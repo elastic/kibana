@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isEqual, merge } from 'lodash';
+import { isEqual } from 'lodash';
 import { Link } from 'react-router-dom';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
@@ -36,7 +36,7 @@ import * as Translations from './translations';
 const getFieldErrors = (formFields: DynamicSettings | null) => {
   if (formFields) {
     const blankStr = 'May not be blank';
-    const { certificatesThresholds, heartbeatIndices } = formFields;
+    const { certThresholds: certificatesThresholds, heartbeatIndices } = formFields;
     const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
     const errorStateErr = certificatesThresholds?.expiration ? null : blankStr;
     const warningStateErr = certificatesThresholds?.age ? null : blankStr;
@@ -67,21 +67,39 @@ export const SettingsPage = () => {
     dispatch(getDynamicSettings());
   }, [dispatch]);
 
-  const [formFields, setFormFields] = useState<DynamicSettings>({ ...dss.settings });
+  const [formFields, setFormFields] = useState<DynamicSettings | null>(
+    dss.settings ? { ...dss.settings } : null
+  );
+
+  if (!dss.loadError && formFields === null && dss.settings) {
+    setFormFields(Object.assign({}, { ...dss.settings }));
+  }
 
   const fieldErrors = getFieldErrors(formFields);
 
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
-  const onChangeFormField: OnFieldChangeType = changedField =>
-    setFormFields(Object.assign({ ...merge(formFields, changedField) }));
+  const onChangeFormField: OnFieldChangeType = changedField => {
+    if (formFields) {
+      setFormFields({
+        heartbeatIndices: changedField.heartbeatIndices ?? formFields.heartbeatIndices,
+        certThresholds: Object.assign(
+          {},
+          formFields.certThresholds,
+          changedField?.certThresholds ?? null
+        ),
+      });
+    }
+  };
 
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
-    dispatch(setDynamicSettings(formFields));
+    if (formFields) {
+      dispatch(setDynamicSettings(formFields));
+    }
   };
 
-  const resetForm = () => setFormFields({ ...dss.settings });
+  const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
   const isFormDirty = !isEqual(dss.settings, formFields);
   const canEdit: boolean =
@@ -114,12 +132,14 @@ export const SettingsPage = () => {
             <form onSubmit={onApply}>
               <EuiForm>
                 <IndicesForm
+                  loading={dss.loading}
                   onChange={onChangeFormField}
                   formFields={formFields}
                   fieldErrors={fieldErrors}
                   isDisabled={isFormDisabled}
                 />
                 <CertificateExpirationForm
+                  loading={dss.loading}
                   onChange={onChangeFormField}
                   formFields={formFields}
                   fieldErrors={fieldErrors}

@@ -13,17 +13,15 @@ import {
   setDynamicSettingsFail,
 } from '../actions/dynamic_settings';
 import { DynamicSettings } from '../../../common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
 export interface DynamicSettingsState {
-  settings: DynamicSettings;
+  settings?: DynamicSettings;
   loadError?: Error;
   saveError?: Error;
   loading: boolean;
 }
 
 const initialState: DynamicSettingsState = {
-  settings: DYNAMIC_SETTINGS_DEFAULTS,
   loading: true,
 };
 
@@ -48,7 +46,6 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
       loading: true,
     }),
     [String(setDynamicSettingsSuccess)]: (state, action: Action<DynamicSettings>) => ({
-      ...state,
       settings: action.payload,
       saveSucceded: true,
       loading: false,

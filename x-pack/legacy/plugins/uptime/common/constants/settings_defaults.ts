@@ -8,7 +8,7 @@ import { DynamicSettings } from '../runtime_types';
 
 export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   heartbeatIndices: 'heartbeat-8*',
-  certificatesThresholds: {
+  certThresholds: {
     expiration: 30,
     age: 365,
   },

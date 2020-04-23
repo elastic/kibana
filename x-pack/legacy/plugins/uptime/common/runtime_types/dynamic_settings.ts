@@ -6,19 +6,15 @@
 
 import * as t from 'io-ts';
 
-export const CertificatesStatesThresholdType = t.partial({
+export const CertStateThresholdsType = t.type({
   age: t.number,
   expiration: t.number,
 });
 
-export const DynamicSettingsType = t.intersection([
-  t.type({
-    heartbeatIndices: t.string,
-  }),
-  t.partial({
-    certificatesThresholds: CertificatesStatesThresholdType,
-  }),
-]);
+export const DynamicSettingsType = t.type({
+  heartbeatIndices: t.string,
+  certThresholds: CertStateThresholdsType,
+});
 
 export const DynamicSettingsSaveType = t.intersection([
   t.type({
@@ -31,4 +27,4 @@ export const DynamicSettingsSaveType = t.intersection([
 
 export type DynamicSettings = t.TypeOf<typeof DynamicSettingsType>;
 export type DynamicSettingsSaveResponse = t.TypeOf<typeof DynamicSettingsSaveType>;
-export type CertificatesStatesThreshold = t.TypeOf<typeof CertificatesStatesThresholdType>;
+export type CertStateThresholds = t.TypeOf<typeof CertStateThresholdsType>;

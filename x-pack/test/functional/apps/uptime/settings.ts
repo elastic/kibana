@@ -60,7 +60,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await settings.go();
 
-      const newFieldValues: DynamicSettings = { heartbeatIndices: 'new*' };
+      const newFieldValues: DynamicSettings = {
+        heartbeatIndices: 'new*',
+        certThresholds: {
+          age: 365,
+          expiration: 30,
+        },
+      };
       await settings.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
       await settings.apply();
 
@@ -89,7 +95,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certificatesThresholds?.expiration).to.eql(newErrorThreshold);
+      expect(fields.certThresholds?.expiration).to.eql(newErrorThreshold);
     });
 
     it('changing certificate expiration warning threshold is reflected in settings page', async () => {
@@ -106,7 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certificatesThresholds?.age).to.eql(newWarningThreshold);
+      expect(fields.certThresholds?.age).to.eql(newWarningThreshold);
     });
   });
 };

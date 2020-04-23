@@ -13,10 +13,11 @@ describe('CertificateForm', () => {
     expect(
       shallowWithRouter(
         <CertificateExpirationForm
+          loading={false}
           onChange={jest.fn()}
           formFields={{
             heartbeatIndices: 'heartbeat-8*',
-            certificatesThresholds: { expiration: 7, age: 36 },
+            certThresholds: { expiration: 7, age: 36 },
           }}
           fieldErrors={{}}
           isDisabled={false}
