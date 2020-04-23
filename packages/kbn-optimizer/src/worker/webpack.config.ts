@@ -32,8 +32,6 @@ import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const STATIC_BUNDLE_PLUGINS = [
