@@ -6,16 +6,18 @@
 
 import { ESCommonProcessorOptions } from '../../../../common/types';
 
+/**
+ * An array of keys that map to a value in an object
+ * structure.
+ *
+ * For instance:
+ * ['a', 'b', '0', 'c'] given { a: { b: [ { c: [] } ] } } => []
+ */
+export type ProcessorSelector = string[];
+
 export interface DraggableLocation {
   index: number;
-  /**
-   * A '.' separated string value that indicates the path in an "n"
-   * nested structure.
-   *
-   * For instance:
-   * 'a.b.0.c' given { a: { b: [ { c: [] } ] } } => []
-   */
-  pathSelector: string;
+  selector: ProcessorSelector;
 }
 
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &

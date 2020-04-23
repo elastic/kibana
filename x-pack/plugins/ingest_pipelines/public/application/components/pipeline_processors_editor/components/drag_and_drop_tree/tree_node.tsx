@@ -7,34 +7,26 @@
 import React, { FunctionComponent } from 'react';
 import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
 
-import { ProcessorInternal } from '../../types';
+import { ProcessorInternal, ProcessorSelector } from '../../types';
+
+import { PrivateDragAndDropTree } from './drag_and_drop_tree';
 
 export interface TreeNodeComponentArgs {
   processor: ProcessorInternal;
-  pathSelector: string;
+  selector: ProcessorSelector;
 }
 
 interface Props {
   component: (args: TreeNodeComponentArgs) => React.ReactNode;
-  pathSelector: string;
+  selector: ProcessorSelector;
   processor: ProcessorInternal;
   index: number;
 }
 
-export const TreeNode: FunctionComponent<Props> = ({
-  processor,
-  pathSelector,
-  index,
-  component,
-}) => {
+export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index, component }) => {
+  const id = selector.join('.');
   return (
-    <EuiDraggable
-      spacing="m"
-      draggableId={pathSelector}
-      key={pathSelector}
-      index={index}
-      customDragHandle={true}
-    >
+    <EuiDraggable spacing="m" draggableId={id} key={id} index={index} customDragHandle={true}>
       {provided => (
         <EuiPanel paddingSize="m">
           <EuiFlexGroup alignItems="center">
@@ -43,7 +35,14 @@ export const TreeNode: FunctionComponent<Props> = ({
                 <EuiIcon type="grab" />
               </div>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{component({ processor, pathSelector })}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
+            {processor.onFailure && (
+              <PrivateDragAndDropTree
+                selector={selector.concat(['onFailure'])}
+                processors={processor.onFailure}
+                nodeComponent={component}
+              />
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       )}

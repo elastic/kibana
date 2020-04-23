@@ -7,7 +7,7 @@
 import React, { FunctionComponent } from 'react';
 import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
-import { ProcessorInternal, DraggableLocation } from '../../types';
+import { ProcessorInternal, DraggableLocation, ProcessorSelector } from '../../types';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
 
@@ -23,24 +23,25 @@ export interface Props {
 }
 
 export interface PrivateProps extends Omit<Props, 'onDragEnd'> {
-  pathSelector: string;
+  selector: ProcessorSelector;
 }
 
-export const ROOT_PATH_ID = 'ROOT';
+export const ROOT_PATH_ID = 'ROOT_PATH_ID';
 
-const PrivateDragAndDropTree: FunctionComponent<PrivateProps> = ({
+export const PrivateDragAndDropTree: FunctionComponent<PrivateProps> = ({
   processors,
-  pathSelector,
+  selector,
   nodeComponent,
 }) => {
+  const id = selector.join('.') || ROOT_PATH_ID;
   return (
-    <EuiDroppable droppableId={pathSelector || ROOT_PATH_ID} spacing="m">
+    <EuiDroppable droppableId={id} spacing="m">
       {processors.map((processor, idx) => {
         return (
           <TreeNode
             key={idx}
             processor={processor}
-            pathSelector={pathSelector + `${idx}`}
+            selector={selector.concat(String(idx))}
             index={idx}
             component={nodeComponent}
           />
@@ -62,21 +63,18 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
           onDragEnd({
             source: {
               index: source.index,
-              pathSelector: source.droppableId,
+              selector: source.droppableId === ROOT_PATH_ID ? [] : source.droppableId.split('.'),
             },
             destination: {
               index: destination.index,
-              pathSelector: destination.droppableId,
+              selector:
+                destination.droppableId === ROOT_PATH_ID ? [] : destination.droppableId.split('.'),
             },
           });
         }
       }}
     >
-      <PrivateDragAndDropTree
-        pathSelector=""
-        processors={processors}
-        nodeComponent={nodeComponent}
-      />
+      <PrivateDragAndDropTree selector={[]} processors={processors} nodeComponent={nodeComponent} />
     </EuiDragDropContext>
   );
 };

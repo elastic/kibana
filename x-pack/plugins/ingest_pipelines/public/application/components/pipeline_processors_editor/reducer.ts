@@ -11,7 +11,7 @@ import { OnFormUpdateArg } from '../../../shared_imports';
 
 import { createProcessorInternal, DeserializeResult } from './data_in';
 import { getValue, setValue } from './utils';
-import { ProcessorInternal, DraggableLocation } from './types';
+import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 
 type StateArg = DeserializeResult;
 
@@ -21,9 +21,22 @@ interface State extends StateArg {
 }
 
 type Action =
-  | { type: 'addProcessor'; payload: { processor: Omit<ProcessorInternal, 'id'> } }
+  | {
+      type: 'addProcessor';
+      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
+    }
+  | {
+      type: 'addOnFailureProcessor';
+      payload: {
+        onFailureProcessor: Omit<ProcessorInternal, 'id'>;
+        targetSelector: ProcessorSelector;
+      };
+    }
   | { type: 'updateProcessor'; payload: { processor: ProcessorInternal } }
-  | { type: 'removeProcessor'; payload: { processor: ProcessorInternal; pathSelector: string } }
+  | {
+      type: 'removeProcessor';
+      payload: { processor: ProcessorInternal; selector: ProcessorSelector };
+    }
   | {
       type: 'moveProcessor';
       payload: { source: DraggableLocation; destination: DraggableLocation };
@@ -38,17 +51,17 @@ const findProcessorIdx = (
   return processors.findIndex(p => p.id === processor.id);
 };
 
+const derivePathToProcessorsArray = (path?: string[]) => {
+  return ['processors'].concat(path ?? []);
+};
+
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {
     const { destination, source } = action.payload;
 
-    const basePath = ['processors'];
-
-    if (source.pathSelector === destination.pathSelector) {
+    if (source.selector.join('.') === destination.selector.join('.')) {
       return produce(state, draft => {
-        const path = basePath.concat(
-          source.pathSelector === 'ROOT' ? [] : source.pathSelector.split('.')
-        );
+        const path = derivePathToProcessorsArray(source.selector);
         setValue(
           path,
           draft,
@@ -71,13 +84,27 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   }
 
   if (action.type === 'addProcessor') {
-    const { processor: processorArgs } = action.payload;
-    const processor = createProcessorInternal(processorArgs);
-    // TODO: For now we just append it to the processor array, this should be a bit more sophisticated
-    return {
-      ...state,
-      processors: state.processors.concat(processor),
-    };
+    return produce(state, draft => {
+      const { processor: processorArgs, selector } = action.payload;
+      const processor = createProcessorInternal(processorArgs);
+      const path = derivePathToProcessorsArray(selector);
+      setValue(path, draft, getValue(path, draft).concat(processor));
+    });
+  }
+
+  if (action.type === 'addOnFailureProcessor') {
+    return produce(state, draft => {
+      const { onFailureProcessor: processorArgs, targetSelector } = action.payload;
+      const path = derivePathToProcessorsArray(targetSelector);
+      const targetProcessor = getValue<ProcessorInternal>(path, draft);
+      if (!targetProcessor) {
+        throw new Error(`Could not find processor at ${path.join('.')}`);
+      }
+      const newProcessor = createProcessorInternal(processorArgs);
+      targetProcessor.onFailure = targetProcessor.onFailure
+        ? targetProcessor.onFailure.concat(newProcessor)
+        : [newProcessor];
+    });
   }
 
   if (action.type === 'updateProcessor') {
@@ -111,5 +138,5 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   return state;
 };
 
-export const useEditorState = (initialState: StateArg) =>
+export const useProcessorsState = (initialState: StateArg) =>
   useReducer<typeof reducer>(reducer, { ...initialState, validate: () => Promise.resolve(true) });

@@ -12,8 +12,8 @@ import { Processor } from '../../../../common/types';
 import { SettingsFormFlyout, DragAndDropTree } from './components';
 import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
-import { useEditorState } from './reducer';
-import { ProcessorInternal } from './types';
+import { useProcessorsState } from './reducer';
+import { ProcessorInternal, ProcessorSelector } from './types';
 import { PipelineProcessor } from './pipeline_processor';
 
 export interface OnUpdateHandlerArg {
@@ -32,6 +32,12 @@ export interface Props {
   onUpdate: (arg: OnUpdateHandlerArg) => void;
 }
 
+type Mode =
+  | { id: 'creatingProcessor'; arg: ProcessorSelector }
+  | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
+  | { id: 'updatingProcessor'; arg: ProcessorInternal }
+  | { id: 'idle' };
+
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   value: { processors: originalProcessors },
   onUpdate,
@@ -40,12 +46,10 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     originalProcessors,
   ]);
 
-  const [state, dispatch] = useEditorState(dataInResult);
+  const [mode, setMode] = useState<Mode>({ id: 'idle' });
+
+  const [state, dispatch] = useProcessorsState(dataInResult);
   const { processors } = state;
-  const [selectedProcessor, setSelectedProcessor] = useState<ProcessorInternal | undefined>(
-    undefined
-  );
-  const [isAddingNewProcessor, setIsAddingNewProcessor] = useState<boolean>(false);
 
   useEffect(() => {
     onUpdate({
@@ -62,9 +66,40 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     [dispatch]
   );
 
+  const onSubmit = useCallback(
+    processorSettings => {
+      if (mode.id === 'creatingProcessor') {
+        dispatch({
+          type: 'addProcessor',
+          payload: { processor: processorSettings, selector: mode.arg ?? [] },
+        });
+      } else if (mode.id === 'updatingProcessor') {
+        dispatch({
+          type: 'updateProcessor',
+          payload: {
+            processor: {
+              ...mode.arg,
+              ...processorSettings,
+            },
+          },
+        });
+      } else if (mode.id === 'creatingOnFailureProcessor') {
+        dispatch({
+          type: 'addOnFailureProcessor',
+          payload: {
+            onFailureProcessor: processorSettings,
+            targetSelector: mode.arg,
+          },
+        });
+      }
+      setMode({ id: 'idle' });
+      dismissFlyout();
+    },
+    [dispatch, mode]
+  );
+
   const dismissFlyout = () => {
-    setSelectedProcessor(undefined);
-    setIsAddingNewProcessor(false);
+    setMode({ id: 'idle' });
   };
 
   return (
@@ -78,18 +113,22 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
             });
           }}
           processors={processors}
-          nodeComponent={({ processor, pathSelector }) => (
+          nodeComponent={({ processor, selector }) => (
             <PipelineProcessor
               onClick={type => {
                 switch (type) {
                   case 'edit':
-                    setSelectedProcessor(processor);
+                    setMode({ id: 'updatingProcessor', arg: processor });
                     break;
                   case 'delete':
-                    // TODO: This should probably have a delete confirmation modal
-                    dispatch({ type: 'removeProcessor', payload: { processor, pathSelector } });
+                    // TODO: This should have a delete confirmation modal
+                    dispatch({
+                      type: 'removeProcessor',
+                      payload: { processor, selector },
+                    });
                     break;
                   case 'addOnFailure':
+                    setMode({ id: 'creatingOnFailureProcessor', arg: selector });
                     break;
                 }
               }}
@@ -97,31 +136,19 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
             />
           )}
         />
-        <EuiButton onClick={() => setIsAddingNewProcessor(true)}>Add a processor</EuiButton>
+        {/* TODO: Translate */}
+        <EuiButton onClick={() => setMode({ id: 'creatingProcessor', arg: [] })}>
+          Add a processor
+        </EuiButton>
       </EuiPanel>
-      {selectedProcessor || isAddingNewProcessor ? (
+      {mode.id !== 'idle' ? (
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}
-          processor={selectedProcessor}
+          onSubmit={onSubmit}
+          processor={mode.id === 'updatingProcessor' ? mode.arg : undefined}
           onClose={() => {
             dismissFlyout();
             dispatch({ type: 'processorForm.close' });
-          }}
-          onSubmit={processorSettings => {
-            if (isAddingNewProcessor) {
-              dispatch({ type: 'addProcessor', payload: { processor: processorSettings } });
-            } else {
-              dispatch({
-                type: 'updateProcessor',
-                payload: {
-                  processor: {
-                    ...selectedProcessor!,
-                    ...processorSettings,
-                  },
-                },
-              });
-            }
-            dismissFlyout();
           }}
         />
       ) : (

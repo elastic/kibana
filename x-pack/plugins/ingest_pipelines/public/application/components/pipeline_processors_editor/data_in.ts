@@ -49,7 +49,7 @@ export const createProcessorInternal = (args: {
   type: string;
   options: any;
   onFailure?: ProcessorInternal[];
-}) => ({
+}): ProcessorInternal => ({
   id: uuid.v4(),
   ...args,
 });

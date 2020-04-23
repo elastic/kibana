@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 
 import { Form, useForm, FormDataProvider, OnFormUpdateArg } from '../../../../../shared_imports';
@@ -27,25 +27,33 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   onSubmit,
   onFormUpdate,
 }) => {
-  const handleSubmit = (data: any, isValid: boolean) => {
-    if (isValid) {
-      const { type, ...options } = data;
-      onSubmit({
-        type,
-        options,
-      });
-    }
-  };
+  const handleSubmit = useCallback(
+    (data: any, isValid: boolean) => {
+      if (isValid) {
+        const { type, ...options } = data;
+        onSubmit({
+          type,
+          options,
+        });
+      }
+    },
+    [onSubmit]
+  );
 
   const { form } = useForm({
-    defaultValue: processor ? { ...processor.options } : undefined,
+    defaultValue: processor?.options,
     onSubmit: handleSubmit,
   });
 
   useEffect(() => {
     const subscription = form.subscribe(onFormUpdate);
     return subscription.unsubscribe;
-  }, [form, onFormUpdate]);
+
+    // TODO: Address this issue
+    // For some reason adding `form` object to the dependencies array here is causing an
+    // infinite update loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onFormUpdate]);
 
   return (
     <Form form={form}>
