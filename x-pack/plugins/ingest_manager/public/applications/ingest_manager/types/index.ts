@@ -17,6 +17,7 @@ export {
   DatasourceInput,
   DatasourceInputStream,
   DatasourceConfigRecordEntry,
+  DataStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
@@ -30,6 +31,8 @@ export {
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  // API schemas - Data Streams
+  GetDataStreamsResponse,
   // API schemas - Agents
   GetAgentsResponse,
   GetAgentsRequest,
