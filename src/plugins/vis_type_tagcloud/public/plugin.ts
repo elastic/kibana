@@ -17,15 +17,18 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-import { ChartsPluginSetup } from '../../../../plugins/charts/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
+import { ChartsPluginSetup } from '../../charts/public';
 
 import { createTagCloudFn } from './tag_cloud_fn';
 import { createTagCloudVisTypeDefinition } from './tag_cloud_type';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
+import { ConfigSchema } from '../config';
+
+import './index.scss';
 
 /** @internal */
 export interface TagCloudPluginSetupDependencies {
@@ -46,9 +49,9 @@ export interface TagCloudVisPluginStartDependencies {
 
 /** @internal */
 export class TagCloudPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
