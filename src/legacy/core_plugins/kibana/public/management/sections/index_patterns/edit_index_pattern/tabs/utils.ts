@@ -31,7 +31,7 @@ function filterByName(items: IndexPatternField[], filter: string) {
 function getCounts(
   fields: IndexPatternField[],
   sourceFilters: {
-    excludes: any[];
+    excludes: string[];
   },
   fieldFilter = ''
 ) {
@@ -53,20 +53,22 @@ function getCounts(
 }
 
 function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: Dictionary<number>) {
-  let translateKey = '';
-  let defaultMessage = '';
+  let title = '';
   switch (type) {
     case 'indexed':
-      translateKey = 'kbn.management.editIndexPattern.tabs.fieldsHeader';
-      defaultMessage = 'Fields';
+      title = i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', {
+        defaultMessage: 'Fields',
+      });
       break;
     case 'scripted':
-      translateKey = 'kbn.management.editIndexPattern.tabs.scriptedHeader';
-      defaultMessage = 'Scripted fields';
+      title = i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', {
+        defaultMessage: 'Scripted fields',
+      });
       break;
     case 'sourceFilters':
-      translateKey = 'kbn.management.editIndexPattern.tabs.sourceHeader';
-      defaultMessage = 'Source filters';
+      title = i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', {
+        defaultMessage: 'Source filters',
+      });
       break;
   }
   const count = ` (${
@@ -74,11 +76,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
       ? filteredCount[type]
       : filteredCount[type] + ' / ' + totalCount[type]
   })`;
-  return (
-    i18n.translate(translateKey, {
-      defaultMessage,
-    }) + count
-  );
+  return title + count;
 }
 
 export function getTabs(

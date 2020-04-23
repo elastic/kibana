@@ -206,15 +206,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldsTabCount() {
       return retry.try(async () => {
-        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
+        const indexedFieldsTab = await find.byCssSelector('#indexedFields .euiTab__content');
+        const text = await indexedFieldsTab.getVisibleText();
+        return text.replace(/\w+\s+\((.*)\)/, '$1');
       });
     }
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const theText = await testSubjects.getVisibleText('tab-count-scriptedFields');
-        return theText.replace(/\((.*)\)/, '$1');
+        const indexedFieldsTab = await find.byCssSelector('#scriptedFields .euiTab__content');
+        const text = await indexedFieldsTab.getVisibleText();
+        return text.replace(/\w+\s+\((.*)\)/, '$1');
       });
     }
 
@@ -241,13 +243,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldTypeFilter(type: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]'
+        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
       );
     }
 
     async setScriptedFieldLanguageFilter(language: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
+        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
           language +
           '"]'
       );

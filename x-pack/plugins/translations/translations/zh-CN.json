@@ -2216,7 +2216,6 @@
     "kbn.management.editIndexPattern.fields.table.typeHeader": "类型",
     "kbn.management.editIndexPattern.mappingConflictHeader": "映射冲突",
     "kbn.management.editIndexPattern.mappingConflictLabel": "匹配此模式的各个索引中{conflictFieldsLength, plural, one {一个字段已} other {# 个字段已}}定义为若干类型（字符串、整数等）。您仍能够在 Kibana 的各个部分中使用这些冲突类型，但它们将无法用于需要 Kibana 知道其类型的函数。要解决此问题，需要重新索引您的数据。",
-    "kbn.management.editIndexPattern.notDateErrorMessage": "该字段是{fieldType}，不是日期。",
     "kbn.management.editIndexPattern.refreshAria": "重新加载字段列表",
     "kbn.management.editIndexPattern.refreshButton": "刷新",
     "kbn.management.editIndexPattern.refreshHeader": "刷新字段列表？",
