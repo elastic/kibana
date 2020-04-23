@@ -18,9 +18,7 @@
  */
 
 import { createInputControlVisFn } from './input_control_fn';
-
-// eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 
 describe('interpreter/functions#input_control_vis', () => {
   const fn = functionWrapper(createInputControlVisFn());

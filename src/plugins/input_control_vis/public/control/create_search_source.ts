@@ -23,7 +23,7 @@ import {
   IndexPattern,
   TimefilterContract,
   DataPublicPluginStart,
-} from '../../../../../plugins/data/public';
+} from 'src/plugins/data/public';
 
 export function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],

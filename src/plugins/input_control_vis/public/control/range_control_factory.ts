@@ -20,16 +20,12 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+import { IFieldType, TimefilterContract, DataPublicPluginStart } from 'src/plugins/data/public';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
 import { InputControlVisDependencies } from '../plugin';
-import {
-  IFieldType,
-  TimefilterContract,
-  DataPublicPluginStart,
-} from '../.../../../../../../plugins/data/public';
 
 const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};

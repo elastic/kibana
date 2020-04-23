@@ -28,7 +28,7 @@ import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
-import { FilterManager, Filter, SearchSource } from '../../data/public';
+import { FilterManager, Filter } from '../../data/public';
 import { VisParams, Vis } from '../../visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {

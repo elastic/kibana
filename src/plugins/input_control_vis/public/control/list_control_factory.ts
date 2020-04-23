@@ -19,17 +19,17 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
-import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
-import { createSearchSource } from './create_search_source';
-import { ControlParams } from '../editor_utils';
-import { InputControlVisDependencies } from '../plugin';
 import {
   IFieldType,
   TimefilterContract,
   SearchSourceFields,
   DataPublicPluginStart,
-} from '../../../../../plugins/data/public';
+} from 'src/plugins/data/public';
+import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
+import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
+import { createSearchSource } from './create_search_source';
+import { ControlParams } from '../editor_utils';
+import { InputControlVisDependencies } from '../plugin';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
