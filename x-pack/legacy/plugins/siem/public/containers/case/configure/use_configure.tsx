@@ -34,10 +34,7 @@ export type Action =
     }
   | {
       type: 'setConnector';
-      connector: {
-        connectorId: State['connectorId'];
-        connectorName: State['connectorName'];
-      };
+      connector: Connector;
     }
   | {
       type: 'setLoading';
@@ -115,18 +112,12 @@ export const configureCasesReducer = (state: State, action: Action) => {
   }
 };
 
-export interface PersistCaseConfigure {
-  closureType: ClosureType;
-  connectorId: string;
-  connectorName: string;
-}
-
 export interface ReturnUseCaseConfigure extends State {
   persistCaseConfigure: ({
     connectorId,
     connectorName,
     closureType,
-  }: PersistCaseConfigure) => unknown;
+  }: ConnectorConfiguration) => unknown;
   refetchCaseConfigure: () => void;
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connectorId: string, connectorName?: string) => void;
@@ -261,7 +252,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
   }, [state.firstLoad]);
 
   const persistCaseConfigure = useCallback(
-    async ({ connectorId, connectorName, closureType }: PersistCaseConfigure) => {
+    async ({ connectorId, connectorName, closureType }: ConnectorConfiguration) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
       const saveCaseConfiguration = async () => {
