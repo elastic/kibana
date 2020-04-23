@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsType } from 'kibana/server';
-// @ts-ignore
-import { migrations } from './migrations';
+import { graphMigrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {
   name: 'graph-workspace',
   namespaceType: 'single',
   hidden: false,
-  migrations,
+  migrations: graphMigrations,
   mappings: {
     properties: {
       description: {

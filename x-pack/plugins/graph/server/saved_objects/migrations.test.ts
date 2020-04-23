@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import migrations from './migrations';
+import { graphMigrations } from './migrations';
+import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 
 describe('graph-workspace', () => {
   describe('7.0.0', () => {
-    const migration = migrations['graph-workspace']['7.0.0'];
+    const migration = graphMigrations['7.0.0'];
 
     test('returns doc on empty object', () => {
-      expect(migration({})).toMatchInlineSnapshot(`
+      expect(migration({} as SavedObjectUnsanitizedDoc)).toMatchInlineSnapshot(`
 Object {
   "references": Array [],
 }
@@ -21,6 +22,7 @@ Object {
     test('returns doc when wsState is not a string', () => {
       const doc = {
         id: '1',
+        type: 'graph-workspace',
         attributes: {
           wsState: true,
         },
@@ -39,6 +41,7 @@ Object {
     test('returns doc when wsState is not valid JSON', () => {
       const doc = {
         id: '1',
+        type: 'graph-workspace',
         attributes: {
           wsState: '123abc',
         },
@@ -57,6 +60,7 @@ Object {
     test('returns doc when "indexPattern" is missing from wsState', () => {
       const doc = {
         id: '1',
+        type: 'graph-workspace',
         attributes: {
           wsState: JSON.stringify(JSON.stringify({ foo: true })),
         },
@@ -75,6 +79,7 @@ Object {
     test('extract "indexPattern" attribute from doc', () => {
       const doc = {
         id: '1',
+        type: 'graph-workspace',
         attributes: {
           wsState: JSON.stringify(JSON.stringify({ foo: true, indexPattern: 'pattern*' })),
           bar: true,
