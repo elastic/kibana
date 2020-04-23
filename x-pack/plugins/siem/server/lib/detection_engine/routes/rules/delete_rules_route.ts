@@ -11,13 +11,10 @@ import { queryRulesSchema } from '../schemas/query_rules_schema';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
-import {
-  DeleteRuleRequestParams,
-  IRuleSavedAttributesSavedObjectAttributes,
-} from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
+import { DeleteRuleRequestParams } from '../../rules/types';
 import { deleteNotifications } from '../../notifications/delete_notifications';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const deleteRulesRoute = (router: IRouter) => {
   router.delete(
@@ -44,6 +41,7 @@ export const deleteRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await deleteRules({
           actionsClient,
           alertsClient,
@@ -56,17 +54,12 @@ export const deleteRulesRoute = (router: IRouter) => {
             ruleAlertId: rule.id,
             savedObjectsClient,
           });
-          const ruleStatuses = await savedObjectsClient.find<
-            IRuleSavedAttributesSavedObjectAttributes
-          >({
-            type: ruleStatusSavedObjectType,
+          const ruleStatuses = await ruleStatusClient.find({
             perPage: 6,
             search: rule.id,
             searchFields: ['alertId'],
           });
-          ruleStatuses.saved_objects.forEach(async obj =>
-            savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
-          );
+          ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
           const [validated, errors] = transformValidate(
             rule,
             undefined,

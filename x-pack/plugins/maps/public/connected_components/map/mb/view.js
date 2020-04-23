@@ -11,15 +11,10 @@ import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
+  moveLayerToTop,
 } from './utils';
-
 import { getGlyphUrl, isRetina } from '../../../meta';
-import {
-  DECIMAL_DEGREES_PRECISION,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  ZOOM_PRECISION,
-} from '../../../../common/constants';
+import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -80,7 +75,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted) {
+    if (this._isMounted && this.props.isMapReady) {
       if (!this.state.hasSyncedLayerList) {
         this.setState(
           {
@@ -92,6 +87,8 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
+      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
+      this._syncSettings();
     }
   }, 256);
 
@@ -133,8 +130,8 @@ export class MBMapContainer extends React.Component {
         scrollZoom: this.props.scrollZoom,
         preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
         interactive: !this.props.disableInteractive,
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
+        maxZoom: this.props.settings.maxZoom,
+        minZoom: this.props.settings.minZoom,
       };
       const initialView = _.get(this.props.goto, 'center');
       if (initialView) {
@@ -265,17 +262,18 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    if (!this.props.isMapReady) {
-      return;
-    }
-
-    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    removeOrphanedSourcesAndLayers(
+      this.state.mbMap,
+      this.props.layerList,
+      this.props.spatialFiltersLayer
+    );
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady || !this.props.inspectorAdapters.map) {
+    if (!this.props.inspectorAdapters.map) {
       return;
     }
 
@@ -288,6 +286,27 @@ export class MBMapContainer extends React.Component {
       style: this.state.mbMap.getStyle(),
     });
   };
+
+  _syncSettings() {
+    let zoomRangeChanged = false;
+    if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
+      this.state.mbMap.setMinZoom(this.props.settings.minZoom);
+      zoomRangeChanged = true;
+    }
+    if (this.props.settings.maxZoom !== this.state.mbMap.getMaxZoom()) {
+      this.state.mbMap.setMaxZoom(this.props.settings.maxZoom);
+      zoomRangeChanged = true;
+    }
+
+    // 'moveend' event not fired when map moves from setMinZoom or setMaxZoom
+    // https://github.com/mapbox/mapbox-gl-js/issues/9610
+    // hack to update extent after zoom update finishes moving map.
+    if (zoomRangeChanged) {
+      setTimeout(() => {
+        this.props.extentChanged(this._getMapState());
+      }, 300);
+    }
+  }
 
   render() {
     let drawControl;
