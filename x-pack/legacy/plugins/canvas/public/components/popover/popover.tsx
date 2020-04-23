@@ -24,6 +24,8 @@ interface Props {
   className?: string;
 }
 
+export type ClosePopoverFn = () => void;
+
 interface State {
   isPopoverOpen: boolean;
 }
@@ -61,7 +63,7 @@ export class Popover extends Component<Props, State> {
     }));
   };
 
-  closePopover = () => {
+  closePopover: ClosePopoverFn = () => {
     this.setState({
       isPopoverOpen: false,
     });
