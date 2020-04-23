@@ -88,6 +88,10 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
+              "certificatesThresholds": Object {
+                "errorState": 7,
+                "warningState": 30,
+              },
               "heartbeatIndices": "heartbeat-7*",
             },
             "locations": Array [],
@@ -131,6 +135,10 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
+              "certificatesThresholds": Object {
+                "errorState": 7,
+                "warningState": 30,
+              },
               "heartbeatIndices": "heartbeat-7*",
             },
             "locations": Array [],

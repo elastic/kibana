@@ -620,6 +620,12 @@ export class DashboardAppController {
       ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
     };
 
+    const unmountNavBar = () => {
+      if (dashboardNavBar) {
+        ReactDOM.unmountComponentAtNode(dashboardNavBar);
+      }
+    };
+
     $scope.timefilterSubscriptions$ = new Subscription();
 
     $scope.timefilterSubscriptions$.add(
@@ -968,6 +974,9 @@ export class DashboardAppController {
     });
 
     $scope.$on('$destroy', () => {
+      // we have to unmount nav bar manually to make sure all internal subscriptions are unsubscribed
+      unmountNavBar();
+
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();
@@ -980,6 +989,9 @@ export class DashboardAppController {
       }
       if (outputSubscription) {
         outputSubscription.unsubscribe();
+      }
+      if (dashboardContainer) {
+        dashboardContainer.destroy();
       }
     });
   }
