@@ -30,8 +30,8 @@ export const ruleActionsSavedObjectMappings = {
             type: 'keyword',
           },
           params: {
-            dynamic: true,
-            properties: {},
+            type: 'object',
+            enabled: false,
           },
         },
       },
