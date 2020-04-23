@@ -23,8 +23,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugi
 import { DrilldownsSetup, DrilldownsStart } from '../../../x-pack/plugins/drilldowns/public';
 import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
 import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
-import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
-import { createStartServicesGetter } from '../../../src/plugins/kibana_utils/public';
 
 export interface UiActionExamplesSetupDependencies {
   data: DataPublicPluginSetup;
@@ -55,8 +53,6 @@ export class UiActionExamplesPlugin
     core: CoreSetup<UiActionExamplesStartDependencies>,
     { uiActions, drilldowns }: UiActionExamplesSetupDependencies
   ) {
-    const start = createStartServicesGetter(core.getStartServices);
-
     uiActions.registerTrigger(helloWorldTrigger);
 
     const helloWorldAction = createHelloWorldAction(async () => ({
@@ -65,8 +61,6 @@ export class UiActionExamplesPlugin
 
     uiActions.registerAction(helloWorldAction);
     uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
-
-    drilldowns.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
   }
 
   public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}
