@@ -127,7 +127,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
                 onChange={e => setScriptedFieldLanguageFilter(e.target.value)}
-                data-test-subj="indexedFieldTypeFilterDropdown"
+                data-test-subj="scriptedFieldLanguageFilterDropdown"
               />
             </EuiFlexItem>
           )}

@@ -208,15 +208,15 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return retry.try(async () => {
         const indexedFieldsTab = await find.byCssSelector('#indexedFields .euiTab__content');
         const text = await indexedFieldsTab.getVisibleText();
-        return text.replace(/\w+\s+\((.*)\)/, '$1');
+        return text.split(/[()]/)[1];
       });
     }
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const indexedFieldsTab = await find.byCssSelector('#scriptedFields .euiTab__content');
-        const text = await indexedFieldsTab.getVisibleText();
-        return text.replace(/\w+\s+\((.*)\)/, '$1');
+        const scriptedFieldsTab = await find.byCssSelector('#scriptedFields .euiTab__content');
+        const text = await scriptedFieldsTab.getVisibleText();
+        return text.split(/[()]/)[1];
       });
     }
 
@@ -414,17 +414,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      await find.clickByCssSelector('#indexedFields');
     }
 
     async clickScriptedFieldsTab() {
       log.debug('click Scripted Fields tab');
-      await testSubjects.click('tab-scriptedFields');
+      await find.clickByCssSelector('#scriptedFields');
     }
 
     async clickSourceFiltersTab() {
       log.debug('click Source Filters tab');
-      await testSubjects.click('tab-sourceFilters');
+      await find.clickByCssSelector('#sourceFilters');
     }
 
     async editScriptedField(name: string) {
