@@ -251,6 +251,15 @@ const reparentSpans = (waterfallItems: IWaterfallItem[]) => {
           const item = waterfallItems.find(_item => _item.id === id);
           if (item) {
             item.parentId = waterfallItem.id;
+            // In some cases, parent starts after its child, to validate it,
+            // calculate the difference between the parent timestamp and the child timestamp,
+            // and if it's greater than 0, sums the difference into the child timestamp
+            // so the child won't be shown before in the waterfall.
+            const offsetDifference =
+              waterfallItem.doc.timestamp.us - item.doc.timestamp.us;
+            if (offsetDifference > 0) {
+              item.doc.timestamp.us += offsetDifference;
+            }
           }
         });
       }
