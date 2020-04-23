@@ -158,10 +158,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return await this.loginWithSAMLResponse(request, samlResponse, state);
     }
 
-    if (authenticationResult.succeeded()) {
-      // If user has been authenticated via session, but request also includes SAML payload
-      // we should check whether this payload is for the exactly same user and if not
-      // we'll re-authenticate user and forward to a page with the respective warning.
+    // If user has been authenticated via session or failed to do so because of expired access token,
+    // but request also includes SAML payload we should check whether this payload is for the exactly
+    // same user and if not we'll re-authenticate user and forward to a page with the respective warning.
+    if (
+      authenticationResult.succeeded() ||
+      (authenticationResult.failed() &&
+        Tokens.isAccessTokenExpiredError(authenticationResult.error))
+    ) {
       return await this.loginWithNewSAMLResponse(
         request,
         samlResponse,
