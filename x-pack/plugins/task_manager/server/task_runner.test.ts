@@ -9,7 +9,7 @@ import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
-import { ConcreteTaskInstance, TaskStatus } from './task';
+import { ConcreteTaskInstance, TaskStatus, TaskDictionary, TaskDefinition } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';

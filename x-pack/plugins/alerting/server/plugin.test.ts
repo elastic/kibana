@@ -10,7 +10,7 @@ import { licensingMock } from '../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, CoreSetup } from 'kibana/server';
 
 describe('Alerting Plugin', () => {
   describe('setup()', () => {
@@ -21,13 +21,13 @@ describe('Alerting Plugin', () => {
       const coreSetup = coreMock.createSetup();
       const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
       await plugin.setup(
-        {
+        ({
           ...coreSetup,
           http: {
             ...coreSetup.http,
             route: jest.fn(),
           },
-        } as ReturnType<typeof coreMock.createSetup>,
+        } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
         ({
           licensing: licensingMock.createSetup(),
           encryptedSavedObjects: encryptedSavedObjectsSetup,
@@ -59,13 +59,13 @@ describe('Alerting Plugin', () => {
         const coreSetup = coreMock.createSetup();
         const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
         await plugin.setup(
-          {
+          ({
             ...coreSetup,
             http: {
               ...coreSetup.http,
               route: jest.fn(),
             },
-          } as ReturnType<typeof coreMock.createSetup>,
+          } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
           ({
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
@@ -102,13 +102,13 @@ describe('Alerting Plugin', () => {
           usingEphemeralEncryptionKey: false,
         };
         await plugin.setup(
-          {
+          ({
             ...coreSetup,
             http: {
               ...coreSetup.http,
               route: jest.fn(),
             },
-          } as ReturnType<typeof coreMock.createSetup>,
+          } as unknown) as CoreSetup<AlertingPluginsStart, unknown>,
           ({
             licensing: licensingMock.createSetup(),
             encryptedSavedObjects: encryptedSavedObjectsSetup,
