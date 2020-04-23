@@ -95,7 +95,7 @@ image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elas
 === File uploader now recommends Filebeat config
 
 experimental[] The file upload UI now has the ability to recommend a Filebeat 
-configuration based on the uploaded file that can be used to add more data of 
+configuration based on the uploaded file. It can be used to add more data of 
 the same structure to the same index that was created during an initial upload.
 
 [role="screenshot"]
