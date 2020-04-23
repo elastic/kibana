@@ -54,7 +54,7 @@ export class DashboardToDiscoverDrilldown
     return true;
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
+  private readonly getPath = async (config: Config, context: ActionContext): Promise<string> => {
     let indexPatternId =
       !!config.customIndexPattern && !!config.indexPatternId ? config.indexPatternId : '';
 
@@ -66,7 +66,15 @@ export class DashboardToDiscoverDrilldown
     }
 
     const index = indexPatternId ? `,index:'${indexPatternId}'` : '';
-    const path = `#/discover?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
+    return `#/discover?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
+  };
+
+  public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
+    return `kibana${await this.getPath(config, context)}`;
+  };
+
+  public readonly execute = async (config: Config, context: ActionContext) => {
+    const path = await this.getPath(config, context);
 
     await this.params.start().core.application.navigateToApp('kibana', {
       path,

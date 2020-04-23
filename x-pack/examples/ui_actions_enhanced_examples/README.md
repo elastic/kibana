@@ -17,6 +17,9 @@ how a drilldown can be built, all in one file.
 `dashboard_to_url_drilldown` is a good starting point for build a drilldown
 that navigates somewhere externally.
 
+One can see how middle-click or Ctrl + click behavior could be supported using
+`getHref` field.
+
 ### `dashboard_to_discover_drilldown`
 
 `dashboard_to_discover_drilldown` shows how a real-world drilldown could look like.

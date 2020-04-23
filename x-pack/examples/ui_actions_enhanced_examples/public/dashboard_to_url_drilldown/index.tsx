@@ -69,11 +69,21 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
     return !!config.url && typeof config.url === 'string';
   };
 
+  /**
+   * `getHref` is need to support mouse middle-click and Cmd + Click behavior
+   * to open a link in new tab.
+   */
+  public readonly getHref = async (config: Config, context: ActionContext) => {
+    return config.url;
+  };
+
   public readonly execute = async (config: Config, context: ActionContext) => {
+    const url = await this.getHref(config, context);
+
     if (config.openInNewTab) {
-      window.open(config.url, '_blank');
+      window.open(url, '_blank');
     } else {
-      window.location.href = config.url;
+      window.location.href = url;
     }
   };
 }
