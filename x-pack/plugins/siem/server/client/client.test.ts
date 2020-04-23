@@ -9,7 +9,7 @@ import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import { SiemClient } from './client';
 
 describe('SiemClient', () => {
-  describe('#signalsIndex', () => {
+  describe('#getSignalsIndex', () => {
     it('returns the index scoped to the specified spaceId', () => {
       const mockConfig = {
         ...createMockConfig(),
@@ -18,7 +18,7 @@ describe('SiemClient', () => {
       const spaceId = 'fooSpace';
       const client = new SiemClient(spaceId, mockConfig);
 
-      expect(client.signalsIndex).toEqual('mockSignalsIndex-fooSpace');
+      expect(client.getSignalsIndex()).toEqual('mockSignalsIndex-fooSpace');
     });
   });
 });
