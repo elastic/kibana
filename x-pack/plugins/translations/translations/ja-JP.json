@@ -973,7 +973,6 @@
     "esUi.forms.fieldValidation.indexPatternInvalidCharactersError": "インデックスパターンに無効な{characterListLength, plural, one {文字} other {文字}} { characterList } が含まれています。",
     "esUi.forms.fieldValidation.indexPatternSpacesError": "インデックスパターンにはスペースを使用できません。",
     "esUi.validation.string.invalidJSONError": "無効なJSON",
-    "expressions.defaultErrorRenderer.errorTitle": "ビジュアライゼーションエラー",
     "expressions.functions.font.args.alignHelpText": "水平テキスト配置",
     "expressions.functions.font.args.colorHelpText": "文字の色です。",
     "expressions.functions.font.args.familyHelpText": "利用可能な{css}ウェブフォント文字列です",

@@ -40,7 +40,7 @@ export const onRenderErrorDefault: RenderErrorHandlerFnType = (
 
   getNotifications().toasts.addError(error, {
     title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
-      defaultMessage: 'Error in visualisation',
+      defaultMessage: 'Error in expression',
     }),
     toastMessage: error.message,
   });

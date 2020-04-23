@@ -974,7 +974,6 @@
     "esUi.forms.fieldValidation.indexPatternInvalidCharactersError": "索引模式包含无效的{characterListLength, plural, one {字符} other {字符}} { characterList }。",
     "esUi.forms.fieldValidation.indexPatternSpacesError": "索引模式不能包含空格。",
     "esUi.validation.string.invalidJSONError": "JSON 无效",
-    "expressions.defaultErrorRenderer.errorTitle": "可视化错误",
     "expressions.functions.font.args.alignHelpText": "水平文本对齐。",
     "expressions.functions.font.args.colorHelpText": "文本颜色。",
     "expressions.functions.font.args.familyHelpText": "可接受的 {css} Web 字体字符串",
