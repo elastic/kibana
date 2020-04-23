@@ -22,10 +22,8 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
 
 const names = ['rows', 'columns', 'slices'];

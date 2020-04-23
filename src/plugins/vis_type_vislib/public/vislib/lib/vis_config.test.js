@@ -20,7 +20,7 @@
 import d3 from 'd3';
 
 import { VisConfig } from './vis_config';
-import { getMockUiState } from '../../fixtures/_vis_fixture';
+import { getMockUiState } from '../../fixtures/mocks';
 
 describe('Vislib VisConfig Class Test Suite', function() {
   let el;

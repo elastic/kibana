@@ -21,10 +21,8 @@ import d3 from 'd3';
 import expect from '@kbn/expect';
 
 import { Chart } from '../../../../../../../plugins/vis_type_vislib/public/vislib/visualizations/_chart';
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 describe('Vislib _chart Test Suite', function() {
   let vis;

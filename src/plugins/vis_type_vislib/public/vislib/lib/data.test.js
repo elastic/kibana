@@ -20,7 +20,7 @@
 import _ from 'lodash';
 
 import { Data } from './data';
-import { getMockUiState } from '../../fixtures/_vis_fixture';
+import { getMockUiState } from '../../fixtures/mocks';
 
 const seriesData = {
   label: '',

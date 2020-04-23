@@ -24,10 +24,8 @@ import expect from '@kbn/expect';
 // Data
 import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
 
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 describe('Vislib Dispatch Class Test Suite', function() {
   function destroyVis(vis) {

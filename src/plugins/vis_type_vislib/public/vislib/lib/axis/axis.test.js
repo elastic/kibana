@@ -23,7 +23,7 @@ import $ from 'jquery';
 
 import { Axis } from './axis';
 import { VisConfig } from '../vis_config';
-import { getMockUiState } from '../../../fixtures/_vis_fixture';
+import { getMockUiState } from '../../../fixtures/mocks';
 
 describe('Vislib Axis Class Test Suite', function() {
   let mockUiState;

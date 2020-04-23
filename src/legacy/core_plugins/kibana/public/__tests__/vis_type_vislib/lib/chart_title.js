@@ -23,7 +23,7 @@ import expect from '@kbn/expect';
 
 import { ChartTitle } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/chart_title';
 import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
-import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 
 describe('Vislib ChartTitle Class Test Suite', function() {
   let mockUiState;

@@ -20,20 +20,10 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
-import { Vis } from '../vislib/vis';
+import { Vis } from '../../../../../../plugins/vis_type_vislib/public/vislib/vis';
 
 // TODO: Remove when converted to jest mocks
-import {
-  ColorsService,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../charts/public/services';
-import { setFormatService } from '../services';
-
-setFormatService({
-  deserialize: () => ({
-    convert: v => v,
-  }),
-});
+import { ColorsService } from '../../../../../../plugins/charts/public/services';
 
 const $visCanvas = $('<div>')
   .attr('id', 'vislib-vis-fixtures')
@@ -77,17 +67,6 @@ const getDeps = () => {
       colors,
     },
   };
-};
-
-export const getMockUiState = () => {
-  const map = new Map();
-
-  return (() => ({
-    get: (...args) => map.get(...args),
-    set: (...args) => map.set(...args),
-    setSilent: (...args) => map.set(...args),
-    on: () => undefined,
-  }))();
 };
 
 export function getVis(visLibParams, element) {

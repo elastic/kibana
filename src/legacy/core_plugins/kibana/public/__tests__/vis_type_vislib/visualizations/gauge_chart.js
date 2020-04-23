@@ -22,10 +22,8 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_series_multiple';
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 describe('Vislib Gauge Chart Test Suite', function() {
   let vis;

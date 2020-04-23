@@ -28,11 +28,8 @@ import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fi
 import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns';
 import stackedSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

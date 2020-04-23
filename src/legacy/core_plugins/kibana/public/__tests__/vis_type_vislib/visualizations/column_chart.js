@@ -33,10 +33,8 @@ import stackedSeries from '../../../../../../../plugins/vis_type_vislib/public/f
 import { seriesMonthlyInterval } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_monthly_interval';
 import { rowsSeriesWithHoles } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows_series_with_holes';
 import rowsWithZeros from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 // tuple, with the format [description, mode, data]
 const dataTypesArray = [

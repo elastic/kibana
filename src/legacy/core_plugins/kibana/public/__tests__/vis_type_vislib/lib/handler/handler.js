@@ -25,11 +25,8 @@ import series from '../../../../../../../../plugins/vis_type_vislib/public/fixtu
 import columns from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_columns';
 import rows from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
 import stackedSeries from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../../_vis_fixture';
 
 const dateHistogramArray = [series, columns, rows, stackedSeries];
 const names = ['series', 'columns', 'rows', 'stackedSeries'];

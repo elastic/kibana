@@ -29,11 +29,8 @@ import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtu
 import histogramColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/histogram/_columns';
 import rangeRows from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/range/_rows';
 import termSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_series';
-
-import {
-  getVis,
-  getMockUiState,
-} from '../../../../../../../plugins/vis_type_vislib/public/fixtures/_vis_fixture';
+import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
+import { getVis } from '../_vis_fixture';
 
 const dataTypes = [
   ['series pos', seriesPos],
