@@ -25,6 +25,7 @@ describe('Utils', () => {
     it('transform correctly', () => {
       const myCase = {
         newCase,
+        connectorId: '123',
         createdDate: '2020-04-09T09:43:51.778Z',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
@@ -37,6 +38,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
+        connector_id: '123',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: 'elastic@elastic.co', full_name: 'Elastic', username: 'elastic' },
         external_service: null,
@@ -49,6 +51,7 @@ describe('Utils', () => {
     it('transform correctly without optional fields', () => {
       const myCase = {
         newCase,
+        connectorId: '123',
         createdDate: '2020-04-09T09:43:51.778Z',
       };
 
@@ -58,6 +61,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
+        connector_id: '123',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: undefined, full_name: undefined, username: undefined },
         external_service: null,
@@ -70,6 +74,7 @@ describe('Utils', () => {
     it('transform correctly with optional fields as null', () => {
       const myCase = {
         newCase,
+        connectorId: '123',
         createdDate: '2020-04-09T09:43:51.778Z',
         email: null,
         full_name: null,
@@ -82,6 +87,7 @@ describe('Utils', () => {
         ...myCase.newCase,
         closed_at: null,
         closed_by: null,
+        connector_id: '123',
         created_at: '2020-04-09T09:43:51.778Z',
         created_by: { email: null, full_name: null, username: null },
         external_service: null,
@@ -238,6 +244,7 @@ describe('Utils', () => {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
+          connector_id: '123',
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -272,6 +279,7 @@ describe('Utils', () => {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
+          connector_id: '123',
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',

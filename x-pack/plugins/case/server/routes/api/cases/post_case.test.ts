@@ -115,6 +115,7 @@ describe('POST cases', () => {
       closed_at: null,
       closed_by: null,
       comments: [],
+      connector_id: '123',
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         email: null,

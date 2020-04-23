@@ -11,7 +11,7 @@ import { RouteDeps } from '../types';
 import { flattenCaseSavedObject, wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ caseService, router }: RouteDeps) {
+export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
   router.get(
     {
       path: CASE_DETAILS_URL,
@@ -29,13 +29,35 @@ export function initGetCaseApi({ caseService, router }: RouteDeps) {
         const client = context.core.savedObjects.client;
         const includeComments = JSON.parse(request.query.includeComments);
 
-        const theCase = await caseService.getCase({
+        let theCase = await caseService.getCase({
           client,
           caseId: request.params.case_id,
         });
+        console.log('theCase', theCase);
+        if (!('connector_id' in theCase.attributes)) {
+          console.log('no connector');
+          const myCaseConfigure = await caseConfigureService.find({ client });
+          const connectorId =
+            myCaseConfigure.saved_objects.length > 0
+              ? myCaseConfigure.saved_objects[0].attributes.connector_id
+              : null;
+
+          await caseService.patchCase({
+            client,
+            caseId: theCase.id,
+            version: theCase.version,
+            updatedAttributes: { connector_id: connectorId },
+          });
+          theCase = await caseService.getCase({
+            client,
+            caseId: request.params.case_id,
+          });
+        }
 
         if (!includeComments) {
-          return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, [])) });
+          return response.ok({
+            body: CaseResponseRt.encode(flattenCaseSavedObject(theCase, [])),
+          });
         }
 
         const theComments = await caseService.getAllCaseComments({

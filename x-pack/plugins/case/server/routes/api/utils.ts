@@ -23,15 +23,17 @@ import {
   CommentAttributes,
 } from '../../../common/api';
 
-import { SortFieldCase, TotalCommentByCase } from './types';
+import { SortFieldCase, ExtraCaseData } from './types';
 
 export const transformNewCase = ({
+  connectorId,
   createdDate,
   email,
   full_name,
   newCase,
   username,
 }: {
+  connectorId: string | null;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
@@ -41,6 +43,7 @@ export const transformNewCase = ({
   ...newCase,
   closed_at: null,
   closed_by: null,
+  connector_id: connectorId,
   created_at: createdDate,
   created_by: { email, full_name, username },
   external_service: null,
@@ -86,7 +89,7 @@ export const transformCases = (
   cases: SavedObjectsFindResponse<CaseAttributes>,
   countOpenCases: number,
   countClosedCases: number,
-  totalCommentByCase: TotalCommentByCase[]
+  totalCommentByCase: ExtraCaseData[]
 ): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
@@ -98,15 +101,18 @@ export const transformCases = (
 
 export const flattenCaseSavedObjects = (
   savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
-  totalCommentByCase: TotalCommentByCase[]
+  extraCaseData: ExtraCaseData[]
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
+    const extraDataThisCase = extraCaseData.find(tc => tc.caseId === savedObject.id);
     return [
       ...acc,
       flattenCaseSavedObject(
         savedObject,
         [],
-        totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0
+        extraDataThisCase?.totalComments ?? 0,
+        extraDataThisCase?.connectorId,
+        extraDataThisCase?.caseVersion
       ),
     ];
   }, []);
@@ -114,11 +120,14 @@ export const flattenCaseSavedObjects = (
 export const flattenCaseSavedObject = (
   savedObject: SavedObject<CaseAttributes>,
   comments: Array<SavedObject<CommentAttributes>> = [],
-  totalComment: number = 0
+  totalComment: number = 0,
+  connector_id: string | null = null,
+  version: string = '0'
 ): CaseResponse => ({
   id: savedObject.id,
-  version: savedObject.version ?? '0',
+  version,
   comments: flattenCommentSavedObjects(comments),
+  connector_id,
   totalComment,
   ...savedObject.attributes,
 });

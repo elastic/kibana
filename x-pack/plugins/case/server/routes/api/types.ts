@@ -24,7 +24,9 @@ export enum SortFieldCase {
   status = 'status',
 }
 
-export interface TotalCommentByCase {
+export interface ExtraCaseData {
   caseId: string;
+  caseVersion: string;
+  connectorId: string | null;
   totalComments: number;
 }

@@ -52,6 +52,7 @@ export const basicCase: Case = {
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  connectorId: '123',
   description: 'Security banana Issue',
   externalService: null,
   status: 'open',
@@ -88,7 +89,7 @@ export const casesStatus: CasesStatus = {
 };
 
 const basicPush = {
-  connectorId: 'connector_id',
+  connectorId: '123',
   connectorName: 'connector name',
   externalId: 'external_id',
   externalTitle: 'external title',
@@ -191,6 +192,7 @@ export const basicCaseSnake: CaseResponse = {
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
+  connector_id: '123',
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
   external_service: null,
@@ -204,7 +206,7 @@ export const casesStatusSnake: CasesStatusResponse = {
 };
 
 export const pushSnake = {
-  connector_id: 'connector_id',
+  connector_id: '123',
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',

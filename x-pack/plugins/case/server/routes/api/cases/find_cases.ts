@@ -11,9 +11,15 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { isEmpty } from 'lodash';
-import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../../common/api';
+import { SavedObjectsFindResponse } from 'kibana/server';
+import {
+  CasesFindResponseRt,
+  CasesFindRequestRt,
+  throwErrors,
+  CommentAttributes,
+} from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
-import { RouteDeps, TotalCommentByCase } from '../types';
+import { RouteDeps, ExtraCaseData } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 
@@ -39,7 +45,7 @@ const buildFilter = (
       : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
     : '';
 
-export function initFindCasesApi({ caseService, router }: RouteDeps) {
+export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,
@@ -99,10 +105,34 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
           caseService.findCases(argsOpenCases),
           caseService.findCases(argsClosedCases),
         ]);
+        const extraDataFindByCases = await Promise.all(
+          cases.saved_objects.map(async c => {
+            let connectorId;
+            let caseVersion;
+            if (!('connector_id' in c.attributes)) {
+              const myCaseConfigure = await caseConfigureService.find({ client });
+              connectorId =
+                myCaseConfigure.saved_objects.length > 0
+                  ? myCaseConfigure.saved_objects[0].attributes.connector_id
+                  : null;
 
-        const totalCommentsFindByCases = await Promise.all(
-          cases.saved_objects.map(c =>
-            caseService.getAllCaseComments({
+              await caseService.patchCase({
+                client,
+                caseId: c.id,
+                version: c.version,
+                updatedAttributes: { connector_id: connectorId },
+              });
+              const theCase = await caseService.getCase({
+                client,
+                caseId: c.id,
+              });
+              caseVersion = theCase.version;
+            } else {
+              connectorId = c.attributes.connector_id;
+              caseVersion = c.version;
+            }
+
+            const allCaseComments = await caseService.getAllCaseComments({
               client,
               caseId: c.id,
               options: {
@@ -110,33 +140,39 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
                 page: 1,
                 perPage: 1,
               },
-            })
-          )
+            });
+            return {
+              ...allCaseComments,
+              connectorId,
+              caseVersion,
+            };
+          })
         );
-
-        const totalCommentsByCases = totalCommentsFindByCases.reduce<TotalCommentByCase[]>(
-          (acc, itemFind) => {
-            if (itemFind.saved_objects.length > 0) {
-              const caseId =
-                itemFind.saved_objects[0].references.find(r => r.type === CASE_SAVED_OBJECT)?.id ??
-                null;
-              if (caseId != null) {
-                return [...acc, { caseId, totalComments: itemFind.total }];
-              }
+        console.log('extraDataFindByCases', extraDataFindByCases);
+        const extraCaseData = extraDataFindByCases.reduce<ExtraCaseData[]>((acc, itemFind) => {
+          if (itemFind.saved_objects.length > 0) {
+            const caseId =
+              itemFind.saved_objects[0].references.find(r => r.type === CASE_SAVED_OBJECT)?.id ??
+              null;
+            if (caseId != null) {
+              console.log('itemFind', itemFind);
+              return [
+                ...acc,
+                {
+                  caseId,
+                  totalComments: itemFind.total,
+                  connectorId: itemFind.connectorId,
+                  caseVersion: itemFind.caseVersion,
+                },
+              ];
             }
-            return [...acc];
-          },
-          []
-        );
+          }
+          return [...acc];
+        }, []);
 
         return response.ok({
           body: CasesFindResponseRt.encode(
-            transformCases(
-              cases,
-              openCases.total ?? 0,
-              closesCases.total ?? 0,
-              totalCommentsByCases
-            )
+            transformCases(cases, openCases.total ?? 0, closesCases.total ?? 0, extraCaseData)
           ),
         });
       } catch (error) {
