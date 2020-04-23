@@ -116,8 +116,9 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { data }: StartDependencies) {
     const actionStart = this.actionService.start();
+
     return {
       actions: actionStart,
     };

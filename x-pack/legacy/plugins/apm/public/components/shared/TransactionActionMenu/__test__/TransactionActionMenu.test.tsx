@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
+import { render, fireEvent, act, wait } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
@@ -143,8 +143,9 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('Custom links', () => {
+    let callApmApiSpy: jasmine.Spy;
     beforeAll(() => {
-      spyOn(apmApi, 'callApmApi').and.returnValue({});
+      callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
     });
     afterAll(() => {
       jest.resetAllMocks();
@@ -257,7 +258,7 @@ describe('TransactionActionMenu component', () => {
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('opens flyout with filters prefilled', () => {
+    it('opens flyout with filters prefilled', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -287,6 +288,7 @@ describe('TransactionActionMenu component', () => {
         fireEvent.click(component.getByText('Create custom link'));
       });
       expectTextsInDocument(component, ['Create link']);
+      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       const getFilterKeyValue = (key: string) => {
         return {
           [(component.getAllByText(key)[0] as HTMLOptionElement)

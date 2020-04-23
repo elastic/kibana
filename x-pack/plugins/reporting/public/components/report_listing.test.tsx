@@ -47,12 +47,24 @@ const toasts = {
   addDanger: jest.fn(),
 } as any;
 
+const mockPollConfig = {
+  jobCompletionNotifier: {
+    interval: 5000,
+    intervalErrorMultiplier: 3,
+  },
+  jobsRefresh: {
+    interval: 5000,
+    intervalErrorMultiplier: 3,
+  },
+};
+
 describe('ReportListing', () => {
   it('Report job listing with some items', () => {
     const wrapper = mountWithIntl(
       <ReportListing
         apiClient={reportingAPIClient as ReportingAPIClient}
         license$={license$}
+        pollConfig={mockPollConfig}
         redirect={jest.fn()}
         toasts={toasts}
       />
@@ -74,6 +86,7 @@ describe('ReportListing', () => {
       <ReportListing
         apiClient={reportingAPIClient as ReportingAPIClient}
         license$={subMock as Observable<ILicense>}
+        pollConfig={mockPollConfig}
         redirect={jest.fn()}
         toasts={toasts}
       />
