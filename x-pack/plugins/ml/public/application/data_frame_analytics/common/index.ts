@@ -30,16 +30,8 @@ export {
 } from './analytics';
 
 export {
-  getDefaultSelectableFields,
-  getDefaultRegressionFields,
-  getDefaultClassificationFields,
   getDefaultFieldsFromJobCaps,
-  getFlattenedFields,
-  sortColumns,
   sortExplorationResultsFields,
-  sortRegressionResultsColumns,
-  toggleSelectedField,
-  toggleSelectedFieldSimple,
   EsId,
   EsDoc,
   EsDocSource,

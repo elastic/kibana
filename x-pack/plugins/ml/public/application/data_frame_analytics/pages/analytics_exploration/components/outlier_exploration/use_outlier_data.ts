@@ -25,6 +25,7 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
@@ -42,12 +43,9 @@ export const useOutlierData = (
     const resultsField = jobConfig.dest.results_field;
     const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
     columns.push(
-      ...getDataGridSchemasFromFieldTypes(
-        fieldTypes,
-        resultsField
-      ) /* .sort((a: any, b: any) =>
-        sortRegressionResultsFields(a, b, jobConfig)
-      )*/
+      ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+        sortExplorationResultsFields(a.id, b.id, jobConfig)
+      )
     );
   }
 
@@ -57,7 +55,7 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== 'ml__id_copy'
+    d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
   );
 
   // initialize sorting: reverse sort on outlier score column
