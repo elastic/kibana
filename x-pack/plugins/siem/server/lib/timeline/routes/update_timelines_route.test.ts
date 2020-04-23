@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -12,28 +13,27 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import {
+  getUpdateTimelinesRequest,
+  inputTimeline,
+  updateTimelineWithTimelineId,
+  updateTemplateTimelineWithTimelineId,
+} from './__mocks__/request_responses';
+import {
   mockGetCurrentUser,
   mockGetTimelineValue,
   mockGetTemplateTimelineValue,
 } from './__mocks__/import_timelines';
 import {
-  getCreateTimelinesRequest,
-  inputTimeline,
-  createTimelineWithoutTimelineId,
-  createTimelineWithTimelineId,
-  createTemplateTimelineWithoutTimelineId,
-  createTemplateTimelineWithTimelineId,
-} from './__mocks__/request_responses';
-import {
-  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-  CREATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/create_timelines';
+  UPDATE_TIMELINE_ERROR_MESSAGE,
+  UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+} from './utils/update_timelines';
 
-describe('create timelines', () => {
+describe('update timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;
+  let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
@@ -55,19 +55,20 @@ describe('create timelines', () => {
     } as unknown) as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
+    mockGetTemplateTimeline = jest.fn();
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
   });
 
   describe('Manipulate timeline', () => {
-    describe('Create a new timeline', () => {
+    describe('Update an existing timeline', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             persistTimeline: mockPersistTimeline.mockReturnValue({
-              timeline: createTimelineWithTimelineId,
+              timeline: updateTimelineWithTimelineId.timeline,
             }),
           };
         });
@@ -84,52 +85,55 @@ describe('create timelines', () => {
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('./create_timelines_route')
-          .createTimelinesRoute;
-        createTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const updateTimelinesRoute = jest.requireActual('./update_timelines_route')
+          .updateTimelinesRoute;
+        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
-        const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
+        const mockRequest = getUpdateTimelinesRequest(updateTimelineWithTimelineId);
         await server.inject(mockRequest, context);
       });
 
-      test('should Create a new timeline savedObject', async () => {
-        expect(mockPersistTimeline).toHaveBeenCalled();
+      test('should Check a if given timeline id exist', async () => {
+        expect(mockGetTimeline.mock.calls[0][1]).toEqual(updateTimelineWithTimelineId.timelineId);
       });
 
-      test('should Create a new timeline savedObject without timelineId', async () => {
-        expect(mockPersistTimeline.mock.calls[0][1]).toBeNull();
+      test('should Update existing timeline savedObject with timelineId', async () => {
+        expect(mockPersistTimeline.mock.calls[0][1]).toEqual(
+          updateTimelineWithTimelineId.timelineId
+        );
       });
 
-      test('should Create a new timeline savedObject without timeline version', async () => {
-        expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
+      test('should Update existing timeline savedObject with timeline version', async () => {
+        expect(mockPersistTimeline.mock.calls[0][2]).toEqual(updateTimelineWithTimelineId.version);
       });
 
-      test('should Create a new timeline savedObject witn given timeline', async () => {
+      test('should Update existing timeline savedObject witn given timeline', async () => {
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual(inputTimeline);
       });
 
-      test('should NOT Create new pinned events', async () => {
+      test('should NOT Update new pinned events', async () => {
         expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
       });
 
-      test('should NOT Create notes', async () => {
+      test('should NOT Update notes', async () => {
         expect(mockPersistNote).not.toBeCalled();
       });
 
       test('returns 200 when create timeline successfully', async () => {
         const response = await server.inject(
-          getCreateTimelinesRequest(createTimelineWithoutTimelineId),
+          getUpdateTimelinesRequest(updateTimelineWithTimelineId),
           context
         );
         expect(response.status).toEqual(200);
       });
     });
 
-    describe('Import a timeline already exist', () => {
+    describe("Update a timeline that doesn't exist", () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline,
           };
         });
@@ -146,18 +150,18 @@ describe('create timelines', () => {
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('./create_timelines_route')
-          .createTimelinesRoute;
-        createTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const updateTimelinesRoute = jest.requireActual('./update_timelines_route')
+          .updateTimelinesRoute;
+        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {
         const response = await server.inject(
-          getCreateTimelinesRequest(createTimelineWithTimelineId),
+          getUpdateTimelinesRequest(updateTimelineWithTimelineId),
           context
         );
         expect(response.body).toEqual({
-          message: CREATE_TIMELINE_ERROR_MESSAGE,
+          message: UPDATE_TIMELINE_ERROR_MESSAGE,
           status_code: 405,
         });
       });
@@ -165,13 +169,16 @@ describe('create timelines', () => {
   });
 
   describe('Manipulate template timeline', () => {
-    describe('Create a new template timeline', () => {
+    describe('Update an existing template timeline', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [mockGetTemplateTimelineValue],
+            }),
             persistTimeline: mockPersistTimeline.mockReturnValue({
-              timeline: createTemplateTimelineWithTimelineId,
+              timeline: updateTimelineWithTimelineId.timeline,
             }),
           };
         });
@@ -188,54 +195,63 @@ describe('create timelines', () => {
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('./create_timelines_route')
-          .createTimelinesRoute;
-        createTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const updateTimelinesRoute = jest.requireActual('./update_timelines_route')
+          .updateTimelinesRoute;
+        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
-        const mockRequest = getCreateTimelinesRequest(createTemplateTimelineWithoutTimelineId);
+        const mockRequest = getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId);
         await server.inject(mockRequest, context);
       });
 
-      test('should Create a new template timeline savedObject', async () => {
-        expect(mockPersistTimeline).toHaveBeenCalled();
-      });
-
-      test('should Create a new template timeline savedObject without timelineId', async () => {
-        expect(mockPersistTimeline.mock.calls[0][1]).toBeNull();
-      });
-
-      test('should Create a new template timeline savedObject without template timeline version', async () => {
-        expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
-      });
-
-      test('should Create a new template timeline savedObject witn given template timeline', async () => {
-        expect(mockPersistTimeline.mock.calls[0][3]).toEqual(
-          createTemplateTimelineWithTimelineId.timeline
+      test('should Check if given timeline id exist', async () => {
+        expect(mockGetTimeline.mock.calls[0][1]).toEqual(
+          updateTemplateTimelineWithTimelineId.timelineId
         );
       });
 
-      test('should NOT Create new pinned events', async () => {
+      test('should Update existing template timeline with template timelineId', async () => {
+        expect(mockGetTemplateTimeline.mock.calls[0][1]).toEqual(
+          updateTemplateTimelineWithTimelineId.timelineId
+        );
+      });
+
+      test('should Update existing template timeline with timeline version', async () => {
+        expect(mockPersistTimeline.mock.calls[0][2]).toEqual(
+          updateTemplateTimelineWithTimelineId.version
+        );
+      });
+
+      test('should Update existing template timeline witn given timeline', async () => {
+        expect(mockPersistTimeline.mock.calls[0][3]).toEqual(
+          updateTemplateTimelineWithTimelineId.timeline
+        );
+      });
+
+      test('should NOT Update new pinned events', async () => {
         expect(mockPersistPinnedEventOnTimeline).not.toBeCalled();
       });
 
-      test('should NOT Create notes', async () => {
+      test('should NOT Update notes', async () => {
         expect(mockPersistNote).not.toBeCalled();
       });
 
-      test('returns 200 when create timeline successfully', async () => {
+      test('returns 200 when create template timeline successfully', async () => {
         const response = await server.inject(
-          getCreateTimelinesRequest(createTimelineWithoutTimelineId),
+          getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId),
           context
         );
         expect(response.status).toEqual(200);
       });
     });
 
-    describe('Import a template timeline already exist', () => {
+    describe("Update a template timeline that doesn't exist", () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {
-            getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+            getTimeline: mockGetTimeline.mockReturnValue(null),
+            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+              timeline: [],
+            }),
             persistTimeline: mockPersistTimeline,
           };
         });
@@ -252,18 +268,18 @@ describe('create timelines', () => {
           };
         });
 
-        const createTimelinesRoute = jest.requireActual('./create_timelines_route')
-          .createTimelinesRoute;
-        createTimelinesRoute(server.router, createMockConfig(), securitySetup);
+        const updateTimelinesRoute = jest.requireActual('./update_timelines_route')
+          .updateTimelinesRoute;
+        updateTimelinesRoute(server.router, createMockConfig(), securitySetup);
       });
 
       test('returns error message', async () => {
         const response = await server.inject(
-          getCreateTimelinesRequest(createTemplateTimelineWithTimelineId),
+          getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId),
           context
         );
         expect(response.body).toEqual({
-          message: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+          message: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
           status_code: 405,
         });
       });

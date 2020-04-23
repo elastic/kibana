@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as rt from 'io-ts';
 import {
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
@@ -12,6 +12,8 @@ import {
 import stream from 'stream';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
+import { updateTimelineSchema } from '../schemas/update_timelines_schema';
+import { createTimelineSchema } from '../schemas/create_timelines_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -37,7 +39,7 @@ export const getImportTimelinesRequest = (filename?: string) =>
     },
   });
 
-export const inputTimeline = {
+export const inputTimeline: SavedTimeline = {
   columns: [
     { columnHeaderType: 'not-filtered', id: '@timestamp' },
     { columnHeaderType: 'not-filtered', id: 'message' },
@@ -55,6 +57,9 @@ export const inputTimeline = {
   kqlMode: 'filter',
   kqlQuery: { filterQuery: null },
   title: 't',
+  timelineType: TimelineType.default,
+  templateTimelineId: null,
+  templateTimelineVersion: null,
   dateRange: { start: 1585227005527, end: 1585313405527 },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
@@ -64,6 +69,7 @@ export const inputTemplateTimeline = {
   ...inputTimeline,
   timelineType: TimelineType.template,
   templateTimelineId: null,
+  templateTimelineVersion: null,
 };
 
 export const createTimelineWithoutTimelineId = {
@@ -93,9 +99,32 @@ export const createTemplateTimelineWithTimelineId = {
   templateTimelineId: 'existing template timeline id',
 };
 
-export const getCreateTimelinesRequest = (mockBody: SavedTimeline) =>
+export const updateTimelineWithTimelineId = {
+  timeline: inputTimeline,
+  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  version: 'WzEyMjUsMV0=',
+};
+
+export const updateTemplateTimelineWithTimelineId = {
+  timeline: {
+    ...inputTemplateTimeline,
+    templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+    templateTimelineVersion: 2,
+  },
+  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  version: 'WzEyMjUsMV0=',
+};
+
+export const getCreateTimelinesRequest = (mockBody: rt.TypeOf<typeof createTimelineSchema>) =>
   requestMock.create({
     method: 'post',
+    path: TIMELINE_URL,
+    body: mockBody,
+  });
+
+export const getUpdateTimelinesRequest = (mockBody: rt.TypeOf<typeof updateTimelineSchema>) =>
+  requestMock.create({
+    method: 'patch',
     path: TIMELINE_URL,
     body: mockBody,
   });

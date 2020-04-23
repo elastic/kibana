@@ -6,13 +6,13 @@
 
 import { TimelineSavedObject } from '../../../../../common/types/timeline';
 
-const UPDATE_TIMELINE_ERROR_MESSAGE =
+export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'CREATE timeline with PATCH is not allowed, please use POST instead';
-const UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
+export const UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'CREATE template timeline with PATCH is not allowed, please use POST instead';
-const NO_MATCH_VERSION_ERROR_MESSAGE =
+export const NO_MATCH_VERSION_ERROR_MESSAGE =
   'TimelineVersion conflict: The given version doesn not match with existing timeline';
-const OLDER_VERSION_ERROR_MESSAGE =
+export const OLDER_VERSION_ERROR_MESSAGE =
   'Template timelineVersion conflict: The given version is older then existing version';
 
 export const checkIsFailureCases = (

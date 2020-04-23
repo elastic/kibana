@@ -45,14 +45,13 @@ export const updateTimelinesRoute = (
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
         const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-
         const existTimeline =
           timelineId != null ? await getTimeline(frameworkRequest, timelineId) : null;
+
         const existTemplateTimeline =
           templateTimelineId != null
             ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
             : null;
-
         const errorObj = checkIsFailureCases(
           isHandlingTemplateTimeline,
           version,
@@ -63,7 +62,6 @@ export const updateTimelinesRoute = (
         if (errorObj != null) {
           return siemResponse.error(errorObj);
         }
-
         const updatedTimeline = await createTimelines(
           (frameworkRequest as unknown) as FrameworkRequest,
           timeline,
