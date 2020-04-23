@@ -28,8 +28,9 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
   let props = { color } as EuiBadgeProps;
   let jobCount;
 
-  // TODO check remove id
   if (icon === true && removeId) {
+    // TODO check iconOnClick prop required by EuiBadge
+    // @ts-ignore
     props = {
       ...props,
       iconType: 'cross',

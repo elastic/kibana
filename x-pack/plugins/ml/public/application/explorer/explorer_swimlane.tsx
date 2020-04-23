@@ -28,6 +28,7 @@ import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_se
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
+import { ChartTooltipValue } from '../components/chart_tooltip/chart_tooltip_service';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -428,7 +429,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
             .on('mouseover', value => {
               mlChartTooltipService.show(
                 [
-                  { skipHeader: true },
+                  { skipHeader: true } as ChartTooltipValue,
                   {
                     label: swimlaneData.fieldName!,
                     value: value === '' ? EMPTY_FIELD_VALUE_LABEL : value,

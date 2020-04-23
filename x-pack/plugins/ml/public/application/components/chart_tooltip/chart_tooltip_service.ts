@@ -15,9 +15,9 @@ export interface TooltipHeader {
   skipHeader: boolean;
 }
 
-export type TooltipData = [TooltipHeader | TooltipValue, TooltipValue];
+export type TooltipData = ChartTooltipValue[];
 
-interface ChartTooltipState {
+export interface ChartTooltipState {
   isTooltipVisible: boolean;
   offset: ToolTipOffset;
   targetPosition: ClientRect;
