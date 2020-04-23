@@ -1,7 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyState component does not render empty state with appropriate base path and no docs 1`] = `
-<EmptyStateComponent
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -104,185 +136,346 @@ exports[`EmptyState component does not render empty state with appropriate base 
       "timeZone": null,
     }
   }
-  loading={false}
-  statesIndexStatus={
-    Object {
-      "docCount": 0,
-      "indexExists": true,
-    }
-  }
 >
-  <DataMissing
-    headingMessage="No uptime data found"
+  <EmptyStateComponent
+    loading={false}
+    statesIndexStatus={
+      Object {
+        "docCount": 0,
+        "indexExists": true,
+      }
+    }
   >
-    <EuiFlexGroup
-      data-test-subj="data-missing"
-      justifyContent="center"
+    <DataOrIndexMissing
+      headingMessage={
+        <FormattedMessage
+          defaultMessage="No uptime data found in index {indexName}"
+          id="xpack.uptime.emptyState.noDataMessage"
+          values={
+            Object {
+              "indexName": <em />,
+            }
+          }
+        />
+      }
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      <EuiFlexGroup
         data-test-subj="data-missing"
+        justifyContent="center"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          data-test-subj="data-missing"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+          <EuiFlexItem
+            grow={false}
+            style={
+              Object {
+                "flexBasis": 700,
+              }
+            }
           >
-            <EuiSpacer
-              size="xs"
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexBasis": 700,
+                }
+              }
             >
-              <div
-                className="euiSpacer euiSpacer--xs"
-              />
-            </EuiSpacer>
-            <EuiPanel>
-              <div
-                className="euiPanel euiPanel--paddingMedium"
+              <EuiSpacer
+                size="m"
               >
-                <EuiEmptyPrompt
-                  body={
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                        id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
-                        values={
-                          Object {
-                            "configureHeartbeatLink": <ForwardRef
-                              href="/app/kibana#/home/tutorial/uptimeMonitors"
-                              target="_blank"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Configure Heartbeat"
-                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                values={Object {}}
-                              />
-                            </ForwardRef>,
-                          }
-                        }
-                      />
-                    </p>
-                  }
-                  iconType="uptimeApp"
-                  title={
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h3>
-                        No uptime data found
-                      </h3>
-                    </EuiTitle>
-                  }
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium"
                 >
-                  <div
-                    className="euiEmptyPrompt"
-                  >
-                    <EuiIcon
-                      color="subdued"
-                      size="xxl"
-                      type="uptimeApp"
-                    >
-                      <div
-                        color="subdued"
-                        data-euiicon-type="uptimeApp"
-                        size="xxl"
-                      />
-                    </EuiIcon>
-                    <EuiSpacer
-                      size="s"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--s"
-                      />
-                    </EuiSpacer>
-                    <EuiTextColor
-                      color="subdued"
-                    >
-                      <span
-                        className="euiTextColor euiTextColor--subdued"
-                      >
-                        <EuiTitle>
-                          <EuiTitle
-                            className="euiTitle euiTitle--medium"
-                            size="l"
+                  <EuiEmptyPrompt
+                    actions={
+                      <ForwardRef>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            fill={true}
+                            href="/app/kibana#/home/tutorial/uptimeMonitors"
                           >
-                            <h3
-                              className="euiTitle euiTitle--large euiTitle euiTitle--medium"
-                            >
-                              No uptime data found
-                            </h3>
-                          </EuiTitle>
-                        </EuiTitle>
-                        <EuiSpacer
-                          size="m"
-                        >
-                          <div
-                            className="euiSpacer euiSpacer--m"
+                            <FormattedMessage
+                              defaultMessage="View setup instructions"
+                              id="xpack.uptime.emptyState.viewSetupInstructions"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            href="/app/uptime#/settings"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Update index pattern settings"
+                              id="xpack.uptime.emptyState.updateIndexPattern"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </ForwardRef>
+                    }
+                    body={
+                      <React.Fragment>
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                            id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                            values={Object {}}
                           />
-                        </EuiSpacer>
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
+                        </p>
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
+                            id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                            values={Object {}}
+                          />
+                        </p>
+                      </React.Fragment>
+                    }
+                    iconType="logoUptime"
+                    title={
+                      <EuiTitle
+                        size="l"
+                      >
+                        <h3>
+                          <FormattedMessage
+                            defaultMessage="No uptime data found in index {indexName}"
+                            id="xpack.uptime.emptyState.noDataMessage"
+                            values={
+                              Object {
+                                "indexName": <em />,
+                              }
+                            }
+                          />
+                        </h3>
+                      </EuiTitle>
+                    }
+                  >
+                    <div
+                      className="euiEmptyPrompt"
+                    >
+                      <EuiIcon
+                        color="subdued"
+                        size="xxl"
+                        type="logoUptime"
+                      >
+                        <div
+                          color="subdued"
+                          data-euiicon-type="logoUptime"
+                          size="xxl"
+                        />
+                      </EuiIcon>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiTextColor
+                        color="subdued"
+                      >
+                        <span
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          <EuiTitle>
+                            <EuiTitle
+                              className="euiTitle euiTitle--medium"
+                              size="l"
+                            >
+                              <h3
+                                className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="No uptime data found in index {indexName}"
+                                  id="xpack.uptime.emptyState.noDataMessage"
+                                  values={
+                                    Object {
+                                      "indexName": <em />,
+                                    }
+                                  }
+                                >
+                                  No uptime data found in index 
+                                  <em />
+                                </FormattedMessage>
+                              </h3>
+                            </EuiTitle>
+                          </EuiTitle>
+                          <EuiSpacer
+                            size="m"
                           >
-                            <p>
-                              <FormattedMessage
-                                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                                id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
-                                values={
-                                  Object {
-                                    "configureHeartbeatLink": <ForwardRef
-                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                      target="_blank"
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <p>
+                                <FormattedMessage
+                                  defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                                  id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                                  values={Object {}}
+                                >
+                                  If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services.
+                                </FormattedMessage>
+                              </p>
+                              <p>
+                                <FormattedMessage
+                                  defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
+                                  id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                                  values={Object {}}
+                                >
+                                  If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config.
+                                </FormattedMessage>
+                              </p>
+                            </div>
+                          </EuiText>
+                        </span>
+                      </EuiTextColor>
+                      <EuiSpacer
+                        size="l"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--l"
+                        />
+                      </EuiSpacer>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                fill={true}
+                                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                              >
+                                <a
+                                  className="euiButton euiButton--primary euiButton--fill"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Configure Heartbeat"
-                                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                        defaultMessage="View setup instructions"
+                                        id="xpack.uptime.emptyState.viewSetupInstructions"
                                         values={Object {}}
-                                      />
-                                    </ForwardRef>,
-                                  }
-                                }
+                                      >
+                                        View setup instructions
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                href="/app/uptime#/settings"
                               >
-                                <EuiLink
-                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                  target="_blank"
+                                <a
+                                  className="euiButton euiButton--primary"
+                                  href="/app/uptime#/settings"
+                                  rel="noreferrer"
                                 >
-                                  <a
-                                    className="euiLink euiLink--primary"
-                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                    rel="noopener noreferrer"
-                                    target="_blank"
+                                  <span
+                                    className="euiButton__content"
                                   >
-                                    <FormattedMessage
-                                      defaultMessage="Configure Heartbeat"
-                                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                      values={Object {}}
+                                    <span
+                                      className="euiButton__text"
                                     >
-                                      Configure Heartbeat
-                                    </FormattedMessage>
-                                  </a>
-                                </EuiLink>
-                                 to start logging uptime data.
-                              </FormattedMessage>
-                            </p>
-                          </div>
-                        </EuiText>
-                      </span>
-                    </EuiTextColor>
-                  </div>
-                </EuiEmptyPrompt>
-              </div>
-            </EuiPanel>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </DataMissing>
-</EmptyStateComponent>
+                                      <FormattedMessage
+                                        defaultMessage="Update index pattern settings"
+                                        id="xpack.uptime.emptyState.updateIndexPattern"
+                                        values={Object {}}
+                                      >
+                                        Update index pattern settings
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </EuiEmptyPrompt>
+                </div>
+              </EuiPanel>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </DataOrIndexMissing>
+  </EmptyStateComponent>
+</Router>
 `;
 
 exports[`EmptyState component doesn't render child components when count is falsy 1`] = `
-<EmptyStateComponent
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -385,73 +578,108 @@ exports[`EmptyState component doesn't render child components when count is fals
       "timeZone": null,
     }
   }
-  loading={false}
-  statesIndexStatus={null}
 >
-  <EmptyStateLoading>
-    <EuiEmptyPrompt
-      body={
-        <React.Fragment>
-          <EuiLoadingSpinner
-            size="xl"
-          />
-          <EuiSpacer />
-          <EuiTitle
-            size="l"
-          >
-            <h2>
-              Loading…
-            </h2>
-          </EuiTitle>
-        </React.Fragment>
-      }
-    >
-      <div
-        className="euiEmptyPrompt"
+  <EmptyStateComponent
+    loading={false}
+    statesIndexStatus={null}
+  >
+    <EmptyStateLoading>
+      <EuiEmptyPrompt
+        body={
+          <React.Fragment>
+            <EuiLoadingSpinner
+              size="xl"
+            />
+            <EuiSpacer />
+            <EuiTitle
+              size="l"
+            >
+              <h2>
+                Loading…
+              </h2>
+            </EuiTitle>
+          </React.Fragment>
+        }
       >
-        <EuiTextColor
-          color="subdued"
+        <div
+          className="euiEmptyPrompt"
         >
-          <span
-            className="euiTextColor euiTextColor--subdued"
+          <EuiTextColor
+            color="subdued"
           >
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
-              >
-                <EuiLoadingSpinner
-                  size="xl"
+            <span
+              className="euiTextColor euiTextColor--subdued"
+            >
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
                 >
-                  <span
-                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                  />
-                </EuiLoadingSpinner>
-                <EuiSpacer>
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiTitle
-                  size="l"
-                >
-                  <h2
-                    className="euiTitle euiTitle--large"
+                  <EuiLoadingSpinner
+                    size="xl"
                   >
-                    Loading…
-                  </h2>
-                </EuiTitle>
-              </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
-      </div>
-    </EuiEmptyPrompt>
-  </EmptyStateLoading>
-</EmptyStateComponent>
+                    <span
+                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                    />
+                  </EuiLoadingSpinner>
+                  <EuiSpacer>
+                    <div
+                      className="euiSpacer euiSpacer--l"
+                    />
+                  </EuiSpacer>
+                  <EuiTitle
+                    size="l"
+                  >
+                    <h2
+                      className="euiTitle euiTitle--large"
+                    >
+                      Loading…
+                    </h2>
+                  </EuiTitle>
+                </div>
+              </EuiText>
+            </span>
+          </EuiTextColor>
+        </div>
+      </EuiEmptyPrompt>
+    </EmptyStateLoading>
+  </EmptyStateComponent>
+</Router>
 `;
 
 exports[`EmptyState component notifies when index does not exist 1`] = `
-<EmptyStateComponent
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -554,203 +782,418 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
       "timeZone": null,
     }
   }
-  loading={false}
-  statesIndexStatus={
-    Object {
-      "docCount": 1,
-      "indexExists": false,
-    }
-  }
 >
-  <DataMissing
-    headingMessage="Uptime index not found"
+  <EmptyStateComponent
+    loading={false}
+    statesIndexStatus={
+      Object {
+        "docCount": 1,
+        "indexExists": false,
+      }
+    }
   >
-    <EuiFlexGroup
-      data-test-subj="data-missing"
-      justifyContent="center"
+    <DataOrIndexMissing
+      headingMessage={
+        <FormattedMessage
+          defaultMessage="No indices found matching pattern {indexName}"
+          id="xpack.uptime.emptyState.noIndexTitle"
+          values={
+            Object {
+              "indexName": <em />,
+            }
+          }
+        />
+      }
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      <EuiFlexGroup
         data-test-subj="data-missing"
+        justifyContent="center"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          data-test-subj="data-missing"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+          <EuiFlexItem
+            grow={false}
+            style={
+              Object {
+                "flexBasis": 700,
+              }
+            }
           >
-            <EuiSpacer
-              size="xs"
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+              style={
+                Object {
+                  "flexBasis": 700,
+                }
+              }
             >
-              <div
-                className="euiSpacer euiSpacer--xs"
-              />
-            </EuiSpacer>
-            <EuiPanel>
-              <div
-                className="euiPanel euiPanel--paddingMedium"
+              <EuiSpacer
+                size="m"
               >
-                <EuiEmptyPrompt
-                  body={
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                        id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
-                        values={
-                          Object {
-                            "configureHeartbeatLink": <ForwardRef
-                              href="/app/kibana#/home/tutorial/uptimeMonitors"
-                              target="_blank"
-                            >
-                              <FormattedMessage
-                                defaultMessage="Configure Heartbeat"
-                                id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                values={Object {}}
-                              />
-                            </ForwardRef>,
-                          }
-                        }
-                      />
-                    </p>
-                  }
-                  iconType="uptimeApp"
-                  title={
-                    <EuiTitle
-                      size="l"
-                    >
-                      <h3>
-                        Uptime index not found
-                      </h3>
-                    </EuiTitle>
-                  }
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium"
                 >
-                  <div
-                    className="euiEmptyPrompt"
-                  >
-                    <EuiIcon
-                      color="subdued"
-                      size="xxl"
-                      type="uptimeApp"
-                    >
-                      <div
-                        color="subdued"
-                        data-euiicon-type="uptimeApp"
-                        size="xxl"
-                      />
-                    </EuiIcon>
-                    <EuiSpacer
-                      size="s"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--s"
-                      />
-                    </EuiSpacer>
-                    <EuiTextColor
-                      color="subdued"
-                    >
-                      <span
-                        className="euiTextColor euiTextColor--subdued"
-                      >
-                        <EuiTitle>
-                          <EuiTitle
-                            className="euiTitle euiTitle--medium"
-                            size="l"
+                  <EuiEmptyPrompt
+                    actions={
+                      <ForwardRef>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            fill={true}
+                            href="/app/kibana#/home/tutorial/uptimeMonitors"
                           >
-                            <h3
-                              className="euiTitle euiTitle--large euiTitle euiTitle--medium"
-                            >
-                              Uptime index not found
-                            </h3>
-                          </EuiTitle>
-                        </EuiTitle>
-                        <EuiSpacer
-                          size="m"
-                        >
-                          <div
-                            className="euiSpacer euiSpacer--m"
+                            <FormattedMessage
+                              defaultMessage="View setup instructions"
+                              id="xpack.uptime.emptyState.viewSetupInstructions"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiButton
+                            color="primary"
+                            href="/app/uptime#/settings"
+                          >
+                            <FormattedMessage
+                              defaultMessage="Update index pattern settings"
+                              id="xpack.uptime.emptyState.updateIndexPattern"
+                              values={Object {}}
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </ForwardRef>
+                    }
+                    body={
+                      <React.Fragment>
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                            id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                            values={Object {}}
                           />
-                        </EuiSpacer>
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
+                        </p>
+                        <p>
+                          <FormattedMessage
+                            defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
+                            id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                            values={Object {}}
+                          />
+                        </p>
+                      </React.Fragment>
+                    }
+                    iconType="logoUptime"
+                    title={
+                      <EuiTitle
+                        size="l"
+                      >
+                        <h3>
+                          <FormattedMessage
+                            defaultMessage="No indices found matching pattern {indexName}"
+                            id="xpack.uptime.emptyState.noIndexTitle"
+                            values={
+                              Object {
+                                "indexName": <em />,
+                              }
+                            }
+                          />
+                        </h3>
+                      </EuiTitle>
+                    }
+                  >
+                    <div
+                      className="euiEmptyPrompt"
+                    >
+                      <EuiIcon
+                        color="subdued"
+                        size="xxl"
+                        type="logoUptime"
+                      >
+                        <div
+                          color="subdued"
+                          data-euiicon-type="logoUptime"
+                          size="xxl"
+                        />
+                      </EuiIcon>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiTextColor
+                        color="subdued"
+                      >
+                        <span
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          <EuiTitle>
+                            <EuiTitle
+                              className="euiTitle euiTitle--medium"
+                              size="l"
+                            >
+                              <h3
+                                className="euiTitle euiTitle--large euiTitle euiTitle--medium"
+                              >
+                                <FormattedMessage
+                                  defaultMessage="No indices found matching pattern {indexName}"
+                                  id="xpack.uptime.emptyState.noIndexTitle"
+                                  values={
+                                    Object {
+                                      "indexName": <em />,
+                                    }
+                                  }
+                                >
+                                  No indices found matching pattern 
+                                  <em />
+                                </FormattedMessage>
+                              </h3>
+                            </EuiTitle>
+                          </EuiTitle>
+                          <EuiSpacer
+                            size="m"
                           >
-                            <p>
-                              <FormattedMessage
-                                defaultMessage="{configureHeartbeatLink} to start logging uptime data."
-                                id="xpack.uptime.dataMissing.configureHeartbeatToGetStartedMessage"
-                                values={
-                                  Object {
-                                    "configureHeartbeatLink": <ForwardRef
-                                      href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                      target="_blank"
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              <p>
+                                <FormattedMessage
+                                  defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                                  id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                                  values={Object {}}
+                                >
+                                  If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services.
+                                </FormattedMessage>
+                              </p>
+                              <p>
+                                <FormattedMessage
+                                  defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
+                                  id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                                  values={Object {}}
+                                >
+                                  If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config.
+                                </FormattedMessage>
+                              </p>
+                            </div>
+                          </EuiText>
+                        </span>
+                      </EuiTextColor>
+                      <EuiSpacer
+                        size="l"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--l"
+                        />
+                      </EuiSpacer>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiFlexGroup>
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                fill={true}
+                                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                              >
+                                <a
+                                  className="euiButton euiButton--primary euiButton--fill"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    className="euiButton__content"
+                                  >
+                                    <span
+                                      className="euiButton__text"
                                     >
                                       <FormattedMessage
-                                        defaultMessage="Configure Heartbeat"
-                                        id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                                        defaultMessage="View setup instructions"
+                                        id="xpack.uptime.emptyState.viewSetupInstructions"
                                         values={Object {}}
-                                      />
-                                    </ForwardRef>,
-                                  }
-                                }
+                                      >
+                                        View setup instructions
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiButton
+                                color="primary"
+                                href="/app/uptime#/settings"
                               >
-                                <EuiLink
-                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                  target="_blank"
+                                <a
+                                  className="euiButton euiButton--primary"
+                                  href="/app/uptime#/settings"
+                                  rel="noreferrer"
                                 >
-                                  <a
-                                    className="euiLink euiLink--primary"
-                                    href="/app/kibana#/home/tutorial/uptimeMonitors"
-                                    rel="noopener noreferrer"
-                                    target="_blank"
+                                  <span
+                                    className="euiButton__content"
                                   >
-                                    <FormattedMessage
-                                      defaultMessage="Configure Heartbeat"
-                                      id="xpack.uptime.emptyState.configureHeartbeatLinkText"
-                                      values={Object {}}
+                                    <span
+                                      className="euiButton__text"
                                     >
-                                      Configure Heartbeat
-                                    </FormattedMessage>
-                                  </a>
-                                </EuiLink>
-                                 to start logging uptime data.
-                              </FormattedMessage>
-                            </p>
-                          </div>
-                        </EuiText>
-                      </span>
-                    </EuiTextColor>
-                  </div>
-                </EuiEmptyPrompt>
-              </div>
-            </EuiPanel>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </DataMissing>
-</EmptyStateComponent>
+                                      <FormattedMessage
+                                        defaultMessage="Update index pattern settings"
+                                        id="xpack.uptime.emptyState.updateIndexPattern"
+                                        values={Object {}}
+                                      >
+                                        Update index pattern settings
+                                      </FormattedMessage>
+                                    </span>
+                                  </span>
+                                </a>
+                              </EuiButton>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </EuiEmptyPrompt>
+                </div>
+              </EuiPanel>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </DataOrIndexMissing>
+  </EmptyStateComponent>
+</Router>
 `;
 
 exports[`EmptyState component renders child components when count is truthy 1`] = `
-<Fragment>
-  <div>
-    Foo
-  </div>
-  <div>
-    Bar
-  </div>
-  <div>
-    Baz
-  </div>
-</Fragment>
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <EmptyStateComponent
+    loading={false}
+    statesIndexStatus={
+      Object {
+        "docCount": 1,
+        "indexExists": true,
+      }
+    }
+  >
+    <div>
+      Foo
+    </div>
+    <div>
+      Bar
+    </div>
+    <div>
+      Baz
+    </div>
+  </EmptyStateComponent>
+</ContextProvider>
 `;
 
 exports[`EmptyState component renders error message when an error occurs 1`] = `
-<EmptyStateComponent
-  errors={
-    Array [
-      [error: There was an error fetching your data.],
-    ]
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
   }
   intl={
     Object {
@@ -854,125 +1297,165 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
       "timeZone": null,
     }
   }
-  loading={false}
-  statesIndexStatus={null}
 >
-  <EmptyStateError
+  <EmptyStateComponent
     errors={
       Array [
         [error: There was an error fetching your data.],
       ]
     }
+    loading={false}
+    statesIndexStatus={null}
   >
-    <EuiFlexGroup
-      justifyContent="center"
+    <EmptyStateError
+      errors={
+        Array [
+          [error: There was an error fetching your data.],
+        ]
+      }
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      <EuiFlexGroup
+        justifyContent="center"
       >
-        <EuiFlexItem
-          grow={false}
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
+          <EuiFlexItem
+            grow={false}
           >
-            <EuiPanel>
-              <div
-                className="euiPanel euiPanel--paddingMedium"
-              >
-                <EuiEmptyPrompt
-                  body={
-                    <React.Fragment>
-                      <p>
-                        There was an error fetching your data.
-                      </p>
-                    </React.Fragment>
-                  }
-                  iconColor="subdued"
-                  iconType="securityApp"
-                  title={
-                    <EuiTitle
-                      size="m"
-                    >
-                      <h3>
-                        Error
-                      </h3>
-                    </EuiTitle>
-                  }
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiPanel>
+                <div
+                  className="euiPanel euiPanel--paddingMedium"
                 >
-                  <div
-                    className="euiEmptyPrompt"
-                  >
-                    <EuiIcon
-                      color="subdued"
-                      size="xxl"
-                      type="securityApp"
-                    >
-                      <div
-                        color="subdued"
-                        data-euiicon-type="securityApp"
-                        size="xxl"
-                      />
-                    </EuiIcon>
-                    <EuiSpacer
-                      size="s"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--s"
-                      />
-                    </EuiSpacer>
-                    <EuiTextColor
-                      color="subdued"
-                    >
-                      <span
-                        className="euiTextColor euiTextColor--subdued"
+                  <EuiEmptyPrompt
+                    body={
+                      <React.Fragment>
+                        <p>
+                          There was an error fetching your data.
+                        </p>
+                      </React.Fragment>
+                    }
+                    iconColor="subdued"
+                    iconType="securityApp"
+                    title={
+                      <EuiTitle
+                        size="m"
                       >
-                        <EuiTitle>
-                          <EuiTitle
-                            className="euiTitle euiTitle--medium"
+                        <h3>
+                          Error
+                        </h3>
+                      </EuiTitle>
+                    }
+                  >
+                    <div
+                      className="euiEmptyPrompt"
+                    >
+                      <EuiIcon
+                        color="subdued"
+                        size="xxl"
+                        type="securityApp"
+                      >
+                        <div
+                          color="subdued"
+                          data-euiicon-type="securityApp"
+                          size="xxl"
+                        />
+                      </EuiIcon>
+                      <EuiSpacer
+                        size="s"
+                      >
+                        <div
+                          className="euiSpacer euiSpacer--s"
+                        />
+                      </EuiSpacer>
+                      <EuiTextColor
+                        color="subdued"
+                      >
+                        <span
+                          className="euiTextColor euiTextColor--subdued"
+                        >
+                          <EuiTitle>
+                            <EuiTitle
+                              className="euiTitle euiTitle--medium"
+                              size="m"
+                            >
+                              <h3
+                                className="euiTitle euiTitle--medium euiTitle euiTitle--medium"
+                              >
+                                Error
+                              </h3>
+                            </EuiTitle>
+                          </EuiTitle>
+                          <EuiSpacer
                             size="m"
                           >
-                            <h3
-                              className="euiTitle euiTitle--medium euiTitle euiTitle--medium"
+                            <div
+                              className="euiSpacer euiSpacer--m"
+                            />
+                          </EuiSpacer>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
                             >
-                              Error
-                            </h3>
-                          </EuiTitle>
-                        </EuiTitle>
-                        <EuiSpacer
-                          size="m"
-                        >
-                          <div
-                            className="euiSpacer euiSpacer--m"
-                          />
-                        </EuiSpacer>
-                        <EuiText>
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            <p
-                              key="There was an error fetching your data."
-                            >
-                              There was an error fetching your data.
-                            </p>
-                          </div>
-                        </EuiText>
-                      </span>
-                    </EuiTextColor>
-                  </div>
-                </EuiEmptyPrompt>
-              </div>
-            </EuiPanel>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </EmptyStateError>
-</EmptyStateComponent>
+                              <p
+                                key="There was an error fetching your data."
+                              >
+                                There was an error fetching your data.
+                              </p>
+                            </div>
+                          </EuiText>
+                        </span>
+                      </EuiTextColor>
+                    </div>
+                  </EuiEmptyPrompt>
+                </div>
+              </EuiPanel>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </EmptyStateError>
+  </EmptyStateComponent>
+</Router>
 `;
 
 exports[`EmptyState component renders loading state if no errors or doc count 1`] = `
-<EmptyStateComponent
+<Router
+  history={
+    Object {
+      "action": "POP",
+      "block": [Function],
+      "canGo": [Function],
+      "createHref": [Function],
+      "entries": Array [
+        Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+      ],
+      "go": [Function],
+      "goBack": [Function],
+      "goForward": [Function],
+      "index": 0,
+      "length": 1,
+      "listen": [Function],
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "push": [Function],
+      "replace": [Function],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -1075,67 +1558,70 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
       "timeZone": null,
     }
   }
-  loading={true}
-  statesIndexStatus={null}
 >
-  <EmptyStateLoading>
-    <EuiEmptyPrompt
-      body={
-        <React.Fragment>
-          <EuiLoadingSpinner
-            size="xl"
-          />
-          <EuiSpacer />
-          <EuiTitle
-            size="l"
-          >
-            <h2>
-              Loading…
-            </h2>
-          </EuiTitle>
-        </React.Fragment>
-      }
-    >
-      <div
-        className="euiEmptyPrompt"
+  <EmptyStateComponent
+    loading={true}
+    statesIndexStatus={null}
+  >
+    <EmptyStateLoading>
+      <EuiEmptyPrompt
+        body={
+          <React.Fragment>
+            <EuiLoadingSpinner
+              size="xl"
+            />
+            <EuiSpacer />
+            <EuiTitle
+              size="l"
+            >
+              <h2>
+                Loading…
+              </h2>
+            </EuiTitle>
+          </React.Fragment>
+        }
       >
-        <EuiTextColor
-          color="subdued"
+        <div
+          className="euiEmptyPrompt"
         >
-          <span
-            className="euiTextColor euiTextColor--subdued"
+          <EuiTextColor
+            color="subdued"
           >
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
-              >
-                <EuiLoadingSpinner
-                  size="xl"
+            <span
+              className="euiTextColor euiTextColor--subdued"
+            >
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
                 >
-                  <span
-                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                  />
-                </EuiLoadingSpinner>
-                <EuiSpacer>
-                  <div
-                    className="euiSpacer euiSpacer--l"
-                  />
-                </EuiSpacer>
-                <EuiTitle
-                  size="l"
-                >
-                  <h2
-                    className="euiTitle euiTitle--large"
+                  <EuiLoadingSpinner
+                    size="xl"
                   >
-                    Loading…
-                  </h2>
-                </EuiTitle>
-              </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
-      </div>
-    </EuiEmptyPrompt>
-  </EmptyStateLoading>
-</EmptyStateComponent>
+                    <span
+                      className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                    />
+                  </EuiLoadingSpinner>
+                  <EuiSpacer>
+                    <div
+                      className="euiSpacer euiSpacer--l"
+                    />
+                  </EuiSpacer>
+                  <EuiTitle
+                    size="l"
+                  >
+                    <h2
+                      className="euiTitle euiTitle--large"
+                    >
+                      Loading…
+                    </h2>
+                  </EuiTitle>
+                </div>
+              </EuiText>
+            </span>
+          </EuiTextColor>
+        </div>
+      </EuiEmptyPrompt>
+    </EmptyStateLoading>
+  </EmptyStateComponent>
+</Router>
 `;
