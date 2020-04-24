@@ -13,7 +13,7 @@ import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/inde
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
-import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 
 enum MODE {
@@ -71,7 +71,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   const dataVizResolvers = {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkGetJobsPrivilege,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     checkMlNodesAvailable,
   };
 

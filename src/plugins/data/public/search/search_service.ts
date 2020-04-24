@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import {
@@ -37,6 +38,7 @@ import { GetInternalStartServicesFn } from '../types';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
+  getAggTypesFunctions,
   AggType,
   AggTypesRegistry,
   AggConfig,
@@ -52,9 +54,10 @@ import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
 
 interface SearchServiceSetupDependencies {
+  expressions: ExpressionsSetup;
+  getInternalStartServices: GetInternalStartServicesFn;
   packageInfo: PackageInfo;
   query: QuerySetup;
-  getInternalStartServices: GetInternalStartServicesFn;
 }
 
 interface SearchServiceStartDependencies {
@@ -97,21 +100,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    { packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
+    { expressions, packageInfo, query, getInternalStartServices }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
+
+    // register each agg type
     const aggTypes = getAggTypes({
       query,
       uiSettings: core.uiSettings,
       getInternalStartServices,
     });
-
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
+
+    // register expression functions for each agg type
+    const aggFunctions = getAggTypesFunctions();
+    aggFunctions.forEach(fn => expressions.registerFunction(fn));
 
     return {
       aggs: {

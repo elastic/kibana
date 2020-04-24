@@ -30,7 +30,7 @@ export function createTimeSeriesQueryRoute(service: Service, router: IRouter, ba
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, TimeSeriesQuery, any>,
+    req: KibanaRequest<unknown, unknown, TimeSeriesQuery>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
