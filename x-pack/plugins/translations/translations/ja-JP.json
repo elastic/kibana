@@ -12368,7 +12368,6 @@
     "xpack.reporting.shareContextMenu.csvReportsButtonLabel": "CSV レポート",
     "xpack.reporting.shareContextMenu.pdfReportsButtonLabel": "PDF レポート",
     "xpack.reporting.shareContextMenu.pngReportsButtonLabel": "PNG レポート",
-    "xpack.rollupJobs.appName": "ロールアップジョブ",
     "xpack.rollupJobs.appTitle": "ロールアップジョブ",
     "xpack.rollupJobs.breadcrumbsTitle": "ロールアップジョブ",
     "xpack.rollupJobs.create.backButton.label": "戻る",
