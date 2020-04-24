@@ -30,7 +30,6 @@ import {
   SharedGlobalConfig,
   ElasticsearchServiceStart,
   IClusterClient,
-  ClusterClient,
 } from '../../../../src/core/server';
 
 import {
@@ -273,9 +272,6 @@ export class AlertingPlugin {
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
       getScopedCallCluster(clusterClient: IClusterClient) {
-        if (!(clusterClient instanceof ClusterClient)) {
-          throw new Error('given clusterClient is not an instance of ClusterClient');
-        }
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
     });
