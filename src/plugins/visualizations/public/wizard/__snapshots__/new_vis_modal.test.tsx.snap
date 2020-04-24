@@ -1214,7 +1214,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           data-test-subj="visNewDialogTypes"
                                           role="menu"
                                         >
-                                          <EuiKeyPadMenuItemButton
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithAliasUrl"
                                             betaBadgeIconType="popout"
                                             betaBadgeLabel="Kibana application"
@@ -1329,8 +1329,8 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
-                                          <EuiKeyPadMenuItemButton
+                                          </EuiKeyPadMenuItem>
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithSearch"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-visWithSearch"
@@ -1398,8 +1398,8 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
-                                          <EuiKeyPadMenuItemButton
+                                          </EuiKeyPadMenuItem>
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-vis"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-vis"
@@ -1467,7 +1467,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
+                                          </EuiKeyPadMenuItem>
                                         </div>
                                       </EuiKeyPadMenu>
                                     </div>
@@ -2669,7 +2669,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           data-test-subj="visNewDialogTypes"
                                           role="menu"
                                         >
-                                          <EuiKeyPadMenuItemButton
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-vis"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-vis"
@@ -2737,8 +2737,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
-                                          <EuiKeyPadMenuItemButton
+                                          </EuiKeyPadMenuItem>
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithAliasUrl"
                                             betaBadgeIconType="popout"
                                             betaBadgeLabel="Kibana application"
@@ -2853,8 +2853,8 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
-                                          <EuiKeyPadMenuItemButton
+                                          </EuiKeyPadMenuItem>
+                                          <EuiKeyPadMenuItem
                                             aria-describedby="visTypeDescription-visWithSearch"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-visWithSearch"
@@ -2922,7 +2922,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 </p>
                                               </div>
                                             </button>
-                                          </EuiKeyPadMenuItemButton>
+                                          </EuiKeyPadMenuItem>
                                         </div>
                                       </EuiKeyPadMenu>
                                     </div>

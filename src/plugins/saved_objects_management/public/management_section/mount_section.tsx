@@ -187,6 +187,7 @@ const SavedObjectsTablePage = ({
       actionRegistry={actionRegistry}
       savedObjectsClient={coreStart.savedObjects.client}
       indexPatterns={dataStart.indexPatterns}
+      search={dataStart.search}
       http={coreStart.http}
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}

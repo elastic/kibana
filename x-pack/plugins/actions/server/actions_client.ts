@@ -152,7 +152,6 @@ export class ActionsClient {
         id,
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
-        config: preconfiguredActionsList.config,
         isPreconfigured: true,
       };
     }
@@ -184,7 +183,6 @@ export class ActionsClient {
         id: preconfiguredAction.id,
         actionTypeId: preconfiguredAction.actionTypeId,
         name: preconfiguredAction.name,
-        config: preconfiguredAction.config,
         isPreconfigured: true,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));

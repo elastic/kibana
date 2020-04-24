@@ -19,13 +19,13 @@ import {
   ConcreteTaskInstance,
 } from './task';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   SavedObjectAttributes,
-} from '../../../../src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 

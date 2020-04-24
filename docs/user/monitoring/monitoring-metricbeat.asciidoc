@@ -25,10 +25,10 @@ Add the following setting in the {kib} configuration file (`kibana.yml`):
 
 [source,yaml]
 ----------------------------------
-xpack.monitoring.kibana.collection.enabled: false
+monitoring.kibana.collection.enabled: false
 ----------------------------------
 
-Leave the `xpack.monitoring.enabled` set to its default value (`true`). 
+Leave the `monitoring.enabled` set to its default value (`true`). 
 // end::disable-kibana-collection[]
 For more information, see 
 <<monitoring-settings-kb,Monitoring settings in {kib}>>.

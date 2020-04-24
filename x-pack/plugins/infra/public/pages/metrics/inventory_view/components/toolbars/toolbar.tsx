@@ -6,6 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import { useSourceContext } from '../../../../../containers/source';
 import {
   SnapshotMetricInput,
   SnapshotGroupBy,
@@ -19,7 +20,7 @@ import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { WaffleOptionsState } from '../../hooks/use_waffle_options';
-import { SavedViews } from './save_views';
+import { useInventoryMeta } from '../../hooks/use_inventory_meta';
 
 export interface ToolbarProps
   extends Omit<WaffleOptionsState, 'view' | 'boundsOverride' | 'autoBounds'> {
@@ -45,9 +46,6 @@ const wrapToolbarItems = (
         <>
           <ToolbarItems {...props} accounts={accounts} regions={regions} />
           <EuiFlexItem grow={true} />
-          <EuiFlexItem grow={false}>
-            <SavedViews />
-          </EuiFlexItem>
         </>
       )}
     </ToolbarWrapper>
@@ -56,10 +54,11 @@ const wrapToolbarItems = (
 
 interface Props {
   nodeType: InventoryItemType;
-  regions: string[];
-  accounts: InventoryCloudAccount[];
 }
-export const Toolbar = ({ nodeType, accounts, regions }: Props) => {
+
+export const Toolbar = ({ nodeType }: Props) => {
+  const { sourceId } = useSourceContext();
+  const { accounts, regions } = useInventoryMeta(sourceId, nodeType);
   const ToolbarItems = findToolbar(nodeType);
   return wrapToolbarItems(ToolbarItems, accounts, regions);
 };
