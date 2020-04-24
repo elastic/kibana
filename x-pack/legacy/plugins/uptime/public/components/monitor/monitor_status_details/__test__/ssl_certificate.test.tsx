@@ -32,7 +32,10 @@ describe('SSL Certificate component', () => {
   });
 
   it('shallow renders', () => {
-    const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
+    const monitorTls1 = {
+      certificate_not_valid_after: '2020-04-24T11:41:38.200Z',
+    };
+    const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls1} />);
     expect(component).toMatchSnapshot();
   });
 
