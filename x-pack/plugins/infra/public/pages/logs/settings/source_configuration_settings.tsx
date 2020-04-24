@@ -81,7 +81,7 @@ export const LogsSettingsPage = () => {
           restrictWidth
           data-test-subj="sourceConfigurationContent"
         >
-          <Prompt when={isFormDirty} message={unsavedFormPromptMessage} />
+          <Prompt prompt={isFormDirty ? unsavedFormPromptMessage : undefined} />
           <EuiPanel paddingSize="l">
             <NameConfigurationPanel
               isLoading={isLoading}
