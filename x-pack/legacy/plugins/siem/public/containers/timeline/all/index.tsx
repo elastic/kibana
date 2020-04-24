@@ -28,6 +28,7 @@ export interface AllTimelinesArgs {
 
 export interface AllTimelinesVariables {
   onlyUserFavorite: boolean;
+  timelineTypes: 'default' | 'template' | null;
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
@@ -79,12 +80,14 @@ const getAllTimeline = memoizeOne(
 const AllTimelinesQueryComponent: React.FC<OwnProps> = ({
   children,
   onlyUserFavorite,
+  timelineTypes,
   pageInfo,
   search,
   sort,
 }) => {
   const variables: GetAllTimeline.Variables = {
     onlyUserFavorite,
+    timelineTypes,
     pageInfo,
     search,
     sort,

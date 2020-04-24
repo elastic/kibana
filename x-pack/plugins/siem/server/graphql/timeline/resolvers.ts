@@ -50,6 +50,7 @@ export const createTimelineResolvers = (
       return libs.timeline.getAllTimeline(
         req,
         args.onlyUserFavorite || null,
+        args.timelineTypes || null,
         args.pageInfo || null,
         args.search || null,
         args.sort || null

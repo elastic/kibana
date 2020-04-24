@@ -42,6 +42,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
+    tabs,
     title,
     totalSearchResultsCount,
   }) => {
@@ -62,15 +63,17 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               selectedTimelinesCount={selectedItems.length}
               title={title}
             />
-
-            <SearchRow
-              data-test-subj="search-row"
-              onlyFavorites={onlyFavorites}
-              onQueryChange={onQueryChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              query={query}
-              totalSearchResultsCount={totalSearchResultsCount}
-            />
+            <>
+              {tabs()}
+              <SearchRow
+                data-test-subj="search-row"
+                onlyFavorites={onlyFavorites}
+                onQueryChange={onQueryChange}
+                onToggleOnlyFavorites={onToggleOnlyFavorites}
+                query={query}
+                totalSearchResultsCount={totalSearchResultsCount}
+              />
+            </>
           </HeaderContainer>
         </EuiModalHeader>
 

@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
@@ -41,6 +42,7 @@ import {
   OnDeleteOneTimeline,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import * as i18n from './translations';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -68,6 +70,19 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
     []
   );
 
+const tabs: Array<{ id: 'default' | 'template'; name: string; disabled: boolean }> = [
+  {
+    id: 'default',
+    name: i18n.TAB_TIMELINES,
+    disabled: false,
+  },
+  {
+    id: 'template',
+    name: i18n.TAB_TEMPLATES,
+    disabled: false,
+  },
+];
+
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
@@ -91,6 +106,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     >({});
     /** Only query for favorite timelines when true */
     const [onlyFavorites, setOnlyFavorites] = useState(false);
+
+    const [timelineTypes, setTimelineTypes] = useState<'default' | 'template'>('default');
     /** The requested page of results */
     const [pageIndex, setPageIndex] = useState(0);
     /** The requested size of each page of search results */
@@ -103,6 +120,28 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
+
+    const renderTabs = useCallback(() => {
+      return (
+        <>
+          <EuiTabs>
+            {tabs.map((tab, index) => (
+              <EuiTab
+                onClick={useCallback(() => {
+                  setTimelineTypes(tab.id);
+                }, [setTimelineTypes, tab])}
+                isSelected={tab.id === timelineTypes}
+                disabled={tab.disabled}
+                key={index}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+          <EuiSpacer size="m" />
+        </>
+      );
+    }, [tabs, timelineTypes]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -146,6 +185,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             sortOrder: sortDirection as Direction,
           },
           onlyUserFavorite: onlyFavorites,
+          timelineTypes,
         });
       },
       [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]
@@ -164,6 +204,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
+        timelineTypes,
       });
 
       // NOTE: we clear the selection state below, but if the server fails to
@@ -252,74 +293,82 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     return (
-      <AllTimelinesQuery
-        pageInfo={{
-          pageIndex: pageIndex + 1,
-          pageSize,
-        }}
-        search={search}
-        sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
-        onlyUserFavorite={onlyFavorites}
-      >
-        {({ timelines, loading, totalCount, refetch }) => {
-          return !isModal ? (
-            <OpenTimeline
-              data-test-subj={'open-timeline'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              importDataModalToggle={importDataModalToggle}
-              onAddTimelinesToFavorites={undefined}
-              onDeleteSelected={onDeleteSelected}
-              onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              refetch={refetch}
-              searchResults={timelines}
-              setImportDataModalToggle={setImportDataModalToggle}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          ) : (
-            <OpenTimelineModalBody
-              data-test-subj={'open-timeline-modal'}
-              deleteTimelines={onDeleteOneTimeline}
-              defaultPageSize={defaultPageSize}
-              hideActions={hideActions}
-              isLoading={loading}
-              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-              onAddTimelinesToFavorites={undefined}
-              onlyFavorites={onlyFavorites}
-              onOpenTimeline={openTimeline}
-              onQueryChange={onQueryChange}
-              onSelectionChange={onSelectionChange}
-              onTableChange={onTableChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              onToggleShowNotes={onToggleShowNotes}
-              pageIndex={pageIndex}
-              pageSize={pageSize}
-              query={search}
-              searchResults={timelines}
-              selectedItems={selectedItems}
-              sortDirection={sortDirection}
-              sortField={sortField}
-              title={title}
-              totalSearchResultsCount={totalCount}
-            />
-          );
-        }}
-      </AllTimelinesQuery>
+      <>
+        <AllTimelinesQuery
+          pageInfo={{
+            pageIndex: pageIndex + 1,
+            pageSize,
+          }}
+          search={search}
+          sort={{
+            sortField: sortField as SortFieldTimeline,
+            sortOrder: sortDirection as Direction,
+          }}
+          onlyUserFavorite={onlyFavorites}
+          timelineTypes={timelineTypes}
+        >
+          {({ timelines, loading, totalCount, refetch }) => {
+            return !isModal ? (
+              <OpenTimeline
+                data-test-subj={'open-timeline'}
+                deleteTimelines={onDeleteOneTimeline}
+                defaultPageSize={defaultPageSize}
+                isLoading={loading}
+                itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+                importDataModalToggle={importDataModalToggle}
+                onAddTimelinesToFavorites={undefined}
+                onDeleteSelected={onDeleteSelected}
+                onlyFavorites={onlyFavorites}
+                onOpenTimeline={openTimeline}
+                onQueryChange={onQueryChange}
+                onSelectionChange={onSelectionChange}
+                onTableChange={onTableChange}
+                onToggleOnlyFavorites={onToggleOnlyFavorites}
+                onToggleShowNotes={onToggleShowNotes}
+                pageIndex={pageIndex}
+                pageSize={pageSize}
+                query={search}
+                refetch={refetch}
+                searchResults={timelines}
+                setImportDataModalToggle={setImportDataModalToggle}
+                selectedItems={selectedItems}
+                sortDirection={sortDirection}
+                sortField={sortField}
+                tabs={renderTabs}
+                title={title}
+                totalSearchResultsCount={totalCount}
+              />
+            ) : (
+              <OpenTimelineModalBody
+                data-test-subj={'open-timeline-modal'}
+                deleteTimelines={onDeleteOneTimeline}
+                defaultPageSize={defaultPageSize}
+                hideActions={hideActions}
+                isLoading={loading}
+                itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+                onAddTimelinesToFavorites={undefined}
+                onlyFavorites={onlyFavorites}
+                onOpenTimeline={openTimeline}
+                onQueryChange={onQueryChange}
+                onSelectionChange={onSelectionChange}
+                onTableChange={onTableChange}
+                onToggleOnlyFavorites={onToggleOnlyFavorites}
+                onToggleShowNotes={onToggleShowNotes}
+                pageIndex={pageIndex}
+                pageSize={pageSize}
+                query={search}
+                searchResults={timelines}
+                selectedItems={selectedItems}
+                sortDirection={sortDirection}
+                sortField={sortField}
+                tabs={renderTabs}
+                title={title}
+                totalSearchResultsCount={totalCount}
+              />
+            );
+          }}
+        </AllTimelinesQuery>
+      </>
     );
   }
 );

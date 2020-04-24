@@ -267,7 +267,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineTypes: String): ResponseTimelines!
   }
 
   extend type Mutation {

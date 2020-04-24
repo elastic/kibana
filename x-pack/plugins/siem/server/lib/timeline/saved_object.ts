@@ -44,6 +44,7 @@ export class Timeline {
   public async getAllTimeline(
     request: FrameworkRequest,
     onlyUserFavorite: boolean | null,
+    timelineTypes: string | null,
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null
@@ -56,6 +57,10 @@ export class Timeline {
       searchFields: onlyUserFavorite
         ? ['title', 'description', 'favorite.keySearch']
         : ['title', 'description'],
+      filter:
+        timelineTypes === 'template' || timelineTypes === 'default'
+          ? `siem-ui-timeline.attributes.timelineType: ${timelineTypes}`
+          : undefined,
       sortField: sort != null ? sort.sortField : undefined,
       sortOrder: sort != null ? sort.sortOrder : undefined,
     };

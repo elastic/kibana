@@ -158,6 +158,8 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
+  /** timeline / template timeline */
+  tabs: () => React.element;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */

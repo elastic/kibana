@@ -71,6 +71,7 @@ const TIMELINE_ITEM_HEIGHT = 50;
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
+  timelineTypes?: 'default' | 'template';
   searchTimelineValue: string;
 }
 
@@ -79,6 +80,7 @@ interface SelectableTimelineProps {
   getSelectableOptions: ({
     timelines,
     onlyFavorites,
+    timelineTypes,
     searchTimelineValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
@@ -96,7 +98,6 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [searchTimelineValue, setSearchTimelineValue] = useState('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
-
   const onSearchTimeline = useCallback(val => {
     setSearchTimelineValue(val);
   }, []);
@@ -225,6 +226,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         search={searchTimelineValue}
         sort={{ sortField: SortFieldTimeline.updated, sortOrder: Direction.desc }}
         onlyUserFavorite={onlyFavorites}
+        timelineTypes="default"
       >
         {({ timelines, loading, totalCount }) => (
           <EuiSelectableContainer isLoading={loading}>
