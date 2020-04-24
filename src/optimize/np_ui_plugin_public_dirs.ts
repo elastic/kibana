@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import KbnServer from '../legacy/server/kbn_server';
 
-export function getNpUiPluginPublicDirs(kbnServer) {
+export function getNpUiPluginPublicDirs(kbnServer: KbnServer) {
   return Array.from(kbnServer.newPlatform.__internals.uiPlugins.internal.entries()).map(
     ([id, { publicTargetDir }]) => ({
       id,
@@ -26,7 +27,7 @@ export function getNpUiPluginPublicDirs(kbnServer) {
   );
 }
 
-export function isNpUiPluginPublicDirs(something) {
+export function isNpUiPluginPublicDirs(something: any) {
   return (
     Array.isArray(something) &&
     something.every(
@@ -35,7 +36,7 @@ export function isNpUiPluginPublicDirs(something) {
   );
 }
 
-export function assertIsNpUiPluginPublicDirs(something) {
+export function assertIsNpUiPluginPublicDirs(something: any) {
   if (!isNpUiPluginPublicDirs(something)) {
     throw new TypeError(
       'npUiPluginPublicDirs must be an array of objects with string `id` and `path` properties'

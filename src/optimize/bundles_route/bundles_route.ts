@@ -18,6 +18,7 @@
  */
 
 import { isAbsolute, extname, join } from 'path';
+import Hapi from 'hapi';
 import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { createDynamicAssetResponse } from './dynamic_asset_response';
@@ -44,6 +45,12 @@ export function createBundlesRoute({
   basePublicPath,
   builtCssPath,
   npUiPluginPublicDirs = [],
+}: {
+  regularBundlesPath: string;
+  dllBundlesPath: string;
+  basePublicPath: string;
+  builtCssPath: string;
+  npUiPluginPublicDirs?: any[];
 }) {
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
@@ -122,6 +129,12 @@ function buildRouteForBundles({
   bundlesPath,
   fileHashCache,
   replacePublicPath = true,
+}: {
+  publicPath: string;
+  routePath: string;
+  bundlesPath: string;
+  fileHashCache: LruCache<unknown, unknown>;
+  replacePublicPath?: boolean;
 }) {
   return {
     method: 'GET',
@@ -130,7 +143,7 @@ function buildRouteForBundles({
       auth: false,
       ext: {
         onPreHandler: {
-          method(request, h) {
+          method(request: Hapi.Request, h: Hapi.ResponseToolkit) {
             const ext = extname(request.params.path);
 
             if (ext !== '.js' && ext !== '.css') {
