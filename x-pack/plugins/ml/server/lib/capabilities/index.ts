@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { privilegesProvider, MlCapabilities } from './check_privileges';
+export { capabilitiesProvider } from './check_capabilities';
+export { setupCapabilitiesSwitcher } from './capabilities_switcher';
