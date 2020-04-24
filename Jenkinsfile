@@ -4,11 +4,11 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
-ciStats.trackBuild {
-  githubPr.withDefaultPrComments {
-    catchError {
-      retryable.enable()
-      parallel([
+  ciStats.trackBuild {
+    githubPr.withDefaultPrComments {
+      catchError {
+        retryable.enable()
+        parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
           'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
           'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
