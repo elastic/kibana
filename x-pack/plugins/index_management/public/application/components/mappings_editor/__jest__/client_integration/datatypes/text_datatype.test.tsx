@@ -158,6 +158,7 @@ describe('text datatype', () => {
       find,
       exists,
       waitFor,
+      waitForFn,
       form: { selectCheckBox, setSelectValue },
       actions: {
         startEditField,
@@ -187,7 +188,7 @@ describe('text datatype', () => {
     let indexAnalyzerValue = find('indexAnalyzer.select').props().value;
     expect(indexAnalyzerValue).toEqual('index_default');
 
-    let searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
+    const searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
 
     expect(searchQuoteAnalyzerSelects.length).toBe(2);
     expect(searchQuoteAnalyzerSelects.at(0).props().value).toBe('language');
@@ -204,32 +205,32 @@ describe('text datatype', () => {
     // And the search analyzer select should not exist
     expect(exists('searchAnalyzer')).toBe(false);
 
-    // Uncheck the "Use same analyzer for search" checkbox and wait for the select
+    // Uncheck the "Use same analyzer for search" checkbox and wait for the search analyzer select
     await act(async () => {
       selectCheckBox('useSameAnalyzerForSearchCheckBox.input', false);
       await waitFor('searchAnalyzer');
     });
 
-    let searchAnalyzerValue = find('searchQuoteAnalyzer.select').props().value;
+    let searchAnalyzerValue = find('searchAnalyzer.select').props().value;
     expect(searchAnalyzerValue).toEqual('index_default');
 
     await act(async () => {
       // Change the value of the 3 analyzers
       setSelectValue('indexAnalyzer.select', 'standard');
       setSelectValue('searchAnalyzer.select', 'simple');
-      setSelectValue('searchQuoteAnalyzer.select', 'whitespace');
+      setSelectValue(find('searchQuoteAnalyzer.select').at(0), 'whitespace');
     });
 
     // Make sure the second dropdown select has been removed
-    searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
-    expect(searchQuoteAnalyzerSelects.length).toBe(1);
+    await waitForFn(
+      async () => find('searchQuoteAnalyzer.select').length === 1,
+      'Error waiting for the second dropdown select of search quote analyzer to be removed'
+    );
 
     await act(async () => {
       // Save & close
       await updateFieldAndCloseFlyout();
     });
-
-    expect(searchQuoteAnalyzerSelects.length).toBe(2);
 
     updatedMappings = {
       ...updatedMappings,
@@ -326,7 +327,8 @@ describe('text datatype', () => {
       await waitFor('searchAnalyzer');
       setSelectValue('searchAnalyzer.select', updatedSearchAnalyzer);
 
-      // Change the searchQuote analyzer using the index default
+      // Change the searchQuote to use built-in analyzer
+      // By default it means using the "index default"
       find('searchQuoteAnalyzer-toggleCustomButton').simulate('click');
       await waitFor('searchQuoteAnalyzer');
 
