@@ -79,7 +79,6 @@ export const useRequest = <D = any, E = Error>(
     deserializer = (data: any): any => data,
   }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
-  const isMounted = useRef(true);
   const sendRequestRef = useRef<() => Promise<SendRequestResponse<D, E>>>();
   const scheduleRequestRef = useRef<() => void>();
 
@@ -103,11 +102,8 @@ export const useRequest = <D = any, E = Error>(
     }
 
     // Set new interval
-    if (pollIntervalMsRef.current && isMounted.current) {
-      pollIntervalIdRef.current = setTimeout(
-        () => sendRequestRef.current!(),
-        pollIntervalMsRef.current
-      );
+    if (pollIntervalMsRef.current) {
+      pollIntervalIdRef.current = setTimeout(sendRequestRef.current!, pollIntervalMsRef.current);
     }
   };
 
@@ -125,12 +121,6 @@ export const useRequest = <D = any, E = Error>(
 
     const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
-
-    // Don't set state if this request resolves after the consuming component has unmounted.
-    // Exit early to stop further polling.
-    if (!isMounted.current) {
-      return { data: null, error: null };
-    }
 
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
@@ -152,11 +142,6 @@ export const useRequest = <D = any, E = Error>(
 
   useEffect(() => {
     sendRequestRef.current!();
-
-    // Prevent state being set if consuming component unmounts while a request is in-flight.
-    return () => {
-      isMounted.current = false;
-    };
 
     // To be functionally correct we'd send a new request if the method, path, query or body changes.
     // But it doesn't seem likely that the method will change and body is likely to be a new
