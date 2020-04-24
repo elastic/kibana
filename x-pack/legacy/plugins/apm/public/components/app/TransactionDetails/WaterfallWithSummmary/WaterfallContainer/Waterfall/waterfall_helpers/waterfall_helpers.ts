@@ -175,8 +175,8 @@ export function getOrderedWaterfallItems(
     visitedWaterfallItemSet.add(item);
 
     const children = sortBy(
-      childrenByParentId[item.id] || [],
-      'doc.timestamp.us'
+      sortBy(childrenByParentId[item.id] || [], 'doc.timestamp.us'),
+      child => child.doc.transaction?.id !== parentItem?.doc.transaction?.id
     );
 
     item.parent = parentItem;
