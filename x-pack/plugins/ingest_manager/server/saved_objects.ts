@@ -13,6 +13,7 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
+import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 
 /*
  * Saved object mappings
@@ -35,7 +36,7 @@ export const savedObjectMappings = {
       last_checkin: { type: 'date' },
       config_revision: { type: 'integer' },
       config_newest_revision: { type: 'integer' },
-      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
+      default_api_key_id: { type: 'keyword' },
       default_api_key: { type: 'keyword' },
       updated_at: { type: 'date' },
       current_error_events: { type: 'text' },
@@ -45,8 +46,7 @@ export const savedObjectMappings = {
     properties: {
       agent_id: { type: 'keyword' },
       type: { type: 'keyword' },
-      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
-      data: { type: 'flattened' },
+      data: { type: 'binary' },
       sent_at: { type: 'date' },
       created_at: { type: 'date' },
     },
@@ -83,7 +83,6 @@ export const savedObjectMappings = {
     properties: {
       name: { type: 'keyword' },
       type: { type: 'keyword' },
-      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
       api_key: { type: 'binary' },
       api_key_id: { type: 'keyword' },
       config_id: { type: 'keyword' },
@@ -100,8 +99,6 @@ export const savedObjectMappings = {
       is_default: { type: 'boolean' },
       hosts: { type: 'keyword' },
       ca_sha256: { type: 'keyword' },
-      // FIXME_INGEST https://github.com/elastic/kibana/issues/56554
-      api_key: { type: 'keyword' },
       fleet_enroll_username: { type: 'binary' },
       fleet_enroll_password: { type: 'binary' },
       config: { type: 'flattened' },
@@ -150,6 +147,7 @@ export const savedObjectMappings = {
       name: { type: 'keyword' },
       version: { type: 'keyword' },
       internal: { type: 'boolean' },
+      removable: { type: 'boolean' },
       es_index_patterns: {
         dynamic: false,
         type: 'object',
@@ -164,3 +162,61 @@ export const savedObjectMappings = {
     },
   },
 };
+
+export function registerEncryptedSavedObjects(
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
+  // Encrypted saved objects
+  encryptedSavedObjects.registerType({
+    type: ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['api_key']),
+    attributesToExcludeFromAAD: new Set([
+      'name',
+      'type',
+      'api_key_id',
+      'config_id',
+      'created_at',
+      'updated_at',
+      'expire_at',
+      'active',
+    ]),
+  });
+  encryptedSavedObjects.registerType({
+    type: OUTPUT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['fleet_enroll_username', 'fleet_enroll_password']),
+    attributesToExcludeFromAAD: new Set([
+      'name',
+      'type',
+      'is_default',
+      'hosts',
+      'ca_sha256',
+      'config',
+    ]),
+  });
+  encryptedSavedObjects.registerType({
+    type: AGENT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['default_api_key']),
+    attributesToExcludeFromAAD: new Set([
+      'shared_id',
+      'type',
+      'active',
+      'enrolled_at',
+      'access_api_key_id',
+      'version',
+      'user_provided_metadata',
+      'local_metadata',
+      'config_id',
+      'last_updated',
+      'last_checkin',
+      'config_revision',
+      'config_newest_revision',
+      'updated_at',
+      'current_error_events',
+    ]),
+  });
+  encryptedSavedObjects.registerType({
+    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['data']),
+    attributesToExcludeFromAAD: new Set(['agent_id', 'type', 'sent_at', 'created_at']),
+  });
+}

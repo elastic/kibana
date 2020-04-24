@@ -5,6 +5,7 @@
  */
 
 import { AnyAction } from 'redux';
+import { FLYOUT_STATE } from '../reducers/ui';
 
 export const UPDATE_FLYOUT: string;
 export const CLOSE_SET_VIEW: string;
@@ -16,6 +17,8 @@ export const SET_OPEN_TOC_DETAILS: string;
 export const SHOW_TOC_DETAILS: string;
 export const HIDE_TOC_DETAILS: string;
 export const UPDATE_INDEXING_STAGE: string;
+
+export function updateFlyout(display: FLYOUT_STATE): AnyAction;
 
 export function setOpenTOCDetails(layerIds?: string[]): AnyAction;
 

@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostListPagination, ServerApiError } from '../../types';
+import { ServerApiError } from '../../types';
 import { HostResultList, HostInfo } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
   payload: HostResultList;
+}
+
+interface ServerFailedToReturnHostList {
+  type: 'serverFailedToReturnHostList';
+  payload: ServerApiError;
 }
 
 interface ServerReturnedHostDetails {
@@ -22,13 +27,8 @@ interface ServerFailedToReturnHostDetails {
   payload: ServerApiError;
 }
 
-interface UserPaginatedHostList {
-  type: 'userPaginatedHostList';
-  payload: HostListPagination;
-}
-
 export type HostAction =
   | ServerReturnedHostList
+  | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails
-  | UserPaginatedHostList;
+  | ServerFailedToReturnHostDetails;
