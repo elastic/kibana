@@ -26,7 +26,7 @@ import { registerEndpointRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
 import { createMockAgentService, createMockMetadataIndexPatternRetriever } from '../../mocks';
-import { AgentService } from '../../../../ingest_manager/common/types';
+import { AgentService } from '../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 

@@ -11,11 +11,12 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-  RecursiveReadonly,
 } from 'kibana/server';
-import { deepFreeze } from '../../../../src/core/utils';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
@@ -28,10 +29,11 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-
+import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
+  registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
@@ -39,15 +41,24 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { IngestManagerConfigType, IngestManagerStartupContract } from '../common';
-import { appContextService, ESIndexPatternSavedObjectService } from './services';
+import { IngestManagerConfigType } from '../common';
+import {
+  appContextService,
+  licenseService,
+  ESIndexPatternSavedObjectService,
+  ESIndexPatternService,
+  AgentService,
+} from './services';
 import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
+
+export type IngestManagerStartDeps = object;
 
 export interface IngestManagerAppContext {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -55,6 +66,8 @@ export interface IngestManagerAppContext {
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
 }
+
+export type IngestManagerSetupContract = void;
 
 const allSavedObjectTypes = [
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -66,7 +79,23 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupContract> {
+/**
+ * Describes public IngestManager plugin contract returned at the `startup` stage.
+ */
+export interface IngestManagerStartContract {
+  esIndexPatternService: ESIndexPatternService;
+  agentService: AgentService;
+}
+
+export class IngestManagerPlugin
+  implements
+    Plugin<
+      IngestManagerSetupContract,
+      IngestManagerStartContract,
+      IngestManagerSetupDeps,
+      IngestManagerStartDeps
+    > {
+  private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -75,9 +104,13 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
     }
+
+    registerSavedObjects(core.savedObjects);
+    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -117,6 +150,7 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerDataStreamRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
@@ -140,22 +174,24 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ): Promise<RecursiveReadonly<IngestManagerStartupContract>> {
+  ) {
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
     });
-    return deepFreeze({
+    licenseService.start(this.licensing$);
+    return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
         getAgentStatusById,
       },
-    });
+    };
   }
 
   public async stop() {
     appContextService.stop();
+    licenseService.stop();
   }
 }

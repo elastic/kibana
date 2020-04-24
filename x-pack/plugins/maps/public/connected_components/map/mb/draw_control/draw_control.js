@@ -64,13 +64,28 @@ export class DrawControl extends React.Component {
 
     if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
       const circle = e.features[0];
-      roundCoordinates(circle.properties.center);
+      const distanceKm = _.round(
+        circle.properties.radiusKm,
+        circle.properties.radiusKm > 10 ? 0 : 2
+      );
+      // Only include as much precision as needed for distance
+      let precision = 2;
+      if (distanceKm <= 1) {
+        precision = 5;
+      } else if (distanceKm <= 10) {
+        precision = 4;
+      } else if (distanceKm <= 100) {
+        precision = 3;
+      }
       const filter = createDistanceFilterWithMeta({
         alias: this.props.drawState.filterLabel,
-        distanceKm: _.round(circle.properties.radiusKm, circle.properties.radiusKm > 10 ? 0 : 2),
+        distanceKm,
         geoFieldName: this.props.drawState.geoFieldName,
         indexPatternId: this.props.drawState.indexPatternId,
-        point: circle.properties.center,
+        point: [
+          _.round(circle.properties.center[0], precision),
+          _.round(circle.properties.center[1], precision),
+        ],
       });
       this.props.addFilters([filter]);
       this.props.disableDrawState();
