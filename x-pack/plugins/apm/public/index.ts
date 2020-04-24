@@ -6,4 +6,5 @@
 
 import { ApmPlugin } from './plugin';
 
-export const plugin = context => new ApmPlugin(context);
+export const plugin = (context: PluginInitializerContext) =>
+  new ApmPlugin(context);
