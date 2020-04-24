@@ -26,7 +26,7 @@ export enum SortFieldCase {
 }
 
 interface PatchConnector {
-  connectorId: string | null;
+  connectorId: string;
   caseVersion: string;
 }
 

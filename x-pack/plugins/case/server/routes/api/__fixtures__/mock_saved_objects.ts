@@ -18,7 +18,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      connector_id: null,
+      connector_id: 'none',
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         full_name: 'elastic',
@@ -47,7 +47,7 @@ export const mockCases: Array<SavedObject<CaseAttributes>> = [
     attributes: {
       closed_at: null,
       closed_by: null,
-      connector_id: null,
+      connector_id: 'none',
       created_at: '2019-11-25T22:32:00.900Z',
       created_by: {
         full_name: 'elastic',

@@ -48,10 +48,17 @@ export const UPDATE_THIRD = (thirdParty: string) => {
   });
 };
 
+export const PUSH_DISABLE_BY_NO_CONFIG_TITLE = i18n.translate(
+  'xpack.siem.case.caseView.pushToServiceDisableByNoConfigTitle',
+  {
+    defaultMessage: 'Configure external connector',
+  }
+);
+
 export const PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigTitle',
   {
-    defaultMessage: 'Configure external connector',
+    defaultMessage: 'Select external connector',
   }
 );
 

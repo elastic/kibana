@@ -24,7 +24,7 @@ import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
-import { useUpdateCase } from '../../../../containers/case/use_update_case';
+import { UpdateKey, useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';
@@ -101,6 +101,18 @@ export const CaseComponent = React.memo<CaseProps>(
               });
             }
             break;
+          case 'connectorId':
+            const connectorId = getTypedPayload<string>(updateValue);
+            if (connectorId.length > 0) {
+              updateCaseProperty({
+                fetchCaseUserActions,
+                updateKey: 'connector_id',
+                updateValue: connectorId,
+                updateCase: handleUpdateNewCase,
+                version: caseData.version,
+              });
+            }
+            break;
           case 'description':
             const descriptionUpdate = getTypedPayload<string>(updateValue);
             if (descriptionUpdate.length > 0) {
@@ -159,9 +171,10 @@ export const CaseComponent = React.memo<CaseProps>(
       userCanCrud,
     });
 
-    const onSubmitConnector = useCallback(newConnector => {
-      console.log('newConnector', newConnector);
-    }, []);
+    const onSubmitConnector = useCallback(
+      connectorId => onUpdateField('connectorId', connectorId),
+      [onUpdateField]
+    );
     const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
     const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [
       onUpdateField,

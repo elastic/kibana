@@ -33,7 +33,7 @@ export const transformNewCase = ({
   newCase,
   username,
 }: {
-  connectorId: string | null;
+  connectorId: string;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;

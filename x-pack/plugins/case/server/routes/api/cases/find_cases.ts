@@ -108,7 +108,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
               connectorId =
                 myCaseConfigure.saved_objects.length > 0
                   ? myCaseConfigure.saved_objects[0].attributes.connector_id
-                  : null;
+                  : 'none';
 
               const patchCaseResp = await caseService.patchCase({
                 client,

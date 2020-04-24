@@ -23,7 +23,7 @@ import { Connector } from '../../../../../../../../plugins/case/common/api/cases
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
-  caseConnectorId: string | null;
+  caseConnectorId: string;
   connectors: Connector[];
   isNew: boolean;
   updateCase: (newCase: Case) => void;
@@ -48,31 +48,35 @@ export const usePushToService = ({
 
   const { isLoading, postPushToService } = usePostPushToService();
 
-  const { connectorId, connectorName, loading: loadingCaseConfigure } = useCaseConfigure();
+  const { loading: loadingCaseConfigure } = useCaseConfigure();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
+  const connectorName = useMemo(() => {
+    return connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
+  }, [caseConnectorId]);
+
   const handlePushToService = useCallback(() => {
-    if (connectorId != null) {
+    if (caseConnectorId != null && caseConnectorId !== 'none') {
       postPushToService({
         caseId,
-        connectorId,
+        connectorId: caseConnectorId,
         connectorName,
         updateCase,
       });
     }
-  }, [caseId, connectorId, connectorName, postPushToService, updateCase]);
+  }, [caseId, caseConnectorId, connectorName, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
-    if (connectorId === 'none' && !loadingCaseConfigure && !loadingLicense) {
+    if (connectors.length === 0 && !loadingLicense) {
       errors = [
         ...errors,
         {
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
@@ -84,6 +88,19 @@ export const usePushToService = ({
                   </EuiLink>
                 ),
               }}
+            />
+          ),
+        },
+      ];
+    } else if (caseConnectorId === 'none' && !loadingLicense) {
+      errors = [
+        ...errors,
+        {
+          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          description: (
+            <FormattedMessage
+              defaultMessage="To open and update cases in external systems, you must select a third-party incident management system for this case."
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
             />
           ),
         },
@@ -107,7 +124,15 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
-  }, [actionLicense, caseStatus, connectorId, loadingCaseConfigure, loadingLicense, urlSearch]);
+  }, [
+    actionLicense,
+    caseStatus,
+    connectors.length,
+    caseConnectorId,
+    loadingCaseConfigure,
+    loadingLicense,
+    urlSearch,
+  ]);
 
   const pushToServiceButton = useMemo(() => {
     const currentConnectorName = connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
@@ -141,8 +166,8 @@ export const usePushToService = ({
     userCanCrud,
   ]);
 
-  const objToReturn = useMemo(
-    () => ({
+  const objToReturn = useMemo(() => {
+    return {
       pushButton:
         errorsMsg.length > 0 ? (
           <EuiToolTip
@@ -156,11 +181,11 @@ export const usePushToService = ({
           <>{pushToServiceButton}</>
         ),
       pushCallouts:
-        errorsMsg.length > 0 ? (
+        errorsMsg.length > 0 && connectors.length === 0 ? (
           <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
         ) : null,
-    }),
-    [errorsMsg, pushToServiceButton]
-  );
+    };
+  }, [errorsMsg, pushToServiceButton]);
+
   return objToReturn;
 };

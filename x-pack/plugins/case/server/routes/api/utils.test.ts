@@ -250,7 +250,7 @@ describe('Utils', () => {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
-          connector_id: null,
+          connector_id: 'none',
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -287,7 +287,7 @@ describe('Utils', () => {
           id: 'mock-id-1',
           closed_at: null,
           closed_by: null,
-          connector_id: null,
+          connector_id: 'none',
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -352,12 +352,12 @@ describe('Utils', () => {
         },
       ]);
     });
-    it('inserts missing connectorId (null)', () => {
+    it('inserts missing connectorId (none)', () => {
       const extraCaseData = [
         {
           caseId: mockCaseNoConnectorId.id,
           totalComment: 2,
-          connectorId: null,
+          connectorId: 'none',
           caseVersion: '700',
         },
       ];
@@ -369,7 +369,7 @@ describe('Utils', () => {
           id: mockCaseNoConnectorId.id,
           closed_at: null,
           closed_by: null,
-          connector_id: null,
+          connector_id: 'none',
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -469,10 +469,10 @@ describe('Utils', () => {
         version: '700',
       });
     });
-    it('inserts missing connectorId (null)', () => {
+    it('inserts missing connectorId (none)', () => {
       const extraCaseData = {
         totalComment: 2,
-        connectorId: null,
+        connectorId: 'none',
         version: '700',
       };
 
@@ -482,7 +482,7 @@ describe('Utils', () => {
         id: mockCaseNoConnectorId.id,
         closed_at: null,
         closed_by: null,
-        connector_id: null,
+        connector_id: 'none',
         created_at: '2019-11-25T21:54:48.952Z',
         created_by: {
           full_name: 'elastic',

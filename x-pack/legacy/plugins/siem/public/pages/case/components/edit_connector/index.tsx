@@ -10,7 +10,6 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -28,7 +27,7 @@ interface EditConnectorProps {
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
   connectors: Connector[];
-  selectedConnector: string | null;
+  selectedConnector: string;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -100,7 +99,7 @@ export const EditConnector = React.memo(
                         idAria: 'caseConnectors',
                         isLoading,
                         disabled: !isEditConnector,
-                        defaultValue: selectedConnector ?? 'none',
+                        defaultValue: selectedConnector,
                       }}
                     />
                   </EuiFlexItem>
