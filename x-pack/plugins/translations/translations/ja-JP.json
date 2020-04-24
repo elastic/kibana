@@ -15692,7 +15692,6 @@
     "xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles": "既存のインデックスパターンのタイトルの取得中にエラーが発生しました:",
     "xpack.transform.stepDetailsForm.errorGettingTransformList": "既存の変換 ID の取得中にエラーが発生しました:",
     "xpack.transform.stepDetailsForm.indexPatternTitleError": "このタイトルのインデックスパターンが既に存在します。",
-    "xpack.transform.stepDetailsForm.transformDescriptionHelpText": "オプションの説明テキストです。",
     "xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel": "オプションの変換の説明を選択してください。",
     "xpack.transform.stepDetailsForm.transformDescriptionLabel": "変換の説明",
     "xpack.transform.stepDetailsForm.transformIdExistsError": "この ID の変換が既に存在します。",

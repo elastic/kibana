@@ -15696,7 +15696,6 @@
     "xpack.transform.stepDetailsForm.errorGettingIndexPatternTitles": "获取现有索引模式标题时发生错误：",
     "xpack.transform.stepDetailsForm.errorGettingTransformList": "获取现有转换 ID 时发生错误：",
     "xpack.transform.stepDetailsForm.indexPatternTitleError": "具有此名称的索引模式已存在。",
-    "xpack.transform.stepDetailsForm.transformDescriptionHelpText": "（可选）描述性文本。",
     "xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel": "选择可选的转换描述。",
     "xpack.transform.stepDetailsForm.transformDescriptionLabel": "转换描述",
     "xpack.transform.stepDetailsForm.transformIdExistsError": "已存在具有此 ID 的转换。",
