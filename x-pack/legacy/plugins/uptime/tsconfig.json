@@ -3,5 +3,9 @@
   "exclude": ["**/node_modules/**"],
   "paths": {
     "react": ["../../../node_modules/@types/react"]
-  }
+  },
+  "include": [
+    "**/*",
+    "../typings/**/*"
+  ]
 }

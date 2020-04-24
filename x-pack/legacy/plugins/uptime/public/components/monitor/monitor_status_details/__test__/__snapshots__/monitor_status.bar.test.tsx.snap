@@ -41,7 +41,7 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
       <h1
         data-test-subj="monitor-page-title"
       >
-        id1
+        ID: id1
       </h1>
     </span>
   </div>

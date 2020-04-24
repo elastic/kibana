@@ -13,7 +13,7 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
   const retry = getService('retry');
 
   return new (class UptimePage {
-    public async goToRoot(refresh) {
+    public async goToRoot(refresh?: boolean) {
       await navigation.goToUptime();
       if (refresh) {
         await navigation.refreshApp();

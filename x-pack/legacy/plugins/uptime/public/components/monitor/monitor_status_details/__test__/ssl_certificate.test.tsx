@@ -12,6 +12,7 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { defaultDynamicSettings, Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 import * as redux from 'react-redux';
+import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../../lib';
 
 describe('SSL Certificate component', () => {
   let monitorTls: Tls;
@@ -32,8 +33,13 @@ describe('SSL Certificate component', () => {
     spy1.mockReturnValue({ settings: defaultDynamicSettings });
   });
 
+  it('shallow renders', () => {
+    const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
+    expect(component).toMatchSnapshot();
+  });
+
   it('renders', () => {
-    const component = renderWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
+    const component = renderWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -41,7 +47,7 @@ describe('SSL Certificate component', () => {
     monitorTls = {
       certificate_not_valid_after: 'i am so invalid date',
     };
-    const component = renderWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
+    const component = renderWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -52,7 +58,7 @@ describe('SSL Certificate component', () => {
     monitorTls = {
       certificate_not_valid_after: dateIn5Days,
     };
-    const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
+    const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
     const badgeComponent = component.find(EuiBadge);
 
@@ -71,7 +77,7 @@ describe('SSL Certificate component', () => {
     monitorTls = {
       certificate_not_valid_after: dateIn40Days,
     };
-    const component = mountWithIntl(<MonitorSSLCertificate tls={monitorTls} />);
+    const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
     const badgeComponent = component.find(EuiBadge);
     expect(badgeComponent.props().color).toBe('default');

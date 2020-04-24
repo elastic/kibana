@@ -16,7 +16,7 @@ export const makePing = async (
   fields: { [key: string]: any },
   mogrify: (doc: any) => any,
   refresh: boolean = true,
-  tls: boolean & TlsProps = false
+  tls: boolean | TlsProps = false
 ) => {
   const baseDoc: any = {
     tcp: {
@@ -103,7 +103,7 @@ export const makePing = async (
   };
 
   if (tls) {
-    baseDoc.tls = makeTls(tls);
+    baseDoc.tls = makeTls(tls as any);
   }
 
   const doc = mogrify(merge(baseDoc, fields));

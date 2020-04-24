@@ -48,7 +48,7 @@ export const MonitorStatusBarComponent: React.FC<MonitorStatusBarProps> = ({
       <EuiFlexItem>
         <EuiTitle size="xs">
           <EuiTextColor color="subdued">
-            <h1 data-test-subj="monitor-page-title">{monitorId}</h1>
+            <h1 data-test-subj="monitor-page-title">ID: {monitorId}</h1>
           </EuiTextColor>
         </EuiTitle>
       </EuiFlexItem>

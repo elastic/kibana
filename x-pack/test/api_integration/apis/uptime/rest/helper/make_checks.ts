@@ -56,7 +56,7 @@ export const makeCheck = async ({
     if (i === numIps - 1) {
       pingFields.summary = summary;
     }
-    const doc = await makePing(es, monitorId, pingFields, mogrify, false, tls);
+    const doc = await makePing(es, monitorId, pingFields, mogrify, false, tls as any);
     docs.push(doc);
     // @ts-ignore
     summary[doc.monitor.status]++;

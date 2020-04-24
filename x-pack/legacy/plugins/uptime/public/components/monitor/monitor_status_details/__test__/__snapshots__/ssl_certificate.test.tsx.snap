@@ -3,29 +3,117 @@
 exports[`SSL Certificate component renders 1`] = `
 Array [
   <div
+    class="euiText euiText--medium"
+  >
+    TLS Certificate
+  </div>,
+  <div
     class="euiSpacer euiSpacer--s"
   />,
   <div
-    aria-label="SSL certificate expires in 2 months"
-    class="euiText euiText--small euiText--constrainedWidth"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
-    SSL certificate expires 
-    <span
-      class="euiBadge euiBadge--iconLeft"
-      style="background-color:#d3dae6;color:#000"
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <span
-        class="euiBadge__content"
+      <div
+        aria-label="SSL certificate expires in 2 months"
+        class="euiText euiText--small eui-displayInline euiText--constrainedWidth"
       >
+        SSL certificate expires 
         <span
-          class="euiBadge__text"
+          class="euiBadge euiBadge--iconLeft"
+          style="background-color:#d3dae6;color:#000"
         >
-          in 2 months
+          <span
+            class="euiBadge__content"
+          >
+            <span
+              class="euiBadge__text"
+            >
+              in 2 months
+            </span>
+          </span>
         </span>
-      </span>
-    </span>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <a
+        class="eui-displayInline"
+        href="/certificates"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          Certificate Overview
+        </div>
+      </a>
+    </div>
   </div>,
 ]
 `;
 
 exports[`SSL Certificate component renders null if invalid date 1`] = `null`;
+
+exports[`SSL Certificate component shallow renders 1`] = `
+<ContextProvider
+  value={
+    Object {
+      "history": Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "TestKeyForTesting",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "TestKeyForTesting",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      },
+      "location": Object {
+        "hash": "",
+        "key": "TestKeyForTesting",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+      "match": Object {
+        "isExact": true,
+        "params": Object {},
+        "path": "/",
+        "url": "/",
+      },
+      "staticContext": undefined,
+    }
+  }
+>
+  <MonitorSSLCertificate
+    tls={
+      Object {
+        "certificate_not_valid_after": "Wed Jun 24 2020 01:51:31 GMT-0400",
+      }
+    }
+  />
+</ContextProvider>
+`;
