@@ -84,7 +84,6 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
-      await PageObjects.visualBuilder.setTimeField(0);
       await PageObjects.common.sleep(3000);
       const newValue = await PageObjects.visualBuilder.getMetricValue();
       expect(newValue).to.eql('3');
