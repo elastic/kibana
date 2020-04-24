@@ -30,6 +30,7 @@ import {
   ExecutionContext,
 } from '../common';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
+import { createStartServicesGetter } from '../../kibana_utils/public';
 import {
   setCoreStart,
   setInterpreter,
@@ -38,6 +39,7 @@ import {
 } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, loader } from './loader';
+import { onRenderErrorDefault } from './rendering';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
@@ -94,12 +96,12 @@ export interface ExpressionsStart extends ExpressionsServiceStart {
 export class ExpressionsPublicPlugin
   implements
     Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly expressions: ExpressionsService = new ExpressionsService();
+  private expressions?: ExpressionsService;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   private configureExecutor(core: CoreSetup) {
-    const { executor } = this.expressions;
+    const { executor } = this.expressions!;
 
     const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
       const [start] = await core.getStartServices();
@@ -113,15 +115,20 @@ export class ExpressionsPublicPlugin
   }
 
   public setup(core: CoreSetup, { bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
+    const start = createStartServicesGetter(core.getStartServices);
+
+    this.expressions = new ExpressionsService({
+      onRenderError: onRenderErrorDefault(start),
+    });
+
     this.configureExecutor(core);
 
-    const { expressions } = this;
-    const { executor, renderers } = expressions;
+    const { executor, renderers } = this.expressions;
 
     setRenderersRegistry(renderers);
     setExpressionsService(this.expressions);
 
-    const expressionsSetup = expressions.setup();
+    const expressionsSetup = this.expressions.setup();
 
     // This is legacy. Should go away when we get rid of __LEGACY.
     const getExecutor = (): ExpressionExecutor => {
@@ -175,9 +182,8 @@ export class ExpressionsPublicPlugin
   public start(core: CoreStart, { bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
 
-    const { expressions } = this;
     const start = {
-      ...expressions.start(),
+      ...this.expressions!.start(),
       ExpressionLoader,
       loader,
       ReactExpressionRenderer,
@@ -187,6 +193,6 @@ export class ExpressionsPublicPlugin
   }
 
   public stop() {
-    this.expressions.stop();
+    this.expressions!.stop();
   }
 }

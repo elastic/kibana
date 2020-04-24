@@ -25,29 +25,6 @@ import { ExecutionContextSearch } from '../execution';
 import { ExpressionValue, ExpressionAstExpression, ExpressionRendererRegistry } from '../../public';
 import { Adapters } from '../../../inspector/public';
 
-// import { getNotifications } from './services';
-// import { getRenderersRegistry } from './services';
-/*
-export const onRenderErrorDefault: RenderErrorHandlerFnType = (
-  element: HTMLElement,
-  error: RenderError,
-  handlers: IInterpreterRenderHandlers
-) => {
-  if (error.name === 'AbortError') {
-    handlers.done();
-    return;
-  }
-
-  getNotifications().toasts.addError(error, {
-    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
-      defaultMessage: 'Error in expression',
-    }),
-    toastMessage: error.message,
-  });
-  handlers.done();
-};
-*/
-
 export const onRenderErrorDefault: RenderErrorHandlerFnType = (element, error, handlers) => {
   // eslint-disable-next-line no-console
   console.error(error);

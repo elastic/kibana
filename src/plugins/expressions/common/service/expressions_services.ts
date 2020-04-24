@@ -24,6 +24,7 @@ import { ExecutionContract } from '../execution/execution_contract';
 import {
   ExpressionRenderingParams,
   ExpressionRendering,
+  RenderErrorHandlerFnType,
 } from '../expression_renderers/expression_rendering';
 
 export type ExpressionsCreateRenderingParams = Omit<ExpressionRenderingParams, 'renderers'>;
@@ -68,6 +69,7 @@ export type ExpressionsServiceStart = Pick<
 export interface ExpressionServiceParams {
   executor?: Executor;
   renderers?: ExpressionRendererRegistry;
+  onRenderError?: RenderErrorHandlerFnType;
 }
 
 /**
@@ -93,10 +95,12 @@ export class ExpressionsService {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
-  constructor({
-    executor = Executor.createWithDefaults(),
-    renderers = new ExpressionRendererRegistry(),
-  }: ExpressionServiceParams = {}) {
+  constructor(private readonly params: ExpressionServiceParams = {}) {
+    const {
+      executor = Executor.createWithDefaults(),
+      renderers = new ExpressionRendererRegistry(),
+    } = params;
+
     this.executor = executor;
     this.renderers = renderers;
   }
@@ -258,7 +262,7 @@ export class ExpressionsService {
   public readonly fork = (): ExpressionsService => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+    const fork = new ExpressionsService({ ...this.params, executor, renderers });
 
     return fork;
   };
@@ -268,6 +272,7 @@ export class ExpressionsService {
   ): ExpressionRendering => {
     const rendering = new ExpressionRendering({
       ...params,
+      onRenderError: params.onRenderError ?? this.params.onRenderError,
       renderers: this.renderers,
     });
 
