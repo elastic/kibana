@@ -90,7 +90,7 @@ export function CollapsibleNav({
   id,
 }: Props) {
   const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
-  const { undefined: unknowns, ...allCategorizedLinks } = groupedNavLinks;
+  const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
 
@@ -205,6 +205,21 @@ export function CollapsibleNav({
             </EuiCollapsibleNavGroup>
           );
         })}
+
+        {/* Things with no category (largely for custom plugins) */}
+        {unknowns.map(linkWithoutCategory => (
+          <EuiCollapsibleNavGroup>
+            <EuiListGroup flush>
+              <EuiListGroupItem
+                color="text"
+                size="s"
+                label={linkWithoutCategory.label}
+                href={linkWithoutCategory.href}
+                icon={linkWithoutCategory.icon}
+              />
+            </EuiListGroup>
+          </EuiCollapsibleNavGroup>
+        ))}
 
         {/* Docking button only for larger screens that can support it*/}
         <EuiShowFor sizes={['l', 'xl']}>
