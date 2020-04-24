@@ -185,7 +185,7 @@
     "glob-all": "^3.2.1",
     "globby": "^8.0.1",
     "h2o2": "^8.1.2",
-    "handlebars": "4.5.3",
+    "handlebars": "4.7.6",
     "hapi": "^17.5.3",
     "hapi-auth-cookie": "^9.0.0",
     "history": "^4.9.0",

@@ -9,8 +9,6 @@ import { compose, withHandlers } from 'recompose';
 import { Dispatch } from 'redux';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
-// @ts-ignore Untyped local
-import { notify } from '../../../lib/notify';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-ignore Untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
