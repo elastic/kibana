@@ -29,7 +29,7 @@ const getJobPrefix = (monitorId: string) => {
   // At such big length, there is minimum chance of having duplicate monitor id
   // Subtracting ML_JOB_ID constant and _ char as well
   if ((lowerCaseMonitorId + ML_JOB_ID + 1).length > 64) {
-    return lowerCaseMonitorId.substring(64 - ML_JOB_ID.length - 1);
+    return lowerCaseMonitorId.substring(0, 64 - ML_JOB_ID.length - 1);
   }
   return lowerCaseMonitorId;
 };
