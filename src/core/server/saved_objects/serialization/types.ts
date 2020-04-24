@@ -72,7 +72,7 @@ interface Referencable {
 export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
 
 /**
- * Describes Saved Object documents have passed through the migration
+ * Describes Saved Object documents that have passed through the migration
  * framework and are guaranteed to have a `references` root property.
  *
  * @public
