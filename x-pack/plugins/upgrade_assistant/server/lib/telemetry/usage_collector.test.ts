@@ -59,7 +59,7 @@ describe('Upgrade Assistant Usage Collector', () => {
         }),
       },
       elasticsearch: {
-        adminClient: clusterClient,
+        legacy: { client: clusterClient },
       },
     };
   });
