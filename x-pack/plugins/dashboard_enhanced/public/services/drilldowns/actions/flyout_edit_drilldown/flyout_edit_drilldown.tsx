@@ -69,7 +69,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
       ),
       {
         ownFocus: true,
-        'data-test-subj': 'dashboardEditDrilldownFlyout',
+        'data-test-subj': 'editDrilldownFlyout',
       }
     );
   }

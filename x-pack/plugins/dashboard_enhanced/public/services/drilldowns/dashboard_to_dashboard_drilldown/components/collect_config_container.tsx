@@ -49,7 +49,7 @@ interface CollectConfigContainerState {
   searchString?: string;
   isLoading: boolean;
   selectedDashboard?: EuiComboBoxOptionOption<string>;
-  error: string | null;
+  error?: string;
 }
 
 export class CollectConfigContainer extends React.Component<
@@ -62,7 +62,7 @@ export class CollectConfigContainer extends React.Component<
     isLoading: false,
     searchString: undefined,
     selectedDashboard: undefined,
-    error: null,
+    error: undefined,
   };
 
   constructor(props: CollectConfigProps) {
@@ -94,7 +94,7 @@ export class CollectConfigContainer extends React.Component<
         onDashboardSelect={dashboardId => {
           onConfig({ ...config, dashboardId });
           if (this.state.error) {
-            this.setState({ error: null });
+            this.setState({ error: undefined });
           }
         }}
         onSearchChange={this.debouncedLoadDashboards}

@@ -22,7 +22,7 @@ export interface DashboardDrilldownConfigProps {
   onKeepRangeToggle?: () => void;
   onSearchChange: (searchString: string) => void;
   isLoading: boolean;
-  error?: string | null;
+  error?: string;
 }
 
 export const DashboardDrilldownConfig: React.FC<DashboardDrilldownConfigProps> = ({

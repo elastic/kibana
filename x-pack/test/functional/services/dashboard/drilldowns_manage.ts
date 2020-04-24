@@ -6,8 +6,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'dashboardCreateDrilldownFlyout';
-const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'dashboardEditDrilldownFlyout';
+const CREATE_DRILLDOWN_FLYOUT_DATA_TEST_SUBJ = 'createDrilldownFlyout';
+const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
 const DASHBOARD_TO_DASHBOARD_ACTION_LIST_ITEM =
   'actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN';
 const DASHBOARD_TO_DASHBOARD_ACTION_WIZARD =

@@ -164,7 +164,7 @@ describe('.execute() & getHref', () => {
     expect(href).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
   });
 
-  test('query is removed with query if filters are disabled', async () => {
+  test('query is removed if filters are disabled', async () => {
     const queryString = 'querystring';
     const queryLanguage = 'kuery';
     const { href } = await setupTestBed(

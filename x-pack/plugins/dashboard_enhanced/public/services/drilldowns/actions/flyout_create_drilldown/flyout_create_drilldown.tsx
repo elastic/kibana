@@ -71,7 +71,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
       ),
       {
         ownFocus: true,
-        'data-test-subj': 'dashboardCreateDrilldownFlyout',
+        'data-test-subj': 'createDrilldownFlyout',
       }
     );
   }
