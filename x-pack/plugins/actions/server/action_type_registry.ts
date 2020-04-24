@@ -64,12 +64,12 @@ export class ActionTypeRegistry {
   /**
    * Returns true if action type is enabled or it is a preconfigured action type.
    */
-  public isActionTypeExecutable(id: string) {
+  public isActionExecutable(actionId: string, actionTypeId: string) {
     return (
-      this.isActionTypeEnabled(id) ||
-      (!this.isActionTypeEnabled(id) &&
+      this.isActionTypeEnabled(actionTypeId) ||
+      (!this.isActionTypeEnabled(actionTypeId) &&
         this.preconfiguredActions.find(
-          preconfiguredAction => preconfiguredAction.actionTypeId === id
+          preconfiguredAction => preconfiguredAction.id === actionId
         ) !== undefined)
     );
   }

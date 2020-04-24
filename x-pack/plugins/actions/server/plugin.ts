@@ -65,7 +65,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
-  isActionTypeExecutable(id: string): boolean;
+  isActionExecutable(actionId: string, actionTypeId: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   preconfiguredActions: PreConfiguredAction[];
@@ -270,8 +270,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isActionTypeEnabled: id => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
-      isActionTypeExecutable: id => {
-        return this.actionTypeRegistry!.isActionTypeExecutable(id);
+      isActionExecutable: (actionId: string, actionTypeId: string) => {
+        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
       },
       // Ability to get an actions client from legacy code
       async getActionsClientWithRequest(request: KibanaRequest) {

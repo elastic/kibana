@@ -204,9 +204,9 @@ describe('isActionTypeEnabled', () => {
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
   });
 
-  test('should call isActionTypeExecutable of the actions config', async () => {
+  test('should call isActionExecutable of the actions config', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionTypeExecutable('foo');
+    actionTypeRegistry.isActionExecutable('my-slack1', 'foo');
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
   });
 
@@ -214,7 +214,7 @@ describe('isActionTypeEnabled', () => {
     mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 
-    expect(actionTypeRegistry.isActionTypeExecutable('foo')).toEqual(true);
+    expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
   });
 
   test('should call isLicenseValidForActionType of the license state', async () => {

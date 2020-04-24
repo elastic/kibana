@@ -90,7 +90,7 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    if (!actionTypeRegistry.isActionTypeExecutable(actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);

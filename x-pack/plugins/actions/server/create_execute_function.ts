@@ -70,7 +70,7 @@ export function createExecuteFunction({
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
     const actionTypeId = await getActionTypeId(id);
 
-    if (!actionTypeRegistry.isActionTypeExecutable(actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
 

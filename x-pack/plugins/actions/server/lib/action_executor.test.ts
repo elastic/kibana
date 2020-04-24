@@ -251,7 +251,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
   });
-  actionTypeRegistry.isActionTypeExecutable.mockImplementationOnce(() => true);
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
   await actionExecutor.execute(executeParams);
 
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);

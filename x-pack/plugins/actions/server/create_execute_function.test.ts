@@ -306,7 +306,7 @@ describe('execute()', () => {
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
     });
-    mockedActionTypeRegistry.isActionTypeExecutable.mockImplementation(() => true);
+    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
       type: 'action',

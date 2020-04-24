@@ -51,7 +51,7 @@ const createExecutionHandlerParams = {
 beforeEach(() => {
   jest.resetAllMocks();
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
-  createExecutionHandlerParams.actionsPlugin.isActionTypeExecutable.mockReturnValue(true);
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 });
 
 test('calls actionsPlugin.execute per selected action', async () => {
@@ -112,7 +112,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
   // Mock two calls, one for check against actions[0] and the second for actions[1]
-  createExecutionHandlerParams.actionsPlugin.isActionTypeExecutable.mockReturnValueOnce(false);
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
@@ -152,7 +152,7 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
 
 test('trow error error message when action type is disabled', async () => {
   createExecutionHandlerParams.actionsPlugin.preconfiguredActions = [];
-  createExecutionHandlerParams.actionsPlugin.isActionTypeExecutable.mockReturnValue(false);
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(false);
   const executionHandler = createExecutionHandler({
     ...createExecutionHandlerParams,
@@ -180,7 +180,7 @@ test('trow error error message when action type is disabled', async () => {
 
   expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(0);
 
-  createExecutionHandlerParams.actionsPlugin.isActionTypeExecutable.mockImplementation(() => true);
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
   const executionHandlerForPreconfiguredAction = createExecutionHandler({
     ...createExecutionHandlerParams,
     actions: [...createExecutionHandlerParams.actions],
