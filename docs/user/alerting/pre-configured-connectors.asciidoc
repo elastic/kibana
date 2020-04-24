@@ -20,8 +20,7 @@ action are predefined, including the connector name and ID.
 
 The following example shows a valid configuration 2 out-of-the box connector.
 
-[source,console]
-------------------------
+```js
   xpack.actions.preconfigured:
     - id: 'my-slack1'           <1>
       actionTypeId: .slack      <2>
@@ -40,7 +39,7 @@ The following example shows a valid configuration 2 out-of-the box connector.
       secrets:                  <5>
         user: elastic
         password: changeme
-------------------------
+```
 
 <1> `id` is the action connector identifier.
 <2> `actionTypeId` is the action type identifier.

@@ -4,16 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GetFleetSetupRequest {}
-
-export interface CreateFleetSetupRequest {
-  body: {
-    fleet_enroll_username: string;
-    fleet_enroll_password: string;
-  };
-}
-
 export interface CreateFleetSetupResponse {
   isInitialized: boolean;
 }
