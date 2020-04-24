@@ -108,8 +108,8 @@ export class IndexPattern implements IIndexPattern {
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.fields = new FieldList(this, [], this.shortDotsEnable);
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
