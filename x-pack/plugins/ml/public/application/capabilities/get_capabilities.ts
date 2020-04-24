@@ -7,12 +7,12 @@
 import { ml } from '../services/ml_api_service';
 
 import { setUpgradeInProgress } from '../services/upgrade_service';
-import { PrivilegesResponse } from '../../../common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../common/types/capabilities';
 
-export function getPrivileges(): Promise<PrivilegesResponse> {
+export function getCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {
-    ml.checkMlPrivileges()
-      .then((resp: PrivilegesResponse) => {
+    ml.checkMlCapabilities()
+      .then((resp: MlCapabilitiesResponse) => {
         if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);
         }
@@ -24,10 +24,10 @@ export function getPrivileges(): Promise<PrivilegesResponse> {
   });
 }
 
-export function getManageMlPrivileges(): Promise<PrivilegesResponse> {
+export function getManageMlCapabilities(): Promise<MlCapabilitiesResponse> {
   return new Promise((resolve, reject) => {
-    ml.checkManageMLPrivileges()
-      .then((resp: PrivilegesResponse) => {
+    ml.checkManageMLCapabilities()
+      .then((resp: MlCapabilitiesResponse) => {
         if (resp.upgradeInProgress === true) {
           setUpgradeInProgress(true);
         }
