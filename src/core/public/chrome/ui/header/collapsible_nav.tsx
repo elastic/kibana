@@ -136,8 +136,38 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      {/* Kibana, Observability, Secuirty, and Management sections */}
       <EuiFlexItem className="eui-yScroll">
+        {/* Recently viewed */}
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed')}
+          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen)}
+        >
+          {recentNavLinks.length > 0 ? (
+            <EuiListGroup
+              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+                defaultMessage: 'Recently viewed links',
+              })}
+              listItems={recentNavLinks}
+              maxWidth="none"
+              color="subdued"
+              gutterSize="none"
+              size="s"
+            />
+          ) : (
+            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+              <p>
+                {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                  defaultMessage: 'No recently viewed items',
+                })}
+              </p>
+            </EuiText>
+          )}
+        </EuiCollapsibleNavGroup>
+
+        {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map(categoryName => {
           const category = categoryDictionary[categoryName]!;
           const links = allCategorizedLinks[categoryName].map(
@@ -175,36 +205,6 @@ export function CollapsibleNav({
             </EuiCollapsibleNavGroup>
           );
         })}
-
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed')}
-          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen)}
-        >
-          {recentNavLinks.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
-              })}
-              listItems={recentNavLinks}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
 
         {/* Docking button only for larger screens that can support it*/}
         <EuiShowFor sizes={['l', 'xl']}>
