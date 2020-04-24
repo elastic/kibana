@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 
-const ServiceNowFieldsRT = rt.union([
+export const ServiceNowFieldsRT = rt.union([
   rt.literal('short_description'),
   rt.literal('description'),
   rt.literal('comments'),

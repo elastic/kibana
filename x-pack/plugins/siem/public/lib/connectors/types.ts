@@ -11,16 +11,11 @@ import { ActionType } from '../../../../triggers_actions_ui/public';
 import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
 import {
-  ServiceNowFieldsType,
-  JiraFieldsType,
-} from '../../../../../../plugins/case/common/api/connectors';
-
-import {
   ActionType as ThirdPartySupportedActions,
   CaseField,
 } from '../../../../../../plugins/case/common/api';
 
-export type AllThirdPartyFields = ServiceNowFieldsType | JiraFieldsType;
+export { ThirdPartyField as AllThirdPartyFields } from '../../../../../../plugins/case/common/api';
 
 export interface ThirdPartyField {
   label: string;

@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 
-const JiraFieldsRT = rt.union([
+export const JiraFieldsRT = rt.union([
   rt.literal('summary'),
   rt.literal('description'),
   rt.literal('comments'),

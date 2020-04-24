@@ -17,8 +17,6 @@ import * as i18n from './translations';
 import { ConnectorFlyoutFormProps } from '../types';
 import { JiraActionConnector } from './types';
 import { withConnectorFlyout } from '../components/connector_flyout';
-import { createDefaultMapping } from '../utils';
-import { connector } from './config';
 
 const JiraConnectorForm: React.FC<ConnectorFlyoutFormProps<JiraActionConnector>> = ({
   errors,
