@@ -109,7 +109,7 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
-    embeddableObject.setLayerList(getLayerList(indexPatterns));
+    await embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
   // Wire up to app refresh action
