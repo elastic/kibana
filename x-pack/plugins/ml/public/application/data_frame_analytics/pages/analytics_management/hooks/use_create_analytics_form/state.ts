@@ -58,27 +58,35 @@ export interface State {
     destinationIndexNameEmpty: boolean;
     destinationIndexNameValid: boolean;
     destinationIndexPatternTitleExists: boolean;
+    eta: undefined | number;
     excludes: string[];
     excludesTableItems: FieldSelectionItem[];
     excludesOptions: EuiComboBoxOptionOption[]; // TODO: remove once we switch to table
+    featureBagFraction: undefined | number;
     fieldOptionsFetchFail: boolean;
+    gamma: undefined | number;
     jobId: DataFrameAnalyticsId;
     jobIdExists: boolean;
     jobIdEmpty: boolean;
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
+    lambda: number | undefined;
     loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
     maxDistinctValuesError: string | undefined;
+    maxTrees: undefined | number;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
     numTopFeatureImportanceValues: number | undefined;
     numTopFeatureImportanceValuesValid: boolean;
+    numTopClasses: number;
+    predictionFieldName: string;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
     requiredFieldsError: string | undefined;
+    randomizeSeed: undefined | number;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -117,8 +125,11 @@ export const getInitialState = (): State => ({
     destinationIndexNameEmpty: true,
     destinationIndexNameValid: false,
     destinationIndexPatternTitleExists: false,
+    eta: undefined,
     excludes: [],
+    featureBagFraction: undefined,
     fieldOptionsFetchFail: false,
+    gamma: undefined,
     excludesTableItems: [],
     excludesOptions: [],
     jobId: '',
@@ -127,17 +138,22 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
+    lambda: undefined,
     loadingDepVarOptions: false,
     loadingFieldOptions: false,
     maxDistinctValuesError: undefined,
+    maxTrees: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
+    numTopClasses: 2,
+    predictionFieldName: '', // TODO: change to constant
     previousJobType: null,
     previousSourceIndex: undefined,
     requiredFieldsError: undefined,
+    randomizeSeed: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -213,6 +229,7 @@ const getExcludesFields = (excluded: string[]) => {
   return updatedExcluded;
 };
 
+// TODO: add in hyper parameters
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
@@ -251,6 +268,19 @@ export const getJobConfigFromFormState = (
     };
   }
 
+  if (
+    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+    jobConfig?.analysis?.classification !== undefined
+  ) {
+    // @ts-ignore
+    jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+
+    if (formState.predictionFieldName !== '') {
+      // @ts-ignore
+      jobConfig.analysis.classification.prediction_field_name = formState.predictionFieldName;
+    }
+  }
+
   return jobConfig;
 };
 
@@ -282,6 +312,11 @@ export function getCloneFormStateFromJobConfig(
     resultState.dependentVariable = analysisConfig.dependent_variable;
     resultState.numTopFeatureImportanceValues = analysisConfig.num_top_feature_importance_values;
     resultState.trainingPercent = analysisConfig.training_percent;
+
+    if (isClassificationAnalysis(analyticsJobConfig.analysis)) {
+      // @ts-ignore // TODO: prediction_field_name as well?
+      resultState.numTopClasses = analysisConfig.num_top_classes;
+    }
   }
 
   return resultState;
