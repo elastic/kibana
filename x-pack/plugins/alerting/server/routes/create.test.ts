@@ -142,7 +142,7 @@ describe('createAlertRoute', () => {
 
     alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {});
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
 
     await handler(context, req, res);
 
@@ -163,7 +163,7 @@ describe('createAlertRoute', () => {
 
     alertsClient.create.mockResolvedValueOnce(createResult);
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {});
+    const [context, req, res] = mockHandlerArguments({ alertsClient }, {});
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 

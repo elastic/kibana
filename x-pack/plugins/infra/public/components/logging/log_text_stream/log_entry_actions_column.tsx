@@ -24,16 +24,24 @@ interface LogEntryActionsColumnProps {
   isMenuOpen: boolean;
   onOpenMenu: () => void;
   onCloseMenu: () => void;
-  onViewDetails: () => void;
+  onViewDetails?: () => void;
+  onViewLogInContext?: () => void;
 }
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
-  defaultMessage: 'View Details',
+  defaultMessage: 'View actions for line',
 });
 
 const LOG_DETAILS_LABEL = i18n.translate('xpack.infra.logs.logEntryActionsDetailsButton', {
-  defaultMessage: 'View actions for line',
+  defaultMessage: 'View details',
 });
+
+const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
+  'xpack.infra.lobs.logEntryActionsViewInContextButton',
+  {
+    defaultMessage: 'View in context',
+  }
+);
 
 export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   isHovered,
@@ -41,11 +49,23 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
   onOpenMenu,
   onCloseMenu,
   onViewDetails,
+  onViewLogInContext,
 }) => {
   const handleClickViewDetails = useCallback(() => {
     onCloseMenu();
-    onViewDetails();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewDetails?.();
   }, [onCloseMenu, onViewDetails]);
+
+  const handleClickViewInContext = useCallback(() => {
+    onCloseMenu();
+
+    // Function might be `undefined` and the linter doesn't like that.
+    // eslint-disable-next-line no-unused-expressions
+    onViewLogInContext?.();
+  }, [onCloseMenu, onViewLogInContext]);
 
   const button = (
     <ButtonWrapper>
@@ -72,6 +92,12 @@ export const LogEntryActionsColumn: React.FC<LogEntryActionsColumnProps> = ({
               </SectionTitle>
               <SectionLinks>
                 <SectionLink label={LOG_DETAILS_LABEL} onClick={handleClickViewDetails} />
+                {onViewLogInContext !== undefined ? (
+                  <SectionLink
+                    label={LOG_VIEW_IN_CONTEXT_LABEL}
+                    onClick={handleClickViewInContext}
+                  />
+                ) : null}
               </SectionLinks>
             </Section>
           </ActionMenu>

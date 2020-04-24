@@ -65,6 +65,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
+  isActionExecutable(actionId: string, actionTypeId: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   preconfiguredActions: PreConfiguredAction[];
@@ -117,7 +118,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.preconfiguredActions = [];
   }
 
-  public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
+  public async setup(
+    core: CoreSetup<ActionsPluginsStart>,
+    plugins: ActionsPluginsSetup
+  ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -167,6 +171,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       taskManager: plugins.taskManager,
       actionsConfigUtils,
       licenseState: this.licenseState,
+      preconfiguredActions: this.preconfiguredActions,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -182,7 +187,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
+      core.getStartServices().then(async ([, startPlugins]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(
@@ -268,6 +273,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isActionTypeEnabled: id => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
+      isActionExecutable: (actionId: string, actionTypeId: string) => {
+        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
+      },
       // Ability to get an actions client from legacy code
       async getActionsClientWithRequest(request: KibanaRequest) {
         if (isESOUsingEphemeralEncryptionKey === true) {
@@ -299,7 +307,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private createRouteHandlerContext = (
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<any, any, any>, 'actions'> => {
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
