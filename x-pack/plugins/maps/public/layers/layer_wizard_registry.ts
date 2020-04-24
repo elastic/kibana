@@ -6,13 +6,11 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { ISource } from './sources/source';
-
-export type PreviewSourceHandler = (source: ISource | null) => void;
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 export type RenderWizardArguments = {
-  onPreviewSource: PreviewSourceHandler;
-  inspectorAdapters: object;
+  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  mapColors: string[];
 };
 
 export type LayerWizard = {
