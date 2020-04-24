@@ -33,7 +33,7 @@ const createServicesMock = () => {
     savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   }> = {
     callCluster: jest.fn(),
-    getScopedClusterClient: jest.fn(),
+    getScopedCallCluster: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
   };
   return mock;
