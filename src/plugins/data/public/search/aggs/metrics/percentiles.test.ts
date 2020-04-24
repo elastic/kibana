@@ -61,12 +61,7 @@ describe('AggTypesMetricsPercentilesProvider class', () => {
           type: METRIC_TYPES.PERCENTILES,
           schema: 'metric',
           params: {
-            field: {
-              displayName: 'bytes',
-              format: {
-                convert: jest.fn(x => `${x}th`),
-              },
-            },
+            field: 'bytes',
             customLabel: 'prince',
             percents: [95],
           },

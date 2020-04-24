@@ -185,31 +185,40 @@ module.exports = {
             zones: [
               {
                 target: [
-                  'src/legacy/**/*',
-                  'x-pack/**/*',
-                  '!x-pack/**/*.test.*',
-                  '!x-pack/test/**/*',
+                  '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'src/core/(public|server)/**/*',
                   'examples/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index.ts',
-                  '!src/core/public/mocks.ts',
-                  '!src/core/public/*.test.mocks.ts',
+                  '!src/core/public/index.ts', // relative import
+                  '!src/core/public/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
                   '!src/core/public/utils/**/*',
+                  '!src/core/public/*.test.mocks{,.ts}',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index.ts',
-                  '!src/core/server/mocks.ts',
-                  '!src/core/server/types.ts',
-                  '!src/core/server/test_utils.ts',
+                  '!src/core/server/index.ts', // relative import
+                  '!src/core/server/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
+                  '!src/core/server/test_utils',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
-                  '!src/core/server/types',
-                  '!src/core/server/*.test.mocks.ts',
-
+                  '!src/core/server/*.test.mocks{,.ts}',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'Plugins may only import from top-level public and server modules in core.',
+              },
+              {
+                target: [
+                  '(src|x-pack)/legacy/**/*',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  'examples/**/*',
+                  '!(src|x-pack)/**/*.test.*',
+                  '!(x-pack/)?test/**/*',
+                ],
+                from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
@@ -823,6 +832,18 @@ module.exports = {
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
+      },
+    },
+    /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 
