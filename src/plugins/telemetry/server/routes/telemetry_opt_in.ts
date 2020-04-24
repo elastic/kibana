@@ -22,7 +22,10 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
+import {
+  StatsGetterConfig,
+  TelemetryCollectionManagerPluginSetup,
+} from 'src/plugins/telemetry_collection_manager/server';
 import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
@@ -79,23 +82,30 @@ export function registerTelemetryOptInRoutes({
         });
       }
 
+      const statsGetterConfig: StatsGetterConfig = {
+        start: moment()
+          .subtract(20, 'minutes')
+          .toISOString(),
+        end: moment().toISOString(),
+        unencrypted: false,
+      };
+
+      const optInStatus = await telemetryCollectionManager.getOptInStats(
+        newOptInStatus,
+        statsGetterConfig
+      );
+
       if (config.sendUsageFrom === 'server') {
         const optInStatusUrl = config.optInStatusUrl;
         await sendTelemetryOptInStatus(
           telemetryCollectionManager,
           { optInStatusUrl, newOptInStatus },
-          {
-            start: moment()
-              .subtract(20, 'minutes')
-              .toISOString(),
-            end: moment().toISOString(),
-            unencrypted: false,
-          }
+          statsGetterConfig
         );
       }
 
       await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
-      return res.ok({});
+      return res.ok({ body: optInStatus });
     }
   );
 }

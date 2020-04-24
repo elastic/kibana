@@ -11,7 +11,7 @@ import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_ty
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Comparator, AlertStates } from './types';
+import { MetricExpressionParams, Comparator, Aggregators, AlertStates } from './types';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
@@ -39,7 +39,7 @@ const getCurrentValueFromAggregations = (
     const { buckets } = aggregations.aggregatedIntervals;
     if (!buckets.length) return null; // No Data state
     const mostRecentBucket = buckets[buckets.length - 1];
-    if (aggType === 'count') {
+    if (aggType === Aggregators.COUNT) {
       return mostRecentBucket.doc_count;
     }
     const { value } = mostRecentBucket.aggregatedValue;
@@ -70,10 +70,10 @@ export const getElasticsearchMetricQuery = (
   groupBy?: string,
   filterQuery?: string
 ) => {
-  if (aggType === 'count' && metric) {
+  if (aggType === Aggregators.COUNT && metric) {
     throw new Error('Cannot aggregate document count with a metric');
   }
-  if (aggType !== 'count' && !metric) {
+  if (aggType !== Aggregators.COUNT && !metric) {
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
@@ -85,9 +85,9 @@ export const getElasticsearchMetricQuery = (
   const offset = getDateHistogramOffset(from, interval);
 
   const aggregations =
-    aggType === 'count'
+    aggType === Aggregators.COUNT
       ? {}
-      : aggType === 'rate'
+      : aggType === Aggregators.RATE
       ? networkTraffic('aggregatedValue', metric)
       : {
           aggregatedValue: {
@@ -242,7 +242,8 @@ const getMetric: (
 const comparatorMap = {
   [Comparator.BETWEEN]: (value: number, [a, b]: number[]) =>
     value >= Math.min(a, b) && value <= Math.max(a, b),
-  // `threshold` is always an array of numbers in case the BETWEEN comparator is
+  [Comparator.OUTSIDE_RANGE]: (value: number, [a, b]: number[]) => value < a || value > b,
+  // `threshold` is always an array of numbers in case the BETWEEN/OUTSIDE_RANGE comparator is
   // used; all other compartors will just destructure the first value in the array
   [Comparator.GT]: (a: number, [b]: number[]) => a > b,
   [Comparator.LT]: (a: number, [b]: number[]) => a < b,

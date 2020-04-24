@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
 import { AlphaMessaging } from '../components';
 import { useLink, useConfig } from '../hooks';
-import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from '../constants';
 
 interface Props {
   section?: Section;
@@ -20,8 +20,6 @@ interface Props {
 const Container = styled.div`
   min-height: calc(100vh - ${props => props.theme.eui.euiHeaderChildSize});
   background: ${props => props.theme.eui.euiColorEmptyShade};
-  display: flex;
-  flex-direction: column;
 `;
 
 const Nav = styled.nav`
@@ -76,6 +74,12 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                 <FormattedMessage
                   id="xpack.ingestManager.appNavigation.fleetLinkText"
                   defaultMessage="Fleet"
+                />
+              </EuiTab>
+              <EuiTab isSelected={section === 'data_stream'} href={useLink(DATA_STREAM_PATH)}>
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
+                  defaultMessage="Data streams"
                 />
               </EuiTab>
             </EuiTabs>
