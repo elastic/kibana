@@ -18,6 +18,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import { HttpStart } from 'src/core/public';
 
 import {
   EuiButton,
@@ -47,6 +48,7 @@ interface TestScriptProps {
   name?: string;
   script?: string;
   executeScript: ExecuteScript;
+  getHttpStart: () => HttpStart;
 }
 
 interface AdditionalField {
@@ -78,7 +80,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
   }
 
   previewScript = async (searchContext?: { query?: Query | undefined }) => {
-    const { indexPattern, lang, name, script, executeScript } = this.props;
+    const { indexPattern, lang, name, script, executeScript, getHttpStart } = this.props;
 
     if (!script || script.length === 0) {
       return;
@@ -106,6 +108,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       indexPatternTitle: indexPattern.title,
       query,
       additionalFields: this.state.additionalFields.map((option: AdditionalField) => option.value),
+      getHttpStart,
     });
 
     if (scriptResponse.status !== 200) {

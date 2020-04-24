@@ -95,7 +95,7 @@ uiModules
 
 // routes for create edit field. Will be removed after migartion all component to react.
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
-const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEditors) => {
+const renderCreateEditField = ($scope, $route, getConfig, fieldFormatEditors) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
     if (!node) {
@@ -112,7 +112,7 @@ const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEdit
             fieldFormatEditors={fieldFormatEditors}
             getConfig={getConfig}
             services={{
-              getHttpStart: () => $http,
+              getHttpStart: () => npStart.core.http,
               notifications: npStart.core.notifications,
               docTitle: npStart.core.chrome.docTitle,
             }}

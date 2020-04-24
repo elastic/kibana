@@ -755,6 +755,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           name={field.name}
           script={field.script}
           executeScript={executeScript}
+          getHttpStart={this.props.helpers.getHttpStart}
         />
       </Fragment>
     );
@@ -795,6 +796,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
+        getHttpStart: this.props.helpers.getHttpStart,
       });
 
       if (!isValid) {

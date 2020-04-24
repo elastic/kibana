@@ -17,8 +17,6 @@
  * under the License.
  */
 
-jest.mock('ui/kfetch', () => ({}));
-
 import React from 'react';
 
 import { npStart } from 'ui/new_platform';

@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { HttpStart } from 'src/core/public';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
@@ -47,6 +48,7 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
+        getHttpStart={() => (({} as unknown) as HttpStart)}
       />
     );
 
@@ -61,6 +63,7 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
+        getHttpStart={() => (({} as unknown) as HttpStart)}
       />
     );
 

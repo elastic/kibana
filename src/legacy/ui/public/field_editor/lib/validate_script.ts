@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { kfetch } from 'ui/kfetch';
 import { Query } from 'src/plugins/data/public';
+import { HttpStart } from 'src/core/public';
 import { ExecuteScriptParams, ExecuteScriptResult } from '../types';
 
 export const executeScript = async ({
@@ -28,6 +28,7 @@ export const executeScript = async ({
   indexPatternTitle,
   query,
   additionalFields = [],
+  getHttpStart,
 }: ExecuteScriptParams): Promise<ExecuteScriptResult> => {
   // Using _msearch because _search with index name in path dorks everything up
   const header = {
@@ -61,7 +62,8 @@ export const executeScript = async ({
   }
 
   const body = `${JSON.stringify(header)}\n${JSON.stringify(search)}\n`;
-  const esResp = await kfetch({ method: 'POST', pathname: '/elasticsearch/_msearch', body });
+  const http = await getHttpStart();
+  const esResp = await http.fetch('/elasticsearch/_msearch', { method: 'POST', body });
   // unwrap _msearch response
   return esResp.responses[0];
 };
@@ -71,13 +73,21 @@ export const isScriptValid = async ({
   lang,
   script,
   indexPatternTitle,
+  getHttpStart,
 }: {
   name: string;
   lang: string;
   script: string;
   indexPatternTitle: string;
+  getHttpStart: () => HttpStart;
 }) => {
-  const scriptResponse = await executeScript({ name, lang, script, indexPatternTitle });
+  const scriptResponse = await executeScript({
+    name,
+    lang,
+    script,
+    indexPatternTitle,
+    getHttpStart,
+  });
 
   if (scriptResponse.status !== 200) {
     return false;

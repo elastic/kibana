@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { HttpStart } from 'src/core/public';
 
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
@@ -35,6 +36,7 @@ interface ScriptingHelpFlyoutProps {
   executeScript: ExecuteScript;
   isVisible: boolean;
   onClose: () => void;
+  getHttpStart: () => HttpStart;
 }
 
 export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
@@ -45,6 +47,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   name,
   script,
   executeScript,
+  getHttpStart,
 }) => {
   const tabs = [
     {
@@ -64,6 +67,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
           name={name}
           script={script}
           executeScript={executeScript}
+          getHttpStart={getHttpStart}
         />
       ),
     },
