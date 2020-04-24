@@ -31,7 +31,7 @@ export class ExportApp extends React.PureComponent {
     const pageElementCount = activePage.elements.length;
 
     return (
-      <div className="canvasExport" data-share-page={selectedPageIndex + 1}>
+      <div className="canvasExport" data-shared-page={selectedPageIndex + 1}>
         <div className="canvasExport__stage">
           <div className="canvasLayout__stageHeader">
             <Link name="loadWorkpad" params={{ id: this.props.workpad.id }}>

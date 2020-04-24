@@ -156,6 +156,7 @@ export class HeadlessChromiumDriverFactory {
 
       // Rx.Observable<never>: stream to interrupt page capture
       const exit$ = this.getPageExit(browser, page);
+
       observer.next({ driver, exit$ });
 
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
