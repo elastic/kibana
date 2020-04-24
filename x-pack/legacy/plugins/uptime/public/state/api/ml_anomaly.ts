@@ -18,7 +18,20 @@ import {
 import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
-export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`.toLowerCase();
+const getJobPrefix = (monitorId: string) => {
+  // ML App doesn't support upper case characters in job name
+  const lowerCaseMonitorId = monitorId.toLowerCase();
+
+  // ML Job ID can't be greater than 64 length, so will be substring it, and hope
+  // At such big length, there is minimum chance of having duplicate monitor id
+  // Subtracting ML_JOB_ID constant and _ char as well
+  if ((lowerCaseMonitorId + ML_JOB_ID + 1).length > 64) {
+    return lowerCaseMonitorId.substring(64 - ML_JOB_ID.length - 1);
+  }
+  return lowerCaseMonitorId;
+};
+
+export const getMLJobId = (monitorId: string) => `${getJobPrefix(monitorId)}_${ML_JOB_ID}`;
 
 export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
@@ -34,11 +47,8 @@ export const createMLJob = async ({
 }: MonitorIdParam & HeartbeatIndicesParam): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
-  // ML App doesn't support upper case characters in job name
-  const lowerCaseMonitorId = monitorId.toLowerCase();
-
   const data = {
-    prefix: `${lowerCaseMonitorId}_`,
+    prefix: `${getJobPrefix(monitorId)}_`,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: moment()
