@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, nextTick } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
 const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
