@@ -57,6 +57,19 @@ def base(Map params, Closure closure) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
         scmVars = checkout scm
+
+        def mergeBase
+        if (env.ghprbTargetBranch) {
+          sh(script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}")
+          mergeBase = sh(script: "cd kibana && git merge-base HEAD FETCH_HEAD", returnStdout: true).trim()
+        }
+
+        ciStats.reportGitInfo(
+          env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
+          scmVars.GIT_COMMIT,
+          env.ghprbTargetBranch,
+          mergeBase
+        )
       }
     }
 
