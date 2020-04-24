@@ -16,7 +16,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
-import { defaultDynamicSettings } from '../../../../common';
+import { DYNAMIC_SETTINGS_DEFAULTS, defaultDynamicSettings } from '../../../../common';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 /**
@@ -52,7 +52,7 @@ const mockOptions = (
     id: '',
     type: '',
     references: [],
-    attributes: defaultDynamicSettings,
+    attributes: DYNAMIC_SETTINGS_DEFAULTS,
   });
   return {
     params,
@@ -88,9 +88,9 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
-              "certificatesThresholds": Object {
-                "errorState": 7,
-                "warningState": 30,
+              "certThresholds": Object {
+                "age": 365,
+                "expiration": 30,
               },
               "heartbeatIndices": "heartbeat-8*",
             },
@@ -135,9 +135,9 @@ describe('status check alert', () => {
           Object {
             "callES": [MockFunction],
             "dynamicSettings": Object {
-              "certificatesThresholds": Object {
-                "errorState": 7,
-                "warningState": 30,
+              "certThresholds": Object {
+                "age": 365,
+                "expiration": 30,
               },
               "heartbeatIndices": "heartbeat-8*",
             },

@@ -25,19 +25,28 @@ import {
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+import { FieldFormatsStart } from '../../../field_formats';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function() {
   let aggConfigs: IAggConfigs;
-  const aggTypesDependencies: PercentileRanksMetricAggDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
-  };
+  let fieldFormats: FieldFormatsStart;
+  let aggTypesDependencies: PercentileRanksMetricAggDependencies;
 
   beforeEach(() => {
+    fieldFormats = fieldFormatsServiceMock.createStartContract();
+    fieldFormats.getDefaultInstance = (() => ({
+      convert: (t?: string) => t,
+    })) as any;
+    aggTypesDependencies = {
+      getInternalStartServices: () =>
+        (({
+          fieldFormats,
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
+    };
     const typesRegistry = mockAggTypesRegistry([getPercentileRanksMetricAgg(aggTypesDependencies)]);
     const field = {
       name: 'bytes',
@@ -59,12 +68,7 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
           type: METRIC_TYPES.PERCENTILE_RANKS,
           schema: 'metric',
           params: {
-            field: {
-              displayName: 'bytes',
-              format: {
-                convert: jest.fn(x => x),
-              },
-            },
+            field: 'bytes',
             customLabel: 'my custom field label',
             values: [5000, 10000],
           },

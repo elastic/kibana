@@ -7,7 +7,7 @@
 import { call, put } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../fetch_effect';
 import { indexStatusAction } from '../../actions';
-import { HttpFetchError } from '../../../../../../../src/core/public/http/http_fetch_error';
+import { HttpFetchError } from 'src/core/public';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
 import { fetchIndexStatus } from '../../api';
 

@@ -5,9 +5,10 @@
  */
 // Base API paths
 export const API_ROOT = `/api/ingest_manager`;
+export const EPM_API_ROOT = `${API_ROOT}/epm`;
+export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const DATASOURCE_API_ROOT = `${API_ROOT}/datasources`;
 export const AGENT_CONFIG_API_ROOT = `${API_ROOT}/agent_configs`;
-export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const FLEET_API_ROOT = `${API_ROOT}/fleet`;
 
 // EPM API routes
@@ -21,6 +22,11 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE,
   FILEPATH_PATTERN: `${EPM_PACKAGES_FILE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
+};
+
+// Data stream API routes
+export const DATA_STREAM_API_ROUTES = {
+  LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
 };
 
 // Datasource API routes
@@ -53,7 +59,8 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/actions`,
   ENROLL_PATTERN: `${FLEET_API_ROOT}/agents/enroll`,
-  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/unenroll`,
+  UNENROLL_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/unenroll`,
+  REASSIGN_PATTERN: `${FLEET_API_ROOT}/agents/{agentId}/reassign`,
   STATUS_PATTERN: `${FLEET_API_ROOT}/agent-status`,
 };
 
