@@ -87,7 +87,7 @@ describe('datatable_expression', () => {
       );
 
       wrapper
-        .find('[data-test-subj="lensFilterForCellValue"]')
+        .find('[data-test-subj="lensDatatableFilterOut"]')
         .first()
         .simulate('click');
 
@@ -101,7 +101,7 @@ describe('datatable_expression', () => {
               value: 10110,
             },
           ],
-          negate: false,
+          negate: true,
         },
         timeFieldName: undefined,
       });

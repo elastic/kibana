@@ -3,17 +3,12 @@
 }
 
 .lnsDataTable__filter {
-  cursor: pointer;
-  visibility: hidden;
-}
-
-.lnsDataTable__filterIcon {
-  fill: $euiColorPrimary;
-  vertical-align: text-bottom;
+  opacity: 0;
+  transition: opacity 250ms ease-in-out;
 }
 
 .lnsDataTable__cell:hover  {
   .lnsDataTable__filter {
-    visibility: visible;
+    opacity: 1;
   }
 }

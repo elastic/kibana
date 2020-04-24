@@ -26,12 +26,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
 
-  async function assertExpectedMetric() {
+  async function assertExpectedMetric(metricCount: string) {
     await PageObjects.lens.assertExactText(
       '[data-test-subj="lns_metric_title"]',
       'Maximum of bytes'
     );
-    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', '19,986');
+    await PageObjects.lens.assertExactText('[data-test-subj="lns_metric_value"]', metricCount);
   }
 
   async function assertExpectedTable() {
@@ -40,8 +40,12 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       'Maximum of bytes'
     );
     await PageObjects.lens.assertExactText(
-      '[data-test-subj="lnsDataTable"] tbody .euiTableCellContent__text',
-      '19,986'
+      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValue"]',
+      '19,985'
+    );
+    await PageObjects.lens.assertExactText(
+      '[data-test-subj="lnsDataTable"] [data-test-subj="lnsDataTableCellValueFilterable"]',
+      'IN'
     );
   }
 
@@ -73,7 +77,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
+      await assertExpectedMetric('19,986');
     });
 
     it('metric should be embeddable in dashboards', async () => {
@@ -83,10 +87,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('Artistpreviouslyknownaslens');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
+      await assertExpectedMetric('19,986');
     });
 
-    it('click on the bar in XYChart adds proper filters/timerange', async () => {
+    it('click on the bar in XYChart adds proper filters/timerange in dashboard', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.clickOpenAddPanel();
@@ -102,15 +106,22 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
-    it('should allow seamless transition to and from table view', async () => {
+    it('should allow seamless transition to and from table view and add a filter', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
-      await assertExpectedMetric();
+      await assertExpectedMetric('19,986');
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsDatatable');
+      await PageObjects.lens.configureDimension({
+        dimension: '[data-test-subj="lnsDatatable_column"] [data-test-subj="lns-empty-dimension"]',
+        operation: 'terms',
+        field: 'geo.dest',
+      });
+      await PageObjects.lens.save('Artistpreviouslyknownaslens');
+      await find.clickByCssSelector('[data-test-subj="lensDatatableFilterOut"]');
       await assertExpectedTable();
       await PageObjects.lens.switchToVisualization('lnsChartSwitchPopover_lnsMetric');
-      await assertExpectedMetric();
+      await assertExpectedMetric('19,985');
     });
 
     it('should allow creation of lens visualizations', async () => {
