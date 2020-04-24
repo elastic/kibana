@@ -85,7 +85,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   const {
     connectorId,
-    connectorName,
     closureType,
     mapping,
     currentConfiguration,
@@ -129,14 +128,17 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   }, []);
 
   const handleActionBar = useCallback(() => {
-    const unsavedChanges = difference(Object.values(currentConfiguration), [
+    const currentConfigurationMinusName = {
+      connectorId: currentConfiguration.connectorId,
+      closureType: currentConfiguration.closureType,
+    };
+    const unsavedChanges = difference(Object.values(currentConfigurationMinusName), [
       connectorId,
       closureType,
-      connectorName,
     ]).length;
     setActionBarVisible(!(unsavedChanges === 0));
     setTotalConfigurationChanges(unsavedChanges);
-  }, [currentConfiguration, connectorName, connectorId, closureType]);
+  }, [currentConfiguration, connectorId, closureType]);
 
   const handleSetAddFlyoutVisibility = useCallback(
     (isVisible: boolean) => {

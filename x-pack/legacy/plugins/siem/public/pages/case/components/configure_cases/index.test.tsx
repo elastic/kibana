@@ -109,7 +109,12 @@ describe('ConfigureCases', () => {
         ...useCaseConfigureResponse,
         closureType: 'close-by-user',
         connectorId: 'not-id',
-        currentConfiguration: { connectorId: 'not-id', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: 'not-id',
+          closureType: 'close-by-user',
+        },
       }));
       useConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, connectors: [] }));
       useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
@@ -138,7 +143,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '123',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
       }));
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
@@ -257,7 +267,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
       }));
       const newWrapper = mount(<ConfigureCases userCanCrud />, {
         wrappingComponent: TestProviders,
@@ -313,7 +328,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
         persistLoading: true,
       }));
 
@@ -342,7 +362,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
         persistLoading: true,
       }));
 
@@ -377,7 +402,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
         persistCaseConfigure,
       }));
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
@@ -417,7 +447,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-user',
+        },
         loading: true,
       }));
       const newWrapper = mount(<ConfigureCases userCanCrud />, {
@@ -448,7 +483,12 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '456',
+          closureType: 'close-by-user',
+        },
       }));
       useConnectorsMock.mockImplementation(() => useConnectorsResponse);
       useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
@@ -483,7 +523,43 @@ describe('ConfigureCases', () => {
         mapping,
         closureType: 'close-by-user',
         connectorId: '456',
-        currentConfiguration: { connectorId: '123', closureType: 'close-by-pushing' },
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: '123',
+          closureType: 'close-by-pushing',
+        },
+      }));
+      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+      wrapper.update();
+      wrapper.find('input[id="close-by-pushing"]').simulate('change');
+      wrapper.update();
+
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeTruthy();
+      expect(
+        wrapper
+          .find('[data-test-subj="case-configure-action-bottom-bar-total-changes"]')
+          .first()
+          .text()
+      ).toBe('2 unsaved changes');
+    });
+    test('it tracks the changes successfully when name changes', () => {
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        mapping,
+        closureType: 'close-by-user',
+        connectorId: '456',
+        connectorName: 'nameChange',
+        currentConfiguration: {
+          connectorId: '123',
+          closureType: 'close-by-pushing',
+          connectorName: 'before',
+        },
       }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
