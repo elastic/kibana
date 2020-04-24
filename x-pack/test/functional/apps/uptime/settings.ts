@@ -6,16 +6,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  defaultDynamicSettings,
-  DynamicSettings,
-<<<<<<< HEAD
-} from '../../../../plugins/uptime/common/runtime_types';
-import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
-=======
-} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { defaultDynamicSettings, DynamicSettings } from '../../../../plugins/uptime/common';
 import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
->>>>>>> master
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime: uptimePage } = getPageObjects(['uptime']);

@@ -14,6 +14,7 @@ import {
   Cert,
   OverviewFilters,
   MonitorDetails,
+  MonitorDurationResult,
   MonitorLocations,
   Snapshot,
   StatesIndexStatus,
@@ -31,7 +32,6 @@ import {
 } from '.';
 import { GetMonitorStatesResult } from './get_monitor_states';
 import { GetSnapshotCountParams } from './get_snapshot_counts';
-import { MonitorDurationResult } from '../../../common/types';
 
 type ESQ<P, R> = UMElasticsearchQueryFn<P, R>;
 

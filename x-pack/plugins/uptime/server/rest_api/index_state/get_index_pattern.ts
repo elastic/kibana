@@ -6,7 +6,7 @@
 
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { API_URLS } from '../../../common/constants/rest_api';
+import { API_URLS } from '../../../common';
 
 export const createGetIndexPatternRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',

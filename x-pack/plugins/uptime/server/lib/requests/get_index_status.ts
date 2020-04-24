@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { StatesIndexStatus } from '../../../common/runtime_types';
+import { StatesIndexStatus } from '../../../common';
 
 export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
   callES,

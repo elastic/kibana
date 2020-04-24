@@ -9,14 +9,14 @@ import { isRight } from 'fp-ts/lib/Either';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { i18n } from '@kbn/i18n';
 import { AlertExecutorOptions } from '../../../../alerting/server';
-import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
 import {
+  ACTION_GROUP_DEFINITIONS,
   StatusCheckExecutorParamsType,
   StatusCheckAlertStateType,
   StatusCheckAlertState,
-} from '../../../common/runtime_types';
+} from '../../../common';
 import { savedObjectsAdapter } from '../saved_objects';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;

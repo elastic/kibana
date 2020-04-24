@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../common/runtime_types';
+import { Ping } from '../../../common';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */

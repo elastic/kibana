@@ -6,7 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
-import { defaultDynamicSettings } from '../../../../common/runtime_types';
+import { defaultDynamicSettings } from '../../../../common';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;

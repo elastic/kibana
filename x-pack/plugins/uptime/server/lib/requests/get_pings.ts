@@ -5,12 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import {
-  GetPingsParams,
-  HttpResponseBody,
-  PingsResponse,
-  Ping,
-} from '../../../common/runtime_types';
+import { GetPingsParams, HttpResponseBody, PingsResponse, Ping } from '../../../common';
 
 const DEFAULT_PAGE_SIZE = 25;
 
