@@ -23,6 +23,11 @@ import {
   AggConfigSerialized,
   AggConfigs,
   AggParamsTerms,
+  AggParamsAvg,
+  AggParamsCardinality,
+  AggParamsCount,
+  AggParamsGeoBounds,
+  AggParamsGeoCentroid,
   AggType,
   aggTypeFieldFilters,
   AggTypesRegistrySetup,
@@ -93,4 +98,9 @@ export type AggExpressionFunctionArgs<
  */
 export interface AggParamsMapping {
   terms: AggParamsTerms;
+  avg: AggParamsAvg;
+  cardinality: AggParamsCardinality;
+  count: AggParamsCount;
+  geo_bounds: AggParamsGeoBounds;
+  geo_centroid: AggParamsGeoCentroid;
 }

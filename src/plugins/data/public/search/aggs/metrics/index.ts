@@ -21,3 +21,8 @@ export * from './metric_agg_type';
 export * from './metric_agg_types';
 export * from './lib/parent_pipeline_agg_helper';
 export * from './lib/sibling_pipeline_agg_helper';
+export { AggParamsAvg } from './avg';
+export { AggParamsCardinality } from './cardinality';
+export { AggParamsCount } from './count';
+export { AggParamsGeoBounds } from './geo_bounds';
+export { AggParamsGeoCentroid } from './geo_centroid';

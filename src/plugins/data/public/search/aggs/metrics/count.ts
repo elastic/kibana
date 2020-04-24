@@ -23,6 +23,9 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsCount {
+  json?: string;
+}
 export interface CountMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

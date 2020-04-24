@@ -27,6 +27,11 @@ const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTit
   defaultMessage: 'Unique Count',
 });
 
+export interface AggParamsCardinality {
+  field: string;
+  json?: string;
+}
+
 export interface CardinalityMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

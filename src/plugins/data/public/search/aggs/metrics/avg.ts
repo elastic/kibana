@@ -27,6 +27,11 @@ const averageTitle = i18n.translate('data.search.aggs.metrics.averageTitle', {
   defaultMessage: 'Average',
 });
 
+export interface AggParamsAvg {
+  field: string;
+  json?: string;
+}
+
 export interface AvgMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

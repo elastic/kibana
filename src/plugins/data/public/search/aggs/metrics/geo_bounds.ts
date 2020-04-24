@@ -23,6 +23,10 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsGeoBounds {
+  field: string;
+  json?: string;
+}
 export interface GeoBoundsMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
