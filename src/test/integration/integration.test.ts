@@ -29,8 +29,10 @@ describe('when a single commit is backported', () => {
   );
 
   it('should create PR for forked branch', () => {
-    const { createPullRequestPayload } = spies.getSpyCalls();
-    expect(createPullRequestPayload.head).toBe('sqren:backport/6.0/pr-85');
+    const { createTargetPullRequestPayload } = spies.getSpyCalls();
+    expect(createTargetPullRequestPayload.head).toBe(
+      'sqren:backport/6.0/pr-85'
+    );
   });
 
   it('should call logger correctly', () => {
@@ -43,13 +45,13 @@ describe('when a single commit is backported', () => {
       getDefaultRepoBranchAndPerformStartupChecks,
       getAuthorRequestConfig,
       getCommitsRequestConfig,
-      createPullRequestPayload,
+      createTargetPullRequestPayload,
     } = spies.getSpyCalls();
 
     expect(getDefaultRepoBranchAndPerformStartupChecks).toMatchSnapshot();
     expect(getAuthorRequestConfig).toMatchSnapshot();
     expect(getCommitsRequestConfig).toMatchSnapshot();
-    expect(createPullRequestPayload).toMatchSnapshot();
+    expect(createTargetPullRequestPayload).toMatchSnapshot();
   });
 
   it('should not create new branches in origin (elastic/backport-demo)', async () => {
@@ -103,12 +105,12 @@ describe('when a multiple commits are backported', () => {
     const {
       getAuthorRequestConfig,
       getCommitsRequestConfig,
-      createPullRequestPayload,
+      createTargetPullRequestPayload,
     } = spies.getSpyCalls();
 
     expect(getAuthorRequestConfig).toMatchSnapshot();
     expect(getCommitsRequestConfig).toMatchSnapshot();
-    expect(createPullRequestPayload).toMatchSnapshot();
+    expect(createTargetPullRequestPayload).toMatchSnapshot();
   });
 
   it('should not create new branches in origin (elastic/backport-demo)', async () => {
@@ -172,8 +174,10 @@ describe('when disabling fork mode', () => {
   );
 
   it('should create PR for non-forked branch', () => {
-    const { createPullRequestPayload } = spies.getSpyCalls();
-    expect(createPullRequestPayload.head).toBe('elastic:backport/6.0/pr-85');
+    const { createTargetPullRequestPayload } = spies.getSpyCalls();
+    expect(createTargetPullRequestPayload.head).toBe(
+      'elastic:backport/6.0/pr-85'
+    );
   });
 
   it('should create new branches in origin (elastic/backport-demo)', async () => {

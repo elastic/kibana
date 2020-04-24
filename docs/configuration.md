@@ -57,7 +57,7 @@ Example:
 {
   "upstream": "elastic/kibana",
   "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
-  "labels": ["backport"]
+  "targetPRLabels": ["backport"]
 }
 ```
 
@@ -79,7 +79,7 @@ Config:
 
 List of branches that will be available to backport to. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
 
-CLI: `--branches 6.1 --branches 6.0`
+CLI: `--branch 6.1 --branch 6.0`
 
 Config:
 
@@ -104,16 +104,17 @@ CLI: `--all`
 Pre-select branch options based on labels on the source PR.
 
 Example:
+
 ```json
 {
   "branchLabelMapping": {
-    "v8.0.0": "",
     "^v7.8.0$": "7.x",
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   }
 }
 ```
-*Note: backslashes must be escaped.*
+
+_Note: backslashes must be escaped._
 
 #### `fork`
 
@@ -182,20 +183,6 @@ Default: `false`
 
 Default: `true`
 
-#### `labels`
-
-Labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs.
-
-CLI: `--labels backport --labels apm-team`
-
-Config:
-
-```json
-{
-  "labels": ["backport", "apm-team"]
-}
-```
-
 #### `prTitle`
 
 Pull request title pattern.
@@ -249,5 +236,33 @@ Config:
 ```json
 {
   "sourceBranch": "7.x"
+}
+```
+
+#### `sourcePRLabels`
+
+Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to filter for PRs that were already backported.
+
+CLI: `--source-labels backport --source-labels apm-team`
+
+Config:
+
+```json
+{
+  "sourcePRLabels": ["was-backported"]
+}
+```
+
+#### `targetPRLabels`
+
+Labels that will be added to the target (backport) pull request. This can be useful if you, at a later time, want to filter for backport PRs.
+
+CLI: `--labels backport --labels apm-team`
+
+Config:
+
+```json
+{
+  "targetPRLabels": ["backport", "apm-team"]
 }
 ```

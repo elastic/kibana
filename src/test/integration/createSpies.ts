@@ -100,7 +100,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
         getCommitsRequestConfig,
       ] = axiosPostSpy.mock.calls.map((call) => call[1]);
 
-      const [createPullRequestPayload] = axiosRequestSpy.mock.calls.map(
+      const [createTargetPullRequestPayload] = axiosRequestSpy.mock.calls.map(
         (call) => call[0].data
       );
 
@@ -126,7 +126,7 @@ export function createSpies({ commitCount }: { commitCount: number }) {
         getDefaultRepoBranchAndPerformStartupChecks,
         getAuthorRequestConfig,
         getCommitsRequestConfig,
-        createPullRequestPayload,
+        createTargetPullRequestPayload,
       };
     },
   };

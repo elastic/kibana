@@ -21,7 +21,7 @@ Object {
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
-      $commitsCount: Int!
+      $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
       $historyPath: String
@@ -31,7 +31,7 @@ Object {
           target {
             ... on Commit {
               history(
-                first: $commitsCount
+                first: $maxNumber
                 author: { id: $authorId }
                 path: $historyPath
               ) {
@@ -99,8 +99,8 @@ Object {
   ",
   "variables": Object {
     "authorId": "sqren_author_id",
-    "commitsCount": 10,
     "historyPath": null,
+    "maxNumber": 10,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
     "sourceBranch": "master",
@@ -217,7 +217,7 @@ Array [
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
-      $commitsCount: Int!
+      $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
       $historyPath: String
@@ -227,7 +227,7 @@ Array [
           target {
             ... on Commit {
               history(
-                first: $commitsCount
+                first: $maxNumber
                 author: { id: $authorId }
                 path: $historyPath
               ) {
@@ -298,8 +298,8 @@ Array [
     "[VERBOSE] Variables:",
     Object {
       "authorId": "sqren_author_id",
-      "commitsCount": 10,
       "historyPath": null,
+      "maxNumber": 10,
       "repoName": "backport-demo",
       "repoOwner": "elastic",
       "sourceBranch": "master",
@@ -478,7 +478,7 @@ fatal: No such remote: 'elastic'
     "",
   ],
   Array [
-    "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"targetBranches\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingBackports\\":[]}] to 6.0",
+    "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"targetBranches\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingTargetPullRequests\\":[]}] to 6.0",
     undefined,
   ],
   Array [
@@ -579,7 +579,7 @@ Object {
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
-      $commitsCount: Int!
+      $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
       $historyPath: String
@@ -589,7 +589,7 @@ Object {
           target {
             ... on Commit {
               history(
-                first: $commitsCount
+                first: $maxNumber
                 author: { id: $authorId }
                 path: $historyPath
               ) {
@@ -657,8 +657,8 @@ Object {
   ",
   "variables": Object {
     "authorId": "sqren_author_id",
-    "commitsCount": 10,
     "historyPath": null,
+    "maxNumber": 10,
     "repoName": "backport-demo",
     "repoOwner": "elastic",
     "sourceBranch": "master",

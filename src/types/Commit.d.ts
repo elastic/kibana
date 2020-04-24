@@ -9,7 +9,7 @@ export interface CommitSelected {
 
 // commit object displayed in list of prompt choices
 export interface CommitChoice extends CommitSelected {
-  existingBackports: {
+  existingTargetPullRequests: {
     branch: string;
     state: 'OPEN' | 'CLOSED' | 'MERGED';
   }[];

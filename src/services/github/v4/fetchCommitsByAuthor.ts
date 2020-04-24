@@ -17,7 +17,7 @@ export async function fetchCommitsByAuthor(
     accessToken,
     branchLabelMapping,
     githubApiBaseUrlV4,
-    commitsCount,
+    maxNumber,
     path,
     repoName,
     repoOwner,
@@ -28,7 +28,7 @@ export async function fetchCommitsByAuthor(
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
-      $commitsCount: Int!
+      $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
       $historyPath: String
@@ -38,7 +38,7 @@ export async function fetchCommitsByAuthor(
           target {
             ... on Commit {
               history(
-                first: $commitsCount
+                first: $maxNumber
                 author: { id: $authorId }
                 path: $historyPath
               ) {
@@ -114,7 +114,7 @@ export async function fetchCommitsByAuthor(
       repoOwner,
       repoName,
       sourceBranch,
-      commitsCount: commitsCount || 10,
+      maxNumber: maxNumber || 10,
       authorId,
       historyPath: path || null,
     },
@@ -133,24 +133,21 @@ export async function fetchCommitsByAuthor(
     const commitMessage = edge.node.message;
     const sha = edge.node.oid;
 
-    // check whether the commit was merged via a pull request
-    const associatedPullRequest = isAssociatedPullRequest({
+    // get the source pull request unless the commit was merged directly
+    const sourcePullRequest = getSourcePullRequest({
       pullRequestEdge,
       options,
       sha,
-    })
-      ? pullRequestEdge
-      : undefined;
+    });
 
-    // find any existing pull requests
-    const existingBackports = getExistingBackportPRs(
+    // find any existing target pull requests
+    const existingTargetPullRequests = getExistingTargetPullRequests(
       commitMessage,
-      associatedPullRequest
+      sourcePullRequest
     );
 
     const pullNumber =
-      associatedPullRequest?.node.number ||
-      getPullNumberFromMessage(commitMessage);
+      sourcePullRequest?.node.number || getPullNumberFromMessage(commitMessage);
 
     const formattedMessage = getFormattedCommitMessage({
       message: commitMessage,
@@ -158,7 +155,7 @@ export async function fetchCommitsByAuthor(
       sha,
     });
 
-    const labels = associatedPullRequest?.node.labels.nodes.map(
+    const labels = sourcePullRequest?.node.labels.nodes.map(
       (node) => node.name
     );
     const targetBranches = getTargetBranchesFromLabels({
@@ -172,7 +169,7 @@ export async function fetchCommitsByAuthor(
       sha,
       formattedMessage,
       pullNumber,
-      existingBackports,
+      existingTargetPullRequests,
     };
   });
 }
@@ -184,7 +181,7 @@ function getPullNumberFromMessage(firstMessageLine: string) {
   }
 }
 
-function isAssociatedPullRequest({
+function getSourcePullRequest({
   pullRequestEdge,
   options,
   sha,
@@ -193,23 +190,25 @@ function isAssociatedPullRequest({
   options: BackportOptions;
   sha: string;
 }) {
-  return (
+  if (
     pullRequestEdge?.node.repository.name === options.repoName &&
     pullRequestEdge?.node.repository.owner.login === options.repoOwner &&
     pullRequestEdge?.node.mergeCommit.oid === sha
-  );
+  ) {
+    return pullRequestEdge;
+  }
 }
 
-export function getExistingBackportPRs(
+export function getExistingTargetPullRequests(
   commitMessage: string,
-  associatedPullRequest: PullRequestEdge | undefined
+  sourcePullRequest: PullRequestEdge | undefined
 ) {
-  if (!associatedPullRequest) {
+  if (!sourcePullRequest) {
     return [];
   }
 
   const firstMessageLine = getFirstCommitMessageLine(commitMessage);
-  return associatedPullRequest.node.timelineItems.edges
+  return sourcePullRequest.node.timelineItems.edges
     .filter(filterEmpty)
     .filter((item) => {
       const { source } = item.node;
@@ -231,7 +230,7 @@ export function getExistingBackportPRs(
 
       const prTitleMatch = source.title.includes(firstMessageLine);
       const prNumberMatch = source.title.includes(
-        associatedPullRequest.node.number.toString()
+        sourcePullRequest.node.number.toString()
       );
 
       return (

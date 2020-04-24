@@ -103,7 +103,7 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
-      '--commitsCount',
+      '--maxNumber',
       '6',
     ]);
 
@@ -129,7 +129,7 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
-      '--commitsCount',
+      '--maxNumber',
       '6',
       '--sourceBranch',
       '7.x',

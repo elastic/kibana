@@ -8,9 +8,9 @@ import * as prompts from '../services/prompts';
 import { ExecError } from '../test/ExecError';
 import { CommitSelected } from '../types/Commit';
 import { SpyHelper } from '../types/SpyHelper';
-import { cherrypickAndCreatePullRequest } from './cherrypickAndCreatePullRequest';
+import { cherrypickAndCreateTargetPullRequest } from './cherrypickAndCreateTargetPullRequest';
 
-describe('cherrypickAndCreatePullRequest', () => {
+describe('cherrypickAndCreateTargetPullRequest', () => {
   let axiosRequestSpy: SpyHelper<typeof axios.request>;
 
   beforeEach(() => {
@@ -45,14 +45,14 @@ describe('cherrypickAndCreatePullRequest', () => {
       const options = {
         githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
-        labels: ['backport'],
+        targetPRLabels: ['backport'],
         prDescription: 'myPrSuffix',
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
-        backportCreatedLabels: [],
+        sourcePRLabels: [],
       } as BackportOptions;
 
       const commits: CommitSelected[] = [
@@ -72,7 +72,7 @@ describe('cherrypickAndCreatePullRequest', () => {
         },
       ];
 
-      await cherrypickAndCreatePullRequest({
+      await cherrypickAndCreateTargetPullRequest({
         options,
         commits,
         targetBranch: '6.x',
@@ -143,15 +143,15 @@ describe('cherrypickAndCreatePullRequest', () => {
       const options = {
         githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
-        labels: ['backport'],
+        targetPRLabels: ['backport'],
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
-        backportCreatedLabels: [],
+        sourcePRLabels: [],
       } as BackportOptions;
 
-      await cherrypickAndCreatePullRequest({
+      await cherrypickAndCreateTargetPullRequest({
         options,
         commits: [
           {
@@ -202,17 +202,17 @@ describe('cherrypickAndCreatePullRequest', () => {
 
       const options = {
         fork: true,
-        labels: ['backport'],
+        targetPRLabels: ['backport'],
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
         username: 'sqren',
         sourceBranch: 'myDefaultSourceBranch',
-        backportCreatedLabels: [],
+        sourcePRLabels: [],
       } as BackportOptions;
 
       const res = await runTimersUntilResolved(() =>
-        cherrypickAndCreatePullRequest({
+        cherrypickAndCreateTargetPullRequest({
           options,
           commits: [
             {

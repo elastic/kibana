@@ -4,7 +4,7 @@ import { CommitSelected, CommitChoice } from '../../../types/Commit';
 import { SpyHelper } from '../../../types/SpyHelper';
 import {
   fetchCommitsByAuthor,
-  getExistingBackportPRs,
+  getExistingTargetPullRequests,
 } from './fetchCommitsByAuthor';
 import { commitsWithPullRequestsMock } from './mocks/commitsByAuthorMock';
 import { getCommitsByAuthorMock } from './mocks/getCommitsByAuthorMock';
@@ -35,7 +35,7 @@ describe('fetchCommitsByAuthor', () => {
         {
           sha: '2e63475c483f7844b0f2833bc57fdee32095bacb',
           formattedMessage: 'Add 👻 (2e63475c)',
-          existingBackports: [],
+          existingTargetPullRequests: [],
           targetBranches: [],
           sourceBranch: 'master',
         },
@@ -43,7 +43,7 @@ describe('fetchCommitsByAuthor', () => {
           sha: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
           formattedMessage: 'Add witch (#85)',
           pullNumber: 85,
-          existingBackports: [],
+          existingTargetPullRequests: [],
           targetBranches: [],
           sourceBranch: 'master',
         },
@@ -51,21 +51,21 @@ describe('fetchCommitsByAuthor', () => {
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
           formattedMessage: 'Add SF mention (#80)',
           pullNumber: 80,
-          existingBackports: [{ branch: '6.3', state: 'MERGED' }],
+          existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
           targetBranches: [],
           sourceBranch: 'master',
         },
         {
           sha: '3827bbbaf39914eda4f02f6940189844375fd097',
           formattedMessage: 'Add backport config (3827bbba)',
-          existingBackports: [],
+          existingTargetPullRequests: [],
           targetBranches: [],
           sourceBranch: 'master',
         },
         {
           sha: '5ea0da550ac191029459289d67f99ad7d310812b',
           formattedMessage: 'Initial commit (5ea0da55)',
-          existingBackports: [],
+          existingTargetPullRequests: [],
           targetBranches: [],
           sourceBranch: 'master',
         },
@@ -82,12 +82,12 @@ describe('fetchCommitsByAuthor', () => {
     });
   });
 
-  describe('existingBackports', () => {
-    it('should return existingBackports when repoNames match', async () => {
+  describe('existingTargetPullRequests', () => {
+    it('should return existingTargetPullRequests when repoNames match', async () => {
       const res = await getExistingBackportsByRepoName('kibana', 'kibana');
       const expectedCommits: CommitChoice[] = [
         {
-          existingBackports: [{ branch: '6.3', state: 'MERGED' }],
+          existingTargetPullRequests: [{ branch: '6.3', state: 'MERGED' }],
           formattedMessage: 'Add SF mention (#80)',
           pullNumber: 80,
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
@@ -98,11 +98,11 @@ describe('fetchCommitsByAuthor', () => {
       expect(res).toEqual(expectedCommits);
     });
 
-    it('should not return existingBackports when repoNames does not match', async () => {
+    it('should not return existingTargetPullRequests when repoNames does not match', async () => {
       const res = await getExistingBackportsByRepoName('kibana', 'kibana2');
       const expectedCommits: CommitChoice[] = [
         {
-          existingBackports: [],
+          existingTargetPullRequests: [],
           formattedMessage: 'Add SF mention (#80)',
           pullNumber: 80,
           sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
@@ -135,7 +135,7 @@ describe('fetchCommitsByAuthor', () => {
   });
 });
 
-describe('getExistingBackportPRs', () => {
+describe('getExistingTargetPullRequests', () => {
   it('should return a result when commit messages match', () => {
     const commitMessage = 'my message (#1234)';
     const pullRequestEdge = getPullRequestEdgeMock({
@@ -145,7 +145,10 @@ describe('getExistingBackportPRs', () => {
         commits: ['my message (#1234)'],
       },
     });
-    const existingPRs = getExistingBackportPRs(commitMessage, pullRequestEdge);
+    const existingPRs = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestEdge
+    );
     expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
   });
 
@@ -158,7 +161,10 @@ describe('getExistingBackportPRs', () => {
         commits: ['my message2 (#1234)'],
       },
     });
-    const existingPRs = getExistingBackportPRs(commitMessage, pullRequestEdge);
+    const existingPRs = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestEdge
+    );
     expect(existingPRs).toEqual([]);
   });
 
@@ -171,7 +177,10 @@ describe('getExistingBackportPRs', () => {
         commits: ['the actual message'],
       },
     });
-    const existingPRs = getExistingBackportPRs(commitMessage, pullRequestEdge);
+    const existingPRs = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestEdge
+    );
     expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
   });
 
@@ -184,7 +193,10 @@ describe('getExistingBackportPRs', () => {
         commits: ['the actual message'],
       },
     });
-    const existingPRs = getExistingBackportPRs(commitMessage, pullRequestEdge);
+    const existingPRs = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestEdge
+    );
     expect(existingPRs).toEqual([]);
   });
 
@@ -197,7 +209,10 @@ describe('getExistingBackportPRs', () => {
         commits: ['my message (#1234)\n\nsomething else'],
       },
     });
-    const existingPRs = getExistingBackportPRs(commitMessage, pullRequestEdge);
+    const existingPRs = getExistingTargetPullRequests(
+      commitMessage,
+      pullRequestEdge
+    );
     expect(existingPRs).toEqual([{ branch: '7.x', state: 'MERGED' }]);
   });
 });

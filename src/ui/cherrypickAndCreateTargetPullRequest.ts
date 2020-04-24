@@ -27,7 +27,7 @@ import { withSpinner } from './withSpinner';
 import dedent = require('dedent');
 import isEmpty = require('lodash.isempty');
 
-export async function cherrypickAndCreatePullRequest({
+export async function cherrypickAndCreateTargetPullRequest({
   options,
   commits,
   targetBranch,
@@ -61,18 +61,22 @@ export async function cherrypickAndCreatePullRequest({
   const pullRequest = await createPullRequest(options, payload);
 
   // add targetPRLabels
-  if (options.labels.length > 0) {
-    await addLabelsToPullRequest(options, pullRequest.number, options.labels);
+  if (options.targetPRLabels.length > 0) {
+    await addLabelsToPullRequest(
+      options,
+      pullRequest.number,
+      options.targetPRLabels
+    );
   }
 
   // add sourcePRLabels
-  if (options.backportCreatedLabels.length > 0) {
+  if (options.sourcePRLabels.length > 0) {
     const promises = commits.map((commit) => {
       if (commit.pullNumber) {
         return addLabelsToPullRequest(
           options,
           commit.pullNumber,
-          options.backportCreatedLabels
+          options.sourcePRLabels
         );
       }
     });

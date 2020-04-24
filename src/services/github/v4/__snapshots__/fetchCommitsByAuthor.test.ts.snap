@@ -32,7 +32,7 @@ Array [
     query getCommitsByAuthorQuery(
       $repoOwner: String!
       $repoName: String!
-      $commitsCount: Int!
+      $maxNumber: Int!
       $sourceBranch: String!
       $authorId: ID
       $historyPath: String
@@ -42,7 +42,7 @@ Array [
           target {
             ... on Commit {
               history(
-                first: $commitsCount
+                first: $maxNumber
                 author: { id: $authorId }
                 path: $historyPath
               ) {
@@ -110,8 +110,8 @@ Array [
   ",
     "variables": Object {
       "authorId": "myUserId",
-      "commitsCount": 10,
       "historyPath": null,
+      "maxNumber": 10,
       "repoName": "kibana",
       "repoOwner": "elastic",
       "sourceBranch": "master",

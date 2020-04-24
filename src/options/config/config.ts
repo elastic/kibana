@@ -20,13 +20,13 @@ export async function getOptionsFromConfigFiles() {
 
   return {
     // defaults
-    backportCreatedLabels: [] as string[] | never[],
+    sourcePRLabels: [] as string[] | never[],
     fork: true,
     multiple: false,
     multipleCommits: false,
     multipleBranches: true,
     all: false,
-    labels: [] as string[],
+    targetPRLabels: [] as string[],
     prTitle: '[{targetBranch}] {commitMessages}',
     gitHostname: 'github.com',
     githubApiBaseUrlV3: 'https://api.github.com',

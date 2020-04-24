@@ -19,16 +19,16 @@ export interface Config {
   // both
   all?: boolean;
   author?: string;
-  backportCreatedLabels?: string[];
-  commitsCount?: number;
+  maxNumber?: number;
   gitHostname?: string;
   githubApiBaseUrlV3?: string;
   githubApiBaseUrlV4?: string;
-  labels?: string[];
   multiple?: boolean;
   multipleBranches?: boolean;
   multipleCommits?: boolean;
   path?: string;
   prDescription?: string;
   prTitle?: string;
+  sourcePRLabels?: string[];
+  targetPRLabels?: string[];
 }

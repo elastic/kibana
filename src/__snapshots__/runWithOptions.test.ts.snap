@@ -88,7 +88,7 @@ Array [
             "name": "1. Add 👻 (2e63475c) ",
             "short": "2e63475c",
             "value": Object {
-              "existingBackports": Array [],
+              "existingTargetPullRequests": Array [],
               "formattedMessage": "Add 👻 (2e63475c)",
               "pullNumber": undefined,
               "sha": "2e63475c483f7844b0f2833bc57fdee32095bacb",
@@ -100,7 +100,7 @@ Array [
             "name": "2. Add witch (#85) ",
             "short": "#85 (f3b618b9)",
             "value": Object {
-              "existingBackports": Array [],
+              "existingTargetPullRequests": Array [],
               "formattedMessage": "Add witch (#85)",
               "pullNumber": 85,
               "sha": "f3b618b9421fdecdb36862f907afbdd6344b361d",
@@ -112,7 +112,7 @@ Array [
             "name": "3. Add SF mention (#80) 6.3",
             "short": "#80 (79cf1845)",
             "value": Object {
-              "existingBackports": Array [
+              "existingTargetPullRequests": Array [
                 Object {
                   "branch": "6.3",
                   "state": "MERGED",
@@ -129,7 +129,7 @@ Array [
             "name": "4. Add backport config (3827bbba) ",
             "short": "3827bbba",
             "value": Object {
-              "existingBackports": Array [],
+              "existingTargetPullRequests": Array [],
               "formattedMessage": "Add backport config (3827bbba)",
               "pullNumber": undefined,
               "sha": "3827bbbaf39914eda4f02f6940189844375fd097",
@@ -141,7 +141,7 @@ Array [
             "name": "5. Initial commit (5ea0da55) ",
             "short": "5ea0da55",
             "value": Object {
-              "existingBackports": Array [],
+              "existingTargetPullRequests": Array [],
               "formattedMessage": "Initial commit (5ea0da55)",
               "pullNumber": undefined,
               "sha": "5ea0da550ac191029459289d67f99ad7d310812b",

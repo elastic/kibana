@@ -27,11 +27,9 @@
   },
   "license": "MIT",
   "scripts": {
-    "format": "prettier \"./{src,test}/**/*.{ts,js,json}\" --write",
     "lint": "tsc --project ./src/test/tsconfig.json && eslint './**/*.{ts,js}'",
     "postinstall": "test -f ./dist/scripts/runPostinstall.js && node ./dist/scripts/runPostinstall.js || echo 'Dist folder missing'",
     "prepublishOnly": "tsc",
-    "publish-dry-run": "tar -tf $(npm pack)",
     "test": "jest",
     "start": "ts-node --transpile-only ./src/index.ts"
   },
