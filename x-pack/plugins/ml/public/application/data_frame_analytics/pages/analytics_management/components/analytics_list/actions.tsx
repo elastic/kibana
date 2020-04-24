@@ -12,7 +12,7 @@ import { DeepReadonly } from '../../../../../../../common/types/common';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../../../privilege/check_privilege';
+} from '../../../../../capabilities/check_capabilities';
 
 import {
   getAnalysisType,
