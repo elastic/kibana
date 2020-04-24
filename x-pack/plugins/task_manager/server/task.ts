@@ -237,7 +237,7 @@ export interface TaskInstance {
    * A task-specific set of parameters, used by the task's run function to tailor
    * its work. This is generally user-input, such as { sms: '333-444-2222' }.
    */
-  // we allow any here as unknown will break current use in otehr plugins
+  // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
@@ -247,7 +247,7 @@ export interface TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  // we allow any here as unknown will break current use in otehr plugins
+  // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
@@ -342,7 +342,7 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * run. If there was no previous run, or if the previous run did not return
    * any state, this will be the empy object: {}
    */
-  // we allow any here as unknown will break current use in otehr plugins
+  // we allow any here as unknown will break current use in other plugins
   // this can be fixed by supporting generics in the future
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   state: Record<string, any>;
