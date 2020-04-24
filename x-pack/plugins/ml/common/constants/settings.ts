@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { MlServerPlugin } from './plugin';
-export { MlPluginSetup, MlPluginStart } from './plugin';
-
-export const plugin = (ctx: PluginInitializerContext) => new MlServerPlugin(ctx);
+export const FILE_DATA_VISUALIZER_MAX_FILE_SIZE = 'ml:fileDataVisualizerMaxFileSize';
