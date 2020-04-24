@@ -21,7 +21,7 @@ import * as vega from 'vega-lib';
 import { i18n } from '@kbn/i18n';
 import { VegaBaseView } from './vega_base_view';
 import { VegaMapLayer } from './vega_map_layer';
-import { KibanaMap } from '../../../../../plugins/maps_legacy/public';
+import { KibanaMap } from '../../../maps_legacy/public';
 import { getEmsTileLayerId, getUISettings } from '../services';
 
 export class VegaMapView extends VegaBaseView {

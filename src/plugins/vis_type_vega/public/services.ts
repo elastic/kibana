@@ -17,38 +17,28 @@
  * under the License.
  */
 
-import { createGetterSetter } from '../../../../../plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../plugins/data/public';
-import { IUiSettingsClient, NotificationsStart, SavedObjectsStart } from 'kibana/public';
-import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
-import { coreMock } from '../../../../../core/public/mocks';
+import { SavedObjectsStart } from 'kibana/public';
+import { NotificationsStart, IUiSettingsClient } from 'src/core/public';
+import { DataPublicPluginStart } from '../../data/public';
+import { createGetterSetter } from '../../kibana_utils/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
-setData(dataPluginMock.createStartContract());
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
-setNotifications(coreMock.createStart().notifications);
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
-setUISettings(coreMock.createStart().uiSettings);
 
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'
 );
-setSavedObjects(coreMock.createStart().savedObjects);
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   esShardTimeout: number;
   enableExternalUrls: boolean;
   emsTileLayerId: unknown;
 }>('InjectedVars');
-setInjectedVars({
-  emsTileLayerId: {},
-  enableExternalUrls: true,
-  esShardTimeout: 10000,
-});
 
 export const getEsShardTimeout = () => getInjectedVars().esShardTimeout;
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
