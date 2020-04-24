@@ -13,7 +13,7 @@ import { MAX_FILE_SIZE } from '../../common/constants/file_datavisualizer';
 export function registerKibanaSettings(coreSetup: CoreSetup) {
   coreSetup.uiSettings.register({
     [FILE_DATA_VISUALIZER_MAX_FILE_SIZE]: {
-      name: i18n.translate('xpack.rollupJobs.rollupIndexPatternsTitle', {
+      name: i18n.translate('xpack.ml.maxFileSizeSettingsName', {
         defaultMessage: 'File Data Visualizer maximum file upload size',
       }),
       value: MAX_FILE_SIZE,
