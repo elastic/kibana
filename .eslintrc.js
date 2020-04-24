@@ -126,13 +126,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/index_management/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/plugins/lens/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -140,12 +133,6 @@ module.exports = {
     },
     {
       files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
       },
