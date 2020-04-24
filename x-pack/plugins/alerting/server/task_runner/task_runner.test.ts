@@ -11,9 +11,10 @@ import { ConcreteTaskInstance, TaskStatus } from '../../../../plugins/task_manag
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../../plugins/encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
 import { actionsMock } from '../../../actions/server/mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
@@ -52,13 +53,9 @@ describe('Task Runner', () => {
 
   afterAll(() => fakeTimer.restore());
 
-  const savedObjectsClient = savedObjectsClientMock.create();
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
-  const services = {
-    log: jest.fn(),
-    callCluster: jest.fn(),
-    savedObjectsClient,
-  };
+  const services = alertsMock.createAlertServices();
+  const savedObjectsClient = services.savedObjectsClient;
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;

@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from '../../../../src/core/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: any) => Services;
@@ -19,6 +24,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedClusterClient(clusterClient: IClusterClient): IScopedClusterClient;
 }
 
 declare module 'src/core/server' {

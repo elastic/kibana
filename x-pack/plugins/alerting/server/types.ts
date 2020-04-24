@@ -7,10 +7,15 @@
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../src/core/server';
 import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../src/core/server';
 
 export type State = Record<string, any>;
 export type Context = Record<string, any>;
@@ -31,6 +36,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedClusterClient(clusterClient: IClusterClient): IScopedClusterClient;
 }
 
 export interface AlertServices extends Services {
