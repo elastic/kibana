@@ -6,4 +6,9 @@
 
 import { ApmPlugin } from './plugin';
 
-export const plugin = () => new ApmPlugin();
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new ApmPlugin();
+}
+export { ApmPluginSetup, ApmPluginStart } from './types';
