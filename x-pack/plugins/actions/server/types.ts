@@ -64,7 +64,7 @@ export interface ActionResult {
   name: string;
   // This will have to remain `any` until we can extend Action Executors with generics
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: Record<string, any>;
+  config?: Record<string, any>;
   isPreconfigured: boolean;
 }
 
