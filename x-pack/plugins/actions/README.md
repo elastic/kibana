@@ -263,7 +263,7 @@ Kibana ships with a set of built-in action types:
 
 | Type                      | Id            | Description                                                        |
 | ------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log) | `.log`        | Logs messages to the Kibana log using `server.log()`               |
+| [Server log](#server-log) | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
 | [Email](#email)           | `.email`      | Sends an email using SMTP                                          |
 | [Slack](#slack)           | `.slack`      | Posts a message to a slack channel                                 |
 | [Index](#index)           | `.index`      | Indexes document(s) into Elasticsearch                             |
