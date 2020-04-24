@@ -116,12 +116,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       const callWithRequestFactoryShim = (
         elasticsearchServiceShim: CallWithRequestFactoryShim,
         request: KibanaRequest
-      ): APICaller => {
-        return rollupEsClient.asScoped(request).callAsCurrentUser;
-        // return (...args: any[]): APICaller => {
-        //   return context.rollup!.client;//.callAsCurrentUser(...args);
-        // }
-      };
+      ): APICaller => rollupEsClient.asScoped(request).callAsCurrentUser;
 
       const { addSearchStrategy } = visTypeTimeseries;
       registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
