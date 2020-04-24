@@ -286,7 +286,7 @@ export const Expressions: React.FC<Props> = props => {
             <EuiToolTip
               content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
                 defaultMessage:
-                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if an error occurs when retrieving data',
+                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
               })}
             >
               <EuiIcon type="questionInCircle" color="subdued" />
