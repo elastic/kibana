@@ -44,7 +44,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 

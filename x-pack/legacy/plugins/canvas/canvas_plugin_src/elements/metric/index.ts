@@ -5,24 +5,25 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import header from './header.png';
-import { getAdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
-
 import { ElementFactory } from '../../../types';
-export const metric: ElementFactory = () => ({
-  name: 'metric',
-  displayName: 'Metric',
-  tags: ['text'],
-  help: 'A number with a label',
-  width: 200,
-  height: 100,
-  image: header,
-  expression: `filters
-| demodata
-| math "unique(country)"
-| metric "Countries" 
-  metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48} 
-  labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
-  metricFormat="${getAdvancedSettings().get('format:number:defaultPattern')}"
-| render`,
-});
+import { SetupInitializer } from '../../plugin';
+
+export const metricElementInitializer: SetupInitializer<ElementFactory> = (core, setup) => {
+  return () => ({
+    name: 'metric',
+    displayName: 'Metric',
+    type: 'chart',
+    help: 'A number with a label',
+    width: 200,
+    height: 100,
+    icon: 'visMetric',
+    expression: `filters
+  | demodata
+  | math "unique(country)"
+  | metric "Countries" 
+    metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48} 
+    labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
+    metricFormat="${core.uiSettings.get('format:number:defaultPattern')}"
+  | render`,
+  });
+};

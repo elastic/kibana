@@ -29,6 +29,7 @@ export const BuildKibanaPlatformPluginsTask = {
       examples: false,
       watch: false,
       dist: true,
+      includeCoreBundle: true,
     });
 
     await runOptimizer(optimizerConfig)

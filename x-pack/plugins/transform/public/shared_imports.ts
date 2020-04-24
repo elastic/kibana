@@ -17,3 +17,18 @@ export {
 } from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
 
 export { getErrorMessage } from '../../ml/common/util/errors';
+
+export {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
+  multiColumnSortFactory,
+  useDataGrid,
+  useRenderCellValue,
+  DataGrid,
+  EsSorting,
+  RenderCellValue,
+  SearchResponse7,
+  UseDataGridReturnType,
+  UseIndexDataReturnType,
+} from '../../ml/public/application/components/data_grid';
+export { INDEX_STATUS } from '../../ml/public/application/data_frame_analytics/common';
