@@ -109,9 +109,9 @@ export const AnalyzerParameterSelects = ({
                 <EuiFlexItem>
                   <UseField
                     path="sub"
-                    defaultValue={subOptions.options[0].value}
                     config={{
                       ...config,
+                      defaultValue: subOptions.options[0].value,
                       label: subOptions.label,
                     }}
                   >
