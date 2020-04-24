@@ -92,15 +92,15 @@ image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elas
 
 [float]
 [[file-uploader-highlights]]
-=== File uploader now recommends Filebeat config
+=== {data-viz} now recommends {filebeat} config
 
-experimental[] The file upload UI now has the ability to recommend a Filebeat 
-configuration based on the uploaded file. It can be used to add more data of 
+experimental[] If you upload a file to the *{data-viz}*, it now has the ability to recommend a {filebeat} 
+configuration. You can then use {filebeat} to add more data of 
 the same structure to the same index that was created during an initial upload.
 
 [role="screenshot"]
 image:release-notes/images/7-7-file-uploader-filebeat.png[Recommended Filebeat config in File uploader]
-
+For more information about *{data-viz}*, see <<xpack-ml>>.
 [float]
 === Learn more
 
