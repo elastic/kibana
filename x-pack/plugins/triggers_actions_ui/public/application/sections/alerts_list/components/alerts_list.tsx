@@ -200,6 +200,15 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
+      field: 'actionsText',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        { defaultMessage: 'Actions' }
+      ),
+      sortable: false,
+      'data-test-subj': 'alertsTableCell-actionsText',
+    },
+    {
       field: 'alertType',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
@@ -381,7 +390,9 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
+  
   const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
+  console.log('andrea', loadedItems);
 
   const isFilterApplied = !(
     isEmpty(searchText) &&
@@ -473,6 +484,7 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
   return alerts.map(alert => ({
     ...alert,
+    actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));
