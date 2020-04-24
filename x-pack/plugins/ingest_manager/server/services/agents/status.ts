@@ -67,7 +67,7 @@ export async function getAgentStatusForConfig(
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
     ].map(kuery =>
       listAgents(soClient, {
-        showInactive: true,
+        showInactive: false,
         perPage: 0,
         page: 1,
         kuery: configId

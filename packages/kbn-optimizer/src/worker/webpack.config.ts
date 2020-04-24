@@ -34,7 +34,6 @@ import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../c
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const STATIC_BUNDLE_PLUGINS = [
@@ -105,7 +104,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     output: {
       path: bundle.outputDir,
       filename: `[name].${bundle.type}.js`,
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
       devtoolModuleFilenameTemplate: info =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
@@ -140,12 +138,22 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary depedencies
       noParse: [
         /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js/,
+        /[\///]node_modules[\///]lodash[\///]index\.js$/,
+        /[\///]node_modules[\///]vega-lib[\///]build[\///]vega\.js$/,
       ],
 
       rules: [
+        {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
+          },
+        },
         {
           test: /\.css$/,
           include: /node_modules/,
