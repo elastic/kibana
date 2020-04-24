@@ -216,6 +216,7 @@ export const CaseComponent = React.memo<CaseProps>(
             backOptions={{
               href: getCaseUrl(search),
               text: i18n.BACK_TO_ALL,
+              dataTestSubj: 'backToCases',
             }}
             data-test-subj="case-view-title"
             titleNode={

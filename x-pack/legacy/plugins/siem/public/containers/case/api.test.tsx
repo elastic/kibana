@@ -5,6 +5,9 @@
  */
 
 import { KibanaServices } from '../../lib/kibana';
+
+import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+
 import {
   deleteCases,
   getActionLicense,
@@ -22,6 +25,7 @@ import {
   pushCase,
   pushToService,
 } from './api';
+
 import {
   actionLicenses,
   allCases,
@@ -44,7 +48,7 @@ import {
   caseUserActionsSnake,
   casesStatusSnake,
 } from './mock';
-import { CASES_URL } from './constants';
+
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
 
