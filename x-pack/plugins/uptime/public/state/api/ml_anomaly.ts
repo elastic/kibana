@@ -8,15 +8,15 @@ import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
+import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
   MonitorIdParam,
   HeartbeatIndicesParam,
 } from '../actions/types';
-import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
-import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
+import { DataRecognizerConfigResponse } from '../../../../../plugins/ml/common/types/modules';
+import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`.toLowerCase();
 

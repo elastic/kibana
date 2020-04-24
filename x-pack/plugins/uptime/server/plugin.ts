@@ -15,11 +15,6 @@ import { initServerWithKibana } from './kibana.index';
 import { KibanaTelemetryAdapter, UptimeCorePlugins } from './lib/adapters';
 import { umDynamicSettings } from './lib/saved_objects';
 
-interface UptimePluginsSetup {
-  features: PluginSetupContract;
-  usageCollection: UsageCollectionSetup;
-}
-
 export class Plugin implements PluginType {
   private savedObjectsClient?: ISavedObjectsRepository;
 
@@ -34,8 +29,8 @@ export class Plugin implements PluginType {
     );
   }
 
-  public start(_core: CoreStart, _plugins: any) {
-    this.savedObjectsClient = _core.savedObjects.createInternalRepository();
+  public start(core: CoreStart, _plugins: any) {
+    this.savedObjectsClient = core.savedObjects.createInternalRepository();
   }
 
   public stop() {}

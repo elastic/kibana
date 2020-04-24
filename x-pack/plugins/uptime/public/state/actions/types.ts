@@ -5,7 +5,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
 
 export interface AsyncAction<Payload, SuccessPayload> {
   get: (payload: Payload) => Action<Payload>;

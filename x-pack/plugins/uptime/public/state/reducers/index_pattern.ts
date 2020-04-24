@@ -5,7 +5,7 @@
  */
 import { handleActions, Action } from 'redux-actions';
 import { getIndexPattern, getIndexPatternSuccess, getIndexPatternFail } from '../actions';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
+import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export interface IndexPatternState {
   index_pattern: IIndexPattern | null;

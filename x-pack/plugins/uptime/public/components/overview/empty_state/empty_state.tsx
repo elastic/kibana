@@ -10,7 +10,7 @@ import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
 import { DataOrIndexMissing } from './data_or_index_missing';
 import { DynamicSettings, StatesIndexStatus } from '../../../../common/runtime_types';
-import { IHttpFetchError } from '../../../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 interface EmptyStateProps {
   children: JSX.Element[] | JSX.Element;

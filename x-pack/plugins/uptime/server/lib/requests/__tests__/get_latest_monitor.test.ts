@@ -5,7 +5,7 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
-import { DYNAMIC_SETTINGS_DEFAULTS, defaultDynamicSettings } from '../../../../common';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;

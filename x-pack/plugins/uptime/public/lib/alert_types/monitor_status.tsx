@@ -8,17 +8,12 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { isRight } from 'fp-ts/lib/Either';
-import {
-  AlertTypeModel,
-  ValidationResult,
-  // TODO: this typing issue should be resolved after NP migration
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/triggers_actions_ui/public/types';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
+import { StatusCheckExecutorParamsType } from '../../../common';
 import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
 
-export const validate = (alertParams: any): ValidationResult => {
+export const validate = (alertParams: any) => {
   const errors: Record<string, any> = {};
   const decoded = StatusCheckExecutorParamsType.decode(alertParams);
 

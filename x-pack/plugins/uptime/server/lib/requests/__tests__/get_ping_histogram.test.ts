@@ -5,7 +5,7 @@
  */
 
 import { getPingHistogram } from '../get_ping_histogram';
-import { DYNAMIC_SETTINGS_DEFAULTS, defaultDynamicSettings } from '../../../../common';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common';
 
 describe('getPingHistogram', () => {
   const standardMockResponse: any = {

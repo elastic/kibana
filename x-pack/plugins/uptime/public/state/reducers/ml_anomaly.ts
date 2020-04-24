@@ -15,11 +15,11 @@ import {
   getMLCapabilitiesAction,
 } from '../actions';
 import { getAsyncInitialState, handleAsyncAction } from './utils';
-import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
 import { AsyncInitialState } from './types';
-import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
+import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 import { CreateMLJobSuccess, DeleteJobResults } from '../actions/types';
-import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
+import { JobExistResult } from '../../../../../plugins/ml/common/types/data_recognizer';
 
 export interface MLJobState {
   mlJob: AsyncInitialState<JobExistResult>;

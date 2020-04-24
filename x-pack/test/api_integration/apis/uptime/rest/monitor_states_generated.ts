@@ -7,8 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
-import { MonitorSummary } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { API_URLS, MonitorSummary } from '../../../../../plugins/uptime/common';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

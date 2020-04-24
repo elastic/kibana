@@ -5,7 +5,6 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { getHistogramIntervalFormatted } from '../helper';
 import { LocationDurationLine, MonitorDurationResult, QUERY } from '../../../common';
 
 export interface GetMonitorChartsParams {

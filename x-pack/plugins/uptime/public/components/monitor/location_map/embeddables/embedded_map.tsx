@@ -52,7 +52,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   if (!embeddablePlugin) {
     throw new Error('Embeddable start plugin not found');
   }
-  const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
+  const factory: any = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
@@ -84,7 +84,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       if (!factory) {
         throw new Error('Map embeddable not found.');
       }
-      const embeddableObject = await factory.create({
+      const embeddableObject: any = await factory.create({
         ...input,
         title: i18n.MAP_TITLE,
       });
