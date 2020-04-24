@@ -21,7 +21,6 @@ import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 import { HttpStart } from 'src/core/public';
 
-// todo move into ui/field_editor
 import {
   GetEnabledScriptingLanguagesProvider,
   getDeprecatedScriptingLanguages,

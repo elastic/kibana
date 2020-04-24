@@ -30,7 +30,6 @@ import {
   IFieldFormatType,
 } from 'src/plugins/data/public';
 import { HttpStart } from '../../../../core/public';
-// import { Field}
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');

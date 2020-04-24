@@ -24,11 +24,11 @@ import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
 import { Sample } from '../../../../types';
 import { FieldFormatEditorProps } from '../../field_format_editor';
 
-export type ConvertSampleInputParams = string | number | Array<string | number>;
+export type ConverterParams = string | number | Array<string | number>;
 
 export const convertSampleInput = (
-  converter: (input: ConvertSampleInputParams) => string,
-  inputs: Array<string | number | Array<string | number>>
+  converter: (input: ConverterParams) => string,
+  inputs: ConverterParams[]
 ) => {
   let error;
   let samples: Sample[] = [];
@@ -61,8 +61,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
-  onChange: (newParams: any) => void; // todo
-  // onChange: FieldFormatEditorProps['onChange'];
+  onChange: (newParams: Record<string, any>) => void;
   onError: FieldFormatEditorProps['onError'];
   basePath: string;
 }
@@ -70,7 +69,7 @@ export interface FormatEditorProps<P> {
 export interface FormatEditorState {
   sampleInputs: ReactText[];
   sampleConverterType: FieldFormatsContentType;
-  error: any;
+  error?: string;
   samples: Sample[];
   sampleInputsByType: SampleInputs;
 }
@@ -78,7 +77,7 @@ export interface FormatEditorState {
 export const defaultState = {
   sampleInputs: [] as ReactText[],
   sampleConverterType: 'text' as FieldFormatsContentType,
-  error: null,
+  error: undefined,
   samples: [] as Sample[],
   sampleInputsByType: {},
 };
@@ -103,6 +102,7 @@ export class DefaultFormatEditor<P = {}, S = {}> extends PureComponent<
 
   onChange = (newParams = {}) => {
     const { onChange, formatParams } = this.props;
+
     onChange({
       ...formatParams,
       ...newParams,

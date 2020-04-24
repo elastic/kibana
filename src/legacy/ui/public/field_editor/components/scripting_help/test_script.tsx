@@ -57,7 +57,7 @@ interface AdditionalField {
 interface TestScriptState {
   isLoading: boolean;
   additionalFields: AdditionalField[];
-  previewData?: any;
+  previewData?: Record<string, any>;
 }
 
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
@@ -77,7 +77,6 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     }
   }
 
-  // todo type this
   previewScript = async (searchContext?: { query?: Query | undefined }) => {
     const { indexPattern, lang, name, script, executeScript } = this.props;
 
@@ -133,7 +132,6 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     });
   };
 
-  // todo
   renderPreview(previewData: { error: any } | undefined) {
     if (!previewData) {
       return null;
@@ -237,7 +235,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
         <div className="testScript__searchBar">
           <SearchBar
-            appName={'management'} // todo - how is this used?
+            appName={'indexPatternManagement'}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}

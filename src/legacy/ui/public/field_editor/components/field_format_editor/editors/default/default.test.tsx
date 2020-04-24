@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FieldFormat } from 'src/plugins/data/public';
 
-import { DefaultFormatEditor, convertSampleInput, ConvertSampleInputParams } from './default';
+import { DefaultFormatEditor, convertSampleInput, ConverterParams } from './default';
 
 const fieldType = 'number';
 const format = {
@@ -33,7 +33,7 @@ const onError = jest.fn();
 
 describe('DefaultFormatEditor', () => {
   describe('convertSampleInput', () => {
-    const converter = (input: ConvertSampleInputParams) => {
+    const converter = (input: ConverterParams) => {
       if (typeof input !== 'number') {
         throw new Error('Input is not a number');
       } else {

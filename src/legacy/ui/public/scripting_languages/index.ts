@@ -30,7 +30,6 @@ export function getDeprecatedScriptingLanguages(): string[] {
   return [];
 }
 
-// todo move to ui/field_editor
 export function GetEnabledScriptingLanguagesProvider($http: HttpStart) {
   return () => {
     return $http
