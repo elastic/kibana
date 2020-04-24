@@ -119,7 +119,10 @@ export class AlertingPlugin {
       .toPromise();
   }
 
-  public async setup(core: CoreSetup, plugins: AlertingPluginsSetup): Promise<PluginSetupContract> {
+  public async setup(
+    core: CoreSetup<AlertingPluginsStart, unknown>,
+    plugins: AlertingPluginsSetup
+  ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
@@ -159,7 +162,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
+      core.getStartServices().then(async ([, startPlugins]) => {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeAlertingTelemetry(
@@ -248,7 +251,7 @@ export class AlertingPlugin {
   }
 
   private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<any, any, any>,
+    RequestHandler<unknown, unknown, unknown>,
     'alerting'
   > => {
     const { alertTypeRegistry, alertsClientFactory } = this;
