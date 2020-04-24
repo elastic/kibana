@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface ApmPluginSetup {
-  getGreeting: () => string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApmPluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApmPluginStart {}
 
