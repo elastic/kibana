@@ -15,18 +15,12 @@ interface Props {
 }
 
 export const DownloadButton = ({ getUrl, job }: Props) => {
-  const downloadReport = () => {
-    window.open(getUrl(job.id));
-  };
-
   return (
     <EuiButton
       size="s"
       data-test-subj="downloadCompletedReportButton"
-      data-test-href={getUrl(job.id)}
-      onClick={() => {
-        downloadReport();
-      }}
+      href={getUrl(job.id)}
+      target="_blank"
     >
       <FormattedMessage
         id="xpack.reporting.publicNotifier.downloadReportButtonLabel"

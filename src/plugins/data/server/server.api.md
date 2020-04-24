@@ -283,7 +283,7 @@ export interface FieldFormatConfig {
 export const fieldFormats: {
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
     FieldFormat: typeof FieldFormat;
-    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
+    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions").SerializedFieldFormat<object>;
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;
     ColorFormat: typeof ColorFormat;
@@ -611,7 +611,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
     // (undocumented)
     setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };

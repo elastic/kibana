@@ -52,6 +52,6 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   // Used in data plugin only
-  IFieldFormatType,
+  FieldFormatInstanceType,
   IFieldFormat,
 } from './types';

@@ -8,6 +8,7 @@ import {
   EPM_API_ROUTES,
   DATASOURCE_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
   FLEET_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
@@ -88,6 +89,12 @@ export const agentConfigRouteService = {
   },
 };
 
+export const dataStreamRouteService = {
+  getListPath: () => {
+    return DATA_STREAM_API_ROUTES.LIST_PATTERN;
+  },
+};
+
 export const fleetSetupRouteService = {
   getFleetSetupPath: () => FLEET_SETUP_API_ROUTES.INFO_PATTERN,
   postFleetSetupPath: () => FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
@@ -97,7 +104,10 @@ export const agentRouteService = {
   getInfoPath: (agentId: string) => AGENT_API_ROUTES.INFO_PATTERN.replace('{agentId}', agentId),
   getUpdatePath: (agentId: string) => AGENT_API_ROUTES.UPDATE_PATTERN.replace('{agentId}', agentId),
   getEventsPath: (agentId: string) => AGENT_API_ROUTES.EVENTS_PATTERN.replace('{agentId}', agentId),
-  getUnenrollPath: () => AGENT_API_ROUTES.UNENROLL_PATTERN,
+  getUnenrollPath: (agentId: string) =>
+    AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
+  getReassignPath: (agentId: string) =>
+    AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
 };

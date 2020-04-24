@@ -15,7 +15,10 @@ import {
 } from 'kibana/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
@@ -28,10 +31,11 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-
+import { registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
+  registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
@@ -39,26 +43,15 @@ import {
   registerInstallScriptRoutes,
 } from './routes';
 
-import { AgentService, IngestManagerConfigType } from '../common';
-import {
-  appContextService,
-  ESIndexPatternService,
-  ESIndexPatternSavedObjectService,
-} from './services';
+import { IngestManagerConfigType, IngestManagerStartupContract } from '../common';
+import { appContextService, ESIndexPatternSavedObjectService } from './services';
 import { getAgentStatusById } from './services/agents';
-
-/**
- * Describes public IngestManager plugin contract returned at the `setup` stage.
- */
-export interface IngestManagerSetupContract {
-  esIndexPatternService: ESIndexPatternService;
-  agentService: AgentService;
-}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface IngestManagerAppContext {
@@ -78,7 +71,7 @@ const allSavedObjectTypes = [
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 ];
 
-export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
+export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupContract> {
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -86,13 +79,12 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
   }
 
-  public async setup(
-    core: CoreSetup,
-    deps: IngestManagerSetupDeps
-  ): Promise<RecursiveReadonly<IngestManagerSetupContract>> {
+  public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     if (deps.security) {
       this.security = deps.security;
     }
+
+    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -132,6 +124,7 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerDataStreamRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
@@ -148,12 +141,6 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
         basePath: core.http.basePath,
       });
     }
-    return deepFreeze({
-      esIndexPatternService: new ESIndexPatternSavedObjectService(),
-      agentService: {
-        getAgentStatusById,
-      },
-    });
   }
 
   public async start(
@@ -161,12 +148,18 @@ export class IngestManagerPlugin implements Plugin<IngestManagerSetupContract> {
     plugins: {
       encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     }
-  ) {
+  ): Promise<RecursiveReadonly<IngestManagerStartupContract>> {
     appContextService.start({
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
+    });
+    return deepFreeze({
+      esIndexPatternService: new ESIndexPatternSavedObjectService(),
+      agentService: {
+        getAgentStatusById,
+      },
     });
   }
 

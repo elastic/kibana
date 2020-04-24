@@ -5,7 +5,7 @@
  */
 import { RequestHandler } from 'src/core/server';
 import { outputService } from '../../services';
-import { CreateFleetSetupResponse } from '../../types';
+import { CreateFleetSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
 
 export const getFleetSetupHandler: RequestHandler = async (context, request, response) => {

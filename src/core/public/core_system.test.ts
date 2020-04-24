@@ -59,7 +59,6 @@ const defaultCoreSystemParams = {
       warnLegacyBrowsers: true,
     },
   } as any,
-  requireLegacyFiles: jest.fn(),
 };
 
 beforeEach(() => {
@@ -104,19 +103,22 @@ describe('constructor', () => {
     });
   });
 
-  it('passes requireLegacyFiles, useLegacyTestHarness, and a dom element to LegacyPlatformService', () => {
+  it('passes required params to LegacyPlatformService', () => {
     const requireLegacyFiles = { requireLegacyFiles: true };
-    const useLegacyTestHarness = { useLegacyTestHarness: true };
+    const requireLegacyBootstrapModule = { requireLegacyBootstrapModule: true };
+    const requireNewPlatformShimModule = { requireNewPlatformShimModule: true };
 
     createCoreSystem({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
 
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledWith({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
   });
 

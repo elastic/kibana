@@ -5,7 +5,6 @@
  */
 
 import { xpackMain } from './legacy/plugins/xpack_main';
-import { graph } from './legacy/plugins/graph';
 import { monitoring } from './legacy/plugins/monitoring';
 import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
@@ -32,7 +31,6 @@ import { triggersActionsUI } from './legacy/plugins/triggers_actions_ui';
 module.exports = function(kibana) {
   return [
     xpackMain(kibana),
-    graph(kibana),
     monitoring(kibana),
     reporting(kibana),
     spaces(kibana),
