@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
+jest.mock(
+  '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
+);
 export const mockFormHook = {
   isSubmitted: false,
   isSubmitting: false,
@@ -35,3 +39,5 @@ export const getFormMock = (sampleData: any) => ({
     }),
   getFormData: () => sampleData,
 });
+
+export const useFormMock = useForm as jest.Mock;

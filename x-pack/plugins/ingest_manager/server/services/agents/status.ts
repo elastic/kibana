@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { listAgents } from './crud';
+import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus, Agent } from '../../types';
 
@@ -16,6 +16,14 @@ import {
   AGENT_TYPE_EPHEMERAL,
 } from '../../constants';
 import { AgentStatusKueryHelper } from '../../../common/services';
+
+export async function getAgentStatusById(
+  soClient: SavedObjectsClientContract,
+  agentId: string
+): Promise<AgentStatus> {
+  const agent = await getAgent(soClient, agentId);
+  return getAgentStatus(agent);
+}
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { type, last_checkin: lastCheckIn } = agent;
@@ -59,7 +67,7 @@ export async function getAgentStatusForConfig(
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
     ].map(kuery =>
       listAgents(soClient, {
-        showInactive: true,
+        showInactive: false,
         perPage: 0,
         page: 1,
         kuery: configId
