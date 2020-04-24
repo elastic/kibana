@@ -17,13 +17,18 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
+// @ts-ignore
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
+// @ts-ignore
 import { DllCompiler } from './dynamic_dll_plugin';
 import { fromRoot } from '../core/server/utils';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
+import KbnServer, { KibanaConfig } from '../legacy/server/kbn_server';
 
-export default async (kbnServer, server, config) => {
+// eslint-disable-next-line import/no-default-export
+export default async (kbnServer: KbnServer, server: Hapi.Server, config: KibanaConfig) => {
   if (!config.get('optimize.enabled')) return;
 
   // the watch optimizer sets up two threads, one is the server listening
@@ -36,6 +41,7 @@ export default async (kbnServer, server, config) => {
   // to prevent complete rebuilds of the optimize content.
   const watch = config.get('optimize.watch');
   if (watch) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     return await kbnServer.mixin(require('./watch/watch'));
   }
 
@@ -47,6 +53,8 @@ export default async (kbnServer, server, config) => {
       basePublicPath: config.get('server.basePath'),
       builtCssPath: fromRoot('built_assets/css'),
       npUiPluginPublicDirs: getNpUiPluginPublicDirs(kbnServer),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
+      isDist: kbnServer.newPlatform.env.packageInfo.dist,
     })
   );
 
@@ -65,7 +73,7 @@ export default async (kbnServer, server, config) => {
 
   // only require the FsOptimizer when we need to
   const optimizer = new FsOptimizer({
-    logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
+    logWithMetadata: server.logWithMetadata,
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),

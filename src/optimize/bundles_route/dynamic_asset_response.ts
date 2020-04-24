@@ -56,16 +56,23 @@ import { replacePlaceholder } from '../public_path_placeholder';
  *  @property {string} options.publicPath
  *  @property {LruCache} options.fileHashCache
  */
-export async function createDynamicAssetResponse(options: {
+export async function createDynamicAssetResponse({
+  request,
+  h,
+  bundlesPath,
+  publicPath,
+  fileHashCache,
+  isImmutable,
+  replacePublicPath,
+}: {
   request: Hapi.Request;
   h: Hapi.ResponseToolkit;
   bundlesPath: string;
   publicPath: string;
   fileHashCache: LruCache<unknown, unknown>;
-  replacePublicPath: any;
+  isImmutable: boolean;
+  replacePublicPath: boolean;
 }) {
-  const { request, h, bundlesPath, publicPath, fileHashCache, replacePublicPath } = options;
-
   let fd: number | undefined;
   try {
     const path = resolve(bundlesPath, request.params.path);
@@ -89,6 +96,15 @@ export async function createDynamicAssetResponse(options: {
       autoClose: true,
     });
     fd = undefined; // read stream is now responsible for fd
+
+    if (isImmutable) {
+      return h
+        .response(read)
+        .takeover()
+        .code(200)
+        .header('cache-control', 'max-age=31536000')
+        .type(request.server.mime.path(path).type);
+    }
 
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
     const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;

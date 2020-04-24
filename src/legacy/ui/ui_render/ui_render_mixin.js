@@ -19,7 +19,7 @@
 
 import { createHash } from 'crypto';
 import Boom from 'boom';
-import { resolve } from 'path';
+import Path from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
@@ -39,7 +39,7 @@ import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
  */
 export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
-  server.setupViews(resolve(__dirname, 'views'));
+  server.setupViews(Path.resolve(__dirname, 'views'));
 
   const translationsCache = { translations: null, hash: null };
   server.route({
@@ -106,15 +106,15 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const styleSheetPaths = [
           ...(isCore ? [] : dllStyleChunks),
-          `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
-                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
+                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
-                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
@@ -136,6 +136,7 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
         const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
+        const buildHash = server.newPlatform.env.packageInfo.buildNum;
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
@@ -149,16 +150,15 @@ export function uiRenderMixin(kbnServer, server, config) {
                 ...dllJsChunks,
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
-          `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
-          `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
-          `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
-          ...uiPluginIds.map(
-            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
+
+          ...['kibanaUtils', 'esUiShared', 'kibanaReact', ...uiPluginIds].map(
+            pluginId => `${regularBundlePath}/${buildHash}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
         ];
 
         // These paths should align with the bundle routes configured in
         // src/optimize/bundles_route/bundles_route.js
+        // TODO check if it still required
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
@@ -175,7 +175,7 @@ export function uiRenderMixin(kbnServer, server, config) {
             styleSheetPaths,
             publicPathMap,
             entryBundlePath: isCore
-              ? `${regularBundlePath}/core/core.entry.js`
+              ? `${regularBundlePath}/${buildHash}/core/core.entry.js`
               : `${regularBundlePath}/${app.getId()}.bundle.js`,
           },
         });

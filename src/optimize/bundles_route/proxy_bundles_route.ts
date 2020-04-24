@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function createProxyBundlesRoute({ host, port }) {
+export function createProxyBundlesRoute({ host, port }: { host: string; port: string }) {
   return [
     buildProxyRouteForBundles('/bundles/', host, port),
     buildProxyRouteForBundles('/built_assets/dlls/', host, port),
@@ -25,7 +25,7 @@ export function createProxyBundlesRoute({ host, port }) {
   ];
 }
 
-function buildProxyRouteForBundles(routePath, host, port) {
+function buildProxyRouteForBundles(routePath: string, host: string, port: string) {
   return {
     path: `${routePath}{path*}`,
     method: 'GET',

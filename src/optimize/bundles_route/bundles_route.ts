@@ -45,12 +45,16 @@ export function createBundlesRoute({
   basePublicPath,
   builtCssPath,
   npUiPluginPublicDirs = [],
+  buildHash,
+  isDist = false,
 }: {
   regularBundlesPath: string;
   dllBundlesPath: string;
   basePublicPath: string;
   builtCssPath: string;
   npUiPluginPublicDirs?: any[];
+  buildHash: string;
+  isDist?: boolean;
 }) {
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
@@ -86,6 +90,19 @@ export function createBundlesRoute({
       fileHashCache,
       replacePublicPath: false,
     }),
+    // for plugin.js chunk only
+    ...npUiPluginPublicDirs.map(({ id, path }) =>
+      buildRouteForBundles({
+        publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
+        routePath: `/bundles/${buildHash}/plugin/${id}/`,
+        bundlesPath: path,
+        fileHashCache,
+        isImmutable: isDist,
+        replacePublicPath: false,
+      })
+    ),
+    // for async chunks that loaded by webpack.
+    // we can configure it as publicPath in webpack though
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
         publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
@@ -97,9 +114,10 @@ export function createBundlesRoute({
     ),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/bundles/core/`,
-      routePath: `/bundles/core/`,
+      routePath: `/bundles/${buildHash}/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
+      isImmutable: isDist,
       replacePublicPath: false,
     }),
     buildRouteForBundles({
@@ -128,12 +146,14 @@ function buildRouteForBundles({
   routePath,
   bundlesPath,
   fileHashCache,
+  isImmutable = false,
   replacePublicPath = true,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: LruCache<unknown, unknown>;
+  isImmutable?: boolean;
   replacePublicPath?: boolean;
 }) {
   return {
@@ -156,6 +176,7 @@ function buildRouteForBundles({
               bundlesPath,
               fileHashCache,
               publicPath,
+              isImmutable,
               replacePublicPath,
             });
           },
