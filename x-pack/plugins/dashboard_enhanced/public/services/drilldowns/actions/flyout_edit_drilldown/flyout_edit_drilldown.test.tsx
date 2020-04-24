@@ -29,8 +29,8 @@ uiActionsPlugin.setup.registerActionFactory({
 });
 
 const actionParams: FlyoutEditDrilldownParams = {
-  drilldowns: () => Promise.resolve(drilldowns),
-  overlays: () => Promise.resolve(overlays),
+  drilldowns: () => drilldowns,
+  overlays: () => overlays,
 };
 
 test('should create', () => {

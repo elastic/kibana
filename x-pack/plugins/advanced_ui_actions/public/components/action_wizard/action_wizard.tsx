@@ -105,7 +105,7 @@ interface SelectedActionFactoryProps {
   onDeselect: () => void;
 }
 
-export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selected-action-factory';
+export const TEST_SUBJ_SELECTED_ACTION_FACTORY = 'selectedActionFactory';
 
 const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   actionFactory,
@@ -118,7 +118,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
   return (
     <div
       className="auaActionWizard__selectedActionFactoryContainer"
-      data-test-subj={TEST_SUBJ_SELECTED_ACTION_FACTORY}
+      data-test-subj={`${TEST_SUBJ_SELECTED_ACTION_FACTORY}-${actionFactory.id}`}
     >
       <header>
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -159,7 +159,7 @@ interface ActionFactorySelectorProps {
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 
-export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'action-factory-item';
+export const TEST_SUBJ_ACTION_FACTORY_ITEM = 'actionFactoryItem';
 
 const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   actionFactories,
@@ -181,7 +181,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
             <EuiKeyPadMenuItem
               className="auaActionWizard__actionFactoryItem"
               label={actionFactory.getDisplayName(context)}
-              data-test-subj={TEST_SUBJ_ACTION_FACTORY_ITEM}
+              data-test-subj={`${TEST_SUBJ_ACTION_FACTORY_ITEM}-${actionFactory.id}`}
               onClick={() => onActionFactorySelected(actionFactory)}
             >
               {actionFactory.getIconType(context) && (

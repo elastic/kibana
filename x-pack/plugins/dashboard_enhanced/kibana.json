@@ -3,6 +3,6 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "embeddable", "dashboard", "drilldowns"],
+  "requiredPlugins": ["data","uiActions", "embeddable", "dashboard", "drilldowns", "share"],
   "configPath": ["xpack", "dashboardEnhanced"]
 }

@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { Trigger } from '../../../../ui_actions/public';
 import { KibanaDatatable } from '../../../../expressions';
+import { Trigger } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
 export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
-export interface ValueClickTriggerContext {
-  embeddable?: IEmbeddable;
+export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
   timeFieldName?: string;
   data: {
     data: Array<{
@@ -39,8 +39,12 @@ export interface ValueClickTriggerContext {
   };
 }
 
-export interface RangeSelectTriggerContext {
-  embeddable?: IEmbeddable;
+export const isValueClickTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is ValueClickTriggerContext => context.data && 'data' in context.data;
+
+export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
   timeFieldName?: string;
   data: {
     table: KibanaDatatable;
@@ -48,6 +52,10 @@ export interface RangeSelectTriggerContext {
     range: number[];
   };
 }
+
+export const isRangeSelectTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {

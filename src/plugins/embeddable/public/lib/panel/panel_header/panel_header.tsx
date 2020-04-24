@@ -64,6 +64,7 @@ function renderNotifications(
 ) {
   return notifications.map(notification => (
     <EuiNotificationBadge
+      data-test-subj={`embeddablePanelNotification-${notification.id}`}
       key={notification.id}
       style={{ marginTop: '4px', marginRight: '4px' }}
       onClick={() => notification.execute({ embeddable })}

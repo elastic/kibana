@@ -5,21 +5,26 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { SharePluginStart, SharePluginSetup } from '../../../../src/plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardDrilldownsService } from './services';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
 
 export interface SetupDependencies {
   drilldowns: DrilldownsSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
+  share: SharePluginSetup;
 }
 
 export interface StartDependencies {
   drilldowns: DrilldownsStart;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
 }
 
 // eslint-disable-next-line
