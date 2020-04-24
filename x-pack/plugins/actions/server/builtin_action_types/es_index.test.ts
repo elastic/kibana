@@ -191,9 +191,9 @@ describe('execute()', () => {
     await actionType.executor(executorOptions);
 
     const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1].body[1].field_to_use_for_time;
+    const timeValue = calls[0][1]?.body[1].field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1].body[1].field_to_use_for_time;
+    delete calls[0][1]?.body[1].field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [

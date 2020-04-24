@@ -13,7 +13,7 @@ export * from '../common';
 import {
   IClusterClient,
   IScopedClusterClient,
- KibanaRequest,
+  KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '../../../../src/core/server';
@@ -38,9 +38,7 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
-  // This will have to remain `any` until we can extend Alert Services with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  callCluster(path: string, opts: any): Promise<any>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }

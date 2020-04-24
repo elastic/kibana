@@ -11,7 +11,7 @@ import { LicenseType } from '../../licensing/common/types';
 import {
   IClusterClient,
   IScopedClusterClient,
- KibanaRequest,
+  KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
 } from '../../../../src/core/server';
@@ -23,7 +23,7 @@ export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
-  callCluster(path: string, opts: unknown): Promise<unknown>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
