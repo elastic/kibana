@@ -54,12 +54,16 @@ export class AddLayerPanel extends Component {
     if (!this._isMounted) {
       return;
     }
-    if (layerDescriptor) {
-      this.setState({ layerDescriptor, isIndexingSource });
-      this.props.previewLayer(layerDescriptor);
-    } else {
+    if (!layerDescriptor) {
+      this.setState({
+        layerDescriptor: null,
+        isIndexingSource: false,
+      });
       this.props.removeTransientLayer();
     }
+
+    this.setState({ layerDescriptor, isIndexingSource });
+    this.props.previewLayer(layerDescriptor);
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {
