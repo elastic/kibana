@@ -267,6 +267,12 @@ export class ExpressionsService {
     return fork;
   };
 
+  /**
+   * Create instance of expression rendering. Rendering receives the final
+   * output of expression and expects it to be of type @type {ExpressionValueRender}.
+   * Internally it selects the right expression renderer from the registry,
+   * create renderer handlers and calls `.render()` method of @type {ExpressionRenderDefinition}.
+   */
   public readonly createRendering = (
     params: ExpressionsCreateRenderingParams
   ): ExpressionRendering => {
