@@ -161,9 +161,9 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.valueOf.condition0).toBe(1);
-      expect(action.thresholdOf.condition0).toStrictEqual([0.75]);
-      expect(action.metricOf.condition0).toBe('test.metric.1');
+      expect(action.reason).toContain('current value is 1');
+      expect(action.reason).toContain('threshold of 0.75');
+      expect(action.reason).toContain('test.metric.1');
     });
     test('fetches the index pattern dynamically', async () => {
       await execute(Comparator.LT, [17], 'alternate');
@@ -271,12 +271,14 @@ describe('The metric threshold alert type', () => {
       const instanceID = 'test-*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      expect(action.valueOf.condition0).toBe(1);
-      expect(action.valueOf.condition1).toBe(3.5);
-      expect(action.thresholdOf.condition0).toStrictEqual([1.0]);
-      expect(action.thresholdOf.condition1).toStrictEqual([3.0]);
-      expect(action.metricOf.condition0).toBe('test.metric.1');
-      expect(action.metricOf.condition1).toBe('test.metric.2');
+      const reasons = action.reason.split('; ');
+      expect(reasons.length).toBe(2);
+      expect(reasons[0]).toContain('test.metric.1');
+      expect(reasons[1]).toContain('test.metric.2');
+      expect(reasons[0]).toContain('current value is 1');
+      expect(reasons[1]).toContain('current value is 3.5');
+      expect(reasons[0]).toContain('threshold of 1');
+      expect(reasons[1]).toContain('threshold of 3');
     });
   });
   describe('querying with the count aggregator', () => {
