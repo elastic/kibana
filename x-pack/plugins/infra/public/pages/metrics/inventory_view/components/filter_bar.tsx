@@ -7,17 +7,13 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
-import { Toolbar } from '../../../components/eui/toolbar';
-import { WaffleTimeControls } from './components/waffle/waffle_time_controls';
-import { WaffleInventorySwitcher } from './components/waffle/waffle_inventory_switcher';
-import { SearchBar } from './components/search_bar';
+import { WaffleTimeControls } from './waffle/waffle_time_controls';
+import { SearchBar } from './search_bar';
+import { ToolbarPanel } from '../../../../components/toolbar_panel';
 
-export const SnapshotToolbar = () => (
-  <Toolbar>
+export const FilterBar = () => (
+  <ToolbarPanel>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <WaffleInventorySwitcher />
-      </EuiFlexItem>
       <EuiFlexItem>
         <SearchBar />
       </EuiFlexItem>
@@ -25,5 +21,5 @@ export const SnapshotToolbar = () => (
         <WaffleTimeControls />
       </EuiFlexItem>
     </EuiFlexGroup>
-  </Toolbar>
+  </ToolbarPanel>
 );
