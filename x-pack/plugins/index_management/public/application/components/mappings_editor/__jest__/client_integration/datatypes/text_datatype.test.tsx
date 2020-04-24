@@ -12,6 +12,17 @@ const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onUpdateHandler = jest.fn();
 const getDataForwarded = getDataForwardedFactory(onUpdateHandler);
 
+// Parameters automatically added to the text datatype when saved (with their default values)
+const defaultTextParameters = {
+  eager_global_ordinals: false,
+  fielddata: false,
+  index: true,
+  index_options: 'positions',
+  index_phrases: false,
+  norms: true,
+  store: false,
+};
+
 describe('text datatype', () => {
   let testBed: MappingsEditorTestBed;
 
@@ -109,13 +120,7 @@ describe('text datatype', () => {
     const streetField = {
       type: 'text',
       // All the default parameters values have been added
-      eager_global_ordinals: false,
-      fielddata: false,
-      index: true,
-      index_options: 'positions',
-      index_phrases: false,
-      norms: true,
-      store: false,
+      ...defaultTextParameters,
     };
     updatedMappings.properties.user.properties.address.properties.street = streetField;
 
@@ -128,7 +133,12 @@ describe('text datatype', () => {
       _meta: {},
       _source: {},
       properties: {
-        myTextField: { type: 'text' },
+        myTextField: {
+          type: 'text',
+          // Should have 2 dropdown selects:
+          // The first one set to 'language' and the second one set to 'french
+          search_quote_analyzer: 'french',
+        },
       },
     };
 
@@ -137,13 +147,7 @@ describe('text datatype', () => {
       properties: {
         myTextField: {
           ...defaultMappings.properties.myTextField,
-          eager_global_ordinals: false,
-          fielddata: false,
-          index: true,
-          index_options: 'positions',
-          index_phrases: false,
-          norms: true,
-          store: false,
+          ...defaultTextParameters,
         },
       },
     };
@@ -183,8 +187,13 @@ describe('text datatype', () => {
     let indexAnalyzerValue = find('indexAnalyzer.select').props().value;
     expect(indexAnalyzerValue).toEqual('index_default');
 
-    let searchQuoteAnalyzerValue = find('searchQuoteAnalyzer.select').props().value;
-    expect(searchQuoteAnalyzerValue).toEqual('index_default');
+    let searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
+
+    expect(searchQuoteAnalyzerSelects.length).toBe(2);
+    expect(searchQuoteAnalyzerSelects.at(0).props().value).toBe('language');
+    expect(searchQuoteAnalyzerSelects.at(1).props().value).toBe(
+      defaultMappings.properties.myTextField.search_quote_analyzer
+    );
 
     // When no "search_analyzer" is defined, the checkBox should be checked
     let isUseSameAnalyzerForSearchChecked = getCheckboxValue(
@@ -209,10 +218,18 @@ describe('text datatype', () => {
       setSelectValue('indexAnalyzer.select', 'standard');
       setSelectValue('searchAnalyzer.select', 'simple');
       setSelectValue('searchQuoteAnalyzer.select', 'whitespace');
+    });
 
+    // Make sure the second dropdown select has been removed
+    searchQuoteAnalyzerSelects = find('searchQuoteAnalyzer.select');
+    expect(searchQuoteAnalyzerSelects.length).toBe(1);
+
+    await act(async () => {
       // Save & close
       await updateFieldAndCloseFlyout();
     });
+
+    expect(searchQuoteAnalyzerSelects.length).toBe(2);
 
     updatedMappings = {
       ...updatedMappings,
@@ -238,14 +255,14 @@ describe('text datatype', () => {
 
     indexAnalyzerValue = find('indexAnalyzer.select').props().value;
     searchAnalyzerValue = find('searchAnalyzer.select').props().value;
-    searchQuoteAnalyzerValue = find('searchQuoteAnalyzer.select').props().value;
+    const searchQuoteAnalyzerValue = find('searchQuoteAnalyzer.select').props().value;
 
     expect(indexAnalyzerValue).toBe('standard');
     expect(searchAnalyzerValue).toBe('simple');
     expect(searchQuoteAnalyzerValue).toBe('whitespace');
   }, 30000);
 
-  test('analyzer parameter: custom analyzer', async () => {
+  test('analyzer parameter: custom analyzer (external plugin)', async () => {
     const defaultMappings = {
       _meta: {},
       _source: {},
@@ -264,13 +281,7 @@ describe('text datatype', () => {
       properties: {
         myTextField: {
           ...defaultMappings.properties.myTextField,
-          eager_global_ordinals: false,
-          fielddata: false,
-          index: true,
-          index_options: 'positions',
-          index_phrases: false,
-          norms: true,
-          store: false,
+          ...defaultTextParameters,
         },
       },
     };
@@ -332,6 +343,95 @@ describe('text datatype', () => {
           analyzer: updatedIndexAnalyzer,
           search_analyzer: updatedSearchAnalyzer,
           search_quote_analyzer: undefined, // Index default means not declaring the analyzer
+        },
+      },
+    };
+
+    expect(data).toEqual(updatedMappings);
+  });
+
+  test('analyzer parameter: custom analyzer (from index settings)', async () => {
+    const indexSettings = {
+      analysis: {
+        analyzer: {
+          customAnalyzer_1: {},
+          customAnalyzer_2: {},
+          customAnalyzer_3: {},
+        },
+      },
+    };
+
+    const customAnalyzers = Object.keys(indexSettings.analysis.analyzer);
+
+    const defaultMappings = {
+      _meta: {},
+      _source: {},
+      properties: {
+        myTextField: {
+          type: 'text',
+          analyzer: customAnalyzers[0],
+        },
+      },
+    };
+
+    let updatedMappings: any = {
+      ...defaultMappings,
+      properties: {
+        myTextField: {
+          ...defaultMappings.properties.myTextField,
+          ...defaultTextParameters,
+        },
+      },
+    };
+
+    testBed = await setup({
+      defaultValue: defaultMappings,
+      onUpdate: onUpdateHandler,
+      indexSettings,
+    });
+
+    const {
+      find,
+      form: { setSelectValue },
+      actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
+    } = testBed;
+    const fieldToEdit = 'myTextField';
+
+    await startEditField(fieldToEdit);
+    await showAdvancedSettings();
+
+    // It should have 2 selects
+    const indexAnalyzerSelects = find('indexAnalyzer.select');
+
+    expect(indexAnalyzerSelects.length).toBe(2);
+    expect(indexAnalyzerSelects.at(0).props().value).toBe('custom');
+    expect(indexAnalyzerSelects.at(1).props().value).toBe(
+      defaultMappings.properties.myTextField.analyzer
+    );
+
+    // Access the list of option of the second dropdown select
+    const subSelectOptions = indexAnalyzerSelects
+      .at(1)
+      .find('option')
+      .map(wrapper => wrapper.text());
+
+    expect(subSelectOptions).toEqual(customAnalyzers);
+
+    await act(async () => {
+      // Change the custom analyzer dropdown to another one from the index settings
+      setSelectValue(find('indexAnalyzer.select').at(1), customAnalyzers[2]);
+
+      // Save & close
+      await updateFieldAndCloseFlyout();
+      ({ data } = await getDataForwarded());
+    });
+
+    updatedMappings = {
+      ...updatedMappings,
+      properties: {
+        myTextField: {
+          ...updatedMappings.properties.myTextField,
+          analyzer: customAnalyzers[2],
         },
       },
     };

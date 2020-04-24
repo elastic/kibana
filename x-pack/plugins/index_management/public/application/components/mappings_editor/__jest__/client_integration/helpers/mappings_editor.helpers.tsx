@@ -317,5 +317,6 @@ export type TestSubjects =
   | 'searchAnalyzer-custom'
   | 'searchAnalyzer-custom.input'
   | 'searchQuoteAnalyzer-custom'
+  | 'searchQuoteAnalyzer-toggleCustomButton'
   | 'searchQuoteAnalyzer-custom.input'
   | 'useSameAnalyzerForSearchCheckBox.input';
