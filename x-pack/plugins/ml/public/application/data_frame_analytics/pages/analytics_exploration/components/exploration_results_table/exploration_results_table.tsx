@@ -71,10 +71,6 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
     const docFieldsCount = classificationData.columns.length;
     const { columns, errorMessage, status, tableItems, visibleColumns } = classificationData;
 
-    useEffect(() => {
-      setEvaluateSearchQuery(searchQuery);
-    }, [JSON.stringify(searchQuery)]);
-
     if (jobConfig === undefined || classificationData === undefined) {
       return null;
     }
