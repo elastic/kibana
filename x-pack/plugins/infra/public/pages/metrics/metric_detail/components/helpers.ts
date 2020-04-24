@@ -7,7 +7,7 @@
 import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
-import { createFormatter } from '../../../../utils/formatters';
+import { createFormatter } from '../../../../../common/formatters';
 import { InfraDataSeries } from '../../../../graphql/types';
 import {
   InventoryVisTypeRT,

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues, last } from 'lodash';
+import { mapValues, last, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   InfraDatabaseSearchResponse,
@@ -17,6 +17,8 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 import { InfraTimerangeInput } from '../../../../common/http_api/snapshot_api';
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraBackendLibs } from '../../infra_types';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { createFormatter } from '../../../../common/formatters';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -38,13 +40,10 @@ export const createInventoryMetricThresholdExecutor = (
   );
 
   const results = await Promise.all(
-    criteria.map(c => {
-      return evaluateCondtion(c, nodeType, source.configuration, services, filterQuery);
-    })
+    criteria.map(c => evaluateCondtion(c, nodeType, source.configuration, services, filterQuery))
   );
 
   const invenotryItems = Object.keys(results[0]);
-
   for (const item of invenotryItems) {
     const alertInstance = services.alertInstanceFactory(`${alertId}-${item}`);
     // AND logic; all criteria must be across the threshold
@@ -59,7 +58,9 @@ export const createInventoryMetricThresholdExecutor = (
       alertInstance.scheduleActions(FIRED_ACTIONS.id, {
         group: item,
         item,
-        valueOf: mapToConditionsLookup(results, result => result[item].currentValue),
+        valueOf: mapToConditionsLookup(results, result =>
+          formatMetric(result[item].metric, result[item].currentValue)
+        ),
         thresholdOf: mapToConditionsLookup(criteria, c => c.threshold),
         metricOf: mapToConditionsLookup(criteria, c => c.metric),
       });
@@ -109,6 +110,7 @@ const evaluateCondtion = async (
 
   return mapValues(currentValues, value => ({
     shouldFire: value !== undefined && value !== null && comparisonFunction(value, threshold),
+    metric,
     currentValue: value,
     isNoData: value === null,
     isError: value === undefined,
@@ -188,4 +190,17 @@ const convertMetricValue = (metric: SnapshotMetricType, value: number) => {
 const converters: Record<string, (n: number) => number> = {
   cpu: n => Number(n) / 100,
   memory: n => Number(n) / 100,
+};
+
+const formatMetric = (metric: SnapshotMetricType, value: number) => {
+  // if (SnapshotCustomMetricInputRT.is(metric)) {
+  //   const formatter = createFormatterForMetric(metric);
+  //   return formatter(val);
+  // }
+  const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
+  if (value == null) {
+    return '';
+  }
+  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
+  return formatter(value);
 };

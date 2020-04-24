@@ -22,7 +22,7 @@ import {
 } from './log_entry_column';
 import { ASSUMED_SCROLLBAR_WIDTH } from './vertical_scroll_panel';
 import { LogPositionState } from '../../../containers/logs/log_position';
-import { localizedDate } from '../../../utils/formatters/datetime';
+import { localizedDate } from '../../../../common/formatters/datetime';
 
 export const LogColumnHeaders: React.FunctionComponent<{
   columnConfigurations: LogColumnConfiguration[];

@@ -16,7 +16,7 @@ import {
   InfraWaffleMapBounds,
   InfraWaffleMapOptions,
 } from '../../../../lib/lib';
-import { createFormatter } from '../../../../utils/formatters';
+import { createFormatter } from '../../../../../common/formatters';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';
