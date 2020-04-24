@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import { Prompt } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
@@ -26,6 +25,7 @@ import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel'
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { Prompt } from '../../../utils/navigation_warning_prompt';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -81,12 +81,7 @@ export const LogsSettingsPage = () => {
           restrictWidth
           data-test-subj="sourceConfigurationContent"
         >
-          <Prompt
-            when={isFormDirty}
-            message={i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
-              defaultMessage: 'Are you sure you want to leave? Changes will be lost',
-            })}
-          />
+          <Prompt when={isFormDirty} message={unsavedFormPromptMessage} />
           <EuiPanel paddingSize="l">
             <NameConfigurationPanel
               isLoading={isLoading}
@@ -189,3 +184,10 @@ export const LogsSettingsPage = () => {
     </>
   );
 };
+
+const unsavedFormPromptMessage = i18n.translate(
+  'xpack.infra.logSourceConfiguration.unsavedFormPromptMessage',
+  {
+    defaultMessage: 'Are you sure you want to leave? Changes will be lost',
+  }
+);
