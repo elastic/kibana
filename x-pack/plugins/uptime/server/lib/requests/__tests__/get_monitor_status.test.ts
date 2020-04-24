@@ -6,8 +6,8 @@
 
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { ScopedClusterClient } from 'src/core/server/elasticsearch';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { ScopedClusterClient } from 'src/core/server';
 
 interface BucketItemCriteria {
   monitor_id: string;
