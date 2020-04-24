@@ -161,27 +161,27 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     ...($scope.getEditOriginatingApp()
       ? [
           {
-            id: 'done',
-            label: i18n.translate('kbn.topNavMenu.doneVisualizationButtonLabel', {
-              defaultMessage: 'Done',
+            id: 'saveAndReturn',
+            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+              defaultMessage: 'Save and return',
             }),
             emphasize: true,
             iconType: 'check',
             description: i18n.translate(
-              'kbn.visualize.topNavMenu.doneVisualizationButtonAriaLabel',
+              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
                 defaultMessage:
                   'Finish editing visualization and return to the dashboard from whence you came',
               }
             ),
-            testId: 'visualizeDoneButton',
+            testId: 'visualizesaveAndReturnButton',
             disableButton() {
               return Boolean($scope.dirty);
             },
             tooltip() {
               if ($scope.dirty) {
                 return i18n.translate(
-                  'kbn.visualize.topNavMenu.doneVisualizationDisabledButtonTooltip',
+                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
                   {
                     defaultMessage: 'Apply or Discard your changes before finishing',
                   }
@@ -202,10 +202,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
           {
             id: 'save',
             label: $scope.getEditOriginatingApp()
-              ? i18n.translate('kbn.topNavMenu.saveVisualizationAsButtonLabel', {
+              ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
                   defaultMessage: 'save as',
                 })
-              : i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', {
+              : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
                   defaultMessage: 'save',
                 }),
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
@@ -252,7 +252,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               };
               const saveAndAddLabel = (
                 <FormattedMessage
-                  id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                  id="visualize.saveDialog.saveAndAddToDashboardButtonLabel"
                   defaultMessage="Save and add to dashboard"
                 />
               );
@@ -264,7 +264,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               } else if ($scope.getEditOriginatingApp()) {
                 confirmButtonLabel = (
                   <FormattedMessage
-                    id="kbn.visualize.saveDialog.saveAndReturnToDashboardButtonLabel"
+                    id="visualize.saveDialog.saveAndReturnToDashboardButtonLabel"
                     defaultMessage="Save and return to dashboard"
                   />
                 );
