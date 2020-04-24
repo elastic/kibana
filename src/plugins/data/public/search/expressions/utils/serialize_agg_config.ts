@@ -27,7 +27,7 @@ export const serializeAggConfig = (aggConfig: IAggConfig): KibanaDatatableColumn
   return {
     type: aggConfig.type.name,
     indexPatternId: aggConfig.getIndexPattern().id,
-    aggConfigParams: aggConfig.toJSON().params,
+    aggConfigParams: aggConfig.serialize().params,
   };
 };
 

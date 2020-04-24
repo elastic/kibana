@@ -158,8 +158,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/elasticsearch-browser.js',
   'webpackShims/moment-timezone.js',
   'webpackShims/ui-bootstrap.js',
-  'x-pack/legacy/plugins/graph/public/graphClientWorkspace.js',
-  'x-pack/legacy/plugins/graph/public/angular-venn-simple.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
