@@ -8,6 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
+import { parse } from 'query-string';
 
 import {
   EuiPageBody,
@@ -31,11 +33,22 @@ import { PipelineTable } from './table';
 import { PipelineDetails } from './details';
 import { PipelineDeleteModal } from './delete_modal';
 
-export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+const getPipelineNameFromLocation = (location: Location) => {
+  const { pipeline } = parse(location.search.substring(1));
+  return pipeline;
+};
+
+export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location,
+}) => {
   const { services } = useKibana();
+  const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | undefined>(undefined);
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
+
+  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
 
   // Track component loaded
   useEffect(() => {
@@ -43,9 +56,14 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     services.breadcrumbs.setBreadcrumbs('home');
   }, [services.metric, services.breadcrumbs]);
 
-  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
-
-  let content: React.ReactNode;
+  useEffect(() => {
+    if (pipelineNameFromLocation && data?.length) {
+      const pipeline = data.find(p => p.name === pipelineNameFromLocation);
+      if (pipeline) {
+        setSelectedPipeline(pipeline);
+      }
+    }
+  }, [pipelineNameFromLocation, data]);
 
   const editPipeline = (name: string) => {
     history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
@@ -54,6 +72,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
   const clonePipeline = (name: string) => {
     history.push(encodeURI(`${BASE_PATH}/create/${encodeURIComponent(name)}`));
   };
+
+  let content: React.ReactNode;
 
   if (isLoading) {
     content = (
