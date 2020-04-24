@@ -90,7 +90,7 @@ export const showView: (state: HostState) => 'policy_response' | 'details' = cre
 /**
  * Returns the Policy Response overall status
  */
-export const policyResponseStatus: (state: Immutable<HostListState>) => string = createSelector(
+export const policyResponseStatus: (state: Immutable<HostState>) => string = createSelector(
   state => state.policyResponse,
   policyResponse => {
     return (policyResponse && policyResponse?.endpoint?.policy?.applied?.status) || '';
