@@ -268,9 +268,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
           };
           getUiActions()
             .getTrigger(triggerId)
-            .exec(context)
-            // Silence "unhandled promise rejection" error in console in production.
-            .catch(() => {});
+            .exec(context);
         }
       })
     );
