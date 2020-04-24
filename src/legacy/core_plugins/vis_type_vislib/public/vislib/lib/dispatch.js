@@ -21,6 +21,8 @@ import d3 from 'd3';
 import { get, pull, restParam, size, reduce } from 'lodash';
 import $ from 'jquery';
 
+import { DIMMING_OPACITY_SETTING } from '../../../../../../plugins/vis_type_vislib/common';
+
 /**
  * Handles event responses
  *
@@ -393,7 +395,7 @@ export class Dispatch {
     return function highlight(element) {
       const label = this.getAttribute('data-label');
       if (!label) return;
-      const dimming = uiSettings.get('visualization:dimmingOpacity');
+      const dimming = uiSettings.get(DIMMING_OPACITY_SETTING);
       $(element)
         .parent()
         .find('[data-label]')

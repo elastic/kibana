@@ -492,33 +492,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['visualization'],
     },
-    'visualization:dimmingOpacity': {
-      name: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityTitle', {
-        defaultMessage: 'Dimming opacity',
-      }),
-      value: 0.5,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityText', {
-        defaultMessage:
-          'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
-          'The lower this number, the more the highlighted element will stand out. ' +
-          'This must be a number between 0 and 1.',
-      }),
-      category: ['visualization'],
-    },
-    'visualization:heatmap:maxBuckets': {
-      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
-        defaultMessage: 'Heatmap maximum buckets',
-      }),
-      value: 50,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
-        defaultMessage:
-          'The maximum number of buckets a single datasource can return. ' +
-          'A higher number might have negative impact on browser rendering performance',
-      }),
-      category: ['visualization'],
-    },
     'csv:separator': {
       name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
         defaultMessage: 'CSV separator',

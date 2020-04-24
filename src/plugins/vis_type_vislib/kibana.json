@@ -1,0 +1,7 @@
+{
+    "id": "visTypeVislib",
+    "version": "kibana",
+    "server": true,
+    "ui": false
+  }
+  
