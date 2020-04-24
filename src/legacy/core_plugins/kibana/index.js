@@ -129,9 +129,6 @@ export default function(kibana) {
       },
 
       savedObjectSchemas: {
-        'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
-        },
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },

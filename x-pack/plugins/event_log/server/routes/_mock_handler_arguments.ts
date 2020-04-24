@@ -11,9 +11,9 @@ import { IEventLogClient } from '../types';
 
 export function mockHandlerArguments(
   eventLogClient: IEventLogClient,
-  req: any,
+  req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
+): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
     ({
       eventLog: {
@@ -22,7 +22,7 @@ export function mockHandlerArguments(
         },
       },
     } as unknown) as RequestHandlerContext,
-    req as KibanaRequest<any, any, any, any>,
+    req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
 }

@@ -153,7 +153,7 @@ describe('when on the hosts page', () => {
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
       expect(policyStatusLink.getAttribute('href')).toEqual(
-        '?selected_host=1&show=policy_response'
+        '?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
     });
     it('should update the URL when policy status link is clicked', async () => {
@@ -164,7 +164,9 @@ describe('when on the hosts page', () => {
         fireEvent.click(policyStatusLink);
       });
       const changedUrlAction = await userChangedUrlChecker;
-      expect(changedUrlAction.payload.search).toEqual('?selected_host=1&show=policy_response');
+      expect(changedUrlAction.payload.search).toEqual(
+        '?page_index=0&page_size=10&selected_host=1&show=policy_response'
+      );
     });
     it('should display Success overall policy status', async () => {
       const renderResult = render();
@@ -236,7 +238,7 @@ describe('when on the hosts page', () => {
         });
       });
 
-      it('should navigate to logs without full page refresh', async () => {
+      it('should navigate to logs without full page refresh', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
@@ -271,7 +273,9 @@ describe('when on the hosts page', () => {
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
-        expect(subHeaderBackLink.getAttribute('href')).toBe('?selected_host=1');
+        expect(subHeaderBackLink.getAttribute('href')).toBe(
+          '?page_index=0&page_size=10&selected_host=1'
+        );
       });
       it('should update URL when back to details link is clicked', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
@@ -280,7 +284,9 @@ describe('when on the hosts page', () => {
           fireEvent.click(subHeaderBackLink);
         });
         const changedUrlAction = await userChangedUrlChecker;
-        expect(changedUrlAction.payload.search).toEqual('?selected_host=1');
+        expect(changedUrlAction.payload.search).toEqual(
+          '?page_index=0&page_size=10&selected_host=1'
+        );
       });
     });
   });

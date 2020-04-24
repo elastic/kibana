@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { HostMetadata, HostPolicyResponseActionStatus } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
-import { useHostListSelector, useHostLogsUrl } from '../hooks';
+import { useHostSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
 import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
@@ -41,8 +41,8 @@ const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
-  const queryParams = useHostListSelector(uiQueryParams);
-  const policyStatus = useHostListSelector(
+  const queryParams = useHostSelector(uiQueryParams);
+  const policyStatus = useHostSelector(
     policyResponseStatus
   ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
   const detailsResultsUpper = useMemo(() => {
