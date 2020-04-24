@@ -52,6 +52,7 @@ export interface SecurityPluginSetup {
     Authentication,
     | 'isAuthenticated'
     | 'getCurrentUser'
+    | 'areAPIKeysEnabled'
     | 'createAPIKey'
     | 'invalidateAPIKey'
     | 'grantAPIKeyAsInternalUser'
@@ -180,6 +181,7 @@ export class Plugin {
       authc: {
         isAuthenticated: authc.isAuthenticated,
         getCurrentUser: authc.getCurrentUser,
+        areAPIKeysEnabled: authc.areAPIKeysEnabled,
         createAPIKey: authc.createAPIKey,
         invalidateAPIKey: authc.invalidateAPIKey,
         grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
