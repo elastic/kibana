@@ -60,6 +60,7 @@ export class AddLayerPanel extends Component {
         isIndexingSource: false,
       });
       this.props.removeTransientLayer();
+      return;
     }
 
     this.setState({ layerDescriptor, isIndexingSource });
@@ -152,10 +153,10 @@ export class AddLayerPanel extends Component {
       : !!this.state.layerDescriptor;
 
     return (
-      <>
+      <Fragment>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
-            <h2>{this._getPanelDescription()}</h2>
+            <h2>{panelDescription}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -169,7 +170,7 @@ export class AddLayerPanel extends Component {
           onClick={this._layerAddHandler}
           nextButtonText={panelDescription}
         />
-      </>
+      </Fragment>
     );
   }
 }

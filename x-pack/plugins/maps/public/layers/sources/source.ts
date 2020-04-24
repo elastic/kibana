@@ -59,7 +59,6 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  shouldBeIndexed(): boolean;
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
@@ -152,10 +151,6 @@ export class AbstractSource implements ISource {
   }
 
   isJoinable(): boolean {
-    return false;
-  }
-
-  shouldBeIndexed(): boolean {
     return false;
   }
 
