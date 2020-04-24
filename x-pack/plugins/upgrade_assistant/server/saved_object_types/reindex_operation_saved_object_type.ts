@@ -6,8 +6,10 @@
 
 import { SavedObjectsType } from 'src/core/server';
 
+import { REINDEX_OP_TYPE } from '../../common/types';
+
 export const reindexOperationSavedObjectType: SavedObjectsType = {
-  name: 'upgrade-assistant-reindex-operation',
+  name: REINDEX_OP_TYPE,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
