@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 
 import { EuiTitle, EuiPanel, EuiFormRow, EuiFieldText, EuiSpacer } from '@elastic/eui';
 
-import { ValidatedRange } from '../../../components/validated_range';
+import { AlphaSlider } from '../../../components/alpha_slider';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ValidatedDualRange } from '../../../../../../../src/plugins/kibana_react/public';
@@ -24,8 +24,7 @@ export function LayerSettings(props) {
   };
 
   const onAlphaChange = alpha => {
-    const alphaDecimal = alpha / 100;
-    props.updateAlpha(props.layerId, alphaDecimal);
+    props.updateAlpha(props.layerId, alpha);
   };
 
   const renderZoomSliders = () => {
@@ -64,34 +63,6 @@ export function LayerSettings(props) {
     );
   };
 
-  const renderAlphaSlider = () => {
-    const alphaPercent = Math.round(props.alpha * 100);
-
-    return (
-      <EuiFormRow
-        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
-          defaultMessage: 'Opacity',
-        })}
-        display="columnCompressed"
-      >
-        <ValidatedRange
-          min={0}
-          max={100}
-          step={1}
-          value={alphaPercent}
-          onChange={onAlphaChange}
-          showInput
-          showRange
-          compressed
-          append={i18n.translate('xpack.maps.layerPanel.settingsPanel.percentageLabel', {
-            defaultMessage: '%',
-            description: 'Percentage',
-          })}
-        />
-      </EuiFormRow>
-    );
-  };
-
   return (
     <Fragment>
       <EuiPanel>
@@ -107,7 +78,7 @@ export function LayerSettings(props) {
         <EuiSpacer size="m" />
         {renderLabel()}
         {renderZoomSliders()}
-        {renderAlphaSlider()}
+        <AlphaSlider alpha={props.alpha} onChange={onAlphaChange} />
       </EuiPanel>
 
       <EuiSpacer size="s" />

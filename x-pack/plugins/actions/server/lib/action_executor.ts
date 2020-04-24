@@ -32,7 +32,7 @@ export interface ActionExecutorContext {
 export interface ExecuteOptions {
   actionId: string;
   request: KibanaRequest;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -95,9 +95,9 @@ export class ActionExecutor {
     }
     const actionType = actionTypeRegistry.get(actionTypeId);
 
-    let validatedParams: Record<string, any>;
-    let validatedConfig: Record<string, any>;
-    let validatedSecrets: Record<string, any>;
+    let validatedParams: Record<string, unknown>;
+    let validatedConfig: Record<string, unknown>;
+    let validatedSecrets: Record<string, unknown>;
 
     try {
       validatedParams = validateParams(actionType, params);
@@ -176,8 +176,8 @@ function actionErrorToMessage(result: ActionTypeExecutorResult): string {
 interface ActionInfo {
   actionTypeId: string;
   name: string;
-  config: any;
-  secrets: any;
+  config: unknown;
+  secrets: unknown;
 }
 
 async function getActionInfo(
