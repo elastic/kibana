@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { LISTING_LIMIT_SETTING } from '../../../../saved_objects/common';
 
 export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -91,7 +92,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
     return savedVisualizations
-      .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
+      .findListItems(filter, uiSettings.get(LISTING_LIMIT_SETTING))
       .then(result => {
         this.totalItems = result.total;
 
@@ -124,7 +125,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     },
   ]);
 
-  this.listingLimit = uiSettings.get('savedObjects:listingLimit');
+  this.listingLimit = uiSettings.get(LISTING_LIMIT_SETTING);
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

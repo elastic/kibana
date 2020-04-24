@@ -19,7 +19,7 @@
 import { TableHeader } from './table_header/table_header';
 import { getServices } from '../../../../kibana_services';
 import {
-  SORT_DEFAULT_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
 } from '../../../../../../../../../plugins/discover/common';
 
@@ -42,7 +42,7 @@ export function createTableHeaderDirective(reactDirective: any) {
     {
       hideTimeColumn: config.get(DOC_HIDE_TIME_COLUMN_SETTING),
       isShortDots: config.get('shortDots:enable'),
-      defaultSortOrder: config.get(SORT_DEFAULT_SETTING),
+      defaultSortOrder: config.get(SORT_DEFAULT_ORDER_SETTING),
     }
   );
 }

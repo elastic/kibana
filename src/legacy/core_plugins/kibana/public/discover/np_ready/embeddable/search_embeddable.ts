@@ -52,7 +52,7 @@ import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../../../../../../../plugins/discover/public';
 import {
   SAMPLE_SIZE_SETTING,
-  SORT_DEFAULT_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../../../../plugins/discover/common';
 
 interface SearchScope extends ng.IScope {
@@ -276,7 +276,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_SETTING)
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 

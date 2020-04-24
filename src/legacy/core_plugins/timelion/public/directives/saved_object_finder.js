@@ -28,6 +28,7 @@ import {
   PaginateControlsDirectiveProvider,
   PaginateDirectiveProvider,
 } from '../../../../../plugins/kibana_legacy/public';
+import { PER_PAGE_SETTING } from '../../../../../plugins/saved_objects/common';
 
 const module = uiModules.get('kibana');
 
@@ -65,7 +66,7 @@ module
         const $input = $element.find('input[ng-model=filter]');
 
         // The number of items to show in the list
-        $scope.perPage = config.get('savedObjects:perPage');
+        $scope.perPage = config.get(PER_PAGE_SETTING);
 
         // the list that will hold the suggestions
         const $list = $element.find('ul');

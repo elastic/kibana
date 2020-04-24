@@ -82,7 +82,7 @@ import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  SORT_DEFAULT_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
 } from '../../../../../../../plugins/discover/common';
@@ -570,7 +570,7 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        config.get(SORT_DEFAULT_SETTING)
+        config.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
     searchSource.setField('highlight', null);
@@ -953,7 +953,11 @@ function discoverController(
       .setField('size', $scope.opts.sampleSize)
       .setField(
         'sort',
-        getSortForSearchSource($scope.state.sort, indexPattern, config.get(SORT_DEFAULT_SETTING))
+        getSortForSearchSource(
+          $scope.state.sort,
+          indexPattern,
+          config.get(SORT_DEFAULT_ORDER_SETTING)
+        )
       )
       .setField('query', $scope.state.query || null)
       .setField('filter', filterManager.getFilters());

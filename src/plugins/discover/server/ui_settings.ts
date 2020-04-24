@@ -26,14 +26,14 @@ import {
   META_FIELDS_SETTING,
   SAMPLE_SIZE_SETTING,
   AGGS_TERMS_SIZE_SETTING,
-  SORT_DEFAULT_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIGHLIGHT_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
-  CONEXT_TIE_BREAKER_FIELDS_SETTING,
+  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -84,7 +84,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.number(),
   },
-  [SORT_DEFAULT_SETTING]: {
+  [SORT_DEFAULT_ORDER_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sortDefaultOrderTitle', {
       defaultMessage: 'Default sort direction',
     }),
@@ -176,7 +176,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.number(),
   },
-  [CONEXT_TIE_BREAKER_FIELDS_SETTING]: {
+  [CONTEXT_TIE_BREAKER_FIELDS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.context.tieBreakerFieldsTitle', {
       defaultMessage: 'Tie breaker fields',
     }),

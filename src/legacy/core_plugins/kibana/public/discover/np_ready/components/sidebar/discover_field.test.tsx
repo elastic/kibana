@@ -28,7 +28,6 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../../../../plugins/data/public';
-import { FIELDS_LIMIT_SETTING } from '../../../../../../../../plugins/discover/common';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
@@ -44,7 +43,7 @@ jest.mock('../../../kibana_services', () => ({
     },
     uiSettings: {
       get: (key: string) => {
-        if (key === FIELDS_LIMIT_SETTING) {
+        if (key === 'fields:popularLimit') {
           return 5;
         } else if (key === 'shortDots:enable') {
           return false;

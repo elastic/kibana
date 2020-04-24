@@ -32,6 +32,7 @@ import template from './edit_index_pattern.html';
 import createEditFieldtemplate from './create_edit_field.html';
 import { fieldWildcardMatcher } from '../../../../../../../../plugins/kibana_utils/public';
 import { subscribeWithScope } from '../../../../../../../../plugins/kibana_legacy/public';
+import { META_FIELDS_SETTING } from '../../../../../../../../plugins/discover/common';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -267,7 +268,7 @@ uiModules
     };
 
     $scope.fieldWildcardMatcher = (...args) =>
-      fieldWildcardMatcher(...args, config.get('metaFields'));
+      fieldWildcardMatcher(...args, config.get(META_FIELDS_SETTING));
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;

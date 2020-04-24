@@ -38,6 +38,7 @@ import {
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { ToastsStart, IUiSettingsClient } from 'kibana/public';
+import { PER_PAGE_SETTING } from '../../../saved_objects/common';
 import { toMountPoint } from '../util';
 
 export const EMPTY_FILTER = '';
@@ -98,7 +99,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   constructor(props: TableListViewProps) {
     super(props);
 
-    const initialPageSize = props.uiSettings.get('savedObjects:perPage');
+    const initialPageSize = props.uiSettings.get(PER_PAGE_SETTING);
     this.pagination = {
       initialPageIndex: 0,
       initialPageSize,

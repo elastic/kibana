@@ -12,6 +12,7 @@ import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../src/plugins/saved_objects/public';
+import { LISTING_LIMIT_SETTING } from '../../../../src/plugins/saved_objects/common';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -111,7 +112,7 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller: function($location, $scope) {
-          $scope.listingLimit = config.get('savedObjects:listingLimit');
+          $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
           $scope.create = () => {
             $location.url(getNewPath());
           };

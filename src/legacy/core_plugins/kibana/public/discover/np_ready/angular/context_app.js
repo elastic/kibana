@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import {
   CONTEXT_STEP_SETTING,
-  CONEXT_TIE_BREAKER_FIELDS_SETTING,
+  CONTEXT_TIE_BREAKER_FIELDS_SETTING,
 } from '../../../../../../../plugins/discover/common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
@@ -67,7 +67,7 @@ function ContextAppController($scope, Private) {
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
     parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
-    getFirstSortableField(this.indexPattern, uiSettings.get(CONEXT_TIE_BREAKER_FIELDS_SETTING)),
+    getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
     this.discoverUrl
   );
 

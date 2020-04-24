@@ -30,6 +30,7 @@ import {
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
+import { META_FIELDS_SETTING } from '../../../../discover/common';
 import { findByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, FieldList, IFieldList } from '../fields';
@@ -104,7 +105,7 @@ export class IndexPattern implements IIndexPattern {
     this.getConfig = getConfig;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig('metaFields');
+    this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.fields = new FieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));

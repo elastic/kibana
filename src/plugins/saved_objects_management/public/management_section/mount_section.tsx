@@ -27,6 +27,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreSetup, CoreStart, ChromeBreadcrumb, Capabilities } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import { PER_PAGE_SETTING } from '../../../saved_objects/common';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import {
   ISavedObjectsManagementServiceRegistry,
@@ -167,7 +168,7 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }) => {
   const capabilities = coreStart.application.capabilities;
-  const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
+  const itemsPerPage = coreStart.uiSettings.get<number>(PER_PAGE_SETTING, 50);
 
   useEffect(() => {
     setBreadcrumbs([

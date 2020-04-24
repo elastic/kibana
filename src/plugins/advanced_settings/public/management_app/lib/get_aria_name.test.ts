@@ -19,13 +19,14 @@
 
 import expect from '@kbn/expect';
 import { getAriaName } from './get_aria_name';
+import { DOC_HIGHLIGHT_SETTING } from '../../../../discover/common';
 
 describe('Settings', function() {
   describe('Advanced', function() {
     describe('getAriaName(name)', function() {
       it('should return a space delimited lower-case string with no special characters', function() {
         expect(getAriaName('xPack:defaultAdminEmail')).to.be('x pack default admin email');
-        expect(getAriaName('doc_table:highlight')).to.be('doc table highlight');
+        expect(getAriaName(DOC_HIGHLIGHT_SETTING)).to.be('doc table highlight');
         expect(getAriaName('foo')).to.be('foo');
       });
 
