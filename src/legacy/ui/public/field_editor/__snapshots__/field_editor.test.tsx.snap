@@ -23,6 +23,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     />
     <ScriptingHelpFlyout
       executeScript={[Function]}
+      getHttpStart={[Function]}
       indexPattern={
         Object {
           "fields": Array [
@@ -258,6 +259,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     />
     <ScriptingHelpFlyout
       executeScript={[Function]}
+      getHttpStart={[Function]}
       indexPattern={
         Object {
           "fields": Array [
@@ -500,6 +502,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     />
     <ScriptingHelpFlyout
       executeScript={[Function]}
+      getHttpStart={[Function]}
       indexPattern={
         Object {
           "fields": Array [
@@ -779,6 +782,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     />
     <ScriptingHelpFlyout
       executeScript={[Function]}
+      getHttpStart={[Function]}
       indexPattern={
         Object {
           "fields": Array [
@@ -1111,6 +1115,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     />
     <ScriptingHelpFlyout
       executeScript={[Function]}
+      getHttpStart={[Function]}
       indexPattern={
         Object {
           "fields": Array [

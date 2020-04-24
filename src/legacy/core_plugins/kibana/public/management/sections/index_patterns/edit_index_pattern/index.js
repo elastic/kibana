@@ -162,11 +162,11 @@ uiRoutes
       },
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $http, Private, config) {
+    controller: function FieldEditorPageController($scope, $route, Private, config) {
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
 
-      renderCreateEditField($scope, $route, getConfig, $http, fieldFormatEditors);
+      renderCreateEditField($scope, $route, getConfig, fieldFormatEditors);
 
       $scope.$on('$destroy', () => {
         destroyCreateEditField();
