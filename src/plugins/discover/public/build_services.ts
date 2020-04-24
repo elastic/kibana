@@ -50,6 +50,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
@@ -87,6 +88,7 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
+    fieldFormats: plugins.data.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),

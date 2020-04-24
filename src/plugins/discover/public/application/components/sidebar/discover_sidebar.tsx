@@ -97,9 +97,9 @@ export function DiscoverSidebar({
   const services = getServices();
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, services);
     setFields(newFields);
-  }, [selectedIndexPattern, fieldCounts, hits]);
+  }, [selectedIndexPattern, fieldCounts, hits, services]);
 
   const onShowDetails = useCallback(
     (show: boolean, field: IndexPatternField) => {
