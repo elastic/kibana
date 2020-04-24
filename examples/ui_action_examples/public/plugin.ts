@@ -19,20 +19,14 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../src/plugins/data/public';
-import { DrilldownsSetup, DrilldownsStart } from '../../../x-pack/plugins/drilldowns/public';
 import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
 import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
 
 export interface UiActionExamplesSetupDependencies {
-  data: DataPublicPluginSetup;
-  drilldowns: DrilldownsSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface UiActionExamplesStartDependencies {
-  data: DataPublicPluginStart;
-  drilldowns: DrilldownsStart;
   uiActions: UiActionsStart;
 }
 
@@ -51,7 +45,7 @@ export class UiActionExamplesPlugin
     Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies> {
   public setup(
     core: CoreSetup<UiActionExamplesStartDependencies>,
-    { uiActions, drilldowns }: UiActionExamplesSetupDependencies
+    { uiActions }: UiActionExamplesSetupDependencies
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
