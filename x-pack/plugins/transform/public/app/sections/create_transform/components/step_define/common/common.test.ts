@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getPivotDropdownOptions } from './common';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { getPivotDropdownOptions } from '../common';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {

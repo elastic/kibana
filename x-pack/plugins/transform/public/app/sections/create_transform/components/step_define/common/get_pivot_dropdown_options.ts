@@ -3,87 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { get } from 'lodash';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
+import {
+  IndexPattern,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   DropDownLabel,
   DropDownOption,
-  EsFieldName,
-  GroupByConfigWithUiSupport,
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
-  PivotAggsConfigWithUiSupport,
   PivotAggsConfigWithUiSupportDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigWithUiSupportDict,
   pivotGroupByFieldSupport,
-  PIVOT_SUPPORTED_AGGS,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../common';
+} from '../../../../../common';
 
-export interface Field {
-  name: EsFieldName;
-  type: KBN_FIELD_TYPES;
-}
-
-function getDefaultGroupByConfig(
-  aggName: string,
-  dropDownName: string,
-  fieldName: EsFieldName,
-  groupByAgg: PIVOT_SUPPORTED_GROUP_BY_AGGS
-): GroupByConfigWithUiSupport {
-  switch (groupByAgg) {
-    case PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS:
-      return {
-        agg: groupByAgg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-      };
-    case PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM:
-      return {
-        agg: groupByAgg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-        interval: '10',
-      };
-    case PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM:
-      return {
-        agg: groupByAgg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-        calendar_interval: '1m',
-      };
-  }
-}
-
-function getDefaultAggregationConfig(
-  aggName: string,
-  dropDownName: string,
-  fieldName: EsFieldName,
-  agg: PIVOT_SUPPORTED_AGGS
-): PivotAggsConfigWithUiSupport {
-  switch (agg) {
-    case PIVOT_SUPPORTED_AGGS.PERCENTILES:
-      return {
-        agg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-        percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
-      };
-    default:
-      return {
-        agg,
-        aggName,
-        dropDownName,
-        field: fieldName,
-      };
-  }
-}
+import { getDefaultAggregationConfig } from './get_default_aggregation_config';
+import { getDefaultGroupByConfig } from './get_default_group_by_config';
+import { Field } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
