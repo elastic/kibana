@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
@@ -31,7 +31,6 @@ import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
-import { UptimeStartupPluginsContext } from '../../../contexts';
 
 interface Props extends MonitorListProps {
   lastRefresh: number;
@@ -67,10 +66,6 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   const [getUrlValues] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
-
-  // const { embeddable } = useContext(UptimeStartupPluginsContext);
-  // const factory = embeddable.getEmbeddableFactory('map');
-  // console.log(factory);
 
   useEffect(() => {
     getMonitorList({
@@ -207,13 +202,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         itemId="monitor_id"
         itemIdToExpandedRowMap={getExpandedRowMap()}
         items={items}
-        // TODO: not needed without sorting and pagination
-        // onChange={onChange}
         noItemsMessage={!!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE}
-        // TODO: reintegrate pagination in future release
-        // pagination={pagination}
-        // TODO: reintegrate sorting in future release
-        // sorting={sorting}
         columns={columns}
       />
       <EuiSpacer size="m" />

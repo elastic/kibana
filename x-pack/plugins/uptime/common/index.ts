@@ -5,5 +5,5 @@
  */
 
 export * from './constants';
-export * from './domain_types';
 export * from './runtime_types';
+export * from './types';

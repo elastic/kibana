@@ -10,14 +10,13 @@ import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { I18nStart, ChromeBreadcrumb, CoreStart } from 'src/core/public';
-import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
+import { ClientPluginsSetup, ClientPluginsStart } from './apps/plugin';
 import { UMUpdateBadge } from './lib/lib';
 import {
   UptimeRefreshContextProvider,
   UptimeSettingsContextProvider,
   UptimeThemeContextProvider,
-  UptimeStartupPluginsContext,
   UptimeStartupPluginsContextProvider,
 } from './contexts';
 import { CommonlyUsedRange } from './components/common/uptime_date_picker';
@@ -44,13 +43,13 @@ export interface UptimeAppProps {
   canSave: boolean;
   core: CoreStart;
   darkMode: boolean;
-  embeddable: any;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
   isLogsAvailable: boolean;
   kibanaBreadcrumbs: ChromeBreadcrumb[];
-  plugins: PluginsSetup;
+  plugins: ClientPluginsSetup;
+  startPlugins: ClientPluginsStart;
   routerBasename: string;
   setBadge: UMUpdateBadge;
   renderGlobalHelpControls(): void;
@@ -64,12 +63,12 @@ const Application = (props: UptimeAppProps) => {
     canSave,
     core,
     darkMode,
-    embeddable,
     i18n: i18nCore,
     plugins,
     renderGlobalHelpControls,
     routerBasename,
     setBadge,
+    startPlugins,
   } = props;
 
   useEffect(() => {
@@ -91,10 +90,7 @@ const Application = (props: UptimeAppProps) => {
 
   kibanaService.core = core;
 
-  // @ts-ignore
   store.dispatch(setBasePath(basePath));
-
-  console.log('embeddable from app bootstrap', embeddable);
 
   return (
     <EuiErrorBoundary>
@@ -105,7 +101,7 @@ const Application = (props: UptimeAppProps) => {
               <UptimeRefreshContextProvider>
                 <UptimeSettingsContextProvider {...props}>
                   <UptimeThemeContextProvider darkMode={darkMode}>
-                    <UptimeStartupPluginsContextProvider embeddable={embeddable}>
+                    <UptimeStartupPluginsContextProvider {...startPlugins}>
                       <UptimeAlertsContextProvider>
                         <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
                           <main>

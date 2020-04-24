@@ -17,10 +17,5 @@ export type UMUpdateBadge = (badge: UMBadge) => void;
 export type BootstrapUptimeApp = (props: UptimeAppProps) => ReactElement<any>;
 
 export interface UMFrameworkAdapter {
-  // render(
-  //   createComponent: BootstrapUptimeApp,
-  //   createGraphQLClient: CreateGraphQLClient,
-  //   element: HTMLElement
-  // ): void;
   render(element: any): void;
 }

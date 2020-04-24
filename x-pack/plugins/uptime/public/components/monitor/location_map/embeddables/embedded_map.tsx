@@ -7,33 +7,17 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
-// import { npStart } from 'ui/new_platform';
-
-// import {
-//   ViewMode,
-//   EmbeddableOutput,
-//   ErrorEmbeddable,
-//   isErrorEmbeddable,
-// } from '../../../../../../../../../src/plugins/embeddable/public';
+import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
 import * as i18n from './translations';
-// import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../legacy/plugins/maps/public';
-// import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../plugins/maps/public';
-// import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-// @ts-ignore
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../legacy/plugins/maps/common/constants';
 import { Location } from '../../../../../common/runtime_types';
-
 import { getLayerList } from './map_config';
 import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../contexts';
-import { MapEmbeddable, MapEmbeddableInput } from 'x-pack/legacy/plugins/maps/public';
-// import {
-//   ErrorEmbeddable,
-//   EmbeddableOutput,
-//   ViewMode,
-//   isErrorEmbeddable,
-// } from 'src/plugins/embeddable/public';
-// import { npStart } from 'ui/new_platform';
-import { isErrorEmbeddable, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
+import {
+  isErrorEmbeddable,
+  ViewMode,
+  ErrorEmbeddable,
+} from '../../../../../../../../src/plugins/embeddable/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../maps/public';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];
@@ -65,12 +49,10 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
   const [embeddable, setEmbeddable] = useState<MapEmbeddable | ErrorEmbeddable | undefined>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
   const { embeddable: embeddablePlugin } = useContext(UptimeStartupPluginsContext);
-  const factory = embeddablePlugin.getEmbeddableFactory('map');
-  // const factory = npStart.plugins.embeddable.getEmbeddableFactory<
-  //   MapEmbeddableInput,
-  //   EmbeddableOutput,
-  //   MapEmbeddable
-  // >(MAP_SAVED_OBJECT_TYPE);
+  if (!embeddablePlugin) {
+    throw new Error('Embeddable start plugin not found');
+  }
+  const factory = embeddablePlugin.getEmbeddableFactory(MAP_SAVED_OBJECT_TYPE);
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),

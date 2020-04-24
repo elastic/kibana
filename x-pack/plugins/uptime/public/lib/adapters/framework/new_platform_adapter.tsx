@@ -19,11 +19,12 @@ import {
   DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../../../common/constants';
 import { UMFrameworkAdapter } from '../../lib';
+import { ClientPluginsStart, ClientPluginsSetup } from '../../../apps/plugin';
 
 export const getKibanaFrameworkAdapter = (
   core: CoreStart,
-  plugins: PluginsSetup,
-  startServices: object
+  plugins: ClientPluginsSetup,
+  startPlugins: ClientPluginsStart
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -35,13 +36,8 @@ export const getKibanaFrameworkAdapter = (
 
   const {
     data: { autocomplete },
-    // TODO: after NP migration we can likely fix this typing problem
-    // @ts-ignore we don't control this type
     triggers_actions_ui,
   } = plugins;
-
-  const { embeddable } = startServices;
-  console.log('em', embeddable);
 
   alertTypeInitializers.forEach(init => {
     const alertInitializer = init({ autocomplete });
@@ -67,7 +63,6 @@ export const getKibanaFrameworkAdapter = (
     canSave,
     core,
     darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
-    embeddable,
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     i18n,
     isApmAvailable: apm,
@@ -75,6 +70,7 @@ export const getKibanaFrameworkAdapter = (
     isLogsAvailable: logs,
     kibanaBreadcrumbs: breadcrumbs,
     plugins,
+    startPlugins,
     renderGlobalHelpControls: () =>
       setHelpExtension({
         appName: i18nFormatter.translate('xpack.uptime.header.appName', {
@@ -97,16 +93,8 @@ export const getKibanaFrameworkAdapter = (
   };
 
   return {
-    // TODO: these parameters satisfy the interface but are no longer needed
-    // render: async (
-    //   createComponent: BootstrapUptimeApp,
-    //   cgc: CreateGraphQLClient,
-    //   element: HTMLElement
-    // ) => {
-    //   ReactDOM.render(<UptimeApp {...props} />, element);
     render: async (element: any) => {
       if (element) {
-        console.log(element);
         ReactDOM.render(<UptimeApp {...props} />, element);
       }
     },

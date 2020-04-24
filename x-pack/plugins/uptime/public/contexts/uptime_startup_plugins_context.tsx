@@ -5,14 +5,11 @@
  */
 
 import React, { createContext } from 'react';
+import { ClientPluginsStart } from '../apps/plugin';
 
-interface UptimeStartupPluginsContextValues {
-  embeddable?: any;
-}
+export const UptimeStartupPluginsContext = createContext<Partial<ClientPluginsStart>>({});
 
-export const UptimeStartupPluginsContext = createContext<UptimeStartupPluginsContextValues>({});
-
-export const UptimeStartupPluginsContextProvider: React.FC<UptimeStartupPluginsContextValues> = ({
+export const UptimeStartupPluginsContextProvider: React.FC<Partial<ClientPluginsStart>> = ({
   children,
-  embeddable,
-}) => <UptimeStartupPluginsContext.Provider value={{ embeddable }} children={children} />;
+  ...props
+}) => <UptimeStartupPluginsContext.Provider value={{ ...props }} children={children} />;
