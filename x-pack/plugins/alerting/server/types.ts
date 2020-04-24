@@ -36,7 +36,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
-  getScopedClusterClient(clusterClient: IClusterClient): IScopedClusterClient;
+  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
 
 export interface AlertServices extends Services {

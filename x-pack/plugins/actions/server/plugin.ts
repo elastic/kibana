@@ -296,11 +296,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
-      getScopedClusterClient(clusterClient: IClusterClient) {
+      getScopedCallCluster(clusterClient: IClusterClient) {
         if (!(clusterClient instanceof ClusterClient)) {
           throw new Error('given clusterClient is not an instance of ClusterClient');
         }
-        return clusterClient.asScoped(request);
+        return clusterClient.asScoped(request).callAsCurrentUser;
       },
     });
   }
