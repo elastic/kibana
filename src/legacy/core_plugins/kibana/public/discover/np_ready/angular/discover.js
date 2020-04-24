@@ -49,7 +49,6 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   getAngularModule,
-  ensureDefaultIndexPattern,
   redirectWhenMissing,
 } from '../../kibana_services';
 
@@ -118,7 +117,7 @@ app.config($routeProvider => {
       savedObjects: function($route, Promise) {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, history).then(() => {
+        return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({

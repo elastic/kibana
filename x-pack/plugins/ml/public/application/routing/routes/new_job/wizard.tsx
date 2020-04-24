@@ -15,7 +15,7 @@ import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
-import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
+import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
 interface WizardPageProps extends PageProps {
@@ -115,7 +115,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
   const { context, results } = useResolver(index, savedSearchId, deps.config, {
     ...basicResolvers(deps),
-    privileges: checkCreateJobsPrivilege,
+    privileges: checkCreateJobsCapabilitiesResolver,
     jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
