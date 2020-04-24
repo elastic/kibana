@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration, ServiceNowFieldsType } from './types';
+import { ConnectorConfiguration } from './types';
 import { SERVICENOW_TITLE } from './translations';
 import logo from './logo.svg';
 
-export const connector: ConnectorConfiguration<ServiceNowFieldsType> = {
+export const connector: ConnectorConfiguration = {
   id: '.servicenow',
   name: SERVICENOW_TITLE,
   logo,

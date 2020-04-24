@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration, JiraFieldsType } from './types';
+import { ConnectorConfiguration } from './types';
 
 import { JIRA_TITLE } from './translations';
 import logo from './logo.svg';
 
-export const connector: ConnectorConfiguration<JiraFieldsType> = {
+export const connector: ConnectorConfiguration = {
   id: '.jira',
   name: JIRA_TITLE,
   logo,

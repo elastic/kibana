@@ -17,6 +17,8 @@ import * as i18n from './translations';
 import { ConnectorFlyoutFormProps } from '../types';
 import { ServiceNowActionConnector } from './types';
 import { withConnectorFlyout } from '../components/connector_flyout';
+import { createDefaultMapping } from '../utils';
+import { connector } from './config';
 
 const ServiceNowConnectorForm: React.FC<ConnectorFlyoutFormProps<ServiceNowActionConnector>> = ({
   errors,
@@ -80,4 +82,5 @@ const ServiceNowConnectorForm: React.FC<ConnectorFlyoutFormProps<ServiceNowActio
 export const ServiceNowConnectorFlyout = withConnectorFlyout<ServiceNowActionConnector>({
   ConnectorFormComponent: ServiceNowConnectorForm,
   secretKeys: ['username', 'password'],
+  connectorActionTypeId: '.servicenow',
 });

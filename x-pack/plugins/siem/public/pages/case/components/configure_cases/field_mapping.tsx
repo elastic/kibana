@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiSuperSelectOption } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -18,11 +18,12 @@ import { FieldMappingRow } from './field_mapping_row';
 import * as i18n from './translations';
 
 import { connectorsConfiguration } from '../../../../lib/connectors/config';
-import { setActionTypeToMapping, setThirdPartyToMapping, createDefaultMapping } from './utils';
+import { setActionTypeToMapping, setThirdPartyToMapping } from './utils';
 import {
   ThirdPartyField as ConnectorConfigurationThirdPartyField,
   AllThirdPartyFields,
 } from '../../../../lib/connectors/types';
+import { createDefaultMapping } from '../../../../lib/connectors/utils';
 
 const FieldRowWrapper = styled.div`
   margin-top: 8px;
@@ -92,6 +93,7 @@ const getThirdPartyOptions = (
 export interface FieldMappingProps {
   disabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
+  connectorActionTypeId: string;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
 }
 
@@ -99,6 +101,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
   disabled,
   mapping,
   onChangeMapping,
+  connectorActionTypeId,
 }) => {
   const onChangeActionType = useCallback(
     (caseField: CaseField, newActionType: ActionType) => {
@@ -116,8 +119,10 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
     [mapping]
   );
 
-  const serviceNow = connectorsConfiguration['.servicenow'];
-  const defaultMapping = createDefaultMapping(serviceNow.fields);
+  const selectedConnector = connectorsConfiguration[connectorActionTypeId] ?? { fields: {} };
+  const defaultMapping = useMemo(() => createDefaultMapping(selectedConnector.fields), [
+    selectedConnector.fields,
+  ]);
 
   return (
     <>
@@ -140,7 +145,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
             key={item.source}
             disabled={disabled}
             siemField={item.source}
-            thirdPartyOptions={getThirdPartyOptions(item.source, serviceNow.fields)}
+            thirdPartyOptions={getThirdPartyOptions(item.source, selectedConnector.fields)}
             actionTypeOptions={actionTypeOptions}
             onChangeActionType={onChangeActionType}
             onChangeThirdParty={onChangeThirdParty}

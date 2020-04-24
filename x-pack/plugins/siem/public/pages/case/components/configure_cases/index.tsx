@@ -200,6 +200,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     currentConfiguration.closureType,
   ]);
 
+  const connectorActionTypeId = useMemo(
+    () => connectors.find(c => c.id === connectorId)?.actionTypeId ?? '.none',
+    [connectorId, connectors]
+  );
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -236,6 +241,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           disabled
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
+          connectorActionTypeId={connectorActionTypeId}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}
         />

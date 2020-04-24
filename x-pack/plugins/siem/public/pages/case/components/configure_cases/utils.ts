@@ -10,8 +10,6 @@ import {
   ThirdPartyField,
 } from '../../../../containers/case/configure/types';
 
-import { ThirdPartyField as ConnectorConfigurationThirdPartyField } from '../../../../lib/connectors/types';
-
 export const setActionTypeToMapping = (
   caseField: CaseField,
   newActionType: ActionType,
@@ -43,15 +41,3 @@ export const setThirdPartyToMapping = (
     }
     return item;
   });
-
-export const createDefaultMapping = (
-  fields: Record<string, ConnectorConfigurationThirdPartyField>
-): CasesConfigurationMapping[] =>
-  Object.keys(fields).map(
-    key =>
-      ({
-        source: fields[key].defaultSourceField,
-        target: key,
-        actionType: fields[key].defaultActionType,
-      } as CasesConfigurationMapping)
-  );

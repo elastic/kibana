@@ -29,9 +29,9 @@ export interface ThirdPartyField {
   defaultActionType: ThirdPartySupportedActions;
 }
 
-export interface ConnectorConfiguration<T extends string> extends ActionType {
+export interface ConnectorConfiguration extends ActionType {
   logo: string;
-  fields: Record<T, ThirdPartyField>;
+  fields: Record<string, ThirdPartyField>;
 }
 
 export interface ActionConnector {
@@ -60,6 +60,7 @@ export interface ConnectorFlyoutFormProps<T> {
 
 export interface ConnectorFlyoutHOCProps<T> {
   ConnectorFormComponent: React.FC<ConnectorFlyoutFormProps<T>>;
+  connectorActionTypeId: string;
   configKeys?: string[];
   secretKeys?: string[];
 }

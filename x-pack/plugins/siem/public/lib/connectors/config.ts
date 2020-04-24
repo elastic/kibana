@@ -6,8 +6,9 @@
 
 import { connector as serviceNowConnectorConfig } from './servicenow/config';
 import { connector as jiraConnectorConfig } from './jira/config';
+import { ConnectorConfiguration } from './types';
 
-export const connectorsConfiguration = {
+export const connectorsConfiguration: Record<string, ConnectorConfiguration> = {
   '.servicenow': serviceNowConnectorConfig,
   '.jira': jiraConnectorConfig,
 };
