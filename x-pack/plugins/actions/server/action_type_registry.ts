@@ -81,7 +81,7 @@ export class ActionTypeRegistry {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
-        getRetry(attempts: number, error: any) {
+        getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }

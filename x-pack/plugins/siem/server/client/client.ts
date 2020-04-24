@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigType } from '..';
+import { ConfigType } from '../config';
 
 export class SiemClient {
-  public readonly signalsIndex: string;
+  private readonly signalsIndex: string;
 
   constructor(private spaceId: string, private config: ConfigType) {
     const configuredSignalsIndex = this.config.signalsIndex;
 
     this.signalsIndex = `${configuredSignalsIndex}-${this.spaceId}`;
   }
+
+  public getSignalsIndex = (): string => this.signalsIndex;
 }
