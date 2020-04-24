@@ -20,7 +20,7 @@ import {
   getDynamicSettings as getDynamicSettingsAPI,
   setDynamicSettings as setDynamicSettingsAPI,
 } from '../api';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { DynamicSettings } from '../../../common';
 import { kibanaService } from '../kibana_service';
 
 export function* fetchDynamicSettingsEffect() {

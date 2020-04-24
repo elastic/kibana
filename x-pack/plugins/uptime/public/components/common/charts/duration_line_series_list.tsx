@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { LineSeries, CurveType } from '@elastic/charts';
-import { LocationDurationLine } from '../../../../common/types';
+import { LocationDurationLine } from '../../../../common';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 
 interface Props {

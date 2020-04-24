@@ -14,7 +14,7 @@ import {
   getMonitorLocationsActionSuccess,
   getMonitorLocationsActionFail,
 } from '../actions/monitor';
-import { MonitorLocations } from '../../../common/runtime_types';
+import { MonitorLocations } from '../../../common';
 
 type MonitorLocationsList = Map<string, MonitorLocations>;
 

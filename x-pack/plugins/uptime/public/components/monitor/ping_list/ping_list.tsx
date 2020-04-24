@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Ping, GetPingsParams, DateRange } from '../../../../common/runtime_types';
+import { Ping, GetPingsParams, DateRange } from '../../../../common';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
 import { LocationName } from './location_name';
 import { Pagination } from '../../overview/monitor_list';

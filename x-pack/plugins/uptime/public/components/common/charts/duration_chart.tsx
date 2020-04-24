@@ -10,7 +10,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Axis, Chart, Position, timeFormatter, Settings, SeriesIdentifier } from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
-import { LocationDurationLine } from '../../../../common/types';
+import { LocationDurationLine } from '../../../../common';
 import { DurationLineSeriesList } from './duration_line_series_list';
 import { ChartWrapper } from './chart_wrapper';
 import { useUrlParams } from '../../../hooks';

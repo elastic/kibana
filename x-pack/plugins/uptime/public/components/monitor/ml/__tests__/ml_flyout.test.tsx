@@ -8,7 +8,7 @@ import React from 'react';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MLFlyoutView } from '../ml_flyout';
 import { UptimeSettingsContext } from '../../../../contexts';
-import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS } from '../../../../../common';
 import { License } from '../../../../../../../plugins/licensing/common/license';
 
 const expiredLicense = new License({

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
+import { CHART_FORMAT_LIMITS } from '../../../../common';
 
 const {
   EIGHT_MINUTES,

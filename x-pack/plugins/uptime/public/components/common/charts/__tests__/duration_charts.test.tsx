@@ -7,7 +7,7 @@
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { DurationChartComponent } from '../duration_chart';
-import { MonitorDurationResult } from '../../../../../common/types';
+import { MonitorDurationResult } from '../../../../../common';
 import { shallowWithRouter } from '../../../../lib';
 
 describe('MonitorCharts component', () => {

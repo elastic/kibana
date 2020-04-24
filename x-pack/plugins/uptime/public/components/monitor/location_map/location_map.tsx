@@ -9,8 +9,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiErrorBoundary, EuiHideFor } from '@elastic/eui';
 import { LocationStatusTags } from './location_status_tags';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
-import { MonitorLocations, MonitorLocation } from '../../../../common/runtime_types';
-import { UNNAMED_LOCATION } from '../../../../common/constants';
+import { UNNAMED_LOCATION, MonitorLocations, MonitorLocation } from '../../../../common';
 import { LocationMissingWarning } from './location_missing';
 
 // These height/width values are used to make sure map is in center of panel

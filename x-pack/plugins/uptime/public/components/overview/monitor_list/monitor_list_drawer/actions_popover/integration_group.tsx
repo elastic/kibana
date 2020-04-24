@@ -19,7 +19,7 @@ import {
   getLoggingIpHref,
   getLoggingKubernetesHref,
 } from '../../../../../lib/helper';
-import { MonitorSummary } from '../../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../../common';
 import { UptimeSettingsContext } from '../../../../../contexts';
 
 interface IntegrationGroupProps {

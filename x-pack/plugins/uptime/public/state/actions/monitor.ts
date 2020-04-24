@@ -6,8 +6,8 @@
 
 import { createAction } from 'redux-actions';
 import { MonitorDetailsActionPayload } from './types';
-import { MonitorError } from '../../../common/runtime_types';
-import { MonitorLocations } from '../../../common/runtime_types';
+import { MonitorError } from '../../../common';
+import { MonitorLocations } from '../../../common';
 import { QueryParams } from './types';
 
 export interface MonitorLocationsPayload extends QueryParams {

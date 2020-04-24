@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
 import { DataOrIndexMissing } from './data_or_index_missing';
-import { DynamicSettings, StatesIndexStatus } from '../../../../common/runtime_types';
+import { DynamicSettings, StatesIndexStatus } from '../../../../common';
 import { IHttpFetchError } from '../../../../../../../target/types/core/public/http';
 
 interface EmptyStateProps {

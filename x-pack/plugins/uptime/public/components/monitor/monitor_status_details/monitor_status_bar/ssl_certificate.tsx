@@ -9,7 +9,7 @@ import moment from 'moment';
 import { EuiSpacer, EuiText, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Tls } from '../../../../../common/runtime_types';
+import { Tls } from '../../../../../common';
 
 interface Props {
   /**

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { MonitorLocation } from '../../../../../common/runtime_types';
+import { MonitorLocation } from '../../../../../common';
 import { StatusByLocations } from '../index';
 
 describe('StatusByLocation component', () => {

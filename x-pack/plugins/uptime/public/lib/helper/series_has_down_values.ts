@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HistogramPoint } from '../../../common/runtime_types';
+import { HistogramPoint } from '../../../common';
 
 export const seriesHasDownValues = (series: HistogramPoint[] | null): boolean => {
   return series ? series.some(point => !!point.down) : false;

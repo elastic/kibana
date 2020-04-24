@@ -12,7 +12,7 @@ import { getMonitorLocationsAction } from '../../../state/actions/monitor';
 import { MonitorStatusDetailsComponent } from './index';
 import { UptimeRefreshContext } from '../../../contexts';
 import { AppState } from '../../../state';
-import { MonitorIdParam } from '../../../../common/types';
+import { MonitorIdParam } from '../../../../common';
 
 export const MonitorStatusDetails: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const { lastRefresh } = useContext(UptimeRefreshContext);

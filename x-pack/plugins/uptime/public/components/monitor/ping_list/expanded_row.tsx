@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
+import { Ping, HttpResponseBody } from '../../../../common';
 import { DocLinkForBody } from './doc_link_body';
 
 interface Props {

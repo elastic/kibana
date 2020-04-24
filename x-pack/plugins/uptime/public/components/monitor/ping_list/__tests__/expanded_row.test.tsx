@@ -7,7 +7,7 @@
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { PingListExpandedRowComponent } from '../expanded_row';
-import { Ping } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common';
 import { DocLinkForBody } from '../doc_link_body';
 
 describe('PingListExpandedRow', () => {

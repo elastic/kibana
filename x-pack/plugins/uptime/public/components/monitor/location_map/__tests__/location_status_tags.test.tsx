@@ -7,7 +7,7 @@
 import React from 'react';
 import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { MonitorLocation } from '../../../../../common/runtime_types/monitor';
+import { MonitorLocation } from '../../../../../common';
 import { LocationStatusTags } from '../index';
 
 describe('LocationStatusTags component', () => {

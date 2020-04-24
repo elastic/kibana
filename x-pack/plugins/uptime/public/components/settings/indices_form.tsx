@@ -14,7 +14,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common';
 import { SettingsFormProps } from '../../pages/settings';
 
 export const IndicesForm: React.FC<SettingsFormProps> = ({

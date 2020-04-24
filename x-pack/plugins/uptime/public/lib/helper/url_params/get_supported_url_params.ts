@@ -6,7 +6,7 @@
 
 import { parseIsPaused } from './parse_is_paused';
 import { parseUrlInt } from './parse_url_int';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
+import { CLIENT_DEFAULTS } from '../../../../common';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
 export interface UptimeUrlParams {

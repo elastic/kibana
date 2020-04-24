@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotType, Snapshot } from '../../../common/runtime_types';
+import { SnapshotType, Snapshot } from '../../../common';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common/constants';
+import { API_URLS } from '../../../common';
 
 export interface SnapShotQueryParams {
   dateRangeStart: string;

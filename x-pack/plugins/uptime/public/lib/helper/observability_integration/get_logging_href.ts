@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary } from '../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../common';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 

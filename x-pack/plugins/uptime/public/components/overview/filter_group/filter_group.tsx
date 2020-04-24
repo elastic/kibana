@@ -9,7 +9,7 @@ import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
-import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
+import { OverviewFilters } from '../../../../common';
 
 interface PresentationalComponentProps {
   loading: boolean;

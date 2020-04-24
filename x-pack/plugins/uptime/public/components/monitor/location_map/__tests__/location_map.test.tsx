@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { LocationMap } from '../location_map';
-import { MonitorLocations } from '../../../../../common/runtime_types';
+import { MonitorLocations } from '../../../../../common';
 import { LocationMissingWarning } from '../location_missing';
 
 // Note For shallow test, we need absolute time strings

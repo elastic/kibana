@@ -6,7 +6,7 @@
 
 import { handleActions, Action } from 'redux-actions';
 import { getMonitorList, getMonitorListSuccess, getMonitorListFailure } from '../actions';
-import { MonitorSummaryResult } from '../../../common/runtime_types';
+import { MonitorSummaryResult } from '../../../common';
 
 export interface MonitorList {
   list: MonitorSummaryResult;

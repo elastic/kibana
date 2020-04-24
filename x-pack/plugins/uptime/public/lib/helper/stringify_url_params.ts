@@ -6,7 +6,7 @@
 
 import { stringify } from 'query-string';
 import { UptimeUrlParams } from './url_params';
-import { CLIENT_DEFAULTS } from '../../../common/constants';
+import { CLIENT_DEFAULTS } from '../../../common';
 
 const {
   AUTOREFRESH_INTERVAL,

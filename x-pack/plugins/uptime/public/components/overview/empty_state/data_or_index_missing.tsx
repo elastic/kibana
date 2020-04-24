@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext } from 'react';
 import { UptimeSettingsContext } from '../../../contexts';
-import { DynamicSettings } from '../../../../common/runtime_types';
+import { DynamicSettings } from '../../../../common';
 
 interface DataMissingProps {
   headingMessage: JSX.Element;

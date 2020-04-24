@@ -5,11 +5,7 @@
  */
 
 import React from 'react';
-import {
-  MonitorSummaryResult,
-  CursorDirection,
-  SortOrder,
-} from '../../../../../common/runtime_types';
+import { MonitorSummaryResult, CursorDirection, SortOrder } from '../../../../../common';
 import { MonitorListComponent } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 

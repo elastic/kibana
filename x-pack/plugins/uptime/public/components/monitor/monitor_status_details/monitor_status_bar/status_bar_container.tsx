@@ -11,7 +11,7 @@ import { MonitorStatusBarComponent } from './index';
 import { getMonitorStatusAction } from '../../../../state/actions';
 import { useGetUrlParams } from '../../../../hooks';
 import { UptimeRefreshContext } from '../../../../contexts';
-import { MonitorIdParam } from '../../../../../common/types';
+import { MonitorIdParam } from '../../../../../common';
 import { AppState } from '../../../../state';
 
 export const MonitorStatusBar: React.FC<MonitorIdParam> = ({ monitorId }) => {

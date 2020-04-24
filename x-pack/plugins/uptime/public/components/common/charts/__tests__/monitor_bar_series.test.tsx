@@ -7,7 +7,7 @@
 import React from 'react';
 import { MonitorBarSeries, MonitorBarSeriesProps } from '../monitor_bar_series';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
-import { HistogramPoint } from '../../../../../common/runtime_types';
+import { HistogramPoint } from '../../../../../common';
 
 describe('MonitorBarSeries component', () => {
   let props: MonitorBarSeriesProps;

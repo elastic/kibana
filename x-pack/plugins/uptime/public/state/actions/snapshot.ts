@@ -5,7 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { Snapshot } from '../../../common/runtime_types';
+import { Snapshot } from '../../../common';
 
 export interface GetSnapshotPayload {
   dateRangeStart: string;

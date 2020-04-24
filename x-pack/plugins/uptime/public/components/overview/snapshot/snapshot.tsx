@@ -9,7 +9,7 @@ import React from 'react';
 import { DonutChart } from '../../common/charts';
 import { ChartWrapper } from '../../common/charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
-import { Snapshot as SnapshotType } from '../../../../common/runtime_types';
+import { Snapshot as SnapshotType } from '../../../../common';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;

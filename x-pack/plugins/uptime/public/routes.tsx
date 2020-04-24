@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { OverviewPage } from './components/overview/overview_container';
-import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common/constants';
+import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 
 interface RouterProps {

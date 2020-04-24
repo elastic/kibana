@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
-import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorDetails, MonitorSummary } from '../../../../../common';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
 
 const ContainerDiv = styled.div`
