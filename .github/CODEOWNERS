@@ -16,6 +16,7 @@
 /src/plugins/vis_type_timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/input_control_vis/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/vis_type_timeseries/ @elastic/kibana-app
 /src/plugins/vis_type_metric/ @elastic/kibana-app
