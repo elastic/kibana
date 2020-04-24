@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './login_form.scss';
+
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import {
   EuiButton,
   EuiIcon,
   EuiCallOut,
-  EuiCard,
   EuiFieldPassword,
   EuiFieldText,
   EuiFormRow,
@@ -28,10 +29,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
-import { LoginValidator, LoginValidationResult } from './validate_login';
 import { parseNext } from '../../../../../common/parse_next';
-import { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';
-import './login_form.scss';
+import { LoginSelector } from '../../../../../common/login_state';
+import { LoginValidator } from './validate_login';
 
 interface Props {
   http: HttpStart;
@@ -52,7 +52,6 @@ interface State {
   message:
     | { type: MessageType.None }
     | { type: MessageType.Danger | MessageType.Info; content: string };
-  formError: LoginValidationResult | null;
   mode: PageMode;
   previousMode: PageMode;
 }
@@ -69,7 +68,7 @@ enum MessageType {
   Danger,
 }
 
-enum PageMode {
+export enum PageMode {
   Selector,
   Form,
   LoginHelp,
@@ -82,9 +81,7 @@ export class LoginForm extends Component<Props, State> {
     super(props);
     this.validator = new LoginValidator({ shouldValidate: false });
 
-    const mode = props.selector.providers.some(provider => !provider.usesLoginForm)
-      ? PageMode.Selector
-      : PageMode.Form;
+    const mode = this.showLoginSelector() ? PageMode.Selector : PageMode.Form;
 
     this.state = {
       loadingState: { type: LoadingStateType.None },
@@ -93,7 +90,6 @@ export class LoginForm extends Component<Props, State> {
       message: this.props.infoMessage
         ? { type: MessageType.Info, content: this.props.infoMessage }
         : { type: MessageType.None },
-      formError: null,
       mode,
       previousMode: mode,
     };
@@ -172,18 +168,23 @@ export class LoginForm extends Component<Props, State> {
   }
 
   private renderLoginForm = () => {
-    const loginSelectorLink = this.props.selector.providers.some(
-      provider => !provider.usesLoginForm
-    ) ? (
-      <EuiButtonEmpty size="xs" onClick={() => this.switchMode(PageMode.Selector)}>
-        <FormattedMessage
-          id="xpack.security.loginPage.loginSelectorLinkText"
-          defaultMessage="See more login options"
-        />
-      </EuiButtonEmpty>
+    const loginSelectorLink = this.showLoginSelector() ? (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          data-test-subj="loginBackToSelector"
+          size="xs"
+          onClick={() => this.onPageModeChange(PageMode.Selector)}
+        >
+          <FormattedMessage
+            id="xpack.security.loginPage.loginSelectorLinkText"
+            defaultMessage="See more login options"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     ) : null;
+
     return (
-      <EuiPanel>
+      <EuiPanel data-test-subj="loginForm">
         <form onSubmit={this.submitLoginForm}>
           <EuiFormRow
             label={
@@ -231,7 +232,7 @@ export class LoginForm extends Component<Props, State> {
 
           <EuiSpacer />
 
-          <EuiFlexGroup repsonsive={false} alignItems="center" gutterSize="s">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -248,7 +249,7 @@ export class LoginForm extends Component<Props, State> {
                 />
               </EuiButton>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{loginSelectorLink}</EuiFlexItem>
+            {loginSelectorLink}
           </EuiFlexGroup>
         </form>
       </EuiPanel>
@@ -256,18 +257,17 @@ export class LoginForm extends Component<Props, State> {
   };
 
   private renderSelector = () => {
-    const showLoginSelector =
-      this.props.selector.enabled && this.props.selector.providers.length > 0;
-    if (!showLoginSelector || this.state.mode !== PageMode.Selector) {
-      return null;
-    }
-
     return (
-      <EuiPanel paddingSize="none">
-        {this.props.selector.providers.map((provider, index) => (
+      <EuiPanel data-test-subj="loginSelector" paddingSize="none">
+        {this.props.selector.providers.map(provider => (
           <button
+            key={provider.name}
             disabled={!this.isLoadingState(LoadingStateType.None)}
-            onClick={() => this.loginWithSelector(provider)}
+            onClick={() =>
+              provider.usesLoginForm
+                ? this.onPageModeChange(PageMode.Form)
+                : this.loginWithSelector(provider.type, provider.name)
+            }
             className={`lgnCard ${
               this.isLoadingState(LoadingStateType.Selector, provider.name)
                 ? 'lgnCard-isLoading'
@@ -284,7 +284,7 @@ export class LoginForm extends Component<Props, State> {
                     {provider.description ?? (
                       <FormattedMessage
                         id="xpack.security.loginPage.loginProviderDescription"
-                        defaultMessage="Login with {providerType}/{providerName}"
+                        defaultMessage="Log in with {providerType}/{providerName}"
                         values={{
                           providerType: provider.type,
                           providerName: provider.name,
@@ -309,61 +309,13 @@ export class LoginForm extends Component<Props, State> {
 
   private renderLoginHelp = () => {
     return (
-      <EuiPanel>
+      <EuiPanel data-test-subj="loginHelp">
         <EuiText>
           <ReactMarkdown>{this.props.loginHelp || ''}</ReactMarkdown>
         </EuiText>
       </EuiPanel>
     );
   };
-
-  /*  private renderSelector = () => {
-    const showLoginSelector =
-      this.props.selector.enabled && this.props.selector.providers.length > 0;
-    if (!showLoginSelector) {
-      return null;
-    }
-
-    const loginSelectorAndLoginFormSeparator = showLoginSelector && this.props.showLoginForm && (
-      <>
-        <EuiText textAlign="center" color="subdued">
-          ―――&nbsp;&nbsp;
-          <FormattedMessage id="xpack.security.loginPage.loginSelectorOR" defaultMessage="OR" />
-          &nbsp;&nbsp;―――
-        </EuiText>
-        <EuiSpacer size="m" />
-      </>
-    );
-
-    return (
-      <>
-        {this.props.selector.providers.map((provider, index) => (
-          <Fragment key={index}>
-            <EuiButton
-              key={provider.name}
-              fullWidth={true}
-              isDisabled={!this.isLoadingState(LoadingStateType.None)}
-              isLoading={this.isLoadingState(LoadingStateType.Selector, provider.name)}
-              onClick={() => this.loginWithSelector(provider.type, provider.name)}
-            >
-              {provider.description ?? (
-                <FormattedMessage
-                  id="xpack.security.loginPage.loginProviderDescription"
-                  defaultMessage="Login with {providerType}/{providerName}"
-                  values={{
-                    providerType: provider.type,
-                    providerName: provider.name,
-                  }}
-                />
-              )}
-            </EuiButton>
-            <EuiSpacer size="m" />
-          </Fragment>
-        ))}
-        {loginSelectorAndLoginFormSeparator}
-      </>
-    );
-  };*/
 
   private renderPageModeSwitchLink = () => {
     if (this.state.mode === PageMode.LoginHelp) {
@@ -372,8 +324,9 @@ export class LoginForm extends Component<Props, State> {
           <EuiSpacer />
           <EuiText size="xs" className="eui-textCenter">
             <EuiLink
+              data-test-subj="loginBackToLoginLink"
               style={{ fontWeight: 'bold' }}
-              onClick={() => this.switchMode(this.state.previousMode)}
+              onClick={() => this.onPageModeChange(this.state.previousMode)}
             >
               <FormattedMessage
                 id="xpack.security.loginPage.goBackToLoginLink"
@@ -390,7 +343,10 @@ export class LoginForm extends Component<Props, State> {
         <Fragment>
           <EuiSpacer />
           <EuiText size="xs" className="eui-textCenter">
-            <EuiLink onClick={() => this.switchMode(PageMode.LoginHelp)}>
+            <EuiLink
+              data-test-subj="loginHelpLink"
+              onClick={() => this.onPageModeChange(PageMode.LoginHelp)}
+            >
               <FormattedMessage
                 id="xpack.security.loginPage.loginHelpLinkText"
                 defaultMessage="Need help?"
@@ -404,15 +360,15 @@ export class LoginForm extends Component<Props, State> {
     return null;
   };
 
-  private switchMode(mode: PageMode) {
-    this.setState({ message: { type: MessageType.None }, mode, previousMode: this.state.mode });
-  }
-
   private setUsernameInputRef(ref: HTMLInputElement) {
     if (ref) {
       ref.focus();
     }
   }
+
+  private onPageModeChange = (mode: PageMode) => {
+    this.setState({ message: { type: MessageType.None }, mode, previousMode: this.state.mode });
+  };
 
   private onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
@@ -434,12 +390,10 @@ export class LoginForm extends Component<Props, State> {
     this.validator.enableValidation();
 
     const { username, password } = this.state;
-    const result = this.validator.validateForLogin(username, password);
-    if (result.isInvalid) {
-      this.setState({ formError: result });
-      return;
-    } else {
-      this.setState({ formError: null });
+    if (this.validator.validateForLogin(username, password).isInvalid) {
+      // Since validation is enabled now, we should ask React to re-render form and display
+      // validation error messages if any.
+      return this.forceUpdate();
     }
 
     this.setState({
@@ -470,31 +424,16 @@ export class LoginForm extends Component<Props, State> {
     }
   };
 
-  private loginWithSelector = async (provider: LoginSelectorProvider) => {
-    if (provider.usesLoginForm) {
-      this.setState({
-        loadingState: { type: LoadingStateType.None },
-        message: { type: MessageType.None },
-        mode: PageMode.Form,
-      });
-      return;
-    }
-
+  private loginWithSelector = async (providerType: string, providerName: string) => {
     this.setState({
-      loadingState: { type: LoadingStateType.Selector, providerName: provider.name },
+      loadingState: { type: LoadingStateType.Selector, providerName },
       message: { type: MessageType.None },
     });
 
     try {
       const { location } = await this.props.http.post<{ location: string }>(
         '/internal/security/login_with',
-        {
-          body: JSON.stringify({
-            providerType: provider.type,
-            providerName: provider.name,
-            currentURL: window.location.href,
-          }),
-        }
+        { body: JSON.stringify({ providerType, providerName, currentURL: window.location.href }) }
       );
 
       window.location.href = location;
@@ -519,6 +458,13 @@ export class LoginForm extends Component<Props, State> {
 
     return (
       loadingState.type !== LoadingStateType.Selector || loadingState.providerName === providerName
+    );
+  }
+
+  private showLoginSelector() {
+    return (
+      this.props.selector.enabled &&
+      this.props.selector.providers.some(provider => !provider.usesLoginForm)
     );
   }
 }
