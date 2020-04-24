@@ -6,7 +6,7 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY } from '../../../../../../legacy/plugins/uptime/common/constants';
 import {
   Check,
   Histogram,
@@ -314,7 +314,7 @@ const getHistogramForMonitors = async (
         by_id: {
           terms: {
             field: 'monitor.id',
-            size: STATES.LEGACY_STATES_QUERY_SIZE,
+            size: queryContext.size,
           },
           aggs: {
             histogram: {
