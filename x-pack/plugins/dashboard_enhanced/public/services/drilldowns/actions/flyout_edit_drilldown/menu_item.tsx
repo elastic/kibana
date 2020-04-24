@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/common';
+import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { EnhancedEmbeddableContext } from '../../../../../../embeddable_enhanced/public';
 import { txtDisplayName } from './i18n';
 

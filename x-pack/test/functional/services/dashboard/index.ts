@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-test.todo('displays all dashboard in a list');
-test.todo('does not display dashboard on which drilldown is being created');
-test.todo('updates config object correctly');
+export { DashboardDrilldownPanelActionsProvider } from './panel_drilldown_actions';
+export { DashboardDrilldownsManageProvider } from './drilldowns_manage';

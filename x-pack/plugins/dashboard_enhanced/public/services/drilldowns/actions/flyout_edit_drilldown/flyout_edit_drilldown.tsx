@@ -20,8 +20,8 @@ import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/publ
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  overlays: () => Promise<CoreStart['overlays']>;
-  drilldowns: () => Promise<DrilldownsStart>;
+  overlays: () => CoreStart['overlays'];
+  drilldowns: () => DrilldownsStart;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
@@ -48,8 +48,8 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   }
 
   public async execute(context: EmbeddableContext) {
-    const overlays = await this.params.overlays();
-    const drilldowns = await this.params.drilldowns();
+    const overlays = this.params.overlays();
+    const drilldowns = this.params.drilldowns();
     const { embeddable } = context;
 
     if (!isEnhancedEmbeddable(embeddable)) {
@@ -69,6 +69,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
       ),
       {
         ownFocus: true,
+        'data-test-subj': 'editDrilldownFlyout',
       }
     );
   }

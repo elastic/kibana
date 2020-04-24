@@ -18,7 +18,7 @@ test('Pick and configure action', () => {
   const screen = render(<Demo actionFactories={[dashboardFactory, urlFactory]} />);
 
   // check that all factories are displayed to pick
-  expect(screen.getAllByTestId(TEST_SUBJ_ACTION_FACTORY_ITEM)).toHaveLength(2);
+  expect(screen.getAllByTestId(new RegExp(TEST_SUBJ_ACTION_FACTORY_ITEM))).toHaveLength(2);
 
   // select URL one
   fireEvent.click(screen.getByText(/Go to URL/i));
@@ -43,8 +43,8 @@ test('If only one actions factory is available then actionFactory selection is e
   const screen = render(<Demo actionFactories={[urlFactory]} />);
 
   // check that no factories are displayed to pick from
-  expect(screen.queryByTestId(TEST_SUBJ_ACTION_FACTORY_ITEM)).not.toBeInTheDocument();
-  expect(screen.queryByTestId(TEST_SUBJ_SELECTED_ACTION_FACTORY)).toBeInTheDocument();
+  expect(screen.queryByTestId(new RegExp(TEST_SUBJ_ACTION_FACTORY_ITEM))).not.toBeInTheDocument();
+  expect(screen.queryByTestId(new RegExp(TEST_SUBJ_SELECTED_ACTION_FACTORY))).toBeInTheDocument();
 
   // Input url
   const URL = 'https://elastic.co';

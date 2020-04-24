@@ -8,12 +8,12 @@
 
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
-import { DashboardDrilldownConfig } from '.';
+import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 
 export const dashboards = [
-  { id: 'dashboard1', title: 'Dashboard 1' },
-  { id: 'dashboard2', title: 'Dashboard 2' },
-  { id: 'dashboard3', title: 'Dashboard 3' },
+  { value: 'dashboard1', label: 'Dashboard 1' },
+  { value: 'dashboard2', label: 'Dashboard 2' },
+  { value: 'dashboard3', label: 'Dashboard 3' },
 ];
 
 const InteractiveDemo: React.FC = () => {
@@ -30,16 +30,23 @@ const InteractiveDemo: React.FC = () => {
       onDashboardSelect={id => setActiveDashboardId(id)}
       onCurrentFiltersToggle={() => setCurrentFilters(old => !old)}
       onKeepRangeToggle={() => setKeepRange(old => !old)}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   );
 };
 
-storiesOf('components/DashboardDrilldownConfig', module)
+storiesOf(
+  'services/drilldowns/dashboard_to_dashboard_drilldown/components/dashboard_drilldown_config',
+  module
+)
   .add('default', () => (
     <DashboardDrilldownConfig
       activeDashboardId={'dashboard2'}
       dashboards={dashboards}
       onDashboardSelect={e => console.log('onDashboardSelect', e)}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   ))
   .add('with switches', () => (
@@ -49,6 +56,8 @@ storiesOf('components/DashboardDrilldownConfig', module)
       onDashboardSelect={e => console.log('onDashboardSelect', e)}
       onCurrentFiltersToggle={() => console.log('onCurrentFiltersToggle')}
       onKeepRangeToggle={() => console.log('onKeepRangeToggle')}
+      onSearchChange={() => {}}
+      isLoading={false}
     />
   ))
   .add('interactive demo', () => <InteractiveDemo />);

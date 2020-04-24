@@ -20,8 +20,8 @@ const drilldowns = drilldownsPluginMock.createStartContract();
 const uiActions = uiActionsPluginMock.createStartContract();
 
 const actionParams: OpenFlyoutAddDrilldownParams = {
-  drilldowns: () => Promise.resolve(drilldowns),
-  overlays: () => Promise.resolve(overlays),
+  drilldowns: () => drilldowns,
+  overlays: () => overlays,
 };
 
 test('should create', () => {

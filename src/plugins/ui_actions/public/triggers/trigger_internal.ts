@@ -68,6 +68,8 @@ export class TriggerInternal<T extends TriggerId> {
       title: this.trigger.title,
       closeMenu: () => session.close(),
     });
-    const session = openContextMenu([panel]);
+    const session = openContextMenu([panel], {
+      'data-test-subj': 'multipleActionsContextMenu',
+    });
   }
 }

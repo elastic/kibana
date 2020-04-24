@@ -40,7 +40,7 @@ export interface ListManageDrilldownsProps {
 
 const noop = () => {};
 
-export const TEST_SUBJ_DRILLDOWN_ITEM = 'list-manage-drilldowns-item';
+export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
 
 export function ListManageDrilldowns({
   drilldowns,
@@ -56,6 +56,7 @@ export function ListManageDrilldowns({
       name: 'Name',
       truncateText: true,
       width: '50%',
+      'data-test-subj': 'drilldownListItemName',
     },
     {
       name: 'Action',
@@ -107,7 +108,12 @@ export function ListManageDrilldowns({
           {txtCreateDrilldown}
         </EuiButton>
       ) : (
-        <EuiButton color="danger" fill onClick={() => onDelete(selectedDrilldowns)}>
+        <EuiButton
+          color="danger"
+          fill
+          onClick={() => onDelete(selectedDrilldowns)}
+          data-test-subj={'listManageDeleteDrilldowns'}
+        >
           {txtDeleteDrilldowns(selectedDrilldowns.length)}
         </EuiButton>
       )}

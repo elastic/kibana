@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
-import { SetupDependencies } from '../../plugin';
+import { SetupDependencies, StartDependencies } from '../../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddableContext } from '../../../../embeddable_enhanced/public';
 import {
@@ -14,8 +14,9 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
-import { DrilldownsStart } from '../../../../drilldowns/public';
+
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
+import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public/';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -30,7 +31,7 @@ interface BootstrapParams {
 
 export class DashboardDrilldownsService {
   bootstrap(
-    core: CoreSetup<{ drilldowns: DrilldownsStart }>,
+    core: CoreSetup<StartDependencies>,
     plugins: SetupDependencies,
     { enableDrilldowns }: BootstrapParams
   ) {
@@ -39,10 +40,17 @@ export class DashboardDrilldownsService {
     }
   }
 
-  setupDrilldowns(core: CoreSetup<{ drilldowns: DrilldownsStart }>, plugins: SetupDependencies) {
-    const overlays = async () => (await core.getStartServices())[0].overlays;
-    const drilldowns = async () => (await core.getStartServices())[1].drilldowns;
-    const savedObjects = async () => (await core.getStartServices())[0].savedObjects.client;
+  setupDrilldowns(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
+    const getStartServices = createStartServicesGetter<StartDependencies, unknown>(
+      core.getStartServices
+    );
+
+    const overlays = () => getStartServices().core.overlays;
+    const drilldowns = () => getStartServices().plugins.drilldowns;
+    const getSavedObjectsClient = () => getStartServices().core.savedObjects.client;
+    const getApplicationService = () => getStartServices().core.application;
+    const getGetUrlGenerator = () => getStartServices().plugins.share.urlGenerators.getUrlGenerator;
+    const getDataPluginActions = () => getStartServices().plugins.data.actions;
 
     const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
@@ -51,7 +59,10 @@ export class DashboardDrilldownsService {
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
     const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
-      savedObjects,
+      getSavedObjectsClient,
+      getGetUrlGenerator,
+      getApplicationService,
+      getDataPluginActions,
     });
     plugins.drilldowns.registerDrilldown(dashboardToDashboardDrilldown);
   }
