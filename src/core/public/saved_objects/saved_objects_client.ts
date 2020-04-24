@@ -458,9 +458,3 @@ const renameKeys = <T extends Record<string, any>, U extends Record<string, any>
       ...{ [keysMap[key] || key]: obj[key] },
     };
   }, {});
-
-const isAutoCreateIndexError = (error: any) => {
-  return (
-    error?.res?.status === 503 && error?.body?.attributes?.code === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-};
