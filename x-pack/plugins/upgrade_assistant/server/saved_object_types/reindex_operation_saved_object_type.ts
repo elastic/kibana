@@ -14,11 +14,49 @@ export const reindexOperationSavedObjectType: SavedObjectsType = {
   namespaceType: 'agnostic',
   mappings: {
     properties: {
+      reindexTaskId: {
+        type: 'keyword',
+      },
       indexName: {
+        type: 'keyword',
+      },
+      newIndexName: {
         type: 'keyword',
       },
       status: {
         type: 'integer',
+      },
+      locked: {
+        type: 'date',
+      },
+      lastCompletedStep: {
+        type: 'integer',
+      },
+      errorMessage: {
+        type: 'keyword',
+      },
+      reindexTaskPercComplete: {
+        type: 'float',
+      },
+      runningReindexCount: {
+        type: 'integer',
+      },
+      reindexOptions: {
+        properties: {
+          openAndClose: {
+            type: 'boolean',
+          },
+          queueSettings: {
+            properties: {
+              queuedAt: {
+                type: 'long',
+              },
+              startedAt: {
+                type: 'long',
+              },
+            },
+          },
+        },
       },
     },
   },
