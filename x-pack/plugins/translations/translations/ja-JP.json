@@ -513,7 +513,6 @@
     "core.notifications.errorToast.closeModal": "閉じる",
     "core.notifications.unableUpdateUISettingNotificationMessageTitle": "UI 設定を更新できません",
     "core.toasts.errorToast.seeFullError": "完全なエラーを表示",
-    "core.ui.analyzeNavList.label": "分析",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "ホームページに移動",
     "core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle": "Elasticに確認する",
     "core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel": "ヘルプメニュー",

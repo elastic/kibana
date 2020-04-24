@@ -513,7 +513,6 @@
     "core.notifications.errorToast.closeModal": "关闭",
     "core.notifications.unableUpdateUISettingNotificationMessageTitle": "无法更新 UI 设置",
     "core.toasts.errorToast.seeFullError": "请参阅完整的错误信息",
-    "core.ui.analyzeNavList.label": "分析",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "前往主页",
     "core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle": "问询 Elastic",
     "core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel": "帮助菜单",
