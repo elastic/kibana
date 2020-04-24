@@ -79,7 +79,7 @@ const metricsItems = Joi.object({
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
   mode: stringOptionalNullable,
-  lag: numberOptional,
+  lag: numberOptionalOrEmptyString,
   alpha: numberOptional,
   beta: numberOptional,
   gamma: numberOptional,
