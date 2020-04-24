@@ -26,6 +26,11 @@ export interface AuthenticationServiceSetup {
    * Returns currently authenticated user and throws if current user isn't authenticated.
    */
   getCurrentUser: () => Promise<AuthenticatedUser>;
+
+  /**
+   * Determines if API Keys are currently enabled.
+   */
+  areAPIKeysEnabled: () => Promise<boolean>;
 }
 
 export class AuthenticationService {
@@ -38,12 +43,16 @@ export class AuthenticationService {
     const getCurrentUser = async () =>
       (await http.get('/internal/security/me', { asSystemRequest: true })) as AuthenticatedUser;
 
+    const areAPIKeysEnabled = async () =>
+      ((await http.get('/internal/security/api_key/_enabled')) as { apiKeysEnabled: boolean })
+        .apiKeysEnabled;
+
     accessAgreementApp.create({ application, getStartServices });
     loginApp.create({ application, config, getStartServices, http });
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });
     overwrittenSessionApp.create({ application, authc: { getCurrentUser }, getStartServices });
 
-    return { getCurrentUser };
+    return { getCurrentUser, areAPIKeysEnabled };
   }
 }

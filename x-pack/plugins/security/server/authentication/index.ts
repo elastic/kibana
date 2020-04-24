@@ -178,6 +178,7 @@ export async function setupAuthentication({
     isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
     acknowledgeAccessAgreement: authenticator.acknowledgeAccessAgreement.bind(authenticator),
     getCurrentUser,
+    areAPIKeysEnabled: () => apiKeys.areAPIKeysEnabled(),
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),
     grantAPIKeyAsInternalUser: (request: KibanaRequest) => apiKeys.grantAsInternalUser(request),
