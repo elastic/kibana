@@ -32,10 +32,14 @@ import { urlFromQueryParams } from './url_from_query_params';
 import { HostInfo, HostStatus, Immutable } from '../../../../../common/types';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
-const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<{ [key in keyof typeof HostStatus]: string }>({
-  ERROR: 'danger',
-  ONLINE: 'success',
-  OFFLINE: 'subdued',
+const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
+  {
+    [key in HostStatus]: string;
+  }
+>({
+  [HostStatus.ERROR]: 'danger',
+  [HostStatus.ONLINE]: 'success',
+  [HostStatus.OFFLINE]: 'subdued',
 });
 
 const HostLink = memo<{
@@ -108,11 +112,7 @@ export const HostList = () => {
         }),
         render: (hostStatus: HostInfo['host_status']) => {
           return (
-            <EuiHealth
-              color={
-                HOST_STATUS_TO_HEALTH_COLOR[hostStatus.toUpperCase() as keyof typeof HostStatus]
-              }
-            >
+            <EuiHealth color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}>
               <FormattedMessage
                 id="xpack.endpoint.host.list.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
@@ -164,8 +164,8 @@ export const HostList = () => {
       },
       {
         field: 'metadata.agent.version',
-        name: i18n.translate('xpack.endpoint.host.list.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        name: i18n.translate('xpack.endpoint.host.list.endpointVersion', {
+          defaultMessage: 'Version',
         }),
       },
       {
