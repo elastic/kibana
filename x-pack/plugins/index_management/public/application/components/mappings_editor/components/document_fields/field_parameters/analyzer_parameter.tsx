@@ -156,6 +156,7 @@ export const AnalyzerParameter = ({
             size="xs"
             onClick={toggleCustom(field)}
             className="mappingsEditor__selectWithCustom__button"
+            data-test-subj={`${dataTestSubj}-toggleCustomButton`}
           >
             {isCustom
               ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
