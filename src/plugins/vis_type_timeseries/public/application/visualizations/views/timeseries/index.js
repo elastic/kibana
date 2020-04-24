@@ -87,7 +87,7 @@ export const TimeSeries = ({
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
   const timeZone = getTimezone(uiSettings);
-  const hasBarChart = series.some(({ bars }) => bars.show);
+  const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // compute the theme based on the bg color
   const theme = getTheme(darkMode, backgroundColor);
@@ -172,7 +172,7 @@ export const TimeSeries = ({
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
 
-          if (bars.show) {
+          if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
@@ -197,7 +197,7 @@ export const TimeSeries = ({
             );
           }
 
-          if (lines.show) {
+          if (lines?.show) {
             return (
               <AreaSeriesDecorator
                 key={key}
