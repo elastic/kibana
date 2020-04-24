@@ -23,7 +23,7 @@ describe('<MappingsEditor />', () => {
 
   describe('multiple mappings detection', () => {
     test('should show a warning when multiple mappings are detected', async () => {
-      const defaultValue = {
+      const value = {
         type1: {
           properties: {
             name1: {
@@ -39,7 +39,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: onUpdateHandler, defaultValue });
+      const testBed = await setup({ onUpdate: onUpdateHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -48,14 +48,14 @@ describe('<MappingsEditor />', () => {
     });
 
     test('should not show a warning when mappings a single-type', async () => {
-      const defaultValue = {
+      const value = {
         properties: {
           name1: {
             type: 'keyword',
           },
         },
       };
-      const testBed = await setup({ onUpdate: onUpdateHandler, defaultValue });
+      const testBed = await setup({ onUpdate: onUpdateHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -72,7 +72,7 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
     });
 
     test('should keep the changes when switching tabs', async () => {
@@ -220,10 +220,10 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
     });
 
-    test('props.defaultValue => should prepopulate the editor data', async () => {
+    test('props.value => should prepopulate the editor data', async () => {
       const {
         actions: { selectTab, getJsonEditorValue, getComboBoxValue, getToggleValue },
         find,

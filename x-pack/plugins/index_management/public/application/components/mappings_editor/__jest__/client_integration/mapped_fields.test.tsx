@@ -52,7 +52,7 @@ describe('Mapped fields', () => {
     test('should correctly represent the fields in the DOM tree', async () => {
       await act(async () => {
         testBed = await setup({
-          defaultValue: defaultMappings,
+          value: defaultMappings,
           onUpdate: onUpdateHandler,
         });
       });

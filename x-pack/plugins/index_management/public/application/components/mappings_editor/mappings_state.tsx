@@ -43,7 +43,7 @@ const DispatchContext = createContext<Dispatch | undefined>(undefined);
 
 export interface Props {
   children: (params: { state: State }) => React.ReactNode;
-  defaultValue: {
+  value: {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
@@ -51,28 +51,26 @@ export interface Props {
   onUpdate: OnUpdateHandler;
 }
 
-export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: Props) => {
+export const MappingsState = React.memo(({ children, onUpdate, value }: Props) => {
   const didMountRef = useRef(false);
 
-  const parsedFieldsDefaultValue = useMemo(() => normalize(defaultValue.fields), [
-    defaultValue.fields,
-  ]);
+  const parsedFieldsDefaultValue = useMemo(() => normalize(value.fields), [value.fields]);
 
   const initialState: State = {
     isValid: undefined,
     configuration: {
-      defaultValue: defaultValue.configuration,
+      defaultValue: value.configuration,
       data: {
-        raw: defaultValue.configuration,
-        format: () => defaultValue.configuration,
+        raw: value.configuration,
+        format: () => value.configuration,
       },
       validate: () => Promise.resolve(true),
     },
     templates: {
-      defaultValue: defaultValue.templates,
+      defaultValue: value.templates,
       data: {
-        raw: defaultValue.templates,
-        format: () => defaultValue.templates,
+        raw: value.templates,
+        format: () => value.templates,
       },
       validate: () => Promise.resolve(true),
     },
@@ -175,22 +173,22 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
   useEffect(() => {
     /**
-     * If the defaultValue has changed that probably means that we have loaded
+     * If the value has changed that probably means that we have loaded
      * new data from JSON. We need to update our state with the new mappings.
      */
     if (didMountRef.current) {
       dispatch({
         type: 'editor.replaceMappings',
         value: {
-          configuration: defaultValue.configuration,
-          templates: defaultValue.templates,
+          configuration: value.configuration,
+          templates: value.templates,
           fields: parsedFieldsDefaultValue,
         },
       });
     } else {
       didMountRef.current = true;
     }
-  }, [defaultValue, parsedFieldsDefaultValue]);
+  }, [value, parsedFieldsDefaultValue]);
 
   return (
     <StateContext.Provider value={state}>

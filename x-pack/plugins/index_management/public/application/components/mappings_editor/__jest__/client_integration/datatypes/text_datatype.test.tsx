@@ -51,7 +51,7 @@ describe('text datatype', () => {
     };
 
     await act(async () => {
-      testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
       // Make sure all the fields are expanded and present in the DOM
       await testBed.actions.expandAllFieldsAndReturnMetadata();
     });
@@ -152,7 +152,7 @@ describe('text datatype', () => {
       },
     };
 
-    testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+    testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
 
     const {
       find,
@@ -287,7 +287,7 @@ describe('text datatype', () => {
       },
     };
 
-    testBed = await setup({ defaultValue: defaultMappings, onUpdate: onUpdateHandler });
+    testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
 
     const {
       find,
@@ -387,7 +387,7 @@ describe('text datatype', () => {
     };
 
     testBed = await setup({
-      defaultValue: defaultMappings,
+      value: defaultMappings,
       onUpdate: onUpdateHandler,
       indexSettings,
     });

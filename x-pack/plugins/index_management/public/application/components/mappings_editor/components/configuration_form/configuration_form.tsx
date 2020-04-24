@@ -18,7 +18,7 @@ import { configurationFormSchema } from './configuration_form_schema';
 type MappingsConfiguration = Types['MappingsConfiguration'];
 
 interface Props {
-  defaultValue?: MappingsConfiguration;
+  value?: MappingsConfiguration;
 }
 
 const stringifyJson = (json: GenericObject) =>
@@ -87,14 +87,14 @@ const formDeserializer = (formData: GenericObject) => {
   };
 };
 
-export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
+export const ConfigurationForm = React.memo(({ value }: Props) => {
   const didMountRef = useRef(false);
 
   const { form } = useForm<MappingsConfiguration>({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
-    defaultValue,
+    defaultValue: value,
   });
   const dispatch = useDispatch();
 
@@ -115,14 +115,14 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     if (didMountRef.current) {
-      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
+      // If the value has changed (it probably means that we have loaded a new JSON)
       // we need to reset the form to update the fields values.
       form.reset({ resetValues: true });
     } else {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
