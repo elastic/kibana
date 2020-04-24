@@ -126,6 +126,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns an error if the index does not exist', async () => {
+      clients.siemClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);

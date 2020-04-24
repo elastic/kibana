@@ -28,6 +28,7 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { GisMap } from '../connected_components/gis_map';
 import { createMapStore, MapStore } from '../reducers/store';
+import { MapSettings } from '../reducers/map';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -40,6 +41,7 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
+  setMapSettings,
 } from '../actions/map_actions';
 import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
@@ -60,6 +62,7 @@ interface MapEmbeddableConfig {
   editable: boolean;
   title?: string;
   layerList: unknown[];
+  settings?: MapSettings;
 }
 
 export interface MapEmbeddableInput extends EmbeddableInput {
@@ -97,6 +100,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   private _prevFilters?: Filter[];
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
+  private _settings?: MapSettings;
 
   constructor(
     config: MapEmbeddableConfig,
@@ -119,6 +123,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._renderTooltipContent = renderTooltipContent;
     this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
+    this._settings = config.settings;
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
@@ -193,6 +198,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store.dispatch(setEventHandlers(this._eventHandlers));
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
+
+    if (this._settings) {
+      this._store.dispatch(setMapSettings(this._settings));
+    }
 
     if (_.has(this.input, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
