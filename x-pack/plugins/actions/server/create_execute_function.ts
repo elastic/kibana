@@ -70,7 +70,9 @@ export function createExecuteFunction({
     const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
     const actionTypeId = await getActionTypeId(id);
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    if (!actionTypeRegistry.isActionTypeExecutable(actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
 
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,

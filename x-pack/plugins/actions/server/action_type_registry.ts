@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
-import { ActionType } from './types';
+import { ActionType, PreConfiguredAction } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
@@ -17,6 +17,7 @@ export interface ActionTypeRegistryOpts {
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class ActionTypeRegistry {
@@ -25,12 +26,14 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
+  private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
+    this.preconfiguredActions = constructorParams.preconfiguredActions;
   }
 
   /**
@@ -55,6 +58,19 @@ export class ActionTypeRegistry {
     return (
       this.actionsConfigUtils.isActionTypeEnabled(id) &&
       this.licenseState.isLicenseValidForActionType(this.get(id)).isValid === true
+    );
+  }
+
+  /**
+   * Returns true if action type is enabled or it is a preconfigured action type.
+   */
+  public isActionTypeExecutable(id: string) {
+    return (
+      this.isActionTypeEnabled(id) ||
+      (!this.isActionTypeEnabled(id) &&
+        this.preconfiguredActions.find(
+          preconfiguredAction => preconfiguredAction.actionTypeId === id
+        ) !== undefined)
     );
   }
 

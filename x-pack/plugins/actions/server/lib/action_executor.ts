@@ -90,7 +90,9 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    if (!actionTypeRegistry.isActionTypeExecutable(actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
     const actionType = actionTypeRegistry.get(actionTypeId);
 
     let validatedParams: Record<string, any>;
