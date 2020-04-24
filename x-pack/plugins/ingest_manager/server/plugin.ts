@@ -31,7 +31,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-import { registerEncryptedSavedObjects } from './saved_objects';
+import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
@@ -84,6 +84,7 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
       this.security = deps.security;
     }
 
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
