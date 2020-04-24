@@ -130,6 +130,10 @@ export class ExpressionRendering {
 
   public readonly render = async (
     value: ExpressionValueError | ExpressionValueRender<unknown>,
+    // TODO: Should we remove this? Why is there special treatment of uiState in Expressions?
+    // TODO: Expressions should know nothing about uiState; and extra data provided to renderer
+    // TODO: should have proper TypeScript typing.
+    // TODO: Tech debt issue created: https://github.com/elastic/kibana/issues/64420
     uiState: any = {}
   ) => {
     if (!value || typeof value !== 'object') {
