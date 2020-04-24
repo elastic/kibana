@@ -44,6 +44,7 @@ beforeEach(() => {
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
+    preconfiguredActions: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
@@ -221,6 +222,7 @@ describe('create()', () => {
       ),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
+      preconfiguredActions: [],
     };
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
