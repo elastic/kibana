@@ -8,6 +8,7 @@ import { ScopedClusterClient } from 'src/core/server';
 export {
   // Object types
   Agent,
+  AgentMetadata,
   AgentSOAttributes,
   AgentStatus,
   AgentType,

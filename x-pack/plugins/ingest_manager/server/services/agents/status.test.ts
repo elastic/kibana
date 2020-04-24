@@ -18,8 +18,8 @@ describe('Agent status service', () => {
       type: AGENT_TYPE_PERMANENT,
       attributes: {
         active: false,
-        local_metadata: '{}',
-        user_provided_metadata: '{}',
+        local_metadata: {},
+        user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
     const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
@@ -33,8 +33,8 @@ describe('Agent status service', () => {
       type: AGENT_TYPE_PERMANENT,
       attributes: {
         active: true,
-        local_metadata: '{}',
-        user_provided_metadata: '{}',
+        local_metadata: {},
+        user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
     const status = await getAgentStatusById(mockSavedObjectsClient, 'id');

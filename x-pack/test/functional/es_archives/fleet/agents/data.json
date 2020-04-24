@@ -11,8 +11,8 @@
         "shared_id": "agent1_filebeat",
         "config_id": "1",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -30,8 +30,8 @@
         "active": true,
         "shared_id": "agent2_filebeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -49,8 +49,8 @@
         "active": true,
         "shared_id": "agent3_metricbeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -68,8 +68,8 @@
         "active": true,
         "shared_id": "agent4_metricbeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }

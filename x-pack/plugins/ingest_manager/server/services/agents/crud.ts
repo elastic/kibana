@@ -98,7 +98,7 @@ export async function updateAgent(
   }
 ) {
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: JSON.stringify(data.userProvidedMetatada),
+    user_provided_metadata: data.userProvidedMetatada,
   });
 }
 

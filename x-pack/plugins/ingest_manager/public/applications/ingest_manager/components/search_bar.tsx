@@ -93,7 +93,6 @@ function useSuggestions(fieldPrefix: string, search: string) {
       const res = (await data.indexPatterns.getFieldsForWildcard({
         pattern: INDEX_NAME,
       })) as IFieldType[];
-
       if (!data || !data.autocomplete) {
         throw new Error('Missing data plugin');
       }

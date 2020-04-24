@@ -234,7 +234,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const columns = [
     {
-      field: 'local_metadata.host',
+      field: 'local_metadata.host.hostname',
       name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
