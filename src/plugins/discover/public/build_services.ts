@@ -40,7 +40,7 @@ import { ChartsPluginStart } from '../../charts/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { createSavedSearchesLoader, SavedSearch } from '.';
 import { DiscoverStartPlugins } from './plugin';
-import { SavedObjectKibanaServices } from '../../../../../plugins/saved_objects/public';
+import { SavedObjectKibanaServices } from '../../saved_objects/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
