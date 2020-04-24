@@ -128,16 +128,6 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
 
     return (
       <>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={useCurrentView}>
-              <FormattedMessage
-                id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
-                defaultMessage="Set to current view"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
         <EuiFormRow
           label={i18n.translate('xpack.maps.mapSettingsPanel.initialLatLabel', {
             defaultMessage: 'Initial latitude',
@@ -155,6 +145,16 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           <EuiFieldNumber value={settings.initialLon} onChange={onInitialLonChange} compressed />
         </EuiFormRow>
         {zoomFormRow}
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={useCurrentView}>
+              <FormattedMessage
+                id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
+                defaultMessage="Set to current view"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }
