@@ -63,12 +63,8 @@ export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<Doc
 );
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
-export {
-  unhashUrl,
-  redirectWhenMissing,
-  ensureDefaultIndexPattern,
-} from '../../kibana_utils/public';
 export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
+export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
 
 // EXPORT types
 export {
