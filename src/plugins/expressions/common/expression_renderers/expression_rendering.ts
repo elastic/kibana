@@ -79,7 +79,7 @@ export interface ExpressionRenderingParams {
  * Constructs expression renderer handlers and passes them to expression renderer.
  */
 export class ExpressionRendering {
-  private destroyFn?: any;
+  private destroyFn?: () => void;
   private renderCount: number = 0;
   private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
@@ -99,7 +99,7 @@ export class ExpressionRendering {
     this.update$ = this.updateSubject.asObservable();
 
     this.handlers = {
-      onDestroy: (fn: any) => {
+      onDestroy: (fn: () => void) => {
         this.destroyFn = fn;
       },
       done: () => {
@@ -112,8 +112,8 @@ export class ExpressionRendering {
       update: value => {
         this.updateSubject.next(value);
       },
-      event: data => {
-        this.eventsSubject.next(data);
+      event: event => {
+        this.eventsSubject.next(event);
       },
     };
   }
@@ -129,16 +129,16 @@ export class ExpressionRendering {
   public readonly events$: Observable<Event>;
 
   public readonly render = async (
-    data: ExpressionValueError | ExpressionValueRender<unknown>,
+    value: ExpressionValueError | ExpressionValueRender<unknown>,
     uiState: any = {}
   ) => {
-    if (!data || typeof data !== 'object') {
+    if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
 
-    if (data.type !== 'render' || !data.as) {
-      if (data.type === 'error') {
-        return this.handleRenderError(data.error);
+    if (value.type !== 'render' || !value.as) {
+      if (value.type === 'error') {
+        return this.handleRenderError(value.error);
       } else {
         return this.handleRenderError(
           new Error('invalid data provided to the expression renderer')
@@ -146,13 +146,13 @@ export class ExpressionRendering {
       }
     }
 
-    if (!this.params.renderers.has(data.as)) {
-      return this.handleRenderError(new Error(`invalid renderer id '${data.as}'`));
+    if (!this.params.renderers.has(value.as)) {
+      return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
-      await this.params.renderers.get(data.as)!.render(this.params.element, data.value, {
+      await this.params.renderers.get(value.as)!.render(this.params.element, value.value, {
         ...this.handlers,
         uiState,
       } as any);
