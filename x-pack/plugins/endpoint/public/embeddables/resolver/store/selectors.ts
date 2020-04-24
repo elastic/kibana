@@ -102,6 +102,9 @@ function uiStateSelector(state: ResolverState) {
  */
 export const isLoading = composeSelectors(dataStateSelector, dataSelectors.isLoading);
 
+/**
+ * Whether or not the resolver encountered an error while fetching data
+ */
 export const hasError = composeSelectors(dataStateSelector, dataSelectors.hasError);
 
 /**
