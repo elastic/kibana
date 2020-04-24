@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConfigurationStepForm } from './configuration_step';
+export { ConfigurationStep } from './configuration_step';

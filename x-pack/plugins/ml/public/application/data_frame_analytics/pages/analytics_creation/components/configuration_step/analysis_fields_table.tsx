@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, Fragment } from 'react';
 import {
   EuiFormRow,
   EuiInMemoryTable,
@@ -14,7 +14,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// import { ColumnType } from '../../../../../components/ml_in_memory_table/types';
 import { FieldSelectionItem } from '../../../../common/analytics';
 
 const columns: any = [
@@ -70,13 +69,6 @@ export const AnalysisFieldsTable: FC<{
   setFormState: any;
   tableItems: any;
 }> = ({ loadingItems, setFormState, tableItems }) => {
-  const [tableSelection, setTableSelection] = useState<string[]>([]);
-
-  useEffect(() => {
-    // set final excluded selection once the table unmounts
-    return () => setFormState({ excluded: tableSelection });
-  }, []);
-
   const message =
     tableItems.length === 0
       ? i18n.translate('xpack.ml.dataframe.analytics.create.excludesFieldsTableMessage', {
@@ -89,7 +81,7 @@ export const AnalysisFieldsTable: FC<{
     selectableMessage: (selectable: boolean, item: FieldSelectionItem) =>
       !selectable ? `${item.name} is already excluded from analysis` : '',
     onSelectionChange: (currentSelection: FieldSelectionItem[]) => {
-      setTableSelection(currentSelection.map(item => item.name));
+      setFormState({ excludes: currentSelection.map(item => item.name) });
     },
   };
 

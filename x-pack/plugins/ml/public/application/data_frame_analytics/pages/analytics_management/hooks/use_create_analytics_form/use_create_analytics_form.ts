@@ -40,6 +40,7 @@ export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
   setCurrentStep?: any; // TODO: update
+  step?: any; // TODO: update
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
