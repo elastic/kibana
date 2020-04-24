@@ -239,19 +239,11 @@ async function _assignPackageStreamToStream(
     throw new Error(`Stream template not found for dataset ${dataset}`);
   }
 
-  // Populate template variables from input config and stream config
-  const data: { [k: string]: string | string[] } = {};
-  if (input.config) {
-    for (const key of Object.keys(input.config)) {
-      data[key] = input.config[key].value;
-    }
-  }
-  if (stream.config) {
-    for (const key of Object.keys(stream.config)) {
-      data[key] = stream.config[key].value;
-    }
-  }
-  const yaml = safeLoad(createStream(data, pkgStream.buffer.toString()));
+  const yaml = createStream(
+    // Populate template variables from input config and stream config
+    Object.assign({}, input.config, stream.config),
+    pkgStream.buffer.toString()
+  );
   stream.pkg_stream = yaml;
   return { ...stream };
 }
