@@ -25,6 +25,11 @@ export interface EmbeddableContext {
   embeddable: IEmbeddable;
 }
 
+export interface EditPanelContext {
+  embeddable: IEmbeddable;
+  originatingApp: string;
+}
+
 export interface ValueClickTriggerContext {
   embeddable?: IEmbeddable;
   timeFieldName?: string;

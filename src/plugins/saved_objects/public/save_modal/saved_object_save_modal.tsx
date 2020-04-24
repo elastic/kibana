@@ -55,6 +55,7 @@ interface Props {
   showCopyOnSave: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
+  confirmButtonOnCopyLabel?: React.ReactNode;
   options?: React.ReactNode;
   description?: string;
   showDescription: boolean;
@@ -248,8 +249,9 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
         defaultMessage: 'Save',
       }
     );
-
-    if (this.props.confirmButtonLabel) {
+    if (this.state.copyOnSave && this.props.confirmButtonOnCopyLabel) {
+      confirmLabel = this.props.confirmButtonOnCopyLabel;
+    } else if (this.props.confirmButtonLabel) {
       confirmLabel = this.props.confirmButtonLabel;
     }
 

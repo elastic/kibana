@@ -21,32 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
-import { IEmbeddable } from '../embeddables';
 import { EmbeddableStart } from '../../plugin';
-// import { DashboardConstants, DASHBOARD_CONTAINER_TYPE } from '../../../../dashboard/public';
+import { EditPanelContext } from '..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
+export const EDIT_PANEL_ORIGINATING_APP = 'editPanelOriginatingApp';
 
-interface ActionContext {
-  embeddable: IEmbeddable;
-}
-
-export class EditPanelAction implements Action<ActionContext> {
+export class EditPanelAction implements Action<EditPanelContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
   public order = 15;
 
   constructor(private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory']) {}
 
-  private isOnDashboard(embeddable: IEmbeddable) {
-    return Boolean(
-      embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === 'dashboard'
-    );
-  }
-
-  public getDisplayName({ embeddable }: ActionContext) {
+  public getDisplayName({ embeddable }: EditPanelContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
@@ -63,7 +51,7 @@ export class EditPanelAction implements Action<ActionContext> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: ActionContext) {
+  public async isCompatible({ embeddable }: EditPanelContext) {
     const canEditEmbeddable = Boolean(
       embeddable && embeddable.getOutput().editable && embeddable.getOutput().editUrl
     );
@@ -71,7 +59,7 @@ export class EditPanelAction implements Action<ActionContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute(context: ActionContext) {
+  public async execute(context: EditPanelContext) {
     const href = await this.getHref(context);
     if (href) {
       // TODO: when apps start using browser router instead of hash router this has to be fixed
@@ -80,12 +68,9 @@ export class EditPanelAction implements Action<ActionContext> {
     }
   }
 
-  public async getHref({ embeddable }: ActionContext): Promise<string> {
+  public async getHref({ embeddable, originatingApp }: EditPanelContext): Promise<string> {
     let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    if (this.isOnDashboard(embeddable)) {
-      // editUrl += `?${DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM}`;
-      editUrl += `?${'editFromDashboard'}`;
-    }
+    editUrl += `?${EDIT_PANEL_ORIGINATING_APP}=${originatingApp}`;
     return editUrl ? editUrl : '';
   }
 }

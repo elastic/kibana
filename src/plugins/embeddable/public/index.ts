@@ -33,6 +33,7 @@ export {
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
   ACTION_EDIT_PANEL,
+  EDIT_PANEL_ORIGINATING_APP,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,

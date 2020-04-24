@@ -31,11 +31,12 @@ import {
   ACTION_EDIT_PANEL,
   FilterActionContext,
   ACTION_APPLY_FILTER,
+  EditPanelContext,
 } from './lib';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext | EditPanelContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
   }
 
@@ -44,7 +45,7 @@ declare module '../../ui_actions/public' {
     [ACTION_ADD_PANEL]: EmbeddableContext;
     [ACTION_INSPECT_PANEL]: EmbeddableContext;
     [REMOVE_PANEL_ACTION]: EmbeddableContext;
-    [ACTION_EDIT_PANEL]: EmbeddableContext;
+    [ACTION_EDIT_PANEL]: EditPanelContext;
     [ACTION_APPLY_FILTER]: FilterActionContext;
   }
 }

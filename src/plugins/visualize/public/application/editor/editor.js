@@ -30,6 +30,8 @@ import { makeStateful, useVisualizeAppState, addEmbeddableToDashboardUrl } from 
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
+import { EDIT_PANEL_ORIGINATING_APP } from '../../../../embeddable/public';
+
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { unhashUrl, removeQueryParam } from '../../../../kibana_utils/public';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
@@ -149,14 +151,14 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   $scope.isAddToDashMode = () => addToDashMode;
 
-  const editFromDashMode =
-    $route.current.params[DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM];
-  removeQueryParam(history, DashboardConstants.EDIT_VISUALIZATION_FROM_DASHBOARD_MODE_PARAM);
+  const editOriginatingApp = $route.current.params[EDIT_PANEL_ORIGINATING_APP];
+  removeQueryParam(history, EDIT_PANEL_ORIGINATING_APP);
+  console.log('edit originating app var name: ', EDIT_PANEL_ORIGINATING_APP);
 
-  $scope.isEditFromDashMode = () => editFromDashMode;
+  $scope.getEditOriginatingApp = () => editOriginatingApp;
 
   $scope.topNavMenu = [
-    ...($scope.isEditFromDashMode()
+    ...($scope.getEditOriginatingApp()
       ? [
           {
             id: 'done',
@@ -199,7 +201,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       ? [
           {
             id: 'save',
-            label: $scope.isEditFromDashMode()
+            label: $scope.getEditOriginatingApp()
               ? i18n.translate('kbn.topNavMenu.saveVisualizationAsButtonLabel', {
                   defaultMessage: 'save as',
                 })
@@ -248,22 +250,25 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   return response;
                 });
               };
+              const saveAndAddLabel = (
+                <FormattedMessage
+                  id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                  defaultMessage="Save and add to dashboard"
+                />
+              );
 
               let confirmButtonLabel = null;
+              let confirmButtonOnCopyLabel = null;
               if ($scope.isAddToDashMode()) {
+                confirmButtonLabel = saveAndAddLabel;
+              } else if ($scope.getEditOriginatingApp()) {
                 confirmButtonLabel = (
                   <FormattedMessage
-                    id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
-                    defaultMessage="Save and add to dashboard"
-                  />
-                );
-              } else if ($scope.isEditFromDashMode()) {
-                confirmButtonLabel = (
-                  <FormattedMessage
-                    id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                    id="kbn.visualize.saveDialog.saveAndReturnToDashboardButtonLabel"
                     defaultMessage="Save and return to dashboard"
                   />
                 );
+                confirmButtonOnCopyLabel = saveAndAddLabel;
               }
 
               const saveModal = (
@@ -274,6 +279,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   showCopyOnSave={savedVis.id ? true : false}
                   objectType="visualization"
                   confirmButtonLabel={confirmButtonLabel}
+                  confirmButtonOnCopyLabel={confirmButtonOnCopyLabel}
                   description={savedVis.description}
                   showDescription={true}
                 />
@@ -685,14 +691,15 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
-            if ($scope.isAddToDashMode() || $scope.isEditFromDashMode()) {
+            if ($scope.isAddToDashMode() || $scope.getEditOriginatingApp()) {
               const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`;
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(appPath);
               setActiveUrl(appPath);
 
-              const lastDashboardUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const visId = $scope.isAddToDashMode() ? savedVis.id : '';
+              const lastAppType = $scope.getEditOriginatingApp() || 'dashboard';
+              const lastDashboardUrl = chrome.navLinks.get(`kibana:${lastAppType}`).url;
+              const visId = $scope.isAddToDashMode() || savedVis.copyOnSave ? savedVis.id : '';
               const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardUrl, visId);
               history.push(dashboardUrl);
             } else if (savedVis.id === $route.current.params.id) {
