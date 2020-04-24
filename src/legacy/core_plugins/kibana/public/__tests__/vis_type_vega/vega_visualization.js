@@ -21,7 +21,9 @@ import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
-import { createVegaVisualization } from '../vega_visualization';
+// Will be replaced with new path when tests are moved
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createVegaVisualization } from '../../../../../../plugins/vis_type_vega/public/vega_visualization';
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -35,24 +37,34 @@ import vegaTooltipGraph from '!!raw-loader!./vega_tooltip_test.hjson';
 
 import vegaMapGraph from '!!raw-loader!./vega_map_test.hjson';
 import vegaMapImage256 from './vega_map_image_256.png';
+// Will be replaced with new path when tests are moved
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { VegaParser } from '../../../../../../plugins/vis_type_vega/public/data_model/vega_parser';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SearchCache } from '../../../../../../plugins/vis_type_vega/public/data_model/search_cache';
 
-import { VegaParser } from '../data_model/vega_parser';
-import { SearchCache } from '../data_model/search_cache';
-
-import { createVegaTypeDefinition } from '../vega_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createVegaTypeDefinition } from '../../../../../../plugins/vis_type_vega/public/vega_type';
 // TODO This is an integration test and thus requires a running platform. When moving to the new platform,
 // this test has to be migrated to the newly created integration test environment.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { npStart } from 'ui/new_platform';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import { BaseVisType } from '../../../../../../plugins/visualizations/public/vis_types/base_vis_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
-import { setInjectedVars } from '../services';
+import { ExprVis } from '../../../../../../plugins/visualizations/public/expressions/vis';
+
+import {
+  setInjectedVars,
+  setData,
+  setSavedObjects,
+  setNotifications,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../plugins/vis_type_vega/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+import { setInjectedVarFunc } from '../../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { ServiceSettings } from '../../../../../../plugins/maps_legacy/public/map/service_settings';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -70,6 +82,9 @@ describe('VegaVisualizations', () => {
     enableExternalUrls: true,
     esShardTimeout: 10000,
   });
+  setData(npStart.plugins.data);
+  setSavedObjects(npStart.core.savedObjects);
+  setNotifications(npStart.core.notifications);
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
@@ -110,9 +125,6 @@ describe('VegaVisualizations', () => {
               timefilter: {
                 timefilter: {},
               },
-            },
-            __LEGACY: {
-              esClient: npStart.plugins.data.search.__LEGACY.esClient,
             },
           },
         },
