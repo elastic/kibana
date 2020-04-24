@@ -5,33 +5,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema, fieldValidators } from '../../../../../shared_imports';
+import { FormSchema, fieldValidators, ValidationFuncArg } from '../../../../../shared_imports';
+import { parseJson, stringifyJson } from '../../../../lib';
 
 const { emptyField, isJsonField } = fieldValidators;
 
-// TODO move to lib?
-const stringifyJson = (json: { [key: string]: unknown }): string =>
-  Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
-
-const parseJson = (jsonString: string): object[] => {
-  let parsedJSON: any;
-
-  try {
-    parsedJSON = JSON.parse(jsonString);
-
-    if (!Array.isArray(parsedJSON)) {
-      // Convert object to array
-      parsedJSON = [parsedJSON];
-    }
-  } catch {
-    parsedJSON = [];
-  }
-
-  return parsedJSON;
-};
-
 export const documentsSchema: FormSchema = {
-  // TODO validation: at least one document required
   documents: {
     label: i18n.translate('xpack.ingestPipelines.debugForm.documentsFieldLabel', {
       defaultMessage: 'Documents',
@@ -41,7 +20,7 @@ export const documentsSchema: FormSchema = {
     validations: [
       {
         validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.debugForm.documentsRequiredError', {
+          i18n.translate('xpack.ingestPipelines.debugForm.noDocumentsError', {
             defaultMessage: 'Documents are required.',
           })
         ),
@@ -52,6 +31,19 @@ export const documentsSchema: FormSchema = {
             defaultMessage: 'The documents JSON is not valid.',
           })
         ),
+      },
+      {
+        validator: ({ value }: ValidationFuncArg<any, any>) => {
+          const parsedJSON = JSON.parse(value);
+
+          if (!parsedJSON.length) {
+            return {
+              message: i18n.translate('xpack.ingestPipelines.debugForm.oneDocumentRequiredError', {
+                defaultMessage: 'At least one document is required.',
+              }),
+            };
+          }
+        },
       },
     ],
   },
