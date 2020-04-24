@@ -24,11 +24,11 @@ const name = 'render';
 /**
  * Represents an object that is intended to be rendered.
  */
-export type ExpressionValueRender<T> = ExpressionValueBoxed<
+export type ExpressionValueRender<Value, As = string> = ExpressionValueBoxed<
   typeof name,
   {
-    as: string;
-    value: T;
+    as: As;
+    value: Value;
   }
 >;
 

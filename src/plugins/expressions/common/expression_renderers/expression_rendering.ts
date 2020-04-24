@@ -22,7 +22,13 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { IInterpreterRenderHandlers } from './types';
 import { ExecutionContextSearch } from '../execution';
-import { ExpressionValue, ExpressionAstExpression, ExpressionRendererRegistry } from '../../public';
+import {
+  ExpressionValue,
+  ExpressionAstExpression,
+  ExpressionRendererRegistry,
+  ExpressionValueRender,
+  ExpressionValueError,
+} from '../../public';
 import { Adapters } from '../../../inspector/public';
 
 export const onRenderErrorDefault: RenderErrorHandlerFnType = (element, error, handlers) => {
@@ -31,9 +37,7 @@ export const onRenderErrorDefault: RenderErrorHandlerFnType = (element, error, h
   handlers.done();
 };
 
-export interface RenderError extends Error {
-  type?: string;
-}
+export type RenderError = ExpressionValueError['error'];
 
 export type RenderErrorHandlerFnType = (
   domNode: HTMLElement,
@@ -124,7 +128,10 @@ export class ExpressionRendering {
   public readonly update$: Observable<UpdateValue | null>;
   public readonly events$: Observable<Event>;
 
-  public readonly render = async (data: any, uiState: any = {}) => {
+  public readonly render = async (
+    data: ExpressionValueError | ExpressionValueRender<unknown>,
+    uiState: any = {}
+  ) => {
     if (!data || typeof data !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
