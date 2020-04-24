@@ -21,8 +21,23 @@ import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
-import { loadPluginBundle } from './plugin_loader';
 import { CoreStart, CoreSetup } from '..';
+
+/**
+ * Unknown variant for internal use only for when plugins are not known.
+ * @internal
+ */
+export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string, unknown>>;
+
+/**
+ * Custom window type for loading bundles. Do not extend global Window to avoid leaking these types.
+ * @internal
+ */
+export interface CoreWindow {
+  __kbnBundles__: {
+    [pluginBundleName: string]: { plugin: UnknownPluginInitializer } | undefined;
+  };
+}
 
 /**
  * The interface that should be returned by a `PluginInitializer`.
@@ -69,7 +84,6 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -87,15 +101,22 @@ export class PluginWrapper<
   }
 
   /**
-   * Loads the plugin's bundle into the browser. Should be called in parallel with all plugins
-   * using `Promise.all`. Must be called before `setup`.
-   * @param addBasePath Function that adds the base path to a string for plugin bundle path.
+   * Reads the plugin's bundle declared in the global context.
    */
-  public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TStart, TPluginsSetup, TPluginsStart>(
-      addBasePath,
-      this.name
-    );
+  private read() {
+    const coreWindow = (window as unknown) as CoreWindow;
+    const exportId = `plugin/${this.name}`;
+    const pluginExport = coreWindow.__kbnBundles__[exportId];
+    if (typeof pluginExport!.plugin !== 'function') {
+      throw new Error(`Definition of plugin "${this.name}" should be a function.`);
+    } else {
+      return pluginExport!.plugin as PluginInitializer<
+        TSetup,
+        TStart,
+        TPluginsSetup,
+        TPluginsStart
+      >;
+    }
   }
 
   /**
@@ -146,11 +167,8 @@ export class PluginWrapper<
   }
 
   private async createPluginInstance() {
-    if (this.initializer === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be setup since its bundle isn't loaded.`);
-    }
-
-    const instance = this.initializer(this.initializerContext);
+    const initializer = this.read();
+    const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);

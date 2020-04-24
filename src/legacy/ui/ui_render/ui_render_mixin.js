@@ -135,6 +135,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                   .reverse(),
               ]),
         ];
+        const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
@@ -151,9 +152,10 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
           `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
           `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
+          ...uiPluginIds.map(
+            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
+          ),
         ];
-
-        const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
 
         // These paths should align with the bundle routes configured in
         // src/optimize/bundles_route/bundles_route.js
