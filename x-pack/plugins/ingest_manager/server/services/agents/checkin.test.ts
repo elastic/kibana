@@ -53,12 +53,12 @@ describe('Agent checkin service', () => {
             agent_id: 'agent1',
             type: 'CONFIG_CHANGE',
             created_at: new Date().toISOString(),
-            data: JSON.stringify({
+            data: {
               config: {
                 id: 'config1',
                 revision: 2,
               },
-            }),
+            },
           },
         ]
       );
@@ -80,24 +80,24 @@ describe('Agent checkin service', () => {
             agent_id: 'agent1',
             type: 'CONFIG_CHANGE',
             created_at: new Date().toISOString(),
-            data: JSON.stringify({
+            data: {
               config: {
                 id: 'config2',
                 revision: 2,
               },
-            }),
+            },
           },
           {
             id: 'action1',
             agent_id: 'agent1',
             type: 'CONFIG_CHANGE',
             created_at: new Date().toISOString(),
-            data: JSON.stringify({
+            data: {
               config: {
                 id: 'config1',
                 revision: 1,
               },
-            }),
+            },
           },
         ]
       );

@@ -15,7 +15,10 @@ import {
 } from 'kibana/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
@@ -28,10 +31,11 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-
+import { registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
+  registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
@@ -47,6 +51,7 @@ export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface IngestManagerAppContext {
@@ -78,6 +83,8 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
     if (deps.security) {
       this.security = deps.security;
     }
+
+    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -117,6 +124,7 @@ export class IngestManagerPlugin implements Plugin<void, IngestManagerStartupCon
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerDataStreamRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
