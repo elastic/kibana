@@ -6,4 +6,9 @@
   overflow-x: hidden;
   min-width: 100%;
   min-height: 100%;
+
+  // TODO remove when EUI is updated
+  &.euiBody--headerIsFixed {
+    padding-top: 49px;
+  }
 }
