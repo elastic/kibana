@@ -50,7 +50,6 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) |  |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) |  |
@@ -119,6 +118,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
@@ -131,7 +131,6 @@
 |  [IAggType](./kibana-plugin-plugins-data-public.iaggtype.md) |  |
 |  [IFieldFormat](./kibana-plugin-plugins-data-public.ifieldformat.md) |  |
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-public.ifieldformatsregistry.md) |  |
-|  [IFieldFormatType](./kibana-plugin-plugins-data-public.ifieldformattype.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-public.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-public.imetricaggtype.md) |  |
 |  [IndexPatternAggRestrictions](./kibana-plugin-plugins-data-public.indexpatternaggrestrictions.md) |  |

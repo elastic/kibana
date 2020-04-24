@@ -60,7 +60,7 @@ import {
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
 } from '../../../../plugins/data/public';
-import { IFieldFormatType } from '../../../../plugins/data/common';
+import { FieldFormatInstanceType } from '../../../../plugins/data/common';
 import { Field } from '../../../../plugins/data/public';
 import {
   ScriptingDisabledCallOut,
@@ -81,7 +81,10 @@ import 'brace/mode/groovy';
 
 const getFieldFormats = () => npStart.plugins.data.fieldFormats;
 
-const getFieldTypeFormatsList = (field: IFieldType, defaultFieldFormat: IFieldFormatType) => {
+const getFieldTypeFormatsList = (
+  field: IFieldType,
+  defaultFieldFormat: FieldFormatInstanceType
+) => {
   const fieldFormats = getFieldFormats();
   const formatsByType = fieldFormats
     .getByFieldType(field.type as KBN_FIELD_TYPES)
@@ -108,7 +111,7 @@ interface FieldTypeFormat {
 }
 
 interface InitialFieldTypeFormat extends FieldTypeFormat {
-  defaultFieldFormat: IFieldFormatType;
+  defaultFieldFormat: FieldFormatInstanceType;
 }
 
 interface FieldClone extends Field {
@@ -204,7 +207,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       errors: [],
       scriptingLangs,
       fieldTypes,
-      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat as IFieldFormatType),
+      fieldTypeFormats: getFieldTypeFormatsList(
+        field,
+        DefaultFieldFormat as FieldFormatInstanceType
+      ),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
       fieldFormatParams: field.format.params(),
     });
@@ -221,7 +227,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { getConfig } = this.props.helpers;
     const { field } = this.state;
     const fieldFormats = getFieldFormats();
-    const DefaultFieldFormat = fieldFormats.getDefaultType(type) as IFieldFormatType;
+    const DefaultFieldFormat = fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     field.type = type;
     field.format = new DefaultFieldFormat(null, getConfig);
@@ -249,7 +255,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { field, fieldTypeFormats } = this.state;
     const FieldFormat = fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
-    ) as IFieldFormatType;
+    ) as FieldFormatInstanceType;
 
     field.format = new FieldFormat(params, this.props.helpers.getConfig);
 

@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-static from(convertFn: FieldFormatConvertFunction): IFieldFormatType;
+static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType;
 ```
 
 ## Parameters
@@ -18,5 +18,5 @@ static from(convertFn: FieldFormatConvertFunction): IFieldFormatType;
 
 <b>Returns:</b>
 
-`IFieldFormatType`
+`FieldFormatInstanceType`
 

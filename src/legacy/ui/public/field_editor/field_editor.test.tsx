@@ -27,7 +27,7 @@ import {
   Field,
   IndexPattern,
   IndexPatternFieldList,
-  IFieldFormatType,
+  FieldFormatInstanceType,
 } from 'src/plugins/data/public';
 import { HttpStart } from '../../../../core/public';
 
@@ -119,11 +119,11 @@ describe('FieldEditor', () => {
     } as unknown) as IndexPattern;
 
     npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(
-      () => (({} as unknown) as IFieldFormatType)
+      () => (({} as unknown) as FieldFormatInstanceType)
     );
     npStart.plugins.data.fieldFormats.getByFieldType = jest.fn(fieldType => {
       if (fieldType === 'number') {
-        return [({} as unknown) as IFieldFormatType];
+        return [({} as unknown) as FieldFormatInstanceType];
       } else {
         return [];
       }
