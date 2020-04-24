@@ -6,7 +6,7 @@
 
 import { fetchSnapshotCount } from '../snapshot';
 import { apiService } from '../utils';
-import { HttpFetchError } from '../../../../../../../../src/core/public/http/http_fetch_error';
+import { HttpFetchError } from 'src/core/public';
 
 describe('snapshot API', () => {
   let fetchMock: jest.SpyInstance<Partial<unknown>>;

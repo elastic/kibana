@@ -139,6 +139,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
