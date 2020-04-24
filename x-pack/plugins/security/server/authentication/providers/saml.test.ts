@@ -315,117 +315,123 @@ describe('SAMLAuthenticationProvider', () => {
         });
       });
 
-      it('redirects to the home page if new SAML Response is for the same user.', async () => {
-        const request = httpServerMock.createKibanaRequest({ headers: {} });
-        const state = {
-          username: 'user',
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-          realm: 'test-realm',
-        };
-        const authorization = `Bearer ${state.accessToken}`;
+      for (const [description, response] of [
+        ['session is valid', Promise.resolve({ username: 'user' })],
+        [
+          'session is is expired',
+          Promise.reject(ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())),
+        ],
+      ] as Array<[string, Promise<any>]>) {
+        it(`redirects to the home page if new SAML Response is for the same user if ${description}.`, async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: {} });
+          const state = {
+            username: 'user',
+            accessToken: 'existing-token',
+            refreshToken: 'existing-refresh-token',
+            realm: 'test-realm',
+          };
+          const authorization = `Bearer ${state.accessToken}`;
 
-        const user = { username: 'user' };
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
+          mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-        mockOptions.client.callAsInternalUser.mockResolvedValue({
-          username: 'user',
-          access_token: 'new-valid-token',
-          refresh_token: 'new-valid-refresh-token',
+          mockOptions.client.callAsInternalUser.mockResolvedValue({
+            username: 'user',
+            access_token: 'new-valid-token',
+            refresh_token: 'new-valid-refresh-token',
+          });
+
+          mockOptions.tokens.invalidate.mockResolvedValue(undefined);
+
+          await expect(
+            provider.login(
+              request,
+              { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+              state
+            )
+          ).resolves.toEqual(
+            AuthenticationResult.redirectTo('/base-path/', {
+              state: {
+                username: 'user',
+                accessToken: 'new-valid-token',
+                refreshToken: 'new-valid-refresh-token',
+                realm: 'test-realm',
+              },
+            })
+          );
+
+          expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
+
+          expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+            'shield.samlAuthenticate',
+            {
+              body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+            }
+          );
+
+          expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+          expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
+            accessToken: state.accessToken,
+            refreshToken: state.refreshToken,
+          });
         });
 
-        mockOptions.tokens.invalidate.mockResolvedValue(undefined);
+        it(`redirects to \`overwritten_session\` if new SAML Response is for the another user if ${description}.`, async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: {} });
+          const state = {
+            username: 'user',
+            accessToken: 'existing-token',
+            refreshToken: 'existing-refresh-token',
+            realm: 'test-realm',
+          };
+          const authorization = `Bearer ${state.accessToken}`;
 
-        await expect(
-          provider.login(
-            request,
-            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
-            state
-          )
-        ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/base-path/', {
-            state: {
-              username: 'user',
-              accessToken: 'new-valid-token',
-              refreshToken: 'new-valid-refresh-token',
-              realm: 'test-realm',
-            },
-          })
-        );
+          const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+          mockScopedClusterClient.callAsCurrentUser.mockImplementation(() => response);
+          mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-        expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
+          mockOptions.client.callAsInternalUser.mockResolvedValue({
+            username: 'new-user',
+            access_token: 'new-valid-token',
+            refresh_token: 'new-valid-refresh-token',
+          });
 
-        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
-          'shield.samlAuthenticate',
-          {
-            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
-          }
-        );
+          mockOptions.tokens.invalidate.mockResolvedValue(undefined);
 
-        expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
-        expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
-          accessToken: state.accessToken,
-          refreshToken: state.refreshToken,
+          await expect(
+            provider.login(
+              request,
+              { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
+              state
+            )
+          ).resolves.toEqual(
+            AuthenticationResult.redirectTo('/mock-server-basepath/security/overwritten_session', {
+              state: {
+                username: 'new-user',
+                accessToken: 'new-valid-token',
+                refreshToken: 'new-valid-refresh-token',
+                realm: 'test-realm',
+              },
+            })
+          );
+
+          expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
+
+          expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
+            'shield.samlAuthenticate',
+            {
+              body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
+            }
+          );
+
+          expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
+          expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
+            accessToken: state.accessToken,
+            refreshToken: state.refreshToken,
+          });
         });
-      });
-
-      it('redirects to `overwritten_session` if new SAML Response is for the another user.', async () => {
-        const request = httpServerMock.createKibanaRequest({ headers: {} });
-        const state = {
-          username: 'user',
-          accessToken: 'existing-valid-token',
-          refreshToken: 'existing-valid-refresh-token',
-          realm: 'test-realm',
-        };
-        const authorization = `Bearer ${state.accessToken}`;
-
-        const existingUser = { username: 'user' };
-        const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-        mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(existingUser);
-        mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-
-        mockOptions.client.callAsInternalUser.mockResolvedValue({
-          username: 'new-user',
-          access_token: 'new-valid-token',
-          refresh_token: 'new-valid-refresh-token',
-        });
-
-        mockOptions.tokens.invalidate.mockResolvedValue(undefined);
-
-        await expect(
-          provider.login(
-            request,
-            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
-            state
-          )
-        ).resolves.toEqual(
-          AuthenticationResult.redirectTo('/mock-server-basepath/security/overwritten_session', {
-            state: {
-              username: 'new-user',
-              accessToken: 'new-valid-token',
-              refreshToken: 'new-valid-refresh-token',
-              realm: 'test-realm',
-            },
-          })
-        );
-
-        expectAuthenticateCall(mockOptions.client, { headers: { authorization } });
-
-        expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith(
-          'shield.samlAuthenticate',
-          {
-            body: { ids: [], content: 'saml-response-xml', realm: 'test-realm' },
-          }
-        );
-
-        expect(mockOptions.tokens.invalidate).toHaveBeenCalledTimes(1);
-        expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
-          accessToken: state.accessToken,
-          refreshToken: state.refreshToken,
-        });
-      });
+      }
     });
 
     describe('User initiated login with captured redirect URL', () => {
