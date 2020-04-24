@@ -8,19 +8,19 @@ import { i18n } from '@kbn/i18n';
 
 import { hasLicenseExpired } from '../license';
 
-import { Privileges, getDefaultPrivileges } from '../../../common/types/privileges';
-import { getPrivileges, getManageMlPrivileges } from './get_privileges';
+import { MlCapabilities, getDefaultCapabilities } from '../../../common/types/capabilities';
+import { getCapabilities, getManageMlCapabilities } from './get_capabilities';
 import { ACCESS_DENIED_PATH } from '../management/management_urls';
 
-let privileges: Privileges = getDefaultPrivileges();
-// manage_ml requires all monitor and admin cluster privileges: https://github.com/elastic/elasticsearch/blob/664a29c8905d8ce9ba8c18aa1ed5c5de93a0eabc/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/privilege/ClusterPrivilege.java#L53
-export function checkGetManagementMlJobs() {
+let _capabilities: MlCapabilities = getDefaultCapabilities();
+
+export function checkGetManagementMlJobsResolver() {
   return new Promise<{ mlFeatureEnabledInSpace: boolean }>((resolve, reject) => {
-    getManageMlPrivileges().then(
+    getManageMlCapabilities().then(
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
-        privileges = capabilities;
-        // Loop through all privileges to ensure they are all set to true.
-        const isManageML = Object.values(privileges).every(p => p === true);
+        _capabilities = capabilities;
+        // Loop through all capabilities to ensure they are all set to true.
+        const isManageML = Object.values(_capabilities).every(p => p === true);
 
         if (isManageML === true && isPlatinumOrTrialLicense === true) {
           return resolve({ mlFeatureEnabledInSpace });
@@ -33,17 +33,17 @@ export function checkGetManagementMlJobs() {
   });
 }
 
-export function checkGetJobsPrivilege(): Promise<Privileges> {
+export function checkGetJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
-      privileges = capabilities;
+    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      _capabilities = capabilities;
       // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
-      // all other functionality is controlled by the return privileges object.
+      // all other functionality is controlled by the return capabilities object.
       // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
       // allow the promise to resolve as the separate license check will redirect then user to
       // a basic feature
-      if (privileges.canGetJobs || isPlatinumOrTrialLicense === false) {
-        return resolve(privileges);
+      if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
+        return resolve(_capabilities);
       } else {
         window.location.href = '#/access-denied';
         return reject();
@@ -52,15 +52,15 @@ export function checkGetJobsPrivilege(): Promise<Privileges> {
   });
 }
 
-export function checkCreateJobsPrivilege(): Promise<Privileges> {
+export function checkCreateJobsCapabilitiesResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities, isPlatinumOrTrialLicense }) => {
-      privileges = capabilities;
+    getCapabilities().then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      _capabilities = capabilities;
       // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
       // allow the promise to resolve as the separate license check will redirect then user to
       // a basic feature
-      if (privileges.canCreateJob || isPlatinumOrTrialLicense === false) {
-        return resolve(privileges);
+      if (_capabilities.canCreateJob || isPlatinumOrTrialLicense === false) {
+        return resolve(_capabilities);
       } else {
         // if the user has no permission to create a job,
         // redirect them back to the Transforms Management page
@@ -71,14 +71,14 @@ export function checkCreateJobsPrivilege(): Promise<Privileges> {
   });
 }
 
-export function checkFindFileStructurePrivilege(): Promise<Privileges> {
+export function checkFindFileStructurePrivilegeResolver(): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
-    getPrivileges().then(({ capabilities }) => {
-      privileges = capabilities;
+    getCapabilities().then(({ capabilities }) => {
+      _capabilities = capabilities;
       // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
-      // all other functionality is controlled by the return privileges object
-      if (privileges.canFindFileStructure) {
-        return resolve(privileges);
+      // all other functionality is controlled by the return _capabilities object
+      if (_capabilities.canFindFileStructure) {
+        return resolve(_capabilities);
       } else {
         window.location.href = '#/access-denied';
         return reject();
@@ -89,14 +89,14 @@ export function checkFindFileStructurePrivilege(): Promise<Privileges> {
 
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
-export function checkPermission(privilegeType: keyof Privileges) {
+export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
-  return privileges[privilegeType] === true && licenseHasExpired !== true;
+  return _capabilities[capability] === true && licenseHasExpired !== true;
 }
 
 // create the text for the button's tooltips if the user's license has
 // expired or if they don't have the privilege to press that button
-export function createPermissionFailureMessage(privilegeType: keyof Privileges) {
+export function createPermissionFailureMessage(privilegeType: keyof MlCapabilities) {
   let message = '';
   const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
