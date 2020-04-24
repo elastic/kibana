@@ -7,25 +7,28 @@
 import { getMLJobId } from '../ml_anomaly';
 
 describe('ML Anomaly API', () => {
-  it('it generates a valid ML job ID', async () => {
+  it('it generates a lowercase job id', async () => {
     const monitorId = 'ABC1334haa';
 
     const jobId = getMLJobId(monitorId);
 
     expect(jobId).toEqual(jobId.toLowerCase());
+  });
 
+  it('should truncate long monitor IDs', () => {
     const longAndWeirdMonitorId =
       'https://auto-mmmmxhhhhhccclongAndWeirdMonitorId123yyyyyrereauto-xcmpa-1345555454646';
-    const jobId1 = getMLJobId(longAndWeirdMonitorId);
 
-    expect(jobId1.length <= 64).toBe(true);
+    expect(getMLJobId(longAndWeirdMonitorId)).toHaveLength(64);
+  });
 
+  it('should remove special characters and replace them with underscore', () => {
     const monIdSpecialChars = '/ ? , " < > | *   a';
 
-    const jobId2 = getMLJobId(monIdSpecialChars);
+    const jobId = getMLJobId(monIdSpecialChars);
 
     const format = /[/?,"<>|*]+/;
 
-    expect(format.test(jobId2)).toBe(false);
+    expect(format.test(jobId)).toBe(false);
   });
 });

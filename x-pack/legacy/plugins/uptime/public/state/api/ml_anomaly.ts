@@ -23,18 +23,20 @@ const getJobPrefix = (monitorId: string) => {
   // Also Spaces and the characters / ? , " < > | * are not allowed
   // so we will replace all special chars with _
 
-  const lowerCaseMonitorId = monitorId.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+  const prefix = monitorId.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
   // ML Job ID can't be greater than 64 length, so will be substring it, and hope
   // At such big length, there is minimum chance of having duplicate monitor id
-  // Subtracting ML_JOB_ID constant and _ char as well
-  if ((lowerCaseMonitorId + ML_JOB_ID + 1).length > 64) {
-    return lowerCaseMonitorId.substring(0, 64 - ML_JOB_ID.length - 1);
+  // Subtracting ML_JOB_ID constant as well
+  const postfix = '_' + ML_JOB_ID;
+
+  if ((prefix + postfix).length >= 64) {
+    return prefix.substring(0, 64 - postfix.length - 1) + '_';
   }
-  return lowerCaseMonitorId;
+  return prefix + '_';
 };
 
-export const getMLJobId = (monitorId: string) => `${getJobPrefix(monitorId)}_${ML_JOB_ID}`;
+export const getMLJobId = (monitorId: string) => `${getJobPrefix(monitorId)}${ML_JOB_ID}`;
 
 export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
@@ -51,7 +53,7 @@ export const createMLJob = async ({
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
   const data = {
-    prefix: `${getJobPrefix(monitorId)}_`,
+    prefix: `${getJobPrefix(monitorId)}`,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: moment()
