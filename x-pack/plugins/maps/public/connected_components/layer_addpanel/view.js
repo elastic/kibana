@@ -17,7 +17,6 @@ export class AddLayerPanel extends Component {
     layerWizard: null,
     layerDescriptor: null, // TODO get this from redux store instead of storing locally
     isIndexingSource: false,
-    shouldLayerBeIndexed: false,
     importView: false,
     layerImportAddReady: false,
   };
