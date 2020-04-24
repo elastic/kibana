@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, SavedObjectsFindResponse } from 'src/core/server';
 import {
   CaseConfigureServiceSetup,
   CaseServiceSetup,
   CaseUserActionServiceSetup,
 } from '../../services';
+import { CommentAttributes } from '../../../common/api/cases';
 
 export interface RouteDeps {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -24,9 +25,18 @@ export enum SortFieldCase {
   status = 'status',
 }
 
-export interface ExtraCaseData {
-  caseId: string;
-  caseVersion: string;
+interface PatchConnector {
   connectorId: string | null;
-  totalComments: number;
+  caseVersion: string;
+}
+
+export interface ExtraCaseData extends PatchConnector {
+  caseId: string;
+  totalComment: number;
+}
+
+export interface ExtraDataFindByCases
+  extends SavedObjectsFindResponse<CommentAttributes>,
+    PatchConnector {
+  cId: string;
 }

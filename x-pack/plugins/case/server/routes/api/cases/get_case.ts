@@ -33,9 +33,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           client,
           caseId: request.params.case_id,
         });
-        console.log('theCase', theCase);
         if (!('connector_id' in theCase.attributes)) {
-          console.log('no connector');
           const myCaseConfigure = await caseConfigureService.find({ client });
           const connectorId =
             myCaseConfigure.saved_objects.length > 0

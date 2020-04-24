@@ -11,15 +11,9 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { isEmpty } from 'lodash';
-import { SavedObjectsFindResponse } from 'kibana/server';
-import {
-  CasesFindResponseRt,
-  CasesFindRequestRt,
-  throwErrors,
-  CommentAttributes,
-} from '../../../../common/api';
+import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../../common/api';
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
-import { RouteDeps, ExtraCaseData } from '../types';
+import { RouteDeps, ExtraCaseData, ExtraDataFindByCases } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
 
@@ -105,7 +99,7 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
           caseService.findCases(argsOpenCases),
           caseService.findCases(argsClosedCases),
         ]);
-        const extraDataFindByCases = await Promise.all(
+        const extraDataFindByCases: ExtraDataFindByCases[] = await Promise.all(
           cases.saved_objects.map(async c => {
             let connectorId;
             let caseVersion;
@@ -116,25 +110,16 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
                   ? myCaseConfigure.saved_objects[0].attributes.connector_id
                   : null;
 
-              await caseService.patchCase({
+              const patchCaseResp = await caseService.patchCase({
                 client,
                 caseId: c.id,
                 version: c.version,
                 updatedAttributes: { connector_id: connectorId },
               });
-              const theCase = await caseService.getCase({
-                client,
-                caseId: c.id,
-              });
-              console.log('theCase', {
-                cId: c.id,
-                id: theCase.id,
-                version: theCase.version,
-              });
-              caseVersion = theCase.version;
+              caseVersion = patchCaseResp.version ?? '';
             } else {
               connectorId = c.attributes.connector_id;
-              caseVersion = c.version;
+              caseVersion = c.version ?? '';
             }
 
             const allCaseComments = await caseService.getAllCaseComments({
@@ -146,39 +131,41 @@ export function initFindCasesApi({ caseService, caseConfigureService, router }: 
                 perPage: 1,
               },
             });
-            console.log('extraDataFindByCases[]', {
-              ...allCaseComments,
-              connectorId,
-              caseVersion,
-            });
             return {
               ...allCaseComments,
               connectorId,
               caseVersion,
+              cId: c.id,
             };
           })
         );
-        const extraCaseData = extraDataFindByCases.reduce<ExtraCaseData[]>((acc, itemFind) => {
+        const extraCaseData = extraDataFindByCases.reduce((acc: ExtraCaseData[], itemFind) => {
           if (itemFind.saved_objects.length > 0) {
             const caseId =
               itemFind.saved_objects[0].references.find(r => r.type === CASE_SAVED_OBJECT)?.id ??
               null;
             if (caseId != null) {
-              console.log('itemFind', itemFind);
               return [
                 ...acc,
                 {
                   caseId,
-                  totalComments: itemFind.total,
+                  totalComment: itemFind.total,
                   connectorId: itemFind.connectorId,
                   caseVersion: itemFind.caseVersion,
                 },
               ];
             }
           }
-          return [...acc];
+          return [
+            ...acc,
+            {
+              caseId: itemFind.cId,
+              totalComment: 0,
+              connectorId: itemFind.connectorId,
+              caseVersion: itemFind.caseVersion,
+            },
+          ];
         }, []);
-
         return response.ok({
           body: CasesFindResponseRt.encode(
             transformCases(cases, openCases.total ?? 0, closesCases.total ?? 0, extraCaseData)

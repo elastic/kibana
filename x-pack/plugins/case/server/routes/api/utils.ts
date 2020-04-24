@@ -109,7 +109,7 @@ export const flattenCaseSavedObjects = (
       ...acc,
       flattenCaseSavedObject({
         savedObject,
-        totalComment: extraDataThisCase?.totalComments,
+        totalComment: extraDataThisCase?.totalComment,
         connectorId: extraDataThisCase?.connectorId,
         version: extraDataThisCase?.caseVersion,
       }),
@@ -120,7 +120,7 @@ export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = 0,
-  connectorId,
+  connectorId = null,
   version,
 }: {
   savedObject: SavedObject<CaseAttributes>;
@@ -130,7 +130,7 @@ export const flattenCaseSavedObject = ({
   version?: string;
 }): CaseResponse => ({
   comments: flattenCommentSavedObjects(comments),
-  connector_id: connectorId ?? savedObject.attributes.connector_id,
+  connector_id: connectorId,
   id: savedObject.id,
   totalComment,
   version: version ?? savedObject.version ?? '0',

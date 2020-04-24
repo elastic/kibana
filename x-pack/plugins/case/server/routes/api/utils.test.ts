@@ -18,7 +18,11 @@ import {
 } from './utils';
 import { newCase } from './__mocks__/request_responses';
 import { isBoom, boomify } from 'boom';
-import { mockCases, mockCaseComments } from './__fixtures__/mock_saved_objects';
+import {
+  mockCases,
+  mockCaseComments,
+  mockCaseNoConnectorId,
+} from './__fixtures__/mock_saved_objects';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {
@@ -211,10 +215,10 @@ describe('Utils', () => {
   describe('transformCases', () => {
     it('transforms correctly', () => {
       const extraCaseData = [
-        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[1].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[2].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[3].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[0].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[1].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[2].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[3].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
       ];
 
       const res = transformCases(
@@ -237,7 +241,7 @@ describe('Utils', () => {
   describe('flattenCaseSavedObjects', () => {
     it('flattens correctly', () => {
       const extraCaseData = [
-        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: 'WzAsMV0=' },
+        { caseId: mockCases[0].id, totalComment: 2, connectorId: '123', caseVersion: 'WzAsMV0=' },
       ];
 
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
@@ -273,7 +277,7 @@ describe('Utils', () => {
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
       const extraCaseData = [
-        { caseId: 'not-exist', totalComments: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: 'not-exist', totalComment: 2, connectorId: '123', caseVersion: '700' },
       ];
 
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
@@ -309,18 +313,63 @@ describe('Utils', () => {
     });
     it('inserts missing connectorId', () => {
       const extraCaseData = [
-        { caseId: mockCases[0].id, totalComments: 2, connectorId: '123', caseVersion: '700' },
+        {
+          caseId: mockCaseNoConnectorId.id,
+          totalComment: 2,
+          connectorId: '123',
+          caseVersion: '700',
+        },
       ];
-      const noConnectorIdCase = { ...mockCases[0] };
-      delete noConnectorIdCase.attributes.connector_id;
 
-      const res = flattenCaseSavedObjects([noConnectorIdCase], extraCaseData);
+      // @ts-ignore this is to update old case saved objects to include connector_id
+      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
       expect(res).toEqual([
         {
-          id: 'mock-id-1',
+          id: mockCaseNoConnectorId.id,
           closed_at: null,
           closed_by: null,
           connector_id: '123',
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          description: 'This is a brand new case of a bad meanie defacing data',
+          external_service: null,
+          title: 'Super Bad Security Issue',
+          status: 'open',
+          tags: ['defacement'],
+          updated_at: '2019-11-25T21:54:48.952Z',
+          updated_by: {
+            full_name: 'elastic',
+            email: 'testemail@elastic.co',
+            username: 'elastic',
+          },
+          comments: [],
+          totalComment: 2,
+          version: '700',
+        },
+      ]);
+    });
+    it('inserts missing connectorId (null)', () => {
+      const extraCaseData = [
+        {
+          caseId: mockCaseNoConnectorId.id,
+          totalComment: 2,
+          connectorId: null,
+          caseVersion: '700',
+        },
+      ];
+
+      // @ts-ignore this is to update old case saved objects to include connector_id
+      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
+      expect(res).toEqual([
+        {
+          id: mockCaseNoConnectorId.id,
+          closed_at: null,
+          closed_by: null,
+          connector_id: null,
           created_at: '2019-11-25T21:54:48.952Z',
           created_by: {
             full_name: 'elastic',
@@ -382,6 +431,78 @@ describe('Utils', () => {
         comments: flattenCommentSavedObjects(comments),
         totalComment: 2,
         ...myCase.attributes,
+      });
+    });
+    it('inserts missing connectorId', () => {
+      const extraCaseData = {
+        totalComment: 2,
+        connectorId: '123',
+        version: '700',
+      };
+
+      // @ts-ignore this is to update old case saved objects to include connector_id
+      const res = flattenCaseSavedObject({ savedObject: mockCaseNoConnectorId, ...extraCaseData });
+      expect(res).toEqual({
+        id: mockCaseNoConnectorId.id,
+        closed_at: null,
+        closed_by: null,
+        connector_id: '123',
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: 'open',
+        tags: ['defacement'],
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        comments: [],
+        totalComment: 2,
+        version: '700',
+      });
+    });
+    it('inserts missing connectorId (null)', () => {
+      const extraCaseData = {
+        totalComment: 2,
+        connectorId: null,
+        version: '700',
+      };
+
+      // @ts-ignore this is to update old case saved objects to include connector_id
+      const res = flattenCaseSavedObject({ savedObject: mockCaseNoConnectorId, ...extraCaseData });
+      expect(res).toEqual({
+        id: mockCaseNoConnectorId.id,
+        closed_at: null,
+        closed_by: null,
+        connector_id: null,
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        external_service: null,
+        title: 'Super Bad Security Issue',
+        status: 'open',
+        tags: ['defacement'],
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: {
+          full_name: 'elastic',
+          email: 'testemail@elastic.co',
+          username: 'elastic',
+        },
+        comments: [],
+        totalComment: 2,
+        version: '700',
       });
     });
   });

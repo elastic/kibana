@@ -286,7 +286,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
       pageIndex: queryParams.page - 1,
       pageSize: queryParams.perPage,
       totalItemCount: data.total,
-      pageSizeOptions: [5, 10, 15, 20, 25],
+      pageSizeOptions: [2, 10, 15, 20, 25],
     }),
     [data, queryParams]
   );
