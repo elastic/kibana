@@ -18,7 +18,6 @@
  */
 
 import React, { PureComponent, Fragment } from 'react';
-import classNames from 'classnames';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,7 +43,6 @@ import { Field, getEditableValue } from '../field';
 import { FieldSetting, SettingsChanges, FieldState } from '../../types';
 
 type Category = string;
-const NAV_IS_LOCKED_KEY = 'core.chrome.isLocked';
 
 interface FormProps {
   settings: Record<string, FieldSetting[]>;

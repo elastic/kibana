@@ -42,6 +42,8 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
           };
         });
 
+      await testSubjects.click('toggleNavButton');
+
       return links;
     }
 
