@@ -69,6 +69,11 @@ export type ExpressionsServiceStart = Pick<
 export interface ExpressionServiceParams {
   executor?: Executor;
   renderers?: ExpressionRendererRegistry;
+
+  /**
+   * Default renderer used to render error when @type {ExpressionRendering}
+   * fails to render an expression value.
+   */
   onRenderError?: RenderErrorHandlerFnType;
 }
 
@@ -278,8 +283,8 @@ export class ExpressionsService {
   ): ExpressionRendering => {
     const rendering = new ExpressionRendering({
       ...params,
-      onRenderError: params.onRenderError ?? this.params.onRenderError,
       renderers: this.renderers,
+      onRenderError: params.onRenderError ?? this.params.onRenderError,
     });
 
     return rendering;
