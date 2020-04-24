@@ -17,7 +17,7 @@ export enum CERT_STATUS {
 export const useCertStatus = (expiryDate?: string) => {
   const dss = useSelector(selectDynamicSettings);
 
-  const errorState = dss.settings?.certificatesThresholds.errorState;
+  const errorState = dss.settings?.certificatesThresholds!.errorState;
 
   const certValidityDate = new Date(expiryDate ?? '');
 

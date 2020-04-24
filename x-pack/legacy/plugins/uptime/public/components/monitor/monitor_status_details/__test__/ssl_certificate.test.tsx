@@ -6,9 +6,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiBadge } from '@elastic/eui';
-import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { defaultDynamicSettings, Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 import * as redux from 'react-redux';

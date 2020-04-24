@@ -21,6 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await makeCheck({ es, tls: true });
+      await uptimeService.navigation.refreshApp();
     });
 
     it('can navigate to cert page', async () => {
