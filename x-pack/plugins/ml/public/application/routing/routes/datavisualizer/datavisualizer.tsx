@@ -16,7 +16,7 @@ import { useResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';
 
 import { checkBasicLicense } from '../../../license';
-import { checkFindFileStructurePrivilege } from '../../../privilege/check_privilege';
+import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { DATA_VISUALIZER_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
 const breadcrumbs = [ML_BREADCRUMB, DATA_VISUALIZER_BREADCRUMB];
@@ -30,7 +30,7 @@ export const selectorRoute: MlRoute = {
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkBasicLicense,
-    checkFindFileStructurePrivilege,
+    checkFindFileStructurePrivilege: checkFindFileStructurePrivilegeResolver,
   });
   return (
     <PageLoader context={context}>
