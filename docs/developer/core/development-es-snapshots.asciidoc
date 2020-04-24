@@ -37,8 +37,31 @@ KBN_ES_SNAPSHOT_USE_UNVERIFIED=true node scripts/functional_tests_server
 
 ==== Google Cloud Storage buckets
 
-kibana-ci-es-snapshots-daily
-kibana-ci-es-snapshots-permanent
+===== kibana-ci-es-snapshots-daily
+
+This bucket stores snapshots that are created on a daily basis, and is the primary location used by `kbn-es` to download snapshots.
+
+Snapshots are automatically deleted after 10 days.
+
+The file structure for this bucket looks like this:
+
+* `<version>/manifest-latest.json`
+* `<version>/manifest-latest-verified.json`
+* `<version>/archives/<unique id>/*.tar.gz`
+* `<version>/archives/<unique id>/*.tar.gz.sha512`
+* `<version>/archives/<unique id>/manifest.json`
+
+===== kibana-ci-es-snapshots-permanent
+
+This bucket stores only the most recently promoted snapshot for each version. Old snapshots are only deleted when new ones are uploaded.
+
+This bucket serves as permanent snapshot storage for old branches/versions that are no longer being built. `kbn-es` checks the daily bucket first, followed by this one if no snapshots were found.
+
+The file structure for this bucket looks like this:
+
+* `<version>/*.tar.gz`
+* `<version>/*.tar.gz.sha512`
+* `<version>/manifest.json`
 
 ==== How snapshots are built, tested, and promoted
 
