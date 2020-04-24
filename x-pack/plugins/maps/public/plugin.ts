@@ -39,11 +39,15 @@ import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { registerLayerWizards } from './layers/load_layer_wizards';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { MapEmbeddableFactory } from './embeddable';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
+  embeddable: EmbeddableSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
@@ -102,12 +106,13 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    const { inspector, home, visualizations } = plugins;
+    const { inspector, home, visualizations, embeddable } = plugins;
     bindSetupCoreAndPlugins(core, plugins);
 
     inspector.registerView(MapView);
     home.featureCatalogue.register(featureCatalogueEntry);
     visualizations.registerAlias(getMapsVisTypeAlias());
+    embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
   }
 
   public start(core: CoreStart, plugins: any) {

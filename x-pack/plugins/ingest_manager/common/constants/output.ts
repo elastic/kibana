@@ -12,5 +12,4 @@ export const DEFAULT_OUTPUT = {
   is_default: true,
   type: OutputType.Elasticsearch,
   hosts: [''],
-  api_key: '',
 };
