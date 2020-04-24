@@ -14,8 +14,8 @@ import { checkLicense } from '../lib/license_check';
 import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
 
 import {
-  SEARCH_EMBEDDABLE_TYPE,
   ISearchEmbeddable,
+  SEARCH_EMBEDDABLE_TYPE,
 } from '../../../../../src/plugins/discover/public';
 
 import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../constants';

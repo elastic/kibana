@@ -24,7 +24,11 @@ import { FieldEditor } from 'ui/field_editor';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IndexHeader } from '../index_header';
-import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
+import {
+  IndexPattern,
+  IndexPatternField,
+  DataPublicPluginStart,
+} from '../../../../../../../../../plugins/data/public';
 import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
 import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
 
@@ -35,6 +39,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
   fieldFormatEditors: any;
   getConfig: (name: string) => any;
   services: {
+    fieldFormats: DataPublicPluginStart['fieldFormats'];
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     http: Function;
@@ -61,10 +66,17 @@ export const CreateEditField = withRouter(
     const field =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
-        : new IndexPatternField(indexPattern, {
-            scripted: true,
-            type: 'number',
-          });
+        : new IndexPatternField(
+            {
+              fieldFormats: services.fieldFormats,
+              toastNotifications: services.notifications.toasts,
+            },
+            indexPattern,
+            {
+              scripted: true,
+              type: 'number',
+            }
+          );
 
     const url = `/management/kibana/index_patterns/${indexPattern.id}`;
 

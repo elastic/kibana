@@ -47,6 +47,7 @@ import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
+  getHistory,
   setDocViewsRegistry,
   setUrlTracker,
   setAngularModule,
@@ -158,6 +159,10 @@ export class DiscoverPlugin
       stop: stopUrlTracker,
       setActiveUrl: setTrackedUrl,
     } = createKbnUrlTracker({
+      // we pass getter here instead of plain `history`,
+      // so history is lazily created (when app is mounted)
+      // this prevents redundant `#` when not in discover app
+      getHistory,
       baseUrl: core.http.basePath.prepend('/app/discover'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
@@ -204,9 +209,13 @@ export class DiscoverPlugin
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
         appMounted();
-        await this.initializeServices();
+        const {
+          plugins: { data: dataStart },
+        } = await this.initializeServices();
         await this.initializeInnerAngular();
 
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {

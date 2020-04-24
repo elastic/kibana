@@ -17,11 +17,25 @@
  * under the License.
  */
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+
+import angular from 'angular';
 import expect from '@kbn/expect';
-import { pluginInstance } from 'plugins/kibana/discover/legacy';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import sinon from 'sinon';
+
+import { PrivateProvider } from '../../../../../../plugins/kibana_legacy/public';
+import { FixedScrollProvider } from '../../../../../../plugins/discover/public/application/angular/directives/fixed_scroll';
+import { DebounceProviderTimeout } from '../../../../../../plugins/discover/public/application/angular/directives/debounce/debounce';
+
+const testModuleName = 'fixedScroll';
+
+angular
+  .module(testModuleName, [])
+  .provider('Private', PrivateProvider)
+  .service('debounce', ['$timeout', DebounceProviderTimeout])
+  .directive('fixedScroll', FixedScrollProvider);
 
 describe('FixedScroll directive', function() {
   const sandbox = sinon.createSandbox();
@@ -29,9 +43,7 @@ describe('FixedScroll directive', function() {
   let compile;
   let flushPendingTasks;
   const trash = [];
-  beforeEach(() => pluginInstance.initializeServices());
-  beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(ngMock.module('app/discover'));
+  beforeEach(ngMock.module(testModuleName));
   beforeEach(
     ngMock.inject(function($compile, $rootScope, $timeout) {
       flushPendingTasks = function flushPendingTasks() {

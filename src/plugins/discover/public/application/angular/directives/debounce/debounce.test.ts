@@ -27,11 +27,9 @@ import 'angular-route';
 import { DebounceProvider } from './index';
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { initializeInnerAngularModule } from '../../../../get_inner_angular';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { initAngularBootstrap } from 'src/plugins/kibana_legacy/public';
+import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
+import { dataPluginMock } from '../../../../../../data/public/mocks';
+import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
 
 describe('debounce service', function() {
   let debounce: (fn: () => void, timeout: number, options?: any) => any;

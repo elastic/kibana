@@ -106,7 +106,15 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.fields = new FieldList(
+      {
+        fieldFormats: getFieldFormats(),
+        toastNotifications: getNotifications().toasts,
+      },
+      this,
+      [],
+      this.shortDotsEnable
+    );
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(
@@ -131,7 +139,15 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = new FieldList(
+      {
+        fieldFormats: getFieldFormats(),
+        toastNotifications: getNotifications().toasts,
+      },
+      this,
+      newValue,
+      this.shortDotsEnable
+    );
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -270,6 +286,10 @@ export class IndexPattern implements IIndexPattern {
 
     this.fields.add(
       new Field(
+        {
+          fieldFormats: getFieldFormats(),
+          toastNotifications: getNotifications().toasts,
+        },
         this,
         {
           name,

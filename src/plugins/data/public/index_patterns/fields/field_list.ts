@@ -18,11 +18,18 @@
  */
 
 import { findIndex } from 'lodash';
+import { ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
+import { FieldFormatsStart } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
+
+interface Deps {
+  fieldFormats: FieldFormatsStart;
+  toastNotifications: ToastsStart;
+}
 
 export interface IFieldList extends Array<Field> {
   getByName(name: Field['name']): Field | undefined;
@@ -44,11 +51,20 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.groups.get(field.type)!.set(field.name, field);
   };
   private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
+  private fieldFormats: FieldFormatsStart;
+  private toastNotifications: ToastsStart;
 
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
+  constructor(
+    { fieldFormats, toastNotifications }: Deps,
+    indexPattern: IndexPattern,
+    specs: FieldSpec[] = [],
+    shortDotsEnable = false
+  ) {
     super();
     this.indexPattern = indexPattern;
     this.shortDotsEnable = shortDotsEnable;
+    this.fieldFormats = fieldFormats;
+    this.toastNotifications = toastNotifications;
 
     specs.map(field => this.add(field));
   }
@@ -56,7 +72,15 @@ export class FieldList extends Array<Field> implements IFieldList {
   getByName = (name: Field['name']) => this.byName.get(name);
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
   add = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
+    const newField = new Field(
+      {
+        fieldFormats: this.fieldFormats,
+        toastNotifications: this.toastNotifications,
+      },
+      this.indexPattern,
+      field,
+      this.shortDotsEnable
+    );
     this.push(newField);
     this.setByName(newField);
     this.setByGroup(newField);
@@ -71,7 +95,15 @@ export class FieldList extends Array<Field> implements IFieldList {
   };
 
   update = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
+    const newField = new Field(
+      {
+        fieldFormats: this.fieldFormats,
+        toastNotifications: this.toastNotifications,
+      },
+      this.indexPattern,
+      field,
+      this.shortDotsEnable
+    );
     const index = this.findIndex(f => f.name === newField.name);
     this.splice(index, 1, newField);
     this.setByName(newField);

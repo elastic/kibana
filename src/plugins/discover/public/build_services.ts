@@ -34,13 +34,14 @@ import {
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
+import { SharePluginStart } from 'src/plugins/share/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
+import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
-import { SharePluginStart } from '../../share/public';
-import { ChartsPluginStart } from '../../charts/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { createSavedSearchesLoader, SavedSearch } from '.';
 import { DiscoverStartPlugins } from './plugin';
 import { SavedObjectKibanaServices } from '../../saved_objects/public';
+import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -49,6 +50,7 @@ export interface DiscoverServices {
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
+  fieldFormats: DataPublicPluginStart['fieldFormats'];
   history: () => History;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
@@ -87,6 +89,7 @@ export async function buildServices(
     data: plugins.data,
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
+    fieldFormats: plugins.data.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     getSavedSearchById: async (id: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),

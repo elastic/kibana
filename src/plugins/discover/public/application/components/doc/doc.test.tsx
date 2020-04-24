@@ -25,10 +25,23 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
 
 jest.mock('../../../kibana_services', () => {
+  let registry: any[] = [];
+
   return {
     getServices: () => ({
       metadata: {
         branch: 'test',
+      },
+    }),
+    getDocViewsRegistry: () => ({
+      addDocView(view: any) {
+        registry.push(view);
+      },
+      getDocViewsSorted() {
+        return registry;
+      },
+      resetRegistry: () => {
+        registry = [];
       },
     }),
   };
