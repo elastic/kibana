@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import * as labels from './translations';
 import { KueryBar } from '..';
 
 interface AlertFieldNumberProps {
@@ -155,25 +156,13 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
   );
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>([
     {
-      'aria-label': i18n.translate(
-        'xpack.uptime.alerts.timerangeUnitSelectable.secondsOption.ariaLabel',
-        {
-          defaultMessage: '"Seconds" time range select item',
-        }
-      ),
+      'aria-label': labels.SECONDS_TIME_RANGE,
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
       key: 's',
-      label: i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
-        defaultMessage: 'seconds',
-      }),
+      label: labels.SECONDS,
     },
     {
-      'aria-label': i18n.translate(
-        'xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel',
-        {
-          defaultMessage: '"Minutes" time range select item',
-        }
-      ),
+      'aria-label': labels.MINUTES_TIME_RANGE,
       'data-test-subj': 'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
       checked: 'on',
       key: 'm',
