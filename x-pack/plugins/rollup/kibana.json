@@ -13,7 +13,8 @@
   "optionalPlugins": [
     "home",
     "indexManagement",
-    "usageCollection"
+    "usageCollection",
+    "visTypeTimeseries"
   ],
   "configPath": ["xpack", "rollup"]
 }

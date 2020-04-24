@@ -33,7 +33,11 @@ Once a rollup index pattern is created, it is tagged with `Rollup` in the list o
 
 ## Create visualizations from rollup index patterns
 
-This plugin enables the user to create visualizations from rollup data using the Visualize app, excluding TSVB, Vega, and Timelion. Limiting visualization editor options is done by [registering configs](public/visualize) to various vis extension points. These configs use information stored on the rollup index pattern to limit:
+This plugin enables the user to create visualizations from rollup data using the Visualize app, excluding TSVB, Vega, and Timelion. When Visualize sends search requests, this plugin routes the requests to the [Elasticsearch rollup search endpoint](https://www.elastic.co/guide/en/elasticsearch/reference/current/rollup-search.html), which searches the special document structure within rollup indices. The visualization options available to users are based on the capabilities of the rollup index pattern they're visualizing.
+
+Routing to the Elasticsearch rollup search endpoint is done by creating an extension point in Courier, effectively allowing multiple "search strategies" to be registered. A [rollup search strategy](public/search/register.js) is registered by this plugin that queries [this plugin's rollup search endpoint](server/routes/api/search.js).
+
+Limiting visualization editor options is done by [registering configs](public/visualize/index.js) to various vis extension points. These configs use information stored on the rollup index pattern to limit:
 * Available aggregation types
 * Available fields for a particular aggregation
 * Default and base interval for histogram aggregation

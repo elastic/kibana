@@ -16,20 +16,23 @@ import {
   CoreSetup,
   Plugin,
   Logger,
+  KibanaRequest,
   PluginInitializerContext,
   IScopedClusterClient,
+  APICaller,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies } from './types';
+import { Dependencies, CallWithRequestFactoryShim } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
 import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
+import { registerRollupSearchStrategy } from './lib/search_strategies';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './lib/is_es_error';
 import { formatEsError } from './lib/format_es_error';
@@ -53,7 +56,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
 
   public setup(
     { http, uiSettings, elasticsearch }: CoreSetup,
-    { licensing, indexManagement, usageCollection }: Dependencies
+    { licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
       {
@@ -107,6 +110,22 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         schema: schema.boolean(),
       },
     });
+
+    if (visTypeTimeseries) {
+      // TODO: When vis_type_timeseries is fully migrated to the NP, it shouldn't require this shim.
+      const callWithRequestFactoryShim = (
+        elasticsearchServiceShim: CallWithRequestFactoryShim,
+        request: KibanaRequest
+      ): APICaller => {
+        return rollupEsClient.asScoped(request).callAsCurrentUser;
+        // return (...args: any[]): APICaller => {
+        //   return context.rollup!.client;//.callAsCurrentUser(...args);
+        // }
+      };
+
+      const { addSearchStrategy } = visTypeTimeseries;
+      registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
+    }
 
     if (usageCollection) {
       this.globalConfig$
