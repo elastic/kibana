@@ -34,6 +34,8 @@ services.callCluster.mockImplementation((_: string, { body, index }: any) => {
   }
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
+  } else if (metric === 'test.metric.3') {
+    return mocks.emptyMetricResponse;
   }
   return mocks.basicMetricResponse;
 });
@@ -305,6 +307,34 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.LT, [1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
+  describe("querying a metric that hasn't reported data", () => {
+    const instanceID = 'test-*';
+    const execute = (alertOnNoData: boolean) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold: 1,
+              metric: 'test.metric.3',
+            },
+          ],
+          alertOnNoData,
+        },
+      });
+    test('sends a No Data alert when configured to do so', async () => {
+      await execute(true);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+    test('does not send a No Data alert when not configured to do so', async () => {
+      await execute(false);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
     });
   });
 });

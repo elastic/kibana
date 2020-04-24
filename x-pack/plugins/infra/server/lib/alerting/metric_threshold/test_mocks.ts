@@ -53,6 +53,14 @@ export const alternateMetricResponse = {
   },
 };
 
+export const emptyMetricResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: [],
+    },
+  },
+};
+
 export const basicCompositeResponse = {
   aggregations: {
     groupings: {
