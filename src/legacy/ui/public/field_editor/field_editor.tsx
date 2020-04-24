@@ -22,7 +22,7 @@ import { intersection, union, get } from 'lodash';
 import { HttpStart } from 'src/core/public';
 
 import {
-  GetEnabledScriptingLanguagesProvider,
+  getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from 'ui/scripting_languages';
@@ -183,8 +183,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { field } = this.state;
     const { indexPattern } = this.props;
 
-    const getEnabledScriptingLanguages = GetEnabledScriptingLanguagesProvider(getHttpStart());
-    const enabledLangs = await getEnabledScriptingLanguages();
+    const enabledLangs = await getEnabledScriptingLanguages(await getHttpStart());
     const scriptingLangs = intersection(
       enabledLangs,
       union(this.supportedLangs, this.deprecatedLangs)

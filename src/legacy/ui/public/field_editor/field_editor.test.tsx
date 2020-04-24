@@ -59,9 +59,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('ui/scripting_languages', () => ({
-  GetEnabledScriptingLanguagesProvider: jest
-    .fn()
-    .mockImplementation(() => () => ['painless', 'testlang']),
+  getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
