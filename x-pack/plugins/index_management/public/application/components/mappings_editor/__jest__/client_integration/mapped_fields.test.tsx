@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, DomFields } from './helpers';
+import { componentHelpers, MappingsEditorTestBed, DomFields, nextTick } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
@@ -67,6 +67,44 @@ describe('Mapped fields', () => {
       });
 
       expect(domTreeMetadata).toEqual(defaultMappings.properties);
+    });
+
+    test('should allow to be controlled by parent component and update on prop change', async () => {
+      await act(async () => {
+        testBed = await setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+        });
+      });
+
+      const {
+        component,
+        setProps,
+        actions: { expandAllFieldsAndReturnMetadata },
+      } = testBed;
+
+      let domTreeMetadata: DomFields = {};
+      await act(async () => {
+        domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      });
+
+      expect(domTreeMetadata).toEqual(defaultMappings.properties);
+
+      // Change the `value` prop of our <MappingsEditor />
+      const newMappings = { properties: { hello: { type: 'text' } } };
+
+      await act(async () => {
+        setProps({ value: newMappings });
+
+        // Don't ask me why but the 3 following lines are all required
+        component.update();
+        await nextTick();
+        component.update();
+
+        domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      });
+
+      expect(domTreeMetadata).toEqual(newMappings.properties);
     });
   });
 });
