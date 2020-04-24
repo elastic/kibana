@@ -6,6 +6,7 @@
 import {
   setup as mappingsEditorSetup,
   MappingsEditorTestBed,
+  DomFields,
   getDataForwardedFactory,
 } from './mappings_editor.helpers';
 
@@ -20,4 +21,4 @@ export const componentHelpers = {
   mappingsEditor: { setup: mappingsEditorSetup, getDataForwardedFactory },
 };
 
-export { MappingsEditorTestBed };
+export { MappingsEditorTestBed, DomFields };

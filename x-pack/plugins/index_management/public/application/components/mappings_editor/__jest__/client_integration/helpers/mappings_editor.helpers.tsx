@@ -7,6 +7,7 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
+import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
 
 jest.mock('@elastic/eui', () => ({
@@ -43,8 +44,22 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
+export interface DomFields {
+  [key: string]: {
+    type: string;
+    properties?: DomFields;
+    fields?: DomFields;
+  };
+}
+
 const createActions = (testBed: TestBed<TestSubjects>) => {
   const { find, exists, waitFor, waitForFn, form, component } = testBed;
+
+  const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
+    const name = find(`${testSubjectField}-fieldName` as TestSubjects).text();
+    const type = find(`${testSubjectField}-datatype` as TestSubjects).props()['data-type-value'];
+    return { name, type };
+  };
 
   const expandField = async (
     field: ReactWrapper
@@ -79,12 +94,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   /**
-   * Expand all the children of a field.
+   * Expand all the children of a field and return a metadata object of the fields found in the DOM.
    *
    * @param fieldName The field under wich we want to expand all the children.
    * If no fieldName is provided, we expand all the **root** level fields.
    */
-  const expandAllFields = async (fieldName?: string) => {
+  const expandAllFieldsAndReturnMetadata = async (
+    fieldName?: string,
+    domTreeMetadata: DomFields = {}
+  ): Promise<DomFields> => {
     const fields = find(
       fieldName ? (`${fieldName}.fieldsList.fieldsListItem` as TestSubjects) : 'fieldsListItem'
     ).map(wrapper => wrapper); // convert to Array for our for of loop below
@@ -92,11 +110,26 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     for (const field of fields) {
       const { isExpanded, testSubjectField } = await expandField(field);
 
+      // Read the info from the DOM about that field and add it to our domFieldMeta
+      const { name, type } = getFieldInfo(testSubjectField);
+      domTreeMetadata[name] = {
+        type,
+      };
+
       if (isExpanded) {
+        // Update our metadata object
+        const childFieldName = getChildFieldsName(type as any)!;
+        domTreeMetadata[name][childFieldName] = {};
+
         // Expand its children
-        await expandAllFields(testSubjectField);
+        await expandAllFieldsAndReturnMetadata(
+          testSubjectField,
+          domTreeMetadata[name][childFieldName]
+        );
       }
     }
+
+    return domTreeMetadata;
   };
 
   // Get a nested field in the rendered DOM tree
@@ -214,7 +247,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     selectTab,
     getFieldAt,
     addField,
-    expandAllFields,
+    expandAllFieldsAndReturnMetadata,
     startEditField,
     updateFieldAndCloseFlyout,
     showAdvancedSettings,
