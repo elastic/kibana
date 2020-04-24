@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../types';
+import { PluginConfigDescriptor } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
-export const createCustomFieldFormat = (convert: TextContextTypeConvert): FieldFormatInstanceType =>
-  class CustomFieldFormat extends FieldFormat {
-    static id = FIELD_FORMAT_IDS.CUSTOM;
+export const config: PluginConfigDescriptor = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+};
 
-    textConvert = convert;
-  };
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
