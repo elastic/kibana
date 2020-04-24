@@ -18,13 +18,15 @@ import {
   UptimeSettingsContextProvider,
   UptimeThemeContextProvider,
 } from './contexts';
-import { CommonlyUsedRange } from './components/functional/uptime_date_picker';
+import { CommonlyUsedRange } from './components/common/uptime_date_picker';
 import { store } from './state';
 import { setBasePath } from './state/actions';
 import { PageRouter } from './routes';
+import {
+  UptimeAlertsContextProvider,
+  UptimeAlertsFlyoutWrapper,
+} from './components/overview/alerts';
 import { kibanaService } from './state/kibana_service';
-import { UptimeAlertsFlyoutWrapper } from './components/connected';
-import { UptimeAlertsContextProvider } from './components/functional/alerts';
 
 export interface UptimeAppColors {
   danger: string;

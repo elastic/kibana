@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LegacyCoreStart,
-  LegacyCoreSetup,
-  PluginInitializerContext,
-  AppMountParameters,
-} from 'src/core/public';
-import { PluginsStart, PluginsSetup } from 'ui/new_platform/new_platform';
+import { LegacyCoreSetup, PluginInitializerContext, AppMountParameters } from 'src/core/public';
+import { PluginsSetup } from 'ui/new_platform/new_platform';
 import { FeatureCatalogueCategory } from '../../../../../../src/plugins/home/public';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
-
-export interface StartObject {
-  core: LegacyCoreStart;
-  plugins: PluginsStart;
-}
 
 export interface SetupObject {
   core: LegacyCoreSetup;

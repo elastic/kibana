@@ -6,7 +6,7 @@
 
 // Create a mock for the privilege check used within the table to
 // enable/disable the 'New Filter' button.
-jest.mock('../../../privilege/check_privilege', () => ({
+jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 jest.mock('../../../services/ml_api_service', () => 'ml');
