@@ -6,15 +6,28 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCodeBlock, EuiSpacer, EuiText, EuiSwitch, EuiLink, EuiIcon } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiText,
+  EuiSwitch,
+  EuiLink,
+  EuiIcon,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { useTestConfigContext } from '../../test_config_context';
 
 interface Props {
-  executeOutput: { docs: object[] };
+  executeOutput?: { docs: object[] };
   handleExecute: (documents: object[], verbose: boolean) => void;
+  isExecuting: boolean;
 }
 
-export const OutputTab: React.FunctionComponent<Props> = ({ executeOutput, handleExecute }) => {
+export const OutputTab: React.FunctionComponent<Props> = ({
+  executeOutput,
+  handleExecute,
+  isExecuting,
+}) => {
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
 
@@ -26,6 +39,18 @@ export const OutputTab: React.FunctionComponent<Props> = ({ executeOutput, handl
 
     handleExecute(cachedDocuments!, isVerboseEnabled);
   };
+
+  let content;
+
+  if (isExecuting) {
+    content = <EuiLoadingSpinner size="m" />;
+  } else if (executeOutput) {
+    content = (
+      <EuiCodeBlock language="json" isCopyable>
+        {JSON.stringify(executeOutput, null, 2)}
+      </EuiCodeBlock>
+    );
+  }
 
   return (
     <>
@@ -64,9 +89,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({ executeOutput, handl
 
       <EuiSpacer size="m" />
 
-      <EuiCodeBlock language="json" isCopyable>
-        {JSON.stringify(executeOutput, null, 2)}
-      </EuiCodeBlock>
+      {content}
     </>
   );
 };

@@ -44,7 +44,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
-  const [shouldExecuteImmediately, setShouldExecuteImmediately] = useState<boolean>(false);
+  const [shouldTestImmediately, setShouldTestImmediately] = useState<boolean>(false);
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
@@ -59,7 +59,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     setIsTestingPipeline(true);
 
     if (cachedDocuments) {
-      setShouldExecuteImmediately(true);
+      setShouldTestImmediately(true);
     }
   };
 
@@ -164,7 +164,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* Test pipeline flyout */}
         {isTestingPipeline ? (
           <PipelineTestFlyout
-            shouldExecuteImmediately={shouldExecuteImmediately}
+            shouldTestImmediately={shouldTestImmediately}
             closeFlyout={() => {
               setIsTestingPipeline(prevIsTestingPipeline => !prevIsTestingPipeline);
             }}

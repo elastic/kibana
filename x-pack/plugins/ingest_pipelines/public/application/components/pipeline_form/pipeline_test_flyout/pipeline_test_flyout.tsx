@@ -26,14 +26,14 @@ export interface PipelineTestFlyoutProps {
   closeFlyout: () => void;
   pipeline: Pipeline;
   isPipelineValid: boolean;
-  shouldExecuteImmediately: boolean;
+  shouldTestImmediately: boolean;
 }
 
 export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps> = ({
   closeFlyout,
   pipeline,
   isPipelineValid,
-  shouldExecuteImmediately,
+  shouldTestImmediately,
 }) => {
   const { services } = useKibana();
 
@@ -84,30 +84,38 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   useEffect(() => {
     // If the user has already tested the pipeline once,
     // use the cached test config and automatically execute the pipeline
-    if (onInitialMount && shouldExecuteImmediately && Object.entries(pipeline).length > 0) {
+    if (onInitialMount && shouldTestImmediately && Object.entries(pipeline).length > 0) {
       handleExecute(cachedDocuments!, cachedVerbose);
       setOnInitialMount(false);
     }
   }, [
-    shouldExecuteImmediately,
     pipeline,
     handleExecute,
     cachedDocuments,
     cachedVerbose,
     onInitialMount,
+    shouldTestImmediately,
   ]);
 
-  // Default to "documents" tab
-  let tabContent = (
-    <DocumentsTab
-      isExecuting={isExecuting}
-      isPipelineValid={isPipelineValid}
-      handleExecute={handleExecute}
-    />
-  );
+  let tabContent;
 
   if (selectedTab === 'output') {
-    tabContent = <OutputTab executeOutput={executeOutput!} handleExecute={handleExecute} />;
+    tabContent = (
+      <OutputTab
+        executeOutput={executeOutput}
+        handleExecute={handleExecute}
+        isExecuting={isExecuting}
+      />
+    );
+  } else {
+    // default to "documents" tab
+    tabContent = (
+      <DocumentsTab
+        isExecuting={isExecuting}
+        isPipelineValid={isPipelineValid}
+        handleExecute={handleExecute}
+      />
+    );
   }
 
   return (

@@ -9,8 +9,13 @@ import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
-  pipeline: schema.any(), // todo
-  documents: schema.any(), // todo
+  pipeline: schema.object({
+    description: schema.string(),
+    processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+    version: schema.maybe(schema.number()),
+    on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  }),
+  documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   verbose: schema.maybe(schema.boolean()),
 });
 

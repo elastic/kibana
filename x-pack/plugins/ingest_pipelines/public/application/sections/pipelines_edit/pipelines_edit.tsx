@@ -88,6 +88,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           }
           color="danger"
           iconType="alert"
+          data-test-subj="fetchPipelineError"
         >
           <p>{error.message}</p>
         </EuiCallOut>
