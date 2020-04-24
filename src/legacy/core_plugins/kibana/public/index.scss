@@ -7,12 +7,6 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// vis_type_vislib UI styles are imported here for running karma Browser tests
-// should be somehow included through the "vis_type_vislib" plugin initialization
-@import '../../../../plugins/vis_type_vislib/public/index';
-
-// Visualize styles
-@import './visualize/index';
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
 @import '../../../../plugins/maps_legacy/public/index';
