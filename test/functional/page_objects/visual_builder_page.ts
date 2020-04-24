@@ -418,6 +418,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async setTimeField(index: number) {
+      await testSubjects.click('metricsIndexPatternFieldsSelect');
+      const options = await find.allByCssSelector('.euiFilterSelectItem');
+      await options[0].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     public async setIntervalValue(value: string) {
       const el = await testSubjects.find('metricsIndexPatternInterval');
       await el.clearValue();
