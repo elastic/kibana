@@ -49,7 +49,7 @@
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
 
-    "DataRecognizer",
+    "Modules",
     "RecognizeIndex",
     "GetModule",
     "SetupModule",
