@@ -16,14 +16,19 @@ export const openUrl = async (
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger
+  logger: LevelLogger,
+  page?: number
 ): Promise<void> => {
+  // If we're moving to another page in the app, we'll want to wait for the app to tell us
+  // it's loaded the next page.
+  const selector = page && page > 1 ? `[data-share-page="${page}"]` : PAGELOAD_SELECTOR;
+
   try {
     await browser.open(
       url,
       {
         conditionalHeaders,
-        waitForSelector: PAGELOAD_SELECTOR,
+        waitForSelector: selector,
         timeout: captureConfig.timeouts.openUrl,
       },
       logger

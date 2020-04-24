@@ -7,13 +7,13 @@
 import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 import { initializeWorkpad } from '../../../state/actions/workpad';
-import { getWorkpad, getSelectedPage } from '../../../state/selectors/workpad';
+import { getWorkpad, getSelectedPageIndex } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { ExportApp as Component } from './export_app';
 
 const mapStateToProps = state => ({
   workpad: getWorkpad(state),
-  selectedPageId: getSelectedPage(state),
+  selectedPageIndex: getSelectedPageIndex(state),
 });
 
 const mapDispatchToProps = dispatch => ({

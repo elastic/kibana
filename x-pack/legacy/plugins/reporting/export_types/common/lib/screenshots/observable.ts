@@ -37,10 +37,12 @@ export function screenshotsObservableFactory(
     return create$.pipe(
       mergeMap(({ driver, exit$ }) => {
         return Rx.from(urls).pipe(
-          concatMap(url => {
+          concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
-              mergeMap(() => openUrl(captureConfig, driver, url, conditionalHeaders, logger)),
+              mergeMap(() =>
+                openUrl(captureConfig, driver, url, conditionalHeaders, logger, index + 1)
+              ),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount);
