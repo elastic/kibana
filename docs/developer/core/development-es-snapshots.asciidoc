@@ -35,6 +35,16 @@ For example, to run functional tests with the latest snapshot:
 KBN_ES_SNAPSHOT_USE_UNVERIFIED=true node scripts/functional_tests_server
 -----------
 
+===== For Pull Requests
+
+Currently, there is not a way to run your pull request with the latest unverified snapshot without a code change. You can, however, do it with a small code change.
+
+1. Edit `Jenkinsfile` in the root of the Kibana repo
+2. Add `env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = 'true'` at the top of the file.
+3. Commit the change
+
+Your pull request should then use the latest snapshot the next time that it runs. Just don't merge the change to `Jenkinsfile`!
+
 ==== Google Cloud Storage buckets
 
 ===== kibana-ci-es-snapshots-daily
