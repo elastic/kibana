@@ -12,7 +12,7 @@ import '../layers/sources/ems_file_source';
 
 import '../layers/sources/es_search_source';
 
-import '../layers/sources/es_pew_pew_source/es_pew_pew_source';
+import '../layers/sources/es_pew_pew_source';
 
 import '../layers/sources/kibana_regionmap_source';
 
