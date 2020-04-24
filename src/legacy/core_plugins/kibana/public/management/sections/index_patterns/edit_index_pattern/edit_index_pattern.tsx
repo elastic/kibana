@@ -97,11 +97,21 @@ export const EditIndexPattern = withRouter(
       indexPattern.fields.filter(field => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(config.get('defaultIndex'));
+    const [tags, setTags] = useState<any[]>([]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
       setConflictedFields(indexPattern.fields.filter(field => field.type === 'conflict'));
     }, [indexPattern, indexPattern.fields]);
+
+    useEffect(() => {
+      const indexPatternTags =
+        services.indexPatternManagement.list.getIndexPatternTags(
+          indexPattern,
+          indexPattern.id === defaultIndex
+        ) || [];
+      setTags(indexPatternTags);
+    }, [defaultIndex, indexPattern, services.indexPatternManagement.list]);
 
     const setDefaultPattern = useCallback(() => {
       config.set('defaultIndex', indexPattern.id);
@@ -158,13 +168,9 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    indexPattern.tags =
-      services.indexPatternManagement.list.getIndexPatternTags(
-        indexPattern,
-        indexPattern.id === defaultIndex
-      ) || [];
-
     services.docTitle.change(indexPattern.title);
+
+    const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
     return (
       <EuiFlexGroup direction="column">
@@ -177,16 +183,14 @@ export const EditIndexPattern = withRouter(
             defaultIndex={defaultIndex}
           />
           <EuiSpacer size="s" />
-          {Boolean(
-            indexPattern.timeFieldName || (indexPattern.tags && indexPattern.tags.length > 0)
-          ) && (
+          {showTagsSection && (
             <EuiFlexGroup wrap>
               {Boolean(indexPattern.timeFieldName) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
                 </EuiFlexItem>
               )}
-              {indexPattern.tags.map((tag: any) => (
+              {tags.map((tag: any) => (
                 <EuiFlexItem grow={false} key={tag.key}>
                   <EuiBadge color="hollow">{tag.name}</EuiBadge>
                 </EuiFlexItem>
