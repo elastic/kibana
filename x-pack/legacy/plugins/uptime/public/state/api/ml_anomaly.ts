@@ -30,8 +30,8 @@ const getJobPrefix = (monitorId: string) => {
   // Subtracting ML_JOB_ID constant as well
   const postfix = '_' + ML_JOB_ID;
 
-  if ((prefix + postfix).length >= 64) {
-    return prefix.substring(0, 64 - postfix.length - 1) + '_';
+  if ((prefix + postfix).length > 64) {
+    return prefix.substring(0, 64 - postfix.length) + '_';
   }
   return prefix + '_';
 };
