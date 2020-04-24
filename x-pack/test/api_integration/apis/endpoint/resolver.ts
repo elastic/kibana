@@ -235,8 +235,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         expect(body.pagination.nextAncestor).to.equal(null);
         expect(body.pagination.nextEvent).to.equal(null);
         expect(body.pagination.nextChild).to.equal(null);
-        expect(body.parent).to.not.be(null);
-        expect(body.parent.parent).to.be(undefined);
         expect(body.children.length).to.equal(0);
         expect(body.events.length).to.equal(0);
         expect(body.lifecycle.length).to.equal(2);

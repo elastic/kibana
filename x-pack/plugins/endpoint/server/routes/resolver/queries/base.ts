@@ -23,12 +23,11 @@ export abstract class ResolverQuery {
   ) {}
 
   protected paginateBy(tiebreaker: string, aggregator: string) {
-    const self = this;
     return (query: JsonObject) => {
-      if (!self.pagination) {
+      if (!this.pagination) {
         return query;
       }
-      return paginate(self.pagination, tiebreaker, aggregator, query);
+      return paginate(this.pagination, tiebreaker, aggregator, query);
     };
   }
 
