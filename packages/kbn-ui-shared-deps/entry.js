@@ -24,9 +24,6 @@ export const Jquery = require('jquery');
 window.$ = window.jQuery = Jquery;
 
 // stateful deps
-export const KbnI18n = require('@kbn/i18n');
-export const KbnI18nAngular = require('@kbn/i18n/angular');
-export const KbnI18nReact = require('@kbn/i18n/react');
 export const Angular = require('angular');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
@@ -38,6 +35,11 @@ export const ReactDomServer = require('react-dom/server');
 export const ReactIntl = require('react-intl');
 export const ReactRouter = require('react-router'); // eslint-disable-line
 export const ReactRouterDom = require('react-router-dom');
+
+// kbn deps depends on others to load before them
+export const KbnI18nAngular = require('@kbn/i18n/angular');
+export const KbnI18n = require('@kbn/i18n');
+export const KbnI18nReact = require('@kbn/i18n/react');
 
 Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 
