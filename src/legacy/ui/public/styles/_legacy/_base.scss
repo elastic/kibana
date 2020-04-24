@@ -121,12 +121,18 @@ input[type='checkbox'],
   }
 }
 
-// A neccessary hack so that the above focus policy doesn't polute some EUI
+// A necessary hack so that the above focus policy doesn't pollute some EUI
 // entrenched inputs.
 .euiComboBox {
   // :not() specificity needed to override the above
   input:not([class^='eui']):focus {
     animation: none !important;
+  }
+}
+
+@include euiBreakpoint('l', 'xl') {
+  .euiBody--collapsibleNavIsDocked .euiBottomBar {
+    margin-left: $euiCollapsibleNavWidth;
   }
 }
 

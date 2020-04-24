@@ -24,16 +24,9 @@ interface Props {
   isLoading: boolean;
   reset: () => void;
   links: Links;
-  isNavDrawerLocked: boolean;
 }
 
-export function MainControls({
-  toggleRequestFlyout,
-  isRequestFlyoutOpen,
-  reset,
-  links,
-  isNavDrawerLocked,
-}: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, links }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [
@@ -87,12 +80,8 @@ export function MainControls({
     </EuiContextMenuItem>,
   ];
 
-  const classes = classNames('painlessLab__bottomBar', {
-    'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
-  });
-
   return (
-    <EuiBottomBar paddingSize="s" className={classes}>
+    <EuiBottomBar paddingSize="s">
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">

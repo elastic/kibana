@@ -325,12 +325,8 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-    const bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-      'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-        localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-    });
     return (
-      <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
+      <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
