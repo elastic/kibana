@@ -224,6 +224,50 @@ test('throws an error if actionType is not enabled', async () => {
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
 });
 
+test('should not throws an error if actionType is preconfigured', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
+  await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+  });
+});
+
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
   const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
   customActionExecutor.initialize({
