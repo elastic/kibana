@@ -16257,7 +16257,6 @@
     "xpack.uptime.locationName.helpLinkAnnotation": "添加位置",
     "xpack.uptime.ml.durationChart.exploreInMlApp": "在 ML 应用中浏览",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.anomalyDetectionTitle": "异常检测",
-    "xpack.uptime.ml.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText": "查看现有作业",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.createMLJobDescription": "在此处可以创建 Machine Learning 作业，以便为运行时间监测计算\n    响应持续时间的异常分数。启用后，详情页面上的监测持续时间图表\n    将显示预期边界并使用异常标注图表。您还可能\n     识别在所有地理区域的延迟增长时段。",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.createNewJobButtonLabel": "创建新作业",
     "xpack.uptime.ml.enableAnomalyDetectionPanel.disableAnomalyDetectionTitle": "禁用异常检测",

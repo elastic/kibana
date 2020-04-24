@@ -13,7 +13,6 @@ import {
   CoreStart,
   PluginInitializerContext,
   Logger,
-  ElasticsearchServiceSetup,
   SavedObjectsClient,
   SavedObjectsServiceStart,
 } from '../../../../src/core/server';
@@ -47,7 +46,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
-  private elasticSearchService?: ElasticsearchServiceSetup;
   private apmOSS?: APMOSSPluginSetup;
 
   // Properties set at start
@@ -67,10 +65,9 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, elasticsearch, getStartServices }: CoreSetup,
+    { http, getStartServices, capabilities }: CoreSetup,
     { usageCollection, cloud, licensing, apm_oss: apmOSS }: PluginsSetup
   ) {
-    this.elasticSearchService = elasticsearch;
     this.licensing = licensing;
     this.apmOSS = apmOSS;
 
@@ -99,13 +96,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerQueryDefaultFieldRoutes(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects }]) => {
+      getStartServices().then(([{ savedObjects, elasticsearch }]) => {
         registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
       });
     }
   }
 
-  async start({ savedObjects }: CoreStart) {
+  async start({ savedObjects, elasticsearch }: CoreStart) {
     this.savedObjectsServiceStart = savedObjects;
 
     // The ReindexWorker uses a map of request headers that contain the authentication credentials
@@ -122,7 +119,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.worker = createReindexWorker({
       credentialStore: this.credentialStore,
       licensing: this.licensing!,
-      elasticsearchService: this.elasticSearchService!,
+      elasticsearchService: elasticsearch,
       logger: this.logger,
       savedObjects: new SavedObjectsClient(
         this.savedObjectsServiceStart.createInternalRepository()
