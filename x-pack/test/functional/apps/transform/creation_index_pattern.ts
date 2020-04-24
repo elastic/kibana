@@ -90,7 +90,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -144,7 +144,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -180,14 +180,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreview(
-            testData.expected.sourcePreview.columns,
-            testData.expected.sourcePreview.rows
+        it('shows the index preview', async () => {
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
           );
         });
 
