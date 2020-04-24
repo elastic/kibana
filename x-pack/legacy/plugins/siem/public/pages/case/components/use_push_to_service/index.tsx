@@ -18,11 +18,13 @@ import { navTabs } from '../../../home/home_navigations';
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
+import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
 
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
-  currentConnectorName: string;
+  caseConnectorId: string | null;
+  connectors: Connector[];
   isNew: boolean;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -34,9 +36,10 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
+  caseConnectorId,
   caseId,
   caseStatus,
-  currentConnectorName,
+  connectors,
   isNew,
   updateCase,
   userCanCrud,
@@ -106,10 +109,11 @@ export const usePushToService = ({
     return errors;
   }, [actionLicense, caseStatus, connectorId, loadingCaseConfigure, loadingLicense, urlSearch]);
 
-  const pushToServiceButton = useMemo(
-    () => (
+  const pushToServiceButton = useMemo(() => {
+    const currentConnectorName = connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
+    return (
       <EuiButton
-        data-test-subj="push-to-service-now"
+        data-test-subj="push-to-external-service"
         fill
         iconType="importAction"
         onClick={handlePushToService}
@@ -124,17 +128,18 @@ export const usePushToService = ({
       >
         {isNew ? i18n.PUSH_THIRD(currentConnectorName) : i18n.UPDATE_THIRD(currentConnectorName)}
       </EuiButton>
-    ),
-    [
-      isNew,
-      handlePushToService,
-      isLoading,
-      loadingLicense,
-      loadingCaseConfigure,
-      errorsMsg,
-      userCanCrud,
-    ]
-  );
+    );
+  }, [
+    caseConnectorId,
+    connectors,
+    errorsMsg,
+    handlePushToService,
+    isLoading,
+    isNew,
+    loadingCaseConfigure,
+    loadingLicense,
+    userCanCrud,
+  ]);
 
   const objToReturn = useMemo(
     () => ({

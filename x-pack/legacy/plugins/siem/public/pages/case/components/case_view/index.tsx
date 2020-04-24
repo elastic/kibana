@@ -12,7 +12,7 @@ import {
   EuiLoadingSpinner,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -37,7 +37,6 @@ import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
-import { useCaseConfigure } from '../../../../containers/case/configure/use_configure_better';
 
 interface Props {
   caseId: string;
@@ -149,15 +148,15 @@ export const CaseComponent = React.memo<CaseProps>(
       [updateCase, fetchCaseUserActions]
     );
 
-    const { currentConfiguration, loading: isLoadingCaseConfigure } = useCaseConfigure();
     const { loading: isLoadingConnectors, connectors } = useConnectors();
     const { pushButton, pushCallouts } = usePushToService({
+      caseConnectorId: caseData.connectorId,
       caseId: caseData.id,
       caseStatus: caseData.status,
+      connectors,
       isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
       updateCase: handleUpdateCase,
       userCanCrud,
-      currentConnectorName: currentConfiguration.connectorName,
     });
 
     const onSubmitConnector = useCallback(newConnector => {
@@ -311,10 +310,10 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  isLoading={isLoadingConnectors || isLoadingCaseConfigure}
+                  isLoading={isLoadingConnectors}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
-                  selectedConnector={currentConfiguration.connectorId}
+                  selectedConnector={caseData.connectorId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

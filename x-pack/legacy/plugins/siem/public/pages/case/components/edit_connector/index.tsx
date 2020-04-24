@@ -100,7 +100,7 @@ export const EditConnector = React.memo(
                         idAria: 'caseConnectors',
                         isLoading,
                         disabled: !isEditConnector,
-                        defaultValue: selectedConnector,
+                        defaultValue: selectedConnector ?? 'none',
                       }}
                     />
                   </EuiFlexItem>
