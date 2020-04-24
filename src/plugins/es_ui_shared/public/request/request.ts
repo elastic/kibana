@@ -95,6 +95,9 @@ export const useRequest = <D = any, E = Error>(
   // We always want to use the most recently-set interval when scheduling the next request.
   pollIntervalMsRef.current = pollIntervalMs;
 
+  // Tied to every render and bound to each request.
+  let isOutdatedRequest = false;
+
   scheduleRequestRef.current = () => {
     // Clear current interval
     if (pollIntervalIdRef.current) {
@@ -121,6 +124,11 @@ export const useRequest = <D = any, E = Error>(
 
     const response = await sendRequest<D, E>(httpClient, requestBody);
     const { data: serializedResponseData, error: responseError } = response;
+
+    // If an outdated request has resolved, ignore its outdated data.
+    if (isOutdatedRequest) {
+      return { data: null, error: null };
+    }
 
     setError(responseError);
     // If there's an error, keep the data from the last request in case it's still useful to the user.
@@ -151,8 +159,9 @@ export const useRequest = <D = any, E = Error>(
   useEffect(() => {
     scheduleRequestRef.current!();
 
-    // Clean up timeout.
+    // Clean up timeout and mark inflight requests as stale if the poll interval changes.
     return () => {
+      isOutdatedRequest = true;
       if (pollIntervalIdRef.current) {
         clearTimeout(pollIntervalIdRef.current);
       }
