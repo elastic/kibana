@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../types';
+import './index.scss';
 
-export const createCustomFieldFormat = (convert: TextContextTypeConvert): FieldFormatInstanceType =>
-  class CustomFieldFormat extends FieldFormat {
-    static id = FIELD_FORMAT_IDS.CUSTOM;
+import { PluginInitializerContext } from '../../../core/public';
+import { InputControlVisPlugin as Plugin } from './plugin';
 
-    textConvert = convert;
-  };
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}
