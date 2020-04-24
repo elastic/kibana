@@ -8,7 +8,7 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction } from '../types';
-import { ResolverEvent, Node } from '../../../../common/types';
+import { ResolverEvent, ResolverNode } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
 
 type MiddlewareFactory<S = ResolverState> = (
@@ -17,7 +17,7 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-function flattenEvents(children: Node[], events: ResolverEvent[] = []): ResolverEvent[] {
+function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): ResolverEvent[] {
   return children.reduce((flattenedEvents, currentNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
@@ -41,8 +41,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         api.dispatch({ type: 'appRequestedResolverData' });
         try {
           let lifecycle: ResolverEvent[];
-          let children: Node[];
-          let ancestors: Node[];
+          let children: ResolverNode[];
+          let ancestors: ResolverNode[];
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
             const entityId = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
@@ -64,7 +64,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
-            payload: { data: { result: { search_results: response } } },
+            payload: response,
           });
         } catch (error) {
           api.dispatch({

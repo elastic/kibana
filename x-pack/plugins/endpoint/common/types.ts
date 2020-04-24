@@ -51,27 +51,27 @@ export class EndpointAppConstants {
   static MAX_LONG_INT = '9223372036854775807'; // 2^63-1
 }
 
-export interface NodeStats {
+export interface ResolverNodeStats {
   totalEvents: number;
   totalAlerts: number;
 }
 
-export interface NodePagination {
+export interface ResolverNodePagination {
   nextChild?: string | null;
   nextEvent?: string | null;
   nextAncestor?: string | null;
   nextAlert?: string | null;
 }
 
-export interface Node {
+export interface ResolverNode {
   id: string;
-  children: Node[];
+  children: ResolverNode[];
   events: ResolverEvent[];
   lifecycle: ResolverEvent[];
-  ancestors?: Node[];
-  parent?: Node | null;
-  pagination: NodePagination;
-  stats?: NodeStats;
+  ancestors?: ResolverNode[];
+  parent?: ResolverNode | null;
+  pagination: ResolverNodePagination;
+  stats?: ResolverNodeStats;
 }
 
 export interface AlertResultList {

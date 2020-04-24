@@ -8,13 +8,7 @@ import { ResolverEvent } from '../../../../../common/types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
-  readonly payload: {
-    readonly data: {
-      readonly result: {
-        readonly search_results: readonly ResolverEvent[];
-      };
-    };
-  };
+  readonly payload: ResolverEvent[];
 }
 
 interface ServerFailedToReturnResolverData {

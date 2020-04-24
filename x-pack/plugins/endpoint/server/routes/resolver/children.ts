@@ -48,7 +48,7 @@ export const validateChildren = {
 
 export function handleChildren(
   log: Logger,
-  indexRetriever: IndexPatternRetriever,
+  indexRetriever: IndexPatternRetriever
 ): RequestHandler<ChildrenPathParams, ChildrenQueryParams> {
   return async (context, req, res) => {
     const {

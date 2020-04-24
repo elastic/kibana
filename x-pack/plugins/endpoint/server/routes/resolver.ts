@@ -6,10 +6,11 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
+import { validateTree } from '../../common/schema/tree';
 import { handleEvents, validateEvents } from './resolver/events';
 import { handleChildren, validateChildren } from './resolver/children';
 import { handleAncestry, validateAncestry } from './resolver/ancestry';
-import { handleTree, validateTree } from './resolver/tree';
+import { handleTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');

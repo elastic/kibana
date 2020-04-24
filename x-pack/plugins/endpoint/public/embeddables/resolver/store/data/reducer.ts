@@ -17,14 +17,9 @@ function initialState(): DataState {
 
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState(), action) => {
   if (action.type === 'serverReturnedResolverData') {
-    const {
-      data: {
-        result: { search_results },
-      },
-    } = action.payload;
     return {
       ...state,
-      results: search_results,
+      results: action.payload,
       isLoading: false,
       hasError: false,
     };

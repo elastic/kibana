@@ -8,6 +8,7 @@ import React, { useLayoutEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { Panel } from './panel';
@@ -77,7 +78,13 @@ export const Resolver = styled(
           </div>
         ) : hasError ? (
           <div className="loading-container">
-            <div>error occured fetching data</div>
+            <div>
+              {' '}
+              <FormattedMessage
+                id="xpack.endpoint.resolver.loadingError"
+                defaultMessage="Error loading data."
+              />
+            </div>
           </div>
         ) : (
           <StyledResolverContainer

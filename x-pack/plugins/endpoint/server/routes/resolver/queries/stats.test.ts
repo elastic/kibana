@@ -9,7 +9,9 @@ import { fakeEventIndexPattern } from './children.test';
 
 describe('stats query', () => {
   it('generates the correct legacy queries', () => {
-    expect(new StatsQuery('awesome-id').build('5')).toStrictEqual({
+    expect(
+      new StatsQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id').build('5')
+    ).toStrictEqual({
       body: {
         size: 0,
         query: {
