@@ -5,12 +5,12 @@
  */
 
 import { ConnectorConfiguration } from './types';
-import { SERVICENOW_TITLE } from './translations';
+import * as i18n from './translations';
 import logo from './logo.svg';
 
 export const connector: ConnectorConfiguration = {
   id: '.servicenow',
-  name: SERVICENOW_TITLE,
+  name: i18n.SERVICENOW_TITLE,
   logo,
   enabled: true,
   enabledInConfig: true,
@@ -18,19 +18,19 @@ export const connector: ConnectorConfiguration = {
   minimumLicenseRequired: 'platinum',
   fields: {
     short_description: {
-      label: 'Short Description',
+      label: i18n.MAPPING_FIELD_SHORT_DESC,
       validSourceFields: ['title', 'description'],
       defaultSourceField: 'title',
       defaultActionType: 'overwrite',
     },
     description: {
-      label: 'Description',
+      label: i18n.MAPPING_FIELD_DESC,
       validSourceFields: ['title', 'description'],
       defaultSourceField: 'description',
       defaultActionType: 'overwrite',
     },
     comments: {
-      label: 'Comments',
+      label: i18n.MAPPING_FIELD_COMMENTS,
       validSourceFields: ['comments'],
       defaultSourceField: 'comments',
       defaultActionType: 'append',

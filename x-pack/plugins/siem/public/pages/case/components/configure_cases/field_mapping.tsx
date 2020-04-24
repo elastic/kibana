@@ -30,29 +30,6 @@ const FieldRowWrapper = styled.div`
   font-size: 14px;
 `;
 
-// const supportedThirdPartyFields: Array<EuiSuperSelectOption<ThirdPartyField>> = [
-//   {
-//     value: 'not_mapped',
-//     inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_NOT_MAPPED}</span>,
-//     'data-test-subj': 'third-party-field-not-mapped',
-//   },
-//   {
-//     value: 'short_description',
-//     inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_SHORT_DESC}</span>,
-//     'data-test-subj': 'third-party-field-short-description',
-//   },
-//   {
-//     value: 'comments',
-//     inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_COMMENTS}</span>,
-//     'data-test-subj': 'third-party-field-comments',
-//   },
-//   {
-//     value: 'description',
-//     inputDisplay: <span>{i18n.FIELD_MAPPING_FIELD_DESC}</span>,
-//     'data-test-subj': 'third-party-field-description',
-//   },
-// ];
-
 const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
   {
     value: 'nothing',
@@ -88,6 +65,7 @@ const getThirdPartyOptions = (
     Object.keys(thirdPartyFields)
       .filter(key => thirdPartyFields[key].validSourceFields.includes(caseField))
       .map(key => ({ key: key as AllThirdPartyFields, label: thirdPartyFields[key].label }))
+      .concat([{ key: 'not_mapped', label: i18n.MAPPING_FIELD_NOT_MAPPED }])
   );
 
 export interface FieldMappingProps {
