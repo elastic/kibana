@@ -29,6 +29,14 @@ import {
   Highlights,
   compileFormattingRules,
 } from './message';
+import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';
+import { decodeOrThrow } from '../../../../common/runtime_types';
+import {
+  logEntryDatasetsResponseRT,
+  LogEntryDatasetBucket,
+  CompositeDatasetKey,
+  createLogEntryDatasetsQuery,
+} from './queries/log_entry_datasets';
 
 export interface LogEntriesParams {
   startTimestamp: number;
@@ -51,10 +59,15 @@ export const LOG_ENTRIES_PAGE_SIZE = 200;
 
 const FIELDS_FROM_CONTEXT = ['log.file.path', 'host.name', 'container.id'] as const;
 
+const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
+
 export class InfraLogEntriesDomain {
   constructor(
     private readonly adapter: LogEntriesAdapter,
-    private readonly libs: { sources: InfraSources }
+    private readonly libs: {
+      framework: KibanaFramework;
+      sources: InfraSources;
+    }
   ) {}
 
   public async getLogEntriesAround(
@@ -263,6 +276,45 @@ export class InfraLogEntriesDomain {
       ),
     };
   }
+
+  public async getLogEntryDatasets(
+    requestContext: RequestHandlerContext,
+    sourceConfiguration: InfraSourceConfiguration,
+    indexName: string,
+    startTime: number,
+    endTime: number
+  ) {
+    let datasetBuckets: LogEntryDatasetBucket[] = [];
+    let afterLatestBatchKey: CompositeDatasetKey | undefined;
+
+    while (true) {
+      const datasetsReponse = await this.libs.framework.callWithRequest(
+        requestContext,
+        'search',
+        createLogEntryDatasetsQuery(
+          indexName,
+          sourceConfiguration.fields.timestamp,
+          startTime,
+          endTime,
+          COMPOSITE_AGGREGATION_BATCH_SIZE,
+          afterLatestBatchKey
+        )
+      );
+
+      const { after_key: afterKey, buckets: latestBatchBuckets } = decodeOrThrow(
+        logEntryDatasetsResponseRT
+      )(datasetsReponse).aggregations.dataset_buckets;
+
+      datasetBuckets = [...datasetBuckets, ...latestBatchBuckets];
+      afterLatestBatchKey = afterKey;
+
+      if (latestBatchBuckets.length < COMPOSITE_AGGREGATION_BATCH_SIZE) {
+        break;
+      }
+    }
+
+    return datasetBuckets.map(({ key: { dataset } }) => dataset);
+  }
 }
 
 interface LogItemHit {
@@ -294,6 +346,8 @@ export interface LogEntriesAdapter {
     id: string,
     source: InfraSourceConfiguration
   ): Promise<LogItemHit>;
+
+  getLogEntryDatasets(requestContext: RequestHandlerContext, indices: string[]): Promise<string[]>;
 }
 
 export type LogEntryQuery = JsonObject;

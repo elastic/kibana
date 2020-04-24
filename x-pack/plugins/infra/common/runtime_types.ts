@@ -9,6 +9,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Errors, Type } from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
+import { RouteValidationFunction } from 'kibana/server';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -23,3 +24,16 @@ export const decodeOrThrow = <A, O, I>(
   createError: ErrorFactory = createPlainError
 ) => (inputValue: I) =>
   pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+
+type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
+
+export const createValidationFunction = <A, O, I>(
+  runtimeType: Type<A, O, I>
+): RouteValidationFunction<A> => (inputValue, { badRequest, ok }) =>
+  pipe(
+    runtimeType.decode(inputValue),
+    fold<Errors, A, ValdidationResult<A>>(
+      (errors: Errors) => badRequest(failure(errors).join('\n')),
+      (result: A) => ok(result)
+    )
+  );
