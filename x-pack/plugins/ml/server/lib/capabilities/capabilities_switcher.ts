@@ -51,7 +51,7 @@ function getSwitcher(license$: Observable<ILicense>, logger: Logger): Capabiliti
 
       return capabilities;
     } catch (e) {
-      logger.debug('Error updating capabilities for ML based on licensing');
+      logger.debug(`Error updating capabilities for ML based on licensing: ${e}`);
       return capabilities;
     }
   };
