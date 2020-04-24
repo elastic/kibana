@@ -28,6 +28,15 @@ export class GaugeChart extends Chart {
     this.gauge = new gaugeTypes[this.gaugeConfig.type](this);
   }
 
+  addEvents(element) {
+    const events = this.events;
+
+    return element
+      .call(events.addHoverEvent())
+      .call(events.addMouseoutEvent())
+      .call(events.addClickEvent());
+  }
+
   /**
    * returns the displayed width and height of a single gauge depending on selected alignment
    * @param alignment - automatic | horizontal | vertical
@@ -101,8 +110,10 @@ export class GaugeChart extends Chart {
             .attr('width', width);
 
           const g = svg.append('g');
-          self.gauge.drawGauge(g, series, width, height);
+          const gauges = self.gauge.drawGauge(g, series, width, height);
           svg.attr('height', height);
+
+          self.addEvents(gauges);
         });
 
         div
