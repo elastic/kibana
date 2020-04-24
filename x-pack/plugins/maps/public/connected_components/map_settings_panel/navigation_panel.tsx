@@ -6,7 +6,10 @@
 
 import React, { ChangeEvent } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
@@ -18,12 +21,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { ValidatedDualRange, Value } from '../../../../../../src/plugins/kibana_react/public';
 import { INITIAL_LOCATION, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { MapCenter } from '../../../common/descriptor_types';
 // @ts-ignore
 import { ValidatedRange } from '../../components/validated_range';
 
 interface Props {
+  center: MapCenter;
   settings: MapSettings;
   updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
+  zoom: number;
 }
 
 const initialLocationOptions = [
@@ -47,7 +53,7 @@ const initialLocationOptions = [
   },
 ];
 
-export function NavigationPanel({ settings, updateMapSetting }: Props) {
+export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Props) {
   const onZoomChange = (value: Value) => {
     updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(value[0] as string, 10)));
     updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(value[1] as string, 10)));
@@ -85,6 +91,12 @@ export function NavigationPanel({ settings, updateMapSetting }: Props) {
     updateMapSetting('initialZoom', value);
   };
 
+  const useCurrentView = () => {
+    updateMapSetting('initialLat', center.lat);
+    updateMapSetting('initialLon', center.lon);
+    updateMapSetting('initialZoom', Math.round(zoom));
+  };
+
   function renderInitialLocationInputs() {
     if (settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION) {
       return null;
@@ -116,6 +128,16 @@ export function NavigationPanel({ settings, updateMapSetting }: Props) {
 
     return (
       <>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={useCurrentView}>
+              <FormattedMessage
+                id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
+                defaultMessage="Set to current view"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiFormRow
           label={i18n.translate('xpack.maps.mapSettingsPanel.initialLatLabel', {
             defaultMessage: 'Initial latitude',
