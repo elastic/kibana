@@ -102,7 +102,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       {/* Mappings code editor */}
       <MappingsEditor
         value={mappings}
-        onUpdate={onMappingsEditorUpdate}
+        onChange={onMappingsEditorUpdate}
         indexSettings={template?.template.settings}
       />
 

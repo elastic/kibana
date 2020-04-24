@@ -273,13 +273,13 @@ export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEdi
   };
 };
 
-export const getDataForwardedFactory = (onUpdateHandler: jest.MockedFunction<any>) => {
+export const getDataForwardedFactory = (onChangeHandler: jest.MockedFunction<any>) => {
   /**
    * Helper to access the latest data sent to the onUpdate handler back to the consumer of the <MappingsEditor />.
    * Read the latest call with its argument passed and build the mappings object from it.
    */
   return async () => {
-    const mockCalls = onUpdateHandler.mock.calls;
+    const mockCalls = onChangeHandler.mock.calls;
 
     if (mockCalls.length === 0) {
       throw new Error(

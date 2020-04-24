@@ -8,11 +8,11 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed, DomFields } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
-const onUpdateHandler = jest.fn();
+const onChangeHandler = jest.fn();
 
 describe('Mapped fields', () => {
   afterEach(() => {
-    onUpdateHandler.mockReset();
+    onChangeHandler.mockReset();
   });
 
   describe('<DocumentFieldsTreeEditor />', () => {
@@ -53,7 +53,7 @@ describe('Mapped fields', () => {
       await act(async () => {
         testBed = await setup({
           value: defaultMappings,
-          onUpdate: onUpdateHandler,
+          onChange: onChangeHandler,
         });
       });
 

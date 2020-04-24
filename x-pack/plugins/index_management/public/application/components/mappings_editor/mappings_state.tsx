@@ -48,10 +48,10 @@ export interface Props {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
   };
-  onUpdate: OnUpdateHandler;
+  onChange: OnUpdateHandler;
 }
 
-export const MappingsState = React.memo(({ children, onUpdate, value }: Props) => {
+export const MappingsState = React.memo(({ children, onChange, value }: Props) => {
   const didMountRef = useRef(false);
 
   const parsedFieldsDefaultValue = useMemo(() => normalize(value.fields), [value.fields]);
@@ -103,7 +103,7 @@ export const MappingsState = React.memo(({ children, onUpdate, value }: Props) =
     const bypassFieldFormValidation =
       state.documentFields.status === 'creatingField' && emptyNameValue;
 
-    onUpdate({
+    onChange({
       // Output a mappings object from the user's input.
       getData: (isValid: boolean) => {
         let nextState = state;
@@ -169,7 +169,7 @@ export const MappingsState = React.memo(({ children, onUpdate, value }: Props) =
       },
       isValid: state.isValid,
     });
-  }, [state, onUpdate]);
+  }, [state, onChange]);
 
   useEffect(() => {
     /**

@@ -9,8 +9,8 @@ import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
 const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
-const onUpdateHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onUpdateHandler);
+const onChangeHandler = jest.fn();
+const getDataForwarded = getDataForwardedFactory(onChangeHandler);
 
 // Parameters automatically added to the text datatype when saved (with their default values)
 const defaultTextParameters = {
@@ -32,7 +32,7 @@ describe('text datatype', () => {
   let data: any;
 
   afterEach(() => {
-    onUpdateHandler.mockReset();
+    onChangeHandler.mockReset();
   });
 
   test('flyout details initial view', async () => {
@@ -51,7 +51,7 @@ describe('text datatype', () => {
     };
 
     await act(async () => {
-      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
       // Make sure all the fields are expanded and present in the DOM
       await testBed.actions.expandAllFieldsAndReturnMetadata();
     });
@@ -152,7 +152,7 @@ describe('text datatype', () => {
       },
     };
 
-    testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
+    testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
       find,
@@ -287,7 +287,7 @@ describe('text datatype', () => {
       },
     };
 
-    testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
+    testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
       find,
@@ -388,7 +388,7 @@ describe('text datatype', () => {
 
     testBed = await setup({
       value: defaultMappings,
-      onUpdate: onUpdateHandler,
+      onChange: onChangeHandler,
       indexSettings,
     });
 

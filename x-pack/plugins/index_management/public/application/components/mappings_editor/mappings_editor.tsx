@@ -21,14 +21,14 @@ import { MappingsState, Props as MappingsStateProps, Types } from './mappings_st
 import { IndexSettingsProvider } from './index_settings_context';
 
 interface Props {
-  onUpdate: MappingsStateProps['onUpdate'];
+  onChange: MappingsStateProps['onChange'];
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
 }
 
 type TabName = 'fields' | 'advanced' | 'templates';
 
-export const MappingsEditor = React.memo(({ onUpdate, value, indexSettings }: Props) => {
+export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Props) => {
   const [selectedTab, selectTab] = useState<TabName>('fields');
 
   const { parsedDefaultValue, multipleMappingsDeclared } = useMemo(() => {
@@ -72,13 +72,13 @@ export const MappingsEditor = React.memo(({ onUpdate, value, indexSettings }: Pr
   useEffect(() => {
     if (multipleMappingsDeclared) {
       // We set the data getter here as the user won't be able to make any changes
-      onUpdate({
+      onChange({
         getData: () => value! as Types['Mappings'],
         validate: () => Promise.resolve(true),
         isValid: true,
       });
     }
-  }, [multipleMappingsDeclared, onUpdate, value]);
+  }, [multipleMappingsDeclared, onChange, value]);
 
   const changeTab = async (tab: TabName, state: State) => {
     if (selectedTab === 'advanced') {
@@ -108,7 +108,7 @@ export const MappingsEditor = React.memo(({ onUpdate, value, indexSettings }: Pr
         <MultipleMappingsWarning />
       ) : (
         <IndexSettingsProvider indexSettings={indexSettings}>
-          <MappingsState onUpdate={onUpdate} value={parsedDefaultValue!}>
+          <MappingsState onChange={onChange} value={parsedDefaultValue!}>
             {({ state }) => {
               const tabToContentMap = {
                 fields: <DocumentFields />,

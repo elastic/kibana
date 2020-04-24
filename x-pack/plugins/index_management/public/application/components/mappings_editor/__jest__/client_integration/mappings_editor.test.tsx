@@ -8,8 +8,8 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
 
 const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
-const onUpdateHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onUpdateHandler);
+const onChangeHandler = jest.fn();
+const getDataForwarded = getDataForwardedFactory(onChangeHandler);
 
 describe('<MappingsEditor />', () => {
   /**
@@ -18,7 +18,7 @@ describe('<MappingsEditor />', () => {
   let data: any;
 
   afterEach(() => {
-    onUpdateHandler.mockReset();
+    onChangeHandler.mockReset();
   });
 
   describe('multiple mappings detection', () => {
@@ -39,7 +39,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: onUpdateHandler, value });
+      const testBed = await setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -55,7 +55,7 @@ describe('<MappingsEditor />', () => {
           },
         },
       };
-      const testBed = await setup({ onUpdate: onUpdateHandler, value });
+      const testBed = await setup({ onChange: onChangeHandler, value });
       const { exists } = testBed;
 
       expect(exists('mappingsEditor')).toBe(true);
@@ -72,7 +72,7 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     test('should keep the changes when switching tabs', async () => {
@@ -220,7 +220,7 @@ describe('<MappingsEditor />', () => {
     let testBed: MappingsEditorTestBed;
 
     beforeEach(async () => {
-      testBed = await setup({ value: defaultMappings, onUpdate: onUpdateHandler });
+      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     test('props.value => should prepopulate the editor data', async () => {
@@ -278,7 +278,7 @@ describe('<MappingsEditor />', () => {
       expect(isRoutingRequired).toBe(defaultMappings._routing.required);
     });
 
-    test('props.onUpdate() => should forward the changes to the consumer component', async () => {
+    test('props.onChange() => should forward the changes to the consumer component', async () => {
       let updatedMappings = { ...defaultMappings };
 
       const {
