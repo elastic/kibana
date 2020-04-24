@@ -170,8 +170,6 @@ import {
   serializeFieldFormat,
 } from '../common/field_formats';
 
-export { DurationFormat };
-
 import { DateFormat } from './field_formats';
 export { baseFormattersPublic } from './field_formats';
 

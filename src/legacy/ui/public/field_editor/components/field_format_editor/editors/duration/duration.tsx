@@ -18,7 +18,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { DurationFormat } from 'src/plugins/data/public';
+import { DurationFormat } from 'src/plugins/data/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
 

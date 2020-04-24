@@ -11,7 +11,6 @@
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
 |  [AggTypeFieldFilters](./kibana-plugin-plugins-data-public.aggtypefieldfilters.md) | A registry to store  which are used to filter down available fields for a specific visualization and . |
 |  [AggTypeFilters](./kibana-plugin-plugins-data-public.aggtypefilters.md) | A registry to store  which are used to filter down available aggregations for a specific visualization and . |
-|  [DurationFormat](./kibana-plugin-plugins-data-public.durationformat.md) |  |
 |  [Field](./kibana-plugin-plugins-data-public.field.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
