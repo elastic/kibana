@@ -74,9 +74,12 @@ describe('deleteAlertRoute', () => {
 
     alertsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      params: { id: '1' },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        params: { id: '1' },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -97,9 +100,12 @@ describe('deleteAlertRoute', () => {
 
     alertsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(alertsClient, {
-      id: '1',
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      {
+        id: '1',
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 

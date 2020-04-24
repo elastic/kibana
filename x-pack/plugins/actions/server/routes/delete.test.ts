@@ -8,6 +8,7 @@ import { mockRouter, RouterMock } from '../../../../../src/core/server/http/rout
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../mocks';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -35,9 +36,8 @@ describe('deleteActionRoute', () => {
       }
     `);
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -71,13 +71,15 @@ describe('deleteActionRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {
-      params: { id: '1' },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -96,13 +98,15 @@ describe('deleteActionRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {
-      id: '1',
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        id: '1',
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 

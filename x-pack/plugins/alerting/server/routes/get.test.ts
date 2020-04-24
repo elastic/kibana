@@ -99,7 +99,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -126,7 +126,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },
