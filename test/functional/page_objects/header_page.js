@@ -36,11 +36,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickVisualize() {
-      await appsMenu.clickLink('Visualization Library');
+      await appsMenu.clickLink('Visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
-        if (firstBreadcrumb !== 'Visualization Library') {
+        if (firstBreadcrumb !== 'Visualize') {
           log.debug('-- first breadcrumb =', firstBreadcrumb);
           return false;
         }

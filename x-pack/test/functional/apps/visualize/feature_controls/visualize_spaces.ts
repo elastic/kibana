@@ -42,7 +42,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Visualization Library');
+        expect(navLinks).to.contain('Visualize');
       });
 
       it(`can view existing Visualization`, async () => {
@@ -83,7 +83,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).not.to.contain('Visualization Library');
+        expect(navLinks).not.to.contain('Visualize');
       });
 
       it(`create new visualization redirects to the home page`, async () => {

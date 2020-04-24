@@ -119,7 +119,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
   chrome.setBreadcrumbs([
     {
       text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
-        defaultMessage: 'Visualization Library',
+        defaultMessage: 'Visualize',
       }),
     },
   ]);

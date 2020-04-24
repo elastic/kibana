@@ -76,7 +76,7 @@ export default function(kibana) {
         {
           id: 'kibana:visualize',
           title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualization Library',
+            defaultMessage: 'Visualize',
           }),
           order: 7000,
           url: `${kbnBaseUrl}#/visualize`,
