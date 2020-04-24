@@ -23,12 +23,14 @@ import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
-import { mlChartTooltipService } from '../components/chart_tooltip';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
-import { ChartTooltipValue } from '../components/chart_tooltip/chart_tooltip_service';
+import {
+  ChartTooltipService,
+  ChartTooltipValue,
+} from '../components/chart_tooltip/chart_tooltip_service';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -71,6 +73,7 @@ export interface ExplorerSwimlaneProps {
     times: number[];
   };
   swimlaneRenderDoneListener?: Function;
+  tooltipService: ChartTooltipService;
 }
 
 export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
@@ -139,7 +142,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
         previousSelectedData = null;
         this.cellMouseoverActive = false;
-        mlChartTooltipService.hide();
+        this.props.tooltipService.hide();
       }
     });
 
@@ -307,6 +310,55 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       points,
     } = swimlaneData;
 
+    const cellMouseover = (
+      target: HTMLElement,
+      laneLabel: string,
+      bucketScore: number,
+      index: number,
+      time: number
+    ) => {
+      if (bucketScore === undefined || getCellMouseoverActive() === false) {
+        return;
+      }
+
+      const displayScore = bucketScore > 1 ? bucketScore : '< 1';
+
+      // Display date using same format as Kibana visualizations.
+      const formattedDate = formatHumanReadableDateTime(time * 1000);
+      const tooltipData: TooltipValue[] = [{ label: formattedDate } as TooltipValue];
+
+      if (swimlaneData.fieldName !== undefined) {
+        tooltipData.push({
+          label: swimlaneData.fieldName,
+          value: laneLabel,
+          // @ts-ignore
+          seriesIdentifier: {
+            key: laneLabel,
+          },
+          valueAccessor: 'fieldName',
+        });
+      }
+      tooltipData.push({
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+          defaultMessage: 'Max anomaly score',
+        }),
+        value: displayScore,
+        color: colorScore(bucketScore),
+        // @ts-ignore
+        seriesIdentifier: {
+          key: laneLabel,
+        },
+        valueAccessor: 'anomaly_score',
+      });
+
+      const offsets = target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 };
+
+      this.props.tooltipService.show(tooltipData, target, {
+        x: target.offsetWidth + offsets.x,
+        y: 6 + offsets.y,
+      });
+    };
+
     function colorScore(value: number): string {
       return getSeverityColor(value);
     }
@@ -344,64 +396,17 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       };
     }
 
-    function cellMouseover(
-      target: HTMLElement,
-      laneLabel: string,
-      bucketScore: number,
-      index: number,
-      time: number
-    ) {
-      if (bucketScore === undefined || getCellMouseoverActive() === false) {
-        return;
-      }
-
-      const displayScore = bucketScore > 1 ? bucketScore : '< 1';
-
-      // Display date using same format as Kibana visualizations.
-      const formattedDate = formatHumanReadableDateTime(time * 1000);
-      const tooltipData: TooltipValue[] = [{ label: formattedDate } as TooltipValue];
-
-      if (swimlaneData.fieldName !== undefined) {
-        tooltipData.push({
-          label: swimlaneData.fieldName,
-          value: laneLabel,
-          // @ts-ignore
-          seriesIdentifier: {
-            key: laneLabel,
-          },
-          valueAccessor: 'fieldName',
-        });
-      }
-      tooltipData.push({
-        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-          defaultMessage: 'Max anomaly score',
-        }),
-        value: displayScore,
-        color: colorScore(bucketScore),
-        // @ts-ignore
-        seriesIdentifier: {
-          key: laneLabel,
-        },
-        valueAccessor: 'anomaly_score',
-      });
-
-      const offsets = target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 };
-      // @ts-ignore
-      mlChartTooltipService.show(tooltipData, target, {
-        x: target.offsetWidth + offsets.x,
-        y: 6 + offsets.y,
-      });
-    }
-
-    function cellMouseleave() {
-      mlChartTooltipService.hide();
-    }
+    const cellMouseleave = () => {
+      this.props.tooltipService.hide();
+    };
 
     const d3Lanes = swimlanes.selectAll('.lane').data(lanes);
     const d3LanesEnter = d3Lanes
       .enter()
       .append('div')
       .classed('lane', true);
+
+    const that = this;
 
     d3LanesEnter
       .append('div')
@@ -427,7 +432,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
             .on('mouseover', value => {
-              mlChartTooltipService.show(
+              that.props.tooltipService.show(
                 [
                   { skipHeader: true } as ChartTooltipValue,
                   {
@@ -446,7 +451,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
               );
             })
             .on('mouseout', () => {
-              mlChartTooltipService.hide();
+              that.props.tooltipService.hide();
             })
             .attr(
               'aria-label',
