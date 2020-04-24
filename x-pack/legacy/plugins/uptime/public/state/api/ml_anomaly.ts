@@ -20,7 +20,10 @@ import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_r
 
 const getJobPrefix = (monitorId: string) => {
   // ML App doesn't support upper case characters in job name
-  const lowerCaseMonitorId = monitorId.toLowerCase();
+  // Also Spaces and the characters / ? , " < > | * are not allowed
+  // so we will replace all special chars with _
+
+  const lowerCaseMonitorId = monitorId.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
   // ML Job ID can't be greater than 64 length, so will be substring it, and hope
   // At such big length, there is minimum chance of having duplicate monitor id
