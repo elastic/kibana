@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiIconTip,
 } from '@elastic/eui';
 import { useTestConfigContext } from '../../test_config_context';
 
@@ -78,10 +79,20 @@ export const OutputTab: React.FunctionComponent<Props> = ({
 
       <EuiSwitch
         label={
-          <FormattedMessage
-            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
-            defaultMessage="View verbose output"
-          />
+          <>
+            <FormattedMessage
+              id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
+              defaultMessage="View verbose output"
+            />{' '}
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchTooltipLabel"
+                  defaultMessage="Include output data for each processor in the executed pipeline response"
+                />
+              }
+            />
+          </>
         }
         checked={cachedVerbose}
         onChange={e => onEnableVerbose(e.target.checked)}

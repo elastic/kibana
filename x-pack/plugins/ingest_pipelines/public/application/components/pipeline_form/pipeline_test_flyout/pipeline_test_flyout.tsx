@@ -42,8 +42,8 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
 
   const initialSelectedTab = cachedDocuments ? 'output' : 'documents';
   const [selectedTab, setSelectedTab] = useState<Tab>(initialSelectedTab);
-  const [onInitialMount, setOnInitialMount] = useState<boolean>(true);
 
+  const [hasNotExecuted, setHasNotExecuted] = useState<boolean>(true);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executeError, setExecuteError] = useState<any>(null);
   const [executeOutput, setExecuteOutput] = useState<any>(undefined);
@@ -71,7 +71,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
       setExecuteOutput(output);
 
       services.notifications.toasts.addSuccess(
-        i18n.translate('xpack.ingestPipelines.execute.successNotificationText', {
+        i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
           defaultMessage: 'Pipeline executed',
         })
       );
@@ -84,16 +84,16 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   useEffect(() => {
     // If the user has already tested the pipeline once,
     // use the cached test config and automatically execute the pipeline
-    if (onInitialMount && shouldTestImmediately && Object.entries(pipeline).length > 0) {
+    if (hasNotExecuted && shouldTestImmediately && Object.entries(pipeline).length > 0) {
       handleExecute(cachedDocuments!, cachedVerbose);
-      setOnInitialMount(false);
+      setHasNotExecuted(false);
     }
   }, [
     pipeline,
     handleExecute,
     cachedDocuments,
     cachedVerbose,
-    onInitialMount,
+    hasNotExecuted,
     shouldTestImmediately,
   ]);
 

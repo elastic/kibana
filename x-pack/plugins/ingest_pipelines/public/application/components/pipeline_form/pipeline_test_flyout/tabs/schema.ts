@@ -12,24 +12,33 @@ const { emptyField, isJsonField } = fieldValidators;
 
 export const documentsSchema: FormSchema = {
   documents: {
-    label: i18n.translate('xpack.ingestPipelines.debugForm.documentsFieldLabel', {
-      defaultMessage: 'Documents',
-    }),
+    label: i18n.translate(
+      'xpack.ingestPipelines.testPipelineFlyout.documentsForm.documentsFieldLabel',
+      {
+        defaultMessage: 'Documents',
+      }
+    ),
     serializer: parseJson,
     deserializer: stringifyJson,
     validations: [
       {
         validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.debugForm.noDocumentsError', {
-            defaultMessage: 'Documents are required.',
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.testPipelineFlyout.documentsForm.noDocumentsError',
+            {
+              defaultMessage: 'Documents are required.',
+            }
+          )
         ),
       },
       {
         validator: isJsonField(
-          i18n.translate('xpack.ingestPipelines.debugForm.documentsJsonError', {
-            defaultMessage: 'The documents JSON is not valid.',
-          })
+          i18n.translate(
+            'xpack.ingestPipelines.testPipelineFlyout.documentsForm.documentsJsonError',
+            {
+              defaultMessage: 'The documents JSON is not valid.',
+            }
+          )
         ),
       },
       {
@@ -38,9 +47,12 @@ export const documentsSchema: FormSchema = {
 
           if (!parsedJSON.length) {
             return {
-              message: i18n.translate('xpack.ingestPipelines.debugForm.oneDocumentRequiredError', {
-                defaultMessage: 'At least one document is required.',
-              }),
+              message: i18n.translate(
+                'xpack.ingestPipelines.testPipelineFlyout.documentsForm.oneDocumentRequiredError',
+                {
+                  defaultMessage: 'At least one document is required.',
+                }
+              ),
             };
           }
         },

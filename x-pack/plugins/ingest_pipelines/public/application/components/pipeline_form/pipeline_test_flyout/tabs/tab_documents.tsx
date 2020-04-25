@@ -68,7 +68,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.documentsDescriptionText"
+            id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
             defaultMessage="Provide an array of documents to be ingested by the pipeline."
           />
         </p>
@@ -91,7 +91,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
             euiCodeEditorProps: {
               height: '300px',
               'aria-label': i18n.translate(
-                'xpack.ingestPipelines.testPipelineFlyout.documentsFieldAriaLabel',
+                'xpack.ingestPipelines.testPipelineFlyout.documentsTab.editorFieldAriaLabel',
                 {
                   defaultMessage: 'Documents JSON editor',
                 }
@@ -121,12 +121,12 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         >
           {isExecuting ? (
             <FormattedMessage
-              id="xpack.ingestPipelines.testPipelineFlyout.runningButtonLabel"
+              id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runningButtonLabel"
               defaultMessage="Running"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestPipelines.testPipelineFlyout.runButtonLabel"
+              id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.runButtonLabel"
               defaultMessage="Run"
             />
           )}
