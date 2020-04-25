@@ -560,6 +560,35 @@ describe('getSortedObjectsForExport()', () => {
         `);
   });
 
+  test('modifies return results to redact `namespaces` attribute', async () => {
+    const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'] }),
+        createSavedObject({ type: 'multi', id: '2', namespaces: ['bar'] }),
+        createSavedObject({ type: 'other', id: '3' }),
+      ],
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      objects: [
+        { type: 'multi', id: '1' },
+        { type: 'multi', id: '2' },
+        { type: 'other', id: '3' },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toEqual(
+      expect.arrayContaining([
+        expect.not.objectContaining({ id: '1', namespaces: expect.anything() }),
+        expect.not.objectContaining({ id: '2', namespaces: expect.anything() }),
+        expect.not.objectContaining({ id: '3', namespaces: expect.anything() }),
+        expect.objectContaining({ exportedCount: 3 }),
+      ])
+    );
+  });
+
   test('includes nested dependencies when passed in', async () => {
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
