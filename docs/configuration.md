@@ -1,4 +1,4 @@
-# Configuration files
+# Configuration
 
 `backport` reads options from two configuration files:
 
