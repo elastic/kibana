@@ -20,7 +20,9 @@
 import d3 from 'd3';
 import expect from '@kbn/expect';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Chart } from '../../../../../../../plugins/vis_type_vislib/public/vislib/visualizations/_chart';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

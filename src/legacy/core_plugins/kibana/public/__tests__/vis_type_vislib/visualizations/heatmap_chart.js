@@ -23,11 +23,17 @@ import d3 from 'd3';
 import expect from '@kbn/expect';
 
 // Data
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import series from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import termsColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import stackedSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

@@ -20,9 +20,11 @@
 import _ from 'lodash';
 import $ from 'jquery';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Vis } from '../../../../../../plugins/vis_type_vislib/public/vislib/vis';
 
 // TODO: Remove when converted to jest mocks
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ColorsService } from '../../../../../../plugins/charts/public/services';
 
 const $visCanvas = $('<div>')

@@ -21,8 +21,11 @@ import d3 from 'd3';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChartTitle } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/chart_title';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { VisConfig } from '../../../../../../../plugins/vis_type_vislib/public/vislib/lib/vis_config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 
 describe('Vislib ChartTitle Class Test Suite', function() {

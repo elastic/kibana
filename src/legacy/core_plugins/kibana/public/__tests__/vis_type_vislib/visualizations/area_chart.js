@@ -22,15 +22,22 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
 const dataTypesArray = {
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   'series pos': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series'),
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   'series pos neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg'),
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   'series neg': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg'),
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   'term columns': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_columns'),
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   'range rows': require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/range/_rows'),
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
   stackedSeries: require('../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series'),
 };
 

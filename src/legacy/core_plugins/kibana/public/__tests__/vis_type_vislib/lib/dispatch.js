@@ -22,8 +22,10 @@ import d3 from 'd3';
 import expect from '@kbn/expect';
 
 // Data
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

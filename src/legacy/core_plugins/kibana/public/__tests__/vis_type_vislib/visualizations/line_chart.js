@@ -23,12 +23,19 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 // Data
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import seriesPos from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import seriesPosNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_pos_neg';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import seriesNeg from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series_neg';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import histogramColumns from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/histogram/_columns';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import rangeRows from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/range/_rows';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import termSeries from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_series';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

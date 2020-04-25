@@ -22,6 +22,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 import { pieChartMockData } from './pie_chart_mock_data';
