@@ -12,7 +12,6 @@ import {
 } from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
-import { getEligibleTypes } from './lib/get_eligible_types';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
@@ -26,8 +25,6 @@ export function copySavedObjectsToSpacesFactory(
   const { getTypeRegistry, getScopedClient } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
-
-  const eligibleTypes = getEligibleTypes(getTypeRegistry());
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -56,7 +53,7 @@ export function copySavedObjectsToSpacesFactory(
         objectLimit: getImportExportObjectLimit(),
         overwrite: options.overwrite,
         savedObjectsClient,
-        supportedTypes: eligibleTypes,
+        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
       });
 

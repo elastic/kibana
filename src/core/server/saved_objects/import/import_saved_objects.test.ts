@@ -22,6 +22,7 @@ import { SavedObject } from '../types';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { savedObjectsClientMock } from '../../mocks';
 import { SavedObjectsErrorHelpers } from '..';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 
 const emptyResponse = {
   saved_objects: [],
@@ -29,6 +30,19 @@ const emptyResponse = {
   per_page: 0,
   page: 0,
 };
+
+const createTypeRegistryMock = (supportedTypes: string[]) => {
+  const typeRegistry = typeRegistryMock.create();
+  const types = supportedTypes.map((name) => ({
+    name,
+    hidden: false,
+    namespaceType: 'single' as 'single',
+    mappings: { properties: {} },
+  }));
+  typeRegistry.getImportableAndExportableTypes.mockReturnValue(types);
+  return typeRegistry;
+};
+
 describe('importSavedObjects()', () => {
   const savedObjects: SavedObject[] = [
     {
@@ -65,6 +79,7 @@ describe('importSavedObjects()', () => {
     },
   ];
   const savedObjectsClient = savedObjectsClientMock.create();
+  const supportedTypes = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -82,7 +97,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 1,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: [],
+      typeRegistry: createTypeRegistryMock([]),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -109,7 +124,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -192,7 +207,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
       namespace: 'foo',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -276,7 +291,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 4,
       overwrite: true,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -365,7 +380,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -461,7 +476,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 4,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -537,7 +552,7 @@ describe('importSavedObjects()', () => {
       objectLimit: 5,
       overwrite: false,
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {

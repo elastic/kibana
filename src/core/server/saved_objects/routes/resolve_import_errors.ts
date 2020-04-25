@@ -72,12 +72,8 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((type) => type.name);
-
       const result = await resolveSavedObjectsImportErrors({
-        supportedTypes,
+        typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
         readStream: createSavedObjectsStreamFromNdJson(file),
         retries: req.body.retries,

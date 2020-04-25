@@ -37,10 +37,11 @@ export async function importSavedObjectsFromStream({
   objectLimit,
   overwrite,
   savedObjectsClient,
-  supportedTypes,
+  typeRegistry,
   namespace,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
   const {

@@ -12,7 +12,6 @@ import {
 } from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
-import { getEligibleTypes } from './lib/get_eligible_types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
@@ -26,8 +25,6 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   const { getTypeRegistry, getScopedClient } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
-
-  const eligibleTypes = getEligibleTypes(getTypeRegistry());
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -59,7 +56,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
         namespace: spaceIdToNamespace(spaceId),
         objectLimit: getImportExportObjectLimit(),
         savedObjectsClient,
-        supportedTypes: eligibleTypes,
+        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
       });

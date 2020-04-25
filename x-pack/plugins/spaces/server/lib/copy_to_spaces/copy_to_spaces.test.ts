@@ -10,7 +10,7 @@ import {
 } from 'src/core/server';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
-import { coreMock, savedObjectsTypeRegistryMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
 
 jest.mock('../../../../../../src/core/server', () => {
   return {
@@ -52,34 +52,6 @@ const expectStreamToContainObjects = async (
 describe('copySavedObjectsToSpaces', () => {
   const setup = (setupOpts: SetupOpts) => {
     const coreStart = coreMock.createStart();
-
-    const typeRegistry = savedObjectsTypeRegistryMock.create();
-    typeRegistry.getAllTypes.mockReturnValue([
-      {
-        name: 'dashboard',
-        namespaceType: 'single',
-        hidden: false,
-        mappings: { properties: {} },
-      },
-      {
-        name: 'visualization',
-        namespaceType: 'single',
-        hidden: false,
-        mappings: { properties: {} },
-      },
-      {
-        name: 'globaltype',
-        namespaceType: 'agnostic',
-        hidden: false,
-        mappings: { properties: {} },
-      },
-    ]);
-
-    typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
-      typeRegistry.getAllTypes().some((t) => t.name === type && t.namespaceType === 'agnostic')
-    );
-
-    coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
     (exportSavedObjectsToStream as jest.Mock).mockImplementation(
       async (opts: SavedObjectsExportOptions) => {
@@ -266,10 +238,18 @@ describe('copySavedObjectsToSpaces', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
+            "typeRegistry": Object {
+              "getAllTypes": [MockFunction],
+              "getImportableAndExportableTypes": [MockFunction],
+              "getIndex": [MockFunction],
+              "getType": [MockFunction],
+              "isHidden": [MockFunction],
+              "isImportableAndExportable": [MockFunction],
+              "isMultiNamespace": [MockFunction],
+              "isNamespaceAgnostic": [MockFunction],
+              "isSingleNamespace": [MockFunction],
+              "registerType": [MockFunction],
+            },
           },
         ],
         Array [
@@ -331,10 +311,18 @@ describe('copySavedObjectsToSpaces', () => {
               "get": [MockFunction],
               "update": [MockFunction],
             },
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
+            "typeRegistry": Object {
+              "getAllTypes": [MockFunction],
+              "getImportableAndExportableTypes": [MockFunction],
+              "getIndex": [MockFunction],
+              "getType": [MockFunction],
+              "isHidden": [MockFunction],
+              "isImportableAndExportable": [MockFunction],
+              "isMultiNamespace": [MockFunction],
+              "isNamespaceAgnostic": [MockFunction],
+              "isSingleNamespace": [MockFunction],
+              "registerType": [MockFunction],
+            },
           },
         ],
       ]

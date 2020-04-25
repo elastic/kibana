@@ -22,6 +22,19 @@ import { SavedObject } from '../types';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 import { savedObjectsClientMock } from '../../mocks';
 import { SavedObjectsErrorHelpers } from '..';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
+
+const createTypeRegistryMock = (supportedTypes: string[]) => {
+  const typeRegistry = typeRegistryMock.create();
+  const types = supportedTypes.map((name) => ({
+    name,
+    hidden: false,
+    namespaceType: 'single' as 'single',
+    mappings: { properties: {} },
+  }));
+  typeRegistry.getImportableAndExportableTypes.mockReturnValue(types);
+  return typeRegistry;
+};
 
 describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
@@ -65,6 +78,7 @@ describe('resolveImportErrors()', () => {
     },
   ];
   const savedObjectsClient = savedObjectsClientMock.create();
+  const supportedTypes = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -86,7 +100,7 @@ describe('resolveImportErrors()', () => {
       objectLimit: 4,
       retries: [],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -120,7 +134,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -181,7 +195,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -249,7 +263,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -320,7 +334,7 @@ describe('resolveImportErrors()', () => {
         replaceReferences: [],
       })),
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -429,7 +443,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -511,7 +525,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -555,7 +569,7 @@ describe('resolveImportErrors()', () => {
         },
       ],
       savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      typeRegistry: createTypeRegistryMock(supportedTypes),
       namespace: 'foo',
     });
     expect(result).toMatchInlineSnapshot(`

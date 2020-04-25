@@ -38,11 +38,12 @@ export async function resolveSavedObjectsImportErrors({
   objectLimit,
   retries,
   savedObjectsClient,
-  supportedTypes,
+  typeRegistry,
   namespace,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
+  const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
 
   // Get the objects to resolve errors

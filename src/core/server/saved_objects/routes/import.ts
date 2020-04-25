@@ -61,13 +61,9 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((type) => type.name);
-
       const result = await importSavedObjectsFromStream({
-        supportedTypes,
         savedObjectsClient: context.core.savedObjects.client,
+        typeRegistry: context.core.savedObjects.typeRegistry,
         readStream: createSavedObjectsStreamFromNdJson(file),
         objectLimit: maxImportExportSize,
         overwrite,
