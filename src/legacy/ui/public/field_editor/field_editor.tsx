@@ -19,7 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
-import { HttpStart } from 'src/core/public';
+import { HttpStart, DocLinksStart } from 'src/core/public';
 
 import {
   getEnabledScriptingLanguages,
@@ -145,6 +145,7 @@ export interface FieldEdiorProps {
     getHttpStart: () => HttpStart;
     fieldFormatEditors: DefaultFormatEditor[];
     redirectAway: () => void;
+    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
   };
 }
 
@@ -745,7 +746,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return (
       <Fragment>
         <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
-        <ScriptingWarningCallOut isVisible />
+        <ScriptingWarningCallOut
+          isVisible
+          docLinksScriptedFields={this.props.helpers.docLinksScriptedFields}
+        />
         <ScriptingHelpFlyout
           isVisible={showScriptingHelp}
           onClose={this.hideScriptingHelp}
@@ -755,6 +759,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           script={field.script}
           executeScript={executeScript}
           getHttpStart={this.props.helpers.getHttpStart}
+          docLinksScriptedFields={this.props.helpers.docLinksScriptedFields}
         />
       </Fragment>
     );

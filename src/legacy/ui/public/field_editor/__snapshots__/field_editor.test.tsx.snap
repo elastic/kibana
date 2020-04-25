@@ -19,9 +19,29 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       isVisible={true}
     />
     <ScriptingHelpFlyout
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       executeScript={[Function]}
       getHttpStart={[Function]}
       indexPattern={
@@ -255,9 +275,29 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       isVisible={true}
     />
     <ScriptingHelpFlyout
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       executeScript={[Function]}
       getHttpStart={[Function]}
       indexPattern={
@@ -498,9 +538,29 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       isVisible={true}
     />
     <ScriptingHelpFlyout
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       executeScript={[Function]}
       getHttpStart={[Function]}
       indexPattern={
@@ -778,9 +838,29 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       isVisible={true}
     />
     <ScriptingHelpFlyout
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       executeScript={[Function]}
       getHttpStart={[Function]}
       indexPattern={
@@ -1111,9 +1191,29 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isVisible={false}
     />
     <scripting-warning-callOut
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       isVisible={true}
     />
     <ScriptingHelpFlyout
+      docLinksScriptedFields={
+        Object {
+          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
+          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
+          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
+          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
+          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
+          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
+        }
+      }
       executeScript={[Function]}
       getHttpStart={[Function]}
       indexPattern={

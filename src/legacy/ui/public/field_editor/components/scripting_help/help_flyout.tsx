@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { HttpStart } from 'src/core/public';
+import { HttpStart, DocLinksStart } from 'src/core/public';
 
 import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 
@@ -37,6 +37,7 @@ interface ScriptingHelpFlyoutProps {
   isVisible: boolean;
   onClose: () => void;
   getHttpStart: () => HttpStart;
+  docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
 }
 
 export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
@@ -48,13 +49,14 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   script,
   executeScript,
   getHttpStart,
+  docLinksScriptedFields,
 }) => {
   const tabs = [
     {
       id: 'syntax',
       name: 'Syntax',
       ['data-test-subj']: 'syntaxTab',
-      content: <ScriptingSyntax />,
+      content: <ScriptingSyntax docLinksScriptedFields={docLinksScriptedFields} />,
     },
     {
       id: 'test',

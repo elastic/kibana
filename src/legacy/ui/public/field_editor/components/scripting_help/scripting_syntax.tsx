@@ -18,13 +18,17 @@
  */
 
 import React, { Fragment } from 'react';
-import { getDocLink } from 'ui/documentation_links';
+import { DocLinksStart } from 'src/core/public';
 
 import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ScriptingSyntax = () => (
+export interface ScriptingSyntaxProps {
+  docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
+}
+
+export const ScriptingSyntax = ({ docLinksScriptedFields }: ScriptingSyntaxProps) => (
   <Fragment>
     <EuiSpacer />
     <EuiText>
@@ -38,7 +42,7 @@ export const ScriptingSyntax = () => (
           specifically for use with Elasticsearch, to access values in the document use the following format:"
           values={{
             painless: (
-              <EuiLink target="_blank" href={getDocLink('scriptedFields.painless')}>
+              <EuiLink target="_blank" href={docLinksScriptedFields.painless}>
                 <FormattedMessage
                   id="common.ui.fieldEditor.syntax.defaultLabel.painlessLink"
                   defaultMessage="Painless"
@@ -64,7 +68,7 @@ export const ScriptingSyntax = () => (
           you'll be up to speed in no time!"
           values={{
             javaAPIs: (
-              <EuiLink target="_blank" href={getDocLink('scriptedFields.painlessApi')}>
+              <EuiLink target="_blank" href={docLinksScriptedFields.painlessApi}>
                 <FormattedMessage
                   id="common.ui.fieldEditor.syntax.painlessLabel.javaAPIsLink"
                   defaultMessage="native Java APIs"
@@ -74,7 +78,7 @@ export const ScriptingSyntax = () => (
               </EuiLink>
             ),
             syntax: (
-              <EuiLink target="_blank" href={getDocLink('scriptedFields.painlessSyntax')}>
+              <EuiLink target="_blank" href={docLinksScriptedFields.painlessSyntax}>
                 <FormattedMessage
                   id="common.ui.fieldEditor.syntax.painlessLabel.syntaxLink"
                   defaultMessage="syntax"
@@ -100,7 +104,7 @@ export const ScriptingSyntax = () => (
           are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
           values={{
             lucene: (
-              <EuiLink target="_blank" href={getDocLink('scriptedFields.luceneExpressions')}>
+              <EuiLink target="_blank" href={docLinksScriptedFields.luceneExpressions}>
                 <FormattedMessage
                   id="common.ui.fieldEditor.syntax.lucene.commonLabel.luceneLink"
                   defaultMessage="Lucene Expressions"

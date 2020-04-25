@@ -18,13 +18,21 @@
  */
 
 import React, { Fragment } from 'react';
-import { getDocLink } from 'ui/documentation_links';
+import { DocLinksStart } from 'src/core/public';
 
 import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const ScriptingWarningCallOut = ({ isVisible = false }) => {
+export interface ScriptingWarningCallOutProps {
+  isVisible: boolean;
+  docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
+}
+
+export const ScriptingWarningCallOut = ({
+  isVisible = false,
+  docLinksScriptedFields,
+}: ScriptingWarningCallOutProps) => {
   return isVisible ? (
     <Fragment>
       <EuiCallOut
@@ -43,7 +51,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }) => {
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
-                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptFields')}>
+                <EuiLink target="_blank" href={docLinksScriptedFields.scriptFields}>
                   <FormattedMessage
                     id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink"
                     defaultMessage="script fields"
@@ -53,7 +61,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }) => {
                 </EuiLink>
               ),
               scriptsInAggregation: (
-                <EuiLink target="_blank" href={getDocLink('scriptedFields.scriptAggs')}>
+                <EuiLink target="_blank" href={docLinksScriptedFields.scriptAggs}>
                   <FormattedMessage
                     id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"

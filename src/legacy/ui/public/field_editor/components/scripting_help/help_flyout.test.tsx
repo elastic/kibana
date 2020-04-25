@@ -20,16 +20,14 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { HttpStart } from 'src/core/public';
+// eslint-disable-next-line
+import { docLinksServiceMock } from '../../../../../../core/public/doc_links/doc_links_service.mock';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
 import { IndexPattern } from '../../../../../../plugins/data/public';
 
 import { ExecuteScript } from '../../types';
-
-jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc: string) => `(docLink for ${doc})`,
-}));
 
 jest.mock('./test_script', () => ({
   TestScript: () => {
@@ -40,6 +38,7 @@ jest.mock('./test_script', () => ({
 const indexPatternMock = {} as IndexPattern;
 
 describe('ScriptingHelpFlyout', () => {
+  const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;
   it('should render normally', async () => {
     const component = shallow(
       <ScriptingHelpFlyout
@@ -49,6 +48,7 @@ describe('ScriptingHelpFlyout', () => {
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
         getHttpStart={() => (({} as unknown) as HttpStart)}
+        docLinksScriptedFields={docLinksScriptedFields}
       />
     );
 
@@ -64,6 +64,7 @@ describe('ScriptingHelpFlyout', () => {
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
         getHttpStart={() => (({} as unknown) as HttpStart)}
+        docLinksScriptedFields={docLinksScriptedFields}
       />
     );
 

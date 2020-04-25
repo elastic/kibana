@@ -115,6 +115,7 @@ const renderCreateEditField = ($scope, $route, getConfig, fieldFormatEditors) =>
               getHttpStart: () => npStart.core.http,
               notifications: npStart.core.notifications,
               docTitle: npStart.core.chrome.docTitle,
+              docLinksScriptedFields: npStart.core.docLinks.links.scriptedFields,
             }}
           />
         </I18nContext>

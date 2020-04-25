@@ -28,6 +28,8 @@ import {
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
 import { HttpStart } from '../../../../core/public';
+// eslint-disable-next-line
+import { docLinksServiceMock } from '../../../../core/public/doc_links/doc_links_service.mock';
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
@@ -104,6 +106,7 @@ const helpers = {
   getHttpStart: () => (({} as unknown) as HttpStart),
   fieldFormatEditors: [],
   redirectAway: () => {},
+  docLinksScriptedFields: docLinksServiceMock.createStartContract().links.scriptedFields,
 };
 
 describe('FieldEditor', () => {

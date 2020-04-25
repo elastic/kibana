@@ -21,20 +21,23 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptingWarningCallOut } from './warning_call_out';
-
-jest.mock('ui/documentation_links', () => ({
-  getDocLink: (doc: string) => `(docLink for ${doc})`,
-}));
+// eslint-disable-next-line
+import { docLinksServiceMock } from '../../../../../../core/public/doc_links/doc_links_service.mock';
 
 describe('ScriptingWarningCallOut', () => {
+  const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;
   it('should render normally', async () => {
-    const component = shallow(<ScriptingWarningCallOut isVisible={true} />);
+    const component = shallow(
+      <ScriptingWarningCallOut isVisible={true} docLinksScriptedFields={docLinksScriptedFields} />
+    );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should render nothing if not visible', async () => {
-    const component = shallow(<ScriptingWarningCallOut />);
+    const component = shallow(
+      <ScriptingWarningCallOut isVisible={false} docLinksScriptedFields={docLinksScriptedFields} />
+    );
 
     expect(component).toMatchSnapshot();
   });

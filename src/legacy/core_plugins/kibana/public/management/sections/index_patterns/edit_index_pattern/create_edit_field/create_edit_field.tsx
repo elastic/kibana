@@ -23,7 +23,7 @@ import { FieldEditor } from 'ui/field_editor';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'src/core/public';
+import { HttpStart, DocLinksStart } from 'src/core/public';
 import { IndexHeader } from '../index_header';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
@@ -39,6 +39,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     getHttpStart: () => HttpStart;
+    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
   };
 }
 
@@ -102,6 +103,7 @@ export const CreateEditField = withRouter(
                 getHttpStart: services.getHttpStart,
                 fieldFormatEditors,
                 redirectAway,
+                docLinksScriptedFields: services.docLinksScriptedFields,
               }}
             />
           </EuiFlexItem>
