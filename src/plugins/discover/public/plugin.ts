@@ -52,7 +52,6 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
-  getHistory,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { getInnerAngularModuleEmbeddable, getInnerAngularModule } from './get_inner_angular';

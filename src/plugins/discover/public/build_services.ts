@@ -40,7 +40,6 @@ import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
-import { SavedObjectKibanaServices } from '../../saved_objects/public';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 
 export interface DiscoverServices {

@@ -86,7 +86,6 @@ function ContextAppRouteController($routeParams, $scope, $route) {
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
   filterManager.setFilters(_.cloneDeep(getFilters()));
   startStateSync();
 

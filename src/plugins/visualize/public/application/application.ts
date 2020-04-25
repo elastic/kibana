@@ -20,6 +20,12 @@
 import './index.scss';
 
 import angular, { IModule } from 'angular';
+
+// required for i18nIdDirective
+import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
+
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';

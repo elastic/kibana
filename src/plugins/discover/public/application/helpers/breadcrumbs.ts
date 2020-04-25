@@ -25,7 +25,7 @@ export function getRootBreadcrumbs() {
       text: i18n.translate('kbn.discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      href: '#/discover',
+      href: '#/',
     },
   ];
 }

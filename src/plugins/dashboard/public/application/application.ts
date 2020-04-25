@@ -43,6 +43,8 @@ import { SavedObjectLoader } from '../../../saved_objects/public';
 
 // required for i18nIdDirective
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
