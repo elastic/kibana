@@ -57,6 +57,8 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
+      resolve(__dirname, './apps/reporting_management'),
+
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -196,6 +198,10 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
       },
+      reporting: {
+        pathname: '/app/kibana/',
+        hash: '/management/kibana/reporting',
+      },
     },
 
     // choose where esArchiver should load archives from
@@ -226,6 +232,17 @@ export default async function({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
