@@ -8,9 +8,7 @@ import { uiRoutes } from '../../angular/helpers/routes';
 import template from './index.html';
 import { NoDataController } from './controller';
 
-uiRoutes
-  .when('/no-data', {
-    template,
-    controller: NoDataController,
-  })
-  .otherwise({ redirectTo: '/home' });
+uiRoutes.when('/no-data', {
+  template,
+  controller: NoDataController,
+});

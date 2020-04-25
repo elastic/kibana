@@ -11,7 +11,7 @@ interface Redirect {
 
 class Routes {
   private routes: RouteObject[] = [];
-  private redirect?: Redirect;
+  public redirect?: Redirect = { redirectTo: '/no-data' };
 
   public when = (...args: RouteObject) => {
     const [, routeOptions] = args;

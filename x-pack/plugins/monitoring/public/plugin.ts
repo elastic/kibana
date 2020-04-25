@@ -8,7 +8,6 @@ import './views/all';
 import { i18n } from '@kbn/i18n';
 import {
   App,
-  AppMountContext,
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -22,11 +21,11 @@ import {
 import { initAngularBootstrap } from '../../../../src/plugins/kibana_legacy/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
-
 import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
   KIBANA_ALERTING_ENABLED,
 } from '../common/constants';
+import { uiRoutes } from './angular/helpers/routes';
 
 export class MonitoringPlugin
   implements Plugin<void, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
@@ -72,7 +71,7 @@ export class MonitoringPlugin
       appRoute: path,
       euiIconType: icon,
       category: DEFAULT_APP_CATEGORIES.management,
-      mount: async (context: AppMountContext, params: AppMountParameters) => {
+      mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
         const deps: MonitoringPluginDependencies = {
@@ -89,7 +88,17 @@ export class MonitoringPlugin
         this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
-        return monitoringApp.destroy;
+        const removeHistoryListener = params.history.listen(location => {
+          if (location.pathname === '' && location.hash === '') {
+            params.history.push({ hash: uiRoutes.redirect?.redirectTo || '/no-data' });
+            monitoringApp.applyScope();
+          }
+        });
+
+        return () => {
+          removeHistoryListener();
+          monitoringApp.destroy();
+        };
       },
     };
 

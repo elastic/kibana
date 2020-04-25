@@ -12,7 +12,7 @@ import { localAppModule, appModuleName } from './app_modules';
 
 import { MonitoringPluginDependencies } from '../types';
 
-const SAFARI_FIX = 'kbnLocalApplicationWrapper';
+const APP_WRAPPER_CLASS = 'monitoringApplicationWrapper';
 export class AngularApp {
   private injector?: angular.auto.IInjectorService;
 
@@ -41,11 +41,10 @@ export class AngularApp {
     configureAppAngularModule(app, np, true);
     const appElement = document.createElement('div');
     appElement.setAttribute('style', 'height: 100%');
-    appElement.setAttribute('class', SAFARI_FIX);
-    appElement.innerHTML = `<div ng-view style="height: 100%" id="monitoring-angular-app" class="${SAFARI_FIX}"></div>`;
+    appElement.innerHTML = '<div ng-view style="height: 100%" id="monitoring-angular-app"></div>';
 
-    if (!element.classList.contains(SAFARI_FIX)) {
-      element.classList.add(SAFARI_FIX);
+    if (!element.classList.contains(APP_WRAPPER_CLASS)) {
+      element.classList.add(APP_WRAPPER_CLASS);
     }
 
     angular.bootstrap(appElement, [appModuleName]);
@@ -56,5 +55,14 @@ export class AngularApp {
     if (this.injector) {
       this.injector.get('$rootScope').$destroy();
     }
+  };
+
+  public applyScope = () => {
+    if (!this.injector) {
+      return;
+    }
+
+    const rootScope = this.injector.get('$rootScope');
+    rootScope.$applyAsync();
   };
 }
