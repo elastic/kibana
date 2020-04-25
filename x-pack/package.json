@@ -186,7 +186,7 @@
     "@elastic/ems-client": "7.8.0",
     "@elastic/eui": "22.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/maki": "6.2.0",
+    "@elastic/maki": "6.3.0",
     "@elastic/node-crypto": "1.1.1",
     "@elastic/numeral": "2.4.0",
     "@kbn/babel-preset": "1.0.0",

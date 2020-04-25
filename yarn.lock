@@ -1202,10 +1202,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.2.0"
 
-"@elastic/charts@18.4.1":
-  version "18.4.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.4.1.tgz#19d82c39aef347fd00b33e33b68b683ac4d745b0"
-  integrity sha512-vV5AAKIKbwgY923OD2Rsr77XFHmsUsWWg/aeCZvG5/b6Yb+fNgM0RF94GADiDMvRvQANhTn2CPPVvNfL18MegQ==
+"@elastic/charts@18.4.2":
+  version "18.4.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-18.4.2.tgz#7d3c40dca8a7a701fb7227382191b84d36d8b32a"
+  integrity sha512-fmEDRUeFEtVWGurafhp/5bHBypOjdXiRXY074tCqnez43hA2iA4v1KrZL8tPFlMePgc/kpZf9wb8aEwxlfWumw==
   dependencies:
     classnames "^2.2.6"
     d3-array "^1.2.4"
@@ -1343,10 +1343,10 @@
     through2 "^2.0.0"
     update-notifier "^0.5.0"
 
-"@elastic/maki@6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.2.0.tgz#d0a85aa248bdc14dca44e1f9430c0b670f65e489"
-  integrity sha512-QkmRNpEY4Dy6eqwDimR5X9leMgdPFjdANmpEIwEW1XVUG2U4YtB2BXhDxsnMmNTUrJUjtnjnwgwBUyg0pU0FTg==
+"@elastic/maki@6.3.0":
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/maki/-/maki-6.3.0.tgz#09780650f1510554bef9121b9db86ce297f021f1"
+  integrity sha512-a2U2DaemIJaW+3nL/sN/+JScdrkoggoGHLDtRPurk2Axnpa9O9QHekmMXLO7eLK1brDpYcplqGE6hwFaMvRRUg==
 
 "@elastic/node-crypto@1.1.1":
   version "1.1.1"

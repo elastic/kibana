@@ -5,7 +5,7 @@
  */
 
 import { getAllActionRoute } from './get_all';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -22,7 +22,7 @@ beforeEach(() => {
 describe('getAllActionRoute', () => {
   it('get all actions with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAllActionRoute(router, licenseState);
 
@@ -57,7 +57,7 @@ describe('getAllActionRoute', () => {
 
   it('ensures the license allows getting all actions', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAllActionRoute(router, licenseState);
 
@@ -84,7 +84,7 @@ describe('getAllActionRoute', () => {
 
   it('ensures the license check prevents getting all actions', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
