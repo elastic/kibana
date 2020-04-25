@@ -21,17 +21,11 @@ import _ from 'lodash';
 import $ from 'jquery';
 import expect from '@kbn/expect';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import series from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_series';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import columns from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_columns';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import rows from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_rows';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import stackedSeries from '../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/date_histogram/_stacked_series';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getVis } from './_vis_fixture';
 
 const dataArray = [series, columns, rows, stackedSeries];

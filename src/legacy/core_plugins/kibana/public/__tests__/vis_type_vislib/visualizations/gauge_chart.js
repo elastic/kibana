@@ -21,9 +21,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import expect from '@kbn/expect';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import data from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mock_data/terms/_series_multiple';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMockUiState } from '../../../../../../../plugins/vis_type_vislib/public/fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 
