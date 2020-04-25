@@ -314,7 +314,12 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
-      getInnerAngularModuleEmbeddable(embeddableAngularName, core, plugins);
+      getInnerAngularModuleEmbeddable(
+        embeddableAngularName,
+        core,
+        plugins,
+        this.initializerContext
+      );
       const mountpoint = document.createElement('div');
       this.embeddableInjector = angular.bootstrap(mountpoint, [embeddableAngularName]);
     }

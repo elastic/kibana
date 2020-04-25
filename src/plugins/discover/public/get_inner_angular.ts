@@ -79,10 +79,11 @@ export function getInnerAngularModule(
 export function getInnerAngularModuleEmbeddable(
   name: string,
   core: CoreStart,
-  deps: DiscoverStartPlugins
+  deps: DiscoverStartPlugins,
+  context: PluginInitializerContext
 ) {
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  configureAppAngularModule(module, core as LegacyCoreStart, true);
+  configureAppAngularModule(module, { core, env: context.env }, true);
   return module;
 }
 
