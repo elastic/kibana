@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const stringifyJson = (json: { [key: string]: unknown }): string =>
+export const stringifyJson = (json: any): string =>
   Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
 
 export const parseJson = (jsonString: string): object[] => {
