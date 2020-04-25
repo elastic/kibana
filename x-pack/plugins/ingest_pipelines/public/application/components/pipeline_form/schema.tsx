@@ -6,15 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  FormSchema,
-  FIELD_TYPES,
-  fieldValidators,
-  fieldFormatters,
-  isJSON,
-  isEmptyString,
-  ValidationFuncArg,
-} from '../../../shared_imports';
+import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
 
 const { emptyField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
@@ -97,27 +89,26 @@ export const pipelineFormSchema: FormSchema = {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
       defaultMessage: 'On-failure processors (optional)',
     }),
-    serializer: parseJson,
+    serializer: value => {
+      const result = parseJson(value);
+      // If an empty array was passed, strip out this value entirely.
+      if (!result.length) {
+        return undefined;
+      }
+      return result;
+    },
     deserializer: stringifyJson,
     validations: [
       {
-        validator: ({ value }: ValidationFuncArg<any, any>) => {
-          if (isJSON(value)) {
-            const parsedJSON = JSON.parse(value);
-            if (!parsedJSON.length) {
-              return {
-                message: 'At least one on-failure processor must be defined.',
-              };
-            }
-          } else {
-            if (!isEmptyString(value)) {
-              return {
-                message: i18n.translate('xpack.ingestPipelines.form.onFailureProcessorsJsonError', {
-                  defaultMessage: 'The on-failure processors JSON is not valid.',
-                }),
-              };
-            }
+        validator: validationArg => {
+          if (!validationArg.value) {
+            return;
           }
+          return isJsonField(
+            i18n.translate('xpack.ingestPipelines.form.onFailureProcessorsJsonError', {
+              defaultMessage: 'The on-failure processors JSON is not valid.',
+            })
+          )(validationArg);
         },
       },
     ],
