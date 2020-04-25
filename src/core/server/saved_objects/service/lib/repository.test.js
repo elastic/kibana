@@ -153,7 +153,7 @@ describe('SavedObjectsRepository', () => {
     validateDoc: jest.fn(),
   });
 
-  const getMockGetResponse = ({ type, id, references, namespace }) => ({
+  const getMockGetResponse = ({ type, id, references, namespace, originId }) => ({
     // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
     found: true,
     _id: `${registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`,
@@ -161,6 +161,7 @@ describe('SavedObjectsRepository', () => {
     _source: {
       ...(registry.isSingleNamespace(type) && { namespace }),
       ...(registry.isMultiNamespace(type) && { namespaces: [namespace ?? 'default'] }),
+      ...(originId && { originId }),
       type,
       [type]: { title: 'Testing' },
       references,
@@ -423,6 +424,7 @@ describe('SavedObjectsRepository', () => {
       id: '6.0.0-alpha1',
       attributes: { title: 'Test One' },
       references: [{ name: 'ref_0', type: 'test', id: '1' }],
+      originId: 'some-origin-id', // only one of the object args has an originId, this is intentional to test both a positive and negative case
     };
     const obj2 = {
       type: 'index-pattern',
@@ -434,13 +436,14 @@ describe('SavedObjectsRepository', () => {
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
-        items: objects.map(({ type, id, attributes, references, migrationVersion }) => ({
+        items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
           create: {
             _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
             _source: {
               [type]: attributes,
               type,
               namespace,
+              ...(originId && { originId }),
               references,
               ...mockTimestampFields,
               migrationVersion: migrationVersion || { [type]: '1.1.1' },
@@ -851,6 +854,7 @@ describe('SavedObjectsRepository', () => {
           id: '1',
         },
       ],
+      originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
     };
     const obj2 = {
       type: 'index-pattern',
@@ -986,6 +990,7 @@ describe('SavedObjectsRepository', () => {
         type,
         id,
         ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+        ...(doc._source.originId && { originId: doc._source.originId }),
         ...(doc._source.updated_at && { updated_at: doc._source.updated_at }),
         version: encodeHitVersion(doc),
         attributes: doc._source[type],
@@ -1052,27 +1057,35 @@ describe('SavedObjectsRepository', () => {
       attributes: { title: 'Test Two' },
     };
     const references = [{ name: 'ref_0', type: 'test', id: '1' }];
+    const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
 
-    const getMockBulkUpdateResponse = (objects, options) => ({
+    const getMockBulkUpdateResponse = (objects, options, includeOriginId) => ({
       items: objects.map(({ type, id }) => ({
         update: {
           _id: `${
             registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
           }${type}:${id}`,
           ...mockVersionProps,
+          get: {
+            _source: {
+              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+              ...(includeOriginId && { originId }),
+            },
+          },
           result: 'updated',
         },
       })),
     });
 
-    const bulkUpdateSuccess = async (objects, options) => {
+    const bulkUpdateSuccess = async (objects, options, includeOriginId) => {
       const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
         callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
       }
-      const response = getMockBulkUpdateResponse(objects, options?.namespace);
+      const response = getMockBulkUpdateResponse(objects, options?.namespace, includeOriginId);
       callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
       const result = await savedObjectsRepository.bulkUpdate(objects, options);
       expect(callAdminCluster).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 2 : 1);
@@ -1350,9 +1363,10 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id, attributes, references }) => ({
+      const expectSuccessResult = ({ type, id, attributes, references, originId }) => ({
         type,
         id,
+        originId,
         attributes,
         references,
         version: mockVersion,
@@ -1399,6 +1413,17 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+
+      it(`includes originId property if present in cluster call response`, async () => {
+        const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
+        const result = await bulkUpdateSuccess([obj1, obj], {}, true);
+        expect(result).toEqual({
+          saved_objects: [
+            expect.objectContaining({ originId }),
+            expect.objectContaining({ originId }),
+          ],
+        });
+      });
     });
   });
 
@@ -1414,6 +1439,7 @@ describe('SavedObjectsRepository', () => {
     const attributes = { title: 'Logstash' };
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
+    const originId = 'some-origin-id';
     const references = [
       {
         name: 'ref_0',
@@ -1488,6 +1514,20 @@ describe('SavedObjectsRepository', () => {
         await test(123);
         await test(true);
         await test(null);
+      });
+
+      it(`defaults to no originId`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectClusterCallArgs({
+          body: expect.not.objectContaining({ originId: expect.anything() }),
+        });
+      });
+
+      it(`accepts custom originId`, async () => {
+        await createSuccess(type, attributes, { id, originId });
+        expectClusterCallArgs({
+          body: expect.objectContaining({ originId }),
+        });
       });
 
       it(`defaults to a refresh setting of wait_for`, async () => {
@@ -1643,10 +1683,16 @@ describe('SavedObjectsRepository', () => {
 
     describe('returns', () => {
       it(`formats the ES response`, async () => {
-        const result = await createSuccess(type, attributes, { id, namespace, references });
+        const result = await createSuccess(type, attributes, {
+          id,
+          namespace,
+          references,
+          originId,
+        });
         expect(result).toEqual({
           type,
           id,
+          originId,
           ...mockTimestampFields,
           version: mockVersion,
           attributes,
@@ -1927,6 +1973,7 @@ describe('SavedObjectsRepository', () => {
               ...mockVersionProps,
               _source: {
                 namespace,
+                originId: 'some-origin-id', // only one of the results has an originId, this is intentional to test both a positive and negative case
                 type: 'index-pattern',
                 ...mockTimestampFields,
                 'index-pattern': {
@@ -2028,6 +2075,7 @@ describe('SavedObjectsRepository', () => {
             'references',
             'migrationVersion',
             'updated_at',
+            'originId',
             'title',
           ],
         });
@@ -2124,6 +2172,7 @@ describe('SavedObjectsRepository', () => {
           expect(response.saved_objects[i]).toEqual({
             id: doc._id.replace(/(index-pattern|config|globalType)\:/, ''),
             type: doc._source.type,
+            originId: doc._source.originId,
             ...mockTimestampFields,
             version: mockVersion,
             attributes: doc._source[doc._source.type],
@@ -2146,6 +2195,7 @@ describe('SavedObjectsRepository', () => {
           expect(response.saved_objects[i]).toEqual({
             id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
             type: doc._source.type,
+            originId: doc._source.originId,
             ...mockTimestampFields,
             version: mockVersion,
             attributes: doc._source[doc._source.type],
@@ -2273,9 +2323,17 @@ describe('SavedObjectsRepository', () => {
     const type = 'index-pattern';
     const id = 'logstash-*';
     const namespace = 'foo-namespace';
+    const originId = 'some-origin-id';
 
-    const getSuccess = async (type, id, options) => {
-      const response = getMockGetResponse({ type, id, namespace: options?.namespace });
+    const getSuccess = async (type, id, options, includeOriginId) => {
+      const response = getMockGetResponse({
+        type,
+        id,
+        namespace: options?.namespace,
+        // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+        // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+        ...(includeOriginId && { originId }),
+      });
       callAdminCluster.mockResolvedValue(response);
       const result = await savedObjectsRepository.get(type, id, options);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -2383,6 +2441,11 @@ describe('SavedObjectsRepository', () => {
           namespaces: expect.anything(),
         });
       });
+
+      it(`includes originId property if present in cluster call response`, async () => {
+        const result = await getSuccess(type, id, {}, true);
+        expect(result).toMatchObject({ originId });
+      });
     });
   });
 
@@ -2391,6 +2454,7 @@ describe('SavedObjectsRepository', () => {
     const id = 'one';
     const field = 'buildNum';
     const namespace = 'foo-namespace';
+    const originId = 'some-origin-id';
 
     const incrementCounterSuccess = async (type, id, field, options) => {
       const isMultiNamespace = registry.isMultiNamespace(type);
@@ -2562,6 +2626,7 @@ describe('SavedObjectsRepository', () => {
                 buildNum: 8468,
                 defaultIndex: 'logstash-*',
               },
+              originId,
             },
           },
         }));
@@ -2584,6 +2649,7 @@ describe('SavedObjectsRepository', () => {
             buildNum: 8468,
             defaultIndex: 'logstash-*',
           },
+          originId,
         });
       });
     });
@@ -2891,8 +2957,9 @@ describe('SavedObjectsRepository', () => {
         id: '1',
       },
     ];
+    const originId = 'some-origin-id';
 
-    const updateSuccess = async (type, id, attributes, options) => {
+    const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse = getMockGetResponse({ type, id, namespace: options?.namespace });
         callAdminCluster.mockResolvedValueOnce(mockGetResponse); // this._callCluster('get', ...)
@@ -2901,10 +2968,17 @@ describe('SavedObjectsRepository', () => {
         _id: `${type}:${id}`,
         ...mockVersionProps,
         result: 'updated',
-        ...(registry.isMultiNamespace(type) && {
-          // don't need the rest of the source for test purposes, just the namespaces attribute
-          get: { _source: { namespaces: [options?.namespace ?? 'default'] } },
-        }),
+        get: {
+          _source: {
+            // don't need the rest of the source for test purposes, just the namespaces attribute
+            ...(registry.isMultiNamespace(type) && {
+              namespaces: [options?.namespace ?? 'default'],
+            }),
+            // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+            // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+            ...(includeOriginId && { originId }),
+          },
+        },
       }); // this._writeToCluster('update', ...)
       const result = await savedObjectsRepository.update(type, id, attributes, options);
       expect(callAdminCluster).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 2 : 1);
@@ -3002,19 +3076,14 @@ describe('SavedObjectsRepository', () => {
         expectClusterCallArgs({ id: expect.stringMatching(`${MULTI_NAMESPACE_TYPE}:${id}`) }, 2);
       });
 
-      it(`includes _sourceIncludes when type is multi-namespace`, async () => {
-        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
-        expectClusterCallArgs({ _sourceIncludes: ['namespaces'] }, 2);
+      it(`uses default _sourceIncludes when type is not multi-namespace`, async () => {
+        await updateSuccess(type, id, attributes);
+        expectClusterCallArgs({ _sourceIncludes: ['originId'] });
       });
 
-      it(`doesn't include _sourceIncludes when type is not multi-namespace`, async () => {
-        await updateSuccess(type, id, attributes);
-        expect(callAdminCluster).toHaveBeenLastCalledWith(
-          expect.any(String),
-          expect.not.objectContaining({
-            _sourceIncludes: expect.anything(),
-          })
-        );
+      it(`adds to _sourceIncludes when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
+        expectClusterCallArgs({ _sourceIncludes: ['originId', 'namespaces'] }, 2);
       });
     });
 
@@ -3101,6 +3170,11 @@ describe('SavedObjectsRepository', () => {
         expect(result).not.toMatchObject({
           namespaces: expect.anything(),
         });
+      });
+
+      it(`includes originId property if present in cluster call response`, async () => {
+        const result = await updateSuccess(type, id, attributes, {}, true);
+        expect(result).toMatchObject({ originId });
       });
     });
   });

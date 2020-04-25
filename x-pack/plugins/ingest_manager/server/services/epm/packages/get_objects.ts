@@ -9,7 +9,11 @@ import { AssetType } from '../../../types';
 import * as Registry from '../registry';
 
 type ArchiveAsset = Pick<SavedObject, 'attributes' | 'migrationVersion' | 'references'>;
-type SavedObjectToBe = Required<SavedObjectsBulkCreateObject> & { type: AssetType };
+type SavedObjectToBe = Required<
+  Pick<SavedObjectsBulkCreateObject, 'type' | 'id' | keyof ArchiveAsset>
+> & {
+  type: AssetType;
+};
 
 export async function getObject(key: string) {
   const buffer = Registry.getAsset(key);

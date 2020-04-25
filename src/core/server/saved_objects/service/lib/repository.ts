@@ -219,6 +219,7 @@ export class SavedObjectsRepository {
       overwrite = false,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
+      originId,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -245,6 +246,7 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      originId,
       attributes,
       migrationVersion,
       updated_at: time,
@@ -376,6 +378,7 @@ export class SavedObjectsRepository {
             ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
             updated_at: time,
             references: object.references || [],
+            originId: object.originId,
           }) as SavedObjectSanitizedDoc
         ),
       };
@@ -760,12 +763,14 @@ export class SavedObjectsRepository {
           } as any) as SavedObject<T>;
         }
 
-        const time = doc._source.updated_at;
+        const { namespaces, originId, updated_at: updatedAt } = doc._source;
+
         return {
           id,
           type,
-          ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
-          ...(time && { updated_at: time }),
+          ...(namespaces && { namespaces }),
+          ...(originId && { originId }),
+          ...(updatedAt && { updated_at: updatedAt }),
           version: encodeHitVersion(doc),
           attributes: doc._source[type],
           references: doc._source.references || [],
@@ -808,12 +813,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { updated_at: updatedAt } = response._source;
+    const { namespaces, originId, updated_at: updatedAt } = response._source;
 
     return {
       id,
       type,
-      ...(response._source.namespaces && { namespaces: response._source.namespaces }),
+      ...(namespaces && { namespaces }),
+      ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
@@ -858,6 +864,10 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
+    const _sourceIncludes = ['originId'];
+    if (this._registry.isMultiNamespace(type)) {
+      _sourceIncludes.push('namespaces');
+    }
     const updateResponse = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
       index: this.getIndexForType(type),
@@ -867,7 +877,7 @@ export class SavedObjectsRepository {
       body: {
         doc,
       },
-      ...(this._registry.isMultiNamespace(type) && { _sourceIncludes: ['namespaces'] }),
+      _sourceIncludes,
     });
 
     if (updateResponse.status === 404) {
@@ -875,14 +885,14 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
+    const { namespaces, originId } = updateResponse.get._source;
     return {
       id,
       type,
+      ...(namespaces && { namespaces }),
+      ...(originId && { originId }),
       updated_at: time,
       version: encodeHitVersion(updateResponse),
-      ...(this._registry.isMultiNamespace(type) && {
-        namespaces: updateResponse.get._source.namespaces,
-      }),
       references,
       attributes,
     };
@@ -1169,6 +1179,7 @@ export class SavedObjectsRepository {
       ? await this._writeToCluster('bulk', {
           refresh,
           body: bulkUpdateParams,
+          _sourceIncludes: ['originId'],
         })
       : {};
 
@@ -1180,7 +1191,7 @@ export class SavedObjectsRepository {
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
         const response = bulkUpdateResponse.items[esRequestIndex];
-        const { error, _seq_no: seqNo, _primary_term: primaryTerm } = Object.values(
+        const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
           response
         )[0] as any;
 
@@ -1192,10 +1203,13 @@ export class SavedObjectsRepository {
             error: getBulkOperationError(error, type, id),
           };
         }
+
+        const { originId } = get._source;
         return {
           id,
           type,
           ...(namespaces && { namespaces }),
+          ...(originId && { originId }),
           updated_at,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
@@ -1220,7 +1234,7 @@ export class SavedObjectsRepository {
     id: string,
     counterFieldName: string,
     options: SavedObjectsIncrementCounterOptions = {}
-  ) {
+  ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
     }
@@ -1283,9 +1297,12 @@ export class SavedObjectsRepository {
       },
     });
 
+    const { originId } = response.get._source;
     return {
       id,
       type,
+      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      ...(originId && { originId }),
       updated_at: time,
       references: response.get._source.references,
       version: encodeHitVersion(response),

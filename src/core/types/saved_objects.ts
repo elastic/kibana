@@ -99,4 +99,11 @@ export interface SavedObject<T = unknown> {
   migrationVersion?: SavedObjectsMigrationVersion;
   /** Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. */
   namespaces?: string[];
+  /**
+   * The ID of the saved object this originated from. This is set if this object's `id` was regenerated; that can happen during migration
+   * from a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import
+   * to ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given
+   * space.
+   */
+  originId?: string;
 }
