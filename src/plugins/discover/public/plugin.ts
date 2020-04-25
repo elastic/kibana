@@ -54,7 +54,6 @@ import {
   setServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
-import { getInnerAngularModuleEmbeddable, getInnerAngularModule } from './get_inner_angular';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 
@@ -249,6 +248,7 @@ export class DiscoverPlugin
         return;
       }
       // this is used by application mount and tests
+      const { getInnerAngularModule } = await import('./get_inner_angular');
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -314,6 +314,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
       getInnerAngularModuleEmbeddable(
         embeddableAngularName,
         core,
