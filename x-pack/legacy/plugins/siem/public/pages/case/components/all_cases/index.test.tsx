@@ -125,8 +125,9 @@ describe('AllCases', () => {
       wrapper
         .find(`[data-test-subj="case-table-column-createdAt"]`)
         .first()
+        .childAt(0)
         .prop('value')
-    ).toEqual(useGetCasesMockState.data.cases[0].createdAt);
+    ).toBe(useGetCasesMockState.data.cases[0].createdAt);
     expect(
       wrapper
         .find(`[data-test-subj="case-table-case-count"]`)

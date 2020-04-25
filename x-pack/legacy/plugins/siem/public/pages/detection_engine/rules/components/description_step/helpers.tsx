@@ -41,7 +41,7 @@ const EuiBadgeWrap = styled(EuiBadge)`
   .euiBadge__text {
     white-space: pre-wrap !important;
   }
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const buildQueryBarDescription = ({
   field,

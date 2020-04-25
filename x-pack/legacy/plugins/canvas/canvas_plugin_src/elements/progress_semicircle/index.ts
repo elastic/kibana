@@ -6,16 +6,14 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const progressSemicircle: ElementFactory = () => ({
   name: 'progressSemicircle',
-  displayName: 'Progress semicircle',
-  tags: ['chart', 'proportion'],
+  displayName: 'Semicircle',
+  type: 'progress',
   help: 'Displays progress as a portion of a semicircle',
   width: 200,
   height: 100,
-  image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"

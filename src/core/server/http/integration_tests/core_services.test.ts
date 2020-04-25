@@ -39,7 +39,8 @@ const cookieOptions = {
   isSecure: false,
 };
 
-describe('http service', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/64310
+describe.skip('http service', () => {
   describe('auth', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
