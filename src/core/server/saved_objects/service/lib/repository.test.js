@@ -202,13 +202,17 @@ describe('SavedObjectsRepository', () => {
   });
   const expectSuccess = ({ type, id }) => expect.toBeDocumentWithoutError(type, id);
   const expectError = ({ type, id }) => ({ type, id, error: expect.any(Object) });
-  const expectErrorResult = ({ type, id }, error) => ({ type, id, error });
-  const expectErrorNotFound = (obj) =>
-    expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id));
-  const expectErrorConflict = (obj) =>
-    expectErrorResult(obj, createConflictError(obj.type, obj.id));
-  const expectErrorInvalidType = (obj) =>
-    expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id));
+  const expectErrorResult = ({ type, id }, error, overrides = {}) => ({
+    type,
+    id,
+    error: { ...error, ...overrides },
+  });
+  const expectErrorNotFound = (obj, overrides) =>
+    expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
+  const expectErrorConflict = (obj, overrides) =>
+    expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
+  const expectErrorInvalidType = (obj, overrides) =>
+    expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id), overrides);
 
   const expectMigrationArgs = (args, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
@@ -455,9 +459,9 @@ describe('SavedObjectsRepository', () => {
     };
 
     const bulkCreateSuccess = async (objects, options) => {
-      const multiNamespaceObjects =
-        options?.overwrite &&
-        objects.filter(({ type, id }) => registry.isMultiNamespace(type) && id);
+      const multiNamespaceObjects = objects.filter(
+        ({ type, id }) => registry.isMultiNamespace(type) && id
+      );
       if (multiNamespaceObjects?.length) {
         const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
         callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
@@ -472,14 +476,15 @@ describe('SavedObjectsRepository', () => {
     // bulk create calls have two objects for each source -- the action, and the source
     const expectClusterCallArgsAction = (
       objects,
-      { method, _index = expect.any(String), getId = () => expect.any(String) }
+      { method, _index = expect.any(String), getId = () => expect.any(String) },
+      n
     ) => {
       const body = [];
       for (const { type, id } of objects) {
         body.push({ [method]: { _index, _id: getId(type, id) } });
         body.push(expect.any(Object));
       }
-      expectClusterCallArgs({ body });
+      expectClusterCallArgs({ body }, n);
     };
 
     const expectObjArgs = ({ type, attributes, references }, overrides) => [
@@ -506,9 +511,9 @@ describe('SavedObjectsRepository', () => {
         expectClusterCalls('bulk');
       });
 
-      it(`should use the ES mget action before bulk action for any types that are multi-namespace, when overwrite=true`, async () => {
+      it(`should use the ES mget action before bulk action for any types that are multi-namespace, when id is defined`, async () => {
         const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_TYPE }];
-        await bulkCreateSuccess(objects, { overwrite: true });
+        await bulkCreateSuccess(objects);
         expectClusterCalls('mget', 'bulk');
         const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
         expectClusterCallArgs({ body: { docs } }, 1);
@@ -557,7 +562,7 @@ describe('SavedObjectsRepository', () => {
         await bulkCreateSuccess(objects, { namespace });
         const expected = expect.not.objectContaining({ namespace: expect.anything() });
         const body = [expect.any(Object), expected, expect.any(Object), expected];
-        expectClusterCallArgs({ body });
+        expectClusterCallArgs({ body }, 2);
       });
 
       it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
@@ -627,7 +632,7 @@ describe('SavedObjectsRepository', () => {
           { ...obj2, type: MULTI_NAMESPACE_TYPE },
         ];
         await bulkCreateSuccess(objects, { namespace });
-        expectClusterCallArgsAction(objects, { method: 'create', getId });
+        expectClusterCallArgsAction(objects, { method: 'create', getId }, 2);
       });
     });
 
@@ -695,8 +700,9 @@ describe('SavedObjectsRepository', () => {
         expectClusterCallArgs({ body: body1 }, 1);
         const body2 = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
         expectClusterCallArgs({ body: body2 }, 2);
+        const expectedError = expectErrorConflict(obj, { metadata: { isNotOverwritable: true } });
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorConflict(obj), expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
         });
       });
 
