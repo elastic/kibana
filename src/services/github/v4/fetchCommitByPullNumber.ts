@@ -67,14 +67,14 @@ export async function fetchCommitByPullNumber(
   const labels = res.repository.pullRequest.labels.nodes.map(
     (label) => label.name
   );
-  const targetBranches = getTargetBranchesFromLabels({
+  const selectedTargetBranches = getTargetBranchesFromLabels({
     labels,
     branchLabelMapping,
   });
 
   return {
     sourceBranch,
-    targetBranches,
+    selectedTargetBranches,
     sha,
     formattedMessage,
     pullNumber,

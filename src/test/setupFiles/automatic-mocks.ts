@@ -35,7 +35,7 @@ jest.mock('../../services/fs-promisified', () => {
       if (filepath === '/path/to/project/config') {
         return JSON.stringify({
           upstream: 'elastic/backport-demo',
-          branches: ['6.0', '5.9'],
+          targetBranchChoices: ['6.0', '5.9'],
         });
       }
 

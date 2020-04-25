@@ -1,7 +1,8 @@
 import { BackportOptions } from '../options/options';
 import * as prompts from '../services/prompts';
-import { SpyHelper } from './../types/SpyHelper';
-import { getTargetBranches } from './getBranches';
+import { BranchChoice } from '../types/Config';
+import { SpyHelper } from '../types/SpyHelper';
+import { getTargetBranches } from './getTargetBranches';
 
 describe('getTargetBranches', () => {
   let promptSpy: SpyHelper<typeof prompts.promptForTargetBranches>;
@@ -12,6 +13,60 @@ describe('getTargetBranches', () => {
     promptSpy = jest
       .spyOn(prompts, 'promptForTargetBranches')
       .mockResolvedValueOnce(['branchA']);
+  });
+
+  describe('targetBranchChoices', () => {
+    let targetBranchChoices: BranchChoice[];
+    beforeEach(async () => {
+      const options = ({
+        targetBranches: [],
+        multipleBranches: true,
+        targetBranchChoices: [
+          { name: 'master' },
+          { name: '7.x' },
+          { name: '7.7' },
+          { name: '7.6' },
+          { name: '7.5' },
+        ] as BranchChoice[],
+        sourceBranch: 'master',
+      } as unknown) as BackportOptions;
+
+      const commits = [
+        {
+          sourceBranch: 'master',
+          selectedTargetBranches: ['7.x'],
+          sha: 'my-sha',
+          formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
+          pullNumber: 62286,
+          existingTargetPullRequests: [],
+        },
+      ];
+
+      await getTargetBranches(options, commits);
+      targetBranchChoices = promptSpy.mock.calls[0][0].targetBranchChoices;
+    });
+
+    it('should list the correct branches', async () => {
+      expect(targetBranchChoices).toEqual([
+        { checked: true, name: '7.x' },
+        { checked: false, name: '7.7' },
+        { checked: false, name: '7.6' },
+        { checked: false, name: '7.5' },
+      ]);
+    });
+
+    it('should not list the sourceBranch (master)', async () => {
+      expect(targetBranchChoices).not.toContainEqual(
+        expect.objectContaining({ name: 'master' })
+      );
+    });
+
+    it('should select 7.x', async () => {
+      expect(targetBranchChoices).toContainEqual({
+        name: '7.x',
+        checked: true,
+      });
+    });
   });
 
   describe('when `options.targetBranches` is empty', () => {

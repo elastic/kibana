@@ -13,7 +13,7 @@ export async function getOptionsFromConfigFiles() {
     getGlobalConfig(),
   ]);
 
-  const { branches, ...combinedConfig } = {
+  const { targetBranchChoices, ...combinedConfig } = {
     ...globalConfig,
     ...projectConfig,
   };
@@ -31,19 +31,21 @@ export async function getOptionsFromConfigFiles() {
     gitHostname: 'github.com',
     githubApiBaseUrlV3: 'https://api.github.com',
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
-    targetBranchChoices: getTargetBranchChoices(branches),
+    targetBranchChoices: getTargetBranchChoicesAsObject(targetBranchChoices),
     ...combinedConfig,
   };
 }
 
 // in the config `branches` can either be a string or an object.
 // We need to transform it so that it is always treated as an object troughout the application
-function getTargetBranchChoices(branches?: Config['branches']) {
-  if (!branches) {
+function getTargetBranchChoicesAsObject(
+  targetBranchChoices?: Config['targetBranchChoices']
+) {
+  if (!targetBranchChoices) {
     return;
   }
 
-  return branches.map((choice) => {
+  return targetBranchChoices.map((choice) => {
     if (isString(choice)) {
       return {
         name: choice,

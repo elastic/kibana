@@ -1,6 +1,5 @@
 {
   "include": ["src/**/*"],
-  "exclude": ["src/**/*.test.*", "src/test/**", "src/**/mocks/**"],
   "compilerOptions": {
     "target": "es2018",
     "lib": ["es2019"],

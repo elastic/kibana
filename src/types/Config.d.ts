@@ -11,24 +11,24 @@ export interface Config {
 
   // project config
   branchLabelMapping?: Record<string, string>;
-  branches?: (string | BranchChoice)[];
-  upstream?: string;
   fork?: boolean;
-  sourceBranch?: string;
+  targetBranchChoices?: (string | BranchChoice)[];
+  upstream?: string;
 
   // both
   all?: boolean;
   author?: string;
-  maxNumber?: number;
   gitHostname?: string;
   githubApiBaseUrlV3?: string;
   githubApiBaseUrlV4?: string;
+  maxNumber?: number;
   multiple?: boolean;
   multipleBranches?: boolean;
   multipleCommits?: boolean;
   path?: string;
   prDescription?: string;
   prTitle?: string;
+  sourceBranch?: string;
   sourcePRLabels?: string[];
   targetPRLabels?: string[];
 }

@@ -136,6 +136,7 @@ export function getOptionsFromCliArgs(
       default: configOptions.sourcePRLabels,
       description: 'Add labels to the source (original) PR',
       type: 'array',
+      alias: 'sourcePRLabel',
     })
     .option('sourceBranch', {
       default: configOptions.sourceBranch,
@@ -146,13 +147,13 @@ export function getOptionsFromCliArgs(
       default: [] as string[],
       description: 'Branch(es) to backport to',
       type: 'array',
-      alias: ['branch', 'b'],
+      alias: ['targetBranch', 'branch', 'b'],
       string: true, // ensure `6.0` is not coerced to `6`
     })
     .option('targetPRLabels', {
       default: configOptions.targetPRLabels,
       description: 'Add labels to the target (backport) PR',
-      alias: 'labels',
+      alias: ['labels', 'label', 'l'],
       type: 'array',
     })
     .option('upstream', {

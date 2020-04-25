@@ -4,11 +4,12 @@ import { HandledError } from './services/HandledError';
 import { logger, consoleLog } from './services/logger';
 import { sequentially } from './services/sequentially';
 import { cherrypickAndCreateTargetPullRequest } from './ui/cherrypickAndCreateTargetPullRequest';
-import { getTargetBranches } from './ui/getBranches';
 import { getCommits } from './ui/getCommits';
+import { getTargetBranches } from './ui/getTargetBranches';
 import { maybeSetupRepo } from './ui/maybeSetupRepo';
 
 export async function runWithOptions(options: BackportOptions) {
+  logger.verbose('Backport options', options);
   if (options.dryRun) {
     consoleLog(chalk.red('Dry run: Nothing will be pushed to Github\n'));
   }

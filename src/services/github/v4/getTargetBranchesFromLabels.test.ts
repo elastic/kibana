@@ -3,7 +3,7 @@ import { getTargetBranchesFromLabels } from './getTargetBranchesFromLabels';
 describe('getTargetBranchesFromLabels', () => {
   it(`should support Kibana's label format`, () => {
     const branchLabelMapping = {
-      'v8.0.0': '', // current major (master)
+      'v8.0.0': '', // current major (master) should be ignored
       '^v7.8.0$': '7.x', // current minor (7.x)
       '^v(\\d+).(\\d+).\\d+$': '$1.$2', // all other branches
     };

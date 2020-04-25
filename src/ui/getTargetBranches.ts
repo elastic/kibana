@@ -18,7 +18,7 @@ export function getTargetBranches(
   // combine target branches from all commits
   const targetBranchesFromLabels = flatMap(
     commits,
-    (commit) => commit.targetBranches
+    (commit) => commit.selectedTargetBranches
   ).filter(filterEmpty);
 
   return promptForTargetBranches({
@@ -43,12 +43,18 @@ function getTargetBranchChoices(
     return options.targetBranchChoices;
   }
 
-  // automatially check options based on pull request labels
-  return options.targetBranchChoices.map((choice) => {
-    const isChecked = targetBranchesFromLabels.includes(choice.name);
-    return {
-      ...choice,
-      checked: isChecked,
-    };
-  });
+  return (
+    options.targetBranchChoices
+      // remove sourceBranch
+      .filter((choice) => choice.name !== options.sourceBranch)
+
+      // automatially select options based on pull request labels
+      .map((choice) => {
+        const isChecked = targetBranchesFromLabels.includes(choice.name);
+        return {
+          ...choice,
+          checked: isChecked,
+        };
+      })
+  );
 }

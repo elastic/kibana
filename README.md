@@ -33,23 +33,23 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
 // .backportrc.json
 {
   "upstream": "elastic/kibana",
-  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
+  "targetBranchChoices": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
 }
 ```
 
-Install backport locally:
+Install locally:
 
 ```
 npm install backport
 ```
 
-Run backport:
+Run:
 
 ```
 npx backport
 ```
 
-_This will start an interactive prompt. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed._
+_This will start an interactive prompt. You can use your keyboards arrow keys to choose options, `<space>` to select checkboxes and `<enter>` to proceed._
 
 ### Config options
 

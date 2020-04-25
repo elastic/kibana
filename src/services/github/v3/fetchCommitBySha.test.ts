@@ -29,7 +29,7 @@ describe('fetchCommitBySha', () => {
       formattedMessage: 'myMessage (sha12345)',
       pullNumber: undefined,
       sha: 'sha123456789',
-      targetBranches: [],
+      selectedTargetBranches: [],
     });
 
     expect(axiosSpy.mock.calls).toMatchSnapshot();

@@ -56,7 +56,13 @@ Example:
 ```json
 {
   "upstream": "elastic/kibana",
-  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
+  "targetBranchChoices": [
+    { "name": "6.x", "checked": true },
+    "6.3",
+    "6.2",
+    "6.1",
+    "6.0"
+  ],
   "targetPRLabels": ["backport"]
 }
 ```
@@ -75,9 +81,9 @@ Config:
 }
 ```
 
-#### `branches` **required**
+#### `targetBranchChoices` **required**
 
-List of branches that will be available to backport to. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
+List of target branches the user can interactively select. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
 
 CLI: `--branch 6.1 --branch 6.0`
 
@@ -85,7 +91,13 @@ Config:
 
 ```json
 {
-  "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"]
+  "targetBranchChoices": [
+    { "name": "6.x", "checked": true },
+    "6.3",
+    "6.2",
+    "6.1",
+    "6.0"
+  ]
 }
 ```
 
@@ -101,7 +113,7 @@ CLI: `--all`
 
 #### `branchLabelMapping`
 
-Pre-select branch options based on labels on the source PR.
+Pre-select target branch options based on the source PR labels.
 
 Example:
 

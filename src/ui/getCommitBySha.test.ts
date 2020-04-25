@@ -25,7 +25,7 @@ describe('getCommitBySha', () => {
         '[Chrome] Bootstrap Angular into document.body (myCommit)',
       sha: 'myCommitSha',
       pullNumber: undefined,
-      targetBranches: [],
+      selectedTargetBranches: [],
     };
 
     expect(commit).toEqual(expectedCommit);
