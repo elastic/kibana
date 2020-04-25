@@ -21,6 +21,7 @@ import { Readable } from 'stream';
 import { SavedObject } from '../types';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { savedObjectsClientMock } from '../../mocks';
+import { SavedObjectsErrorHelpers } from '..';
 
 const emptyResponse = {
   saved_objects: [],
@@ -351,13 +352,10 @@ describe('importSavedObjects()', () => {
     });
     savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
     savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map((savedObject) => ({
-        type: savedObject.type,
-        id: savedObject.id,
-        error: {
-          statusCode: 409,
-          message: 'conflict',
-        },
+      saved_objects: savedObjects.map(({ type, id }) => ({
+        type,
+        id,
+        error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
         attributes: {},
         references: [],
       })),
@@ -451,10 +449,8 @@ describe('importSavedObjects()', () => {
         {
           type: 'index-pattern',
           id: '2',
-          error: {
-            statusCode: 404,
-            message: 'Not found',
-          },
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '2').output
+            .payload,
           attributes: {},
           references: [],
         },
