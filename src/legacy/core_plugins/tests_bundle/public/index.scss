@@ -1,9 +1,6 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
-// vis_type_vislib UI styles are imported here for running karma Browser tests
-// should be somehow included through the "vis_type_vislib" plugin initialization
+// This file pulls some styles of NP plugins into the legacy test stylesheet
+// so they are available for karma browser tests.
 @import '../../../../plugins/vis_type_vislib/public/index';
-
-// Visualization styles are imported here for running karma Browser tests
-// should be somehow included through the "visualizations" plugin initialization
 @import '../../../../plugins/visualizations/public/index';

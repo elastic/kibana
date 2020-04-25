@@ -8,6 +8,7 @@ import { RequestHandler } from 'src/core/server';
 import bluebird from 'bluebird';
 import { appContextService, agentConfigService, datasourceService } from '../../services';
 import { listAgents } from '../../services/agents';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   GetAgentConfigsRequestSchema,
   GetOneAgentConfigRequestSchema,
@@ -50,7 +51,7 @@ export const getAgentConfigsHandler: RequestHandler<
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `agents.config_id:${agentConfig.id}`,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentConfig.id}`,
         }).then(({ total: agentTotal }) => (agentConfig.agents = agentTotal)),
       { concurrency: 10 }
     );
