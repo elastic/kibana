@@ -39,17 +39,21 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the types, searchFields, and rawSearchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
-  if (!searchFields || !searchFields.length) {
+function getFieldsForTypes(
+  types: string[],
+  searchFields: string[] = [],
+  rawSearchFields: string[] = []
+) {
+  if (!searchFields.length && !rawSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields: string[] = [];
+  let fields: string[] = rawSearchFields;
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
@@ -102,6 +106,7 @@ interface QueryParams {
   type?: string | string[];
   search?: string;
   searchFields?: string[];
+  rawSearchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
@@ -117,6 +122,7 @@ export function getQueryParams({
   type,
   search,
   searchFields,
+  rawSearchFields,
   defaultSearchOperator,
   hasReference,
   kueryNode,
@@ -164,7 +170,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(types, searchFields, rawSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

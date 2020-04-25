@@ -277,13 +277,19 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`searchFields` parameter', () => {
+    describe('`searchFields` and `rawSearchFields` parameters', () => {
       const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
         const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
         return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
       };
 
-      const test = (searchFields: string[]) => {
+      const test = ({
+        searchFields,
+        rawSearchFields,
+      }: {
+        searchFields?: string[];
+        rawSearchFields?: string[];
+      }) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
           const result = getQueryParams({
             mappings,
@@ -291,8 +297,12 @@ describe('#getQueryParams', () => {
             type: typeOrTypes,
             search,
             searchFields,
+            rawSearchFields,
           });
-          const fields = getExpectedFields(searchFields, typeOrTypes);
+          let fields = rawSearchFields || [];
+          if (searchFields) {
+            fields = fields.concat(getExpectedFields(searchFields, typeOrTypes));
+          }
           expectResult(result, expect.objectContaining({ fields }));
         }
         // also test with no specified type/s
@@ -302,31 +312,48 @@ describe('#getQueryParams', () => {
           type: undefined,
           search,
           searchFields,
+          rawSearchFields,
         });
-        const fields = getExpectedFields(searchFields, ALL_TYPES);
+        let fields = rawSearchFields || [];
+        if (searchFields) {
+          fields = fields.concat(getExpectedFields(searchFields, ALL_TYPES));
+        }
         expectResult(result, expect.objectContaining({ fields }));
       };
 
-      it('includes lenient flag and all fields when `searchFields` is not specified', () => {
+      it('includes lenient flag and all fields when `searchFields` and `rawSearchFields` are not specified', () => {
         const result = getQueryParams({
           mappings,
           registry,
           search,
           searchFields: undefined,
+          rawSearchFields: undefined,
         });
         expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
       });
 
       it('includes specified search fields for appropriate type/s', () => {
-        test(['title']);
+        test({ searchFields: ['title'] });
       });
 
       it('supports boosting', () => {
-        test(['title^3']);
+        test({ searchFields: ['title^3'] });
       });
 
-      it('supports multiple fields', () => {
-        test(['title, title.raw']);
+      it('supports multiple search fields', () => {
+        test({ searchFields: ['title, title.raw'] });
+      });
+
+      it('includes specified raw search fields', () => {
+        test({ rawSearchFields: ['_id'] });
+      });
+
+      it('supports multiple raw search fields', () => {
+        test({ rawSearchFields: ['_id', 'originId'] });
+      });
+
+      it('supports search fields and raw search fields', () => {
+        test({ searchFields: ['title'], rawSearchFields: ['_id'] });
       });
     });
 

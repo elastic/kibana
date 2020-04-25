@@ -31,6 +31,7 @@ interface GetSearchDslOptions {
   search?: string;
   defaultSearchOperator?: string;
   searchFields?: string[];
+  rawSearchFields?: string[];
   sortField?: string;
   sortOrder?: string;
   namespace?: string;
@@ -51,6 +52,7 @@ export function getSearchDsl(
     search,
     defaultSearchOperator,
     searchFields,
+    rawSearchFields,
     sortField,
     sortOrder,
     namespace,
@@ -74,6 +76,7 @@ export function getSearchDsl(
       type,
       search,
       searchFields,
+      rawSearchFields,
       defaultSearchOperator,
       hasReference,
       kueryNode,
