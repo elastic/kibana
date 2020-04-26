@@ -13,6 +13,7 @@ import '../layers/sources/kibana_regionmap_source';
 import '../layers/sources/es_geo_grid_source';
 import '../layers/sources/xyz_tms_source';
 import { KibanaTilemapSource } from '../layers/sources/kibana_tilemap_source';
+import { TileLayer } from '../layers/tile_layer';
 import { EMSTMSSource } from '../layers/sources/ems_tms_source';
 import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { getInjectedVarFunc } from '../kibana_services';
@@ -25,10 +26,10 @@ export function getInitialLayers(layerListJSON, initialLayers = []) {
 
   const tilemapSourceFromKibana = getKibanaTileMap();
   if (_.get(tilemapSourceFromKibana, 'url')) {
-    const sourceDescriptor = KibanaTilemapSource.createDescriptor();
-    const source = new KibanaTilemapSource(sourceDescriptor);
-    const layer = source.createDefaultLayer();
-    return [layer.toLayerDescriptor(), ...initialLayers];
+    const layerDescriptor = TileLayer.createDescriptor({
+      sourceDescriptor: KibanaTilemapSource.createDescriptor(),
+    });
+    return [layerDescriptor, ...initialLayers];
   }
 
   const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
