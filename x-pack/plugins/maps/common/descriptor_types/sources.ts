@@ -116,6 +116,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & 
   maxSourceZoom: number;
 
   fields: MVTFieldDescriptor[];
+  tooltipProperties: string[];
 };
 
 export type JoinDescriptor = {

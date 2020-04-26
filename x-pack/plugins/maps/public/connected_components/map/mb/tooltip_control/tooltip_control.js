@@ -53,7 +53,7 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getIdsForFeatures(mbFeatures) {
+  _getIdsAndFeaturesMeta(mbFeatures) {
     const uniqueFeatures = [];
     //there may be duplicates in the results from mapbox
     //this is because mapbox returns the results per tile
@@ -72,9 +72,13 @@ export class TooltipControl extends React.Component {
         }
       }
       if (!match) {
+        //This keeps track of first properties (assuming these will be identical for features in different tiles
         uniqueFeatures.push({
           id: featureId,
           layerId: layerId,
+          meta: {
+            mbProperties: mbFeature.properties,
+          },
         });
       }
     }
@@ -98,7 +102,7 @@ export class TooltipControl extends React.Component {
     const targetMbFeataure = mbFeatures[0];
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
-    const features = this._getIdsForFeatures(mbFeatures);
+    const features = this._getIdsAndFeaturesMeta(mbFeatures);
     this.props.openOnClickTooltip({
       features: features,
       location: popupAnchorLocation,
@@ -127,9 +131,10 @@ export class TooltipControl extends React.Component {
     }
 
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
-    const features = this._getIdsForFeatures(mbFeatures);
+    const featuresAndMeta = this._getIdsAndFeaturesMeta(mbFeatures);
     this.props.openOnHoverTooltip({
-      features: features,
+      mbFeatures,
+      features: featuresAndMeta,
       location: popupAnchorLocation,
     });
   }, 100);

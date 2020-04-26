@@ -32,6 +32,7 @@ export class FeatureProperties extends React.Component {
   }
 
   _loadProperties = () => {
+    console.log('load properties')
     this._fetchProperties({
       nextFeatureId: this.props.featureId,
       nextLayerId: this.props.layerId,
@@ -39,6 +40,7 @@ export class FeatureProperties extends React.Component {
   };
 
   _fetchProperties = async ({ nextLayerId, nextFeatureId }) => {
+    console.log('fetch proeprties', nextLayerId, nextFeatureId);
     if (this.prevLayerId === nextLayerId && this.prevFeatureId === nextFeatureId) {
       // do not reload same feature properties
       return;

@@ -24,14 +24,15 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
       minSourceZoom,
       maxSourceZoom,
       fields,
+      tooltipProperties,
     }: MVTSingleLayerVectorSourceConfig) => {
       const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
         urlTemplate,
         layerName,
         minSourceZoom,
         maxSourceZoom,
-        type: SOURCE_TYPES.MVT_SINGLE_LAYER,
         fields: fields ? fields : [],
+        tooltipProperties: tooltipProperties ? tooltipProperties : [],
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);

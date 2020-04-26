@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
+import React from 'react';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
@@ -24,6 +25,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { VectorLayerArguments } from '../../vector_layer';
 import { MVTField } from '../../fields/mvt_field';
+import { UpdateSourceEditor } from './update_source_editor';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -40,6 +42,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     minSourceZoom,
     maxSourceZoom,
     fields,
+    tooltipProperties,
   }: TiledSingleLayerVectorSourceDescriptor) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
@@ -48,22 +51,29 @@ export class MVTSingleLayerVectorSource extends AbstractSource
       layerName,
       minSourceZoom: Math.max(MIN_ZOOM, minSourceZoom),
       maxSourceZoom: Math.min(MAX_ZOOM, maxSourceZoom),
-      fields: fields ? fields : [],
+      fields: fields ? fields : [], // todo remove. temp for debuggin older saved objects
+      tooltipProperties: tooltipProperties ? tooltipProperties : [], // todo remove normalization. temp for debuggin older saved objects
     };
   }
 
   readonly _descriptor: TiledSingleLayerVectorSourceDescriptor;
+  readonly _tooltipFields: MVTField[];
 
   constructor(
     sourceDescriptor: TiledSingleLayerVectorSourceDescriptor,
     inspectorAdapters?: object
   ) {
     super(sourceDescriptor, inspectorAdapters);
-    this._descriptor = sourceDescriptor;
+    this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
+    this._tooltipFields = this._descriptor.tooltipProperties.map(fieldName => {
+      return this.createField({ fieldName });
+    });
   }
 
-  renderSourceSettingsEditor() {
-    return null;
+  renderSourceSettingsEditor({ onChange }) {
+    return (
+      <UpdateSourceEditor onChange={onChange} tooltipFields={this._tooltipFields} source={this} />
+    );
   }
 
   getFieldNames(): string[] {

@@ -12,4 +12,5 @@ export interface MVTSingleLayerVectorSourceConfig {
   minSourceZoom: number;
   maxSourceZoom: number;
   fields?: MVTFieldDescriptor[];
+  tooltipProperties?: string[];
 }
