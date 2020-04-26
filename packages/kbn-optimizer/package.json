@@ -28,7 +28,7 @@
     "del": "^5.1.0",
     "file-loader": "^4.2.0",
     "istanbul-instrumenter-loader": "^3.0.1",
-    "jest-diff": "^25.1.0",
+    "jest-diff": "^25.4.0",
     "json-stable-stringify": "^1.0.1",
     "loader-utils": "^1.2.3",
     "node-sass": "^4.13.0",
