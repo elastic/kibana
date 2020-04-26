@@ -6,7 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
+// @ts-ignore
 import { ESGeoGridSource, heatmapTitle } from './es_geo_grid_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { HeatmapLayer } from '../../heatmap_layer';

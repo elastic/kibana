@@ -7,8 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
+// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer } from '../../blended_vector_layer';
 import { VectorLayer } from '../../vector_layer';
@@ -31,7 +33,7 @@ export const esDocumentsLayerWizardConfig = {
   }),
   icon: 'logoElasticsearch',
   renderWizard: ({ previewLayer, mapColors }) => {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
         previewLayer(null);
         return;

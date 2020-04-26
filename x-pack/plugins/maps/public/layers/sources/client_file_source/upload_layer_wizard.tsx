@@ -12,9 +12,12 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
+// @ts-ignore
 import { ESSearchSource } from '../es_search_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
+// @ts-ignore
 import { GeojsonFileSource } from './geojson_file_source';
 import { VectorLayer } from '../../vector_layer';
 import { createDefaultLayerDescriptor } from '../es_search_source';

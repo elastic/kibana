@@ -16,11 +16,9 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 import {
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VectorLayerArguments } from '../../vector_layer';
 import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';
 
 export const sourceTitle = i18n.translate(

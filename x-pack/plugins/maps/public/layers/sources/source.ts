@@ -13,8 +13,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
 
-import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
-import { ILayer } from '../layer';
+import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 

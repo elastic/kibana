@@ -7,8 +7,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
 import { KibanaRegionmapSource, sourceTitle } from './kibana_regionmap_source';
 import { VectorLayer } from '../../vector_layer';
+// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
@@ -17,7 +19,7 @@ export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
   }),
   icon: 'logoKibana',
   renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig: unknown) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayer(layerDescriptor);

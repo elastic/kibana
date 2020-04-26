@@ -6,7 +6,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { WMSCreateSourceEditor } from './wms_create_source_editor';
+// @ts-ignore
 import { sourceTitle, WMSSource } from './wms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { TileLayer } from '../../tile_layer';
@@ -17,13 +19,12 @@ export const wmsLayerWizardConfig: LayerWizard = {
   }),
   icon: 'grid',
   renderWizard: ({ previewLayer }: RenderWizardArguments) => {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
         previewLayer(null);
         return;
       }
 
-      const sourceDescriptor = WMSSource.createDescriptor(sourceConfig);
       const layerDescriptor = TileLayer.createDescriptor({
         sourceDescriptor: WMSSource.createDescriptor(sourceConfig),
       });

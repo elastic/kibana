@@ -5,8 +5,6 @@
  */
 
 import { XYZTMSSource } from './xyz_tms_source';
-import { ILayer } from '../../layer';
-import { TileLayer } from '../../tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 

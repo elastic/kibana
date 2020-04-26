@@ -9,7 +9,7 @@ import React from 'react';
 import { XYZTMSEditor, XYZTMSSourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { TileLayer } from '../../tile_layer';
 
 export const tmsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {

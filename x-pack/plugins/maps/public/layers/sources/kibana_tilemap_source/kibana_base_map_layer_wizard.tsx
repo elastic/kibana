@@ -7,7 +7,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
+// @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../tile_layer';
 
