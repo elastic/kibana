@@ -255,7 +255,7 @@
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
     "rison-node": "1.0.2",
-    "rxjs": "^6.5.4",
+    "rxjs": "^6.5.5",
     "script-loader": "0.7.2",
     "seedrandom": "^3.0.5",
     "semver": "^5.5.0",
