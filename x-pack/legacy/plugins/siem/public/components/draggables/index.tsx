@@ -8,7 +8,6 @@ import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
@@ -119,7 +118,7 @@ DefaultDraggable.displayName = 'DefaultDraggable';
 
 export const Badge = styled(EuiBadge)`
   vertical-align: top;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 Badge.displayName = 'Badge';
 
@@ -167,7 +166,7 @@ export const DraggableBadge = React.memo<BadgeDraggableType>(
         tooltipContent={tooltipContent}
         queryValue={queryValue}
       >
-        <Badge iconType={iconType} color={color}>
+        <Badge iconType={iconType} color={color} title="">
           {children ? children : value !== '' ? value : getEmptyStringTag()}
         </Badge>
       </DefaultDraggable>

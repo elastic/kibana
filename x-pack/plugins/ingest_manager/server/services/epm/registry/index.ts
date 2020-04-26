@@ -16,11 +16,11 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { appContextService } from '../../';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
+import { getRegistryUrl } from './registry_url';
 
 export { ArchiveEntry } from './extract';
 
@@ -32,7 +32,7 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
   `${name}-${version}`;
 
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
     url.searchParams.set('category', params.category);
@@ -45,7 +45,7 @@ export async function fetchFindLatestPackage(
   packageName: string,
   internal: boolean = true
 ): Promise<RegistrySearchResult> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search?package=${packageName}&internal=${internal}`);
   const res = await fetchUrl(url.toString());
   const searchResults = JSON.parse(res);
@@ -56,24 +56,24 @@ export async function fetchFindLatestPackage(
   }
 }
 
-export async function fetchInfo(pkgkey: string): Promise<RegistryPackage> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
-  // change pkg-version to pkg/version
-  return fetchUrl(`${registryUrl}/package/${pkgkey.replace('-', '/')}`).then(JSON.parse);
+export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
+  const registryUrl = getRegistryUrl();
+  return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
 }
 
 export async function fetchFile(filePath: string): Promise<Response> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   return getResponse(`${registryUrl}${filePath}`);
 }
 
 export async function fetchCategories(): Promise<CategorySummaryList> {
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+  const registryUrl = getRegistryUrl();
   return fetchUrl(`${registryUrl}/categories`).then(JSON.parse);
 }
 
 export async function getArchiveInfo(
-  pkgkey: string,
+  pkgName: string,
+  pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const paths: string[] = [];
@@ -87,7 +87,7 @@ export async function getArchiveInfo(
     }
   };
 
-  await extract(pkgkey, filter, onEntry);
+  await extract(pkgName, pkgVersion, filter, onEntry);
 
   return paths;
 }
@@ -123,21 +123,22 @@ export function pathParts(path: string): AssetParts {
 }
 
 async function extract(
-  pkgkey: string,
+  pkgName: string,
+  pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry: (entry: ArchiveEntry) => void
 ) {
-  const archiveBuffer = await getOrFetchArchiveBuffer(pkgkey);
+  const archiveBuffer = await getOrFetchArchiveBuffer(pkgName, pkgVersion);
 
   return untarBuffer(archiveBuffer, filter, onEntry);
 }
 
-async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
+async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
   // assume .tar.gz for now. add support for .zip if/when we need it
-  const key = `${pkgkey}.tar.gz`;
+  const key = `${pkgName}-${pkgVersion}.tar.gz`;
   let buffer = cacheGet(key);
   if (!buffer) {
-    buffer = await fetchArchiveBuffer(pkgkey);
+    buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
     cacheSet(key, buffer);
   }
 
@@ -148,9 +149,9 @@ async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
   }
 }
 
-async function fetchArchiveBuffer(key: string): Promise<Buffer> {
-  const { download: archivePath } = await fetchInfo(key);
-  const registryUrl = appContextService.getConfig()?.epm.registryUrl;
+async function fetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
+  const { download: archivePath } = await fetchInfo(pkgName, pkgVersion);
+  const registryUrl = getRegistryUrl();
   return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
 }
 

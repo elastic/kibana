@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiHorizontalRule,
@@ -17,10 +17,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, useForm } from '../../../../shared_imports';
+import { Form, FormDataProvider, useForm } from '../../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
 
 interface TagListProps {
   disabled?: boolean;
@@ -54,6 +56,22 @@ export const TagList = React.memo(
         setIsEditTags(false);
       }
     }, [form, onSubmit]);
+    const { tags: tagOptions } = useGetTags();
+    const [options, setOptions] = useState(
+      tagOptions.map(label => ({
+        label,
+      }))
+    );
+
+    useEffect(
+      () =>
+        setOptions(
+          tagOptions.map(label => ({
+            label,
+          }))
+        ),
+      [tagOptions]
+    );
 
     return (
       <EuiText>
@@ -61,10 +79,11 @@ export const TagList = React.memo(
           <EuiFlexItem grow={false}>
             <h4>{i18n.TAGS}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner />}
+          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
           {!isLoading && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
               <EuiButtonIcon
+                data-test-subj="tag-list-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_TAGS_ARIA}
                 iconType={'pencil'}
@@ -74,17 +93,19 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs">
-          {tags.length === 0 && !isEditTags && <p>{i18n.NO_TAGS}</p>}
+        <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
+          {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
           {tags.length > 0 &&
             !isEditTags &&
             tags.map((tag, key) => (
               <EuiFlexItem grow={false} key={`${tag}${key}`}>
-                <EuiBadge color="hollow">{tag}</EuiBadge>
+                <EuiBadge data-test-subj="case-tag" color="hollow">
+                  {tag}
+                </EuiBadge>
               </EuiFlexItem>
             ))}
           {isEditTags && (
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>
                 <Form form={form}>
                   <CommonUseField
@@ -95,9 +116,30 @@ export const TagList = React.memo(
                       euiFieldProps: {
                         fullWidth: true,
                         placeholder: '',
+                        options,
+                        noSuggestions: false,
                       },
                     }}
                   />
+                  <FormDataProvider pathsToWatch="tags">
+                    {({ tags: anotherTags }) => {
+                      const current: string[] = options.map(opt => opt.label);
+                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+                        if (!acc.includes(item)) {
+                          return [...acc, item];
+                        }
+                        return acc;
+                      }, current);
+                      if (!isEqual(current, newOptions)) {
+                        setOptions(
+                          newOptions.map((label: string) => ({
+                            label,
+                          }))
+                        );
+                      }
+                      return null;
+                    }}
+                  </FormDataProvider>
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -105,6 +147,7 @@ export const TagList = React.memo(
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       color="secondary"
+                      data-test-subj="edit-tags-submit"
                       fill
                       iconType="save"
                       onClick={onSubmitTags}
@@ -115,6 +158,7 @@ export const TagList = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="edit-tags-cancel"
                       iconType="cross"
                       onClick={setIsEditTags.bind(null, false)}
                       size="s"

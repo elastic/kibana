@@ -32,7 +32,9 @@ export default function({ getService }) {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
-      it('should have a default policy to manage the Watcher history indices', async () => {
+      // Disabled as the underline ES API has changed. Need to investigate
+      // Opened issue: https://github.com/elastic/kibana/issues/62778
+      it.skip('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
         const policy = body.find(policy => policy.name === DEFAULT_POLICY_NAME);
 

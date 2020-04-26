@@ -18,7 +18,7 @@ export type TimeframeMapAll = Pick<TimeframeMap, 'all'>;
 export type APMDataTelemetry = DeepPartial<{
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
-  versions: {
+  version: {
     apm_server: {
       minor: number;
       major: number;

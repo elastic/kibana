@@ -28,28 +28,15 @@ export default function(providerContext: FtrProviderContext) {
         .send({
           action: {
             type: 'CONFIG_CHANGE',
-            data: 'action_data',
+            data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(200);
 
       expect(apiResponse.success).to.be(true);
-      expect(apiResponse.item.data).to.be('action_data');
+      expect(apiResponse.item.data).to.eql({ data: 'action_data' });
       expect(apiResponse.item.sent_at).to.be('2020-03-18T19:45:02.620Z');
-
-      const { body: agentResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/agents/agent1`)
-        .set('kbn-xsrf', 'xx')
-        .expect(200);
-
-      const updatedAction = agentResponse.item.actions.find(
-        (itemAction: Record<string, string>) => itemAction?.data === 'action_data'
-      );
-
-      expect(updatedAction.type).to.be('CONFIG_CHANGE');
-      expect(updatedAction.data).to.be('action_data');
-      expect(updatedAction.sent_at).to.be('2020-03-18T19:45:02.620Z');
     });
 
     it('should return a 400 when request does not have type information', async () => {
@@ -58,7 +45,7 @@ export default function(providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .send({
           action: {
-            data: 'action_data',
+            data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
@@ -75,12 +62,12 @@ export default function(providerContext: FtrProviderContext) {
         .send({
           action: {
             type: 'CONFIG_CHANGE',
-            data: 'action_data',
+            data: { data: 'action_data' },
             sent_at: '2020-03-18T19:45:02.620Z',
           },
         })
         .expect(404);
-      expect(apiResponse.message).to.eql('Saved object [agents/agent100] not found');
+      expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
     });
   });
 }

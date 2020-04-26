@@ -38,6 +38,30 @@ export const displayErrorToast = (
 };
 
 /**
+ * Displays a warning toast for the provided title and message
+ *
+ * @param title warning message to display in toaster and modal
+ * @param dispatchToaster provided by useStateToaster()
+ * @param id unique ID if necessary
+ */
+export const displayWarningToast = (
+  title: string,
+  dispatchToaster: React.Dispatch<ActionToaster>,
+  id: string = uuid.v4()
+): void => {
+  const toast: AppToast = {
+    id,
+    title,
+    color: 'warning',
+    iconType: 'help',
+  };
+  dispatchToaster({
+    type: 'addToaster',
+    toast,
+  });
+};
+
+/**
  * Displays a success toast for the provided title and message
  *
  * @param title success message to display in toaster and modal

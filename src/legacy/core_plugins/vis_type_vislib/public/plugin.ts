@@ -24,6 +24,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
@@ -39,7 +40,6 @@ import {
   createGoalVisTypeDefinition,
 } from './vis_type_vislib_vis_types';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
-import { ConfigSchema as VisTypeXyConfigSchema } from '../../vis_type_xy';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { setFormatService, setDataActions } from './services';
 
@@ -53,6 +53,7 @@ export interface VisTypeVislibPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 /** @internal */
@@ -68,7 +69,7 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
 
   public async setup(
     core: VisTypeVislibCoreSetup,
-    { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
+    { expressions, visualizations, charts, visTypeXy }: VisTypeVislibPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<VisTypeVislibDependencies> = {
       uiSettings: core.uiSettings,
@@ -86,12 +87,8 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
     ];
     const vislibFns = [createVisTypeVislibVisFn(), createPieVisFn()];
 
-    const visTypeXy = core.injectedMetadata.getInjectedVar('visTypeXy') as
-      | VisTypeXyConfigSchema['visTypeXy']
-      | undefined;
-
     // if visTypeXy plugin is disabled it's config will be undefined
-    if (!visTypeXy || !visTypeXy.enabled) {
+    if (!visTypeXy) {
       const convertedTypes: any[] = [];
       const convertedFns: any[] = [];
 
@@ -111,6 +108,6 @@ export class VisTypeVislibPlugin implements Plugin<void, void> {
 
   public start(core: CoreStart, { data }: VisTypeVislibPluginStartDependencies) {
     setFormatService(data.fieldFormats);
-    setDataActions({ createFiltersFromEvent: data.actions.createFiltersFromEvent });
+    setDataActions(data.actions);
   }
 }

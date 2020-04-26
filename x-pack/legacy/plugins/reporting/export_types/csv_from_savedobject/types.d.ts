@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { JobParamPostPayload, JobDocPayload, ServerFacade } from '../../types';
+import { JobDocPayload, JobParamPostPayload } from '../../types';
 
 export interface FakeRequest {
-  headers: any;
-  server: ServerFacade;
+  headers: Record<string, unknown>;
 }
 
 export interface JobParamsPostPayloadPanelCsv extends JobParamPostPayload {

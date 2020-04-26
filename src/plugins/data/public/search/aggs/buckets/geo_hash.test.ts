@@ -17,13 +17,31 @@
  * under the License.
  */
 
-import { geoHashBucketAgg } from './geo_hash';
+import { getGeoHashBucketAgg, GeoHashBucketAggDependencies } from './geo_hash';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { IBucketAggConfig } from './_bucket_agg_type';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import { InternalStartServices } from '../../../types';
 
 describe('Geohash Agg', () => {
+  let aggTypesDependencies: GeoHashBucketAggDependencies;
+  let geoHashBucketAgg: BucketAggType;
+
+  beforeEach(() => {
+    aggTypesDependencies = {
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
+    };
+
+    geoHashBucketAgg = getGeoHashBucketAgg(aggTypesDependencies);
+  });
+
   const getAggConfigs = (params?: Record<string, any>) => {
     const indexPattern = {
       id: '1234',
@@ -61,7 +79,10 @@ describe('Geohash Agg', () => {
           },
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      {
+        typesRegistry: mockAggTypesRegistry(),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+      }
     );
   };
 
@@ -74,7 +95,7 @@ describe('Geohash Agg', () => {
       precisionParam = geoHashBucketAgg.params[PRECISION_PARAM_INDEX];
     });
 
-    it('should select precision parameter', () => {
+    test('should select precision parameter', () => {
       expect(precisionParam.name).toEqual('precision');
     });
   });
@@ -89,7 +110,7 @@ describe('Geohash Agg', () => {
         geoHashGridAgg = aggConfigs.aggs[0] as IBucketAggConfig;
       });
 
-      it('should create filter, geohash_grid, and geo_centroid aggregations', () => {
+      test('should create filter, geohash_grid, and geo_centroid aggregations', () => {
         const requestAggs = geoHashBucketAgg.getRequestAggs(geoHashGridAgg) as IBucketAggConfig[];
 
         expect(requestAggs.length).toEqual(3);
@@ -101,7 +122,7 @@ describe('Geohash Agg', () => {
   });
 
   describe('aggregation options', () => {
-    it('should only create geohash_grid and geo_centroid aggregations when isFilteredByCollar is false', () => {
+    test('should only create geohash_grid and geo_centroid aggregations when isFilteredByCollar is false', () => {
       const aggConfigs = getAggConfigs({ isFilteredByCollar: false });
       const requestAggs = geoHashBucketAgg.getRequestAggs(
         aggConfigs.aggs[0] as IBucketAggConfig
@@ -112,7 +133,7 @@ describe('Geohash Agg', () => {
       expect(requestAggs[1].type.name).toEqual('geo_centroid');
     });
 
-    it('should only create filter and geohash_grid aggregations when useGeocentroid is false', () => {
+    test('should only create filter and geohash_grid aggregations when useGeocentroid is false', () => {
       const aggConfigs = getAggConfigs({ useGeocentroid: false });
       const requestAggs = geoHashBucketAgg.getRequestAggs(
         aggConfigs.aggs[0] as IBucketAggConfig
@@ -138,7 +159,7 @@ describe('Geohash Agg', () => {
       ) as IBucketAggConfig[];
     });
 
-    it('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
+    test('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
           boundingBox: {
@@ -151,7 +172,7 @@ describe('Geohash Agg', () => {
       expect(originalRequestAggs[1].params).not.toEqual(geoBoxingBox.params);
     });
 
-    it('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
+    test('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
       const [, geoBoxingBox] = geoHashBucketAgg.getRequestAggs(
         getAggConfigs({
           boundingBox: {

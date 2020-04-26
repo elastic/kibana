@@ -10,8 +10,11 @@ import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 import { npStart } from 'ui/new_platform';
 
-import { EmbeddablePanel } from '../../../../../../../src/plugins/embeddable/public';
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import {
+  EmbeddablePanel,
+  ErrorEmbeddable,
+} from '../../../../../../../src/plugins/embeddable/public';
+import { DEFAULT_INDEX_KEY } from '../../../../../../plugins/siem/common/constants';
 import { getIndexPatternTitleIdMapping } from '../../hooks/api/helpers';
 import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { Loader } from '../loader';
@@ -84,7 +87,9 @@ export const EmbeddedMapComponent = ({
   setQuery,
   startDate,
 }: EmbeddedMapProps) => {
-  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | null>(null);
+  const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
+    undefined
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isIndexError, setIsIndexError] = useState(false);

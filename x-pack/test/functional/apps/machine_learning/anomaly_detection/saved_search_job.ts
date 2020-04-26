@@ -15,7 +15,7 @@ export default function({ getService }: FtrProviderContext) {
   const testDataList = [
     {
       suiteTitle: 'with filter',
-      jobSource: 'farequote_filter',
+      jobSource: 'ft_farequote_filter',
       jobId: `fq_saved_search_1_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with filter',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -66,7 +66,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with lucene query',
-      jobSource: 'farequote_lucene',
+      jobSource: 'ft_farequote_lucene',
       jobId: `fq_saved_search_2_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with lucene query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -117,7 +117,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with kuery query',
-      jobSource: 'farequote_kuery',
+      jobSource: 'ft_farequote_kuery',
       jobId: `fq_saved_search_3_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -168,7 +168,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with filter and lucene query',
-      jobSource: 'farequote_filter_and_lucene',
+      jobSource: 'ft_farequote_filter_and_lucene',
       jobId: `fq_saved_search_4_${Date.now()}`,
       jobDescription:
         'Create multi metric job based on a saved search with filter and lucene query',
@@ -220,7 +220,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with filter and kuery query',
-      jobSource: 'farequote_filter_and_kuery',
+      jobSource: 'ft_farequote_filter_and_kuery',
       jobId: `fq_saved_search_5_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with filter and kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -272,14 +272,21 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('saved search', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
     });
 

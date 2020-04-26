@@ -9,114 +9,133 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
-import { AppState } from '../state';
 import { selectDynamicSettings } from '../state/selectors';
-import { DynamicSettingsState } from '../state/reducers/dynamic_settings';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { defaultDynamicSettings, DynamicSettings } from '../../common/runtime_types';
+import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { UptimePage, useUptimeTelemetry } from '../hooks';
+import { IndicesForm } from '../components/settings/indices_form';
+import {
+  CertificateExpirationForm,
+  OnFieldChangeType,
+} from '../components/settings/certificate_form';
+import * as Translations from './translations';
 
-interface Props {
-  dynamicSettingsState: DynamicSettingsState;
+interface SettingsPageFieldErrors {
+  heartbeatIndices: 'May not be blank' | '';
+  certificatesThresholds: {
+    expirationThresholdError: string | null;
+    ageThresholdError: string | null;
+  } | null;
 }
 
-interface DispatchProps {
-  dispatchGetDynamicSettings: typeof getDynamicSettings;
-  dispatchSetDynamicSettings: typeof setDynamicSettings;
+export interface SettingsFormProps {
+  loading: boolean;
+  onChange: OnFieldChangeType;
+  formFields: DynamicSettings | null;
+  fieldErrors: SettingsPageFieldErrors | null;
+  isDisabled: boolean;
 }
 
-export const SettingsPageComponent = ({
-  dynamicSettingsState: dss,
-  dispatchGetDynamicSettings,
-  dispatchSetDynamicSettings,
-}: Props & DispatchProps) => {
-  const settingsBreadcrumbText = i18n.translate('xpack.uptime.settingsBreadcrumbText', {
-    defaultMessage: 'Settings',
-  });
-  useBreadcrumbs([{ text: settingsBreadcrumbText }]);
+const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
+  if (formFields) {
+    const blankStr = 'May not be blank';
+    const { certThresholds: certificatesThresholds, heartbeatIndices } = formFields;
+    const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
+    const expirationThresholdError = certificatesThresholds?.expiration ? null : blankStr;
+    const ageThresholdError = certificatesThresholds?.age ? null : blankStr;
+    return {
+      heartbeatIndices: heartbeatIndErr,
+      certificatesThresholds:
+        expirationThresholdError || ageThresholdError
+          ? {
+              expirationThresholdError,
+              ageThresholdError,
+            }
+          : null,
+    };
+  }
+  return null;
+};
+
+export const SettingsPage = () => {
+  const dss = useSelector(selectDynamicSettings);
+
+  useBreadcrumbs([{ text: Translations.settings.breadcrumbText }]);
 
   useUptimeTelemetry(UptimePage.Settings);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    dispatchGetDynamicSettings({});
-  }, [dispatchGetDynamicSettings]);
+    dispatch(getDynamicSettings());
+  }, [dispatch]);
 
-  const [formFields, setFormFields] = useState<DynamicSettings | null>(dss.settings || null);
+  const [formFields, setFormFields] = useState<DynamicSettings | null>(
+    dss.settings ? { ...dss.settings } : null
+  );
 
-  if (!dss.loadError && formFields == null && dss.settings) {
-    setFormFields({ ...dss.settings });
+  if (!dss.loadError && formFields === null && dss.settings) {
+    setFormFields(Object.assign({}, { ...dss.settings }));
   }
 
-  const fieldErrors = formFields && {
-    heartbeatIndices: formFields.heartbeatIndices.match(/^\S+$/) ? null : 'May not be blank',
-  };
+  const fieldErrors = getFieldErrors(formFields);
+
   const isFormValid = !(fieldErrors && Object.values(fieldErrors).find(v => !!v));
 
-  const onChangeFormField = (field: keyof DynamicSettings, value: any) => {
+  const onChangeFormField: OnFieldChangeType = changedField => {
     if (formFields) {
-      formFields[field] = value;
-      setFormFields({ ...formFields });
+      setFormFields({
+        heartbeatIndices: changedField.heartbeatIndices ?? formFields.heartbeatIndices,
+        certThresholds: Object.assign(
+          {},
+          formFields.certThresholds,
+          changedField?.certThresholds ?? null
+        ),
+      });
     }
   };
 
   const onApply = (event: React.FormEvent) => {
     event.preventDefault();
     if (formFields) {
-      dispatchSetDynamicSettings(formFields);
+      dispatch(setDynamicSettings(formFields));
     }
   };
 
-  const resetForm = () => {
-    if (formFields && dss.settings) {
-      setFormFields({ ...dss.settings });
-    }
-  };
+  const resetForm = () => setFormFields(dss.settings ? { ...dss.settings } : null);
 
-  const isFormDirty = dss.settings ? !isEqual(dss.settings, formFields) : true;
+  const isFormDirty = !isEqual(dss.settings, formFields);
   const canEdit: boolean =
     !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
   const isFormDisabled = dss.loading || !canEdit;
 
-  const editNoticeTitle = i18n.translate('xpack.uptime.settings.cannotEditTitle', {
-    defaultMessage: 'You do not have permission to edit settings.',
-  });
-  const editNoticeText = i18n.translate('xpack.uptime.settings.cannotEditText', {
-    defaultMessage:
-      "Your user currently has 'Read' permissions for the Uptime app. Enable a permissions-level of 'All' to edit these settings.",
-  });
   const cannotEditNotice = canEdit ? null : (
     <>
-      <EuiCallOut title={editNoticeTitle}>{editNoticeText}</EuiCallOut>
+      <EuiCallOut title={Translations.settings.editNoticeTitle}>
+        {Translations.settings.editNoticeText}
+      </EuiCallOut>
       <EuiSpacer size="s" />
     </>
   );
 
   return (
     <>
-      <Link to={OVERVIEW_ROUTE}>
+      <Link to={OVERVIEW_ROUTE} data-test-subj="uptimeSettingsToOverviewLink">
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.uptime.settings.returnToOverviewLinkLabel', {
-            defaultMessage: 'Return to overview',
-          })}
+          {Translations.settings.returnToOverviewLinkLabel}
         </EuiButtonEmpty>
       </Link>
       <EuiSpacer size="s" />
@@ -128,68 +147,20 @@ export const SettingsPageComponent = ({
           <EuiFlexItem grow={false}>
             <form onSubmit={onApply}>
               <EuiForm>
-                <EuiTitle size="s">
-                  <h3>
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
-                      defaultMessage="Indices"
-                    />
-                  </h3>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <EuiDescribedFormGroup
-                  title={
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
-                        defaultMessage="Uptime indices"
-                      />
-                    </h4>
-                  }
-                  description={
-                    <FormattedMessage
-                      id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
-                      defaultMessage="Index pattern for matching indices that contain Heartbeat data"
-                    />
-                  }
-                >
-                  <EuiFormRow
-                    describedByIds={['heartbeatIndices']}
-                    error={fieldErrors?.heartbeatIndices}
-                    fullWidth
-                    helpText={
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
-                        defaultMessage="The default value is {defaultValue}"
-                        values={{
-                          defaultValue: (
-                            <EuiCode>{defaultDynamicSettings.heartbeatIndices}</EuiCode>
-                          ),
-                        }}
-                      />
-                    }
-                    isInvalid={!!fieldErrors?.heartbeatIndices}
-                    label={
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
-                        defaultMessage="Heartbeat indices"
-                      />
-                    }
-                  >
-                    <EuiFieldText
-                      data-test-subj={`heartbeat-indices-input-${
-                        dss.loading ? 'loading' : 'loaded'
-                      }`}
-                      fullWidth
-                      disabled={isFormDisabled}
-                      isLoading={dss.loading}
-                      value={formFields?.heartbeatIndices || ''}
-                      onChange={(event: any) =>
-                        onChangeFormField('heartbeatIndices', event.currentTarget.value)
-                      }
-                    />
-                  </EuiFormRow>
-                </EuiDescribedFormGroup>
+                <IndicesForm
+                  loading={dss.loading}
+                  onChange={onChangeFormField}
+                  formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
+                <CertificateExpirationForm
+                  loading={dss.loading}
+                  onChange={onChangeFormField}
+                  formFields={formFields}
+                  fieldErrors={fieldErrors}
+                  isDisabled={isFormDisabled}
+                />
 
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -230,18 +201,3 @@ export const SettingsPageComponent = ({
     </>
   );
 };
-
-const mapStateToProps = (state: AppState) => ({
-  dynamicSettingsState: selectDynamicSettings(state),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  dispatchGetDynamicSettings: () => {
-    return dispatch(getDynamicSettings({}));
-  },
-  dispatchSetDynamicSettings: (settings: DynamicSettings) => {
-    return dispatch(setDynamicSettings(settings));
-  },
-});
-
-export const SettingsPage = connect(mapStateToProps, mapDispatchToProps)(SettingsPageComponent);

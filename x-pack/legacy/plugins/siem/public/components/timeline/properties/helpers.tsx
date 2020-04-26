@@ -21,6 +21,7 @@ import React, { useCallback } from 'react';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -29,6 +30,8 @@ import { NOTES_PANEL_WIDTH } from './notes_size';
 import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
 import { SiemPageName } from '../../../pages/home/types';
+import { timelineSelectors } from '../../../store/timeline';
+import { State } from '../../../store';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -36,7 +39,7 @@ export const newTimelineToolTip = 'Create a new timeline';
 
 const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
@@ -121,6 +124,9 @@ interface NewCaseProps {
 
 export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, timelineTitle }) => {
   const history = useHistory();
+  const { savedObjectId } = useSelector((state: State) =>
+    timelineSelectors.selectTimeline(state, timelineId)
+  );
   const handleClick = useCallback(() => {
     onClosePopover();
     history.push({
@@ -128,6 +134,7 @@ export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, t
       state: {
         insertTimeline: {
           timelineId,
+          timelineSavedObjectId: savedObjectId,
           timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
         },
       },

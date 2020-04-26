@@ -5,12 +5,15 @@
  */
 
 import cytoscape from 'cytoscape';
+import { isRumAgentName } from '../../../../../../../plugins/apm/common/agent_name';
 import {
   AGENT_NAME,
-  SERVICE_NAME,
-  SPAN_TYPE,
-  SPAN_SUBTYPE
+  SPAN_SUBTYPE,
+  SPAN_TYPE
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
+import awsIcon from './icons/aws.svg';
+import cassandraIcon from './icons/cassandra.svg';
+import darkIcon from './icons/dark.svg';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
 import documentsIcon from './icons/documents.svg';
@@ -18,25 +21,61 @@ import dotNetIcon from './icons/dot-net.svg';
 import elasticsearchIcon from './icons/elasticsearch.svg';
 import globeIcon from './icons/globe.svg';
 import goIcon from './icons/go.svg';
+import graphqlIcon from './icons/graphql.svg';
+import grpcIcon from './icons/grpc.svg';
+import handlebarsIcon from './icons/handlebars.svg';
 import javaIcon from './icons/java.svg';
+import kafkaIcon from './icons/kafka.svg';
+import mongodbIcon from './icons/mongodb.svg';
+import mysqlIcon from './icons/mysql.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import phpIcon from './icons/php.svg';
+import postgresqlIcon from './icons/postgresql.svg';
 import pythonIcon from './icons/python.svg';
+import redisIcon from './icons/redis.svg';
 import rubyIcon from './icons/ruby.svg';
 import rumJsIcon from './icons/rumjs.svg';
+import websocketIcon from './icons/websocket.svg';
 
 export const defaultIcon = defaultIconImport;
 
-// The colors here are taken from the logos of the corresponding technologies
-const icons: { [key: string]: string } = {
+const defaultTypeIcons: { [key: string]: string } = {
   cache: databaseIcon,
   db: databaseIcon,
+  ext: globeIcon,
   external: globeIcon,
   messaging: documentsIcon,
   resource: globeIcon
 };
 
-const serviceIcons: { [key: string]: string } = {
+const typeIcons: { [key: string]: { [key: string]: string } } = {
+  aws: {
+    servicename: awsIcon
+  },
+  db: {
+    cassandra: cassandraIcon,
+    elasticsearch: elasticsearchIcon,
+    mongodb: mongodbIcon,
+    mysql: mysqlIcon,
+    postgresql: postgresqlIcon,
+    redis: redisIcon
+  },
+  external: {
+    graphql: graphqlIcon,
+    grpc: grpcIcon,
+    websocket: websocketIcon
+  },
+  messaging: {
+    jms: javaIcon,
+    kafka: kafkaIcon
+  },
+  template: {
+    handlebars: handlebarsIcon
+  }
+};
+
+const agentIcons: { [key: string]: string } = {
+  dark: darkIcon,
   dotnet: dotNetIcon,
   go: goIcon,
   java: javaIcon,
@@ -46,6 +85,24 @@ const serviceIcons: { [key: string]: string } = {
   python: pythonIcon,
   ruby: rubyIcon
 };
+
+function getAgentIcon(agentName?: string) {
+  // RUM can have multiple names. Normalize it
+  const normalizedAgentName = isRumAgentName(agentName) ? 'js-base' : agentName;
+  return normalizedAgentName && agentIcons[normalizedAgentName];
+}
+
+function getSpanIcon(type?: string, subtype?: string) {
+  if (!type) {
+    return;
+  }
+
+  const types = type ? typeIcons[type] : {};
+  if (subtype && types && subtype in types) {
+    return types[subtype];
+  }
+  return defaultTypeIcons[type] || defaultIcon;
+}
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the
 // map to not work at all. We would prefer to do some kind of feature detection
@@ -59,20 +116,13 @@ const serviceIcons: { [key: string]: string } = {
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export function iconForNode(node: cytoscape.NodeSingular) {
+  const agentName = node.data(AGENT_NAME);
+  const subtype = node.data(SPAN_SUBTYPE);
   const type = node.data(SPAN_TYPE);
 
-  if (node.data(SERVICE_NAME)) {
-    return serviceIcons[node.data(AGENT_NAME) as string];
-  } else if (isIE11) {
-    return defaultIcon;
-  } else if (
-    node.data(SPAN_TYPE) === 'db' &&
-    node.data(SPAN_SUBTYPE) === 'elasticsearch'
-  ) {
-    return elasticsearchIcon;
-  } else if (icons[type]) {
-    return icons[type];
-  } else {
+  if (isIE11) {
     return defaultIcon;
   }
+
+  return getAgentIcon(agentName) || getSpanIcon(type, subtype) || defaultIcon;
 }

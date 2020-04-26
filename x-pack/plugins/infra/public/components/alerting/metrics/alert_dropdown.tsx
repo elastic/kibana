@@ -38,7 +38,7 @@ export const AlertDropdown = () => {
           'kibana#/management/kibana/triggersActions/alerts'
         )}
       >
-        <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage Alerts" />
+        <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
       </EuiContextMenuItem>,
     ];
   }, [kibana.services]);

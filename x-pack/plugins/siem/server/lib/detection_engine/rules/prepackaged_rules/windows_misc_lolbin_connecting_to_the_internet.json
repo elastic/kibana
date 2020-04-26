@@ -1,0 +1,50 @@
+{
+  "description": "Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Adversaries may use these binaries to 'live off the land' and execute malicious files that could bypass application whitelisting and signature validation.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Network Connection via Signed Binary",
+  "query": "process.name:(expand.exe or extrac.exe or ieexec.exe or makecab.exe) and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "risk_score": 21,
+  "rule_id": "63e65ec3-43b1-45b0-8f2d-45b34291dc44",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

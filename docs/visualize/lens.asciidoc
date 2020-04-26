@@ -15,30 +15,16 @@ beta[]
 * Save your visualization for use in a dashboard.
 
 [float]
-[[lens-aggregation]]
-=== Supported aggregations
-
-Lens supports the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-
-* <<visualize-bucket-aggregations,Bucket>>
-
-[float]
 [[drag-drop]]
 === Drag and drop
 
-The data panel in the left column shows the data fields for the selected time period. When
+The panel shows the data fields for the selected time period. When
 you drag a field from the data panel, Lens highlights where you can drop that field. The first time you drag a data field,
 you'll see two places highlighted in green:
 
 * The visualization builder pane
 
-* The *X-axis* or *Y-axis* fields in the right column
+* The *X-axis* or *Y-axis* fields
 
 You can incorporate many fields into your visualization, and Lens uses heuristics to decide how
 to apply each one to the visualization.
@@ -57,7 +43,7 @@ Lens shows you fields based on the <<index-patterns, index patterns>> you have d
 {kib}, and the current time range. When you change the index pattern or time filter,
 the list of fields are updated.
 
-To narrow the list of fields you see in the left panel, you can:
+To narrow the list of fields, you can:
 
 * Enter the field name in *Search field names*.
 
@@ -89,8 +75,8 @@ You can switch between suggestions without losing your previous state:
 [role="screenshot"]
 image::images/lens_suggestions.gif[]
 
-If you want to switch to a chart type that is not suggested, click the chart type in the
-top right, then select a chart type. When there is an exclamation point (!)
+If you want to switch to a chart type that is not suggested, click the chart type,
+then select a chart type. When there is an exclamation point (!)
 next to a chart type, Lens is unable to transfer your current data, but
 still allows you to make the change.
 
@@ -100,17 +86,13 @@ still allows you to make the change.
 
 Lens allows some customizations of the data for each visualization.
 
-. Change the index pattern.
-
-.. In the left column, click the index pattern name.
-
-.. Select the new index pattern.
+. Click the index pattern name, then select the new index pattern.
 +
 If there is a match, Lens displays the new data. All fields that do not match the index pattern are removed.
 
 . Change the data field options, such as the aggregation or label.
 
-.. Click *Drop a field here* or the field name in the right column.
+.. Click *Drop a field here* or the field name in the column.
 
 .. Change the options that appear depending on the type of field.
 
@@ -147,7 +129,7 @@ Drag and drop your data onto the visualization builder pane.
 
 . On the *New Visualization* window, click *Lens*.
 
-. In the left column, select the *kibana_sample_data_ecommerce* index.
+. Select the *kibana_sample_data_ecommerce* index.
 
 . Click image:images/time-filter-calendar.png[], then click *Last 7 days*. The list of data fields are updated.
 
@@ -172,7 +154,7 @@ image::images/lens_tutorial_2.png[Lens tutorial]
 
 Customize your visualization to look exactly how you want.
 
-. In the right column, click *Average of taxful_total_price*.
+. Click *Average of taxful_total_price*.
 
 .. Change the *Label* to `Sales`, or a name that you prefer for the data.
 
@@ -184,7 +166,7 @@ six available categories.
 . Look at the suggestions. None of them show an area chart, but for sales data, a stacked area chart
 might make sense. To switch the chart type:
 
-.. Click *Stacked bar chart* in the right column.
+.. Click *Stacked bar chart* in the column.
 
 .. Click *Stacked area*.
 +

@@ -79,8 +79,6 @@ export const Wizard: FC<Props> = ({
     stringifyConfigs(jobCreator.jobConfig, jobCreator.datafeedConfig)
   );
 
-  useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);
-
   useEffect(() => {
     const subscription = jobValidator.validationResult$.subscribe(() => {
       setJobValidatorUpdate(jobValidatorUpdated);
@@ -122,6 +120,8 @@ export const Wizard: FC<Props> = ({
       setHighestStep(currentStep);
     }
   }, [currentStep]);
+
+  useModelMemoryEstimator(jobCreator, jobValidator, jobCreatorUpdate, jobCreatorUpdated);
 
   return (
     <JobCreatorContext.Provider value={jobCreatorContext}>

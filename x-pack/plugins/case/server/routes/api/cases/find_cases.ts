@@ -15,6 +15,7 @@ import { CasesFindResponseRt, CasesFindRequestRt, throwErrors } from '../../../.
 import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps, TotalCommentByCase } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
+import { CASES_URL } from '../../../../common/constants';
 
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter(i => i !== '').join(` ${operator} `);
@@ -31,16 +32,17 @@ const buildFilter = (
 ): string =>
   filters != null && filters.length > 0
     ? Array.isArray(filters)
-      ? filters
+      ? // Be aware of the surrounding parenthesis (as string inside literal) around filters.
+        `(${filters
           .map(filter => `${CASE_SAVED_OBJECT}.attributes.${field}: ${filter}`)
-          ?.join(` ${operator} `)
+          ?.join(` ${operator} `)})`
       : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
     : '';
 
 export function initFindCasesApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/_find',
+      path: `${CASES_URL}/_find`,
       validate: {
         query: escapeHatch,
       },

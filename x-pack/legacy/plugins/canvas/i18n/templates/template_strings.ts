@@ -37,14 +37,6 @@ export const getTemplateStrings = (): TemplateStringDict => ({
       defaultMessage: 'Light color themed presentation deck',
     }),
   },
-  Pitch: {
-    name: i18n.translate('xpack.canvas.templates.pitchName', {
-      defaultMessage: 'Pitch',
-    }),
-    help: i18n.translate('xpack.canvas.templates.pitchHelp', {
-      defaultMessage: 'Branded presentation with large photos',
-    }),
-  },
   Status: {
     name: i18n.translate('xpack.canvas.templates.statusName', {
       defaultMessage: 'Status',
@@ -59,6 +51,17 @@ export const getTemplateStrings = (): TemplateStringDict => ({
     }),
     help: i18n.translate('xpack.canvas.templates.summaryHelp', {
       defaultMessage: 'Infographic-style report with live charts',
+    }),
+  },
+});
+
+export const getUnusedTemplateStrings = (): TemplateStringDict => ({
+  Pitch: {
+    name: i18n.translate('xpack.canvas.templates.pitchName', {
+      defaultMessage: 'Pitch',
+    }),
+    help: i18n.translate('xpack.canvas.templates.pitchHelp', {
+      defaultMessage: 'Branded presentation with large photos',
     }),
   },
 });

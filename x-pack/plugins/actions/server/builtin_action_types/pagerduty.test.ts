@@ -22,7 +22,7 @@ const postPagerdutyMock = postPagerduty as jest.Mock;
 const ACTION_TYPE_ID = '.pagerduty';
 
 const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
+  callCluster: async (path: string, opts: unknown) => {},
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
@@ -141,6 +141,25 @@ describe('validateParams()', () => {
 - [eventAction.1]: expected value to equal [resolve]
 - [eventAction.2]: expected value to equal [acknowledge]"
 `);
+  });
+
+  test('should validate and throw error when timestamp has spaces', () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const timestamp = `  ${randoDate}`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
+
+  test('should validate and throw error when timestamp is invalid', () => {
+    const timestamp = `1963-09-55 90:23:45`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 });
 

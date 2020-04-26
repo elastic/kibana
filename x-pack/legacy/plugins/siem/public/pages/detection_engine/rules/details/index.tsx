@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useMemo, useState } from 'react';
@@ -53,7 +54,7 @@ import * as detectionI18n from '../../translations';
 import { ReadOnlyCallOut } from '../components/read_only_callout';
 import { RuleSwitch } from '../components/rule_switch';
 import { StepPanel } from '../components/step_panel';
-import { getStepsData, redirectToDetections } from '../helpers';
+import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
 import * as ruleI18n from '../translations';
 import * as i18n from './translations';
 import { GlobalTime } from '../../../../containers/global_time';
@@ -66,6 +67,8 @@ import { RuleActionsOverflow } from '../components/rule_actions_overflow';
 import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
+import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
+import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -85,7 +88,7 @@ const ruleDetailTabs = [
   },
 ];
 
-const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
+export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   filters,
   query,
   setAbsoluteRangeDatePicker,
@@ -96,7 +99,6 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     isAuthenticated,
     hasEncryptionKey,
     canUserCRUD,
-    hasManageApiKey,
     hasIndexWrite,
     signalIndexName,
   } = useUserInfo();
@@ -115,8 +117,11 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
           scheduleRuleData: null,
         };
   const [lastSignals] = useSignalInfo({ ruleId });
-  const userHasNoPermissions =
-    canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
+  const mlCapabilities = useMlCapabilities();
+
+  // TODO: Refactor license check + hasMlAdminPermissions to common check
+  const hasMlPermissions =
+    mlCapabilities.isPlatinumOrTrialLicense && hasMlAdminPermissions(mlCapabilities);
 
   const title = isLoading === true || rule === null ? <EuiLoadingSpinner size="m" /> : rule.name;
   const subTitle = useMemo(
@@ -227,7 +232,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   return (
     <>
       {hasIndexWrite != null && !hasIndexWrite && <NoWriteSignalsCallOut />}
-      {userHasNoPermissions && <ReadOnlyCallOut />}
+      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indicesExist, indexPattern }) => {
           return indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
@@ -262,13 +267,25 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                     >
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem grow={false}>
-                          <RuleSwitch
-                            id={rule?.id ?? '-1'}
-                            isDisabled={userHasNoPermissions}
-                            enabled={rule?.enabled ?? false}
-                            optionLabel={i18n.ACTIVATE_RULE}
-                            onChange={handleOnChangeEnabledRule}
-                          />
+                          <EuiToolTip
+                            position="top"
+                            content={
+                              rule?.type === 'machine_learning' && !hasMlPermissions
+                                ? detectionI18n.ML_RULES_DISABLED_MESSAGE
+                                : undefined
+                            }
+                          >
+                            <RuleSwitch
+                              id={rule?.id ?? '-1'}
+                              isDisabled={
+                                userHasNoPermissions(canUserCRUD) ||
+                                (!hasMlPermissions && !rule?.enabled)
+                              }
+                              enabled={rule?.enabled ?? false}
+                              optionLabel={i18n.ACTIVATE_RULE}
+                              onChange={handleOnChangeEnabledRule}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
 
                         <EuiFlexItem grow={false}>
@@ -277,7 +294,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                               <EuiButton
                                 href={getEditRuleUrl(ruleId ?? '')}
                                 iconType="controlsHorizontal"
-                                isDisabled={userHasNoPermissions ?? true}
+                                isDisabled={userHasNoPermissions(canUserCRUD) ?? true}
                               >
                                 {ruleI18n.EDIT_RULE_SETTINGS}
                               </EuiButton>
@@ -285,7 +302,7 @@ const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
                             <EuiFlexItem grow={false}>
                               <RuleActionsOverflow
                                 rule={rule}
-                                userHasNoPermissions={userHasNoPermissions}
+                                userHasNoPermissions={userHasNoPermissions(canUserCRUD)}
                               />
                             </EuiFlexItem>
                           </EuiFlexGroup>

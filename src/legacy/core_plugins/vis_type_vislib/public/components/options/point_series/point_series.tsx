@@ -21,7 +21,8 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { BasicOptions, SwitchOption, ValidationVisOptionsProps } from '../../common';
+import { ValidationVisOptionsProps } from '../../common';
+import { BasicOptions, SwitchOption } from '../../../../../../../plugins/charts/public';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
 import { BasicVislibParams } from '../../../types';

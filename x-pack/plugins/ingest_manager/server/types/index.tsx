@@ -14,6 +14,7 @@ export {
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
+  AgentActionSOAttributes,
   Datasource,
   NewDatasource,
   FullAgentConfigDatasource,
@@ -21,6 +22,7 @@ export {
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,
+  DataStream,
   Output,
   NewOutput,
   OutputType,
@@ -46,6 +48,8 @@ export {
   RegistrySearchResults,
   RegistrySearchResult,
   DefaultPackages,
+  TemplateRef,
+  IndexTemplateMappings,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

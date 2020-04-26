@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiEmptyPrompt,
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -36,6 +35,7 @@ import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
+import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 
 const ENTER_KEY = 13;
 
@@ -280,8 +280,6 @@ export const AlertsList: React.FunctionComponent = () => {
         key="create-alert"
         data-test-subj="createAlertButton"
         fill
-        iconType="plusInCircle"
-        iconSide="left"
         onClick={() => setAlertFlyoutVisibility(true)}
       >
         <FormattedMessage
@@ -291,44 +289,6 @@ export const AlertsList: React.FunctionComponent = () => {
       </EuiButton>
     );
   }
-
-  const emptyPrompt = (
-    <EuiEmptyPrompt
-      iconType="watchesApp"
-      data-test-subj="createFirstAlertEmptyPrompt"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyTitle"
-            defaultMessage="Create your first alert"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
-            defaultMessage="Receive an alert through email, Slack, or another connector when a trigger is hit."
-          />
-        </p>
-      }
-      actions={
-        <EuiButton
-          data-test-subj="createFirstAlertButton"
-          key="create-action"
-          fill
-          iconType="plusInCircle"
-          iconSide="left"
-          onClick={() => setAlertFlyoutVisibility(true)}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.emptyButton"
-            defaultMessage="Create alert"
-          />
-        </EuiButton>
-      }
-    />
-  );
 
   const table = (
     <Fragment>
@@ -473,7 +433,7 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        emptyPrompt
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
       )}
       <AlertsContextProvider
         value={{

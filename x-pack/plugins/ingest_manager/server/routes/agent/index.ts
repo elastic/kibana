@@ -23,6 +23,7 @@ import {
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
   PostNewAgentActionRequestSchema,
+  PutAgentReassignRequestSchema,
 } from '../../types';
 import {
   getAgentsHandler,
@@ -35,6 +36,7 @@ import {
   postAgentsUnenrollHandler,
   getAgentStatusForConfigHandler,
   getInternalUserSOClient,
+  putAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import * as AgentService from '../../services/agents';
@@ -122,7 +124,7 @@ export const registerRoutes = (router: IRouter) => {
     },
     postNewAgentActionHandlerBuilder({
       getAgent: AgentService.getAgent,
-      updateAgentActions: AgentService.updateAgentActions,
+      createAgentAction: AgentService.createAgentAction,
     })
   );
 
@@ -133,6 +135,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postAgentsUnenrollHandler
+  );
+
+  router.put(
+    {
+      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
+      validate: PutAgentReassignRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    putAgentsReassignHandler
   );
 
   // Get agent events

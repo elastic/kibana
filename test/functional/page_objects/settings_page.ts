@@ -206,15 +206,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldsTabCount() {
       return retry.try(async () => {
-        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
+        const indexedFieldsTab = await find.byCssSelector('#indexedFields .euiTab__content');
+        const text = await indexedFieldsTab.getVisibleText();
+        return text.split(/[()]/)[1];
       });
     }
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const theText = await testSubjects.getVisibleText('tab-count-scriptedFields');
-        return theText.replace(/\((.*)\)/, '$1');
+        const scriptedFieldsTab = await find.byCssSelector('#scriptedFields .euiTab__content');
+        const text = await scriptedFieldsTab.getVisibleText();
+        return text.split(/[()]/)[1];
       });
     }
 
@@ -241,13 +243,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldTypeFilter(type: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]'
+        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
       );
     }
 
     async setScriptedFieldLanguageFilter(language: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
+        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
           language +
           '"]'
       );
@@ -326,7 +328,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickOptionalAddNewButton();
+        await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
           await this.clickCreateNewRollupButton();
         }
@@ -356,11 +358,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await this.getIndexPatternIdFromUrl();
     }
 
-    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
-    async clickOptionalAddNewButton() {
-      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
-        await testSubjects.click('createIndexPatternButton');
-      }
+    async clickAddNewIndexPatternButton() {
+      await testSubjects.click('createIndexPatternButton');
     }
 
     async clickCreateNewRollupButton() {
@@ -415,17 +414,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      await find.clickByCssSelector('#indexedFields');
     }
 
     async clickScriptedFieldsTab() {
       log.debug('click Scripted Fields tab');
-      await testSubjects.click('tab-scriptedFields');
+      await find.clickByCssSelector('#scriptedFields');
     }
 
     async clickSourceFiltersTab() {
       log.debug('click Source Filters tab');
-      await testSubjects.click('tab-sourceFilters');
+      await find.clickByCssSelector('#sourceFilters');
     }
 
     async editScriptedField(name: string) {

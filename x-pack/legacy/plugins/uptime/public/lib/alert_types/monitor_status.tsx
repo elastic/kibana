@@ -16,7 +16,7 @@ import {
 } from '../../../../../../plugins/triggers_actions_ui/public/types';
 import { AlertTypeInitializer } from '.';
 import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
-import { AlertMonitorStatus } from '../../components/connected/alerts';
+import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
 
 export const validate = (alertParams: any): ValidationResult => {
   const errors: Record<string, any> = {};
@@ -61,7 +61,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
 }): AlertTypeModel => ({
   id: 'xpack.uptime.alerts.monitorStatus',
-  name: 'Uptime Monitor Status',
+  name: 'Uptime monitor status',
   iconClass: 'uptimeApp',
   alertParamsExpression: params => {
     return <AlertMonitorStatus {...params} autocomplete={autocomplete} />;

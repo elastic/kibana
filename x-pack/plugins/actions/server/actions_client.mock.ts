@@ -7,18 +7,21 @@
 import { ActionsClient } from './actions_client';
 
 type ActionsClientContract = PublicMethodsOf<ActionsClient>;
+export type ActionsClientMock = jest.Mocked<ActionsClientContract>;
 
 const createActionsClientMock = () => {
-  const mocked: jest.Mocked<ActionsClientContract> = {
+  const mocked: ActionsClientMock = {
     create: jest.fn(),
     get: jest.fn(),
-    find: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    getAll: jest.fn(),
   };
   return mocked;
 };
 
-export const actionsClientMock = {
+export const actionsClientMock: {
+  create: () => ActionsClientMock;
+} = {
   create: createActionsClientMock,
 };

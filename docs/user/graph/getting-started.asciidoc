@@ -38,7 +38,7 @@ image::user/graph/images/graph-url-connections.png["URL connections"]
 [role="screenshot"]
 image::user/graph/images/graph-link-summary.png["Link summary"]
 
-. Use the control bar on the right to explore
+. Use the control bar to explore
 additional connections:
 +
 * To display additional vertices that connect to your graph, click the expand icon
@@ -70,7 +70,7 @@ select *Edit settings*.
 
 To change the color and label of selected vertices,
 click the style icon image:user/graph/images/graph-style-button.png[Style]
-in the control bar on the right.
+in the control bar.
 
 
 [float]

@@ -67,7 +67,7 @@ class AgentConfigService {
   public async ensureDefaultAgentConfig(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find<AgentConfig>({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: 'agent_configs.attributes.is_default:true',
+      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (configs.total === 0) {
@@ -244,7 +244,7 @@ class AgentConfigService {
   public async getDefaultAgentConfigId(soClient: SavedObjectsClientContract) {
     const configs = await soClient.find({
       type: AGENT_CONFIG_SAVED_OBJECT_TYPE,
-      filter: 'agent_configs.attributes.is_default:true',
+      filter: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (configs.saved_objects.length === 0) {
@@ -319,9 +319,9 @@ class AgentConfigService {
           return outputs;
         }, {} as FullAgentConfig['outputs']),
       },
-      datasources: (config.datasources as Datasource[]).map(ds =>
-        storedDatasourceToAgentDatasource(ds)
-      ),
+      datasources: (config.datasources as Datasource[])
+        .filter(datasource => datasource.enabled)
+        .map(ds => storedDatasourceToAgentDatasource(ds)),
       revision: config.revision,
     };
 

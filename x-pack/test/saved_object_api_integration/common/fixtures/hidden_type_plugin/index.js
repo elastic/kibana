@@ -21,5 +21,7 @@ export default function(kibana) {
     },
 
     config() {},
+
+    init() {}, // need empty init for plugin to load
   });
 }

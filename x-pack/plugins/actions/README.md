@@ -28,7 +28,7 @@ Table of Contents
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_find`: Find actions](#get-apiactionfind-find-actions)
+    - [`GET /api/action/_getAll`: Get all actions](#get-apiaction-get-all-actions)
     - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
     - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
     - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
@@ -92,6 +92,7 @@ Built-In-Actions are configured using the _xpack.actions_ namespoace under _kiba
 | _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                               | boolean       |
 | _xpack.actions._**whitelistedHosts**   | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
 | _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                                   | Array<String> |
+| _xpack.actions._**preconfigured**      | A list of preconfigured actions. Default: `[]`                                                                                                                                                                                                                                                                                                                                                                                                                                | Array<Object> |
 
 #### Whitelisting Built-in Action Types
 
@@ -174,11 +175,13 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/action/_find`: Find actions
+### `GET /api/action/_getAll`: Get all actions
 
-Params:
+No parameters.
 
-See the [saved objects API documentation for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html). All the properties are the same except that you cannot pass in `type`.
+Return all actions from saved objects merged with predefined list.
+Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
+List of predefined actions should be set up in Kibana.yaml.
 
 ### `GET /api/action/{id}`: Get action
 
@@ -260,7 +263,7 @@ Kibana ships with a set of built-in action types:
 
 | Type                      | Id            | Description                                                        |
 | ------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log) | `.log`        | Logs messages to the Kibana log using `server.log()`               |
+| [Server log](#server-log) | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
 | [Email](#email)           | `.email`      | Sends an email using SMTP                                          |
 | [Slack](#slack)           | `.slack`      | Posts a message to a slack channel                                 |
 | [Index](#index)           | `.index`      | Indexes document(s) into Elasticsearch                             |

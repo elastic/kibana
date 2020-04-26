@@ -25,7 +25,12 @@ export const distDir: string;
 /**
  * Filename of the main bundle file in the distributable directory
  */
-export const distFilename: string;
+export const jsFilename: string;
+
+/**
+ * Filename of files that must be loaded before the jsFilename
+ */
+export const jsDepFilenames: string[];
 
 /**
  * Filename of the unthemed css file in the distributable directory
@@ -48,3 +53,8 @@ export const lightCssDistFilename: string;
 export const externals: {
   [key: string]: string;
 };
+
+/**
+ * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
+ */
+export const publicPathLoader: string;

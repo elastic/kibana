@@ -16,6 +16,8 @@ import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_reac
 import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
+import { getErrorMessage } from '../../../../../shared_imports';
+
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
@@ -116,7 +118,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -127,7 +131,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -141,7 +147,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 defaultMessage: 'An error occurred getting the existing index pattern titles:',
               }
             ),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
       })();
@@ -232,7 +240,6 @@ export const StepDetailsForm: FC<Props> = React.memo(
             ]}
           >
             <EuiFieldText
-              placeholder="transform ID"
               value={transformId}
               onChange={e => setTransformId(e.target.value)}
               aria-label={i18n.translate(
@@ -249,15 +256,12 @@ export const StepDetailsForm: FC<Props> = React.memo(
             label={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionLabel', {
               defaultMessage: 'Transform description',
             })}
-            helpText={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformDescriptionHelpText',
-              {
-                defaultMessage: 'Optional descriptive text.',
-              }
-            )}
           >
             <EuiFieldText
-              placeholder="transform description"
+              placeholder={i18n.translate(
+                'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
+                { defaultMessage: 'Description (optional)' }
+              )}
               value={transformDescription}
               onChange={e => setTransformDescription(e.target.value)}
               aria-label={i18n.translate(
@@ -302,7 +306,6 @@ export const StepDetailsForm: FC<Props> = React.memo(
             }
           >
             <EuiFieldText
-              placeholder="destination index"
               value={destinationIndex}
               onChange={e => setDestinationIndex(e.target.value)}
               aria-label={i18n.translate(

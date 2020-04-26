@@ -35,16 +35,16 @@ test('returns empty list if there are no embeddable factories', () => {
 
 test('returns existing embeddable factories', () => {
   const { setup, doStart } = testPlugin();
-  const start = doStart();
-  const { length } = [...start.getEmbeddableFactories()];
 
-  const factory1 = new FilterableContainerFactory(start.getEmbeddableFactory);
-  const factory2 = new ContactCardEmbeddableFactory({} as any, (() => null) as any, {} as any);
+  const factory1 = new FilterableContainerFactory(async () => await start.getEmbeddableFactory);
+  const factory2 = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
   setup.registerEmbeddableFactory(factory1.type, factory1);
   setup.registerEmbeddableFactory(factory2.type, factory2);
 
+  const start = doStart();
+
   const list = [...start.getEmbeddableFactories()];
-  expect(list.length - length).toBe(2);
+  expect(list.length).toBe(2);
   expect(!!list.find(({ type }) => factory1.type === type)).toBe(true);
   expect(!!list.find(({ type }) => factory2.type === type)).toBe(true);
 });

@@ -13,6 +13,7 @@
     "@types/cypress-cucumber-preprocessor": "^1.14.1",
     "@types/js-yaml": "^3.12.1",
     "@types/node": "^10.12.11",
+    "axios": "^0.19.2",
     "cypress": "^4.2.0",
     "cypress-cucumber-preprocessor": "^2.0.1",
     "js-yaml": "^3.13.1",
@@ -21,6 +22,7 @@
     "p-retry": "^4.2.0",
     "ts-loader": "^6.2.2",
     "typescript": "3.8.3",
+    "yargs": "^15.3.1",
     "wait-on": "^4.0.1",
     "webpack": "^4.42.1"
   }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
+exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiPopover
     anchorPosition="leftCenter"
@@ -12,6 +12,7 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
       >
         <Styled(EuiButtonIcon)
           aria-label="All actions"
+          data-test-subj="rules-details-popover-button-icon"
           iconType="boxesHorizontal"
           isDisabled={false}
           onClick={[Function]}
@@ -19,6 +20,7 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
       </EuiToolTip>
     }
     closePopover={[Function]}
+    data-test-subj="rules-details-popover"
     display="inlineBlock"
     hasArrow={true}
     id="ruleActionsOverflow"
@@ -27,24 +29,28 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
     panelPaddingSize="none"
   >
     <EuiContextMenuPanel
+      data-test-subj="rules-details-menu-panel"
       hasFocus={true}
       items={
         Array [
           <EuiContextMenuItem
+            data-test-subj="rules-details-duplicate-rule"
             disabled={false}
-            icon="exportAction"
+            icon="copy"
             onClick={[Function]}
           >
             Duplicate rule…
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            data-test-subj="rules-details-export-rule"
             disabled={false}
-            icon="indexEdit"
+            icon="exportAction"
             onClick={[Function]}
           >
             Export rule
           </EuiContextMenuItem>,
           <EuiContextMenuItem
+            data-test-subj="rules-details-delete-rule"
             disabled={false}
             icon="trash"
             onClick={[Function]}
@@ -56,6 +62,7 @@ exports[`RuleActionsOverflow renders correctly against snapshot 1`] = `
     />
   </EuiPopover>
   <GenericDownloader
+    data-test-subj="rules-details-generic-downloader"
     exportSelectedData={[Function]}
     filename="rules_export.ndjson"
     ids={Array []}

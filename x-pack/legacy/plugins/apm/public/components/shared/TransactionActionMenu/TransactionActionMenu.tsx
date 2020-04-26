@@ -85,7 +85,13 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     urlParams
   });
 
+  const closePopover = () => {
+    setIsActionPopoverOpen(false);
+    setIsCustomLinksPopoverOpen(false);
+  };
+
   const toggleCustomLinkFlyout = () => {
+    closePopover();
     setIsCustomLinkFlyoutOpen(isOpen => !isOpen);
   };
 
@@ -111,17 +117,14 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       )}
       <ActionMenu
         id="transactionActionMenu"
-        closePopover={() => {
-          setIsActionPopoverOpen(false);
-          setIsCustomLinksPopoverOpen(false);
-        }}
+        closePopover={closePopover}
         isOpen={isActionPopoverOpen}
         anchorPosition="downRight"
         button={
           <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
         }
       >
-        <div style={{ maxHeight: px(600) }}>
+        <div style={{ maxHeight: px(600), width: px(335) }}>
           {isCustomLinksPopoverOpen ? (
             <CustomLinkPopover
               customLinks={customLinks.slice(3, customLinks.length)}

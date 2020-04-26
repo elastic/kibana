@@ -21,7 +21,6 @@
 |  [RequestTimeoutError](./kibana-plugin-plugins-data-public.requesttimeouterror.md) | Class used to signify that a request timed out. Useful for applications to conditionally handle this type of error differently than other errors. |
 |  [SearchError](./kibana-plugin-plugins-data-public.searcherror.md) |  |
 |  [SearchInterceptor](./kibana-plugin-plugins-data-public.searchinterceptor.md) |  |
-|  [SearchSource](./kibana-plugin-plugins-data-public.searchsource.md) |  |
 |  [TimeHistory](./kibana-plugin-plugins-data-public.timehistory.md) |  |
 
 ## Enumerations
@@ -50,7 +49,6 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) |  |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) |  |
@@ -88,7 +86,6 @@
 |  [SavedQuery](./kibana-plugin-plugins-data-public.savedquery.md) |  |
 |  [SavedQueryService](./kibana-plugin-plugins-data-public.savedqueryservice.md) |  |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) |  |
-|  [SearchStrategyProvider](./kibana-plugin-plugins-data-public.searchstrategyprovider.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-public.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-public.tabbedtable.md) | \* |
 |  [TimeRange](./kibana-plugin-plugins-data-public.timerange.md) |  |
@@ -120,6 +117,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
@@ -140,7 +138,7 @@
 |  [IpRangeKey](./kibana-plugin-plugins-data-public.iprangekey.md) |  |
 |  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
-|  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) |  |
+|  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | \* |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-public.parsedinterval.md) |  |
 |  [PhraseFilter](./kibana-plugin-plugins-data-public.phrasefilter.md) |  |

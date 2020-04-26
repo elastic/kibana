@@ -77,7 +77,7 @@ export const getCasesColumns = (
               size="s"
             />
             <Spacer data-test-subj="case-table-column-createdBy">
-              {createdBy.fullName ?? createdBy.username ?? ''}
+              {createdBy.fullName ? createdBy.fullName : createdBy.username ?? ''}
             </Spacer>
           </>
         );
@@ -114,7 +114,9 @@ export const getCasesColumns = (
     name: i18n.COMMENTS,
     sortable: true,
     render: (totalComment: Case['totalComment']) =>
-      renderStringField(`${totalComment}`, `case-table-column-commentCount`),
+      totalComment != null
+        ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
+        : getEmptyTagValue(),
   },
   filterStatus === 'open'
     ? {
@@ -124,10 +126,9 @@ export const getCasesColumns = (
         render: (createdAt: Case['createdAt']) => {
           if (createdAt != null) {
             return (
-              <FormattedRelativePreferenceDate
-                value={createdAt}
-                data-test-subj={`case-table-column-createdAt`}
-              />
+              <span data-test-subj={`case-table-column-createdAt`}>
+                <FormattedRelativePreferenceDate value={createdAt} />
+              </span>
             );
           }
           return getEmptyTagValue();
@@ -140,17 +141,16 @@ export const getCasesColumns = (
         render: (closedAt: Case['closedAt']) => {
           if (closedAt != null) {
             return (
-              <FormattedRelativePreferenceDate
-                value={closedAt}
-                data-test-subj={`case-table-column-closedAt`}
-              />
+              <span data-test-subj={`case-table-column-closedAt`}>
+                <FormattedRelativePreferenceDate value={closedAt} />
+              </span>
             );
           }
           return getEmptyTagValue();
         },
       },
   {
-    name: 'ServiceNow Incident',
+    name: i18n.SERVICENOW_INCIDENT,
     render: (theCase: Case) => {
       if (theCase.id != null) {
         return <ServiceNowColumn theCase={theCase} />;
@@ -159,7 +159,7 @@ export const getCasesColumns = (
     },
   },
   {
-    name: 'Actions',
+    name: i18n.ACTIONS,
     actions,
   },
 ];
@@ -168,7 +168,7 @@ interface Props {
   theCase: Case;
 }
 
-const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
+export const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
   const handleRenderDataToPush = useCallback(() => {
     const lastCaseUpdate = theCase.updatedAt != null ? new Date(theCase.updatedAt) : null;
     const lastCasePush =
@@ -190,7 +190,9 @@ const ServiceNowColumn: React.FC<Props> = ({ theCase }) => {
         >
           {theCase.externalService?.externalTitle}
         </EuiLink>
-        {hasDataToPush ? i18n.REQUIRES_UPDATE : i18n.UP_TO_DATE}
+        {hasDataToPush
+          ? renderStringField(i18n.REQUIRES_UPDATE, `case-table-column-external-requiresUpdate`)
+          : renderStringField(i18n.UP_TO_DATE, `case-table-column-external-upToDate`)}
       </p>
     );
   }, [theCase]);

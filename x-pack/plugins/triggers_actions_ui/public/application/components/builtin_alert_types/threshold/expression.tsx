@@ -145,6 +145,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     }
   };
 
+  const closeIndexPopover = () => {
+    setIndexPopoverOpen(false);
+    if (timeField === undefined) {
+      setAlertParams('timeField', '');
+    }
+  };
+
   useEffect(() => {
     const indexPatternsFunction = async () => {
       setIndexPatterns(await getIndexPatterns());
@@ -276,7 +283,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const firstSetOfSteps = [
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.selectIndex', {
-        defaultMessage: 'Select an index.',
+        defaultMessage: 'Select an index',
       }),
       children: (
         <>
@@ -293,18 +300,16 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                         defaultMessage: 'index',
                       }
                     )}
-                    value={index ? index.join(' ') : firstFieldOption.text}
+                    value={index && index.length > 0 ? index.join(' ') : firstFieldOption.text}
                     isActive={indexPopoverOpen}
                     onClick={() => {
                       setIndexPopoverOpen(true);
                     }}
-                    color={index ? 'secondary' : 'danger'}
+                    color={index && index.length > 0 && timeField !== '' ? 'secondary' : 'danger'}
                   />
                 }
                 isOpen={indexPopoverOpen}
-                closePopover={() => {
-                  setIndexPopoverOpen(false);
-                }}
+                closePopover={closeIndexPopover}
                 ownFocus
                 withTitle
                 anchorPosition="downLeft"
@@ -323,6 +328,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
+                          data-test-subj="closePopover"
                           iconType="cross"
                           color="danger"
                           aria-label={i18n.translate(
@@ -331,9 +337,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
                               defaultMessage: 'Close',
                             }
                           )}
-                          onClick={() => {
-                            setIndexPopoverOpen(false);
-                          }}
+                          onClick={closeIndexPopover}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -392,7 +396,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     },
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.conditionPrompt', {
-        defaultMessage: 'Define the condition.',
+        defaultMessage: 'Define the condition',
       }),
       children: (
         <>
@@ -441,12 +445,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiSteps steps={firstSetOfSteps} />
-      <EuiSpacer size="l" />
+      <EuiSteps className="actAddAlertSteps" steps={firstSetOfSteps} />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>
-            <EuiSpacer size="xl" />
             <EuiEmptyPrompt
               iconType="visBarVertical"
               body={

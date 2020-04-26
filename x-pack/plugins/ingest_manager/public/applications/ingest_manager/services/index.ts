@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { getFlattenedObject } from '../../../../../../../src/core/utils';
+
 export {
   agentConfigRouteService,
   datasourceRouteService,
+  dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
   enrollmentAPIKeyRouteService,

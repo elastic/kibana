@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from '../../../core/public';
+import { Query, Filter } from 'src/plugins/data/public';
+import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
+import { SavedDashboardPanel730ToLatest } from '../common';
+import { ViewMode } from './embeddable_plugin';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
@@ -64,4 +67,65 @@ export interface Field {
   filterable: boolean;
   searchable: boolean;
   subType?: FieldSubType;
+}
+
+export type NavAction = (anchorElement?: any) => void;
+
+/**
+ * This should always represent the latest dashboard panel shape, after all possible migrations.
+ */
+export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
+
+export interface DashboardAppState {
+  panels: SavedDashboardPanel[];
+  fullScreenMode: boolean;
+  title: string;
+  description: string;
+  timeRestore: boolean;
+  options: {
+    hidePanelTitles: boolean;
+    useMargins: boolean;
+  };
+  query: Query | string;
+  filters: Filter[];
+  viewMode: ViewMode;
+  savedQuery?: string;
+}
+
+export type DashboardAppStateDefaults = DashboardAppState & {
+  description?: string;
+};
+
+/**
+ * In URL panels are optional,
+ * Panels are not added to the URL when in "view" mode
+ */
+export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
+  panels?: SavedDashboardPanel[];
+};
+
+export interface DashboardAppStateTransitions {
+  set: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState>(
+    prop: T,
+    value: DashboardAppState[T]
+  ) => DashboardAppState;
+  setOption: (
+    state: DashboardAppState
+  ) => <T extends keyof DashboardAppState['options']>(
+    prop: T,
+    value: DashboardAppState['options'][T]
+  ) => DashboardAppState;
+}
+
+export interface SavedDashboardPanelMap {
+  [key: string]: SavedDashboardPanel;
+}
+
+export interface StagedFilter {
+  field: string;
+  value: string;
+  operator: string;
+  index: string;
 }

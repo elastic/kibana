@@ -9,7 +9,7 @@ import { AlertEvent, EndpointAppConstants } from '../../../../common/types';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
-import { getHostData } from '../../../routes/metadata';
+import { getHostData } from '../../metadata';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -26,22 +26,33 @@ export const alertDetailsHandlerWrapper = function(
         id: alertId,
       })) as GetResponse<AlertEvent>;
 
+      const indexPattern = await endpointAppContext.service
+        .getIndexPatternRetriever()
+        .getEventIndexPattern(ctx);
+
       const config = await endpointAppContext.config();
       const pagination: AlertDetailsPagination = new AlertDetailsPagination(
         config,
         ctx,
         req.params,
-        response
+        response,
+        indexPattern
       );
 
-      const currentHostInfo = await getHostData(ctx, response._source.host.id);
+      const currentHostInfo = await getHostData(
+        {
+          endpointAppContext,
+          requestHandlerContext: ctx,
+        },
+        response._source.host.id
+      );
 
       return res.ok({
         body: {
           id: response._id,
           ...response._source,
           state: {
-            host_metadata: currentHostInfo,
+            host_metadata: currentHostInfo?.metadata,
           },
           next: await pagination.getNextUrl(),
           prev: await pagination.getPrevUrl(),

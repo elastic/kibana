@@ -6,6 +6,7 @@
 
 import { getBasePath, isIntegrationsPopupOpen } from '../index';
 import { AppState } from '../../../state';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('state selectors', () => {
   const state: AppState = {
@@ -20,6 +21,7 @@ describe('state selectors', () => {
       loading: false,
     },
     dynamicSettings: {
+      settings: DYNAMIC_SETTINGS_DEFAULTS,
       loading: false,
     },
     monitor: {
@@ -46,7 +48,6 @@ describe('state selectors', () => {
     },
     monitorStatus: {
       status: null,
-      monitor: null,
       loading: false,
     },
     indexPattern: {
@@ -59,10 +60,27 @@ describe('state selectors', () => {
       loading: false,
       errors: [],
     },
+    pingList: {
+      loading: false,
+      pingList: {
+        total: 0,
+        locations: [],
+        pings: [],
+      },
+    },
     monitorDuration: {
       durationLines: null,
       loading: false,
       errors: [],
+    },
+    monitorList: {
+      list: {
+        prevPagePagination: null,
+        nextPagePagination: null,
+        summaries: [],
+        totalSummaryCount: 0,
+      },
+      loading: false,
     },
     ml: {
       mlJob: {

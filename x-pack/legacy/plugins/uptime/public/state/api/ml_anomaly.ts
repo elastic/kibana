@@ -7,15 +7,20 @@
 import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
-import { API_URLS, INDEX_NAMES, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
-import { CreateMLJobSuccess, DeleteJobResults, MonitorIdParam } from '../actions/types';
+import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
+import {
+  CreateMLJobSuccess,
+  DeleteJobResults,
+  MonitorIdParam,
+  HeartbeatIndicesParam,
+} from '../actions/types';
 import { DataRecognizerConfigResponse } from '../../../../../../plugins/ml/common/types/modules';
 import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_recognizer';
 
-export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`;
+export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`.toLowerCase();
 
-export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
+export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
 };
 
@@ -25,36 +30,43 @@ export const getExistingJobs = async (): Promise<JobExistResult> => {
 
 export const createMLJob = async ({
   monitorId,
-}: MonitorIdParam): Promise<CreateMLJobSuccess | null> => {
+  heartbeatIndices,
+}: MonitorIdParam & HeartbeatIndicesParam): Promise<CreateMLJobSuccess | null> => {
   const url = API_URLS.ML_SETUP_MODULE + ML_MODULE_ID;
 
+  // ML App doesn't support upper case characters in job name
+  const lowerCaseMonitorId = monitorId.toLowerCase();
+
   const data = {
-    prefix: `${monitorId}_`,
+    prefix: `${lowerCaseMonitorId}_`,
     useDedicatedIndex: false,
     startDatafeed: true,
     start: moment()
       .subtract(24, 'h')
       .valueOf(),
-    indexPatternName: INDEX_NAMES.HEARTBEAT,
+    indexPatternName: heartbeatIndices,
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              'monitor.id': monitorId,
-            },
-          },
+          { term: { 'monitor.id': lowerCaseMonitorId } },
+          { range: { 'monitor.duration.us': { gt: 0 } } },
         ],
       },
     },
   };
 
   const response: DataRecognizerConfigResponse = await apiService.post(url, data);
-  if (response?.jobs?.[0]?.id === getMLJobId(monitorId) && response?.jobs?.[0]?.success) {
-    return {
-      count: 1,
-      jobId: response?.jobs?.[0]?.id,
-    };
+  if (response?.jobs?.[0]?.id === getMLJobId(monitorId)) {
+    const jobResponse = response.jobs[0];
+    if (jobResponse.success) {
+      return {
+        count: 1,
+        jobId: jobResponse.id,
+      };
+    } else {
+      const { error } = jobResponse;
+      throw new Error(error?.msg);
+    }
   } else {
     return null;
   }

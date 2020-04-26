@@ -16,6 +16,8 @@ export {
   NewDatasource,
   DatasourceInput,
   DatasourceInputStream,
+  DatasourceConfigRecordEntry,
+  DataStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
@@ -29,6 +31,8 @@ export {
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  // API schemas - Data Streams
+  GetDataStreamsResponse,
   // API schemas - Agents
   GetAgentsResponse,
   GetAgentsRequest,
@@ -38,8 +42,11 @@ export {
   GetOneAgentEventsResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  PutAgentReassignRequest,
+  PutAgentReassignResponse,
   // API schemas - Enrollment API Keys
   GetEnrollmentAPIKeysResponse,
+  GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
   // EPM types
   AssetReference,
@@ -55,6 +62,7 @@ export {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryDatasource,
   PackageList,
   PackageListItem,
   PackagesGroupedByStatus,
@@ -69,4 +77,5 @@ export {
   DeletePackageResponse,
   DetailViewPanelName,
   InstallStatus,
+  InstallationStatus,
 } from '../../../../common';

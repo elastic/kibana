@@ -45,10 +45,7 @@ export interface ServiceNodeMetrics {
 }
 
 export function isValidPlatinumLicense(license: ILicense) {
-  return (
-    license.isActive &&
-    (license.type === 'platinum' || license.type === 'trial')
-  );
+  return license.isActive && license.hasAtLeast('platinum');
 }
 
 export const invalidLicenseMessage = i18n.translate(

@@ -10,9 +10,12 @@ import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
-import { RuleAlertAction, RuleType } from '../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import {
+  RuleAlertAction,
+  RuleType,
+} from '../../../../../../../plugins/siem/common/detection_engine/types';
+import { isMlRule } from '../../../../../../../plugins/siem/common/detection_engine/ml_helpers';
+import { transformRuleToAlertAction } from '../../../../../../../plugins/siem/common/detection_engine/transform_actions';
 import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import { FormData, FormHook, FormSchema } from '../../../shared_imports';
@@ -64,7 +67,7 @@ export const getActionsStepsData = (
     actions: actions?.map(transformRuleToAlertAction),
     isNew: false,
     throttle,
-    kibanaSiemAppUrl: meta?.kibanaSiemAppUrl,
+    kibanaSiemAppUrl: meta?.kibana_siem_app_url,
     enabled,
   };
 };
@@ -267,3 +270,7 @@ export const getActionMessageParams = memoizeOne((ruleType: RuleType | undefined
     ...actionMessageRuleParams.map(param => `context.rule.${param}`),
   ];
 });
+
+// typed as null not undefined as the initial state for this value is null.
+export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? !canUserCRUD : false;

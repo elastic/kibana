@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources';
+export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -28,6 +28,7 @@ export enum KibanaAssetType {
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
+  map = 'map',
 }
 
 export enum ElasticsearchAssetType {
@@ -56,6 +57,7 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
+  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
   datasources?: RegistryDatasource[];
@@ -217,6 +219,7 @@ export type PackageInfo = Installable<
 
 export interface Installation extends SavedObjectAttributes {
   installed: AssetReference[];
+  es_index_patterns: Record<string, string>;
   name: string;
   version: string;
 }
@@ -251,6 +254,11 @@ export enum IngestAssetType {
 export enum DefaultPackages {
   base = 'base',
   system = 'system',
+  endpoint = 'endpoint',
+}
+
+export interface IndexTemplateMappings {
+  properties: any;
 }
 
 export interface IndexTemplate {
@@ -259,4 +267,9 @@ export interface IndexTemplate {
   settings: any;
   mappings: object;
   aliases: object;
+}
+
+export interface TemplateRef {
+  templateName: string;
+  indexTemplate: IndexTemplate;
 }

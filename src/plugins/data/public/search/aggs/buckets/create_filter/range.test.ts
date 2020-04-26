@@ -17,21 +17,32 @@
  * under the License.
  */
 
-import { rangeBucketAgg } from '../range';
+import { getRangeBucketAgg, RangeBucketAggDependencies } from '../range';
 import { createFilterRange } from './range';
 import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common';
 import { AggConfigs } from '../../agg_configs';
 import { mockDataServices, mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('range', () => {
+    let aggTypesDependencies: RangeBucketAggDependencies;
+
     beforeEach(() => {
+      aggTypesDependencies = {
+        getInternalStartServices: () =>
+          (({
+            fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
+          } as unknown) as InternalStartServices),
+      };
+
       mockDataServices();
     });
-
-    const typesRegistry = mockAggTypesRegistry([rangeBucketAgg]);
 
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
@@ -62,11 +73,14 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry }
+        {
+          typesRegistry: mockAggTypesRegistry([getRangeBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
     };
 
-    it('should return a range filter for range agg', () => {
+    test('should return a range filter for range agg', () => {
       const aggConfigs = getAggConfigs();
       const filter = createFilterRange(aggConfigs.aggs[0] as IBucketAggConfig, {
         gte: 1024,

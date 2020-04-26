@@ -35,6 +35,7 @@ export default function({ getService, getPageObjects }) {
 
     afterEach(async function() {
       await esArchiver.unload('discover');
+      await esArchiver.load('empty_kibana');
     });
 
     it('should import saved objects mgmt', async function() {

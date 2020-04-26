@@ -12,6 +12,12 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         "width": "96px",
       },
       Object {
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": false,
+      },
+      Object {
         "field": "message",
         "name": "Error message and culprit",
         "render": [Function],
@@ -135,6 +141,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Group ID"
                 >
                   Group ID
                 </span>
@@ -142,7 +149,29 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             </th>
             <th
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_message_1"
+              data-test-subj="tableHeaderCell_type_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                  title="Type"
+                >
+                  Type
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_message_2"
               role="columnheader"
               scope="col"
               style={
@@ -156,6 +185,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Error message and culprit"
                 >
                   Error message and culprit
                 </span>
@@ -163,7 +193,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
             </th>
             <td
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_handled_2"
+              data-test-subj="tableHeaderCell_handled_3"
               role="columnheader"
               scope="col"
               style={
@@ -184,7 +214,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               aria-live="polite"
               aria-sort="descending"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_occurrenceCount_3"
+              data-test-subj="tableHeaderCell_occurrenceCount_4"
               role="columnheader"
               scope="col"
               style={
@@ -204,6 +234,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Occurrences; Sorted in descending order"
                   >
                     Occurrences
                   </span>
@@ -225,7 +256,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
               aria-live="polite"
               aria-sort="none"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_5"
               role="columnheader"
               scope="col"
               style={
@@ -245,6 +276,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Latest occurrence"
                   >
                     Latest occurrence
                   </span>
@@ -264,7 +296,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
           >
             <td
               className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-              colSpan={5}
+              colSpan={6}
               style={
                 Object {
                   "width": undefined,
@@ -294,6 +326,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
   font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
+.c2 {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .c1 {
   max-width: 100%;
   white-space: nowrap;
@@ -301,7 +340,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
   text-overflow: ellipsis;
 }
 
-.c2 {
+.c3 {
   font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
   font-size: 16px;
   max-width: 100%;
@@ -310,7 +349,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
   text-overflow: ellipsis;
 }
 
-.c3 {
+.c4 {
   font-family: "Roboto Mono",Consolas,Menlo,Courier,monospace;
 }
 
@@ -323,6 +362,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         "render": [Function],
         "sortable": false,
         "width": "96px",
+      },
+      Object {
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": false,
       },
       Object {
         "field": "message",
@@ -479,6 +524,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Group ID"
                 >
                   Group ID
                 </span>
@@ -486,7 +532,29 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </th>
             <th
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_message_1"
+              data-test-subj="tableHeaderCell_type_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                  title="Type"
+                >
+                  Type
+                </span>
+              </div>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_message_2"
               role="columnheader"
               scope="col"
               style={
@@ -500,6 +568,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               >
                 <span
                   className="euiTableCellContent__text"
+                  title="Error message and culprit"
                 >
                   Error message and culprit
                 </span>
@@ -507,7 +576,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             </th>
             <td
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_handled_2"
+              data-test-subj="tableHeaderCell_handled_3"
               role="columnheader"
               scope="col"
               style={
@@ -528,7 +597,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               aria-live="polite"
               aria-sort="descending"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_occurrenceCount_3"
+              data-test-subj="tableHeaderCell_occurrenceCount_4"
               role="columnheader"
               scope="col"
               style={
@@ -548,6 +617,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Occurrences; Sorted in descending order"
                   >
                     Occurrences
                   </span>
@@ -569,7 +639,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               aria-live="polite"
               aria-sort="none"
               className="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_latestOccurrenceAt_4"
+              data-test-subj="tableHeaderCell_latestOccurrenceAt_5"
               role="columnheader"
               scope="col"
               style={
@@ -589,6 +659,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
+                    title="Latest occurrence"
                   >
                     Latest occurrence
                   </span>
@@ -646,6 +717,49 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               className="euiTableRowCell"
               style={
                 Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Type
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorOverviewLink)
+                  className=""
+                  query={
+                    Object {
+                      "end": "2018-01-10T10:06:41.050Z",
+                      "kuery": "error.exception.type:undefined",
+                      "page": 0,
+                      "serviceName": "opbeans-python",
+                      "start": "2018-01-10T09:51:41.050Z",
+                      "transactionType": "request",
+                    }
+                  }
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c1"
+                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c1"
+                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      rel="noreferrer"
+                    />
+                  </EuiLink>
+                </Styled(ErrorOverviewLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
                   "width": "50%",
                 }
               }
@@ -662,7 +776,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className=""
                 >
                   <div
-                    className="c1"
+                    className="c2"
                   >
                     <span
                       className="euiToolTipAnchor"
@@ -676,13 +790,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         serviceName="opbeans-python"
                       >
                         <EuiLink
-                          className="c2"
+                          className="c3"
                           href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
-                            className="euiLink euiLink--primary c2"
+                            className="euiLink euiLink--primary c3"
                             href="#/services/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                             onBlur={[Function]}
                             onFocus={[Function]}
@@ -704,7 +818,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         onFocus={[Function]}
                       >
                         <div
-                          className="c3"
+                          className="c4"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
@@ -816,6 +930,49 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               className="euiTableRowCell"
               style={
                 Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Type
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorOverviewLink)
+                  className=""
+                  query={
+                    Object {
+                      "end": "2018-01-10T10:06:41.050Z",
+                      "kuery": "error.exception.type:undefined",
+                      "page": 0,
+                      "serviceName": "opbeans-python",
+                      "start": "2018-01-10T09:51:41.050Z",
+                      "transactionType": "request",
+                    }
+                  }
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c1"
+                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c1"
+                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      rel="noreferrer"
+                    />
+                  </EuiLink>
+                </Styled(ErrorOverviewLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
                   "width": "50%",
                 }
               }
@@ -832,7 +989,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className=""
                 >
                   <div
-                    className="c1"
+                    className="c2"
                   >
                     <span
                       className="euiToolTipAnchor"
@@ -846,13 +1003,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         serviceName="opbeans-python"
                       >
                         <EuiLink
-                          className="c2"
+                          className="c3"
                           href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
-                            className="euiLink euiLink--primary c2"
+                            className="euiLink euiLink--primary c3"
                             href="#/services/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                             onBlur={[Function]}
                             onFocus={[Function]}
@@ -874,7 +1031,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         onFocus={[Function]}
                       >
                         <div
-                          className="c3"
+                          className="c4"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
@@ -986,6 +1143,49 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               className="euiTableRowCell"
               style={
                 Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Type
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorOverviewLink)
+                  className=""
+                  query={
+                    Object {
+                      "end": "2018-01-10T10:06:41.050Z",
+                      "kuery": "error.exception.type:undefined",
+                      "page": 0,
+                      "serviceName": "opbeans-python",
+                      "start": "2018-01-10T09:51:41.050Z",
+                      "transactionType": "request",
+                    }
+                  }
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c1"
+                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c1"
+                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      rel="noreferrer"
+                    />
+                  </EuiLink>
+                </Styled(ErrorOverviewLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
                   "width": "50%",
                 }
               }
@@ -1002,7 +1202,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className=""
                 >
                   <div
-                    className="c1"
+                    className="c2"
                   >
                     <span
                       className="euiToolTipAnchor"
@@ -1016,13 +1216,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         serviceName="opbeans-python"
                       >
                         <EuiLink
-                          className="c2"
+                          className="c3"
                           href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
-                            className="euiLink euiLink--primary c2"
+                            className="euiLink euiLink--primary c3"
                             href="#/services/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                             onBlur={[Function]}
                             onFocus={[Function]}
@@ -1044,7 +1244,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         onFocus={[Function]}
                       >
                         <div
-                          className="c3"
+                          className="c4"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
@@ -1156,6 +1356,49 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
               className="euiTableRowCell"
               style={
                 Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                Type
+              </div>
+              <div
+                className="euiTableCellContent euiTableCellContent--overflowingContent"
+              >
+                <Styled(ErrorOverviewLink)
+                  className=""
+                  query={
+                    Object {
+                      "end": "2018-01-10T10:06:41.050Z",
+                      "kuery": "error.exception.type:undefined",
+                      "page": 0,
+                      "serviceName": "opbeans-python",
+                      "start": "2018-01-10T09:51:41.050Z",
+                      "transactionType": "request",
+                    }
+                  }
+                  serviceName="opbeans-python"
+                >
+                  <EuiLink
+                    className="c1"
+                    href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                  >
+                    <a
+                      className="euiLink euiLink--primary c1"
+                      href="#/services/opbeans-python/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&page=0&serviceName=opbeans-python&transactionType=request&start=2018-01-10T09:51:41.050Z&end=2018-01-10T10:06:41.050Z&kuery=error.exception.type:undefined"
+                      rel="noreferrer"
+                    />
+                  </EuiLink>
+                </Styled(ErrorOverviewLink)>
+              </div>
+            </td>
+            <td
+              className="euiTableRowCell"
+              style={
+                Object {
                   "width": "50%",
                 }
               }
@@ -1172,7 +1415,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   className=""
                 >
                   <div
-                    className="c1"
+                    className="c2"
                   >
                     <span
                       className="euiToolTipAnchor"
@@ -1186,13 +1429,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         serviceName="opbeans-python"
                       >
                         <EuiLink
-                          className="c2"
+                          className="c3"
                           href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >
                           <a
-                            className="euiLink euiLink--primary c2"
+                            className="euiLink euiLink--primary c3"
                             href="#/services/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                             onBlur={[Function]}
                             onFocus={[Function]}
@@ -1214,7 +1457,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                         onFocus={[Function]}
                       >
                         <div
-                          className="c3"
+                          className="c4"
                           onBlur={[Function]}
                           onFocus={[Function]}
                         >

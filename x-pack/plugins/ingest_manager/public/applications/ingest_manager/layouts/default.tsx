@@ -8,8 +8,9 @@ import styled from 'styled-components';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
+import { AlphaMessaging } from '../components';
 import { useLink, useConfig } from '../hooks';
-import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from '../constants';
 
 interface Props {
   section?: Section;
@@ -55,8 +56,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                 disabled={!epm?.enabled}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.appNavigation.packagesLinkText"
-                  defaultMessage="Packages"
+                  id="xpack.ingestManager.appNavigation.epmLinkText"
+                  defaultMessage="Integrations"
                 />
               </EuiTab>
               <EuiTab isSelected={section === 'agent_config'} href={useLink(AGENT_CONFIG_PATH)}>
@@ -75,11 +76,18 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                   defaultMessage="Fleet"
                 />
               </EuiTab>
+              <EuiTab isSelected={section === 'data_stream'} href={useLink(DATA_STREAM_PATH)}>
+                <FormattedMessage
+                  id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
+                  defaultMessage="Data streams"
+                />
+              </EuiTab>
             </EuiTabs>
           </EuiFlexItem>
         </EuiFlexGroup>
       </Nav>
       {children}
+      <AlphaMessaging />
     </Container>
   );
 };

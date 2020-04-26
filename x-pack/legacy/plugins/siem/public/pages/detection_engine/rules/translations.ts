@@ -406,7 +406,7 @@ export const RELOAD_MISSING_PREPACKAGED_RULES = (missingRules: number) =>
   i18n.translate('xpack.siem.detectionEngine.rules.reloadMissingPrePackagedRulesButton', {
     values: { missingRules },
     defaultMessage:
-      'Reload {missingRules} deleted Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
+      'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} ',
   });
 
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
