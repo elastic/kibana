@@ -60,6 +60,10 @@ export class TopTermPercentageField implements IESAggField {
     return 0;
   }
 
+  supportsAutoDomain(): boolean {
+    return true;
+  }
+
   supportsFieldMeta(): boolean {
     return false;
   }

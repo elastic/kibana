@@ -50,7 +50,7 @@ interface State {}
 export class MVTFieldConfigEditor extends Component<Props, State> {
   state = {};
 
-  _removeField(index) {
+  _removeField(index: number) {
     const newFields = this.props.fields.slice();
     newFields.splice(index, 1);
 

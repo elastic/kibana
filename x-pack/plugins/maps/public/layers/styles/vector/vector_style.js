@@ -146,7 +146,6 @@ export class VectorStyle extends AbstractStyle {
   renderEditor({ layer, onStyleDescriptorChange }) {
     const rawProperties = this.getRawProperties();
     const handlePropertyChange = (propertyName, settings) => {
-      console.log('handle property change', propertyName, settings);
       rawProperties[propertyName] = settings; //override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(rawProperties, this.isTimeAware());
       onStyleDescriptorChange(vectorStyleDescriptor);
@@ -580,7 +579,6 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _makeField(fieldDescriptor) {
-    console.log('mkaefield', fieldDescriptor);
     if (!fieldDescriptor || !fieldDescriptor.name) {
       return null;
     }
@@ -626,7 +624,6 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      console.log('mnae tcolor po', field);
       return new DynamicColorProperty(
         descriptor.options,
         styleName,

@@ -89,7 +89,6 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    console.log('render color stops inpiut')
     if (this.props.supportsAutoDomain) {
       return null;
     }
@@ -104,7 +103,6 @@ export class ColorMapSelect extends Component {
         />
       );
     } else {
-      console.log('render colors', this.state.customColorMap);
       colorStopEditor = (
         <ColorStopsCategorical
           colorStops={this.state.customColorMap}

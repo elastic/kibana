@@ -67,7 +67,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getFieldNames(): string[] {
-    console.log('getfn');
     return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
       return field.name;
     });
@@ -81,6 +80,9 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     const field = this._descriptor.fields.find((f: MVTFieldDescriptor) => {
       return f.name === fieldName;
     });
+    if (!field) {
+      throw new Error(`Cannot create field for fieldName ${fieldName}`);
+    }
     return new MVTField({
       fieldName: field.name,
       type: field.type,
@@ -200,6 +202,10 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   getApplyGlobalQuery(): boolean {
+    return false;
+  }
+
+  supportsFieldMeta(): boolean {
     return false;
   }
 }

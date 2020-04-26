@@ -85,8 +85,6 @@ export function DynamicColorForm({
       return null;
     }
 
-    console.log('f', field, fields);
-
     const showColorMapTypeToggle = !CATEGORICAL_DATA_TYPES.includes(field.type);
 
     if (styleProperty.isOrdinal()) {
@@ -102,7 +100,9 @@ export function DynamicColorForm({
           colorMapType={COLOR_MAP_TYPE.ORDINAL}
           color={styleOptions.color}
           customColorMap={styleOptions.customColorRamp}
-          useCustomColorMap={!field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorRamp', false)}
+          useCustomColorMap={
+            !field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorRamp', false)
+          }
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
@@ -121,7 +121,9 @@ export function DynamicColorForm({
           colorMapType={COLOR_MAP_TYPE.CATEGORICAL}
           color={styleOptions.colorCategory}
           customColorMap={styleOptions.customColorPalette}
-          useCustomColorMap={!field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorPalette', false)}
+          useCustomColorMap={
+            !field.supportsAutoDomain || _.get(styleOptions, 'useCustomColorPalette', false)
+          }
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
           swatches={swatches}
@@ -130,7 +132,6 @@ export function DynamicColorForm({
     }
   };
 
-  console.log('render color select');
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">

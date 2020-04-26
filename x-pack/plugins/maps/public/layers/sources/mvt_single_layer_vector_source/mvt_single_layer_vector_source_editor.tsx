@@ -43,7 +43,6 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
       this.state.urlTemplate.indexOf('{z}') >= 0;
 
     if (canPreview && this.state.layerName) {
-      console.log('nf', this.state.fields);
       this.props.onSourceConfigChange({
         urlTemplate: this.state.urlTemplate,
         layerName: this.state.layerName,
@@ -141,7 +140,6 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
             }
           )}
         />
-
       </Fragment>
     );
   }

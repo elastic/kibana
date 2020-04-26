@@ -31,7 +31,7 @@ export const mvtVectorSourceWizardConfig: LayerWizard = {
         minSourceZoom,
         maxSourceZoom,
         type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-        fields,
+        fields: fields ? fields : [],
       });
       const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
