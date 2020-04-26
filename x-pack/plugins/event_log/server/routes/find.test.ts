@@ -5,7 +5,7 @@
  */
 
 import { findRoute } from './find';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
 
@@ -17,7 +17,7 @@ beforeEach(() => {
 
 describe('find', () => {
   it('finds events with proper parameters', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     findRoute(router);
 
@@ -56,7 +56,7 @@ describe('find', () => {
   });
 
   it('supports optional pagination parameters', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     findRoute(router);
 
