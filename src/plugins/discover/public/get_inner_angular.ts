@@ -23,7 +23,7 @@
 import angular from 'angular';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import { CoreStart, LegacyCoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreStart, PluginInitializerContext } from 'kibana/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { Storage } from '../../kibana_utils/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
