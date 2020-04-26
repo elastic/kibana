@@ -16,12 +16,6 @@ const descriptor: XYZTMSSourceDescriptor = {
   id: 'foobar',
 };
 describe('xyz Tilemap Source', () => {
-  it('should create a tile-layer', () => {
-    const source = new XYZTMSSource(descriptor);
-    const layer: ILayer = source.createDefaultLayer();
-    expect(layer instanceof TileLayer).toEqual(true);
-  });
-
   it('should echo url template for url template', async () => {
     const source = new XYZTMSSource(descriptor);
     const template = await source.getUrlTemplate();
