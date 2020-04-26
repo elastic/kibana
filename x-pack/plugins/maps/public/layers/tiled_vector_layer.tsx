@@ -14,7 +14,7 @@ import { ITiledSingleLayerVectorSource } from './sources/vector_source';
 import { SyncContext } from '../actions/map_actions';
 import { ISource } from './sources/source';
 import { VectorLayerDescriptor, VectorSourceRequestMeta } from '../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from './sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';
+import { MVTSingleLayerVectorSourceConfig } from './sources/mvt_single_layer_vector_source/types';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
