@@ -67,7 +67,7 @@ export default function(providerContext: FtrProviderContext) {
           },
         })
         .expect(404);
-      expect(apiResponse.message).to.eql('Saved object [agents/agent100] not found');
+      expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
     });
   });
 }

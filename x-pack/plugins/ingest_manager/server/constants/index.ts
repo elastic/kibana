@@ -12,6 +12,7 @@ export {
   // Routes
   PLUGIN_ID,
   EPM_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
   DATASOURCE_API_ROUTES,
   AGENT_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
@@ -32,4 +33,5 @@ export {
   // Defaults
   DEFAULT_AGENT_CONFIG,
   DEFAULT_OUTPUT,
+  DEFAULT_REGISTRY_URL,
 } from '../../common';
