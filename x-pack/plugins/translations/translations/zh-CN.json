@@ -15963,7 +15963,6 @@
     "xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription": "正在加载操作类型……",
     "xpack.triggersActionsUI.sections.alertForm.renotifyFieldLabel": "通知频率",
     "xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip": "定义告警处于活动状态时重复操作的频率。",
-    "xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeEditTitle": "{actionConnectorName}",
     "xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle": "操作：选择操作类型",
     "xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle": "选择触发器类型",
     "xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle": "{alertType}",
