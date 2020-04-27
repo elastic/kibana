@@ -10,6 +10,7 @@ import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import { useLocation, useHistory, useParams } from 'react-router-dom';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, AllTimelinesQuery } from '../../containers/timeline/all';
@@ -43,6 +44,8 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import * as i18n from './translations';
+import { SiemPageName } from '../../pages/home/types';
+import { useTimelineTabs } from './useTimelineTabs';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -70,19 +73,6 @@ export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): str
     []
   );
 
-const tabs: Array<{ id: 'default' | 'template'; name: string; disabled: boolean }> = [
-  {
-    id: 'default',
-    name: i18n.TAB_TIMELINES,
-    disabled: false,
-  },
-  {
-    id: 'template',
-    name: i18n.TAB_TEMPLATES,
-    disabled: false,
-  },
-];
-
 /** Manages the state (e.g table selection) of the (pure) `OpenTimeline` component */
 export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
   ({
@@ -106,8 +96,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     >({});
     /** Only query for favorite timelines when true */
     const [onlyFavorites, setOnlyFavorites] = useState(false);
-
-    const [timelineTypes, setTimelineTypes] = useState<'default' | 'template'>('default');
     /** The requested page of results */
     const [pageIndex, setPageIndex] = useState(0);
     /** The requested size of each page of search results */
@@ -121,27 +109,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const renderTabs = useCallback(() => {
-      return (
-        <>
-          <EuiTabs>
-            {tabs.map((tab, index) => (
-              <EuiTab
-                onClick={useCallback(() => {
-                  setTimelineTypes(tab.id);
-                }, [setTimelineTypes, tab])}
-                isSelected={tab.id === timelineTypes}
-                disabled={tab.disabled}
-                key={index}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-          <EuiSpacer size="m" />
-        </>
-      );
-    }, [tabs, timelineTypes]);
+    const { timelineTypes, renderTabs } = useTimelineTabs();
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -329,12 +297,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
                 pageSize={pageSize}
                 query={search}
                 refetch={refetch}
+                renderTabs={renderTabs}
                 searchResults={timelines}
                 setImportDataModalToggle={setImportDataModalToggle}
                 selectedItems={selectedItems}
                 sortDirection={sortDirection}
                 sortField={sortField}
-                tabs={renderTabs}
                 title={title}
                 totalSearchResultsCount={totalCount}
               />
@@ -361,7 +329,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
                 selectedItems={selectedItems}
                 sortDirection={sortDirection}
                 sortField={sortField}
-                tabs={renderTabs}
                 title={title}
                 totalSearchResultsCount={totalCount}
               />

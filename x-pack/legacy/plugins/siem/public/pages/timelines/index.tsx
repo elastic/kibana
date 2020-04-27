@@ -7,10 +7,24 @@
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 
+import { Router, Switch, Route, Redirect, useHistory } from 'react-router-dom';
 import { TimelinesPage } from './timelines_page';
+import { SiemPageName } from '../home/types';
 
-export const Timelines = React.memo(() => (
-  <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
-));
+const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(default|template)`;
+const timelinesDefaultPath = `/${SiemPageName.timelines}/default`;
+export const Timelines = React.memo(() => {
+  const history = useHistory();
+  return (
+    <Router history={history}>
+      <Switch>
+        <Route path={timelinesPagePath}>
+          <ApolloConsumer>{client => <TimelinesPage apolloClient={client} />}</ApolloConsumer>
+        </Route>
+        <Redirect to={timelinesDefaultPath} />
+      </Switch>
+    </Router>
+  );
+});
 
 Timelines.displayName = 'Timelines';

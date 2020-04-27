@@ -17,8 +17,8 @@ export type TimelineComponentProps = RouteComponentProps<{
 }>;
 
 export const RedirectToTimelinesPage = ({ location: { search } }: TimelineComponentProps) => (
-  <RedirectWrapper to={`/${SiemPageName.timelines}${search}`} />
+  <RedirectWrapper to={`/${SiemPageName.timelines}/default${search}`} />
 );
 
 export const getTimelinesUrl = (search?: string) =>
-  `#/link-to/${SiemPageName.timelines}${appendSearch(search)}`;
+  `#/link-to/${SiemPageName.timelines}/default${appendSearch(search)}`;
