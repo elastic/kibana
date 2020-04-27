@@ -130,12 +130,53 @@ export type CameraState = {
     }
 );
 
-export const waitingForRelatedEventData = Symbol('The app has requested related event data for this entity ID, but has not yet receieved it');
-export type RelatedEventDataEntry = object;
+/**
+ * This is the current list of known related event types. It has been transcribed from the 
+ * v0 Endgame app.
+ */
+export type RelatedEventType =
+  | "Network"
+  | "File"
+  | "DNS"
+  | "Registry"
+  | "Powershell"
+  | "WMI"
+  | "API"
+  | "CLR"
+  | "Image Load"
+  | "User"
+/**
+ * This symbol indicates that the app is waiting for related event data for the subject
+ * of any particular request.
+ */
+export const waitingForRelatedEventData = Symbol(
+  'The app has requested related event data for this entity ID, but has not yet receieved it'
+);
+/**
+ * This represents all the raw data (sans statistics, metadata, etc.) 
+ * about a particular subject's related events
+ */
+export type RelatedEventDataEntry = {
+  related_events: {
+    related_event_id: string,
+    related_event_type: RelatedEventType,
+  }[]
+};
+/**
+ * This represents the raw related events data enhanced with statistics
+ * (e.g. counts of items grouped by their related event types)
+ */
 export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
-  stats: object;
-}
-export type RelatedEventData = Record<string, RelatedEventDataEntryWithStats | typeof waitingForRelatedEventData>;
+  stats: Partial<Record<RelatedEventType, number>>
+};
+/**
+ * This represents a Record that will return either a `RelatedEventDataEntryWithStats`
+ * or a `waitingForRelatedEventData` symbol when called with a unique event id. 
+ */
+export type RelatedEventData = Record<
+  string,
+  RelatedEventDataEntryWithStats | typeof waitingForRelatedEventData
+>;
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.

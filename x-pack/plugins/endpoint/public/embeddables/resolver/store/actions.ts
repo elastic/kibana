@@ -7,6 +7,7 @@ import { CameraAction } from './camera';
 import { DataAction } from './data';
 import { ResolverEvent } from '../../../../common/types';
 
+
 /**
  * When the user wants to bring a process node front-and-center on the map.
  */
@@ -42,6 +43,16 @@ interface UserChangedSelectedEvent {
  */
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
+}
+
+
+/**
+ * The action dispatched when the app requests related event data for one or more
+ * subjects (whose ids should be included as an array @ `payload`)
+ */
+interface AppRequestedRelatedEventData {
+  readonly type: 'appRequestedRelatedEventData';
+  readonly payload: Array<string>;
 }
 
 /**
@@ -84,4 +95,5 @@ export type ResolverAction =
   | UserChangedSelectedEvent
   | AppRequestedResolverData
   | UserFocusedOnResolverNode
-  | UserSelectedResolverNode;
+  | UserSelectedResolverNode
+  | AppRequestedRelatedEventData;

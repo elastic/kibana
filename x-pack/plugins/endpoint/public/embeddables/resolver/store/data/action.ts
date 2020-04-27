@@ -17,4 +17,15 @@ interface ServerReturnedResolverData {
   };
 }
 
-export type DataAction = ServerReturnedResolverData;
+/**
+ * Will occur when a request for related event data is fulfilled.
+ */
+interface ServerReturnedRelatedEventData {
+  readonly type: 'serverReturnedRelatedEventData';
+  readonly payload: {
+    //TODO: add type information when /related API is finalized
+    readonly data: object
+  };
+}
+
+export type DataAction = ServerReturnedResolverData | ServerReturnedRelatedEventData;
