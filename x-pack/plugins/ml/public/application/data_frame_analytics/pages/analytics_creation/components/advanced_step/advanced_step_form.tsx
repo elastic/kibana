@@ -211,7 +211,6 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state 
             </h3>
           </EuiTitle>
         }
-        onToggle={() => alert('boo')}
         initialIsOpen={false}
         data-test-subj="mlAnalyticsCreateJobWizardHyperParametersSection"
       >
