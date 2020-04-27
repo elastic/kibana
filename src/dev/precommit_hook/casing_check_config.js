@@ -35,7 +35,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/apm/**/*',
   'x-pack/legacy/plugins/canvas/tasks/**/*',
   'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
   '**/.*',

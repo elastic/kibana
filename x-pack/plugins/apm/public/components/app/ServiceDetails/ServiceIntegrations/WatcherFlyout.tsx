@@ -36,6 +36,7 @@ import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 import { ApmPluginContext } from '../../../../context/ApmPluginContext';
+import { getApmIndexPatternTitle } from '../../../../services/rest/index_pattern';
 
 type ScheduleKey = keyof Schedule;
 
@@ -149,11 +150,7 @@ export class WatcherFlyout extends Component<
     this.setState({ slackUrl: event.target.value });
   };
 
-  public createWatch = ({
-    indexPatternTitle
-  }: {
-    indexPatternTitle: string;
-  }) => () => {
+  public createWatch = () => {
     const { serviceName } = this.props.urlParams;
     const { core } = this.context;
 
@@ -190,19 +187,21 @@ export class WatcherFlyout extends Component<
             unit: 'h'
           };
 
-    return createErrorGroupWatch({
-      http: core.http,
-      emails,
-      schedule,
-      serviceName,
-      slackUrl,
-      threshold: this.state.threshold,
-      timeRange,
-      apmIndexPatternTitle: indexPatternTitle
-    })
-      .then((id: string) => {
-        this.props.onClose();
-        this.addSuccessToast(id);
+    return getApmIndexPatternTitle()
+      .then(indexPatternTitle => {
+        return createErrorGroupWatch({
+          http: core.http,
+          emails,
+          schedule,
+          serviceName,
+          slackUrl,
+          threshold: this.state.threshold,
+          timeRange,
+          apmIndexPatternTitle: indexPatternTitle
+        }).then((id: string) => {
+          this.props.onClose();
+          this.addSuccessToast(id);
+        });
       })
       .catch(e => {
         // eslint-disable-next-line
@@ -613,26 +612,20 @@ export class WatcherFlyout extends Component<
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <ApmPluginContext.Consumer>
-                {({ config }) => {
-                  return (
-                    <EuiButton
-                      onClick={this.createWatch(config)}
-                      fill
-                      disabled={
-                        !this.state.actions.email && !this.state.actions.slack
-                      }
-                    >
-                      {i18n.translate(
-                        'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
-                        {
-                          defaultMessage: 'Create watch'
-                        }
-                      )}
-                    </EuiButton>
-                  );
-                }}
-              </ApmPluginContext.Consumer>
+              <EuiButton
+                onClick={() => this.createWatch()}
+                fill
+                disabled={
+                  !this.state.actions.email && !this.state.actions.slack
+                }
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceDetails.enableErrorReportsPanel.createWatchButtonLabel',
+                  {
+                    defaultMessage: 'Create watch'
+                  }
+                )}
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

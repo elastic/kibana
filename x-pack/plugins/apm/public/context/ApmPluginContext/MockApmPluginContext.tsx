@@ -6,7 +6,7 @@
 import React from 'react';
 import { ApmPluginContext, ApmPluginContextValue } from '.';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { ConfigSchema } from '../../plugin';
+import { ConfigSchema } from '../..';
 
 const mockCore = {
   chrome: {
@@ -30,7 +30,6 @@ const mockCore = {
 };
 
 const mockConfig: ConfigSchema = {
-  indexPatternTitle: 'apm-*',
   serviceMapEnabled: true,
   ui: {
     enabled: false

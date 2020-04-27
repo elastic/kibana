@@ -62,9 +62,6 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
-  __LEGACY: {
-    server: APMLegacyServer;
-  };
 };
 
 export type RouteFactoryFn<
@@ -108,7 +105,6 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
-      __LEGACY: { server: Server };
     }
   ) => void;
 }

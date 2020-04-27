@@ -8,9 +8,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
-import savedObjectMappings from './mappings.json';
-
-export { savedObjectMappings };
 
 export const config = {
   exposeToBrowser: {
@@ -76,4 +73,4 @@ export type APMConfig = ReturnType<typeof mergeConfigs>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APMPlugin, APMPluginContract } from './plugin';
+export { APMPlugin, APMPluginSetup } from './plugin';

@@ -10,7 +10,6 @@ import { reporting } from './legacy/plugins/reporting';
 import { security } from './legacy/plugins/security';
 import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
-import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
 import { indexManagement } from './legacy/plugins/index_management';
 import { spaces } from './legacy/plugins/spaces';
@@ -35,7 +34,6 @@ module.exports = function(kibana) {
     security(kibana),
     dashboardMode(kibana),
     beats(kibana),
-    apm(kibana),
     maps(kibana),
     canvas(kibana),
     indexManagement(kibana),

@@ -5,7 +5,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { ConfigSchema } from './plugin';
+import { ConfigSchema } from '.';
 
 export function toggleAppLinkInNav(core: CoreStart, { ui }: ConfigSchema) {
   if (ui.enabled === false) {

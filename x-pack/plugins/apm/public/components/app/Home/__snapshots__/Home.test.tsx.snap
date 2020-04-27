@@ -5,7 +5,6 @@ exports[`Home component should render services 1`] = `
   value={
     Object {
       "config": Object {
-        "indexPatternTitle": "apm-*",
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,
@@ -46,7 +45,6 @@ exports[`Home component should render traces 1`] = `
   value={
     Object {
       "config": Object {
-        "indexPatternTitle": "apm-*",
         "serviceMapEnabled": true,
         "ui": Object {
           "enabled": false,

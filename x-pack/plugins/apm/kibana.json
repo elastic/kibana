@@ -2,7 +2,14 @@
   "id": "apm",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["apm_oss", "data", "home", "licensing"],
+  "requiredPlugins": [
+    "features",
+    "apm_oss",
+    "data",
+    "home",
+    "licensing",
+    "triggers_actions_ui"
+  ],
   "optionalPlugins": [
     "cloud",
     "usageCollection",
@@ -11,6 +18,6 @@
     "alerting"
   ],
   "server": true,
-  "ui": false,
+  "ui": true,
   "configPath": ["xpack", "apm"]
 }

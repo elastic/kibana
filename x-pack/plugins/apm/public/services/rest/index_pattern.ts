@@ -12,3 +12,9 @@ export const createStaticIndexPattern = async () => {
     pathname: '/api/apm/index_pattern/static'
   });
 };
+
+export const getApmIndexPatternTitle = async () => {
+  return await callApmApi({
+    pathname: '/api/apm/index_pattern/title'
+  });
+};
