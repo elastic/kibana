@@ -8,7 +8,7 @@ import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
@@ -38,7 +38,7 @@ const getJobPrefix = (monitorId: string) => {
 
 export const getMLJobId = (monitorId: string) => `${getJobPrefix(monitorId)}${ML_JOB_ID}`;
 
-export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
+export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
 };
 
