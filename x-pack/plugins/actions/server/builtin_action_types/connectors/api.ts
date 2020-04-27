@@ -69,7 +69,7 @@ const pushToServiceHandler = async ({
     const commentsTransformed = transformComments(comments, ['informationAdded']);
 
     // Create comments sequentially.
-    const promises = comments.reduce(async (prevPromise, currentComment) => {
+    const promises = commentsTransformed.reduce(async (prevPromise, currentComment) => {
       const totalComments = await prevPromise;
       const comment = await externalService.createComment({
         incidentId: res.id,
