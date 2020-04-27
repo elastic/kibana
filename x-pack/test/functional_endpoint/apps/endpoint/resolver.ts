@@ -6,12 +6,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { EndpointDocGenerator, Event } from '../../../../../x-pack/plugins/endpoint/common/generate_data';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'endpointAlerts']);
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   describe('Endpoint Alert Resolver', function() {
     this.tags(['ciGroup7']);
@@ -42,33 +42,46 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('resolver Table and Node data same length', async () => {
+      let count = 1;
       const tableData = await pageObjects.endpointAlerts.getEndpointAlertResolverTableData(
         'resolverEmbeddable',
         'tr'
       );
-      // const Nodes = await testSubjects.findAll('nodeLabel');
-      const Nodes = await pageObjects.endpointAlerts.getEndpointAlertResolverNodeData(
-        'resolverNode',
-        'div'
-      );
-      // console.log(Nodes.length);
-      // console.log(tableData.length);
-      expect(tableData.length - 1).to.eql(Nodes.length);
+      await retry.try(async function() {
+        await (await testSubjects.find('zoom-out')).click();
+        const Nodes = await testSubjects.findAll('resolverNode');
+        expect(tableData.length - 1).to.eql(Nodes.length);
+        count++;
+      });
+
+      for (let i = 0; i < count; i++) {
+        await (await testSubjects.find('zoom-in')).click();
+      }
     });
 
     it('compare resolver Nodes and Table data', async () => {
-      const Nodes = await testSubjects.findAll('resolverNode');
-      const $ = [];
-
-      for (const value of Nodes) {
-        $.push(await value._webElement.getText());
-      }
+      const $: string[] = [];
+      let count = 1;
       const tableData = await pageObjects.endpointAlerts.getEndpointAlertResolverTableData(
         'resolverEmbeddable',
         'tr'
       );
+
+      await retry.try(async function() {
+        await (await testSubjects.find('zoom-out')).click();
+        const Nodes = await testSubjects.findAll('resolverNode');
+        expect(tableData.length - 1).to.eql(Nodes.length);
+        for (const value of Nodes) {
+          $.push(await value._webElement.getText());
+        }
+        count++;
+      });
+
       for (let i = 0; i < $.length; i++) {
-        expect(tableData[i + 1][0]).to.eql($[i].split(' ')[0].split('\n')[0]);
+        expect(tableData[i + 1][0]).to.eql($[i].split('\n')[1]);
+      }
+      for (let i = 0; i < count; i++) {
+        await (await testSubjects.find('zoom-in')).click();
       }
     });
 
@@ -185,13 +198,80 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       }
     });
 
+    // it('resolver Nodes navigation zoom in', async () => {
+    //   const OriginalNodeData = await pageObjects.endpointAlerts.getEndpointAlertResolverNodeData(
+    //     'resolverNode',
+    //     'style'
+    //   );
+    //   await (await testSubjects.find('zoom-in')).click();
+    //   await browser.setWindowSize(2400, 1800);
+    //   const NewNodeData = await pageObjects.endpointAlerts.getEndpointAlertResolverNodeData(
+    //     'resolverNode',
+    //     'style'
+    //   );
+    //
+    //   for (let i = 1; i < NewNodeData.length; i++) {
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[1])).to.lessThan(
+    //       parseFloat(NewNodeData[i].split(' ')[1])
+    //     );
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[3])).to.lessThan(
+    //       parseFloat(NewNodeData[i].split(' ')[3])
+    //     );
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[5])).to.lessThan(
+    //       parseFloat(NewNodeData[i].split(' ')[5])
+    //     );
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[7])).to.lessThan(
+    //       parseFloat(NewNodeData[i].split(' ')[7])
+    //     );
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[9].split('(')[1].split(')')[0].split('-')[1]))
+    //       .to.lessThan(
+    //           parseFloat(NewNodeData[i].split(' ')[9].split('(')[1].split(')')[0].split('-')[1])
+    //     );
+    //     expect(parseFloat(OriginalNodeData[i].split(' ')[10].split('(')[1].split(')')[0].split('-')[1]))
+    //       .to.lessThan(
+    //       parseFloat(NewNodeData[i].split(' ')[10].split('(')[1].split(')')[0].split('-')[1])
+    //     );
+    //   }
+    //   await (await testSubjects.find('zoom-out')).click();
+    // });
+    //
+    // it('resolver Nodes navigation zoom out', async () => {
+    //   const OriginalNodeData = await pageObjects.endpointAlerts.getEndpointAlertResolverNodeData(
+    //     'resolverNode',
+    //     'style'
+    //   );
+    //   await (await testSubjects.find('zoom-out')).click();
+    //   const NewNodeData = await pageObjects.endpointAlerts.getEndpointAlertResolverNodeData(
+    //     'resolverNode',
+    //     'style'
+    //   );
+    //
+    //   for (let i = 1; i < OriginalNodeData.length; i++) {
+    //     expect(parseFloat(NewNodeData[i].split(' ')[1])).to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[1])
+    //     );
+    //     expect(parseFloat(NewNodeData[i].split(' ')[3])).to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[3])
+    //     );
+    //     expect(parseFloat(NewNodeData[i].split(' ')[5])).to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[5])
+    //     );
+    //     expect(parseFloat(NewNodeData[i].split(' ')[7])).to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[7])
+    //     );
+    //     expect(parseFloat(NewNodeData[i].split(' ')[9].split('(')[1].split(')')[0].split('-')[1]))
+    //       .to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[9].split('(')[1].split(')')[0].split('-')[1])
+    //     );
+    //     expect(parseFloat(NewNodeData[i].split(' ')[10].split('(')[1].split(')')[0].split('-')[1]))
+    //       .to.lessThan(
+    //       parseFloat(OriginalNodeData[i].split(' ')[10].split('(')[1].split(')')[0].split('-')[1])
+    //     );
+    //   }
+    //   await (await testSubjects.find('zoom-in')).click();
+    // });
+
     after(async () => {
-      // await testSubjects.existOrFail('tableHeaderCell_timestamp_1');
-      // await (await testSubjects.find('tableHeaderCell_timestamp_1')).click();
-      // await pageObjects.common.sleep(2000);
-      // await testSubjects.existOrFail('tableHeaderSortButton');
-      // await (await testSubjects.find('tableHeaderSortButton')).click();
-      // await pageObjects.common.sleep(2000);
       await (await testSubjects.find('euiFlyoutCloseButton')).click();
       await pageObjects.common.sleep(2000);
       await esArchiver.unload('endpoint/resolver_tree/api_feature');
