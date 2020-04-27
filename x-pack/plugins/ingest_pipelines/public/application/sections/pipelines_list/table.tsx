@@ -33,6 +33,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   return (
     <EuiInMemoryTable
       itemId="name"
+      data-test-subj="pipelinesTable"
       isSelectable
       sorting={{ sort: { field: 'name', direction: 'asc' } }}
       selection={{

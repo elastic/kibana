@@ -98,6 +98,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
                   href={services.documentation.getIngestNodeUrl()}
                   target="_blank"
                   iconType="help"
+                  data-test-subj="documentationLink"
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
