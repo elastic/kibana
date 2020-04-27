@@ -13,7 +13,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Log Entry Rate Tab', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
 
     describe('with a trial license', () => {
       it('is visible', async () => {

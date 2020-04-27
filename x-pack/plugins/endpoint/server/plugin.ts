@@ -14,13 +14,13 @@ import { registerResolverRoutes } from './routes/resolver';
 import { registerIndexPatternRoute } from './routes/index_pattern';
 import { registerEndpointRoutes } from './routes/metadata';
 import { IngestIndexPatternRetriever } from './index_pattern';
-import { IngestManagerStartupContract } from '../../ingest_manager/common/types';
+import { IngestManagerStartContract } from '../../ingest_manager/server';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
 export interface EndpointPluginStartDependencies {
-  ingestManager: IngestManagerStartupContract;
+  ingestManager: IngestManagerStartContract;
 }
 
 export interface EndpointPluginSetupDependencies {
