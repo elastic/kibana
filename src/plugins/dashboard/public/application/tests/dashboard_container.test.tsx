@@ -84,6 +84,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
           getAllEmbeddableFactories={(() => []) as any}
           getEmbeddableFactory={(() => null) as any}
           notifications={{} as any}
+          application={{} as any}
           overlays={{} as any}
           inspector={inspector}
           SavedObjectFinder={() => null}

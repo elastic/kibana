@@ -275,6 +275,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
             getEmbeddableFactory={this.props.kibana.services.embeddable.getEmbeddableFactory}
             getAllEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
             overlays={this.props.kibana.services.overlays}
+            application={this.props.kibana.services.application}
             notifications={this.props.kibana.services.notifications}
             inspector={this.props.kibana.services.inspector}
             SavedObjectFinder={this.props.kibana.services.SavedObjectFinder}
