@@ -89,7 +89,7 @@ describe('when on the hosts page', () => {
         ).not.toBeNull();
       });
 
-      describe('when the user clicks the hostname in the table', () => {
+      describe('when the user clicks the first hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           const hostDetailsApiResponse = mockHostDetailsApiResult();
