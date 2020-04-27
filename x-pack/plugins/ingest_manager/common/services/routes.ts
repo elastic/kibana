@@ -8,6 +8,7 @@ import {
   EPM_API_ROUTES,
   DATASOURCE_API_ROUTES,
   AGENT_CONFIG_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
   FLEET_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
@@ -85,6 +86,12 @@ export const agentConfigRouteService = {
 
   getInfoFullPath: (agentConfigId: string) => {
     return AGENT_CONFIG_API_ROUTES.FULL_INFO_PATTERN.replace('{agentConfigId}', agentConfigId);
+  },
+};
+
+export const dataStreamRouteService = {
+  getListPath: () => {
+    return DATA_STREAM_API_ROUTES.LIST_PATTERN;
   },
 };
 

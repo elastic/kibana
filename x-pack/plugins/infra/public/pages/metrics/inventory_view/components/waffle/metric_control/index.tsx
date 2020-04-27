@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useCallback } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 import {
@@ -21,6 +20,7 @@ import { ModeSwitcher } from './mode_switcher';
 import { MetricsEditMode } from './metrics_edit_mode';
 import { CustomMetricMode } from './types';
 import { SnapshotMetricType } from '../../../../../../../common/inventory_models/types';
+import { DropdownButton } from '../../dropdown_button';
 
 interface Props {
   options: Array<{ text: string; value: string }>;
@@ -132,17 +132,13 @@ export const WaffleMetricControls = ({
   }
 
   const button = (
-    <EuiFilterButton iconType="arrowDown" onClick={handleToggle}>
-      <FormattedMessage
-        id="xpack.infra.waffle.metricButtonLabel"
-        defaultMessage="Metric: {selectedMetric}"
-        values={{ selectedMetric: currentLabel }}
-      />
-    </EuiFilterButton>
+    <DropdownButton onClick={handleToggle} label="Metric">
+      {currentLabel}
+    </DropdownButton>
   );
 
   return (
-    <EuiFilterGroup>
+    <>
       <EuiPopover
         isOpen={isPopoverOpen}
         id="metricsPanel"
@@ -194,6 +190,6 @@ export const WaffleMetricControls = ({
           customMetrics={customMetrics}
         />
       </EuiPopover>
-    </EuiFilterGroup>
+    </>
   );
 };
