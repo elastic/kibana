@@ -40,7 +40,7 @@ input[type='checkbox'],
 // Application Layout
 
 // chrome-context
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 .chrHeaderWrapper:not(.headerWrapper) .content {
   display: flex;
@@ -123,7 +123,7 @@ input[type='checkbox'],
   }
 }
 
-// A neccessary hack so that the above focus policy doesn't polute some EUI
+// A necessary hack so that the above focus policy doesn't pollute some EUI
 // entrenched inputs.
 .euiComboBox {
   // :not() specificity needed to override the above

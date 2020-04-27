@@ -201,7 +201,7 @@ export class Header extends Component<HeaderProps, State> {
     }
 
     const className = classnames(
-      'chrHeaderWrapper', // TODO when legacy nav removed - delete this
+      'chrHeaderWrapper', // TODO #64541 - delete this
       'hide-for-sharing',
       {
         'chrHeaderWrapper--navIsLocked': this.state.isLocked,
@@ -233,7 +233,7 @@ export class Header extends Component<HeaderProps, State> {
                 </EuiHeaderSectionItem>
               )
             ) : (
-              // TODO when legacy nav removed
+              // TODO #64541
               // Delete this block
               <EuiShowFor sizes={['xs', 's']}>
                 <EuiHeaderSectionItem border="right">
@@ -287,7 +287,7 @@ export class Header extends Component<HeaderProps, State> {
             }}
           />
         ) : (
-          // TODO when legacy nav removed
+          // TODO #64541
           // Delete this block
           <NavDrawer
             isLocked={this.state.isLocked}

@@ -1,7 +1,7 @@
 @import '@elastic/eui/src/components/header/variables';
 @import '@elastic/eui/src/components/nav_drawer/variables';
 
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 .chrHeaderWrapper:not(.headerWrapper) {
   width: 100%;
@@ -10,7 +10,7 @@
   z-index: 10;
 }
 
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 .chrHeaderWrapper:not(.headerWrapper) ~ .app-wrapper:not(.hidden-chrome) {
   top: $euiHeaderChildSize;
@@ -34,7 +34,7 @@
 }
 
 // Mobile header is smaller
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 @include euiBreakpoint('xs', 's') {
   .chrHeaderWrapper:not(.headerWrapper) ~ .app-wrapper:not(.hidden-chrome) {
@@ -42,7 +42,7 @@
   }
 }
 
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 @include euiBreakpoint('xl') {
   .chrHeaderWrapper--navIsLocked:not(.headerWrapper) {

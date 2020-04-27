@@ -9,7 +9,7 @@
   min-height: 100%;
 }
 
-// TODO when legacy nav removed
+// TODO #64541
 // Delete this block
 .chrHeaderWrapper:not(.headerWrapper) ~ .app-wrapper {
   display: flex;
@@ -35,7 +35,7 @@
   }
 }
 
-// TODO when legacy nav removed
+// TODO #64541
 // Remove .headerWrapper conditional
 .headerWrapper ~ .app-wrapper {
   display: flex;
