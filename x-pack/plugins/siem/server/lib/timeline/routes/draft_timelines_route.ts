@@ -14,7 +14,7 @@ import { SetupPlugins } from '../../../plugin';
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelinesQuerySchema } from './schemas/draft_timelines_schema';
 import { draftTimelineDefaults } from '../default_timeline';
-import { TimelineType } from '../../../graphql/types';
+// import { TimelineType } from '../../../graphql/types';
 
 export const draftTimelinesRoute = (
   router: IRouter,

@@ -286,7 +286,6 @@ export const convertTimelineAsInput = (
   timelineTimeRange: TimeRange
 ): TimelineInput =>
   Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
-    console.error('sssss', timeline);
     if (has(key, timeline)) {
       if (key === 'timelineType') {
         return set(key, get(key, timeline), acc);
