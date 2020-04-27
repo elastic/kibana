@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE = 'enrollment_api_keys';
+export const ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE = 'fleet-enrollment-api-keys';

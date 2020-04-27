@@ -156,7 +156,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   static type = LAYER_TYPE.BLENDED_VECTOR;
 
   static createDescriptor(
-    options: VectorLayerDescriptor,
+    options: Partial<VectorLayerDescriptor>,
     mapColors: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = VectorLayer.createDescriptor(options, mapColors);

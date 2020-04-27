@@ -23,7 +23,7 @@ import { DetectorCell } from './detector_cell';
 import { EntityCell } from '../entity_cell';
 import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
