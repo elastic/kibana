@@ -43,7 +43,7 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       index: 'testing-123',
       refresh: false,
     };
@@ -97,7 +97,7 @@ describe('config validation', () => {
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       indeX: 'bob',
     };
 
@@ -111,7 +111,7 @@ describe('config validation', () => {
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
