@@ -6,8 +6,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
 import { EMSTMSSource, sourceTitle } from './ems_tms_source';
+// @ts-ignore
 import { VectorTileLayer } from '../../vector_tile_layer';
+// @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
@@ -16,7 +19,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   }),
   icon: 'emsApp',
   renderWizard: ({ previewLayer }: RenderWizardArguments) => {
-    const onSourceConfigChange = sourceConfig => {
+    const onSourceConfigChange = (sourceConfig: unknown) => {
       const layerDescriptor = VectorTileLayer.createDescriptor({
         sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });

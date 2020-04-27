@@ -12,7 +12,11 @@ import { CreateSourceEditor } from './create_source_editor';
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { VectorLayer } from '../../vector_layer';
-import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
+import {
+  ESGeoGridSourceDescriptor,
+  ColorDynamicOptions,
+  SizeDynamicOptions,
+} from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -21,9 +25,9 @@ import {
   FIELD_ORIGIN,
   RENDER_AS,
   VECTOR_STYLES,
+  STYLE_TYPE,
 } from '../../../../common/constants';
-import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
+// @ts-ignore
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 
 export const clustersLayerWizardConfig: LayerWizard = {
@@ -42,10 +46,12 @@ export const clustersLayerWizardConfig: LayerWizard = {
       const layerDescriptor = VectorLayer.createDescriptor({
         sourceDescriptor: ESGeoGridSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
+          // @ts-ignore
           [VECTOR_STYLES.FILL_COLOR]: {
-            type: DynamicStyleProperty.type,
+            type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
+              ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!
+                .options as ColorDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -55,21 +61,21 @@ export const clustersLayerWizardConfig: LayerWizard = {
             },
           },
           [VECTOR_STYLES.LINE_COLOR]: {
-            type: StaticStyleProperty.type,
+            type: STYLE_TYPE.STATIC,
             options: {
               color: '#FFF',
             },
           },
           [VECTOR_STYLES.LINE_WIDTH]: {
-            type: StaticStyleProperty.type,
+            type: STYLE_TYPE.STATIC,
             options: {
               size: 0,
             },
           },
           [VECTOR_STYLES.ICON_SIZE]: {
-            type: DynamicStyleProperty.type,
+            type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
+              ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -77,9 +83,9 @@ export const clustersLayerWizardConfig: LayerWizard = {
             },
           },
           [VECTOR_STYLES.LABEL_TEXT]: {
-            type: DynamicStyleProperty.type,
+            type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
+              ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options,
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,

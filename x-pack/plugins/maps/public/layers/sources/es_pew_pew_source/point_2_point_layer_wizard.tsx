@@ -11,12 +11,18 @@ import { VectorLayer } from '../../vector_layer';
 // @ts-ignore
 import { ESPewPewSource, sourceTitle } from './es_pew_pew_source';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { FIELD_ORIGIN, COUNT_PROP_NAME, VECTOR_STYLES } from '../../../../common/constants';
+import {
+  FIELD_ORIGIN,
+  COUNT_PROP_NAME,
+  VECTOR_STYLES,
+  STYLE_TYPE,
+} from '../../../../common/constants';
+// @ts-ignore
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.pewPewDescription', {
@@ -35,9 +41,10 @@ export const point2PointLayerWizardConfig: LayerWizard = {
         sourceDescriptor: ESPewPewSource.createDescriptor(sourceConfig),
         style: VectorStyle.createDescriptor({
           [VECTOR_STYLES.LINE_COLOR]: {
-            type: DynamicStyleProperty.type,
+            type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
+              ...(defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR]!
+                .options as ColorDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,
@@ -46,9 +53,10 @@ export const point2PointLayerWizardConfig: LayerWizard = {
             },
           },
           [VECTOR_STYLES.LINE_WIDTH]: {
-            type: DynamicStyleProperty.type,
+            type: STYLE_TYPE.DYNAMIC,
             options: {
-              ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
+              ...(defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH]!
+                .options as SizeDynamicOptions),
               field: {
                 name: COUNT_PROP_NAME,
                 origin: FIELD_ORIGIN.SOURCE,

@@ -20,6 +20,7 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
   icon: 'emsApp',
   renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
+      // @ts-ignore
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayer(layerDescriptor);

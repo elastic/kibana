@@ -6,21 +6,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import uuid from 'uuid/v4';
+import { IFieldType } from 'src/plugins/data/public';
 import {
   ES_GEO_FIELD_TYPE,
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
 // @ts-ignore
-import { ESSearchSource } from '../es_search_source';
+import { ESSearchSource, createDefaultLayerDescriptor } from '../es_search_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 // @ts-ignore
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 // @ts-ignore
 import { GeojsonFileSource } from './geojson_file_source';
 import { VectorLayer } from '../../vector_layer';
-import { createDefaultLayerDescriptor } from '../es_search_source';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.geojsonFileDescription', {
@@ -36,8 +35,8 @@ export const uploadLayerWizardConfig: LayerWizard = {
     onIndexReady,
     importSuccessHandler,
     importErrorHandler,
-  }) => {
-    function previewGeojsonFile(geojsonFile, name) {
+  }: RenderWizardArguments) => {
+    function previewGeojsonFile(geojsonFile: unknown, name: string) {
       if (!geojsonFile) {
         previewLayer(null);
         return;
@@ -48,19 +47,30 @@ export const uploadLayerWizardConfig: LayerWizard = {
       previewLayer(layerDescriptor, true);
     }
 
-    function viewIndexedData(indexResponses = {}) {
+    function viewIndexedData(indexResponses: {
+      indexDataResp: unknown;
+      indexPatternResp: unknown;
+    }) {
       const { indexDataResp, indexPatternResp } = indexResponses;
 
+      // @ts-ignore
       const indexCreationFailed = !(indexDataResp && indexDataResp.success);
+      // @ts-ignore
       const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
+      // @ts-ignore
       const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
 
       if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
         importErrorHandler(indexResponses);
         return;
       }
+      // @ts-ignore
       const { fields, id: indexPatternId } = indexPatternResp;
-      const geoField = fields.find(field => Object.values(ES_GEO_FIELD_TYPE).includes(field.type));
+      const geoField = fields.find((field: IFieldType) =>
+        [ES_GEO_FIELD_TYPE.GEO_POINT as string, ES_GEO_FIELD_TYPE.GEO_SHAPE as string].includes(
+          field.type
+        )
+      );
       if (!indexPatternId || !geoField) {
         previewLayer(null);
       } else {
@@ -68,6 +78,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
           indexPatternId,
           geoField: geoField.name,
           // Only turn on bounds filter for large doc counts
+          // @ts-ignore
           filterByMapBounds: indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW,
           scalingType:
             geoField.type === ES_GEO_FIELD_TYPE.GEO_POINT

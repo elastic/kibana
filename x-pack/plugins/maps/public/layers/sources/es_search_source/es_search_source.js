@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './load_index_settings';
+import uuid from 'uuid/v4';
 
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -69,7 +70,7 @@ export class ESSearchSource extends AbstractESSource {
   static createDescriptor(descriptor) {
     return {
       ...descriptor,
-      id: descriptor.id,
+      id: descriptor.id ? descriptor.id : uuid(),
       type: ESSearchSource.type,
       indexPatternId: descriptor.indexPatternId,
       geoField: descriptor.geoField,

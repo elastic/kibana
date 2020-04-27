@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
 import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
@@ -16,23 +15,20 @@ import { BlendedVectorLayer } from '../../blended_vector_layer';
 import { VectorLayer } from '../../vector_layer';
 import { SCALING_TYPES } from '../../../../common/constants';
 
-export function createDefaultLayerDescriptor(sourceConfig, mapColors) {
-  const sourceDescriptor = ESSearchSource.createDescriptor({
-    id: uuid(),
-    ...sourceConfig,
-  });
+export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: string[]) {
+  const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
 
   return sourceDescriptor.scalingType === SCALING_TYPES.CLUSTERS
     ? BlendedVectorLayer.createDescriptor({ sourceDescriptor }, mapColors)
     : VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
 }
 
-export const esDocumentsLayerWizardConfig = {
+export const esDocumentsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Vector data from a Kibana index pattern',
   }),
   icon: 'logoElasticsearch',
-  renderWizard: ({ previewLayer, mapColors }) => {
+  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: unknown) => {
       if (!sourceConfig) {
         previewLayer(null);

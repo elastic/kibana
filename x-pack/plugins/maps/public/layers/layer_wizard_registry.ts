@@ -11,6 +11,12 @@ import { LayerDescriptor } from '../../common/descriptor_types';
 export type RenderWizardArguments = {
   previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
   mapColors: string[];
+  // upload arguments
+  isIndexingTriggered: boolean;
+  onRemove: () => void;
+  onIndexReady: () => void;
+  importSuccessHandler: (indexResponses: unknown) => void;
+  importErrorHandler: (indexResponses: unknown) => void;
 };
 
 export type LayerWizard = {
