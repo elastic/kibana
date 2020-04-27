@@ -11,12 +11,12 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions_simulators';
+} from '../../../../common/fixtures/plugins/actions';
 
 const mapping = [
   {
     source: 'title',
-    target: 'short_description',
+    target: 'summary',
     actionType: 'overwrite',
   },
   {
@@ -32,19 +32,20 @@ const mapping = [
 ];
 
 // eslint-disable-next-line import/no-default-export
-export default function servicenowTest({ getService }: FtrProviderContext) {
+export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  const mockServiceNow = {
+  const mockJira = {
     config: {
-      apiUrl: 'www.servicenowisinkibanaactions.com',
+      apiUrl: 'www.jiraisinkibanaactions.com',
+      projectKey: 'CK',
       casesConfiguration: { mapping },
     },
     secrets: {
-      password: 'elastic',
-      username: 'changeme',
+      apiToken: 'elastic',
+      email: 'elastic@elastic.co',
     },
     params: {
       action: 'pushToService',
@@ -72,41 +73,42 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     },
   };
 
-  let servicenowSimulatorURL: string = '<could not determine kibana url>';
+  let jiraSimulatorURL: string = '<could not determine kibana url>';
 
-  describe('ServiceNow', () => {
+  describe('Jira', () => {
     before(() => {
-      servicenowSimulatorURL = kibanaServer.resolveUrl(
-        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      jiraSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA)
       );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
 
-    describe('ServiceNow - Action Creation', () => {
-      it('should return 200 when creating a servicenow action successfully', async () => {
+    describe('Jira - Action Creation', () => {
+      it('should return 200 when creating a jira action successfully', async () => {
         const { body: createdAction } = await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            name: 'A jira action',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              ...mockJira.config,
+              apiUrl: jiraSimulatorURL,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockJira.secrets,
           })
           .expect(200);
 
         expect(createdAction).to.eql({
           id: createdAction.id,
           isPreconfigured: false,
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
+          name: 'A jira action',
+          actionTypeId: '.jira',
           config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: mockServiceNow.config.casesConfiguration,
+            apiUrl: jiraSimulatorURL,
+            projectKey: mockJira.config.projectKey,
+            casesConfiguration: mockJira.config.casesConfiguration,
           },
         });
 
@@ -117,23 +119,24 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           isPreconfigured: false,
-          name: 'A servicenow action',
-          actionTypeId: '.servicenow',
+          name: 'A jira action',
+          actionTypeId: '.jira',
           config: {
-            apiUrl: servicenowSimulatorURL,
-            casesConfiguration: mockServiceNow.config.casesConfiguration,
+            apiUrl: jiraSimulatorURL,
+            projectKey: mockJira.config.projectKey,
+            casesConfiguration: mockJira.config.casesConfiguration,
           },
         });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with no apiUrl', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {},
+            name: 'A jira action',
+            actionTypeId: '.jira',
+            config: { projectKey: 'CK' },
           })
           .expect(400)
           .then((resp: any) => {
@@ -146,18 +149,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with a non whitelisted apiUrl', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with no projectKey', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: 'http://servicenow.mynonexistent.com',
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
-            },
-            secrets: mockServiceNow.secrets,
+            name: 'A jira action',
+            actionTypeId: '.jira',
+            config: { apiUrl: jiraSimulatorURL },
           })
           .expect(400)
           .then((resp: any) => {
@@ -165,21 +164,47 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring connector action: target url "http://servicenow.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+                'error validating action type config: [projectKey]: expected value of type [string] but got [undefined]',
             });
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action without secrets', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with a non whitelisted apiUrl', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            name: 'A jira action',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              apiUrl: 'http://jira.mynonexistent.com',
+              projectKey: mockJira.config.projectKey,
+              casesConfiguration: mockJira.config.casesConfiguration,
+            },
+            secrets: mockJira.secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: error configuring connector action: target url "http://jira.mynonexistent.com" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+            });
+          });
+      });
+
+      it('should respond with a 400 Bad Request when creating a jira action without secrets', async () => {
+        await supertest
+          .post('/api/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A jira action',
+            actionTypeId: '.jira',
+            config: {
+              apiUrl: jiraSimulatorURL,
+              projectKey: mockJira.config.projectKey,
+              casesConfiguration: mockJira.config.casesConfiguration,
             },
           })
           .expect(400)
@@ -188,22 +213,23 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
+                'error validating action type secrets: [email]: expected value of type [string] but got [undefined]',
             });
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action without casesConfiguration', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action without casesConfiguration', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            name: 'A jira action',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: jiraSimulatorURL,
+              projectKey: mockJira.config.projectKey,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockJira.secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -216,18 +242,19 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with empty mapping', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            name: 'A jira action',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: jiraSimulatorURL,
+              projectKey: mockJira.config.projectKey,
               casesConfiguration: { mapping: [] },
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockJira.secrets,
           })
           .expect(400)
           .then((resp: any) => {
@@ -240,15 +267,16 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should respond with a 400 Bad Request when creating a servicenow action with wrong actionType', async () => {
+      it('should respond with a 400 Bad Request when creating a jira action with wrong actionType', async () => {
         await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            name: 'A jira action',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
+              apiUrl: jiraSimulatorURL,
+              projectKey: mockJira.config.projectKey,
               casesConfiguration: {
                 mapping: [
                   {
@@ -259,26 +287,27 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 ],
               },
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockJira.secrets,
           })
           .expect(400);
       });
     });
 
-    describe('ServiceNow - Executor', () => {
+    describe('Jira - Executor', () => {
       let simulatedActionId: string;
       before(async () => {
         const { body } = await supertest
           .post('/api/action')
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'A servicenow simulator',
-            actionTypeId: '.servicenow',
+            name: 'A jira simulator',
+            actionTypeId: '.jira',
             config: {
-              apiUrl: servicenowSimulatorURL,
-              casesConfiguration: mockServiceNow.config.casesConfiguration,
+              apiUrl: jiraSimulatorURL,
+              projectKey: mockJira.config.projectKey,
+              casesConfiguration: mockJira.config.casesConfiguration,
             },
-            secrets: mockServiceNow.secrets,
+            secrets: mockJira.secrets,
           });
         simulatedActionId = body.id;
       });
@@ -362,7 +391,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
                   caseId: 'success',
                 },
@@ -385,7 +414,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
                   caseId: 'success',
                   title: 'success',
@@ -409,9 +438,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
-                  ...mockServiceNow.params.actionParams,
+                  ...mockJira.params.actionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -437,9 +466,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
-                  ...mockServiceNow.params.actionParams,
+                  ...mockJira.params.actionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -465,9 +494,9 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
-                  ...mockServiceNow.params.actionParams,
+                  ...mockJira.params.actionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -490,28 +519,28 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
-          const { body: result } = await supertest
+          const { body } = await supertest
             .post(`/api/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
-                ...mockServiceNow.params,
+                ...mockJira.params,
                 actionParams: {
-                  ...mockServiceNow.params.actionParams,
+                  ...mockJira.params.actionParams,
                   comments: [],
                 },
               },
             })
             .expect(200);
 
-          expect(result).to.eql({
+          expect(body).to.eql({
             status: 'ok',
             actionId: simulatedActionId,
             data: {
               id: '123',
-              title: 'INC01',
-              pushedDate: '2020-03-10T12:24:20.000Z',
-              url: `${servicenowSimulatorURL}/nav_to.do?uri=incident.do?sys_id=123`,
+              title: 'CK-1',
+              pushedDate: '2020-04-27T14:17:45.490Z',
+              url: `${jiraSimulatorURL}/browse/CK-1`,
             },
           });
         });

@@ -6,9 +6,9 @@
 
 import Hapi from 'hapi';
 
-interface ServiceNowRequest extends Hapi.Request {
+interface JiraRequest extends Hapi.Request {
   payload: {
-    short_description: string;
+    summary: string;
     description?: string;
     comments?: string;
   };
@@ -16,7 +16,7 @@ interface ServiceNowRequest extends Hapi.Request {
 export function initPlugin(server: Hapi.Server, path: string) {
   server.route({
     method: 'POST',
-    path: `${path}/api/now/v2/table/incident`,
+    path: `${path}/rest/api/2/issue`,
     options: {
       auth: false,
     },
@@ -24,8 +24,8 @@ export function initPlugin(server: Hapi.Server, path: string) {
   });
 
   server.route({
-    method: 'PATCH',
-    path: `${path}/api/now/v2/table/incident/{id}`,
+    method: 'PUT',
+    path: `${path}/rest/api/2/issue/{id}`,
     options: {
       auth: false,
     },
@@ -34,38 +34,58 @@ export function initPlugin(server: Hapi.Server, path: string) {
 
   server.route({
     method: 'GET',
-    path: `${path}/api/now/v2/table/incident/{id}`,
+    path: `${path}/rest/api/2/issue/{id}`,
     options: {
       auth: false,
     },
     handler: getHandler as Hapi.Lifecycle.Method,
+  });
+
+  server.route({
+    method: 'POST',
+    path: `${path}/rest/api/2/issue/{id}/comment`,
+    options: {
+      auth: false,
+    },
+    handler: createCommentHanlder as Hapi.Lifecycle.Method,
   });
 }
 
 // ServiceNow simulator: create a servicenow action pointing here, and you can get
 // different responses based on the message posted. See the README.md for
 // more info.
-function createHandler(request: ServiceNowRequest, h: any) {
+function createHandler(request: JiraRequest, h: any) {
   return jsonResponse(h, 200, {
-    result: { sys_id: '123', number: 'INC01', sys_created_on: '2020-03-10 12:24:20' },
+    id: '123',
+    key: 'CK-1',
+    created: '2020-04-27T14:17:45.490Z',
   });
 }
 
-function updateHandler(request: ServiceNowRequest, h: any) {
+function updateHandler(request: JiraRequest, h: any) {
   return jsonResponse(h, 200, {
-    result: { sys_id: '123', number: 'INC01', sys_updated_on: '2020-03-10 12:24:20' },
+    id: '123',
+    key: 'CK-1',
+    created: '2020-04-27T14:17:45.490Z',
+    updated: '2020-04-27T14:17:45.490Z',
   });
 }
 
-function getHandler(request: ServiceNowRequest, h: any) {
+function getHandler(request: JiraRequest, h: any) {
   return jsonResponse(h, 200, {
-    result: {
-      sys_id: '123',
-      number: 'INC01',
-      sys_created_on: '2020-03-10 12:24:20',
-      short_description: 'title',
-      description: 'description',
-    },
+    id: '123',
+    key: 'CK-1',
+    created: '2020-04-27T14:17:45.490Z',
+    updated: '2020-04-27T14:17:45.490Z',
+    summary: 'title',
+    description: 'description',
+  });
+}
+
+function createCommentHanlder(request: JiraRequest, h: any) {
+  return jsonResponse(h, 200, {
+    id: '123',
+    created: '2020-04-27T14:17:45.490Z',
   });
 }
 
