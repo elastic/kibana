@@ -187,7 +187,6 @@ export class DashboardPlugin
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
-    // TODO this doesn't work yet because the new platform doesn't allow it: https://github.com/elastic/kibana/issues/56027
     const { appMounted, appUnMounted, stop: stopUrlTracker, getActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${DashboardConstants.LANDING_PAGE_PATH}`,

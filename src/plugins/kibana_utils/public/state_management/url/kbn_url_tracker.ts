@@ -19,7 +19,7 @@
 
 import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppBase, ToastsSetup } from 'kibana/public';
+import { AppUpdater, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -93,7 +93,7 @@ export function createKbnUrlTracker({
   /**
    * App updater subject passed into the application definition to change nav link url.
    */
-  navLinkUpdater$: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
   /**
    * Toast notifications service to show toasts in error cases.
    */
@@ -128,7 +128,7 @@ export function createKbnUrlTracker({
   let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
-    navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
+    navLinkUpdater$.next(() => ({ defaultPath: baseUrl + hash }));
   }
 
   function getActiveSubUrl(url: string) {

@@ -18,9 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { App, CoreSetup, Plugin } from 'kibana/public';
+import { BehaviorSubject } from 'rxjs';
+import { App, AppUpdater, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { AppNavLinkStatus } from '../../../core/public';
 
 import './index.scss';
 
@@ -92,6 +94,7 @@ export interface DevTool {
 
 export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
   private readonly devTools = new Map<string, DevTool>();
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private getSortedDevTools(): readonly DevTool[] {
     return sortBy([...this.devTools.values()], 'order');
@@ -103,6 +106,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       title: i18n.translate('kbn.devToolsTitle', {
         defaultMessage: 'Dev Tools',
       }),
+      updater$: this.appStateUpdater,
       euiIconType: 'devToolsApp',
       order: 9001,
       category: {
@@ -141,9 +145,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
   }
 
   public start() {
-    return {
-      getSortedDevTools: this.getSortedDevTools.bind(this),
-    };
+    if (this.getSortedDevTools().length === 0) {
+      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    }
   }
 
   public stop() {}

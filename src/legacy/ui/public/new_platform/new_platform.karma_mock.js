@@ -357,9 +357,6 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
-      getSortedDevTools: () => [],
-    },
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],

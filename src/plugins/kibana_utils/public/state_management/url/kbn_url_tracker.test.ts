@@ -21,7 +21,7 @@ import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { createMemoryHistory, History } from 'history';
 import { createKbnUrlTracker, KbnUrlTracker } from './kbn_url_tracker';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { AppBase, ToastsSetup } from 'kibana/public';
+import { AppBase, AppUpdater, ToastsSetup } from 'kibana/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -35,7 +35,7 @@ describe('kbnUrlTracker', () => {
   let urlTracker: KbnUrlTracker;
   let state1Subject: Subject<{ key1: string }>;
   let state2Subject: Subject<{ key2: string }>;
-  let navLinkUpdaterSubject: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  let navLinkUpdaterSubject: BehaviorSubject<AppUpdater>;
   let toastService: jest.Mocked<ToastsSetup>;
 
   function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
@@ -62,7 +62,7 @@ describe('kbnUrlTracker', () => {
   }
 
   function getActiveNavLinkUrl() {
-    return navLinkUpdaterSubject.getValue()({} as AppBase)?.activeUrl;
+    return navLinkUpdaterSubject.getValue()({} as AppBase)?.defaultPath;
   }
 
   beforeEach(() => {
@@ -72,9 +72,7 @@ describe('kbnUrlTracker', () => {
     history = createMemoryHistory();
     state1Subject = new Subject<{ key1: string }>();
     state2Subject = new Subject<{ key2: string }>();
-    navLinkUpdaterSubject = new BehaviorSubject<
-      (app: AppBase) => { activeUrl?: string } | undefined
-    >(() => undefined);
+    navLinkUpdaterSubject = new BehaviorSubject<AppUpdater>(() => undefined);
   });
 
   test('do not touch nav link to default if nothing else is set', () => {
