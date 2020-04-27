@@ -69,7 +69,6 @@ export interface ResolverNode {
   events: ResolverEvent[];
   lifecycle: ResolverEvent[];
   ancestors?: ResolverNode[];
-  parent?: ResolverNode | null;
   pagination: ResolverNodePagination;
   stats?: ResolverNodeStats;
 }

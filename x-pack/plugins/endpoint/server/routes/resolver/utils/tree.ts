@@ -93,8 +93,6 @@ export class Tree {
       throw new Error('cannot merge trees with different roots');
     }
 
-    // our caches should be exclusive for everything but the root node so we can
-    // just merge them
     Object.entries(ancestors.cache).forEach(([id, node]) => {
       if (rootID !== id) {
         children.cache.set(id, node);
@@ -102,7 +100,6 @@ export class Tree {
     });
 
     children.root.lifecycle = ancestors.root.lifecycle;
-    children.root.parent = ancestors.root.parent;
     children.root.ancestors = ancestors.root.ancestors;
     children.root.events = events.root.events;
 

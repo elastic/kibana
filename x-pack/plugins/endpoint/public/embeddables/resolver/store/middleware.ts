@@ -48,13 +48,18 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
             [{ lifecycle, children, ancestors }] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
-                query: { legacyEndpointID },
+                query: { legacyEndpointID, children: 5, ancestors: 5 },
               }),
             ]);
           } else {
             const entityId = action.payload.selectedEvent.process.entity_id;
             [{ lifecycle, children, ancestors }] = await Promise.all([
-              context.services.http.get(`/api/endpoint/resolver/${entityId}`),
+              context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
+                query: {
+                  children: 5,
+                  ancestors: 5,
+                },
+              }),
             ]);
           }
           const response: ResolverEvent[] = [

@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent, LegacyEndpointEvent, ResolverEvent } from '../types';
+import { LegacyEndpointEvent, ResolverEvent } from '../types';
 
-export function isLegacyEvent(
-  event: EndpointEvent | LegacyEndpointEvent
-): event is LegacyEndpointEvent {
+export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEvent {
   return (event as LegacyEndpointEvent).endgame !== undefined;
 }
 
-export function eventTimestamp(
-  event: EndpointEvent | LegacyEndpointEvent
-): string | undefined | number {
+export function eventTimestamp(event: ResolverEvent): string | undefined | number {
   if (isLegacyEvent(event)) {
     return event.endgame.timestamp_utc;
   } else {
@@ -22,8 +18,7 @@ export function eventTimestamp(
   }
 }
 
-/** TODO, seems wrong */
-export function eventName(event: EndpointEvent | LegacyEndpointEvent): string {
+export function eventName(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     return event.endgame.process_name ? event.endgame.process_name : '';
   } else {
@@ -31,24 +26,23 @@ export function eventName(event: EndpointEvent | LegacyEndpointEvent): string {
   }
 }
 
-export function eventId(event: ResolverEvent) {
+export function eventId(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
-    return String(event.endgame.serial_event_id);
+    return event.endgame.serial_event_id ? String(event.endgame.serial_event_id) : '';
   }
   return event.event.id;
 }
 
-export function entityId(event: ResolverEvent) {
+export function entityId(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
-    return String(event.endgame.unique_pid);
+    return event.endgame.unique_pid ? String(event.endgame.unique_pid) : '';
   }
   return event.process.entity_id;
 }
 
-export function parentEntityId(event: ResolverEvent) {
+export function parentEntityId(event: ResolverEvent): string | undefined {
   if (isLegacyEvent(event)) {
-    const ppid = event.endgame.unique_ppid;
-    return String(ppid); // if unique_ppid is undefined return undefined
+    return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
   }
   return event.process.parent?.entity_id;
 }
