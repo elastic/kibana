@@ -5,14 +5,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
-import { Toolbar } from '../../../../../components/eui/toolbar';
-import { ToolbarProps } from './toolbar';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/source';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
+import { ToolbarProps } from './toolbar';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
@@ -36,26 +36,27 @@ export const ToolbarWrapper = (props: Props) => {
   } = useWaffleOptionsContext();
   const { createDerivedIndexPattern } = useSourceContext();
   return (
-    <Toolbar>
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        {props.children({
-          createDerivedIndexPattern,
-          changeMetric,
-          changeGroupBy,
-          changeAccount,
-          changeRegion,
-          changeCustomOptions,
-          customOptions,
-          groupBy,
-          metric,
-          nodeType,
-          region,
-          accountId,
-          customMetrics,
-          changeCustomMetrics,
-        })}
-      </EuiFlexGroup>
-    </Toolbar>
+    <>
+      <EuiFlexItem grow={false}>
+        <WaffleInventorySwitcher />
+      </EuiFlexItem>
+      {props.children({
+        createDerivedIndexPattern,
+        changeMetric,
+        changeGroupBy,
+        changeAccount,
+        changeRegion,
+        changeCustomOptions,
+        customOptions,
+        groupBy,
+        metric,
+        nodeType,
+        region,
+        accountId,
+        customMetrics,
+        changeCustomMetrics,
+      })}
+    </>
   );
 };
 

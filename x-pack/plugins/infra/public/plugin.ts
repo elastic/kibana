@@ -19,7 +19,8 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
+
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -140,10 +141,12 @@ export class Plugin
   // NOTE: apm is importing from `infra/public` and async importing that
   // allow us to reduce the apm bundle size
   private async registerAlertType(pluginsSetup: ClientPluginsSetup) {
-    const { getAlertType } = await import(
+    const logThreshold = await import('./components/alerting/logs/log_threshold_alert_type');
+    const metricThreshold = await import(
       './components/alerting/metrics/metric_threshold_alert_type'
     );
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(metricThreshold.getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(logThreshold.getAlertType());
   }
 }
