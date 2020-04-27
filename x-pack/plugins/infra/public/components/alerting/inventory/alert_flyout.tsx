@@ -9,14 +9,14 @@ import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-
-import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
 
 interface Props {
   visible?: boolean;
-  series?: MetricsExplorerSeries;
+  options?: Partial<InfraWaffleMapOptions>;
+  nodeType?: InventoryItemType;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -29,7 +29,7 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: {},
+            metadata: { options: props.options, nodeType: props.nodeType },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
             docLinks: services.docLinks,

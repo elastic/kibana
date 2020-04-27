@@ -22,7 +22,6 @@ import {
 } from '../../../../server/lib/alerting/metric_threshold/types';
 import { euiStyled } from '../../../../../observability/public';
 import {
-  WhenExpression,
   ThresholdExpression,
   ForLastExpression,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -50,16 +49,18 @@ import { InventoryItemType, SnapshotMetricType } from '../../../../common/invent
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
+import { InfraWaffleMapOptions } from '../../../lib/lib';
 
 interface AlertContextMeta {
-  currentOptions?: Partial<MetricsExplorerOptions>;
-  series?: MetricsExplorerSeries;
+  options?: Partial<InfraWaffleMapOptions>;
+  nodeType?: InventoryItemType;
 }
 
 interface Props {
   errors: IErrorObject[];
   alertParams: {
     criteria: InventoryMetricConditions[];
+    nodeType: InventoryItemType;
     groupBy?: string;
     filterQuery?: string;
     sourceId?: string;
@@ -89,7 +90,6 @@ export const Expressions: React.FC<Props> = props => {
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
-  const [nodeType, setNodeType] = useState<InventoryItemType>('host');
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -162,7 +162,6 @@ export const Expressions: React.FC<Props> = props => {
 
   const updateNodeType = useCallback(
     (nt: any) => {
-      setNodeType(nt);
       setAlertParams('nodeType', nt);
     },
     [setAlertParams]
@@ -170,39 +169,41 @@ export const Expressions: React.FC<Props> = props => {
 
   useEffect(() => {
     const md = alertsContext.metadata;
-    if (md) {
-      if (md.currentOptions?.metrics) {
-        setAlertParams(
-          'criteria',
-          md.currentOptions.metrics.map(metric => ({
-            metric: metric.field,
-            comparator: Comparator.GT,
-            threshold: [],
-            timeSize,
-            timeUnit,
-            aggType: metric.aggregation,
-          }))
-        );
+    if (!alertParams.nodeType) {
+      if (md && md.nodeType) {
+        setAlertParams('nodeType', md.nodeType);
+      } else {
+        setAlertParams('nodeType', 'host');
+      }
+    }
+
+    if (!alertParams.criteria) {
+      if (md && md.options) {
+        setAlertParams('criteria', [
+          {
+            ...defaultExpression,
+            metric: md.options.metric!.type,
+          } as InventoryMetricConditions,
+        ]);
       } else {
         setAlertParams('criteria', [defaultExpression]);
       }
-
-      if (md.currentOptions) {
-        if (md.currentOptions.filterQuery) {
-          setAlertParams('filterQuery', md.currentOptions.filterQuery);
-        } else if (md.currentOptions.groupBy && md.series) {
-          const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-          setAlertParams('filterQuery', filter);
-        }
-
-        setAlertParams('groupBy', md.currentOptions.groupBy);
-      }
-    } else {
-      setAlertParams('criteria', [defaultExpression]);
     }
-    setAlertParams('sourceId', source?.id);
-    setAlertParams('nodeType', nodeType);
-  }, [alertsContext.metadata, defaultExpression, source, nodeType]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // if (md.currentOptions) {
+    //   if (md.currentOptions.filterQuery) {
+    //     setAlertParams('filterQuery', md.currentOptions.filterQuery);
+    //   } else if (md.currentOptions.groupBy && md.series) {
+    //     const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
+    //     setAlertParams('filterQuery', filter);
+    //   }
+
+    //   setAlertParams('groupBy', md.currentOptions.groupBy);
+    // }
+    if (!alertParams.sourceId) {
+      setAlertParams('sourceId', source?.id);
+    }
+  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -216,14 +217,18 @@ export const Expressions: React.FC<Props> = props => {
         </h4>
       </EuiText>
       <StyledExpression>
-        <NodeTypeExpression options={nodeTypes} value={nodeType} onChange={updateNodeType} />
+        <NodeTypeExpression
+          options={nodeTypes}
+          value={alertParams.nodeType || 'host'}
+          onChange={updateNodeType}
+        />
       </StyledExpression>
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
         alertParams.criteria.map((e, idx) => {
           return (
             <ExpressionRow
-              nodeType={nodeType}
+              nodeType={alertParams.nodeType}
               canDelete={alertParams.criteria.length > 1}
               remove={removeExpression}
               addExpression={addExpression}

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../components/alerting/metrics/alert_flyout';
+import { AlertFlyout } from '../../../../../components/alerting/inventory/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
 import { createUptimeLink } from '../../lib/create_uptime_link';
@@ -145,6 +145,15 @@ export const NodeContextMenu: React.FC<Props> = ({
     isDisabled: !showUptimeLink,
   };
 
+  const createAlertMenuItem: SectionLinkProps = {
+    label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
+      defaultMessage: 'Create alert',
+    }),
+    onClick: () => {
+      setFlyoutVisible(true);
+    },
+  };
+
   return (
     <>
       <ActionMenu
@@ -179,12 +188,14 @@ export const NodeContextMenu: React.FC<Props> = ({
               <SectionLink {...nodeDetailMenuItem} />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} />
+              <SectionLink {...createAlertMenuItem} />
             </SectionLinks>
           </Section>
         </div>
       </ActionMenu>
       <AlertFlyout
-        options={{ filterQuery: `${nodeType}: ${node.id}` }}
+        options={options}
+        nodeType={nodeType}
         setVisible={setFlyoutVisible}
         visible={flyoutVisible}
       />
