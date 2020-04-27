@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { handleActions, Action } from 'redux-actions';
 import {
   getDynamicSettings,
@@ -31,7 +30,6 @@ export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
     [String(getDynamicSettings)]: state => ({
       ...state,
       loading: true,
-      loadErrors: [],
     }),
     [String(getDynamicSettingsSuccess)]: (_state, action: Action<DynamicSettings>) => ({
       loading: false,
