@@ -1301,11 +1301,11 @@ export const ComponentStrings = {
   WorkpadHeaderViewMenu: {
     getAutoplayOffMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOffMenuItemLabel', {
-        defaultMessage: 'Turn autoplay off',
+        defaultMessage: 'Autoplay off',
       }),
     getAutoplayOnMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOnMenuItemLabel', {
-        defaultMessage: 'Turn autoplay on',
+        defaultMessage: 'Autoplay on',
       }),
     getAutoplaySettingsMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplaySettingsMenuItemLabel', {

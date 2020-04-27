@@ -186,6 +186,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getRefreshSettingsMenuItemLabel(),
+        icon: 'empty',
         panel: {
           id: 1,
           title: strings.getRefreshSettingsMenuItemLabel(),
@@ -210,6 +211,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getAutoplaySettingsMenuItemLabel(),
+        icon: 'empty',
         panel: {
           id: 2,
           title: strings.getAutoplaySettingsMenuItemLabel(),
