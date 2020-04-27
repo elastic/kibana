@@ -33,6 +33,7 @@ import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { getKibanaMapFactoryProvider, IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
+import { ConfigSchema } from '../config';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
