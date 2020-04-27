@@ -16,32 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsType } from 'kibana/server';
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-
-import uiRoutes from '../routes';
-
-import template from './error_auto_create_index.html';
-
-uiRoutes.when('/error/action.auto_create_index', {
-  template,
-  k7Breadcrumbs: () => [
-    {
-      text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', {
-        defaultMessage: 'Error',
-      }),
+export const kqlTelemetry: SavedObjectsType = {
+  name: 'kql-telemetry',
+  namespaceType: 'agnostic',
+  hidden: false,
+  mappings: {
+    properties: {
+      optInCount: {
+        type: 'long',
+      },
+      optOutCount: {
+        type: 'long',
+      },
     },
-  ],
-});
-
-export function isAutoCreateIndexError(error: object) {
-  return (
-    get(error, 'res.status') === 503 &&
-    get(error, 'body.attributes.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-}
-
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
-}
+  },
+};
