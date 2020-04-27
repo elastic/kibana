@@ -36,8 +36,9 @@
 }
 
 // TODO #64541
-// Remove .headerWrapper conditional
-.headerWrapper ~ .app-wrapper {
+// Remove .headerWrapper and header conditionals
+.headerWrapper ~ .app-wrapper,
+:not(header) ~ .app-wrapper {
   display: flex;
   flex-flow: column nowrap;
   margin: 0 auto;
