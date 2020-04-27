@@ -104,7 +104,10 @@ export const HostList = () => {
         }),
         render: (hostStatus: HostInfo['host_status']) => {
           return (
-            <EuiHealth color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}>
+            <EuiHealth
+              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+              data-test-subj="rowHostStatus"
+            >
               <FormattedMessage
                 id="xpack.endpoint.host.list.hostStatusValue"
                 defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
@@ -182,7 +185,7 @@ export const HostList = () => {
       headerLeft={i18n.translate('xpack.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiText color="subdued" size="xs">
+      <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
         <FormattedMessage
           id="xpack.endpoint.host.list.totalCount"
           defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
