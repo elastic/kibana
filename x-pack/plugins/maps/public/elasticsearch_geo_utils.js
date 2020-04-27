@@ -245,21 +245,20 @@ function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   ensureGeoField(geoFieldType);
 
-  const safePolygon = convertMapExtentToPolygon(mapExtent);
-
   // Extent filters are used to dynamically filter data for the current map view port.
   // Continue to use geo_bounding_box queries for extent filters
   // 1) geo_bounding_box queries are faster than polygon queries
   // 2) geo_shape benefits of pre-indexed shapes and
   // compatability across multi-indices with geo_point and geo_shape do not apply to this use case.
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    return createGeoBoundBoxFilter(safePolygon, geoFieldName);
+    // geo_bounding_box can not use longitudes outside -180,180 yet
+    return createGeoBoundBoxFilter(convertMapExtentToPolygon(mapExtent), geoFieldName);
   }
 
   return {
     geo_shape: {
       [geoFieldName]: {
-        shape: safePolygon,
+        shape: formatEnvelopeAsPolygon(mapExtent),
         relation: ES_SPATIAL_RELATIONS.INTERSECTS,
       },
     },
@@ -376,7 +375,7 @@ export function getBoundingBoxGeometry(geometry) {
     extent.maxLat = Math.max(exterior[i][LAT_INDEX], extent.maxLat);
   }
 
-  return convertMapExtentToPolygon(extent);
+  return formatEnvelopeAsPolygon(extent);
 }
 
 function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
