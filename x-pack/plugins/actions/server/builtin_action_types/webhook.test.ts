@@ -11,20 +11,17 @@ jest.mock('axios', () => ({
 import { getActionType } from './webhook';
 import { ActionType, Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
+import { actionsMock } from '../mocks';
 import axios from 'axios';
 
 const axiosRequestMock = axios.request as jest.Mock;
 
 const ACTION_TYPE_ID = '.webhook';
 
-const services: Services = {
-  callCluster: async (path: string, opts: unknown) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;

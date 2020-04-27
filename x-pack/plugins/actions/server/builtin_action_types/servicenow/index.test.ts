@@ -7,9 +7,9 @@
 import { getActionType } from '.';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../../types';
 import { validateConfig, validateSecrets, validateParams } from '../../lib';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from '../index.test';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { actionsMock } from '../../mocks';
 
 import { ACTION_TYPE_ID } from './constants';
 import * as i18n from './translations';
@@ -21,10 +21,7 @@ jest.mock('./action_handlers');
 
 const handleIncidentMock = handleIncident as jest.Mock;
 
-const services: Services = {
-  callCluster: async (path: string, opts: unknown) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 
