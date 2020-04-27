@@ -40,15 +40,19 @@ export function IconMapSelect({
       />
     );
   }
+
+  const field = styleProperty.getField();
+  const defaultOptions = field.supportsAutoDomain() ? getIconPaletteOptions(isDarkMode) : [];
+
   return (
     <StyleMapSelect
       onChange={onMapSelectChange}
       customOptionLabel={i18n.translate('xpack.maps.styles.icon.customMapLabel', {
         defaultMessage: 'Custom icon palette',
       })}
-      options={getIconPaletteOptions(isDarkMode)}
+      options={defaultOptions}
       customMapStops={customIconStops}
-      useCustomMap={useCustomIconMap}
+      useCustomMap={field.supportsAutoDomain() ? useCustomIconMap : true}
       selectedMapId={iconPaletteId}
       renderCustomStopsInput={renderCustomIconStopsInput}
     />

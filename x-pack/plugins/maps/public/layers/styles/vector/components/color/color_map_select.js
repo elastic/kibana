@@ -89,7 +89,7 @@ export class ColorMapSelect extends Component {
   };
 
   _renderColorStopsInput() {
-    if (this.props.supportsAutoDomain) {
+    if (this.props.supportsAutoDomain && !this.props.useCustomColorMap) {
       return null;
     }
 
