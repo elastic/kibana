@@ -42,6 +42,8 @@ describe('indexDocument', () => {
 });
 
 describe('doesIlmPolicyExist', () => {
+  // ElasticsearchError can be a bit random in shape, we need an any here
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const notFoundError = new Error('Not found') as any;
   notFoundError.statusCode = 404;
 
@@ -187,6 +189,8 @@ describe('createIndex', () => {
   });
 
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
+    // ElasticsearchError can be a bit random in shape, we need an any here
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = new Error('Already exists') as any;
     err.body = {
       error: {
