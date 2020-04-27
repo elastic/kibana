@@ -19,39 +19,41 @@ exports[`Header should render a different name, prompt, and beta tag if provided
       />
     </h1>
   </EuiTitle>
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiText
-        size="s"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-          >
-            <FormattedMessage
-              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
-              values={Object {}}
-            />
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiSpacer
     size="s"
+  />
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        id="kbn.management.createIndexPatternLabel"
+        values={
+          Object {
+            "helpLink": <ForwardRef
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="index patterns"
+                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
+                values={Object {}}
+              />
+              <EuiIcon
+                className="eui-alignTop"
+                size="s"
+                type="questionInCircle"
+              />
+            </ForwardRef>,
+          }
+        }
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="m"
   />
   <div>
     Test prompt
   </div>
-  <EuiSpacer
-    size="m"
-  />
 </div>
 `;
 
@@ -70,33 +72,35 @@ exports[`Header should render normally 1`] = `
       />
     </h1>
   </EuiTitle>
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiText
-        size="s"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-          >
-            <FormattedMessage
-              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
-              values={Object {}}
-            />
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiSpacer
-    size="m"
+    size="s"
   />
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        id="kbn.management.createIndexPatternLabel"
+        values={
+          Object {
+            "helpLink": <ForwardRef
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="index patterns"
+                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
+                values={Object {}}
+              />
+              <EuiIcon
+                className="eui-alignTop"
+                size="s"
+                type="questionInCircle"
+              />
+            </ForwardRef>,
+          }
+        }
+      />
+    </p>
+  </EuiText>
 </div>
 `;
 
@@ -115,32 +119,34 @@ exports[`Header should render without including system indices 1`] = `
       />
     </h1>
   </EuiTitle>
-  <EuiFlexGroup
-    alignItems="flexEnd"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiText
-        size="s"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-          >
-            <FormattedMessage
-              defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
-              values={Object {}}
-            />
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
   <EuiSpacer
-    size="m"
+    size="s"
   />
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        id="kbn.management.createIndexPatternLabel"
+        values={
+          Object {
+            "helpLink": <ForwardRef
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="index patterns"
+                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
+                values={Object {}}
+              />
+              <EuiIcon
+                className="eui-alignTop"
+                size="s"
+                type="questionInCircle"
+              />
+            </ForwardRef>,
+          }
+        }
+      />
+    </p>
+  </EuiText>
 </div>
 `;

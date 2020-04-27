@@ -21,6 +21,9 @@ import React from 'react';
 import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
+// @ts-ignore
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('EmptyState', () => {
   it('should render normally', () => {
@@ -34,9 +37,9 @@ describe('EmptyState', () => {
       it('is called when refresh button is clicked', () => {
         const onRefreshHandler = sinon.stub();
 
-        const component = shallow(<EmptyState onRefresh={onRefreshHandler} />);
+        const component = mountWithIntl(<EmptyState onRefresh={onRefreshHandler} />);
 
-        component.find('[data-test-subj="refreshIndicesButton"]').simulate('click');
+        findTestSubject(component, 'refreshIndicesButton').simulate('click');
 
         sinon.assert.calledOnce(onRefreshHandler);
       });

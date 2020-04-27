@@ -2,7 +2,10 @@
 
 exports[`IndicesList should change pages 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -101,7 +104,10 @@ exports[`IndicesList should change pages 1`] = `
 
 exports[`IndicesList should change per page 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -201,7 +207,10 @@ exports[`IndicesList should change per page 1`] = `
 
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -305,7 +314,10 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
 
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"
@@ -404,7 +416,10 @@ exports[`IndicesList should render normally 1`] = `
 
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
-  <EuiTable>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
     <EuiTableBody>
       <EuiTableRow
         key="0"

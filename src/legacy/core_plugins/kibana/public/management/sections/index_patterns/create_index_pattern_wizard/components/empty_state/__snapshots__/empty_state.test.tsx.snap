@@ -1,66 +1,184 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyState should render normally 1`] = `
-<div>
-  <EuiCallOut
-    color="warning"
-    title={
-      <FormattedMessage
-        defaultMessage="Couldn't find any Elasticsearch data"
-        id="kbn.management.createIndexPattern.emptyStateHeader"
-        values={Object {}}
-      />
-    }
-  >
-    <p>
-      <FormattedMessage
-        defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
-        id="kbn.management.createIndexPattern.emptyStateLabel.emptyStateDetail"
-        values={
-          Object {
-            "getStartedLink": <ForwardRef
-              href="#/home/tutorial_directory/sampleData"
-            >
-              <FormattedMessage
-                defaultMessage="get started with some sample data sets."
-                id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
-                values={Object {}}
-              />
-            </ForwardRef>,
-            "learnHowLink": <ForwardRef
-              href="#/home/tutorial_directory"
-            >
-              <FormattedMessage
-                defaultMessage="Learn how"
-                id="kbn.management.createIndexPattern.emptyStateLabel.learnHowLink"
-                values={Object {}}
-              />
-            </ForwardRef>,
-            "needToIndex": <EuiTextColor
-              color="subdued"
-            >
-              <FormattedMessage
-                defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
-                id="kbn.management.createIndexPattern.emptyStateLabel.needToIndexLabel"
-                values={Object {}}
-              />
-            </EuiTextColor>,
-          }
-        }
-      />
-    </p>
-    <EuiButton
-      color="warning"
-      data-test-subj="refreshIndicesButton"
-      iconType="refresh"
-      onClick={[Function]}
+<EuiPageContent
+  className="inpEmptyState"
+  grow={false}
+  horizontalPosition="center"
+>
+  <EuiPageContentHeader>
+    <EuiPageContentHeaderSection>
+      <EuiTitle>
+        <h2>
+          <FormattedMessage
+            defaultMessage="Ready to try Kibana? First, you need data."
+            id="kbn.management.emptyState.noDataTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiTitle>
+    </EuiPageContentHeaderSection>
+  </EuiPageContentHeader>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiPageContentBody>
+    <EuiFlexGrid
+      className="inpEmptyState__cardGrid"
+      columns={3}
+      responsive={true}
     >
-      <FormattedMessage
-        defaultMessage="Check for new data"
-        id="kbn.management.createIndexPattern.emptyState.checkDataButton"
-        values={Object {}}
-      />
-    </EuiButton>
-  </EuiCallOut>
-</div>
+      <EuiFlexItem>
+        <EuiCard
+          className="inpEmptyState__card"
+          description={
+            <FormattedMessage
+              defaultMessage="Add data from a variety of sources."
+              id="kbn.management.emptyState.integrationCardDescription"
+              values={Object {}}
+            />
+          }
+          href="#/home/tutorial_directory"
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="database"
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="Add integration"
+              id="kbn.management.emptyState.integrationCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCard
+          betaBadgeLabel="Basic license"
+          betaBadgeTooltipContent="Requires a Basic license"
+          className="inpEmptyState__card"
+          description={
+            <FormattedMessage
+              defaultMessage="Import a CSV, NDJSON, or log file."
+              id="kbn.management.emptyState.uploadCardDescription"
+              values={Object {}}
+            />
+          }
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="document"
+            />
+          }
+          isDisabled={true}
+          title={
+            <FormattedMessage
+              defaultMessage="Upload a file"
+              id="kbn.management.emptyState.uploadCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCard
+          className="inpEmptyState__card"
+          description={
+            <FormattedMessage
+              defaultMessage="Load a data set and a Kibana dashboard."
+              id="kbn.management.emptyState.sampleDataCardDescription"
+              values={Object {}}
+            />
+          }
+          href="#/home/tutorial_directory/sampleData"
+          icon={
+            <EuiIcon
+              color="subdued"
+              size="xl"
+              type="heatmap"
+            />
+          }
+          title={
+            <FormattedMessage
+              defaultMessage="Add sample data"
+              id="kbn.management.emptyState.sampleDataCardTitle"
+              values={Object {}}
+            />
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGrid>
+    <EuiSpacer
+      size="xxl"
+    />
+    <div
+      className="inpEmptyState__footer"
+    >
+      <EuiFlexGrid
+        columns={3}
+      >
+        <EuiFlexItem
+          className="inpEmptyState__footerFlexItem"
+        >
+          <EuiDescriptionList
+            listItems={
+              Array [
+                Object {
+                  "description": <ForwardRef
+                    external={true}
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html"
+                    target="_blank"
+                  >
+                    Read documentation
+                  </ForwardRef>,
+                  "title": <FormattedMessage
+                    defaultMessage="Want to learn more?"
+                    id="kbn.management.emptyState.learnMore"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="inpEmptyState__footerFlexItem"
+        >
+          <EuiDescriptionList
+            listItems={
+              Array [
+                Object {
+                  "description": <ForwardRef
+                    data-test-subj="refreshIndicesButton"
+                    onClick={[Function]}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Check for new data"
+                      id="kbn.management.createIndexPattern.emptyState.checkDataButton"
+                      values={Object {}}
+                    />
+                     
+                    <EuiIcon
+                      size="s"
+                      type="refresh"
+                    />
+                  </ForwardRef>,
+                  "title": <FormattedMessage
+                    defaultMessage="Pretty sure you have data?"
+                    id="kbn.management.emptyState.haveData"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    </div>
+  </EuiPageContentBody>
+</EuiPageContent>
 `;

@@ -12,14 +12,14 @@ exports[`TimeField should render a loading state 1`] = `
       <div>
         <p>
           <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
+            defaultMessage="The time filter uses this field to filter your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            defaultMessage="If you choose not to have a time field, you won't be able to narrow your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
@@ -27,30 +27,16 @@ exports[`TimeField should render a loading state 1`] = `
       </div>
     }
     label={
-      <ForwardRef
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiLoadingSpinner
-            size="s"
-          />
-        </EuiFlexItem>
-      </ForwardRef>
+      <FormattedMessage
+        defaultMessage="Time Filter field name"
+        id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiLoadingSpinner
+        size="s"
+      />
     }
     labelType="label"
   >
@@ -83,14 +69,14 @@ exports[`TimeField should render a selected time field 1`] = `
       <div>
         <p>
           <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
+            defaultMessage="The time filter uses this field to filter your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            defaultMessage="If you choose not to have a time field, you won't be able to narrow your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
@@ -98,37 +84,26 @@ exports[`TimeField should render a selected time field 1`] = `
       </div>
     }
     label={
-      <ForwardRef
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
+      <FormattedMessage
+        defaultMessage="Time Filter field name"
+        id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiText
+        size="xs"
       >
-        <EuiFlexItem
-          grow={false}
+        <ForwardRef
+          onClick={[Function]}
         >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <ForwardRef
-            className="timeFieldRefreshButton"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Refresh"
-              id="kbn.management.createIndexPattern.stepTime.refreshButton"
-              values={Object {}}
-            />
-          </ForwardRef>
-        </EuiFlexItem>
-      </ForwardRef>
+          <FormattedMessage
+            defaultMessage="Refresh"
+            id="kbn.management.createIndexPattern.stepTime.refreshButton"
+            values={Object {}}
+          />
+        </ForwardRef>
+      </EuiText>
     }
     labelType="label"
   >
@@ -164,14 +139,14 @@ exports[`TimeField should render normally 1`] = `
       <div>
         <p>
           <FormattedMessage
-            defaultMessage="The Time Filter will use this field to filter your data by time."
+            defaultMessage="The time filter uses this field to filter your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
-            defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+            defaultMessage="If you choose not to have a time field, you won't be able to narrow your data by time."
             id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
@@ -179,37 +154,26 @@ exports[`TimeField should render normally 1`] = `
       </div>
     }
     label={
-      <ForwardRef
-        alignItems="center"
-        gutterSize="xs"
-        justifyContent="spaceBetween"
+      <FormattedMessage
+        defaultMessage="Time Filter field name"
+        id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+        values={Object {}}
+      />
+    }
+    labelAppend={
+      <EuiText
+        size="xs"
       >
-        <EuiFlexItem
-          grow={false}
+        <ForwardRef
+          onClick={[Function]}
         >
-          <span>
-            <FormattedMessage
-              defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-              values={Object {}}
-            />
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <ForwardRef
-            className="timeFieldRefreshButton"
-            onClick={[Function]}
-          >
-            <FormattedMessage
-              defaultMessage="Refresh"
-              id="kbn.management.createIndexPattern.stepTime.refreshButton"
-              values={Object {}}
-            />
-          </ForwardRef>
-        </EuiFlexItem>
-      </ForwardRef>
+          <FormattedMessage
+            defaultMessage="Refresh"
+            id="kbn.management.createIndexPattern.stepTime.refreshButton"
+            values={Object {}}
+          />
+        </ForwardRef>
+      </EuiText>
     }
     labelType="label"
   >

@@ -2,17 +2,7 @@
 
 exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 <Fragment>
-  <div>
-    <Header
-      indexPatternName="name"
-      isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
-      prompt={null}
-      showSystemIndices={true}
-    />
-    <LoadingState />
-  </div>
+  <LoadingState />
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}
@@ -23,7 +13,7 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 
 exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
 <Fragment>
-  <div>
+  <EuiPageContent>
     <Header
       indexPatternName="name"
       isBeta={false}
@@ -32,6 +22,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
       prompt={null}
       showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={
         Array [
@@ -89,7 +80,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
         }
       }
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}
@@ -100,19 +91,9 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
 <Fragment>
-  <div>
-    <Header
-      indexPatternName="name"
-      isBeta={false}
-      isIncludingSystemIndices={false}
-      onChangeIncludingSystemIndices={[Function]}
-      prompt={null}
-      showSystemIndices={true}
-    />
-    <EmptyState
-      onRefresh={[Function]}
-    />
-  </div>
+  <EmptyState
+    onRefresh={[Function]}
+  />
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}
@@ -123,7 +104,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 
 exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
 <Fragment>
-  <div>
+  <EuiPageContent>
     <Header
       indexPatternName="name"
       isBeta={false}
@@ -132,6 +113,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
       prompt={null}
       showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepTimeField
       createIndexPattern={[Function]}
       goToPreviousStep={[Function]}
@@ -154,7 +136,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
         }
       }
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}
@@ -165,7 +147,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
 
 exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
 <Fragment>
-  <div>
+  <EuiPageContent>
     <Header
       indexPatternName="name"
       isBeta={false}
@@ -174,6 +156,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
       prompt={null}
       showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={Array []}
       esService={
@@ -225,7 +208,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
         }
       }
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}
@@ -236,7 +219,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
 <Fragment>
-  <div>
+  <EuiPageContent>
     <Header
       indexPatternName="name"
       isBeta={false}
@@ -245,6 +228,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
       prompt={null}
       showSystemIndices={true}
     />
+    <EuiHorizontalRule />
     <StepIndexPattern
       allIndices={
         Array [
@@ -302,7 +286,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
         }
       }
     />
-  </div>
+  </EuiPageContent>
   <EuiGlobalToastList
     dismissToast={[Function]}
     toastLifeTimeMs={6000}

@@ -17,9 +17,7 @@ exports[`StepTimeField should enable the action button if the user decides to no
 `;
 
 exports[`StepTimeField should render "Custom index pattern ID already exists" when error is "Conflict" 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -73,38 +71,49 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
-<EuiPanel>
-  <EuiFlexGroup
-    alignItems="center"
+<EuiFlexGroup
+  alignItems="center"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
   >
-    <EuiFlexItem
-      grow={false}
+    <EuiTitle
+      size="s"
     >
-      <EuiLoadingSpinner />
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiText>
+      <h3
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
+      >
         <FormattedMessage
           defaultMessage="Creating index pattern…"
           id="kbn.management.createIndexPattern.stepTime.creatingLabel"
           values={Object {}}
         />
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</EuiPanel>
+      </h3>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
 
 exports[`StepTimeField should render a selected timeField 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -154,13 +163,11 @@ exports[`StepTimeField should render a selected timeField 1`] = `
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render advanced options 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -192,13 +199,11 @@ exports[`StepTimeField should render advanced options 1`] = `
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -230,13 +235,11 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render any error message 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -286,13 +289,11 @@ exports[`StepTimeField should render any error message 1`] = `
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render normally 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -324,13 +325,11 @@ exports[`StepTimeField should render normally 1`] = `
     goToPreviousStep={[Function]}
     submittable={true}
   />
-</EuiPanel>
+</Fragment>
 `;
 
 exports[`StepTimeField should render timeFields 1`] = `
-<EuiPanel
-  paddingSize="l"
->
+<Fragment>
   <Header
     indexPattern="ki*"
     indexPatternName="name"
@@ -379,5 +378,5 @@ exports[`StepTimeField should render timeFields 1`] = `
     goToPreviousStep={[Function]}
     submittable={false}
   />
-</EuiPanel>
+</Fragment>
 `;

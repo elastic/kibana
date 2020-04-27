@@ -3,47 +3,37 @@
 exports[`LoadingIndices should render normally 1`] = `
 <EuiFlexGroup
   alignItems="center"
+  direction="column"
+  gutterSize="s"
   justifyContent="center"
 >
   <EuiFlexItem
     grow={false}
   >
-    <EuiLoadingSpinner
-      size="m"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <EuiText>
-      <EuiTextColor
-        color="subdued"
+    <EuiTitle
+      size="s"
+    >
+      <h3
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
       >
         <FormattedMessage
           defaultMessage="Looking for matching indices…"
           id="kbn.management.createIndexPattern.step.loadingHeader"
           values={Object {}}
         />
-      </EuiTextColor>
-    </EuiText>
-    <EuiText
-      size="s"
-      style={
-        Object {
-          "textAlign": "center",
-        }
-      }
-    >
-      <EuiTextColor
-        color="subdued"
-      >
-        <FormattedMessage
-          defaultMessage="Just a sec…"
-          id="kbn.management.createIndexPattern.step.loadingLabel"
-          values={Object {}}
-        />
-      </EuiTextColor>
-    </EuiText>
+      </h3>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
