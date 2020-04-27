@@ -566,7 +566,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -615,7 +615,7 @@ module.exports = {
     // {
     //   // will introduced after the other warns are fixed
     //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/legacy/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   files: ['x-pack/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
     //   plugins: ['react-perf'],
     //   rules: {
     //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
