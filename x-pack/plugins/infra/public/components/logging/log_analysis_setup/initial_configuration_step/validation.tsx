@@ -11,10 +11,20 @@ export type ValidationIndicesUIError =
   | { error: 'NETWORK_ERROR' }
   | { error: 'TOO_FEW_SELECTED_INDICES' };
 
+export type DatasetFilter =
+  | {
+      include: 'all';
+    }
+  | {
+      include: 'some';
+      datasets: string[];
+    };
+
 interface ValidIndex {
   validity: 'valid';
   name: string;
   isSelected: boolean;
+  datasetFilter: DatasetFilter;
 }
 
 interface InvalidIndex {
