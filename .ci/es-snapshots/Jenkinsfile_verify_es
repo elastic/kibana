@@ -21,6 +21,7 @@ def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-d
 
 kibanaPipeline(timeoutMinutes: 120) {
   catchErrors {
+    retryable.enable(2)
     withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
       parallel([
         'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
