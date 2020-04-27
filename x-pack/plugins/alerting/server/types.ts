@@ -7,14 +7,16 @@
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import {
-  SavedObjectAttributes,
-  SavedObjectsClientContract,
-  KibanaRequest,
-} from '../../../../src/core/server';
 import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../src/core/server';
 
 // This will have to remain `any` until we can extend Alert Executors with generics
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,10 +38,9 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
-  // This will have to remain `any` until we can extend Alert Services with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  callCluster(path: string, opts: any): Promise<any>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
 
 export interface AlertServices extends Services {
