@@ -105,7 +105,7 @@ export class VegaMapView extends VegaBaseView {
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 
-    this._kibanaMap = getKibanaMapFactory(this._$container.get(0), {
+    this._kibanaMap = getKibanaMapFactory()(this._$container.get(0), {
       zoom,
       minZoom,
       maxZoom,
