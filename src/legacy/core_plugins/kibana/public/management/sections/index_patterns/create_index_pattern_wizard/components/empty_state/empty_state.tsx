@@ -38,16 +38,6 @@ import {
 } from '@elastic/eui';
 
 export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
-  const refreshButton = (
-    <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
-      <FormattedMessage
-        id="kbn.management.createIndexPattern.emptyState.checkDataButton"
-        defaultMessage="Check for new data"
-      />{' '}
-      <EuiIcon type="refresh" size="s" />
-    </EuiLink>
-  );
-
   return (
     <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
       <EuiPageContentHeader>
@@ -164,7 +154,15 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
                         defaultMessage="Pretty sure you have data?"
                       />
                     ),
-                    description: refreshButton,
+                    description: (
+                      <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
+                        <FormattedMessage
+                          id="kbn.management.createIndexPattern.emptyState.checkDataButton"
+                          defaultMessage="Check for new data"
+                        />{' '}
+                        <EuiIcon type="refresh" size="s" />
+                      </EuiLink>
+                    ),
                   },
                 ]}
               />

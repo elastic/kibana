@@ -24,7 +24,7 @@ import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiLink, EuiSwitch } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon } from '@elastic/eui';
-import { CreateIndexPatternHelp } from '../../../create_index_pattern_help';
+import { CreateIndexPatternPrompt } from '../../../create_index_pattern_prompt';
 
 interface Props {
   prompt?: React.ReactNode;
@@ -111,7 +111,7 @@ export const Header: React.FunctionComponent<Props> = ({
         </Fragment>
       ) : null}
 
-      {showFlyout && <CreateIndexPatternHelp onClose={() => setShowFlyout(false)} />}
+      {showFlyout && <CreateIndexPatternPrompt onClose={() => setShowFlyout(false)} />}
     </div>
   );
 };

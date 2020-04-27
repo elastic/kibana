@@ -55,15 +55,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('index_patterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      // check for the index pattern info flyout that covers the
-      // create index pattern button on smaller screens
-      // @ts-ignore
-      await retry.waitFor('index pattern info flyout', async () => {
-        if (await testSubjects.exists('CreateIndexPatternPrompt')) {
-          await testSubjects.click('CreateIndexPatternPrompt > euiFlyoutCloseButton');
-        } else return true;
-      });
     }
 
     async getAdvancedSettings(propertyName: string) {
