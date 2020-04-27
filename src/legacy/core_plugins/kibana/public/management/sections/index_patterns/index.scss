@@ -52,6 +52,16 @@
       margin: 0 auto;
     }
   }
+
+  &__background {
+    fill: lightOrDarkTheme($euiColorLightestShade, $euiColorLightShade);
+  }
+  &__dots {
+    fill: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  }
+  &__speed {
+    fill: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade);
+  }
 }
 
 .inpEmptyState__text {
