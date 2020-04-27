@@ -21,7 +21,7 @@ export class InfraFieldsDomain {
     indexType: InfraIndexType
   ): Promise<InfraIndexField[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const includeMetricIndices = [InfraIndexType.ANY, InfraIndexType.METRICS].includes(indexType);

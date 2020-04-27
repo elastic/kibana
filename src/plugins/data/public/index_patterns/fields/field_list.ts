@@ -29,6 +29,7 @@ export interface IFieldList extends Array<Field> {
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
   remove(field: IFieldType): void;
+  update(field: FieldSpec): void;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {

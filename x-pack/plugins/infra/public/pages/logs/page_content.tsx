@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -73,13 +75,20 @@ export const LogsPageContent: React.FunctionComponent = () => {
         readOnlyBadge={!uiCapabilities?.logs?.save}
       />
       <AppNavigation aria-label={pageTitle}>
-        <RoutedTabs
-          tabs={
-            logAnalysisCapabilities.hasLogAnalysisCapabilites
-              ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
-              : [streamTab, settingsTab]
-          }
-        />
+        <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
+          <EuiFlexItem>
+            <RoutedTabs
+              tabs={
+                logAnalysisCapabilities.hasLogAnalysisCapabilites
+                  ? [streamTab, logRateTab, logCategoriesTab, settingsTab]
+                  : [streamTab, settingsTab]
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertDropdown />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </AppNavigation>
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
