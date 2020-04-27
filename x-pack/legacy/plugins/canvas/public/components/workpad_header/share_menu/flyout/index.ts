@@ -12,7 +12,6 @@ import {
   getRenderedWorkpadExpressions,
 } from '../../../../state/selectors/workpad';
 // @ts-ignore Untyped local
-import { notify } from '../../../../lib/notify';
 import {
   downloadRenderedWorkpad,
   downloadRuntime,
@@ -70,7 +69,7 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
       unsupportedRenderers,
       onClose,
       onCopy: () => {
-        notify.info(strings.getCopyShareConfigMessage());
+        kibana.services.canvas.notify.info(strings.getCopyShareConfigMessage());
       },
       onDownload: type => {
         switch (type) {
@@ -86,7 +85,9 @@ export const ShareWebsiteFlyout = compose<ComponentProps, Pick<Props, 'onClose'>
               .post(`${basePath}${API_ROUTE_SHAREABLE_ZIP}`, JSON.stringify(renderedWorkpad))
               .then(blob => downloadZippedRuntime(blob.data))
               .catch((err: Error) => {
-                notify.error(err, { title: strings.getShareableZipErrorTitle(workpad.name) });
+                kibana.services.canvas.notify.error(err, {
+                  title: strings.getShareableZipErrorTitle(workpad.name),
+                });
               });
             return;
           default:
