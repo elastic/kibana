@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PipelineFormProvider as PipelineForm } from './pipeline_form_provider';
+export { PipelineTestFlyoutProvider as PipelineTestFlyout } from './pipeline_test_flyout_provider';
