@@ -6394,7 +6394,6 @@
     "xpack.endpoint.host.list.os": "操作系统",
     "xpack.endpoint.host.list.policy": "政策",
     "xpack.endpoint.host.list.policyStatus": "策略状态",
-    "xpack.endpoint.host.list.sensorVersion": "感应器版本",
     "xpack.endpoint.host.list.totalCount": "正在显示：{totalItemCount, plural, one {# 个主机} other {# 个主机}}",
     "xpack.endpoint.notFound": "未找到页面",
     "xpack.endpoint.pluginTitle": "终端",

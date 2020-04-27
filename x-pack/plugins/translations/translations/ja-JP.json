@@ -6392,7 +6392,6 @@
     "xpack.endpoint.host.list.os": "オペレーティングシステム",
     "xpack.endpoint.host.list.policy": "ポリシー",
     "xpack.endpoint.host.list.policyStatus": "ポリシーステータス",
-    "xpack.endpoint.host.list.sensorVersion": "サーバーバージョン",
     "xpack.endpoint.host.list.totalCount": "表示中: {totalItemCount, plural, one {# ホスト} other {# ホスト}}",
     "xpack.endpoint.notFound": "ページが見つかりません",
     "xpack.endpoint.pluginTitle": "エンドポイント",
