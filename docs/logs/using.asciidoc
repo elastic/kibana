@@ -69,11 +69,18 @@ To highlight a word or phrase in the logs stream, click *Highlights* and enter y
 [float]
 [[logs-event-inspector]]
 === Inspect a log event
-To inspect a log event, hover over it, then click the *View details* icon image:logs/images/logs-view-event.png[View event icon] beside the event.
-This opens the *Log event document details* fly-out that shows the fields associated with the log event.
+To inspect a log event, hover over it, then click the *View actions for line* icon image:logs/images/logs-action-menu.png[View actions for line icon]. On the menu that opens, select *View details*. This opens the *Log event document details* fly-out that shows the fields associated with the log event.
 
 To quickly filter the logs stream by one of the field values, in the log event details, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
+
+[float]
+[[log-view-in-context]]
+=== View log line in context
+To view a certain line in its context (for example, with other log lines from the same file, or the same cloud container), hover over it, then click the *View actions for line* image:logs/images/logs-action-menu.png[View actions for line icon]. On the menu that opens, select *View in context*. This opens the *View log in context* modal, that shows the log line in its context.
+
+[role="screenshot"]
+image::logs/images/logs-view-in-context.png[View a log line in context]
 
 [float]
 [[view-log-anomalies]]
