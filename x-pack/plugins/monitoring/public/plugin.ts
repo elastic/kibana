@@ -25,7 +25,6 @@ import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
   KIBANA_ALERTING_ENABLED,
 } from '../common/constants';
-import { uiRoutes } from './angular/helpers/routes';
 
 export class MonitoringPlugin
   implements Plugin<void, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
@@ -90,7 +89,6 @@ export class MonitoringPlugin
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen(location => {
           if (location.pathname === '' && location.hash === '') {
-            params.history.push({ hash: uiRoutes.redirect?.redirectTo || '/no-data' });
             monitoringApp.applyScope();
           }
         });

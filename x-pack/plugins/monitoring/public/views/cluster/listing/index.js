@@ -32,7 +32,7 @@ uiRoutes
           }
           if (clusters.length === 1) {
             // Bypass the cluster listing if there is just 1 cluster
-            kbnUrl.changePath('/overview');
+            kbnUrl.redirect('/overview');
             return Promise.reject();
           }
           return clusters;

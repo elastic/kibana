@@ -235,7 +235,7 @@ const changeCluster = (scope, globalState, kbnUrl, clusterUuid, ccs) => {
     globalState.cluster_uuid = clusterUuid;
     globalState.ccs = ccs;
     globalState.save();
-    kbnUrl.changePath('/overview');
+    kbnUrl.redirect('/overview');
   });
 };
 
