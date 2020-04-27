@@ -31,12 +31,12 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
         title={
           docCount === 0 ? (
             <FormattedMessage
-              id="kbn.context.newerDocumentsWarningZero"
+              id="discover.context.newerDocumentsWarningZero"
               defaultMessage="No documents newer than the anchor could be found."
             />
           ) : (
             <FormattedMessage
-              id="kbn.context.newerDocumentsWarning"
+              id="discover.context.newerDocumentsWarning"
               defaultMessage="Only {docCount} documents newer than the anchor could be found."
               values={{ docCount }}
             />
@@ -55,12 +55,12 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
       title={
         docCount === 0 ? (
           <FormattedMessage
-            id="kbn.context.olderDocumentsWarningZero"
+            id="discover.context.olderDocumentsWarningZero"
             defaultMessage="No documents older than the anchor could be found."
           />
         ) : (
           <FormattedMessage
-            id="kbn.context.olderDocumentsWarning"
+            id="discover.context.olderDocumentsWarning"
             defaultMessage="Only {docCount} documents older than the anchor could be found."
             values={{ docCount }}
           />

@@ -23,7 +23,7 @@ const { docLinks } = getServices();
 
 export function addHelpMenuToAppChrome(chrome) {
   chrome.setHelpExtension({
-    appName: i18n.translate('kbn.discover.helpMenu.appName', {
+    appName: i18n.translate('discover.helpMenu.appName', {
       defaultMessage: 'Discover',
     }),
     links: [

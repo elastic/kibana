@@ -19,7 +19,7 @@ exports[`render 1`] = `
       <h2>
         <FormattedMessage
           defaultMessage="Open search"
-          id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+          id="discover.topNav.openSearchPanel.openSearchTitle"
           values={Object {}}
         />
       </h2>
@@ -30,7 +30,7 @@ exports[`render 1`] = `
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
-          id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+          id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
           values={Object {}}
         />
       }
@@ -62,7 +62,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Manage searches"
-            id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+            id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
             values={Object {}}
           />
         </EuiButton>

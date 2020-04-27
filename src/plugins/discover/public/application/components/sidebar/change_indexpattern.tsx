@@ -82,7 +82,7 @@ export function ChangeIndexPattern({
     >
       <div style={{ width: 320 }}>
         <EuiPopoverTitle>
-          {i18n.translate('kbn.discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
+          {i18n.translate('discover.fieldChooser.indexPattern.changeIndexPatternTitle', {
             defaultMessage: 'Change index pattern',
           })}
         </EuiPopoverTitle>

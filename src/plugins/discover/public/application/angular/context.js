@@ -32,7 +32,7 @@ const k7Breadcrumbs = $route => {
   return [
     ...getRootBreadcrumbs(),
     {
-      text: i18n.translate('kbn.context.breadcrumb', {
+      text: i18n.translate('discover.context.breadcrumb', {
         defaultMessage: 'Context of {indexPatternTitle}#{docId}',
         values: {
           indexPatternTitle: indexPattern.title,

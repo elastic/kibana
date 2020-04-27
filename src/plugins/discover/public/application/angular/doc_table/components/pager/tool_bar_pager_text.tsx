@@ -30,7 +30,7 @@ export function ToolBarPagerText({ startItem, endItem, totalItems }: Props) {
     <I18nProvider>
       <div className="kuiToolBarText" data-test-subj="toolBarPagerText">
         <FormattedMessage
-          id="kbn.docTable.pagerControl.pagesCountLabel"
+          id="discover.docTable.pagerControl.pagesCountLabel"
           defaultMessage="{startItem}&ndash;{endItem} of {totalItems}"
           values={{ startItem, endItem, totalItems }}
         />

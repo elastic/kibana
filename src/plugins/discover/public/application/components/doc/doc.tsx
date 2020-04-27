@@ -74,7 +74,7 @@ export function Doc(props: DocProps) {
             iconType="alert"
             title={
               <FormattedMessage
-                id="kbn.doc.failedToLocateIndexPattern"
+                id="discover.doc.failedToLocateIndexPattern"
                 defaultMessage="No index pattern matches ID {indexPatternId}"
                 values={{ indexPatternId: props.indexPatternId }}
               />
@@ -88,13 +88,13 @@ export function Doc(props: DocProps) {
             iconType="alert"
             title={
               <FormattedMessage
-                id="kbn.doc.failedToLocateDocumentDescription"
+                id="discover.doc.failedToLocateDocumentDescription"
                 defaultMessage="Cannot find document"
               />
             }
           >
             <FormattedMessage
-              id="kbn.doc.couldNotFindDocumentsDescription"
+              id="discover.doc.couldNotFindDocumentsDescription"
               defaultMessage="No documents match that ID."
             />
           </EuiCallOut>
@@ -107,13 +107,13 @@ export function Doc(props: DocProps) {
             iconType="alert"
             title={
               <FormattedMessage
-                id="kbn.doc.failedToExecuteQueryDescription"
+                id="discover.doc.failedToExecuteQueryDescription"
                 defaultMessage="Cannot run search"
               />
             }
           >
             <FormattedMessage
-              id="kbn.doc.somethingWentWrongDescription"
+              id="discover.doc.somethingWentWrongDescription"
               defaultMessage="{indexName} is missing."
               values={{ indexName: props.index }}
             />{' '}
@@ -124,7 +124,7 @@ export function Doc(props: DocProps) {
               target="_blank"
             >
               <FormattedMessage
-                id="kbn.doc.somethingWentWrongDescriptionAddon"
+                id="discover.doc.somethingWentWrongDescriptionAddon"
                 defaultMessage="Please ensure the index exists."
               />
             </EuiLink>
@@ -134,7 +134,7 @@ export function Doc(props: DocProps) {
         {reqState === ElasticRequestState.Loading && (
           <EuiCallOut data-test-subj={`doc-msg-loading`}>
             <EuiLoadingSpinner size="m" />{' '}
-            <FormattedMessage id="kbn.doc.loadingDescription" defaultMessage="Loading…" />
+            <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
           </EuiCallOut>
         )}
 

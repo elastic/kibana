@@ -21,7 +21,7 @@
       <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
       <span
         class="kuiInfoPanelHeader__title"
-        i18n-id="kbn.context.failedToLoadAnchorDocumentDescription"
+        i18n-id="discover.context.failedToLoadAnchorDocumentDescription"
         i18n-default-message="Failed to load the anchor document"
       ></span>
     </div>
@@ -30,7 +30,7 @@
       <div
         class="kuiInfoPanelBody__message"
         ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.INVALID_TIEBREAKER"
-        i18n-id="kbn.context.noSearchableTiebreakerFieldDescription"
+        i18n-id="discover.context.noSearchableTiebreakerFieldDescription"
         i18n-default-message="No searchable tiebreaker field could be found in the index pattern {indexPatternId}. Please change the advanced setting {tieBreakerFields} to include a valid field for this index pattern."
         i18n-values="{
           indexPatternId: contextApp.state.queryParameters.indexPatternId,
@@ -43,7 +43,7 @@
         ng-if="contextApp.state.loadingStatus.anchor.reason === contextApp.constants.FAILURE_REASONS.UNKNOWN"
       >
         <span
-          i18n-id="kbn.context.reloadPageDescription.reloadOrVisitTextMessage"
+          i18n-id="discover.context.reloadPageDescription.reloadOrVisitTextMessage"
           i18n-default-message="Please reload or go back to the document list to select a valid anchor document."
         ></span>
     </div>
@@ -80,7 +80,7 @@
   >
     <div
       class="kuiTableInfo"
-      i18n-id="kbn.context.loadingDescription"
+      i18n-id="discover.context.loadingDescription"
       i18n-default-message="Loading…"
     ></div>
   </div>

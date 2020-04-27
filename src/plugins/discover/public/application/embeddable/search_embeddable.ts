@@ -284,10 +284,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();
-    const title = i18n.translate('kbn.embeddable.inspectorRequestDataTitle', {
+    const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
-    const description = i18n.translate('kbn.embeddable.inspectorRequestDescription', {
+    const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
@@ -317,7 +317,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       if (error.name === 'AbortError') return;
 
       getServices().toastNotifications.addError(error, {
-        title: i18n.translate('kbn.embeddable.errorTitle', {
+        title: i18n.translate('discover.embeddable.errorTitle', {
           defaultMessage: 'Error fetching data',
         }),
       });

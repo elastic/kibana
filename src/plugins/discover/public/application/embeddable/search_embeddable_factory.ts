@@ -43,7 +43,7 @@ export class SearchEmbeddableFactory
   private $injector: auto.IInjectorService | null;
   private getInjector: () => Promise<auto.IInjectorService> | null;
   public readonly savedObjectMetaData = {
-    name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+    name: i18n.translate('discover.savedSearch.savedObjectName', {
       defaultMessage: 'Saved search',
     }),
     type: 'search',
@@ -67,7 +67,7 @@ export class SearchEmbeddableFactory
   };
 
   public getDisplayName() {
-    return i18n.translate('kbn.embeddable.search.displayName', {
+    return i18n.translate('discover.embeddable.search.displayName', {
       defaultMessage: 'search',
     });
   }

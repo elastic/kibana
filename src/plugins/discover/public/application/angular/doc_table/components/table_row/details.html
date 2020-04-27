@@ -8,7 +8,7 @@
         <div class="euiFlexItem euiFlexItem--flexGrowZero">
           <h4
             class="euiTitle euiTitle--xsmall"
-            i18n-id="kbn.docTable.tableRow.detailHeading"
+            i18n-id="discover.docTable.tableRow.detailHeading"
             i18n-default-message="Expanded document"
           ></h4>
         </div>
@@ -22,7 +22,7 @@
             data-test-subj="docTableRowAction"
             ng-href="{{ getContextAppHref() }}"
             ng-if="indexPattern.isTimeBased()"
-            i18n-id="kbn.docTable.tableRow.viewSurroundingDocumentsLinkText"
+            i18n-id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
             i18n-default-message="View surrounding documents"
           ></a>
         </div>
@@ -31,7 +31,7 @@
             class="euiLink"
             data-test-subj="docTableRowAction"
             ng-href="#/doc/{{indexPattern.id}}/{{row._index}}?id={{uriEncodedId}}"
-            i18n-id="kbn.docTable.tableRow.viewSingleDocumentLinkText"
+            i18n-id="discover.docTable.tableRow.viewSingleDocumentLinkText"
             i18n-default-message="View single document"
           ></a>
         </div>

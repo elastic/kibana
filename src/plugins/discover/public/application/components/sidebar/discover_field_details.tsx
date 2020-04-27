@@ -45,7 +45,7 @@ export function DiscoverFieldDetails({
       {!details.error && (
         <EuiText size="xs">
           <FormattedMessage
-            id="kbn.discover.fieldChooser.detailViews.topValuesInRecordsDescription"
+            id="discover.fieldChooser.detailViews.topValuesInRecordsDescription"
             defaultMessage="Top 5 values in"
           />{' '}
           {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
@@ -57,7 +57,7 @@ export function DiscoverFieldDetails({
           )}{' '}
           / {details.total}{' '}
           <FormattedMessage
-            id="kbn.discover.fieldChooser.detailViews.recordsText"
+            id="discover.fieldChooser.detailViews.recordsText"
             defaultMessage="records"
           />
         </EuiText>
@@ -89,7 +89,7 @@ export function DiscoverFieldDetails({
             data-test-subj={`fieldVisualize-${field.name}`}
           >
             <FormattedMessage
-              id="kbn.discover.fieldChooser.detailViews.visualizeLinkText"
+              id="discover.fieldChooser.detailViews.visualizeLinkText"
               defaultMessage="Visualize"
             />
             {warnings.length > 0 && (

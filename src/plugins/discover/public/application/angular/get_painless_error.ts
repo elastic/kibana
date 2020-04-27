@@ -40,7 +40,7 @@ export function getPainlessError(error: Error) {
   return {
     lang,
     script,
-    message: i18n.translate('kbn.discover.painlessError.painlessScriptedFieldErrorMessage', {
+    message: i18n.translate('discover.painlessError.painlessScriptedFieldErrorMessage', {
       defaultMessage: "Error with Painless scripted field '{script}'.",
       values: { script },
     }),

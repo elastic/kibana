@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export function getRootBreadcrumbs() {
   return [
     {
-      text: i18n.translate('kbn.discover.rootBreadcrumb', {
+      text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
       href: '#/',

@@ -25,7 +25,7 @@ export function getWarnings(field: IndexPatternField) {
   if (field.scripted) {
     warnings.push(
       i18n.translate(
-        'kbn.discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
+        'discover.fieldChooser.discoverField.scriptedFieldsTakeLongExecuteDescription',
         {
           defaultMessage: 'Scripted fields can take a long time to execute.',
         }
