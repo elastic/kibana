@@ -85,7 +85,6 @@ describe('toNavLink', () => {
     expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
   });
 
-  ////
   it('appends the defaultPath when present on app', () => {
     const link = toNavLink(
       app({
