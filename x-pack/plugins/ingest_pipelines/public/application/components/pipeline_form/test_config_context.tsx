@@ -35,17 +35,7 @@ export const useTestConfigContext = () => {
   return ctx;
 };
 
-export const TestConfigContextProvider = ({
-  children,
-  value,
-}: {
-  value: TestConfigContext;
-  children: React.ReactNode;
-}) => {
-  return <TestConfigContext.Provider value={value}> {children} </TestConfigContext.Provider>;
-};
-
-export const useTestConfig = () => {
+export const TestConfigContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [testConfig, setTestConfig] = useState<TestConfig>({
     verbose: false,
   });
@@ -54,8 +44,14 @@ export const useTestConfig = () => {
     setTestConfig(currentTestConfig);
   }, []);
 
-  return {
-    testConfig,
-    setCurrentTestConfig,
-  };
+  return (
+    <TestConfigContext.Provider
+      value={{
+        testConfig,
+        setCurrentTestConfig,
+      }}
+    >
+      {children}
+    </TestConfigContext.Provider>
+  );
 };

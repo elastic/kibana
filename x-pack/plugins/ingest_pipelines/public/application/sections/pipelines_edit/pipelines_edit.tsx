@@ -65,7 +65,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
     services.breadcrumbs.setBreadcrumbs('edit');
   }, [services.breadcrumbs]);
 
-  let content;
+  let content: React.ReactNode;
 
   if (isLoading) {
     content = (

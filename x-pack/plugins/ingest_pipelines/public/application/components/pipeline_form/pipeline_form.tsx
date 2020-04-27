@@ -13,7 +13,6 @@ import { Pipeline } from '../../../../common/types';
 
 import { PipelineRequestFlyout } from '../';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
-import { useTestConfigContext } from './test_config_context';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
@@ -44,7 +43,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
-  const [shouldTestImmediately, setShouldTestImmediately] = useState<boolean>(false);
 
   const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
     if (isValid) {
@@ -52,15 +50,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     }
   };
 
-  const { testConfig } = useTestConfigContext();
-  const { documents: cachedDocuments } = testConfig;
-
   const handleTestPipelineClick = () => {
     setIsTestingPipeline(true);
-
-    if (cachedDocuments) {
-      setShouldTestImmediately(true);
-    }
   };
 
   const { form } = useForm({
@@ -164,7 +155,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* Test pipeline flyout */}
         {isTestingPipeline ? (
           <PipelineTestFlyout
-            shouldTestImmediately={shouldTestImmediately}
             closeFlyout={() => {
               setIsTestingPipeline(prevIsTestingPipeline => !prevIsTestingPipeline);
             }}

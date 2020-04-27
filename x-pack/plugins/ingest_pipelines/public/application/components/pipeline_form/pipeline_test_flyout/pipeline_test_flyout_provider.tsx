@@ -12,10 +12,7 @@ import { PipelineTestFlyout, PipelineTestFlyoutProps } from './pipeline_test_fly
 
 type Props = Omit<PipelineTestFlyoutProps, 'pipeline' | 'isPipelineValid'>;
 
-export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({
-  closeFlyout,
-  shouldTestImmediately,
-}) => {
+export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({ closeFlyout }) => {
   const form = useFormContext();
   const [formData, setFormData] = useState<Pipeline>({} as Pipeline);
   const [isFormDataValid, setIsFormDataValid] = useState<boolean>(false);
@@ -37,7 +34,6 @@ export const PipelineTestFlyoutProvider: React.FunctionComponent<Props> = ({
       pipeline={formData}
       closeFlyout={closeFlyout}
       isPipelineValid={isFormDataValid}
-      shouldTestImmediately={shouldTestImmediately}
     />
   );
 };

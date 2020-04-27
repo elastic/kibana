@@ -41,7 +41,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
     handleExecute(cachedDocuments!, isVerboseEnabled);
   };
 
-  let content;
+  let content: React.ReactNode | undefined;
 
   if (isExecuting) {
     content = <EuiLoadingSpinner size="m" />;

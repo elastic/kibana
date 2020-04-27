@@ -26,14 +26,12 @@ export interface PipelineTestFlyoutProps {
   closeFlyout: () => void;
   pipeline: Pipeline;
   isPipelineValid: boolean;
-  shouldTestImmediately: boolean;
 }
 
 export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps> = ({
   closeFlyout,
   pipeline,
   isPipelineValid,
-  shouldTestImmediately,
 }) => {
   const { services } = useKibana();
 
@@ -43,7 +41,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   const initialSelectedTab = cachedDocuments ? 'output' : 'documents';
   const [selectedTab, setSelectedTab] = useState<Tab>(initialSelectedTab);
 
-  const [hasNotExecuted, setHasNotExecuted] = useState<boolean>(true);
+  const [shouldExecuteImmediately, setShouldExecuteImmediately] = useState<boolean>(false);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [executeError, setExecuteError] = useState<any>(null);
   const [executeOutput, setExecuteOutput] = useState<any>(undefined);
@@ -73,7 +71,10 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
       services.notifications.toasts.addSuccess(
         i18n.translate('xpack.ingestPipelines.testPipelineFlyout.successNotificationText', {
           defaultMessage: 'Pipeline executed',
-        })
+        }),
+        {
+          toastLifeTimeMs: 1000,
+        }
       );
 
       setSelectedTab('output');
@@ -82,19 +83,27 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   );
 
   useEffect(() => {
+    if (cachedDocuments) {
+      setShouldExecuteImmediately(true);
+    }
+    // We only want to know on initial mount if there are cached documents
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     // If the user has already tested the pipeline once,
     // use the cached test config and automatically execute the pipeline
-    if (hasNotExecuted && shouldTestImmediately && Object.entries(pipeline).length > 0) {
+    if (shouldExecuteImmediately && Object.entries(pipeline).length > 0) {
+      setShouldExecuteImmediately(false);
       handleExecute(cachedDocuments!, cachedVerbose);
-      setHasNotExecuted(false);
     }
   }, [
     pipeline,
     handleExecute,
     cachedDocuments,
     cachedVerbose,
-    hasNotExecuted,
-    shouldTestImmediately,
+    isExecuting,
+    shouldExecuteImmediately,
   ]);
 
   let tabContent;

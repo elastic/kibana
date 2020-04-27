@@ -6,15 +6,13 @@
 
 import React from 'react';
 
-import { PipelineForm, PipelineFormProps } from './pipeline_form';
-import { TestConfigContextProvider, useTestConfig } from './test_config_context';
+import { PipelineForm as PipelineFormUI, PipelineFormProps } from './pipeline_form';
+import { TestConfigContextProvider } from './test_config_context';
 
 export const PipelineFormProvider: React.FunctionComponent<PipelineFormProps> = passThroughProps => {
-  const testConfigContextValue = useTestConfig();
-
   return (
-    <TestConfigContextProvider value={testConfigContextValue}>
-      <PipelineForm {...passThroughProps} />
+    <TestConfigContextProvider>
+      <PipelineFormUI {...passThroughProps} />
     </TestConfigContextProvider>
   );
 };
