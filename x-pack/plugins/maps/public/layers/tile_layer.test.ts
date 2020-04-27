@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TileLayer } from './tile_layer';
+// eslint-disable-next-line max-classes-per-file
+import { ITileLayerArguments, TileLayer } from './tile_layer';
 import { SOURCE_TYPES } from '../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
 import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
@@ -22,9 +23,6 @@ class MockTileSource extends AbstractTMSSource implements ITMSSource {
     super(descriptor, {});
     this._descriptor = descriptor;
   }
-  createDefaultLayer(): ILayer {
-    throw new Error('not implemented');
-  }
 
   async getDisplayName(): Promise<string> {
     return this._descriptor.urlTemplate;
@@ -38,10 +36,13 @@ class MockTileSource extends AbstractTMSSource implements ITMSSource {
 describe('TileLayer', () => {
   it('should use display-label from source', async () => {
     const source = new MockTileSource(sourceDescriptor);
-    const layer: ILayer = new TileLayer({
+
+    const args: ITileLayerArguments = {
       source,
       layerDescriptor: { id: 'layerid', sourceDescriptor },
-    });
+    };
+
+    const layer: ILayer = new TileLayer(args);
     expect(await source.getDisplayName()).toEqual(await layer.getDisplayName());
   });
 

@@ -21,7 +21,6 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import mappings from './mappings.json';
@@ -119,42 +118,6 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectsManagement: {
-        dashboard: {
-          icon: 'dashboardApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'dashboard.show',
-            };
-          },
-        },
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-      },
-
-      savedObjectSchemas: {
-        'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
-
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
         const tilemap = mapConfig.tilemap;
@@ -177,63 +140,6 @@ export default function(kibana) {
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
-
-      migrations,
-    },
-
-    uiCapabilities: async function() {
-      return {
-        discover: {
-          show: true,
-          createShortUrl: true,
-          save: true,
-          saveQuery: true,
-        },
-        visualize: {
-          show: true,
-          createShortUrl: true,
-          delete: true,
-          save: true,
-          saveQuery: true,
-        },
-        dashboard: {
-          createNew: true,
-          show: true,
-          showWriteControls: true,
-          saveQuery: true,
-        },
-        catalogue: {
-          discover: true,
-          dashboard: true,
-          visualize: true,
-          console: true,
-          advanced_settings: true,
-          index_patterns: true,
-        },
-        advancedSettings: {
-          show: true,
-          save: true,
-        },
-        indexPatterns: {
-          save: true,
-        },
-        savedObjectsManagement: {
-          delete: true,
-          edit: true,
-          read: true,
-        },
-        management: {
-          /*
-           * Management settings correspond to management section/link ids, and should not be changed
-           * without also updating those definitions.
-           */
-          kibana: {
-            settings: true,
-            index_patterns: true,
-            objects: true,
-          },
-        },
-      };
     },
 
     preInit: async function(server) {

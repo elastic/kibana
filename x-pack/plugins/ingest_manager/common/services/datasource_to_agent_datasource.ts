@@ -12,7 +12,8 @@ export const storedDatasourceToAgentDatasource = (
   const { name, namespace, enabled, package: pkg, inputs } = datasource;
 
   const fullDatasource: FullAgentConfigDatasource = {
-    id: name,
+    id: 'id' in datasource ? datasource.id : name,
+    name,
     namespace,
     enabled,
     use_output: DEFAULT_OUTPUT.name, // TODO: hardcoded to default output for now

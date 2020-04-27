@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { WMSSource, wmsLayerWizardConfig } from './wms_source';
+export { wmsLayerWizardConfig } from './wms_layer_wizard';
+export { WMSSource } from './wms_source';

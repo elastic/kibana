@@ -27,7 +27,9 @@ import { Loading } from '../../../../../components';
 
 const CONFIG_KEYS_ORDER = [
   'id',
+  'name',
   'revision',
+  'type',
   'outputs',
   'datasources',
   'enabled',
@@ -52,7 +54,7 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={7}>
-        <EuiCodeBlock language="yaml" isCopyable>
+        <EuiCodeBlock language="yaml" isCopyable overflowHeight={500}>
           {dump(fullConfigRequest.data.item, {
             sortKeys: (keyA: string, keyB: string) => {
               const indexA = CONFIG_KEYS_ORDER.indexOf(keyA);

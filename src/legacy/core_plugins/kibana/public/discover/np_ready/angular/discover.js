@@ -49,7 +49,6 @@ import {
   subscribeWithScope,
   tabifyAggResponse,
   getAngularModule,
-  ensureDefaultIndexPattern,
   redirectWhenMissing,
 } from '../../kibana_services';
 
@@ -57,8 +56,7 @@ const {
   core,
   chrome,
   data,
-  docTitle,
-  history,
+  history: getHistory,
   indexPatterns,
   filterManager,
   share,
@@ -117,8 +115,9 @@ app.config($routeProvider => {
     reloadOnSearch: false,
     resolve: {
       savedObjects: function($route, Promise) {
+        const history = getHistory();
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, data, history).then(() => {
+        return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
@@ -205,6 +204,8 @@ function discoverController(
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
   };
 
+  const history = getHistory();
+
   const {
     appStateContainer,
     startSync: startStateSync,
@@ -214,6 +215,7 @@ function discoverController(
     isAppStateDirty,
     kbnUrlStateStorage,
     getPreviousAppState,
+    resetInitialAppState,
   } = getState({
     defaultAppState: getStateDefaults(),
     storeInSessionStorage: config.get('state:storeInSessionStorage'),
@@ -373,6 +375,8 @@ function discoverController(
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
+            } else {
+              resetInitialAppState();
             }
             return response;
           });
@@ -758,7 +762,7 @@ function discoverController(
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
-            docTitle.change(savedSearch.lastSavedTitle);
+            chrome.docTitle.change(savedSearch.lastSavedTitle);
           }
         }
       });
