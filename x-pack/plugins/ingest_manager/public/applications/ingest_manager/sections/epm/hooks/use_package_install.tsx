@@ -11,6 +11,7 @@ import { NotificationsStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
+import { useLinks } from '.';
 import { InstallStatus } from '../../../types';
 
 interface PackagesInstall {
@@ -21,9 +22,12 @@ interface PackageInstallItem {
   status: InstallStatus;
 }
 
-type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
+type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  fromUpdate?: boolean;
+};
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
+  const { toDetailView } = useLinks();
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
@@ -37,7 +41,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title }: InstallPackageProps) => {
+    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
 
@@ -62,7 +66,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-
+        if (fromUpdate) {
+          const settingsUrl = toDetailView({
+            name,
+            version,
+            panel: 'settings',
+          });
+          window.location.href = settingsUrl;
+        }
         notifications.toasts.addSuccess({
           title: toMountPoint(
             <FormattedMessage
@@ -81,7 +92,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
+    [notifications.toasts, setPackageInstallStatus, toDetailView]
   );
 
   const getPackageInstallStatus = useCallback(

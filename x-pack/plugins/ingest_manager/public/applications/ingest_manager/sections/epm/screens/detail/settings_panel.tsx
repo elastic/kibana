@@ -78,8 +78,8 @@ export const SettingsPanel = (
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText>
-          <table>
+        <table>
+          <tbody>
             <tr>
               <SettingsTitleCell>
                 <FormattedMessage
@@ -107,8 +107,18 @@ export const SettingsPanel = (
                 </EuiTitle>
               </td>
             </tr>
-          </table>
-        </EuiText>
+          </tbody>
+        </table>
+        {updatesAvailable && (
+          <p>
+            <InstallationButton
+              {...props}
+              version={latestVersion}
+              disabled={false}
+              isUpdate={true}
+            />
+          </p>
+        )}
       </div>
       <EuiSpacer size="s" />
       {packageInstallStatus === InstallStatus.notInstalled ||
