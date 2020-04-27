@@ -12,7 +12,7 @@ export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
 /**
  * Request types
  */
-export const validationDatasetsRequestPayloadRT = rt.type({
+export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
     sourceId: rt.string,
     indices: rt.array(rt.string),
@@ -21,22 +21,24 @@ export const validationDatasetsRequestPayloadRT = rt.type({
   }),
 });
 
-export type ValidationDatasetsRequestPayload = rt.TypeOf<typeof validationDatasetsRequestPayloadRT>;
+export type ValidateLogEntryDatasetsRequestPayload = rt.TypeOf<
+  typeof validateLogEntryDatasetsRequestPayloadRT
+>;
 
 /**
  * Response types
  * */
-const validationDatasetsEntryRT = rt.strict({
+const logEntryDatasetsEntryRT = rt.strict({
   indexName: rt.string,
   datasets: rt.array(rt.string),
 });
 
-export const validationDatasetsResponsePayloadRT = rt.type({
+export const validateLogEntryDatasetsResponsePayloadRT = rt.type({
   data: rt.type({
-    datasets: rt.array(validationDatasetsEntryRT),
+    datasets: rt.array(logEntryDatasetsEntryRT),
   }),
 });
 
-export type ValidationDatasetsResponsePayload = rt.TypeOf<
-  typeof validationDatasetsResponsePayloadRT
+export type ValidateLogEntryDatasetsResponsePayload = rt.TypeOf<
+  typeof validateLogEntryDatasetsResponsePayloadRT
 >;

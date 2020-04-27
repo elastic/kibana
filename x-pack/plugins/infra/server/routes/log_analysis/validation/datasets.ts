@@ -8,8 +8,8 @@ import Boom from 'boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
-  validationDatasetsRequestPayloadRT,
-  validationDatasetsResponsePayloadRT,
+  validateLogEntryDatasetsRequestPayloadRT,
+  validateLogEntryDatasetsResponsePayloadRT,
 } from '../../../../common/http_api';
 
 import { createValidationFunction } from '../../../../common/runtime_types';
@@ -24,7 +24,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
       method: 'post',
       path: LOG_ANALYSIS_VALIDATE_DATASETS_PATH,
       validate: {
-        body: createValidationFunction(validationDatasetsRequestPayloadRT),
+        body: createValidationFunction(validateLogEntryDatasetsRequestPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
@@ -53,7 +53,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
         );
 
         return response.ok({
-          body: validationDatasetsResponsePayloadRT.encode({ data: { datasets } }),
+          body: validateLogEntryDatasetsResponsePayloadRT.encode({ data: { datasets } }),
         });
       } catch (error) {
         if (Boom.isBoom(error)) {
