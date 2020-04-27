@@ -216,17 +216,7 @@ export class SavedObjectsClient {
       }),
     });
 
-    return createRequest
-      .then(resp => this.createSavedObject(resp))
-      .catch((error: object) => {
-        if (isAutoCreateIndexError(error)) {
-          window.location.assign(
-            this.http.basePath.prepend('/app/kibana#/error/action.auto_create_index')
-          );
-        }
-
-        throw error;
-      });
+    return createRequest.then(resp => this.createSavedObject(resp));
   };
 
   /**
@@ -468,9 +458,3 @@ const renameKeys = <T extends Record<string, any>, U extends Record<string, any>
       ...{ [keysMap[key] || key]: obj[key] },
     };
   }, {});
-
-const isAutoCreateIndexError = (error: any) => {
-  return (
-    error?.res?.status === 503 && error?.body?.attributes?.code === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-};
