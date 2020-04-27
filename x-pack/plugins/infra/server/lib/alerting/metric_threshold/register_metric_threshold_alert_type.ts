@@ -7,8 +7,15 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './types';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
+
+const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
+  schema.string({
+    validate: value =>
+      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
+  });
 
 export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
   if (!alertingPlugin) {
@@ -20,13 +27,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
 
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: schema.oneOf([
-      schema.literal('>'),
-      schema.literal('<'),
-      schema.literal('>='),
-      schema.literal('<='),
-      schema.literal('between'),
-    ]),
+    comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };
@@ -34,13 +35,7 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
   const nonCountCriterion = schema.object({
     ...baseCriterion,
     metric: schema.string(),
-    aggType: schema.oneOf([
-      schema.literal('avg'),
-      schema.literal('min'),
-      schema.literal('max'),
-      schema.literal('rate'),
-      schema.literal('cardinality'),
-    ]),
+    aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
   });
 
   const countCriterion = schema.object({

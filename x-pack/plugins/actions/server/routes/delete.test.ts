@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { deleteActionRoute } from './delete';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../mocks';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -20,7 +21,7 @@ beforeEach(() => {
 describe('deleteActionRoute', () => {
   it('deletes an action with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     deleteActionRoute(router, licenseState);
 
@@ -35,9 +36,8 @@ describe('deleteActionRoute', () => {
       }
     `);
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -65,19 +65,21 @@ describe('deleteActionRoute', () => {
 
   it('ensures the license allows deleting actions', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     deleteActionRoute(router, licenseState);
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {
-      params: { id: '1' },
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: { id: '1' },
+      }
+    );
 
     await handler(context, req, res);
 
@@ -86,7 +88,7 @@ describe('deleteActionRoute', () => {
 
   it('ensures the license check prevents deleting actions', async () => {
     const licenseState = licenseStateMock.create();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -96,13 +98,15 @@ describe('deleteActionRoute', () => {
 
     const [, handler] = router.delete.mock.calls[0];
 
-    const actionsClient = {
-      delete: jest.fn().mockResolvedValueOnce({}),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.delete.mockResolvedValueOnce({});
 
-    const [context, req, res] = mockHandlerArguments(actionsClient, {
-      id: '1',
-    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        id: '1',
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 

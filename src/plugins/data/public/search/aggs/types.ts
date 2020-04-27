@@ -19,21 +19,23 @@
 
 import { IndexPattern } from '../../index_patterns';
 import {
+  AggConfig,
+  AggConfigSerialized,
+  AggConfigs,
+  AggParamsTerms,
   AggType,
+  aggTypeFieldFilters,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
-  AggConfig,
-  AggConfigs,
   CreateAggConfigParams,
   FieldParamType,
   getCalculateAutoTimeExpression,
   MetricAggType,
-  aggTypeFieldFilters,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './';
 
-export { IAggConfig } from './agg_config';
+export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
@@ -69,4 +71,26 @@ export interface SearchAggsStart {
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;
+}
+
+/** @internal */
+export interface AggExpressionType {
+  type: 'agg_type';
+  value: AggConfigSerialized;
+}
+
+/** @internal */
+export type AggExpressionFunctionArgs<
+  Name extends keyof AggParamsMapping
+> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+
+/**
+ * A global list of the param interfaces for each agg type.
+ * For now this is internal, but eventually we will probably
+ * want to make it public.
+ *
+ * @internal
+ */
+export interface AggParamsMapping {
+  terms: AggParamsTerms;
 }
