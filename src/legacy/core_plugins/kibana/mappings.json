@@ -5,15 +5,5 @@
         "type": "keyword"
       }
     }
-  },
-  "kql-telemetry": {
-    "properties": {
-      "optInCount": {
-        "type": "long"
-      },
-      "optOutCount": {
-        "type": "long"
-      }
-    }
   }
 }
