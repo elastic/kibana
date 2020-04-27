@@ -13,6 +13,7 @@ import { LogPositionState, WithLogPositionUrlState } from '../../../containers/l
 import { LogFilterState, WithLogFilterUrlState } from '../../../containers/logs/log_filter';
 import { LogEntriesState } from '../../../containers/logs/log_entries';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 
 const LogFilterStateProvider: React.FC = ({ children }) => {
   const { derivedIndexPattern } = useLogSourceContext();
@@ -21,6 +22,25 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
       <WithLogFilterUrlState />
       {children}
     </LogFilterState.Provider>
+  );
+};
+
+const ViewLogInContextProvider: React.FC = ({ children }) => {
+  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const { sourceId } = useContext(Source.Context);
+
+  if (!startTimestamp || !endTimestamp) {
+    return null;
+  }
+
+  return (
+    <ViewLogInContext.Provider
+      startTimestamp={startTimestamp}
+      endTimestamp={endTimestamp}
+      sourceId={sourceId}
+    >
+      {children}
+    </ViewLogInContext.Provider>
   );
 };
 
@@ -96,11 +116,13 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
       <LogFlyout.Provider>
         <LogPositionState.Provider>
           <WithLogPositionUrlState />
-          <LogFilterStateProvider>
-            <LogEntriesStateProvider>
-              <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>
-            </LogEntriesStateProvider>
-          </LogFilterStateProvider>
+          <ViewLogInContextProvider>
+            <LogFilterStateProvider>
+              <LogEntriesStateProvider>
+                <LogHighlightsStateProvider>{children}</LogHighlightsStateProvider>
+              </LogEntriesStateProvider>
+            </LogFilterStateProvider>
+          </ViewLogInContextProvider>
         </LogPositionState.Provider>
       </LogFlyout.Provider>
     </LogViewConfiguration.Provider>
