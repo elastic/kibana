@@ -30,7 +30,7 @@ import {
 import { SecurityPluginSetup } from '../../security/public';
 import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
 import { initTelemetry } from './lib/telemetry';
-import { KibanaServices } from './lib/kibana';
+import { KibanaServices } from './lib/kibana/services';
 import { serviceNowActionType } from './lib/connectors';
 
 export interface SetupPlugins {
