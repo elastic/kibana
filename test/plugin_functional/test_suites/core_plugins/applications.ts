@@ -35,9 +35,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
   const loadingScreenShown = () => testSubjects.existOrFail('kbnLoadingMessage');
 
-  const getAppWrapperWidth = async () => {
+  const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('app-wrapper');
-    return (await wrapper.getSize()).width;
+    return (await wrapper.getSize()).height;
   };
 
   const getKibanaUrl = (pathname?: string, search?: string) =>
@@ -90,7 +90,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     it('navigates to app root when navlink is clicked', async () => {
       await appsMenu.clickLink('Foo');
       await waitForUrlToBe('/app/foo');
-      await loadingScreenNotShown();
+      // await loadingScreenNotShown();
       await testSubjects.existOrFail('fooAppHome');
     });
 
@@ -122,9 +122,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(false);
 
-      const wrapperWidth = await getAppWrapperWidth();
-      const windowWidth = (await browser.getWindowSize()).width;
-      expect(wrapperWidth).to.eql(windowWidth);
+      const wrapperHeight = await getAppWrapperHeight();
+      const windowHeight = (await browser.getWindowSize()).height;
+      expect(wrapperHeight).to.eql(windowHeight);
     });
 
     it('navigating away from chromeless application shows chrome', async () => {
@@ -132,9 +132,9 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       await loadingScreenNotShown();
       expect(await testSubjects.exists('headerGlobalNav')).to.be(true);
 
-      const wrapperWidth = await getAppWrapperWidth();
-      const windowWidth = (await browser.getWindowSize()).width;
-      expect(wrapperWidth).to.be.below(windowWidth);
+      const wrapperHeight = await getAppWrapperHeight();
+      const windowHeight = (await browser.getWindowSize()).height;
+      expect(wrapperHeight).to.be.below(windowHeight);
     });
 
     it('can navigate from NP apps to legacy apps', async () => {

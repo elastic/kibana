@@ -166,7 +166,7 @@ export function CollapsibleNav({
         </EuiCollapsibleNavGroup>
 
         {/* Kibana, Observability, Security, and Management sections */}
-        {orderedCategories.map(categoryName => {
+        {orderedCategories.map((categoryName, i) => {
           const category = categoryDictionary[categoryName]!;
           const links = allCategorizedLinks[categoryName].map(
             ({ label, href, onClick }: NavLink) => ({
@@ -205,8 +205,8 @@ export function CollapsibleNav({
         })}
 
         {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map(linkWithoutCategory => (
-          <EuiCollapsibleNavGroup>
+        {unknowns.map((linkWithoutCategory, i) => (
+          <EuiCollapsibleNavGroup key={i}>
             <EuiListGroup flush>
               <EuiListGroupItem
                 color="text"
