@@ -5,4 +5,4 @@
  */
 
 export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
-export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './anomaly_swimlane_embaddable';
+export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './anomaly_swimlane_embeddable';

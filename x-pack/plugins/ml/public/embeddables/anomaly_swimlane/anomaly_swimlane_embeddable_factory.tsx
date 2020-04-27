@@ -21,7 +21,7 @@ import {
   AnomalySwimlaneEmbeddableInput,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableServices,
-} from './anomaly_swimlane_embaddable';
+} from './anomaly_swimlane_embeddable';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { MlStartDependencies } from '../../plugin';
 import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';

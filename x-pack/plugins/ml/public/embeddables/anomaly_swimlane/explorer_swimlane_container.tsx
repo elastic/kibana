@@ -19,7 +19,7 @@ import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   MlServices,
-} from './anomaly_swimlane_embaddable';
+} from './anomaly_swimlane_embeddable';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
