@@ -263,12 +263,17 @@ export interface IndexTemplateMappings {
   properties: any;
 }
 
+// This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
+// until "proper" documentation of the new format is available.
+// Ingest Manager does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
-  order: number;
+  priority: number;
   index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
+  template: {
+    settings: any;
+    mappings: object;
+    aliases: object;
+  };
 }
 
 export interface TemplateRef {
