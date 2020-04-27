@@ -78,16 +78,6 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectsManagement: {
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-      },
-
       savedObjectSchemas: {
         'kql-telemetry': {
           isNamespaceAgnostic: true,
