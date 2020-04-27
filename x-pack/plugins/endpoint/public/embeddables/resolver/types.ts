@@ -130,6 +130,13 @@ export type CameraState = {
     }
 );
 
+export const waitingForRelatedEventData = Symbol('The app has requested related event data for this entity ID, but has not yet receieved it');
+export type RelatedEventDataEntry = object;
+export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
+  stats: object;
+}
+export type RelatedEventData = Record<string, RelatedEventDataEntryWithStats | typeof waitingForRelatedEventData>;
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */

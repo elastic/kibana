@@ -105,70 +105,72 @@ const OptionList = React.memo(
   }
 );
 
-const NodeSubMenu = styled(React.memo(
-  ({
-    menuTitle,
-    menuAction,
-    optionsWithActions,
-    className,
-  }: { menuTitle: string; className?: string } & (
-    | {
-        menuAction?: undefined;
-        optionsWithActions: ResolverSubmenuOptionList;
+const NodeSubMenu = styled(
+  React.memo(
+    ({
+      menuTitle,
+      menuAction,
+      optionsWithActions,
+      className,
+    }: { menuTitle: string; className?: string } & (
+      | {
+          menuAction?: undefined;
+          optionsWithActions: ResolverSubmenuOptionList;
+        }
+      | { menuAction: () => unknown; optionsWithActions?: undefined }
+    )) => {
+      const [menuIsOpen, setMenuOpen] = useState(false);
+      const handleMenuOpenClick = useCallback(
+        (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          clickEvent.preventDefault();
+          clickEvent.stopPropagation();
+          setMenuOpen(!menuIsOpen);
+        },
+        [menuIsOpen]
+      );
+      const handleMenuActionClick = useCallback(
+        (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          clickEvent.preventDefault();
+          clickEvent.stopPropagation();
+          if (typeof menuAction === 'function') menuAction();
+        },
+        [menuAction]
+      );
+      if (!optionsWithActions) {
+        /**
+         * When called with a `menuAction`
+         * Render without dropdown and call the supplied action when host button is clicked
+         */
+        return (
+          <div className={className}>
+            <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+              {menuTitle}
+            </EuiButton>
+          </div>
+        );
       }
-    | { menuAction: () => unknown; optionsWithActions?: undefined }
-  )) => {
-    const [menuIsOpen, setMenuOpen] = useState(false);
-    const handleMenuOpenClick = useCallback(
-      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-        setMenuOpen(!menuIsOpen);
-      },
-      [menuIsOpen]
-    );
-    const handleMenuActionClick = useCallback(
-      (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        clickEvent.preventDefault();
-        clickEvent.stopPropagation();
-        if (typeof menuAction === 'function') menuAction();
-      },
-      [menuAction]
-    );
-    if (!optionsWithActions) {
       /**
-       * When called with a `menuAction`
-       * Render without dropdown and call the supplied action when host button is clicked
+       * When called with a set of `optionsWithActions`:
+       * Render with a panel of options that appear when the menu host button is clicked
        */
       return (
-        <div className={className}>
-          <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+        <div className={className + (menuIsOpen ? ' is-open' : '')}>
+          <EuiButton
+            onClick={handleMenuOpenClick}
+            color="ghost"
+            size="s"
+            iconType="arrowUp"
+            iconSide="right"
+            tabIndex={-1}
+          >
             {menuTitle}
           </EuiButton>
+          {menuIsOpen && <OptionList subMenuOptions={optionsWithActions} />}
         </div>
       );
     }
-    /**
-     * When called with a set of `optionsWithActions`:
-     * Render with a panel of options that appear when the menu host button is clicked
-     */
-    return (
-      <div className={className + (menuIsOpen ? ' is-open' : '')}>
-        <EuiButton
-          onClick={handleMenuOpenClick}
-          color="ghost"
-          size="s"
-          iconType="arrowUp"
-          iconSide="right"
-          tabIndex={-1}
-        >
-          {menuTitle}
-        </EuiButton>
-        {menuIsOpen && <OptionList subMenuOptions={optionsWithActions} />}
-      </div>
-    );
-  }
-))`
+  )
+)`
   margin: 0;
   padding: 0;
   border: none;
@@ -178,7 +180,7 @@ const NodeSubMenu = styled(React.memo(
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-`
+`;
 
 /**
  * An artefact that represents a process node.
