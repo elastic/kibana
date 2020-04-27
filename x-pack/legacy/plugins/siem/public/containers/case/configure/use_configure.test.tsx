@@ -5,13 +5,18 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useCaseConfigure, ReturnUseCaseConfigure, PersistCaseConfigure } from './use_configure';
-import { caseConfigurationCamelCaseResponseMock } from './mock';
+import {
+  initialState,
+  useCaseConfigure,
+  ReturnUseCaseConfigure,
+  ConnectorConfiguration,
+} from './use_configure';
+import { mapping, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
 
-const configuration: PersistCaseConfigure = {
+const configuration: ConnectorConfiguration = {
   connectorId: '456',
   connectorName: 'My Connector 2',
   closureType: 'close-by-pushing',
@@ -23,23 +28,20 @@ describe('useConfigure', () => {
     jest.restoreAllMocks();
   });
 
-  const args = {
-    setConnector: jest.fn(),
-    setClosureType: jest.fn(),
-    setCurrentConfiguration: jest.fn(),
-  };
-
   test('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
-        loading: true,
-        persistLoading: false,
+        ...initialState,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setConnector: result.current.setConnector,
+        setClosureType: result.current.setClosureType,
+        setMapping: result.current.setMapping,
       });
     });
   });
@@ -47,67 +49,29 @@ describe('useConfigure', () => {
   test('fetch case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
       expect(result.current).toEqual({
+        ...initialState,
+        closureType: caseConfigurationCamelCaseResponseMock.closureType,
+        connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        currentConfiguration: {
+          closureType: caseConfigurationCamelCaseResponseMock.closureType,
+          connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        },
+        version: caseConfigurationCamelCaseResponseMock.version,
+        firstLoad: true,
         loading: false,
-        persistLoading: false,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
-      });
-    });
-  });
-
-  test('fetch case configuration - setConnector', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(args.setConnector).toHaveBeenCalledWith('123', 'My Connector');
-    });
-  });
-
-  test('fetch case configuration - setClosureType', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(args.setClosureType).toHaveBeenCalledWith('close-by-user');
-    });
-  });
-
-  test('fetch case configuration - setCurrentConfiguration', async () => {
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(args.setCurrentConfiguration).toHaveBeenCalledWith({
-        connectorId: '123',
-        closureType: 'close-by-user',
-      });
-    });
-  });
-
-  test('fetch case configuration - only setConnector', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure({ setConnector: jest.fn() })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        loading: false,
-        persistLoading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        persistCaseConfigure: result.current.persistCaseConfigure,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setConnector: result.current.setConnector,
+        setClosureType: result.current.setClosureType,
+        setMapping: result.current.setMapping,
       });
     });
   });
@@ -117,7 +81,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -126,10 +90,23 @@ describe('useConfigure', () => {
     });
   });
 
+  test('correctly sets mappings', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
+        useCaseConfigure()
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      expect(result.current.mapping).toEqual(null);
+      result.current.setMapping(mapping);
+      expect(result.current.mapping).toEqual(mapping);
+    });
+  });
+
   test('set isLoading to true when fetching case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -142,19 +119,12 @@ describe('useConfigure', () => {
   test('persist case configuration', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-
       result.current.persistCaseConfigure(configuration);
-
-      expect(result.current).toEqual({
-        loading: false,
-        persistLoading: true,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-      });
+      expect(result.current.persistLoading).toBeTruthy();
     });
   });
 
@@ -178,21 +148,16 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
 
       result.current.persistCaseConfigure(configuration);
 
+      expect(result.current.connectorId).toEqual('123');
       await waitForNextUpdate();
-
-      expect(args.setConnector).toHaveBeenNthCalledWith(2, '456');
-      expect(args.setClosureType).toHaveBeenNthCalledWith(2, 'close-by-pushing');
-      expect(args.setCurrentConfiguration).toHaveBeenNthCalledWith(2, {
-        connectorId: '456',
-        closureType: 'close-by-pushing',
-      });
+      expect(result.current.connectorId).toEqual('456');
     });
   });
 
@@ -207,43 +172,16 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
 
       result.current.persistCaseConfigure(configuration);
 
+      expect(result.current.connectorId).toEqual('123');
       await waitForNextUpdate();
-
-      expect(args.setConnector).toHaveBeenNthCalledWith(2, '456');
-      expect(args.setClosureType).toHaveBeenNthCalledWith(2, 'close-by-pushing');
-      expect(args.setCurrentConfiguration).toHaveBeenNthCalledWith(2, {
-        connectorId: '456',
-        closureType: 'close-by-pushing',
-      });
-    });
-  });
-
-  test('save case configuration - only setConnector', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure({ setConnector: jest.fn() })
-      );
-
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-
-      result.current.persistCaseConfigure(configuration);
-
-      await waitForNextUpdate();
-
-      expect(result.current).toEqual({
-        loading: false,
-        persistLoading: false,
-        refetchCaseConfigure: result.current.refetchCaseConfigure,
-        persistCaseConfigure: result.current.persistCaseConfigure,
-      });
+      expect(result.current.connectorId).toEqual('456');
     });
   });
 
@@ -255,22 +193,34 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
 
       await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
+        ...initialState,
         loading: false,
         persistLoading: false,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setConnector: result.current.setConnector,
+        setClosureType: result.current.setClosureType,
+        setMapping: result.current.setMapping,
       });
     });
   });
 
   test('unhappy path - persist case configuration', async () => {
+    const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
+    spyOnGetCaseConfigure.mockImplementation(() =>
+      Promise.resolve({
+        ...caseConfigurationCamelCaseResponseMock,
+        version: '',
+      })
+    );
     const spyOnPostCaseConfigure = jest.spyOn(api, 'postCaseConfigure');
     spyOnPostCaseConfigure.mockImplementation(() => {
       throw new Error('Something went wrong');
@@ -278,7 +228,7 @@ describe('useConfigure', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, ReturnUseCaseConfigure>(() =>
-        useCaseConfigure(args)
+        useCaseConfigure()
       );
 
       await waitForNextUpdate();
@@ -286,13 +236,24 @@ describe('useConfigure', () => {
 
       result.current.persistCaseConfigure(configuration);
 
-      await waitForNextUpdate();
-
       expect(result.current).toEqual({
+        ...initialState,
+        closureType: caseConfigurationCamelCaseResponseMock.closureType,
+        connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+        connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        currentConfiguration: {
+          closureType: caseConfigurationCamelCaseResponseMock.closureType,
+          connectorId: caseConfigurationCamelCaseResponseMock.connectorId,
+          connectorName: caseConfigurationCamelCaseResponseMock.connectorName,
+        },
+        firstLoad: true,
         loading: false,
-        persistLoading: false,
         refetchCaseConfigure: result.current.refetchCaseConfigure,
         persistCaseConfigure: result.current.persistCaseConfigure,
+        setCurrentConfiguration: result.current.setCurrentConfiguration,
+        setConnector: result.current.setConnector,
+        setClosureType: result.current.setClosureType,
+        setMapping: result.current.setMapping,
       });
     });
   });
