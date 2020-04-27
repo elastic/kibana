@@ -32,6 +32,7 @@ interface Props {
   history: History;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
 interface Params {
@@ -43,6 +44,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   mounters,
   setAppLeaveHandler,
   appStatuses$,
+  setIsMounting,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -67,7 +69,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                       appPath={url}
                       appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
                       createScopedHistory={createScopedHistory}
-                      {...{ appId, mounter, setAppLeaveHandler }}
+                      {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
                     />
                   )}
                 />,
@@ -92,7 +94,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id}
                 appStatus={appStatuses.get(id) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler }}
+                {...{ mounter, setAppLeaveHandler, setIsMounting }}
               />
             );
           }}

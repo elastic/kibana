@@ -20,7 +20,7 @@
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
@@ -420,9 +420,9 @@ describe('#setup()', () => {
     const container = setupDeps.context.createContextContainer.mock.results[0].value;
     const pluginId = Symbol();
 
-    const mount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, mount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', mount);
+    const appMount = () => () => undefined;
+    registerMountContext(pluginId, 'test' as any, appMount);
+    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
   });
 });
 
@@ -722,6 +722,47 @@ describe('#start()', () => {
           "beta",
           "gamma",
           "delta",
+        ]
+      `);
+    });
+
+    it('updates httpLoadingCount$ while mounting', async () => {
+      // Use a memory history so that mounting the component will work
+      const { createMemoryHistory } = jest.requireActual('history');
+      const history = createMemoryHistory();
+      setupDeps.history = history;
+
+      // Create some dummy applications
+      const { register } = service.setup(setupDeps);
+      register(Symbol(), createApp({ id: 'alpha' }));
+      register(Symbol(), createApp({ id: 'beta' }));
+      register(Symbol(), createApp({ id: 'gamma' }));
+      register(Symbol(), createApp({ id: 'delta' }));
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+      const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
+      const stop$ = new Subject();
+      const promise = httpLoadingCount$.pipe(bufferCount(8), takeUntil(stop$)).toPromise();
+      mount(getComponent()!);
+
+      await navigateToApp('alpha');
+      await navigateToApp('beta');
+      await navigateToApp('gamma');
+      await navigateToApp('delta');
+      stop$.next();
+
+      const loadingCounts = await promise;
+
+      expect(loadingCounts).toMatchInlineSnapshot(`
+        Array [
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          1,
         ]
       `);
     });

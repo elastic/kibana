@@ -28,6 +28,12 @@ import { ScopedHistory } from '../scoped_history';
 describe('AppContainer', () => {
   const appId = 'someApp';
   const setAppLeaveHandler = jest.fn();
+  const setIsMounting = jest.fn();
+
+  beforeEach(() => {
+    setAppLeaveHandler.mockClear();
+    setIsMounting.mockClear();
+  });
 
   const flushPromises = async () => {
     await new Promise(async resolve => {
@@ -67,6 +73,7 @@ describe('AppContainer', () => {
         appStatus={AppStatus.inaccessible}
         mounter={mounter}
         setAppLeaveHandler={setAppLeaveHandler}
+        setIsMounting={setIsMounting}
         createScopedHistory={(appPath: string) =>
           // Create a history using the appPath as the current location
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
@@ -91,5 +98,35 @@ describe('AppContainer', () => {
     wrapper.update();
 
     expect(wrapper.text()).toContain('some-content');
+  });
+
+  it('should call setIsMounting while mounting', async () => {
+    const [waitPromise, resolvePromise] = createResolver();
+    const mounter = createMounter(waitPromise);
+
+    const wrapper = mount(
+      <AppContainer
+        appPath={`/app/${appId}`}
+        appId={appId}
+        appStatus={AppStatus.accessible}
+        mounter={mounter}
+        setAppLeaveHandler={setAppLeaveHandler}
+        setIsMounting={setIsMounting}
+        createScopedHistory={(appPath: string) =>
+          // Create a history using the appPath as the current location
+          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+        }
+      />
+    );
+
+    expect(setIsMounting).toHaveBeenCalledTimes(1);
+    expect(setIsMounting).toHaveBeenLastCalledWith(true);
+
+    resolvePromise();
+    await flushPromises();
+    wrapper.update();
+
+    expect(setIsMounting).toHaveBeenCalledTimes(2);
+    expect(setIsMounting).toHaveBeenLastCalledWith(false);
   });
 });

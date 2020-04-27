@@ -38,6 +38,7 @@ interface Props {
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
 export const AppContainer: FunctionComponent<Props> = ({
@@ -47,6 +48,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   setAppLeaveHandler,
   createScopedHistory,
   appStatus,
+  setIsMounting,
 }: Props) => {
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -65,6 +67,7 @@ export const AppContainer: FunctionComponent<Props> = ({
     }
     setAppNotFound(false);
 
+    setIsMounting(true);
     if (mounter.unmountBeforeMounting) {
       unmount();
     }
@@ -77,12 +80,13 @@ export const AppContainer: FunctionComponent<Props> = ({
           element: elementRef.current!,
           onAppLeave: handler => setAppLeaveHandler(appId, handler),
         })) || null;
+      setIsMounting(false);
     };
 
     mount();
 
     return unmount;
-  }, [appId, appStatus, mounter, createScopedHistory, setAppLeaveHandler, appPath]);
+  }, [appId, appStatus, mounter, createScopedHistory, setAppLeaveHandler, appPath, setIsMounting]);
 
   return (
     <Fragment>

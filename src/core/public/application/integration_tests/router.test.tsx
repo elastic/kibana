@@ -40,7 +40,7 @@ describe('AppContainer', () => {
   };
   const mockMountersToMounters = () =>
     new Map([...mounters].map(([appId, { mounter }]) => [appId, mounter]));
-  const setAppLeaveHandlerMock = () => undefined;
+  const noop = () => undefined;
 
   const mountersToAppStatus$ = () => {
     return new BehaviorSubject(
@@ -86,7 +86,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={appStatuses$}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
   });
@@ -214,7 +215,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
@@ -245,7 +247,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
@@ -286,7 +289,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
