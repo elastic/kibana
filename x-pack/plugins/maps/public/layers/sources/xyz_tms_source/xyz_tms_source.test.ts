@@ -5,8 +5,6 @@
  */
 
 import { XYZTMSSource } from './xyz_tms_source';
-import { ILayer } from '../../layer';
-import { TileLayer } from '../../tile_layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 
@@ -16,12 +14,6 @@ const descriptor: XYZTMSSourceDescriptor = {
   id: 'foobar',
 };
 describe('xyz Tilemap Source', () => {
-  it('should create a tile-layer', () => {
-    const source = new XYZTMSSource(descriptor);
-    const layer: ILayer = source.createDefaultLayer();
-    expect(layer instanceof TileLayer).toEqual(true);
-  });
-
   it('should echo url template for url template', async () => {
     const source = new XYZTMSSource(descriptor);
     const template = await source.getUrlTemplate();
