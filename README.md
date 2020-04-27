@@ -63,20 +63,21 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 | --all            | Show commits from other than me                        | false          | boolean |
 | --author         | Filter commits by author                               | _Current user_ | string  |
 | --branch         | Target branch to backport to                           |                | string  |
-| --max-number     | Number of commits to choose from                       | 10             | number  |
 | --dry-run        | Perform backport without pushing to Github             | false          | boolean |
 | --editor         | Editor (eg. `code`) to open and solve conflicts        |                | string  |
 | --fork           | Create backports in fork (true) or origin repo (false) | true           | boolean |
 | --labels         | Pull request labels                                    |                | string  |
 | --mainline       | Parent id of merge commit                              | 1              | number  |
+| --max-number     | Number of commits to choose from                       | 10             | number  |
 | --multiple       | Select multiple commits/branches                       | false          | boolean |
 | --path           | Only list commits touching files under a specific path |                | string  |
+| --pr             | Pull request to backport                               |                | number  |
+| --pr-filter      | List commits from PRs filtered by a given query        |                | string  |
 | --pr-description | Pull request description suffix                        |                | string  |
 | --pr-title       | Pull request title pattern                             |                | string  |
-| --pr             | Pull request to backport                               |                | number  |
 | --reset-author   | Set yourself as commit author                          |                | boolean |
 | --sha            | Sha of commit to backport                              |                | string  |
-| --sourceBranch   | The branch to source commits from                      |                | string  |
+| --source-branch  | The branch to source commits from                      |                | string  |
 | --upstream       | Name of organization and repository                    |                | string  |
 | --username       | Github username                                        |                | string  |
 | --help           | Show help                                              |                |         |
@@ -100,12 +101,13 @@ This tools is for anybody who is working on a codebase where they have to mainta
 
 - interactively backport one or more commits to one or more branches with an intuitive UI
 - will never run `git reset --hard` or other git commands in your working directory - all git operations are handled in a separate directory
-- backport a commit by specifying a PR (`backport --pr 1337`)
-- list and backport commits by a particular user (`backport --author john`)
-- list and backport commits by a particular path (`backport --path src/plugins/chatbot`)
-- forward port commits: `backport --sourceBranch 7.x --branch master` (will backport from 7.x to master)
-- backport merge commits (`backport --mainline`)
-- see which commits have been backported and to which branches
+- backport a commit by specifying a PR: `backport --pr 1337`
+- list and backport commits by a particular user: `backport --author john`
+- list and backport commits by a particular path: `backport --path src/plugins/chatbot`
+- list PRs filtered by a query: `backport --pr-filter label:backport-v2` (will list commits from PRs with the label "backport-v2")
+- forward port commits: `backport --sourceBranch 7.x --branch master` (will forwardport from 7.x to master)
+- backport merge commits: `backport --mainline`
+- ability to see which commits have been backported and to which branches
 - customize the title, description and labels of the created backport PRs
 
 ## Contributing

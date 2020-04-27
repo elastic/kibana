@@ -83,7 +83,7 @@ Config:
 
 #### `targetBranchChoices` **required**
 
-List of target branches the user can interactively select. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
+List of target branches the user can select interactively. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
 
 CLI: `--branch 6.1 --branch 6.0`
 
@@ -113,7 +113,7 @@ CLI: `--all`
 
 #### `branchLabelMapping`
 
-Pre-select target branch options based on the source PR labels.
+Pre-select target branch choices based on the source PR labels.
 
 Example:
 

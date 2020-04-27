@@ -13,25 +13,30 @@ export async function getOptionsFromConfigFiles() {
     getGlobalConfig(),
   ]);
 
-  const { targetBranchChoices, ...combinedConfig } = {
+  const { targetBranchChoices, branches, ...combinedConfig } = {
     ...globalConfig,
     ...projectConfig,
   };
 
   return {
     // defaults
-    sourcePRLabels: [] as string[] | never[],
-    fork: true,
-    multiple: false,
-    multipleCommits: false,
-    multipleBranches: true,
-    all: false,
-    targetPRLabels: [] as string[],
-    prTitle: '[{targetBranch}] {commitMessages}',
+    all: false, // show users own commits
+    fork: true, // push target branch to {username}/{repoName}
     gitHostname: 'github.com',
     githubApiBaseUrlV3: 'https://api.github.com',
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
-    targetBranchChoices: getTargetBranchChoicesAsObject(targetBranchChoices),
+    maxNumber: 10, // display 10 commits to pick from
+    multiple: false,
+    multipleBranches: true, // allow user to pick multiple target branches
+    multipleCommits: false, // only let user pick a single commit
+    prTitle: '[{targetBranch}] {commitMessages}',
+    sourcePRLabels: [] as string[] | never[],
+    targetBranchChoices: getTargetBranchChoicesAsObject(
+      targetBranchChoices || branches
+    ),
+    targetPRLabels: [] as string[],
+
+    // merge defaults with config values
     ...combinedConfig,
   };
 }

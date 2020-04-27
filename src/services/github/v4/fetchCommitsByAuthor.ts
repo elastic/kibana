@@ -1,3 +1,5 @@
+import isEmpty from 'lodash.isempty';
+import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { CommitChoice } from '../../../types/Commit';
 import { filterEmpty } from '../../../utils/filterEmpty';
@@ -105,20 +107,28 @@ export async function fetchCommitsByAuthor(
     }
   `;
 
-  const authorId = await fetchAuthorId(options);
-  const res = await apiRequestV4<DataResponse>({
-    githubApiBaseUrlV4,
-    accessToken,
-    query,
-    variables: {
-      repoOwner,
-      repoName,
-      sourceBranch,
-      maxNumber: maxNumber || 10,
-      authorId,
-      historyPath: path || null,
-    },
-  });
+  const spinner = ora('Loading commits...').start();
+  let res: DataResponse;
+  try {
+    const authorId = await fetchAuthorId(options);
+    res = await apiRequestV4<DataResponse>({
+      githubApiBaseUrlV4,
+      accessToken,
+      query,
+      variables: {
+        repoOwner,
+        repoName,
+        sourceBranch,
+        maxNumber,
+        authorId,
+        historyPath: path || null,
+      },
+    });
+    spinner.stop();
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 
   if (res.repository.ref === null) {
     throw new HandledError(
@@ -126,7 +136,7 @@ export async function fetchCommitsByAuthor(
     );
   }
 
-  return res.repository.ref.target.history.edges.map((edge) => {
+  const commits = res.repository.ref.target.history.edges.map((edge) => {
     // it is assumed that there can only be a single PR associated with a commit
     // that assumption might not hold true forever but for now it works out
     const pullRequestEdge = edge.node.associatedPullRequests.edges[0];
@@ -172,6 +182,21 @@ export async function fetchCommitsByAuthor(
       existingTargetPullRequests,
     };
   });
+
+  // terminate if not commits were found
+  if (isEmpty(commits)) {
+    const pathText = options.path
+      ? ` touching files in path: "${options.path}"`
+      : '';
+
+    const errorText = options.all
+      ? `There are no commits in this repository${pathText}`
+      : `There are no commits by "${options.author}" in this repository${pathText}. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
+
+    throw new HandledError(errorText);
+  }
+
+  return commits;
 }
 
 function getPullNumberFromMessage(firstMessageLine: string) {
@@ -293,7 +318,7 @@ export interface PullRequestEdge {
   };
 }
 
-export interface TimelineItemEdge {
+interface TimelineItemEdge {
   node: {
     source: {
       __typename: string;

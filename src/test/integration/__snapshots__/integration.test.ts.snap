@@ -184,7 +184,7 @@ Array [
       "gitHostname": "github.com",
       "githubApiBaseUrlV3": "https://api.github.com",
       "githubApiBaseUrlV4": "https://api.github.com/graphql",
-      "maxNumber": undefined,
+      "maxNumber": 10,
       "multiple": false,
       "multipleBranches": true,
       "multipleCommits": false,
@@ -520,10 +520,6 @@ fatal: No such remote: 'elastic'
   ],
   Array [
     "[INFO] Backporting [{\\"sourceBranch\\":\\"master\\",\\"selectedTargetBranches\\":[],\\"sha\\":\\"f3b618b9421fdecdb36862f907afbdd6344b361d\\",\\"formattedMessage\\":\\"Add witch (#85)\\",\\"pullNumber\\":85,\\"existingTargetPullRequests\\":[]}] to 6.0",
-    undefined,
-  ],
-  Array [
-    "[INFO] Pulling latest changes",
     undefined,
   ],
   Array [

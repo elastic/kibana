@@ -242,6 +242,7 @@ function getDefaultOptions(options: Partial<BackportOptions> = {}) {
     accessToken: 'myAccessToken',
     username: 'sqren',
     author: 'sqren',
+    maxNumber: 10,
     githubApiBaseUrlV3: 'https://api.github.com',
     githubApiBaseUrlV4: 'https://api.github.com/graphql',
     ...options,

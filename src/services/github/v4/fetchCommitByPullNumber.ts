@@ -1,3 +1,4 @@
+import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { CommitSelected } from '../../../types/Commit';
 import { HandledError } from '../../HandledError';
@@ -41,16 +42,27 @@ export async function fetchCommitByPullNumber(
     }
   `;
 
-  const res = await apiRequestV4<DataResponse>({
-    githubApiBaseUrlV4,
-    accessToken,
-    query,
-    variables: {
-      repoOwner,
-      repoName,
-      pullNumber,
-    },
-  });
+  const spinner = ora(
+    `Loading merge commit from pull request #${options.pullNumber}`
+  ).start();
+
+  let res: DataResponse;
+  try {
+    res = await apiRequestV4<DataResponse>({
+      githubApiBaseUrlV4,
+      accessToken,
+      query,
+      variables: {
+        repoOwner,
+        repoName,
+        pullNumber,
+      },
+    });
+    spinner.stop();
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 
   if (res.repository.pullRequest.mergeCommit === null) {
     throw new HandledError(`The PR #${pullNumber} is not merged`);

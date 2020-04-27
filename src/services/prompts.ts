@@ -19,13 +19,13 @@ async function prompt<T = unknown>(options: Question) {
 }
 
 export async function promptForCommits({
-  commits,
+  commitChoices,
   isMultipleChoice,
 }: {
-  commits: CommitChoice[];
+  commitChoices: CommitChoice[];
   isMultipleChoice: boolean;
 }): Promise<CommitChoice[]> {
-  const choices = commits.map((c, i) => {
+  const choices = commitChoices.map((c, i) => {
     const existingPRs = c.existingTargetPullRequests
       .map((item) => {
         const styling = item.state === 'MERGED' ? chalk.green : chalk.gray;
@@ -53,7 +53,7 @@ export async function promptForCommits({
 
   const selectedCommits = Array.isArray(res) ? res.reverse() : [res];
   return isEmpty(selectedCommits)
-    ? promptForCommits({ commits, isMultipleChoice })
+    ? promptForCommits({ commitChoices: commitChoices, isMultipleChoice })
     : selectedCommits;
 }
 

@@ -31,10 +31,5 @@ export async function runWithArgs(args: string[]) {
       // log file
       logger.info('Unknown error:', e);
     }
-
-    // wait exiting until logs have been flushed to disc
-    logger.on('finish', () => {
-      process.exit(1);
-    });
   }
 }

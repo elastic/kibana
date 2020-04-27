@@ -23,7 +23,6 @@ import { consoleLog } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
 import { CommitSelected } from '../types/Commit';
-import { withSpinner } from './withSpinner';
 import dedent = require('dedent');
 import isEmpty = require('lodash.isempty');
 
@@ -39,17 +38,11 @@ export async function cherrypickAndCreateTargetPullRequest({
   const featureBranch = getFeatureBranchName(targetBranch, commits);
   consoleLog(`\n${chalk.bold(`Backporting to ${targetBranch}:`)}`);
 
-  await withSpinner({ text: 'Pulling latest changes' }, () =>
-    createFeatureBranch(options, targetBranch, featureBranch)
-  );
-
+  await createFeatureBranch(options, targetBranch, featureBranch);
   await sequentially(commits, (commit) => waitForCherrypick(options, commit));
 
   if (options.resetAuthor) {
-    await withSpinner(
-      { text: `Changing author to "${options.username}"` },
-      () => setCommitAuthor(options, options.username)
-    );
+    await setCommitAuthor(options, options.username);
   }
 
   const headBranchName = getHeadBranchName(options, featureBranch);

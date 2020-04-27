@@ -51,16 +51,19 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
     .option('gitHostname', {
+      hidden: true,
       default: configOptions.gitHostname,
       description: 'Hostname for Github',
       type: 'string',
     })
     .option('githubApiBaseUrlV3', {
+      hidden: true,
       default: configOptions.githubApiBaseUrlV3,
       description: `Base url for Github's REST (v3) API`,
       type: 'string',
     })
     .option('githubApiBaseUrlV4', {
+      hidden: true,
       default: configOptions.githubApiBaseUrlV4,
       description: `Base url for Github's GraphQL (v4) API`,
       type: 'string',
@@ -118,6 +121,7 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
     .option('pullNumber', {
+      conflicts: ['sha', 'sourcePRsFilter'],
       description: 'Pull request to backport',
       type: 'number',
       alias: 'pr',
@@ -128,6 +132,7 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
     .option('sha', {
+      conflicts: ['pullNumber', 'sourcePRsFilter'],
       description: 'Commit sha to backport',
       type: 'string',
       alias: 'commit',
@@ -137,6 +142,13 @@ export function getOptionsFromCliArgs(
       description: 'Add labels to the source (original) PR',
       type: 'array',
       alias: 'sourcePRLabel',
+    })
+    .option('sourcePRsFilter', {
+      conflicts: ['pullNumber', 'sha'],
+      // default: configOptions.githubApiBaseUrlV4,
+      description: `Filter source pull requests by a query`,
+      alias: 'pr-filter',
+      type: 'string',
     })
     .option('sourceBranch', {
       default: configOptions.sourceBranch,

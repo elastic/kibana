@@ -204,11 +204,22 @@ export async function getUnmergedFiles(options: BackportOptions) {
     .map((file) => ` - ${pathResolve(repoPath, file)}`);
 }
 
-export function setCommitAuthor(options: BackportOptions, username: string) {
-  return exec(
-    `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
-    { cwd: getRepoPath(options) }
-  );
+export async function setCommitAuthor(
+  options: BackportOptions,
+  username: string
+) {
+  const spinner = ora(`Changing author to "${options.username}"`).start();
+  try {
+    const res = await exec(
+      `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
+      { cwd: getRepoPath(options) }
+    );
+    spinner.stop();
+    return res;
+  } catch (e) {
+    spinner.fail();
+    throw e;
+  }
 }
 
 export async function addUnstagedFiles(options: BackportOptions) {
@@ -220,12 +231,18 @@ export async function createFeatureBranch(
   targetBranch: string,
   featureBranch: string
 ) {
+  const spinner = ora('Pulling latest changes').start();
+
   try {
-    return await exec(
+    const res = await exec(
       `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${targetBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${targetBranch} --no-track`,
       { cwd: getRepoPath(options) }
     );
+    spinner.stop();
+    return res;
   } catch (e) {
+    spinner.fail();
+
     const isBranchInvalid =
       e.stderr?.toLowerCase().includes(`couldn't find remote ref`) ||
       e.stderr?.toLowerCase().includes(`Invalid refspec`);
@@ -235,6 +252,7 @@ export async function createFeatureBranch(
         `The branch "${targetBranch}" is invalid or doesn't exist`
       );
     }
+
     throw e;
   }
 }

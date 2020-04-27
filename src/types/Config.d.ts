@@ -31,4 +31,7 @@ export interface Config {
   sourceBranch?: string;
   sourcePRLabels?: string[];
   targetPRLabels?: string[];
+
+  // deprecated - kept for backwards compatability
+  branches?: (string | BranchChoice)[];
 }

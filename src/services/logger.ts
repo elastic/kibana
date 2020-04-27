@@ -75,6 +75,12 @@ export function initLogger() {
       }),
     ],
   });
+
+  // wait exiting until logs have been flushed to disk
+  winstonInstance.on('finish', () => {
+    process.exit(1);
+  });
+
   return winstonInstance;
 }
 
