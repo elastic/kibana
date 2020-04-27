@@ -41,7 +41,6 @@ export class InfraSources {
     sourceId: string
   ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
       .then(internalSourceConfiguration => ({
         id: sourceId,

@@ -101,7 +101,7 @@ export const ClosablePopoverTitle = ({ children, onClose }: ClosablePopoverTitle
             iconType="cross"
             color="danger"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.common.expressionItems.components.closablePopoverTitle.closeLabel',
+              'xpack.infra.metrics.expressionItems.components.closablePopoverTitle.closeLabel',
               {
                 defaultMessage: 'Close',
               }
