@@ -7,12 +7,16 @@
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { indexPatternGetParamsSchema } from './schema/index_pattern';
+import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
 export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
+  : unknown extends T
+  ? unknown
   : T extends Array<infer U>
   ? ImmutableArray<U>
   : T extends Map<infer K, infer V>
@@ -30,9 +34,9 @@ export type Direction = 'asc' | 'desc';
 
 export class EndpointAppConstants {
   static BASE_API_URL = '/api/endpoint';
-  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
+  static INDEX_PATTERN_ROUTE = `${EndpointAppConstants.BASE_API_URL}/index_pattern`;
   static ALERT_INDEX_NAME = 'events-endpoint-1';
-  static EVENT_INDEX_NAME = 'events-endpoint-*';
+  static EVENT_DATASET = 'events';
   static DEFAULT_TOTAL_HITS = 10000;
   /**
    * Legacy events are stored in indices with endgame-* prefix
@@ -376,11 +380,6 @@ export interface EndpointEvent {
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
- */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
-
-/**
  * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
  * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
  * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
@@ -447,3 +446,230 @@ export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
  * Result of the validated query params when handling alert index requests.
  */
 export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Result of the validated params when handling an index pattern request.
+ */
+export type IndexPatternGetParamsResult = TypeOf<typeof indexPatternGetParamsSchema>;
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+/**
+ * Windows-specific policy configuration that is supported via the UI
+ */
+type WindowsPolicyConfig = Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+
+/**
+ * Mac-specific policy configuration that is supported via the UI
+ */
+type MacPolicyConfig = Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+
+/**
+ * Linux-specific policy configuration that is supported via the UI
+ */
+type LinuxPolicyConfig = Pick<PolicyConfig['linux'], 'events'>;
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  windows: WindowsPolicyConfig;
+  mac: MacPolicyConfig;
+  linux: LinuxPolicyConfig;
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
+}
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
+
+/**
+ * New policy data. Used when updating the policy record via ingest APIs
+ */
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * the possible status for actions, configurations and overall Policy Response
+ */
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
+/**
+ * The details of a given action
+ */
+interface HostPolicyResponseActionDetails {
+  status: HostPolicyResponseActionStatus;
+  message: string;
+}
+
+/**
+ * A known list of possible Endpoint actions
+ */
+interface HostPolicyResponseActions {
+  download_model: HostPolicyResponseActionDetails;
+  ingest_events_config: HostPolicyResponseActionDetails;
+  workflow: HostPolicyResponseActionDetails;
+  configure_elasticsearch_connection: HostPolicyResponseActionDetails;
+  configure_kernel: HostPolicyResponseActionDetails;
+  configure_logging: HostPolicyResponseActionDetails;
+  configure_malware: HostPolicyResponseActionDetails;
+  connect_kernel: HostPolicyResponseActionDetails;
+  detect_file_open_events: HostPolicyResponseActionDetails;
+  detect_file_write_events: HostPolicyResponseActionDetails;
+  detect_image_load_events: HostPolicyResponseActionDetails;
+  detect_process_events: HostPolicyResponseActionDetails;
+  download_global_artifacts: HostPolicyResponseActionDetails;
+  load_config: HostPolicyResponseActionDetails;
+  load_malware_model: HostPolicyResponseActionDetails;
+  read_elasticsearch_config: HostPolicyResponseActionDetails;
+  read_events_config: HostPolicyResponseActionDetails;
+  read_kernel_config: HostPolicyResponseActionDetails;
+  read_logging_config: HostPolicyResponseActionDetails;
+  read_malware_config: HostPolicyResponseActionDetails;
+  // The list of possible Actions will change rapidly, so the below entry will allow
+  // them without us defining them here statically
+  [key: string]: HostPolicyResponseActionDetails;
+}
+
+interface HostPolicyResponseConfigurationStatus {
+  status: HostPolicyResponseActionStatus;
+  concerned_actions: Array<keyof HostPolicyResponseActions>;
+}
+
+/**
+ * Information about the applying of a policy to a given host
+ */
+export interface HostPolicyResponse {
+  '@timestamp': string;
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
+  ecs: {
+    version: string;
+  };
+  event: {
+    created: string;
+    kind: string;
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
+  endpoint: {
+    artifacts: {};
+    policy: {
+      applied: {
+        version: string;
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        response: {
+          configurations: {
+            malware: HostPolicyResponseConfigurationStatus;
+            events: HostPolicyResponseConfigurationStatus;
+            logging: HostPolicyResponseConfigurationStatus;
+            streaming: HostPolicyResponseConfigurationStatus;
+          };
+          actions: Partial<HostPolicyResponseActions>;
+        };
+      };
+    };
+  };
+}
+
+/**
+ * REST API response for retrieving a host's Policy Response status
+ */
+export interface GetHostPolicyResponse {
+  policy_response: HostPolicyResponse;
+}

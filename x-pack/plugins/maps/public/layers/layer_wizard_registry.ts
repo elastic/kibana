@@ -5,17 +5,25 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-type LayerWizard = {
+import { ReactElement } from 'react';
+import { LayerDescriptor } from '../../common/descriptor_types';
+
+export type RenderWizardArguments = {
+  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  mapColors: string[];
+  // upload arguments
+  isIndexingTriggered: boolean;
+  onRemove: () => void;
+  onIndexReady: () => void;
+  importSuccessHandler: (indexResponses: unknown) => void;
+  importErrorHandler: (indexResponses: unknown) => void;
+};
+
+export type LayerWizard = {
   description: string;
   icon: string;
   isIndexingSource?: boolean;
-  renderWizard({
-    onPreviewSource,
-    inspectorAdapters,
-  }: {
-    onPreviewSource: () => void;
-    inspectorAdapters: unknown;
-  }): unknown;
+  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
 };
 

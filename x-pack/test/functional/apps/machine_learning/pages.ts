@@ -7,18 +7,13 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('page navigation', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['skipFirefox', 'mlqa']);
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await ml.api.cleanMlIndices();
       await ml.securityUI.loginAsMlPowerUser();
-    });
-
-    after(async () => {
-      await esArchiver.unload('empty_kibana');
     });
 
     it('loads the home page', async () => {

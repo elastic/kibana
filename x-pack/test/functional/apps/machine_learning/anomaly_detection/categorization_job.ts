@@ -16,7 +16,7 @@ export default function({ getService }: FtrProviderContext) {
   const jobId = `categorization_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
   const jobDescription =
-    'Create categorization job based on the categorization_functional_test dataset with a count rare';
+    'Create categorization job based on the ft_categorization dataset with a count rare';
   const jobGroups = ['automated', 'categorization'];
   const jobGroupsClone = [...jobGroups, 'clone'];
   const detectorTypeIdentifier = 'Rare';
@@ -64,7 +64,6 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      model_bytes_memory_limit: '15.0 MB',
       total_by_field_count: '30',
       total_over_field_count: '0',
       total_partition_field_count: '2',
@@ -74,16 +73,20 @@ export default function({ getService }: FtrProviderContext) {
     };
   }
 
+  const calendarId = `wizard-test-calendar_${Date.now()}`;
+
   describe('categorization', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/categorization');
-      await ml.api.createCalendar('wizard-test-calendar');
+      await esArchiver.loadIfNeeded('ml/categorization');
+      await ml.testResources.createIndexPatternIfNeeded('ft_categorization', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await ml.api.createCalendar(calendarId);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/categorization');
       await ml.api.cleanMlIndices();
     });
 
@@ -97,9 +100,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(
-        'categorization_functional_test'
-      );
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_categorization');
     });
 
     it('job creation loads the categorization job wizard page', async () => {
@@ -178,7 +179,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation assigns calendars', async () => {
-      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
+      await ml.jobWizardCommon.addCalendar(calendarId);
     });
 
     it('job creation opens the advanced section', async () => {
@@ -310,7 +311,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job cloning persists assigned calendars', async () => {
-      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+      await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
     });
 
     it('job cloning opens the advanced section', async () => {

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { getTaskStateBadge } from './columns';
 
 import {

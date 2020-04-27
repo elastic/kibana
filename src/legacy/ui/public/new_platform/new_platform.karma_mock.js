@@ -242,6 +242,7 @@ export const npSetup = {
     },
     kibanaLegacy: {
       registerLegacyApp: () => {},
+      registerLegacyAppAlias: () => {},
       forwardApp: () => {},
       config: {
         defaultAppId: 'home',
@@ -309,6 +310,12 @@ export const npSetup = {
       registerAlias: sinon.fake(),
       hideTypes: sinon.fake(),
     },
+
+    mapsLegacy: {
+      serviceSettings: sinon.fake(),
+      getPrecision: sinon.fake(),
+      getZoomPrecision: sinon.fake(),
+    },
   },
 };
 
@@ -356,6 +363,7 @@ export const npStart = {
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
+      getLegacyAppAliases: () => [],
       config: {
         defaultAppId: 'home',
       },
@@ -369,7 +377,8 @@ export const npStart = {
     },
     data: {
       actions: {
-        createFiltersFromEvent: Promise.resolve(['yes']),
+        createFiltersFromValueClickAction: Promise.resolve(['yes']),
+        createFiltersFromRangeSelectAction: sinon.fake(),
       },
       autocomplete: {
         getProvider: sinon.fake(),
@@ -447,6 +456,7 @@ export const npStart = {
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
             });
           },
           types: aggTypesRegistry.start(),

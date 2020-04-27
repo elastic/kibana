@@ -15,7 +15,7 @@ export default function({ getService }: FtrProviderContext) {
   const testDataList = [
     {
       suiteTitle: 'with filter',
-      jobSource: 'farequote_filter',
+      jobSource: 'ft_farequote_filter',
       jobId: `fq_saved_search_1_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with filter',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -54,7 +54,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -66,7 +65,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with lucene query',
-      jobSource: 'farequote_lucene',
+      jobSource: 'ft_farequote_lucene',
       jobId: `fq_saved_search_2_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with lucene query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -105,7 +104,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '7',
           total_over_field_count: '0',
           total_partition_field_count: '6',
@@ -117,7 +115,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with kuery query',
-      jobSource: 'farequote_kuery',
+      jobSource: 'ft_farequote_kuery',
       jobId: `fq_saved_search_3_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -156,7 +154,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '7',
           total_over_field_count: '0',
           total_partition_field_count: '6',
@@ -168,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with filter and lucene query',
-      jobSource: 'farequote_filter_and_lucene',
+      jobSource: 'ft_farequote_filter_and_lucene',
       jobId: `fq_saved_search_4_${Date.now()}`,
       jobDescription:
         'Create multi metric job based on a saved search with filter and lucene query',
@@ -208,7 +205,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -220,7 +216,7 @@ export default function({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'with filter and kuery query',
-      jobSource: 'farequote_filter_and_kuery',
+      jobSource: 'ft_farequote_filter_and_kuery',
       jobId: `fq_saved_search_5_${Date.now()}`,
       jobDescription: 'Create multi metric job based on a saved search with filter and kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
@@ -259,7 +255,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '20.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -272,14 +267,21 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('saved search', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
     });
 
@@ -457,7 +459,6 @@ export default function({ getService }: FtrProviderContext) {
               job_id: testData.jobId,
               result_type: testData.expected.modelSizeStats.result_type,
               model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              model_bytes_memory_limit: testData.expected.modelSizeStats.model_bytes_memory_limit,
               total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
               total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
               total_partition_field_count:

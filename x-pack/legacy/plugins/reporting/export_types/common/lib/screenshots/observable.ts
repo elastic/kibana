@@ -18,6 +18,9 @@ import { ScreenSetupData, ScreenshotObservableOpts, ScreenshotResults } from './
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
+const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
+const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
+
 export function screenshotsObservableFactory(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
@@ -45,7 +48,7 @@ export function screenshotsObservableFactory(
               ),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async itemsCount => {
-                const viewport = layout.getViewport(itemsCount);
+                const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
                 await Promise.all([
                   driver.setViewport(viewport, logger),
                   waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
@@ -86,7 +89,12 @@ export function screenshotsObservableFactory(
                     : getDefaultElementPosition(layout.getViewport(1));
                   const screenshots = await getScreenshots(driver, elements, logger);
                   const { timeRange, error: setupError } = data;
-                  return { timeRange, screenshots, error: setupError };
+                  return {
+                    timeRange,
+                    screenshots,
+                    error: setupError,
+                    elementsPositionAndAttributes: elements,
+                  };
                 }
               )
             );
@@ -101,16 +109,29 @@ export function screenshotsObservableFactory(
 }
 
 /*
+ * If Kibana is showing a non-HTML error message, the viewport might not be
+ * provided by the browser.
+ */
+const getDefaultViewPort = () => ({
+  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
+  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
+  zoom: 1,
+});
+/*
  * If an error happens setting up the page, we don't know if there actually
  * are any visualizations showing. These defaults should help capture the page
  * enough for the user to see the error themselves
  */
-const getDefaultElementPosition = ({ height, width }: { height: number; width: number }) => [
-  {
+const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
+  const height = dimensions?.height || DEFAULT_SCREENSHOT_CLIP_HEIGHT;
+  const width = dimensions?.width || DEFAULT_SCREENSHOT_CLIP_WIDTH;
+
+  const defaultObject = {
     position: {
       boundingClientRect: { top: 0, left: 0, height, width },
       scroll: { x: 0, y: 0 },
     },
     attributes: {},
-  },
-];
+  };
+  return [defaultObject];
+};

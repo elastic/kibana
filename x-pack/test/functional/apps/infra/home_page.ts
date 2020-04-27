@@ -15,7 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
   describe('Home page', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
     });

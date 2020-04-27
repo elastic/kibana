@@ -73,7 +73,10 @@ function FormRow({
       return (
         <SelectWithPlaceholder
           placeholder={setting.placeholder}
-          options={[{ text: 'true' }, { text: 'false' }]}
+          options={[
+            { text: 'true', value: 'true' },
+            { text: 'false', value: 'false' }
+          ]}
           value={value}
           onChange={e => onChange(setting.key, e.target.value)}
         />
@@ -105,7 +108,7 @@ function FormRow({
                 defaultMessage: 'Select unit'
               })}
               value={unit}
-              options={setting.units?.map(text => ({ text }))}
+              options={setting.units?.map(text => ({ text, value: text }))}
               onChange={e =>
                 onChange(
                   setting.key,

@@ -46,13 +46,17 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referencedByCount: 0,
         },
         {
+          id: 'preconfigured-es-index-action',
+          isPreconfigured: true,
+          actionTypeId: '.index',
+          name: 'preconfigured_es_index_action',
+          referencedByCount: 0,
+        },
+        {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
-          config: {
-            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-          },
           referencedByCount: 0,
         },
         {
@@ -60,11 +64,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
           name: 'SystemABC',
-          config: {
-            xyzConfig1: 'value1',
-            xyzConfig2: 'value2',
-            listOfThings: ['a', 'b', 'c', 'd'],
-          },
+          referencedByCount: 0,
+        },
+        {
+          id: 'preconfigured.test.index-record',
+          isPreconfigured: true,
+          actionTypeId: 'test.index-record',
+          name: 'Test:_Preconfigured_Index_Record',
           referencedByCount: 0,
         },
       ]);
@@ -89,13 +95,17 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
       await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/action/_getAll`).expect(200, [
         {
+          id: 'preconfigured-es-index-action',
+          isPreconfigured: true,
+          actionTypeId: '.index',
+          name: 'preconfigured_es_index_action',
+          referencedByCount: 0,
+        },
+        {
           id: 'my-slack1',
           isPreconfigured: true,
           actionTypeId: '.slack',
           name: 'Slack#xyz',
-          config: {
-            webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-          },
           referencedByCount: 0,
         },
         {
@@ -103,11 +113,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           isPreconfigured: true,
           actionTypeId: 'system-abc-action-type',
           name: 'SystemABC',
-          config: {
-            xyzConfig1: 'value1',
-            xyzConfig2: 'value2',
-            listOfThings: ['a', 'b', 'c', 'd'],
-          },
+          referencedByCount: 0,
+        },
+        {
+          id: 'preconfigured.test.index-record',
+          isPreconfigured: true,
+          actionTypeId: 'test.index-record',
+          name: 'Test:_Preconfigured_Index_Record',
           referencedByCount: 0,
         },
       ]);

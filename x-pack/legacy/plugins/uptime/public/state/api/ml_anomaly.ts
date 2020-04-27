@@ -8,7 +8,7 @@ import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
 import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
-import { PrivilegesResponse } from '../../../../../../plugins/ml/common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../../../plugins/ml/common/types/capabilities';
 import {
   CreateMLJobSuccess,
   DeleteJobResults,
@@ -20,7 +20,7 @@ import { JobExistResult } from '../../../../../../plugins/ml/common/types/data_r
 
 export const getMLJobId = (monitorId: string) => `${monitorId}_${ML_JOB_ID}`.toLowerCase();
 
-export const getMLCapabilities = async (): Promise<PrivilegesResponse> => {
+export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
   return await apiService.get(API_URLS.ML_CAPABILITIES);
 };
 
@@ -48,11 +48,8 @@ export const createMLJob = async ({
     query: {
       bool: {
         filter: [
-          {
-            term: {
-              'monitor.id': lowerCaseMonitorId,
-            },
-          },
+          { term: { 'monitor.id': lowerCaseMonitorId } },
+          { range: { 'monitor.duration.us': { gt: 0 } } },
         ],
       },
     },

@@ -19,7 +19,7 @@ StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 Badge.displayName = 'Badge';
 
 interface Props {
@@ -51,7 +51,9 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
               tooltipPosition="bottom"
             />
           ) : (
-            <Badge color="hollow">{badgeOptions.text}</Badge>
+            <Badge color="hollow" title="">
+              {badgeOptions.text}
+            </Badge>
           )}
         </>
       )}

@@ -120,7 +120,7 @@ describe('Ingest Manager - validateDatasource()', () => {
       {
         type: 'foo',
         enabled: true,
-        config: {
+        vars: {
           'foo-input-var-name': { value: 'foo-input-var-value', type: 'text' },
           'foo-input2-var-name': { value: 'foo-input2-var-value', type: 'text' },
           'foo-input3-var-name': { value: ['test'], type: 'text' },
@@ -130,14 +130,14 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'foo-foo',
             dataset: 'foo',
             enabled: true,
-            config: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+            vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
           },
         ],
       },
       {
         type: 'bar',
         enabled: true,
-        config: {
+        vars: {
           'bar-input-var-name': { value: ['value1', 'value2'], type: 'text' },
           'bar-input2-var-name': { value: 'test', type: 'text' },
         },
@@ -146,13 +146,13 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'bar-bar',
             dataset: 'bar',
             enabled: true,
-            config: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+            vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
           },
           {
             id: 'bar-bar2',
             dataset: 'bar2',
             enabled: true,
-            config: { 'var-name': { value: undefined, type: 'text' } },
+            vars: { 'var-name': { value: undefined, type: 'text' } },
           },
         ],
       },
@@ -169,7 +169,7 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'with-disabled-streams-disabled',
             dataset: 'disabled',
             enabled: false,
-            config: { 'var-name': { value: undefined, type: 'text' } },
+            vars: { 'var-name': { value: undefined, type: 'text' } },
           },
           {
             id: 'with-disabled-streams-disabled2',
@@ -188,7 +188,7 @@ describe('Ingest Manager - validateDatasource()', () => {
       {
         type: 'foo',
         enabled: true,
-        config: {
+        vars: {
           'foo-input-var-name': { value: undefined, type: 'text' },
           'foo-input2-var-name': { value: '', type: 'text' },
           'foo-input3-var-name': { value: [], type: 'text' },
@@ -198,14 +198,14 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'foo-foo',
             dataset: 'foo',
             enabled: true,
-            config: { 'var-name': { value: 'invalidyaml: test\n foo bar:', type: 'yaml' } },
+            vars: { 'var-name': { value: 'invalidyaml: test\n foo bar:', type: 'yaml' } },
           },
         ],
       },
       {
         type: 'bar',
         enabled: true,
-        config: {
+        vars: {
           'bar-input-var-name': { value: 'invalid value for multi', type: 'text' },
           'bar-input2-var-name': { value: undefined, type: 'text' },
         },
@@ -214,13 +214,13 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'bar-bar',
             dataset: 'bar',
             enabled: true,
-            config: { 'var-name': { value: '    \n\n', type: 'yaml' } },
+            vars: { 'var-name': { value: '    \n\n', type: 'yaml' } },
           },
           {
             id: 'bar-bar2',
             dataset: 'bar2',
             enabled: true,
-            config: { 'var-name': { value: undefined, type: 'text' } },
+            vars: { 'var-name': { value: undefined, type: 'text' } },
           },
         ],
       },
@@ -237,7 +237,7 @@ describe('Ingest Manager - validateDatasource()', () => {
             id: 'with-disabled-streams-disabled',
             dataset: 'disabled',
             enabled: false,
-            config: {
+            vars: {
               'var-name': {
                 value: 'invalid value but not checked due to not enabled',
                 type: 'text',
@@ -259,22 +259,22 @@ describe('Ingest Manager - validateDatasource()', () => {
     description: null,
     inputs: {
       foo: {
-        config: {
+        vars: {
           'foo-input-var-name': null,
           'foo-input2-var-name': null,
           'foo-input3-var-name': null,
         },
-        streams: { 'foo-foo': { config: { 'var-name': null } } },
+        streams: { 'foo-foo': { vars: { 'var-name': null } } },
       },
       bar: {
-        config: { 'bar-input-var-name': null, 'bar-input2-var-name': null },
+        vars: { 'bar-input-var-name': null, 'bar-input2-var-name': null },
         streams: {
-          'bar-bar': { config: { 'var-name': null } },
-          'bar-bar2': { config: { 'var-name': null } },
+          'bar-bar': { vars: { 'var-name': null } },
+          'bar-bar2': { vars: { 'var-name': null } },
         },
       },
       'with-disabled-streams': {
-        streams: { 'with-disabled-streams-disabled': { config: { 'var-name': null } } },
+        streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
       },
     },
   };
@@ -289,25 +289,25 @@ describe('Ingest Manager - validateDatasource()', () => {
       description: null,
       inputs: {
         foo: {
-          config: {
+          vars: {
             'foo-input-var-name': null,
             'foo-input2-var-name': ['foo-input2-var-name is required'],
             'foo-input3-var-name': ['foo-input3-var-name is required'],
           },
-          streams: { 'foo-foo': { config: { 'var-name': ['Invalid YAML format'] } } },
+          streams: { 'foo-foo': { vars: { 'var-name': ['Invalid YAML format'] } } },
         },
         bar: {
-          config: {
+          vars: {
             'bar-input-var-name': ['Invalid format'],
             'bar-input2-var-name': ['bar-input2-var-name is required'],
           },
           streams: {
-            'bar-bar': { config: { 'var-name': ['var-name is required'] } },
-            'bar-bar2': { config: { 'var-name': null } },
+            'bar-bar': { vars: { 'var-name': ['var-name is required'] } },
+            'bar-bar2': { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
-          streams: { 'with-disabled-streams-disabled': { config: { 'var-name': null } } },
+          streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
         },
       },
     });
@@ -336,25 +336,25 @@ describe('Ingest Manager - validateDatasource()', () => {
       description: null,
       inputs: {
         foo: {
-          config: {
+          vars: {
             'foo-input-var-name': null,
             'foo-input2-var-name': ['foo-input2-var-name is required'],
             'foo-input3-var-name': ['foo-input3-var-name is required'],
           },
-          streams: { 'foo-foo': { config: { 'var-name': null } } },
+          streams: { 'foo-foo': { vars: { 'var-name': null } } },
         },
         bar: {
-          config: {
+          vars: {
             'bar-input-var-name': ['Invalid format'],
             'bar-input2-var-name': ['bar-input2-var-name is required'],
           },
           streams: {
-            'bar-bar': { config: { 'var-name': null } },
-            'bar-bar2': { config: { 'var-name': null } },
+            'bar-bar': { vars: { 'var-name': null } },
+            'bar-bar2': { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
-          streams: { 'with-disabled-streams-disabled': { config: { 'var-name': null } } },
+          streams: { 'with-disabled-streams-disabled': { vars: { 'var-name': null } } },
         },
       },
     });
@@ -411,7 +411,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
   it('returns true for stream validation results with errors', () => {
     expect(
       validationHasErrors({
-        config: { foo: ['foo error'], bar: null },
+        vars: { foo: ['foo error'], bar: null },
       })
     ).toBe(true);
   });
@@ -419,7 +419,7 @@ describe('Ingest Manager - validationHasErrors()', () => {
   it('returns false for stream validation results with no errors', () => {
     expect(
       validationHasErrors({
-        config: { foo: null, bar: null },
+        vars: { foo: null, bar: null },
       })
     ).toBe(false);
   });
@@ -427,14 +427,14 @@ describe('Ingest Manager - validationHasErrors()', () => {
   it('returns true for input validation results with errors', () => {
     expect(
       validationHasErrors({
-        config: { foo: ['foo error'], bar: null },
-        streams: { stream1: { config: { foo: null, bar: null } } },
+        vars: { foo: ['foo error'], bar: null },
+        streams: { stream1: { vars: { foo: null, bar: null } } },
       })
     ).toBe(true);
     expect(
       validationHasErrors({
-        config: { foo: null, bar: null },
-        streams: { stream1: { config: { foo: ['foo error'], bar: null } } },
+        vars: { foo: null, bar: null },
+        streams: { stream1: { vars: { foo: ['foo error'], bar: null } } },
       })
     ).toBe(true);
   });
@@ -442,8 +442,8 @@ describe('Ingest Manager - validationHasErrors()', () => {
   it('returns false for input validation results with no errors', () => {
     expect(
       validationHasErrors({
-        config: { foo: null, bar: null },
-        streams: { stream1: { config: { foo: null, bar: null } } },
+        vars: { foo: null, bar: null },
+        streams: { stream1: { vars: { foo: null, bar: null } } },
       })
     ).toBe(false);
   });
@@ -455,8 +455,8 @@ describe('Ingest Manager - validationHasErrors()', () => {
         description: null,
         inputs: {
           input1: {
-            config: { foo: null, bar: null },
-            streams: { stream1: { config: { foo: null, bar: null } } },
+            vars: { foo: null, bar: null },
+            streams: { stream1: { vars: { foo: null, bar: null } } },
           },
         },
       })
@@ -467,8 +467,8 @@ describe('Ingest Manager - validationHasErrors()', () => {
         description: null,
         inputs: {
           input1: {
-            config: { foo: ['foo error'], bar: null },
-            streams: { stream1: { config: { foo: null, bar: null } } },
+            vars: { foo: ['foo error'], bar: null },
+            streams: { stream1: { vars: { foo: null, bar: null } } },
           },
         },
       })
@@ -479,8 +479,8 @@ describe('Ingest Manager - validationHasErrors()', () => {
         description: null,
         inputs: {
           input1: {
-            config: { foo: null, bar: null },
-            streams: { stream1: { config: { foo: ['foo error'], bar: null } } },
+            vars: { foo: null, bar: null },
+            streams: { stream1: { vars: { foo: ['foo error'], bar: null } } },
           },
         },
       })
@@ -494,8 +494,8 @@ describe('Ingest Manager - validationHasErrors()', () => {
         description: null,
         inputs: {
           input1: {
-            config: { foo: null, bar: null },
-            streams: { stream1: { config: { foo: null, bar: null } } },
+            vars: { foo: null, bar: null },
+            streams: { stream1: { vars: { foo: null, bar: null } } },
           },
         },
       })

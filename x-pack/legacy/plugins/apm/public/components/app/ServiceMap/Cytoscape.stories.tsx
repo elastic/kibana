@@ -75,8 +75,22 @@ storiesOf('app/ServiceMap/Cytoscape', module)
       const cy = cytoscape();
       const elements = [
         { data: { id: 'default' } },
+        {
+          data: {
+            id: 'aws',
+            'span.type': 'aws',
+            'span.subtype': 'servicename'
+          }
+        },
         { data: { id: 'cache', 'span.type': 'cache' } },
         { data: { id: 'database', 'span.type': 'db' } },
+        {
+          data: {
+            id: 'cassandra',
+            'span.type': 'db',
+            'span.subtype': 'cassandra'
+          }
+        },
         {
           data: {
             id: 'elasticsearch',
@@ -84,8 +98,87 @@ storiesOf('app/ServiceMap/Cytoscape', module)
             'span.subtype': 'elasticsearch'
           }
         },
+        {
+          data: {
+            id: 'mongodb',
+            'span.type': 'db',
+            'span.subtype': 'mongodb'
+          }
+        },
+        {
+          data: {
+            id: 'mysql',
+            'span.type': 'db',
+            'span.subtype': 'mysql'
+          }
+        },
+        {
+          data: {
+            id: 'postgresql',
+            'span.type': 'db',
+            'span.subtype': 'postgresql'
+          }
+        },
+        {
+          data: {
+            id: 'redis',
+            'span.type': 'db',
+            'span.subtype': 'redis'
+          }
+        },
         { data: { id: 'external', 'span.type': 'external' } },
+        { data: { id: 'ext', 'span.type': 'ext' } },
+        {
+          data: {
+            id: 'graphql',
+            'span.type': 'external',
+            'span.subtype': 'graphql'
+          }
+        },
+        {
+          data: {
+            id: 'grpc',
+            'span.type': 'external',
+            'span.subtype': 'grpc'
+          }
+        },
+        {
+          data: {
+            id: 'websocket',
+            'span.type': 'external',
+            'span.subtype': 'websocket'
+          }
+        },
         { data: { id: 'messaging', 'span.type': 'messaging' } },
+        {
+          data: {
+            id: 'jms',
+            'span.type': 'messaging',
+            'span.subtype': 'jms'
+          }
+        },
+        {
+          data: {
+            id: 'kafka',
+            'span.type': 'messaging',
+            'span.subtype': 'kafka'
+          }
+        },
+        { data: { id: 'template', 'span.type': 'template' } },
+        {
+          data: {
+            id: 'handlebars',
+            'span.type': 'template',
+            'span.subtype': 'handlebars'
+          }
+        },
+        {
+          data: {
+            id: 'dark',
+            'service.name': 'dark service',
+            'agent.name': 'dark'
+          }
+        },
         {
           data: {
             id: 'dotnet',
@@ -158,11 +251,13 @@ storiesOf('app/ServiceMap/Cytoscape', module)
             <EuiFlexItem key={node.data('id')}>
               <EuiCard
                 description={
-                  <pre>
-                    agent.name: {node.data('agent.name') || 'undefined'},
-                    span.type: {node.data('span.type') || 'undefined'},
+                  <code style={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+                    agent.name: {node.data('agent.name') || 'undefined'}
+                    <br />
+                    span.type: {node.data('span.type') || 'undefined'}
+                    <br />
                     span.subtype: {node.data('span.subtype') || 'undefined'}
-                  </pre>
+                  </code>
                 }
                 icon={
                   <img

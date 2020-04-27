@@ -4,16 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DynamicSettings,
-  defaultDynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+import { DynamicSettings } from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../legacy/plugins/uptime/common/constants';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
-
-export interface UMDynamicSettingsType {
-  heartbeatIndices: string;
-}
 
 export interface UMSavedObjectsAdapter {
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
@@ -26,11 +20,21 @@ export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 export const umDynamicSettings: SavedObjectsType = {
   name: settingsObjectType,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       heartbeatIndices: {
         type: 'keyword',
+      },
+      certThresholds: {
+        properties: {
+          expiration: {
+            type: 'long',
+          },
+          age: {
+            type: 'long',
+          },
+        },
       },
     },
   },
@@ -43,7 +47,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       return obj.attributes;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return defaultDynamicSettings;
+        return DYNAMIC_SETTINGS_DEFAULTS;
       }
       throw getErr;
     }

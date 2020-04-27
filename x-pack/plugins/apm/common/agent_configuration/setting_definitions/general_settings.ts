@@ -67,10 +67,10 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     options: [
-      { text: 'off' },
-      { text: 'errors' },
-      { text: 'transactions' },
-      { text: 'all' }
+      { text: 'off', value: 'off' },
+      { text: 'errors', value: 'errors' },
+      { text: 'transactions', value: 'transactions' },
+      { text: 'all', value: 'all' }
     ],
     excludeAgents: ['js-base', 'rum-js']
   },

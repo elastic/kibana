@@ -12,6 +12,17 @@ import {
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { defaultIcon, iconForNode } from './icons';
 
+// IE 11 does not properly load some SVGs or draw certain shapes. This causes
+// a runtime error and the map fails work at all. We would prefer to do some
+// kind of feature detection rather than browser detection, but some of these
+// limitations are not well documented for older browsers.
+//
+// This method of detecting IE is from a Stack Overflow answer:
+// https://stackoverflow.com/a/21825207
+//
+// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+
 export const animationOptions: cytoscape.AnimationOptions = {
   duration: parseInt(theme.euiAnimSpeedNormal, 10),
   // @ts-ignore The cubic-bezier options here are not recognized by the cytoscape types
@@ -37,8 +48,9 @@ const style: cytoscape.Stylesheet[] = [
       // used here.
       //
       // @ts-ignore
-      'background-image': (el: cytoscape.NodeSingular) =>
-        iconForNode(el) ?? defaultIcon,
+      'background-image': isIE11
+        ? undefined
+        : (el: cytoscape.NodeSingular) => iconForNode(el) ?? defaultIcon,
       'background-height': (el: cytoscape.NodeSingular) =>
         isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
@@ -48,7 +60,7 @@ const style: cytoscape.Stylesheet[] = [
           ? theme.euiColorPrimary
           : theme.euiColorMediumShade,
       'border-width': 2,
-      color: theme.textColors.default,
+      color: theme.textColors.text,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
@@ -65,7 +77,7 @@ const style: cytoscape.Stylesheet[] = [
       'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
-        isService(el) ? 'ellipse' : 'diamond',
+        isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
       'text-background-color': theme.euiColorLightestShade,
       'text-background-opacity': 0,
       'text-background-padding': theme.paddingSizes.xs,
@@ -87,12 +99,12 @@ const style: cytoscape.Stylesheet[] = [
       'line-color': lineColor,
       'overlay-opacity': 0,
       'target-arrow-color': lineColor,
-      'target-arrow-shape': 'triangle',
+      'target-arrow-shape': isIE11 ? 'none' : 'triangle',
       // The DefinitelyTyped definitions don't specify this property since it's
       // fairly new.
       //
       // @ts-ignore
-      'target-distance-from-node': theme.paddingSizes.xs,
+      'target-distance-from-node': isIE11 ? undefined : theme.paddingSizes.xs,
       width: 1,
       'source-arrow-shape': 'none',
       'z-index': zIndexEdge
@@ -101,12 +113,16 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'edge[bidirectional]',
     style: {
-      'source-arrow-shape': 'triangle',
+      'source-arrow-shape': isIE11 ? 'none' : 'triangle',
       'source-arrow-color': lineColor,
-      'target-arrow-shape': 'triangle',
+      'target-arrow-shape': isIE11 ? 'none' : 'triangle',
       // @ts-ignore
-      'source-distance-from-node': parseInt(theme.paddingSizes.xs, 10),
-      'target-distance-from-node': parseInt(theme.paddingSizes.xs, 10)
+      'source-distance-from-node': isIE11
+        ? undefined
+        : parseInt(theme.paddingSizes.xs, 10),
+      'target-distance-from-node': isIE11
+        ? undefined
+        : parseInt(theme.paddingSizes.xs, 10)
     }
   },
   // @ts-ignore DefinitelyTyped says visibility is "none" but it's

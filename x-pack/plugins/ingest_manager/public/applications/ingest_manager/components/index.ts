@@ -6,3 +6,5 @@
 export { Loading } from './loading';
 export { Error } from './error';
 export { Header, HeaderProps } from './header';
+export { AlphaMessaging } from './alpha_messaging';
+export * from './settings_flyout';
