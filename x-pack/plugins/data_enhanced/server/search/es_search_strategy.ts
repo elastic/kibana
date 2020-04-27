@@ -20,6 +20,8 @@ import {
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
+import { BackgroundSearchService } from '../background_search/bg_search_service';
+import { SecurityPluginSetup } from '../../../security/server';
 
 export interface AsyncSearchResponse<T> {
   id: string;
@@ -28,8 +30,13 @@ export interface AsyncSearchResponse<T> {
   response: SearchResponse<T>;
 }
 
+export interface IEnhancedSearchContext extends ISearchContext {
+  backgroundSearchService?: BackgroundSearchService;
+  security: SecurityPluginSetup;
+}
+
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
+  context: IEnhancedSearchContext,
   caller: APICaller
 ) => {
   const search: ISearch<typeof ES_SEARCH_STRATEGY> = async (
@@ -42,7 +49,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 
     return request.indexType === 'rollup'
       ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
+      : asyncSearch(caller, { ...request, params }, options, context);
   };
 
   const cancel: ISearchCancel<typeof ES_SEARCH_STRATEGY> = async id => {
@@ -57,7 +64,8 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
 async function asyncSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
+  options?: ISearchOptions,
+  context: IEnhancedSearchContext
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     trackTotalHits: true, // Get the exact count of hits
@@ -71,13 +79,28 @@ async function asyncSearch(
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '1s', ...queryParams });
+  const query = toSnakeCase({ waitForCompletionTimeout: '1ms', ...queryParams });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
     { method, path, body, query },
     options
   )) as AsyncSearchResponse<any>;
+
+  if (
+    context.backgroundSearchService &&
+    context.security &&
+    !!request.sessionId &&
+    !!id &&
+    !request.id
+  ) {
+    context.backgroundSearchService.trackId(
+      context.security.authc.getCurrentUser(options?.rawRequest)?.email,
+      request.sessionId,
+      request.params,
+      id
+    );
+  }
 
   return {
     id,

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { KibanaRequest } from 'kibana/server';
 import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 import { TStrategyTypes } from './strategy_types';
 import { ES_SEARCH_STRATEGY, IEsSearchResponse } from '../../common/search/es_search';
@@ -24,6 +25,7 @@ import { IEsSearchRequest } from './es_search';
 
 export interface ISearchOptions {
   signal?: AbortSignal;
+  rawRequest?: KibanaRequest;
 }
 
 export interface IRequestTypesMap {

@@ -78,6 +78,7 @@ import {
 } from '../../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../../../../plugins/kibana_legacy/public';
+import { uuidV4 } from '../../../../../../../plugins/kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -796,6 +797,7 @@ function discoverController(
       .then(setupVisualization)
       .then(function() {
         $scope.fetchStatus = fetchStatuses.LOADING;
+        $scope.searchSource.setSessionId(uuidV4());
         logInspectorRequest();
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,

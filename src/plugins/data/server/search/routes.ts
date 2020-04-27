@@ -39,7 +39,11 @@ export function registerSearchRoute(router: IRouter): void {
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const response = await context.search!.search(searchRequest, { signal }, strategy);
+        const response = await context.search!.search(
+          searchRequest,
+          { signal, rawRequest: request },
+          strategy
+        );
         return res.ok({ body: response });
       } catch (err) {
         return res.customError({

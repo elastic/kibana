@@ -94,6 +94,7 @@ export interface SearchSourceDependencies {
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
+  private sessionId?: string;
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
@@ -137,6 +138,15 @@ export class SearchSource {
 
   getFields() {
     return { ...this.fields };
+  }
+
+  getSessionId(): string | undefined {
+    const parent = this.getParent();
+    return this.sessionId || parent?.getSessionId();
+  }
+
+  setSessionId(sessionId: string) {
+    this.sessionId = sessionId;
   }
 
   /**
@@ -210,9 +220,14 @@ export class SearchSource {
       body: searchRequest.body,
       ...searchParams,
     };
-    return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
-      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
-    );
+    return search(
+      {
+        params,
+        indexType: searchRequest.indexType,
+        sessionId: this.getSessionId(),
+      },
+      { signal }
+    ).pipe(map(({ rawResponse }) => handleResponse(searchRequest, rawResponse)));
   }
 
   /**

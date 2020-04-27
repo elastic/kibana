@@ -23,4 +23,6 @@ import { CoreSetup, SharedGlobalConfig } from '../../../../core/server';
 export interface ISearchContext {
   core: CoreSetup;
   config$: Observable<SharedGlobalConfig>;
+  backgroundSearchService?: any;
+  security?: any;
 }

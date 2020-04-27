@@ -30,6 +30,8 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
   getId: jest.fn(),
+  getSessionId: jest.fn(),
+  setSessionId: jest.fn(),
   getFields: jest.fn(),
   getField: jest.fn(),
   getOwnField: jest.fn(),

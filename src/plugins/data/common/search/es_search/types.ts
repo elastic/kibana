@@ -24,6 +24,13 @@ export const ES_SEARCH_STRATEGY = 'es';
 export interface IEsSearchRequest extends IKibanaSearchRequest {
   params: SearchParams;
   indexType?: string;
+
+  /*
+    An identifier used to mark multiple search requests as originating from a single
+    application session. In particular, this argument is used to restore long running
+    background search requests.
+   */
+  sessionId?: string;
 }
 
 export interface IEsSearchResponse<Hits = unknown> extends IKibanaSearchResponse {

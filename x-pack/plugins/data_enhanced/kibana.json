@@ -6,6 +6,7 @@
     "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
+    "security",
     "data"
   ],
   "server": true,
