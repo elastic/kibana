@@ -21,7 +21,10 @@ export const Main: React.FunctionComponent = () => {
   const {
     store: { payload, validation },
     updatePayload,
-    services: { http },
+    services: {
+      http,
+      chrome: { getIsNavDrawerLocked$ },
+    },
     links,
   } = useAppContext();
 
@@ -38,6 +41,16 @@ export const Main: React.FunctionComponent = () => {
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
+
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   return (
     <div className="painlessLabMainContainer">
@@ -64,6 +77,7 @@ export const Main: React.FunctionComponent = () => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
+        isNavDrawerLocked={isNavDrawerLocked}
         reset={() => updatePayload({ code: exampleScript })}
       />
 
