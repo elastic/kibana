@@ -3,19 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
-  IClusterClient,
-  Logger,
-  RouteValidationResultFactory,
+  CoreSetup,
 } from 'kibana/server';
-import { IEventLogService, IEventLogger } from '../../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server/types';
+import { EventEmitter } from 'events';
+import { TaskManagerStartContract } from '../../../../../plugins/task_manager/server';
 
 const scope = 'testing';
 const taskManagerQuery = {
@@ -37,7 +35,7 @@ const taskManagerQuery = {
 export function initRoutes(
   router: IRouter,
   core: CoreSetup,
-  taskManagerStart: Promise<TaskManagerStart>,
+  taskManagerStart: Promise<TaskManagerStartContract>,
   taskTestingEvents: EventEmitter
 ) {
   async function ensureIndexIsRefreshed() {

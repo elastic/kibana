@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'kibana/server';
+import { Plugin, CoreSetup, CoreStart } from 'kibana/server';
 import { EventEmitter } from 'events';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { initRoutes } from './init_routes';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  ConcreteTaskInstance,
 } from '../../../../../plugins/task_manager/server';
 import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
 
@@ -20,20 +21,21 @@ export interface SampleTaskManagerFixtureSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 export interface SampleTaskManagerFixtureStartDeps {
-  taskManager: TaskManagerSetupContract;
+  taskManager: TaskManagerStartContract;
 }
 
 export class SampleTaskManagerFixturePlugin
   implements
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
-  taskManagerStart$: Subject<TaskManager> = new Subject<TaskManager>();
-  taskManagerStart: Promise<TaskManager> = this.taskManagerStart$.pipe(first()).toPromise();
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'eventLogFixture');
-  }
+  taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
+  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
+    .pipe(first())
+    .toPromise();
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
+    const taskTestingEvents = new EventEmitter();
+    taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+
     const defaultSampleTaskConfig = {
       timeout: '1m',
       // This task allows tests to specify its behavior (whether it reschedules itself, whether it errors, etc)
@@ -43,7 +45,7 @@ export class SampleTaskManagerFixturePlugin
       //    failOn: number - If specified, the task will only throw the `failWith` error when `count` equals to the failOn value
       //    waitForParams : boolean - should the task stall ands wait to receive params asynchronously before using the default params
       //    waitForEvent : string - if provided, the task will stall (after completing the run) and wait for an asyn event before completing
-      createTaskRunner: ({ taskInstance }) => ({
+      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
         async run() {
           const { params, state, id } = taskInstance;
           const prevState = state || { count: 0 };
@@ -90,11 +92,13 @@ export class SampleTaskManagerFixturePlugin
     taskManager.registerTaskDefinitions({
       sampleTask: {
         ...defaultSampleTaskConfig,
+        type: 'sampleTask',
         title: 'Sample Task',
         description: 'A sample task for testing the task_manager.',
       },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
+        type: 'singleAttemptSampleTask',
         title: 'Failing Sample Task',
         description:
           'A sample task for testing the task_manager that fails on the first attempt to run.',
@@ -128,10 +132,11 @@ export class SampleTaskManagerFixturePlugin
           },
         };
       },
-    });
 
-    const taskTestingEvents = new EventEmitter();
-    taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+      async beforeMarkRunning(context) {
+        return context;
+      },
+    });
     initRoutes(core.http.createRouter(), core, this.taskManagerStart, taskTestingEvents);
   }
 
@@ -142,7 +147,7 @@ export class SampleTaskManagerFixturePlugin
   public stop() {}
 }
 
-function millisecondsFromNow(ms) {
+function millisecondsFromNow(ms: number) {
   if (!ms) {
     return;
   }
@@ -152,7 +157,7 @@ function millisecondsFromNow(ms) {
   return dt;
 }
 
-const once = function(emitter, event) {
+const once = function(emitter: EventEmitter, event: string): Promise<Record<string, unknown>> {
   return new Promise(resolve => {
     emitter.once(event, data => resolve(data || {}));
   });
