@@ -10,8 +10,8 @@ Every now and then visual changes will be made that will require the snapshots t
 
 1. Load the ES Archive containing the dashboard and data
   ```
-  node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/reporting/configs/chromium_functional.js
-  node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/reporting/configs/chromium_functional.js
+  node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/functional/config.js
+  node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/functional/config.js
   ```
 2. Generate a report of the archived E-commerce dashboard in the Kibana UI.
 3. Download the report and save it in the `reports/baseline` folder.
