@@ -8,9 +8,11 @@ import d3 from 'd3';
 
 import { Annotation } from '../../../../../common/types/annotations';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { ChartTooltipService } from '../../../components/chart_tooltip';
 
 interface Props {
   selectedJob: CombinedJob;
+  tooltipService: ChartTooltipService;
 }
 
 interface State {

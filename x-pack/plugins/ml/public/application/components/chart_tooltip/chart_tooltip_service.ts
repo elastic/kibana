@@ -7,7 +7,7 @@
 import { BehaviorSubject, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
 import { TooltipValue, TooltipValueFormatter } from '@elastic/charts';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 export interface ChartTooltipValue extends TooltipValue {
   skipHeader?: boolean;
@@ -53,7 +53,7 @@ export class ChartTooltipService {
 
   public tooltipState$: Observable<ChartTooltipState> = this.chartTooltip$
     .asObservable()
-    .pipe(debounceTime(100), distinctUntilChanged(isEqual));
+    .pipe(distinctUntilChanged(isEqual));
 
   public show(
     tooltipData: TooltipData,

@@ -121,21 +121,27 @@ function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel })
         ) {
           return (
             <MlTooltipComponent>
-              <ExplorerChartDistribution
-                tooManyBuckets={tooManyBuckets}
-                seriesConfig={series}
-                severity={severity}
-              />
+              {tooltipService => (
+                <ExplorerChartDistribution
+                  tooManyBuckets={tooManyBuckets}
+                  seriesConfig={series}
+                  severity={severity}
+                  tooltipService={tooltipService}
+                />
+              )}
             </MlTooltipComponent>
           );
         }
         return (
           <MlTooltipComponent>
-            <ExplorerChartSingleMetric
-              tooManyBuckets={tooManyBuckets}
-              seriesConfig={series}
-              severity={severity}
-            />
+            {tooltipService => (
+              <ExplorerChartSingleMetric
+                tooManyBuckets={tooManyBuckets}
+                seriesConfig={series}
+                severity={severity}
+                tooltipService={tooltipService}
+              />
+            )}
           </MlTooltipComponent>
         );
       })()}

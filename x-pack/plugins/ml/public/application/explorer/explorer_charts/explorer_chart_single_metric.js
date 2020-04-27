@@ -52,6 +52,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
     severity: PropTypes.number.isRequired,
+    tooltipService: PropTypes.object.isRequired,
   };
 
   componentDidMount() {

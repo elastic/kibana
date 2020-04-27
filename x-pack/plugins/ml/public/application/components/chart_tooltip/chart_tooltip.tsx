@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
 import { TooltipValueFormatter } from '@elastic/charts';
 
 import './_index.scss';
 
+import { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
 import { ChartTooltipService, ChartTooltipValue, TooltipData } from './chart_tooltip_service';
-
-type RefValue = HTMLElement | null;
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {
@@ -25,11 +24,14 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
 
 const Tooltip: FC<{ service: ChartTooltipService }> = ({ service }) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
-  const tooltipTriggerRef = useRef<RefValue>(null);
+  const refCallback = useRef<ChildrenArg['triggerRef']>();
 
   useEffect(() => {
     const subscription = service.tooltipState$.subscribe(tooltipState => {
-      tooltipTriggerRef.current = tooltipState.target;
+      if (refCallback.current) {
+        // update trigger
+        refCallback.current(tooltipState.target);
+      }
       setData(tooltipState.tooltipData);
     });
     return () => {
@@ -37,14 +39,20 @@ const Tooltip: FC<{ service: ChartTooltipService }> = ({ service }) => {
     };
   }, []);
 
-  const isTooltipShown = tooltipData.length > 0;
+  const triggerCallback = useCallback(
+    (({ triggerRef }) => {
+      // obtain the reference to the trigger setter callback
+      // to update the target based on changes from the service.
+      refCallback.current = triggerRef;
+      // actual trigger is resolved by the service, hence don't render
+      return null;
+    }) as TooltipTriggerProps['children'],
+    []
+  );
 
-  return (
-    <TooltipTrigger
-      placement="right-start"
-      trigger="none"
-      tooltipShown={isTooltipShown}
-      tooltip={({ tooltipRef, getTooltipProps }) => (
+  const tooltipCallback = useCallback(
+    (({ tooltipRef, getTooltipProps }) => {
+      return (
         <div
           {...getTooltipProps({
             ref: tooltipRef,
@@ -79,24 +87,36 @@ const Tooltip: FC<{ service: ChartTooltipService }> = ({ service }) => {
             </div>
           )}
         </div>
-      )}
+      );
+    }) as TooltipTriggerProps['tooltip'],
+    [tooltipData]
+  );
+
+  const isTooltipShown = tooltipData.length > 0;
+
+  return (
+    <TooltipTrigger
+      placement="right-start"
+      trigger="none"
+      tooltipShown={isTooltipShown}
+      tooltip={tooltipCallback}
     >
-      {({ triggerRef }) => {
-        triggerRef(tooltipTriggerRef.current);
-        // actual trigger is resolved by the service, hence don't render
-        return null;
-      }}
+      {triggerCallback}
     </TooltipTrigger>
   );
 };
 
-export const MlTooltipComponent: FC<{ children: React.ReactElement }> = ({ children }) => {
+interface MlTooltipComponentProps {
+  children: (tooltipService: ChartTooltipService) => React.ReactElement;
+}
+
+export const MlTooltipComponent: FC<MlTooltipComponentProps> = ({ children }) => {
   const service = useMemo(() => new ChartTooltipService(), []);
 
   return (
     <>
       <Tooltip service={service} />
-      {React.cloneElement(children, { ...children.props, tooltipService: service })}
+      {children(service)}
     </>
   );
 };

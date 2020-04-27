@@ -1299,16 +1299,19 @@ export class TimeSeriesExplorer extends React.Component {
                 </EuiFlexGroup>
                 <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
                   <MlTooltipComponent>
-                    <TimeseriesChart
-                      {...chartProps}
-                      bounds={bounds}
-                      detectorIndex={selectedDetectorIndex}
-                      renderFocusChartOnly={renderFocusChartOnly}
-                      selectedJob={selectedJob}
-                      showAnnotations={showAnnotations}
-                      showForecast={showForecast}
-                      showModelBounds={showModelBounds}
-                    />
+                    {tooltipService => (
+                      <TimeseriesChart
+                        {...chartProps}
+                        bounds={bounds}
+                        detectorIndex={selectedDetectorIndex}
+                        renderFocusChartOnly={renderFocusChartOnly}
+                        selectedJob={selectedJob}
+                        showAnnotations={showAnnotations}
+                        showForecast={showForecast}
+                        showModelBounds={showModelBounds}
+                        tooltipService={tooltipService}
+                      />
+                    )}
                   </MlTooltipComponent>
                 </div>
                 {showAnnotations && focusAnnotationData.length > 0 && (

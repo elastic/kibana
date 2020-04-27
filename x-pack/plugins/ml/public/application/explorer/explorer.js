@@ -418,17 +418,20 @@ export class Explorer extends React.Component {
             >
               {showOverallSwimlane && (
                 <MlTooltipComponent>
-                  <ExplorerSwimlane
-                    chartWidth={swimlaneContainerWidth}
-                    filterActive={filterActive}
-                    maskAll={maskAll}
-                    timeBuckets={this.timeBuckets}
-                    swimlaneCellClick={this.swimlaneCellClick}
-                    swimlaneData={overallSwimlaneData}
-                    swimlaneType={SWIMLANE_TYPE.OVERALL}
-                    selection={selectedCells}
-                    swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                  />
+                  {tooltipService => (
+                    <ExplorerSwimlane
+                      chartWidth={swimlaneContainerWidth}
+                      filterActive={filterActive}
+                      maskAll={maskAll}
+                      timeBuckets={this.timeBuckets}
+                      swimlaneCellClick={this.swimlaneCellClick}
+                      swimlaneData={overallSwimlaneData}
+                      swimlaneType={SWIMLANE_TYPE.OVERALL}
+                      selection={selectedCells}
+                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                      tooltipService={tooltipService}
+                    />
+                  )}
                 </MlTooltipComponent>
               )}
             </div>
@@ -496,17 +499,20 @@ export class Explorer extends React.Component {
                       data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                     >
                       <MlTooltipComponent>
-                        <ExplorerSwimlane
-                          chartWidth={swimlaneContainerWidth}
-                          filterActive={filterActive}
-                          maskAll={maskAll}
-                          timeBuckets={this.timeBuckets}
-                          swimlaneCellClick={this.swimlaneCellClick}
-                          swimlaneData={viewBySwimlaneData}
-                          swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                          selection={selectedCells}
-                          swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                        />
+                        {tooltipService => (
+                          <ExplorerSwimlane
+                            chartWidth={swimlaneContainerWidth}
+                            filterActive={filterActive}
+                            maskAll={maskAll}
+                            timeBuckets={this.timeBuckets}
+                            swimlaneCellClick={this.swimlaneCellClick}
+                            swimlaneData={viewBySwimlaneData}
+                            swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                            selection={selectedCells}
+                            swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                            tooltipService={tooltipService}
+                          />
+                        )}
                       </MlTooltipComponent>
                     </div>
                   </>

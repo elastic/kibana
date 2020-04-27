@@ -49,6 +49,7 @@ export class ExplorerChartDistribution extends React.Component {
   static propTypes = {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number,
+    tooltipService: PropTypes.object.isRequired,
   };
 
   componentDidMount() {

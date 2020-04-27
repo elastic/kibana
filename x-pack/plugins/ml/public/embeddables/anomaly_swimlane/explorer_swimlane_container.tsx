@@ -153,12 +153,15 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             <>
               <EuiSpacer size="m" />
               <MlTooltipComponent>
-                <ExplorerSwimlane
-                  chartWidth={chartWidth}
-                  timeBuckets={timeBuckets}
-                  swimlaneData={swimlaneData}
-                  swimlaneType={swimlaneType}
-                />
+                {tooltipService => (
+                  <ExplorerSwimlane
+                    chartWidth={chartWidth}
+                    timeBuckets={timeBuckets}
+                    swimlaneData={swimlaneData}
+                    swimlaneType={swimlaneType}
+                    tooltipService={tooltipService}
+                  />
+                )}
               </MlTooltipComponent>
             </>
           )}
