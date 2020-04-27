@@ -41,12 +41,15 @@ export const ComparatorToi18nMap = {
   [Comparator.NOT_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.notEq', {
     defaultMessage: 'is not',
   }),
-  [`${Comparator.EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
+  [`${Comparator.EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eqNumber', {
     defaultMessage: 'equals',
   }),
-  [`${Comparator.NOT_EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
-    defaultMessage: 'does not equal',
-  }),
+  [`${Comparator.NOT_EQ}:number`]: i18n.translate(
+    'xpack.infra.logs.alerting.comparator.notEqNumber',
+    {
+      defaultMessage: 'does not equal',
+    }
+  ),
   [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.match', {
     defaultMessage: 'matches',
   }),
