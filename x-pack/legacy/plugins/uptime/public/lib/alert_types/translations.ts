@@ -24,16 +24,26 @@ export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
     defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
 
-{expiringCount} expiring common names, including  {expiringCommonNameAndDate}.
-    
-{agingCount} aged common names, including  {agingCommonNameAndDate}.
+{expiringConditionalOpen}
+Expiring cert count: {expiringCount}
+Expiring Certificates: {expiringCommonNameAndDate}.
+{expiringConditionalClose}    
+
+{agingConditionalOpen}
+Aging cert count: {agingCount}
+Aging Certificates: {agingCommonNameAndDate}.
+{agingConditionalClose}
 `,
     values: {
       count: '{{state.count}}',
       expiringCount: '{{state.expiringCount}}',
       expiringCommonNameAndDate: '{{state.expiringCommonNameAndDate}}',
+      expiringConditionalOpen: '{{#state.hasExpired}}',
+      expiringConditionalClose: '{{/state.hasExpired}}',
       agingCount: '{{state.agingCount}}',
       agingCommonNameAndDate: '{{state.agingCommonNameAndDate}}',
+      agingConditionalOpen: '{{#state.hasAging}}',
+      agingConditionalClose: '{{/state.hasAging}}',
     },
   }),
   name: i18n.translate('xpack.uptime.alerts.tls.clientName', {

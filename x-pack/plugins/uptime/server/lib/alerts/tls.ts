@@ -25,10 +25,15 @@ const DEFAULT_SIZE = 20;
 
 const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
 
-const mapCertsToSummaryString = (certs: Cert[], maxSummaryItems: number): string =>
+const mapCertsToSummaryString = (
+  certs: Cert[],
+  getCertValue: (cert: Cert) => string,
+  expirationVerb: 'expires' | 'valid after date',
+  maxSummaryItems: number
+): string =>
   certs
     .slice(0, maxSummaryItems)
-    .map(cert => `${cert.common_name}, expires: ${cert.certificate_not_valid_after}`)
+    .map(cert => `${cert.common_name}, ${expirationVerb}: ${getCertValue(cert)}`)
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 interface TlsAlertState {
@@ -37,7 +42,13 @@ interface TlsAlertState {
   agingCommonNameAndDate: string;
   expiringCount: number;
   expiringCommonNameAndDate: string;
+  hasAging: true | null;
+  hasExpired: true | null;
 }
+
+const getValidAfter = (cert: Cert) => cert.certificate_not_valid_after ?? '';
+
+const getValidBefore = (cert: Cert) => cert.certificate_not_valid_before ?? '';
 
 export const getCertSummary = (
   certs: Cert[],
@@ -62,13 +73,25 @@ export const getCertSummary = (
   return {
     count: certs.length,
     agingCount: aging.length,
-    agingCommonNameAndDate: mapCertsToSummaryString(aging, maxSummaryItems),
-    expiringCommonNameAndDate: mapCertsToSummaryString(expiring, maxSummaryItems),
+    agingCommonNameAndDate: mapCertsToSummaryString(
+      aging,
+      getValidBefore,
+      'valid after date',
+      maxSummaryItems
+    ),
+    expiringCommonNameAndDate: mapCertsToSummaryString(
+      expiring,
+      getValidAfter,
+      'expires',
+      maxSummaryItems
+    ),
     expiringCount: expiring.length,
+    hasAging: aging.length > 0 ? true : null,
+    hasExpired: expiring.length > 0 ? true : null,
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
+export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.tls',
   name: i18n.translate('xpack/uptime.alerts.tls', {
     defaultMessage: 'Uptime TLS',
@@ -160,8 +183,9 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
         )
         .valueOf();
       const alertInstance = alertInstanceFactory(TLS.id);
+      const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
       alertInstance.replaceState({
-        ...getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold),
+        ...summary,
       });
       alertInstance.scheduleActions(TLS.id);
     }
