@@ -24,3 +24,13 @@ export interface TagCloudVisParams {
   maxFontSize: number;
   showLabel: boolean;
 }
+
+export interface FeedbackMessageComponentState {
+  shouldShowTruncate: boolean;
+  shouldShowIncomplete: boolean;
+}
+
+export interface LabelComponentState {
+  label: string;
+  shouldShowLabel: boolean;
+}
