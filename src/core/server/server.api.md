@@ -1707,7 +1707,7 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
 
 // @public (undocumented)

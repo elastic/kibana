@@ -4,7 +4,7 @@
 
 ## SavedObjectUnsanitizedDoc type
 
-We want to have two types, one that guarantees a "references" attribute will exist and one that allows it to be null. Since we're not migrating all the saved objects to have a "references" array, we need to support the scenarios where it may be missing (ex migrations).
+Describes Saved Object documents from Kibana &lt; 7.0.0 which don't have a `references` root property defined. This type should only be used in migrations.
 
 <b>Signature:</b>
 
