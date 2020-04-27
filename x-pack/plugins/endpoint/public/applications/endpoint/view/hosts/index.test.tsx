@@ -170,6 +170,9 @@ describe('when on the hosts page', () => {
     });
     it('should display Success overall policy status', async () => {
       const renderResult = render();
+      reactTestingLibrary.act(() => {
+        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.success);
+      });
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink.textContent).toEqual('Success');
 
@@ -180,7 +183,6 @@ describe('when on the hosts page', () => {
     });
     it('should display Warning overall policy status', async () => {
       const renderResult = render();
-      await middlewareSpy.waitForAction('serverReturnedHostPolicyResponse');
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
       });
@@ -194,7 +196,6 @@ describe('when on the hosts page', () => {
     });
     it('should display Failed overall policy status', async () => {
       const renderResult = render();
-      await middlewareSpy.waitForAction('serverReturnedHostPolicyResponse');
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
       });
@@ -208,7 +209,6 @@ describe('when on the hosts page', () => {
     });
     it('should display Unknown overall policy status', async () => {
       const renderResult = render();
-      await middlewareSpy.waitForAction('serverReturnedHostPolicyResponse');
       reactTestingLibrary.act(() => {
         dispatchServerReturnedHostPolicyResponse('' as HostPolicyResponseActionStatus);
       });
