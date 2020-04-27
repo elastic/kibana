@@ -14,7 +14,7 @@ export declare class Field implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
+|  [(constructor)({ fieldFormats, toastNotifications }, indexPattern, spec, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
 
 ## Properties
 

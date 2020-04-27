@@ -9,13 +9,14 @@ Constructs a new instance of the `FieldList` class
 <b>Signature:</b>
 
 ```typescript
-constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
+constructor({ fieldFormats, toastNotifications };: Deps, indexPattern;: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean;)
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
+|  { fieldFormats, toastNotifications } | <code>Deps</code> |  |
 |  indexPattern | <code>IndexPattern</code> |  |
 |  specs | <code>FieldSpec[]</code> |  |
 |  shortDotsEnable | <code>boolean</code> |  |

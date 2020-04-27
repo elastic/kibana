@@ -920,7 +920,8 @@ export class IndexPatternField implements IFieldType {
     //
     // (undocumented)
     $$spec: FieldSpec;
-    constructor(indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable?: boolean);
+    // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
+    constructor({ fieldFormats, toastNotifications }: Deps, indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable?: boolean);
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
@@ -959,7 +960,8 @@ export class IndexPatternField implements IFieldType {
 //
 // @public (undocumented)
 export class IndexPatternFieldList extends Array<IndexPatternField> implements IFieldList {
-    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
+    // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
+    constructor({ fieldFormats, toastNotifications }: Deps_2, indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
     // (undocumented)
     add: (field: Record<string, any>) => void;
     // (undocumented)
@@ -1341,7 +1343,7 @@ export interface QueryState {
 // Warning: (ae-missing-release-tag) "QueryStringInput" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const QueryStringInput: React.FC<Pick<Props_3, "query" | "placeholder" | "onChange" | "onSubmit" | "prepend" | "indexPatterns" | "disableAutoFocus" | "screenTitle" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition" | "dataTestSubj">>;
+export const QueryStringInput: React.FC<Pick<Props_3, "query" | "placeholder" | "onChange" | "onSubmit" | "prepend" | "indexPatterns" | "screenTitle" | "dataTestSubj" | "disableAutoFocus" | "persistedLog" | "bubbleSubmitEvent" | "languageSwitcherPopoverAnchorPosition">>;
 
 // @public (undocumented)
 export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
@@ -1519,7 +1521,7 @@ export type SavedQueryTimeFilter = TimeRange & {
 export const search: {
     aggs: {
         AggConfigs: typeof AggConfigs;
-        aggGroupNamesMap: () => Record<"metrics" | "buckets", string>;
+        aggGroupNamesMap: () => Record<"buckets" | "metrics", string>;
         aggTypeFilters: import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
         CidrMask: typeof CidrMask;
         convertDateRangeToString: typeof convertDateRangeToString;
@@ -1558,8 +1560,8 @@ export const search: {
 // Warning: (ae-missing-release-tag) "SearchBar" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "intl" | "indexPatterns" | "refreshInterval" | "screenTitle" | "dataTestSubj" | "customSubmitButton" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange">, "query" | "isLoading" | "filters" | "indexPatterns" | "refreshInterval" | "screenTitle" | "dataTestSubj" | "customSubmitButton" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange">, any> & {
-    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "intl" | "indexPatterns" | "refreshInterval" | "screenTitle" | "dataTestSubj" | "customSubmitButton" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange"> & ReactIntl.InjectedIntlProps>;
+export const SearchBar: React.ComponentClass<Pick<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "intl" | "indexPatterns" | "refreshInterval" | "customSubmitButton" | "screenTitle" | "dataTestSubj" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange">, "query" | "isLoading" | "filters" | "indexPatterns" | "refreshInterval" | "customSubmitButton" | "screenTitle" | "dataTestSubj" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange">, any> & {
+    WrappedComponent: React.ComponentType<Pick<SearchBarProps, "query" | "isLoading" | "filters" | "intl" | "indexPatterns" | "refreshInterval" | "customSubmitButton" | "screenTitle" | "dataTestSubj" | "showQueryBar" | "showQueryInput" | "showFilterBar" | "showDatePicker" | "showAutoRefreshOnly" | "isRefreshPaused" | "dateRangeFrom" | "dateRangeTo" | "showSaveQuery" | "savedQuery" | "onQueryChange" | "onQuerySubmit" | "onSaved" | "onSavedQueryUpdated" | "onClearSavedQuery" | "onRefresh" | "timeHistory" | "onFiltersUpdated" | "onRefreshChange"> & ReactIntl.InjectedIntlProps>;
 };
 
 // Warning: (ae-forgotten-export) The symbol "SearchBarOwnProps" needs to be exported by the entry point index.d.ts
