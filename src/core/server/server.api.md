@@ -1875,8 +1875,6 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
-    static createEsAutoCreateIndexError(): DecoratedError;
-    // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -1902,8 +1900,6 @@ export class SavedObjectsErrorHelpers {
     static isBadRequestError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isConflictError(error: Error | DecoratedError): boolean;
-    // (undocumented)
-    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)
