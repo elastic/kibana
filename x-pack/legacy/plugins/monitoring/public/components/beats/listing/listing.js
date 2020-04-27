@@ -12,12 +12,12 @@ import { formatMetric } from 'plugins/monitoring/lib/format_number';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { i18n } from '@kbn/i18n';
 import { BEATS_SYSTEM_ID } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
 
 export class Listing extends PureComponent {
   getColumns() {
-    const { kbnUrl, scope } = this.props.angular;
     const setupMode = this.props.setupMode;
 
     return [
@@ -51,11 +51,7 @@ export class Listing extends PureComponent {
           return (
             <div>
               <EuiLink
-                onClick={() => {
-                  scope.$evalAsync(() => {
-                    kbnUrl.changePath(`/beats/beat/${beat.uuid}`);
-                  });
-                }}
+                href={getSafeForExternalLink(`#/beats/beat/${beat.uuid}`)}
                 data-test-subj={`beatLink-${name}`}
               >
                 {name}

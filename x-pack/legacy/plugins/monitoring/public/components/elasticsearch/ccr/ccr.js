@@ -16,7 +16,7 @@ import {
   EuiIconTip,
   EuiTextColor,
 } from '@elastic/eui';
-
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import './ccr.css';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -64,7 +64,9 @@ export class Ccr extends Component {
               ),
               render: shardId => {
                 return (
-                  <EuiLink href={`#/elasticsearch/ccr/${index}/shard/${shardId}`}>
+                  <EuiLink
+                    href={getSafeForExternalLink(`#/elasticsearch/ccr/${index}/shard/${shardId}`)}
+                  >
                     {shardId}
                   </EuiLink>
                 );

@@ -20,6 +20,7 @@ import { EuiMonitoringTable } from '../../table';
 import { KibanaStatusIcon } from '../status_icon';
 import { StatusIcon } from 'plugins/monitoring/components/status_icon';
 import { formatMetric, formatNumber } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SetupModeBadge } from '../../setup_mode/badge';
@@ -67,7 +68,7 @@ const getColumns = setupMode => {
         return (
           <div>
             <EuiLink
-              href={`#/kibana/instances/${kibana.kibana.uuid}`}
+              href={getSafeForExternalLink(`#/kibana/instances/${kibana.kibana.uuid}`)}
               data-test-subj={`kibanaLink-${name}`}
             >
               {name}

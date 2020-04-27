@@ -72,12 +72,11 @@ async function executor(
     bulkBody.push(document);
   }
 
-  const bulkParams: any = {
+  const bulkParams = {
     index,
     body: bulkBody,
+    refresh: config.refresh,
   };
-
-  bulkParams.refresh = config.refresh;
 
   let result;
   try {
