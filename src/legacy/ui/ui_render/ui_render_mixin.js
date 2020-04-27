@@ -157,13 +157,15 @@ export function uiRenderMixin(kbnServer, server, config) {
         ];
 
         // These paths should align with the bundle routes configured in
-        // src/optimize/bundles_route/bundles_route.js
-        // TODO check if it still required
+        // src/optimize/bundles_route/bundles_route.ts
         const publicPathMap = JSON.stringify({
-          core: `${regularBundlePath}/core/`,
+          core: `${regularBundlePath}/${buildHash}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
           ...uiPluginIds.reduce(
-            (acc, pluginId) => ({ ...acc, [pluginId]: `${regularBundlePath}/plugin/${pluginId}/` }),
+            (acc, pluginId) => ({
+              ...acc,
+              [pluginId]: `${regularBundlePath}/${buildHash}/plugin/${pluginId}/`,
+            }),
             {}
           ),
         });

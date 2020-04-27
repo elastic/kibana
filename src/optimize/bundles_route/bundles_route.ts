@@ -102,7 +102,6 @@ export function createBundlesRoute({
       })
     ),
     // for async chunks that loaded by webpack.
-    // we can configure it as publicPath in webpack though
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
         publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
