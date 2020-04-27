@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Dataset,
-  RegistryPackage,
-  ElasticsearchAssetType,
-  TemplateRef,
-  IngestAssetType,
-} from '../../../../types';
+import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
