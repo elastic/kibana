@@ -29,7 +29,10 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
       const { sourceId } = request.params;
 
       try {
-        const sourceConfiguration = await sources.getSourceConfiguration(requestContext, sourceId);
+        const sourceConfiguration = await sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
 
         return response.ok({
           body: getLogSourceConfigurationSuccessResponsePayloadRT.encode({
@@ -65,7 +68,10 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
       const { data: patchedSourceConfigurationProperties } = request.body;
 
       try {
-        const sourceConfiguration = await sources.getSourceConfiguration(requestContext, sourceId);
+        const sourceConfiguration = await sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
 
         if (sourceConfiguration.origin === 'internal') {
           response.conflict({
