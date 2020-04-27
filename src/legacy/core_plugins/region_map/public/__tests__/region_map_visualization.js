@@ -54,6 +54,7 @@ import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_ty
 import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -132,12 +133,23 @@ describe('RegionMapsVisualizationTests', function() {
         includeElasticMapsService: true,
         layers: [],
       };
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {},
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
 
       dependencies = {
         serviceSettings,
         $injector,
         regionmapsConfig,
         uiSettings,
+        BaseMapsVisualization,
       };
 
       regionMapVisType = new BaseVisType(createRegionMapTypeDefinition(dependencies));
