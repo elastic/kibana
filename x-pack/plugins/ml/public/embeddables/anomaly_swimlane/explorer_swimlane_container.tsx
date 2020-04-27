@@ -39,7 +39,6 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   embeddableInput,
   services,
   refresh,
-  onOutputChange,
 }) => {
   const [{ uiSettings, notifications }, , { explorerService }] = services;
 
@@ -72,8 +71,6 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
           const { jobs, viewBy, swimlaneType: swimlaneTypeInput, timeRange } = input;
 
           explorerService.setTimeRange(timeRange);
-
-          onOutputChange({ timeRange });
 
           if (!swimlaneType) {
             setSwimlaneType(swimlaneTypeInput);

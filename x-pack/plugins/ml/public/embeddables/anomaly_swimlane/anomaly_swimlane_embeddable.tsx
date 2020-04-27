@@ -46,7 +46,6 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   jobs: Job[];
   swimlaneType: string;
   viewBy?: string;
-  timeRange?: TimeRange;
 }
 
 export interface MlServices {
