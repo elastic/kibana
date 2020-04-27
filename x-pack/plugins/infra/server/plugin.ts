@@ -119,6 +119,7 @@ export class InfraServerPlugin {
         sources,
       }),
       logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
+        framework,
         sources,
       }),
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
