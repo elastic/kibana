@@ -28,10 +28,6 @@ const documentCountPrefix = i18n.translate('xpack.infra.logs.alertFlyout.documen
   defaultMessage: 'when',
 });
 
-const documentCountValue = i18n.translate('xpack.infra.logs.alertFlyout.documentCountValue', {
-  defaultMessage: 'Log entries',
-});
-
 const getComparatorOptions = (): Array<{
   value: Comparator;
   text: string;
@@ -54,6 +50,11 @@ interface Props {
 export const DocumentCount: React.FC<Props> = ({ comparator, value, updateCount, errors }) => {
   const [isComparatorPopoverOpen, setComparatorPopoverOpenState] = useState(false);
   const [isValuePopoverOpen, setIsValuePopoverOpen] = useState(false);
+
+  const documentCountValue = i18n.translate('xpack.infra.logs.alertFlyout.documentCountValue', {
+    defaultMessage: '{value, plural, one {log entry} other {log entries}}',
+    values: { value },
+  });
 
   return (
     <EuiFlexGroup gutterSize="s">
