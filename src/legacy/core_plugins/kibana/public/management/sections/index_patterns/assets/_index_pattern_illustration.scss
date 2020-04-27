@@ -1,0 +1,12 @@
+
+.indexPatternIllustration {
+  &__background {
+    fill: lightOrDarkTheme($euiColorLightestShade, $euiColorLightShade);
+  }
+  &__dots {
+    fill: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
+  }
+  &__speed {
+    fill: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade);
+  }
+}
