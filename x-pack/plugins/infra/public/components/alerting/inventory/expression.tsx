@@ -284,6 +284,7 @@ export const Expressions: React.FC<Props> = props => {
           </EuiFormRow>
         </>
       )}
+      <EuiSpacer size={'m'} />
     </>
   );
 };

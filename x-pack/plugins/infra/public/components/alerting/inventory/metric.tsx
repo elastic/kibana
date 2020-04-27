@@ -19,9 +19,6 @@ import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 import { SnapshotMetricType } from '../../../../common/inventory_models/types';
-// import { builtInAggregationTypes } from '../constants';
-// import { AggregationType } from '../types';
-// import { IErrorObject } from '../../types';
 
 interface Props {
   metric?: { value: SnapshotMetricType; text: string };

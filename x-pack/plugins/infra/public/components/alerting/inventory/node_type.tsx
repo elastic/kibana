@@ -42,7 +42,7 @@ export const NodeTypeExpression = ({
     <EuiPopover
       button={
         <EuiExpression
-          data-test-subj="whenExpression"
+          data-test-subj="nodeTypeExpression"
           description={i18n.translate(
             'xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel',
             {
