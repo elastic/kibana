@@ -28,6 +28,81 @@ export const detailsLoading = (state: Immutable<HostState>): boolean => state.de
 
 export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
+const detailsPolicyResponse = () => {
+  const response = {
+    '@timestamp': 'a formatted timestamp',
+    elastic: {
+      agent: {},
+    },
+    ecs: {
+      version: '1.0.0',
+    },
+    event: {
+      created: '2015-01-01T12:10:30Z',
+      kind: 'policy_response',
+    },
+    agent: {
+      version: '6.0.0-rc2',
+      id: '8a4f500d',
+    },
+    endpoint: {
+      artifacts: {
+        'global-manifest': {
+          version: '1.2.3',
+          sha256: 'abcdef',
+        },
+        'endpointpe-v4-windows': {
+          version: '1.2.3',
+          sha256: 'abcdef',
+        },
+        'user-whitelist-windows': {
+          version: '1.2.3',
+          sha256: 'abcdef',
+        },
+        'global-whitelist-windows': {
+          version: '1.2.3',
+          sha256: 'abcdef',
+        },
+      },
+      policy: {
+        version: '1.0.0',
+        id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
+        response: {
+          configurations: {
+            malware: {
+              status: 'success',
+              concerned_actions: ['download_model'],
+            },
+            eventing: {
+              status: 'failed',
+              concerned_actions: ['ingest_events_config'],
+            },
+          },
+          actions: {
+            download_model: {
+              status: 'success',
+              message: 'model downloaded',
+            },
+            ingest_events_config: {
+              status: 'failure',
+              message: 'no action taken',
+            },
+          },
+        },
+      },
+    },
+  };
+  return response.endpoint.policy.response;
+};
+
+export const policyResponseConfigurations = createSelector(detailsPolicyResponse, response => {
+  return response.configurations;
+});
+
+export const policyResponseActions = createSelector(detailsPolicyResponse, response => {
+  return response.actions;
+});
+
 export const isOnHostPage = (state: Immutable<HostState>) =>
   state.location ? state.location.pathname === '/hosts' : false;
 
