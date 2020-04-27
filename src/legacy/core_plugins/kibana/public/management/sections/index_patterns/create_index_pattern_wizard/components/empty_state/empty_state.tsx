@@ -27,18 +27,17 @@ import {
   EuiPageContent,
   EuiIcon,
   EuiSpacer,
+  EuiFlexItem,
+  EuiDescriptionList,
+  EuiFlexGrid,
+  EuiCard,
+  EuiLink,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiDescriptionList } from '@elastic/eui';
-import { EuiFlexGrid } from '@elastic/eui';
-import { EuiCard } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 
 export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
-  <EuiPageContent grow={false} horizontalPosition="center">
+  <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
         <EuiTitle>
@@ -46,9 +45,9 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
         </EuiTitle>
       </EuiPageContentHeaderSection>
     </EuiPageContentHeader>
-    <EuiSpacer size="l" />
+    <EuiSpacer size="m" />
     <EuiPageContentBody>
-      <EuiFlexGrid columns={3}>
+      <EuiFlexGrid columns={3} responsive={true}>
         <EuiFlexItem>
           <EuiCard
             href="#/home/tutorial_directory"
@@ -78,7 +77,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
       </EuiFlexGrid>
       <EuiSpacer size="xxl" />
       <div className="inpEmptyState__footer">
-        <EuiFlexGroup responsive={false} wrap>
+        <EuiFlexGrid columns={3}>
           <EuiFlexItem>
             <EuiDescriptionList
               listItems={[
@@ -111,7 +110,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
               ]}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGrid>
       </div>
     </EuiPageContentBody>
   </EuiPageContent>

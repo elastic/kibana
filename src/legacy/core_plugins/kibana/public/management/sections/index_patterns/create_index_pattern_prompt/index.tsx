@@ -43,9 +43,9 @@ export const CreateIndexPatternPrompt: FunctionComponent<Props> = ({
   indexPatternCreationOptions,
 }) => {
   return (
-    <EuiPageContent style={{ maxWidth: 750 }} grow={false} horizontalPosition="center">
-      <EuiFlexGroup responsive={false} wrap gutterSize="xl" alignItems="center">
-        <EuiFlexItem grow={2}>
+    <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
+      <EuiFlexGroup wrap gutterSize="xl" alignItems="center">
+        <EuiFlexItem grow={2} className="inpEmptyState__text">
           <EuiText grow={false}>
             <h2>
               You have data in Elasticsearch. <br /> Now, create an index pattern.
@@ -63,7 +63,7 @@ export const CreateIndexPatternPrompt: FunctionComponent<Props> = ({
             </CreateButton>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} className="inpEmptyState__illustration">
           <Illustration />
         </EuiFlexItem>
       </EuiFlexGroup>
