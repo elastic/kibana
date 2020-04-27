@@ -13,8 +13,13 @@ export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from '
 // Once all plugins are migrated to NP, this can be removed
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TaskManager } from '../../../../plugins/task_manager/server/task_manager';
+import {
+  LegacyPluginApi,
+  LegacyPluginSpec,
+  ArrayOrItem,
+} from '../../../../../src/legacy/plugin_discovery/types';
 
-export function taskManager(kibana: any) {
+export function taskManager(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   return new kibana.Plugin({
     id: 'task_manager',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -45,7 +50,11 @@ export function taskManager(kibana: any) {
               // instead we will start the internal Task Manager plugin when
               // all legacy plugins have finished initializing
               // Once all plugins are migrated to NP, this can be removed
-              this.kbnServer.afterPluginsInit(() => {
+
+              // the typing for the lagcy server isn't quite correct, so
+              // we'll bypase it for now
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (this as any).kbnServer.afterPluginsInit(() => {
                 taskManagerPlugin.start();
               });
               return taskManagerPlugin;
@@ -53,5 +62,5 @@ export function taskManager(kibana: any) {
         )
       );
     },
-  });
+  } as Legacy.PluginSpecOptions);
 }

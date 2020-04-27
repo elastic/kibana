@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { getAgent, listAgents } from './crud';
-import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus, Agent } from '../../types';
 
 import {
@@ -67,13 +67,13 @@ export async function getAgentStatusForConfig(
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
     ].map(kuery =>
       listAgents(soClient, {
-        showInactive: true,
+        showInactive: false,
         perPage: 0,
         page: 1,
         kuery: configId
           ? kuery
-            ? `(${kuery}) and (agents.config_id:"${configId}")`
-            : `agents.config_id:"${configId}"`
+            ? `(${kuery}) and (${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}")`
+            : `${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}"`
           : kuery,
       })
     )
@@ -91,7 +91,9 @@ export async function getAgentStatusForConfig(
 async function getEventsCount(soClient: SavedObjectsClientContract, configId?: string) {
   const { total } = await soClient.find({
     type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-    filter: configId ? `agent_events.attributes.config_id:"${configId}"` : undefined,
+    filter: configId
+      ? `${AGENT_EVENT_SAVED_OBJECT_TYPE}.attributes.config_id:"${configId}"`
+      : undefined,
     perPage: 0,
     page: 1,
     sortField: 'timestamp',

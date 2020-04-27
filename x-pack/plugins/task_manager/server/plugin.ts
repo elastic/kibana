@@ -34,7 +34,7 @@ export class TaskManagerPlugin
     this.currentConfig = {} as TaskManagerConfig;
   }
 
-  public async setup(core: CoreSetup, plugins: any): Promise<TaskManagerSetupContract> {
+  public async setup(core: CoreSetup, plugins: unknown): Promise<TaskManagerSetupContract> {
     const logger = this.initContext.logger.get('taskManager');
     const config = await this.initContext.config
       .create<TaskManagerConfig>()

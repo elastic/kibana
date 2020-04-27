@@ -43,6 +43,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
+  ElasticJs,
 } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -129,7 +130,7 @@ export class TaskManager {
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: opts.callAsInternalUser,
+      callCluster: (opts.callAsInternalUser as unknown) as ElasticJs,
       index: opts.config.index,
       maxAttempts: opts.config.max_attempts,
       definitions: this.definitions,
@@ -273,7 +274,7 @@ export class TaskManager {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: any
+    options?: object
   ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
@@ -308,7 +309,7 @@ export class TaskManager {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: any
+    options?: object
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);

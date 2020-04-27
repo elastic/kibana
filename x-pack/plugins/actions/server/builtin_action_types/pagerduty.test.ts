@@ -22,7 +22,7 @@ const postPagerdutyMock = postPagerduty as jest.Mock;
 const ACTION_TYPE_ID = '.pagerduty';
 
 const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
+  callCluster: async (path: string, opts: unknown) => {},
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
