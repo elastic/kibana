@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { XYZTMSEditor, XYZTMSSourceConfig } from './xyz_tms_editor';
-import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
+import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+// @ts-ignore
+import { CreateSourceEditor } from './create_source_editor';
+// @ts-ignore
+import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../tile_layer';
 
-export const tmsLayerWizardConfig: LayerWizard = {
-  description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
-    defaultMessage: 'Tile map service configured in interface',
+export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
+    defaultMessage: 'Tile map service configured in kibana.yml',
   }),
-  icon: 'grid',
+  icon: 'logoKibana',
   renderWizard: ({ previewLayer }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig) => {
+    const onSourceConfigChange = () => {
       const layerDescriptor = TileLayer.createDescriptor({
-        sourceDescriptor: XYZTMSSource.createDescriptor(sourceConfig),
+        sourceDescriptor: KibanaTilemapSource.createDescriptor(),
       });
       previewLayer(layerDescriptor);
     };
-    return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,
 };
