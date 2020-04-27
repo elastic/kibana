@@ -8,11 +8,22 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
 import { InstallStatus, PackageInfo } from '../../../../types';
 import { useGetDatasources } from '../../../../hooks';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallationButton } from './installation_button';
+import { UpdateIcon } from '../../components/icons';
+
+const SettingsTitleCell = styled.td`
+  padding-right: ${props => props.theme.eui.spacerSizes.xl};
+  padding-bottom: ${props => props.theme.eui.spacerSizes.m};
+`;
+
+const UpdatesAvailableMsgContainer = styled.span`
+  padding-left: ${props => props.theme.eui.spacerSizes.s};
+`;
 
 const NoteLabel = () => (
   <FormattedMessage
@@ -20,8 +31,18 @@ const NoteLabel = () => (
     defaultMessage="Note:"
   />
 );
+const UpdatesAvailableMsg = () => (
+  <UpdatesAvailableMsgContainer>
+    <UpdateIcon />
+    <FormattedMessage
+      id="xpack.ingestManager.integrations.settings.versionInfo.updatesAvailable"
+      defaultMessage="Updates are available"
+    />
+  </UpdatesAvailableMsgContainer>
+);
+
 export const SettingsPanel = (
-  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version' | 'removable'>
+  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version' | 'removable' | 'latestVersion'>
 ) => {
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: datasourcesData } = useGetDatasources({
@@ -29,9 +50,10 @@ export const SettingsPanel = (
     page: 1,
     kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
-  const { name, title, removable } = props;
+  const { name, title, removable, version, latestVersion } = props;
   const packageInstallStatus = getPackageInstallStatus(name);
   const packageHasDatasources = !!datasourcesData?.total;
+  const updatesAvailable = latestVersion > version;
   return (
     <EuiText>
       <EuiTitle>
@@ -42,6 +64,52 @@ export const SettingsPanel = (
           />
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
+      <div>
+        <EuiTitle>
+          <h4>
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.settings.packageVersionTitle"
+              defaultMessage="{title} version"
+              values={{
+                title,
+              }}
+            />
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <table>
+            <tr>
+              <SettingsTitleCell>
+                <FormattedMessage
+                  id="xpack.ingestManager.integrations.settings.versionInfo.installedVersion"
+                  defaultMessage="Installed version"
+                />
+              </SettingsTitleCell>
+              <td>
+                <EuiTitle size="xs">
+                  <span>{props.version}</span>
+                </EuiTitle>
+                {updatesAvailable && <UpdatesAvailableMsg />}
+              </td>
+            </tr>
+            <tr>
+              <SettingsTitleCell>
+                <FormattedMessage
+                  id="xpack.ingestManager.integrations.settings.versionInfo.latestVersion"
+                  defaultMessage="Latest version"
+                />
+              </SettingsTitleCell>
+              <td>
+                <EuiTitle size="xs">
+                  <span>{props.latestVersion}</span>
+                </EuiTitle>
+              </td>
+            </tr>
+          </table>
+        </EuiText>
+      </div>
       <EuiSpacer size="s" />
       {packageInstallStatus === InstallStatus.notInstalled ||
       packageInstallStatus === InstallStatus.installing ? (
