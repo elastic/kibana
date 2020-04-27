@@ -5,12 +5,13 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
@@ -26,7 +27,7 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { GisMap } from '../connected_components/gis_map';
+// import GisMap from '../connected_components/gis_map/lazy';
 import { createMapStore, MapStore } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
 import {
@@ -86,6 +87,7 @@ export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
+const GisMap = lazy(() => import('../connected_components/gis_map/lazy'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
@@ -254,10 +256,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            renderTooltipContent={this._renderTooltipContent}
-          />
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <GisMap
+              addFilters={this.input.hideFilterActions ? null : this.addFilters}
+              renderTooltipContent={this._renderTooltipContent}
+            />
+          </Suspense>
         </I18nContext>
       </Provider>,
       this._domNode
