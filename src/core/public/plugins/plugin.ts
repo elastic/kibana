@@ -21,23 +21,8 @@ import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
+import { read } from './plugin_reader';
 import { CoreStart, CoreSetup } from '..';
-
-/**
- * Unknown variant for internal use only for when plugins are not known.
- * @internal
- */
-export type UnknownPluginInitializer = PluginInitializer<unknown, Record<string, unknown>>;
-
-/**
- * Custom window type for loading bundles. Do not extend global Window to avoid leaking these types.
- * @internal
- */
-export interface CoreWindow {
-  __kbnBundles__: {
-    [pluginBundleName: string]: { plugin: UnknownPluginInitializer } | undefined;
-  };
-}
 
 /**
  * The interface that should be returned by a `PluginInitializer`.
@@ -101,25 +86,6 @@ export class PluginWrapper<
   }
 
   /**
-   * Reads the plugin's bundle declared in the global context.
-   */
-  private read() {
-    const coreWindow = (window as unknown) as CoreWindow;
-    const exportId = `plugin/${this.name}`;
-    const pluginExport = coreWindow.__kbnBundles__[exportId];
-    if (typeof pluginExport!.plugin !== 'function') {
-      throw new Error(`Definition of plugin "${this.name}" should be a function.`);
-    } else {
-      return pluginExport!.plugin as PluginInitializer<
-        TSetup,
-        TStart,
-        TPluginsSetup,
-        TPluginsStart
-      >;
-    }
-  }
-
-  /**
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
    * for the `setup` lifecycle event.
@@ -167,7 +133,13 @@ export class PluginWrapper<
   }
 
   private async createPluginInstance() {
-    const initializer = this.read();
+    const initializer = read(this.name) as PluginInitializer<
+      TSetup,
+      TStart,
+      TPluginsSetup,
+      TPluginsStart
+    >;
+
     const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {

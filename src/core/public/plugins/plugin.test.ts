@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
+import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
 import { coreMock } from '../mocks';
@@ -40,7 +40,7 @@ const opaqueId = Symbol();
 const initializerContext = coreMock.createPluginInitializerContext();
 
 beforeEach(() => {
-  mockPluginLoader.mockClear();
+  mockPluginReader.mockClear();
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
@@ -48,12 +48,6 @@ beforeEach(() => {
 });
 
 describe('PluginWrapper', () => {
-  test('`setup` fails if load is not called first', async () => {
-    await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Plugin \\"plugin-a\\" can't be setup since its bundle isn't loaded."`
-    );
-  });
-
   test('`setup` fails if plugin.setup is not a function', async () => {
     mockInitializer.mockReturnValueOnce({ start: jest.fn() } as any);
     await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -102,19 +96,21 @@ describe('PluginWrapper', () => {
     };
 
     let startDependenciesResolved = false;
-    mockPluginLoader.mockResolvedValueOnce(() => ({
-      setup: jest.fn(),
-      start: async () => {
-        // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-        await new Promise(resolve => setTimeout(resolve, 10));
-        expect(startDependenciesResolved).toBe(false);
-        return pluginStartContract;
-      },
-    }));
+    mockPluginReader.mockReturnValueOnce(
+      jest.fn(() => ({
+        setup: jest.fn(),
+        start: jest.fn(async () => {
+          // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+          await new Promise(resolve => setTimeout(resolve, 10));
+          expect(startDependenciesResolved).toBe(false);
+          return pluginStartContract;
+        }),
+        stop: jest.fn(),
+      }))
+    );
     await plugin.setup({} as any, {} as any);
     const context = { any: 'thing' } as any;
     const deps = { otherDep: 'value' };
-
     // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
     // called.
     const startDependenciesCheck = plugin.startDependencies.then(res => {
