@@ -207,8 +207,8 @@ describe('policy list store concerns', () => {
     it(`uses last param value if param is defined multiple times`, async () => {
       dispatchUserChangedUrl('?page_size=20&page_size=50&page_index=20&page_index=40');
       expect(urlSearchParams(getState())).toEqual({
-        page_index: 20,
-        page_size: 20,
+        page_index: 40,
+        page_size: 50,
       });
     });
   });
