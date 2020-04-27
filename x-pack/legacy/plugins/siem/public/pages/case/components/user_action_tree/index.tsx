@@ -18,10 +18,12 @@ import { AddComment } from '../add_comment';
 import { getLabelTitle } from './helpers';
 import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
+import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
 
 export interface UserActionTreeProps {
   data: Case;
   caseUserActions: CaseUserActions[];
+  connectors: Connector[];
   fetchUserActions: () => void;
   firstIndexPushToService: number;
   isLoadingDescription: boolean;
@@ -43,6 +45,7 @@ export const UserActionTree = React.memo(
   ({
     data: caseData,
     caseUserActions,
+    connectors,
     fetchUserActions,
     firstIndexPushToService,
     isLoadingDescription,
@@ -228,6 +231,7 @@ export const UserActionTree = React.memo(
               field: myField,
               firstIndexPushToService,
               index,
+              connectors,
             });
 
             return (

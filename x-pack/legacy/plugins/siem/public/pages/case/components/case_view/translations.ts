@@ -26,6 +26,21 @@ export const CHANGED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabe
   defaultMessage: 'changed',
 });
 
+export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
+  i18n.translate('xpack.siem.case.caseView.actionLabel.selectedThirdParty', {
+    values: {
+      thirdParty,
+    },
+    defaultMessage: 'selected { thirdParty } as incident management system',
+  });
+
+export const REMOVED_THIRD_PARTY = i18n.translate(
+  'xpack.siem.case.caseView.actionLabel.removedThirdParty',
+  {
+    defaultMessage: 'removed third-party incident management system',
+  }
+);
+
 export const EDITED_FIELD = i18n.translate('xpack.siem.case.caseView.actionLabel.editedField', {
   defaultMessage: 'edited',
 });

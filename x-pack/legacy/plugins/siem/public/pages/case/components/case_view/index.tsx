@@ -269,6 +269,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   <>
                     <UserActionTree
                       caseUserActions={caseUserActions}
+                      connectors={connectors}
                       data={caseData}
                       fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
                       firstIndexPushToService={firstIndexPushToService}

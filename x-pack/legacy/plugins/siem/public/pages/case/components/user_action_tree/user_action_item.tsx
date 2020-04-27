@@ -85,6 +85,7 @@ export const UserActionItemContainer = styled(EuiFlexGroup)`
 `;
 
 const MyEuiPanel = styled(EuiPanel)<{ showoutline: string }>`
+  flex-grow: 0;
   ${({ theme, showoutline }) =>
     showoutline === 'true'
       ? `

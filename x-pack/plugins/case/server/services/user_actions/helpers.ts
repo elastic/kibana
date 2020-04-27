@@ -119,6 +119,7 @@ export const buildCaseUserActionItem = ({
 
 const userActionFieldsAllowed: UserActionField = [
   'comment',
+  'connector_id',
   'description',
   'tags',
   'title',

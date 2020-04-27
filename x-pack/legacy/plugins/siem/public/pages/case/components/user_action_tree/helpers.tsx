@@ -7,24 +7,39 @@
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
 
-import { CaseFullExternalService } from '../../../../../../../../plugins/case/common/api';
+import {
+  CaseFullExternalService,
+  Connector,
+} from '../../../../../../../../plugins/case/common/api';
 import { CaseUserActions } from '../../../../containers/case/types';
 import * as i18n from '../case_view/translations';
 
 interface LabelTitle {
   action: CaseUserActions;
+  connectors: Connector[];
   field: string;
   firstIndexPushToService: number;
   index: number;
 }
 
-export const getLabelTitle = ({ action, field, firstIndexPushToService, index }: LabelTitle) => {
+export const getLabelTitle = ({
+  action,
+  connectors,
+  field,
+  firstIndexPushToService,
+  index,
+}: LabelTitle) => {
   if (field === 'tags') {
     return getTagsLabelTitle(action);
   } else if (field === 'title' && action.action === 'update') {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
       action.newValue
     }"`;
+  } else if (field === 'connector_id' && action.action === 'update') {
+    const newConnector = connectors.find(c => c.id === action.newValue);
+    return action.newValue != null && action.newValue !== 'none' && newConnector != null
+      ? i18n.SELECTED_THIRD_PARTY(newConnector.name)
+      : i18n.REMOVED_THIRD_PARTY;
   } else if (field === 'description' && action.action === 'update') {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
   } else if (field === 'status' && action.action === 'update') {

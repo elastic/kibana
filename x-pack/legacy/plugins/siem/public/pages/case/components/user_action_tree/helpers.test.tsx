@@ -9,12 +9,15 @@ import { getUserAction } from '../../../../containers/case/mock';
 import { getLabelTitle } from './helpers';
 import * as i18n from '../case_view/translations';
 import { mount } from 'enzyme';
+import { connectorsMock } from '../../../../containers/case/configure/mock';
 
 describe('User action tree helpers', () => {
+  const connectors = connectorsMock;
   it('label title generated for update tags', () => {
     const action = getUserAction(['title'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'tags',
       firstIndexPushToService: 0,
       index: 0,
@@ -39,6 +42,7 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['title'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'title',
       firstIndexPushToService: 0,
       index: 0,
@@ -54,6 +58,7 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['description'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'description',
       firstIndexPushToService: 0,
       index: 0,
@@ -65,6 +70,7 @@ describe('User action tree helpers', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'status',
       firstIndexPushToService: 0,
       index: 0,
@@ -76,6 +82,7 @@ describe('User action tree helpers', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'status',
       firstIndexPushToService: 0,
       index: 0,
@@ -87,6 +94,7 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['comment'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'comment',
       firstIndexPushToService: 0,
       index: 0,
@@ -98,6 +106,7 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'pushed',
       firstIndexPushToService: 0,
       index: 0,
@@ -121,6 +130,7 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'pushed',
       firstIndexPushToService: 0,
       index: 1,
@@ -139,5 +149,30 @@ describe('User action tree helpers', () => {
         .first()
         .prop('href')
     ).toEqual(JSON.parse(action.newValue).external_url);
+  });
+  it('label title generated for update connector', () => {
+    const action = getUserAction(['connector_id'], 'update');
+    const result: string | JSX.Element = getLabelTitle({
+      action,
+      connectors,
+      field: 'tags',
+      firstIndexPushToService: 0,
+      index: 0,
+    });
+
+    const wrapper = mount(<>{result}</>);
+    expect(
+      wrapper
+        .find(`[data-test-subj="ua-tags-label"]`)
+        .first()
+        .text()
+    ).toEqual(` ${i18n.TAGS.toLowerCase()}`);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="ua-tag"]`)
+        .first()
+        .text()
+    ).toEqual(action.newValue);
   });
 });
