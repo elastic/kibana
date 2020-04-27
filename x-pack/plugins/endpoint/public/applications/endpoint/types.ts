@@ -22,6 +22,7 @@ import {
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
+  HostPolicyResponse,
   HostInfo,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
@@ -108,6 +109,8 @@ export interface HostState {
   detailsLoading: boolean;
   /** api error from retrieving host details */
   detailsError?: ServerApiError;
+  /** Holds the Policy Response for the Host currently being displayed in the details */
+  policyResponse?: HostPolicyResponse;
   /** current location info */
   location?: Immutable<EndpointAppLocation>;
 }
