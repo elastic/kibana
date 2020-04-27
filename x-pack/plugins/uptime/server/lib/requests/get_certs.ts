@@ -69,10 +69,11 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
     },
   };
 
-  if (search || notValidBefore || notValidAfter) {
-    params.body.query.bool.should = [];
-  }
   if (search) {
+    if (!params.body.query.bool.should) {
+      params.body.query.bool.should = [];
+    }
+
     params.body.query.bool.should = [
       {
         wildcard: {
@@ -105,24 +106,32 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
     ];
   }
 
-  if (notValidBefore) {
-    params.body.query.bool.should.push({
-      range: {
-        'tls.certificate_not_valid_before': {
-          lte: notValidBefore,
-        },
+  if (notValidBefore || notValidAfter) {
+    const validityFilters: any = {
+      bool: {
+        should: [],
       },
-    });
-  }
+    };
+    if (notValidBefore) {
+      validityFilters.bool.should.push({
+        range: {
+          'tls.certificate_not_valid_before': {
+            lte: notValidBefore,
+          },
+        },
+      });
+    }
+    if (notValidAfter) {
+      validityFilters.bool.should.push({
+        range: {
+          'tls.certificate_not_valid_after': {
+            lte: notValidAfter,
+          },
+        },
+      });
+    }
 
-  if (notValidAfter) {
-    params.body.query.bool.should.push({
-      range: {
-        'tls.certificate_not_valid_after': {
-          lte: notValidAfter,
-        },
-      },
-    });
+    params.body.query.bool.filter.push(validityFilters);
   }
 
   const result = await callES('search', params);
