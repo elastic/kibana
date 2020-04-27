@@ -2264,8 +2264,6 @@
     "kbn.management.editIndexPattern.timeFilterHeader": "时间筛选字段名称：{timeFieldName}",
     "kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink": "映射 API",
     "kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail": "此页根据 Elasticsearch 的记录列出“{indexPatternTitle}”索引中的每个字段以及字段的关联核心类型。要更改字段类型，请使用 Elasticsearch",
-    "kbn.management.editIndexPattern.unsupportedTimePatternHeader": "对重复索引模式的支持已移除",
-    "kbn.management.editIndexPattern.unsupportedTimePatternLabel": "对基于时间间隔的索引模式的支持已移除！在 Kibana 下一主要版本中，此索引模式将不再有效。通过在下面指定新模式，将此索引模式迁移到通配符模式。",
     "kbn.management.editIndexPatternLiveRegionAriaLabel": "索引模式",
     "kbn.management.indexPattern.goToPatternButtonLabel": "前往现有模式",
     "kbn.management.indexPattern.sectionsHeader": "索引模式",

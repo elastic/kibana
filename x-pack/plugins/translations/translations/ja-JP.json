@@ -2263,8 +2263,6 @@
     "kbn.management.editIndexPattern.timeFilterHeader": "時間フィルターフィールド名: {timeFieldName}",
     "kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink": "マッピング API",
     "kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail": "このページは {indexPatternTitle} インデックス内のすべてのフィールドと、Elasticsearch に記録された各フィールドのコアタイプを一覧表示します。フィールドタイプを変更するには Elasticsearch を使用します",
-    "kbn.management.editIndexPattern.unsupportedTimePatternHeader": "繰り返しのインデックスパターンのサポート終了",
-    "kbn.management.editIndexPattern.unsupportedTimePatternLabel": "時間間隔に基づくインデックスパターンがサポートされなくなりました！Kibanaの次のメジャーなバージョンでは、これらのインデックスパターンは動作しなくなります。下に新しいパターンを指定して、このインデックスパターンをワイルドカードパターンに移行してください。",
     "kbn.management.editIndexPatternLiveRegionAriaLabel": "インデックスパターン",
     "kbn.management.indexPattern.goToPatternButtonLabel": "既存のパターンに移動",
     "kbn.management.indexPattern.sectionsHeader": "インデックスパターン",
