@@ -1,17 +1,22 @@
-## The Reporting Tests
+## The Dashboard Reporting Tests
 
-### Reporting baseline snapshots
+### Baseline snapshots
 
-The functional version of the reporting tests create a few pdf reports and do a snapshot comparison against a couple baselines.  The baseline images are stored in `./functional/reports/baseline`.
+The reporting tests create a few PNG reports and do a snapshot comparison against stored baselines.  The baseline images are stored in `./reports/baseline`.
 
-#### Updating the baselines
+### Updating the baselines
 
-Every now and then visual changes will be made that will require the snapshots to be updated.  This is how you go about updating it.  I will discuss generating snapshots from chromium since that is the way of the future.
+Every now and then visual changes will be made that will require the snapshots to be updated.  This is how you go about updating it.
 
-1. Load the ES Archive containing the dashboard and data
+1. **Load the ES Archive containing the dashboard and data.**
+   This will load the test data into an Elasticsearch instance running via the functional test server:
   ```
   node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/functional/config.js
   node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/functional/config.js
   ```
-2. Generate a report of the archived E-commerce dashboard in the Kibana UI.
-3. Download the report and save it in the `reports/baseline` folder.
+2. **Generate the reports of the E-commerce dashboard in the Kibana UI.**
+   Navigate to `http://localhost:5620`, find the archived dashboard, and generate all the types of reports for which there are stored baseline images.
+3. **Download the reports, and save them into the `reports/baseline` folder.**
+   Change the names of the PNG/PDF files to overwrite the stored baselines.
+
+The next time functional tests run, the generated reports will be compared to the latest image that you have saved :bowtie:
