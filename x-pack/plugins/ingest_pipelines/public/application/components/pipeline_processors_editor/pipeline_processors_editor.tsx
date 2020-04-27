@@ -9,12 +9,11 @@ import { EuiPanel, EuiButton } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
-import { SettingsFormFlyout, DragAndDropTree } from './components';
+import { SettingsFormFlyout, DragAndDropTree, PipelineProcessorEditorItem } from './components';
 import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
 import { useProcessorsState } from './reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
-import { PipelineProcessorEditorItem } from './pipeline_processor_editor_item';
 
 export interface OnUpdateHandlerArg {
   getData: () => SerializeResult;

@@ -9,3 +9,5 @@ export { SettingsFormFlyout } from './settings_form_flyout';
 export { ProcessorSettingsForm, ProcessorSettingsFromOnSubmitArg } from './processor_settings_form';
 
 export { DragAndDropTree } from './drag_and_drop_tree';
+
+export { PipelineProcessorEditorItem } from './pipeline_processor_editor_item';

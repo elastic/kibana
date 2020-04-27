@@ -8,7 +8,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ProcessorInternal } from './types';
+import { ProcessorInternal } from '../types';
 
 type ProcessorClickEventType = 'edit' | 'addOnFailure' | 'delete';
 
