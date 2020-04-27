@@ -9,10 +9,11 @@ import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
 import { asOk, asErr } from './lib/result_type';
 import { TaskEvent, asTaskRunEvent, asTaskMarkRunningEvent } from './task_events';
-import { ConcreteTaskInstance, TaskStatus } from './task';
+import { ConcreteTaskInstance, TaskStatus, TaskDictionary, TaskDefinition } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import moment from 'moment';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -113,6 +114,60 @@ describe('TaskManagerRunner', () => {
     expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
   });
 
+  test('expiration returns time after which timeout will have elapsed from start', async () => {
+    const now = moment();
+    const { runner } = testOpts({
+      instance: {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Running,
+        startedAt: now.toDate(),
+      },
+      definitions: {
+        bar: {
+          timeout: `1m`,
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    expect(runner.isExpired).toBe(false);
+    expect(runner.expiration).toEqual(now.add(1, 'm').toDate());
+  });
+
+  test('runDuration returns duration which has elapsed since start', async () => {
+    const now = moment()
+      .subtract(30, 's')
+      .toDate();
+    const { runner } = testOpts({
+      instance: {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Running,
+        startedAt: now,
+      },
+      definitions: {
+        bar: {
+          timeout: `1m`,
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    expect(runner.isExpired).toBe(false);
+    expect(runner.startedAt).toEqual(now);
+  });
+
   test('reschedules tasks that return a runAt', async () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({
@@ -208,7 +263,7 @@ describe('TaskManagerRunner', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  test('warns if cancel is called on a non-cancellable task', async () => {
+  test('debug logs if cancel is called on a non-cancellable task', async () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
@@ -223,10 +278,7 @@ describe('TaskManagerRunner', () => {
     await runner.cancel();
     await promise;
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"The task bar \\"foo\\" is not cancellable."`
-    );
+    expect(logger.debug).toHaveBeenCalledWith(`The task bar "foo" is not cancellable.`);
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
@@ -854,8 +906,8 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definitions?: any;
-    onTaskEvent?: (event: TaskEvent<any, any>) => void;
+    definitions?: unknown;
+    onTaskEvent?: (event: TaskEvent<unknown, unknown>) => void;
   }
 
   function testOpts(opts: TestOpts) {
@@ -904,7 +956,7 @@ describe('TaskManagerRunner', () => {
           title: 'Bar!',
           createTaskRunner,
         },
-      }),
+      }) as TaskDictionary<TaskDefinition>,
       onTaskEvent: opts.onTaskEvent,
     });
 
@@ -918,7 +970,7 @@ describe('TaskManagerRunner', () => {
     };
   }
 
-  async function testReturn(result: any, shouldBeValid: boolean) {
+  async function testReturn(result: unknown, shouldBeValid: boolean) {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
@@ -939,11 +991,11 @@ describe('TaskManagerRunner', () => {
     }
   }
 
-  function allowsReturnType(result: any) {
+  function allowsReturnType(result: unknown) {
     return testReturn(result, true);
   }
 
-  function disallowsReturnType(result: any) {
+  function disallowsReturnType(result: unknown) {
     return testReturn(result, false);
   }
 });

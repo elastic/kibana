@@ -8,24 +8,30 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus, PackageInfo } from '../../../../types';
-import { InstallationButton } from './installation_button';
 import { useGetDatasources } from '../../../../hooks';
+import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { useGetPackageInstallStatus } from '../../hooks';
+import { InstallationButton } from './installation_button';
 
+const NoteLabel = () => (
+  <FormattedMessage
+    id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
+    defaultMessage="Note:"
+  />
+);
 export const SettingsPanel = (
-  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version'>
+  props: Pick<PackageInfo, 'assets' | 'name' | 'title' | 'version' | 'removable'>
 ) => {
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: datasourcesData } = useGetDatasources({
     perPage: 0,
     page: 1,
-    kuery: `datasources.package.name:${props.name}`,
+    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
-  const { name, title } = props;
+  const { name, title, removable } = props;
   const packageInstallStatus = getPackageInstallStatus(name);
   const packageHasDatasources = !!datasourcesData?.total;
-
   return (
     <EuiText>
       <EuiTitle>
@@ -89,12 +95,12 @@ export const SettingsPanel = (
           <p>
             <InstallationButton
               {...props}
-              disabled={!datasourcesData ? true : packageHasDatasources}
+              disabled={!datasourcesData || removable === false ? true : packageHasDatasources}
             />
           </p>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {packageHasDatasources && (
+      {packageHasDatasources && removable === true && (
         <p>
           <FormattedMessage
             id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
@@ -103,10 +109,23 @@ export const SettingsPanel = (
               title,
               strongNote: (
                 <strong>
-                  <FormattedMessage
-                    id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
-                    defaultMessage="Note:"
-                  />
+                  <NoteLabel />
+                </strong>
+              ),
+            }}
+          />
+        </p>
+      )}
+      {removable === false && (
+        <p>
+          <FormattedMessage
+            id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
+            defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
+            values={{
+              title,
+              strongNote: (
+                <strong>
+                  <NoteLabel />
                 </strong>
               ),
             }}

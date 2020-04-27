@@ -15,9 +15,9 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
-  LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
+  VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
@@ -66,12 +66,15 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return [];
   }
 
-  createDefaultLayer(options: LayerDescriptor): TiledVectorLayer {
-    const layerDescriptor = {
+  createDefaultLayer(options?: Partial<VectorLayerDescriptor>): TiledVectorLayer {
+    const layerDescriptor: Partial<VectorLayerDescriptor> = {
       sourceDescriptor: this._descriptor,
       ...options,
     };
-    const normalizedLayerDescriptor = TiledVectorLayer.createDescriptor(layerDescriptor, []);
+    const normalizedLayerDescriptor: VectorLayerDescriptor = TiledVectorLayer.createDescriptor(
+      layerDescriptor,
+      []
+    );
     const vectorLayerArguments: VectorLayerArguments = {
       layerDescriptor: normalizedLayerDescriptor,
       source: this,

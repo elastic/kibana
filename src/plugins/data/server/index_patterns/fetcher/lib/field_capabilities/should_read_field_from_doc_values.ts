@@ -18,5 +18,5 @@
  */
 
 export function shouldReadFieldFromDocValues(aggregatable: boolean, esType: string) {
-  return aggregatable && esType !== 'text' && !esType.startsWith('_');
+  return aggregatable && !['text', 'geo_shape'].includes(esType) && !esType.startsWith('_');
 }

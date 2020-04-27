@@ -28,6 +28,8 @@ export interface Alert {
   consumer: string;
   schedule: IntervalSchedule;
   actions: AlertAction[];
+  // This will have to remain `any` until we can extend Alert Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   scheduledTaskId?: string;
   createdBy: string | null;
