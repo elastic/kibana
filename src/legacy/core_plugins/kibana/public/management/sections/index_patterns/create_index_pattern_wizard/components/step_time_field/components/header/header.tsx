@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }
     <EuiText>
       <FormattedMessage
         id="kbn.management.createIndexPattern.stepTimeLabel"
-        defaultMessage="You've defined {indexPattern} as your {indexPatternName}. Now you can specify some settings before we create it."
+        defaultMessage="Specify some settings for your {indexPattern} {indexPatternName}."
         values={{
           indexPattern: <strong>{indexPattern}</strong>,
           indexPatternName,

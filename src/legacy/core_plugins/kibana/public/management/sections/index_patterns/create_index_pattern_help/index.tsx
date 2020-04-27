@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getDocLink } from 'ui/documentation_links';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -26,6 +27,7 @@ import {
   EuiFlyoutBody,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
@@ -50,6 +52,14 @@ export const CreateIndexPatternHelp = ({ onClose }: { onClose: () => void }) => 
             defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
           Kibana."
           />
+        </p>
+        <p>
+          <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>
+            <FormattedMessage
+              id="kbn.management.indexPatternPrompt.documentation"
+              defaultMessage="Read documentation"
+            />
+          </EuiLink>
         </p>
       </EuiText>
       <EuiHorizontalRule margin="l" />

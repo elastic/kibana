@@ -18,6 +18,9 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { getDocLink } from 'ui/documentation_links';
 
 import {
   EuiPageContentHeader,
@@ -34,14 +37,17 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-
 export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
   <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
         <EuiTitle>
-          <h2>Ready to try Kibana? First, you need data.</h2>
+          <h2>
+            <FormattedMessage
+              id="kbn.management.emptyState.noDataTitle"
+              defaultMessage="Ready to try Kibana? First, you need data."
+            />
+          </h2>
         </EuiTitle>
       </EuiPageContentHeaderSection>
     </EuiPageContentHeader>
@@ -53,19 +59,46 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
             className="inpEmptyState__card"
             href="#/home/tutorial_directory"
             icon={<EuiIcon size="xl" type="database" color="subdued" />}
-            title="Add integration"
-            description="Add data from a variety of sources."
+            title={
+              <FormattedMessage
+                id="kbn.management.emptyState.integrationCardTitle"
+                defaultMessage="Add integration"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="kbn.management.emptyState.integrationCardDescription"
+                defaultMessage="Add data from a variety of sources."
+              />
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
             className="inpEmptyState__card"
-            betaBadgeLabel="Gold license"
-            betaBadgeTooltipContent="Requires a different license"
+            betaBadgeLabel={i18n.translate('kbn.management.emptyState.basicLicenseLabel', {
+              defaultMessage: 'Basic license',
+            })}
+            betaBadgeTooltipContent={i18n.translate(
+              'kbn.management.emptyState.basicLicenseDescription',
+              {
+                defaultMessage: 'Requires a Basic license',
+              }
+            )}
             isDisabled
             icon={<EuiIcon size="xl" type="document" color="subdued" />}
-            title="Upload a file"
-            description="Import a CSV, NDJSON, or log file."
+            title={
+              <FormattedMessage
+                id="kbn.management.emptyState.uploadCardTitle"
+                defaultMessage="Upload a file"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="kbn.management.emptyState.uploadCardDescription"
+                defaultMessage="Import a CSV, NDJSON, or log file."
+              />
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -73,8 +106,18 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
             className="inpEmptyState__card"
             href="#/home/tutorial_directory/sampleData"
             icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
-            title="Add sample data"
-            description="Load a data set and a Kibana dashboard."
+            title={
+              <FormattedMessage
+                id="kbn.management.emptyState.sampleDataCardTitle"
+                defaultMessage="Add sample data"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="kbn.management.emptyState.sampleDataCardDescription"
+                defaultMessage="Load a data set and a Kibana dashboard."
+              />
+            }
           />
         </EuiFlexItem>
       </EuiFlexGrid>
@@ -85,10 +128,15 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
             <EuiDescriptionList
               listItems={[
                 {
-                  title: 'Want to learn more?',
+                  title: (
+                    <FormattedMessage
+                      id="kbn.management.emptyState.learnMore"
+                      defaultMessage="Want to learn more?"
+                    />
+                  ),
                   description: (
-                    <EuiLink>
-                      Read documentation <EuiIcon type="popout" size="s" />
+                    <EuiLink href={getDocLink('kibana')} target="_blank" external>
+                      Read documentation
                     </EuiLink>
                   ),
                 },
@@ -99,7 +147,12 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
             <EuiDescriptionList
               listItems={[
                 {
-                  title: 'Pretty sure you have data?',
+                  title: (
+                    <FormattedMessage
+                      id="kbn.management.emptyState.haveData"
+                      defaultMessage="Pretty sure you have data?"
+                    />
+                  ),
                   description: (
                     <EuiLink onClick={onRefresh} data-test-subj="refreshIndicesButton">
                       <FormattedMessage

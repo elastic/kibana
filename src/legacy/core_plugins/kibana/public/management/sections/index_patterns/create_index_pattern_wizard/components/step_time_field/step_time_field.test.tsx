@@ -134,7 +134,7 @@ describe('StepTimeField', () => {
     });
 
     // If the value is undefined, that means the user selected the
-    // `I don't want to use a Time filter` option
+    // `I don't want to use a time filter` option
     (component.instance() as StepTimeField).onTimeFieldChanged(({
       target: { value: undefined },
     } as unknown) as React.ChangeEvent<HTMLSelectElement>);

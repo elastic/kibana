@@ -89,16 +89,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         &nbsp;
         <FormattedMessage
           id="kbn.management.createIndexPattern.step.status.successLabel.successDetail"
-          defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
+          defaultMessage="Your index pattern matches {strongIndices}."
           values={{
-            strongSuccess: (
-              <strong>
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
-                  defaultMessage="Success!"
-                />
-              </strong>
-            ),
             strongIndices: (
               <strong>
                 <FormattedMessage

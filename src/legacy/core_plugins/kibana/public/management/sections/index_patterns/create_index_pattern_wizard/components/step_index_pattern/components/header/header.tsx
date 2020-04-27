@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
       <h2>
         <FormattedMessage
           id="kbn.management.createIndexPattern.stepHeader"
-          defaultMessage="Step 1 of 2: Define index pattern"
+          defaultMessage="Step 1 of 2: Define an index pattern"
         />
       </h2>
     </EuiTitle>
@@ -80,12 +80,12 @@ export const Header: React.FC<HeaderProps> = ({
               <>
                 <FormattedMessage
                   id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
-                  defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
+                  defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
                   values={{ asterisk: <strong>*</strong> }}
                 />{' '}
                 <FormattedMessage
                   id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
-                  defaultMessage="You can't use spaces or the characters {characterList}."
+                  defaultMessage="Spaces and the characters {characterList} are not allowed."
                   values={{ characterList: <strong>{characterList}</strong> }}
                 />
               </>

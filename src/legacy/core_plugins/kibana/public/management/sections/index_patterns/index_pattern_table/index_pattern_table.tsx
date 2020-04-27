@@ -28,8 +28,8 @@ import {
   EuiText,
   EuiTitle,
   EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
+import { getDocLink } from 'ui/documentation_links';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CreateButton } from '../create_button';
@@ -110,11 +110,18 @@ export const IndexPatternTable: React.FunctionComponent<Props> = ({
               </EuiTitle>
               <EuiText size="s" grow={false}>
                 <p>
-                  Kibana requires an index pattern to identify which indices you want to explore. An
-                  index pattern can point to a specific index, for example, your log data from
-                  yesterday, or all indices that contain your log data.{' '}
-                  <EuiLink>
-                    Read documentation <EuiIcon type="popout" size="s" />
+                  <FormattedMessage
+                    id="kbn.management.indexPatternTable.indexPatternExplanation"
+                    defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
+                index pattern can point to a specific index, for example, your log data from
+                yesterday, or all indices that contain your log data."
+                  />
+                  <br />
+                  <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>
+                    <FormattedMessage
+                      id="kbn.management.indexPatternTable.documentation"
+                      defaultMessage="Read documentation"
+                    />
                   </EuiLink>
                 </p>
               </EuiText>

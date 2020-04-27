@@ -19,18 +19,7 @@
 
 import React from 'react';
 
-import './time_field.css';
-
-import {
-  EuiForm,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSelect,
-  EuiText,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiLink, EuiSelect, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -56,41 +45,37 @@ export const TimeField: React.FC<TimeFieldProps> = ({
     {isVisible ? (
       <EuiFormRow
         label={
-          <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <span>
+          <FormattedMessage
+            id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+            defaultMessage="Time Filter field name"
+          />
+        }
+        labelAppend={
+          isLoading ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            <EuiText size="xs">
+              <EuiLink onClick={fetchTimeFields}>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-                  defaultMessage="Time Filter field name"
+                  id="kbn.management.createIndexPattern.stepTime.refreshButton"
+                  defaultMessage="Refresh"
                 />
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiLink className="timeFieldRefreshButton" onClick={fetchTimeFields}>
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.stepTime.refreshButton"
-                    defaultMessage="Refresh"
-                  />
-                </EuiLink>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              </EuiLink>
+            </EuiText>
+          )
         }
         helpText={
           <div>
             <p>
               <FormattedMessage
                 id="kbn.management.createIndexPattern.stepTime.fieldLabel"
-                defaultMessage="The Time Filter will use this field to filter your data by time."
+                defaultMessage="The time filter uses this field to filter your data by time."
               />
             </p>
             <p>
               <FormattedMessage
                 id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
-                defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
+                defaultMessage="If you choose not to have a time field, you won't be able to narrow your data by time."
               />
             </p>
           </div>
