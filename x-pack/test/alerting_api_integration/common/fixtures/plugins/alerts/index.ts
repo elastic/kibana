@@ -12,7 +12,7 @@ import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins
 export default function(kibana: any) {
   return new kibana.Plugin({
     require: ['xpack_main', 'elasticsearch'],
-    name: 'alertsXXX',
+    name: 'alerts-fixture',
     init(server: any) {
       server.plugins.xpack_main.registerFeature({
         id: 'alerting',
