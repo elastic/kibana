@@ -26,7 +26,7 @@ export const createExternalService = ({
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
 
-  if (!url || !apiToken || !email) {
+  if (!url || !projectKey || !apiToken || !email) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
@@ -51,7 +51,9 @@ export const createExternalService = ({
         url: `${incidentUrl}/${id}`,
       });
 
-      return { ...res.data };
+      const { fields, ...rest } = res.data;
+
+      return { ...rest, ...fields };
     } catch (error) {
       throw new Error(
         getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
@@ -60,6 +62,9 @@ export const createExternalService = ({
   };
 
   const createIncident = async ({ incident }: ExternalServiceParams) => {
+    // The response from Jira when creating an issue contains only the key and the id.
+    // The function makes two calls when creating an issue. One to create the issue and one to get
+    // the created issue with all the necessary fields.
     try {
       const res = await request({
         axios: axiosInstance,
@@ -75,7 +80,7 @@ export const createExternalService = ({
       return {
         title: updatedIncident.key,
         id: updatedIncident.id,
-        pushedDate: new Date(updatedIncident.fields.created).toISOString(),
+        pushedDate: new Date(updatedIncident.created).toISOString(),
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
@@ -99,7 +104,7 @@ export const createExternalService = ({
       return {
         title: updatedIncident.key,
         id: updatedIncident.id,
-        pushedDate: new Date(updatedIncident.fields.updated).toISOString(),
+        pushedDate: new Date(updatedIncident.updated).toISOString(),
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
