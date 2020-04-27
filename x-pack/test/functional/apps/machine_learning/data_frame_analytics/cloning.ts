@@ -14,8 +14,6 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('jobs cloning supported by UI form', function() {
-    this.tags(['smoke']);
-
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

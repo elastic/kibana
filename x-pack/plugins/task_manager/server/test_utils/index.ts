@@ -33,11 +33,11 @@ interface Resolvable {
  */
 export function resolvable(): PromiseLike<void> & Resolvable {
   let resolve: () => void;
-  const result = new Promise<void>(r => (resolve = r)) as any;
-
-  result.resolve = () => nativeTimeout(resolve, 0);
-
-  return result;
+  return Object.assign(new Promise<void>(r => (resolve = r)), {
+    resolve() {
+      return nativeTimeout(resolve, 0);
+    },
+  });
 }
 
 /**

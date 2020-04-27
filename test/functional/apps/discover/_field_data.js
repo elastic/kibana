@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
   describe('discover tab', function describeIndexTests() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('discover');
