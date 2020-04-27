@@ -61,6 +61,8 @@ export const createLogThresholdExecutor = (alertUUID: string, libs: InfraBackend
       alertInstance.replaceState({
         alertState: AlertStates.ERROR,
       });
+
+      throw new Error(e);
     }
   };
 
