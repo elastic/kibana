@@ -7,8 +7,7 @@
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
 import { KibanaRequest } from 'kibana/server';
-import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 
 jest.mock('./event_log_client');
 
@@ -41,7 +40,7 @@ describe('EventLogClientService', () => {
 
 function fakeRequest(): KibanaRequest {
   const savedObjectsClient = savedObjectsClientMock.create();
-  return {
+  return ({
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -55,5 +54,5 @@ function fakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectsClient,
-  } as any;
+  } as unknown) as KibanaRequest;
 }
