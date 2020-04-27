@@ -23,19 +23,6 @@ const DEFAULT_TO = 'now';
 const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 20;
 
-const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
-
-const mapCertsToSummaryString = (
-  certs: Cert[],
-  getCertValue: (cert: Cert) => string,
-  expirationVerb: 'expires' | 'valid after date',
-  maxSummaryItems: number
-): string =>
-  certs
-    .slice(0, maxSummaryItems)
-    .map(cert => `${cert.common_name}, ${expirationVerb}: ${getCertValue(cert)}`)
-    .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
-
 interface TlsAlertState {
   count: number;
   agingCount: number;
@@ -46,9 +33,33 @@ interface TlsAlertState {
   hasExpired: true | null;
 }
 
-const getValidAfter = (cert: Cert) => cert.certificate_not_valid_after ?? '';
+const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).valueOf();
 
-const getValidBefore = (cert: Cert) => cert.certificate_not_valid_before ?? '';
+const mapCertsToSummaryString = (
+  certs: Cert[],
+  certLimitMessage: (cert: Cert) => string,
+  maxSummaryItems: number
+): string =>
+  certs
+    .slice(0, maxSummaryItems)
+    .map(cert => `${cert.common_name}, ${certLimitMessage(cert)}`)
+    .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
+
+const getValidAfter = ({ certificate_not_valid_after: date }: Cert) => {
+  if (!date) return 'Error, missing `certificate_not_valid_after` date.';
+  const relativeDate = moment().diff(date, 'days');
+  return relativeDate >= 0
+    ? `expires on ${date} in ${relativeDate} days.`
+    : `expired on ${date} ${Math.abs(relativeDate)} days ago`;
+};
+
+const getValidBefore = ({ certificate_not_valid_before: date }: Cert): string => {
+  if (!date) return 'Error, missing `certificate_not_valid_before` date.';
+  const relativeDate = moment().diff(date, 'days');
+  return relativeDate >= 0
+    ? `valid since ${date}, ${relativeDate} days ago.`
+    : `invalid until ${date}, ${Math.abs(relativeDate)} days from now.`;
+};
 
 export const getCertSummary = (
   certs: Cert[],
@@ -73,18 +84,8 @@ export const getCertSummary = (
   return {
     count: certs.length,
     agingCount: aging.length,
-    agingCommonNameAndDate: mapCertsToSummaryString(
-      aging,
-      getValidBefore,
-      'valid after date',
-      maxSummaryItems
-    ),
-    expiringCommonNameAndDate: mapCertsToSummaryString(
-      expiring,
-      getValidAfter,
-      'expires',
-      maxSummaryItems
-    ),
+    agingCommonNameAndDate: mapCertsToSummaryString(aging, getValidBefore, maxSummaryItems),
+    expiringCommonNameAndDate: mapCertsToSummaryString(expiring, getValidAfter, maxSummaryItems),
     expiringCount: expiring.length,
     hasAging: aging.length > 0 ? true : null,
     hasExpired: expiring.length > 0 ? true : null,
