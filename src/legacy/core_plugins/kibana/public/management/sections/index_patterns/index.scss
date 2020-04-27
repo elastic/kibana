@@ -43,16 +43,6 @@
 }
 
 .inpEmptyState__illustration {
-  @include euiBreakpoint('xs', 's') {
-    order: 1;
-
-    > svg {
-      width: 190px;
-      height: auto;
-      margin: 0 auto;
-    }
-  }
-
   &__background {
     fill: lightOrDarkTheme($euiColorLightestShade, $euiColorLightShade);
   }
@@ -61,6 +51,16 @@
   }
   &__speed {
     fill: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade);
+  }
+
+  @include euiBreakpoint('xs', 's') {
+    order: 1;
+
+    > svg {
+      width: 190px;
+      height: auto;
+      margin: 0 auto;
+    }
   }
 }
 
