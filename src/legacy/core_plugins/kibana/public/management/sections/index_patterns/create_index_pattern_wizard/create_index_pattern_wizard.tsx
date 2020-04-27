@@ -19,11 +19,15 @@
 
 import React, { ReactElement, Component } from 'react';
 
-import { EuiGlobalToastList, EuiGlobalToastListToast, EuiPageContent } from '@elastic/eui';
+import {
+  EuiGlobalToastList,
+  EuiGlobalToastListToast,
+  EuiPageContent,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiHorizontalRule } from '@elastic/eui';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';

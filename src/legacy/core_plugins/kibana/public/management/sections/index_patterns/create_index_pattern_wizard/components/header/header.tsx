@@ -19,11 +19,18 @@
 
 import React, { Fragment, useState } from 'react';
 
-import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiLink, EuiSwitch } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiLink,
+  EuiSwitch,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon } from '@elastic/eui';
 import { CreateIndexPatternPrompt } from '../../../create_index_pattern_prompt';
 
 interface Props {

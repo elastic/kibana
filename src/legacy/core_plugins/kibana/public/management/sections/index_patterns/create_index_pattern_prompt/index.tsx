@@ -21,6 +21,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getDocLink } from 'ui/documentation_links';
 import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiText,
@@ -29,8 +32,6 @@ import {
   EuiSpacer,
   EuiLink,
 } from '@elastic/eui';
-import { EuiDescriptionListTitle } from '@elastic/eui';
-import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 
 export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) => (
   <EuiFlyout size="s" onClose={onClose} data-test-subj="CreateIndexPatternPrompt">
