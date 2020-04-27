@@ -152,61 +152,6 @@ export default function(kibana) {
       uiSettingDefaults: getUiSettingDefaults(),
     },
 
-    uiCapabilities: async function() {
-      return {
-        discover: {
-          show: true,
-          createShortUrl: true,
-          save: true,
-          saveQuery: true,
-        },
-        visualize: {
-          show: true,
-          createShortUrl: true,
-          delete: true,
-          save: true,
-          saveQuery: true,
-        },
-        dashboard: {
-          createNew: true,
-          show: true,
-          showWriteControls: true,
-          saveQuery: true,
-        },
-        catalogue: {
-          discover: true,
-          dashboard: true,
-          visualize: true,
-          console: true,
-          advanced_settings: true,
-          index_patterns: true,
-        },
-        advancedSettings: {
-          show: true,
-          save: true,
-        },
-        indexPatterns: {
-          save: true,
-        },
-        savedObjectsManagement: {
-          delete: true,
-          edit: true,
-          read: true,
-        },
-        management: {
-          /*
-           * Management settings correspond to management section/link ids, and should not be changed
-           * without also updating those definitions.
-           */
-          kibana: {
-            settings: true,
-            index_patterns: true,
-            objects: true,
-          },
-        },
-      };
-    },
-
     preInit: async function(server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).

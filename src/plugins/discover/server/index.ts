@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { registerRoutes } from './routes';
-import { indexPatternSavedObjectType } from '../saved_objects';
-import { capabilitiesProvider } from './capabilities_provider';
+import { PluginInitializerContext } from 'kibana/server';
+import { DiscoverServerPlugin } from './plugin';
 
-export class IndexPatternsService implements Plugin<void> {
-  public setup(core: CoreSetup) {
-    core.savedObjects.registerType(indexPatternSavedObjectType);
-    core.capabilities.registerProvider(capabilitiesProvider);
-
-    registerRoutes(core.http);
-  }
-
-  public start() {}
-}
+export const plugin = (initContext: PluginInitializerContext) =>
+  new DiscoverServerPlugin(initContext);
