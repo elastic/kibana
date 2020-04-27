@@ -72,6 +72,14 @@ const installPreBuiltTemplates = async (
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+    let templateAPIPath = '_template';
+
+    // v2 index templates need to be installed through the new API endpoint.
+    // Checking for 'template' and 'composed_of' should catch them all.
+    // For the new v2 format, see https://github.com/elastic/elasticsearch/issues/53101
+    if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
+      templateAPIPath = '_index_template';
+    }
 
     const callClusterParams: {
       method: string;
@@ -80,13 +88,13 @@ const installPreBuiltTemplates = async (
       body: any;
     } = {
       method: 'PUT',
-      path: `/_index_template/${templateName}`,
+      path: `/${templateAPIPath}/${templateName}`,
       ignore: [404],
       body: content,
     };
     // This uses the catch-all endpoint 'transport.request' because there is no
     // convenience endpoint using the new _index_template API yet.
-    // The existing convenience endpoint `indices.putTemplate` sends to _template,
+    // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
     await callCluster('transport.request', callClusterParams);
