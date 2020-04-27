@@ -60,8 +60,15 @@ def base(Map params, Closure closure) {
 
         def mergeBase
         if (env.ghprbTargetBranch) {
-          sh(script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}")
-          mergeBase = sh(script: "cd kibana && git merge-base HEAD FETCH_HEAD", returnStdout: true).trim()
+          sh(
+            script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}",
+            label: "update reference to target branch 'origin/${env.ghprbTargetBranch}'"
+          )
+          mergeBase = sh(
+            script: "cd kibana && git merge-base HEAD FETCH_HEAD",
+            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'"
+            returnStdout: true
+          ).trim()
         }
 
         ciStats.reportGitInfo(
