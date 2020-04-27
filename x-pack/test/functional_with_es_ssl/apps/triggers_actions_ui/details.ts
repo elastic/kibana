@@ -172,6 +172,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alert = await alerting.alerts.createAlertWithActions(
           testRunUuid,
           '.index-threshold',
+          params
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+
+        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
+        expect(headingText).to.be(updatedAlertName);
+      });
+    });
+
+    describe('Edit alert button', function() {
+      const testRunUuid = uuid.v4();
+
+      it('should open edit alert flyout', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
           params,
           [
             {
