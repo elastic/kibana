@@ -87,17 +87,15 @@ export async function createDynamicAssetResponse({
     // the file 2 or 3 times per request it seems logical
     fd = await fcb(cb => open(path, 'r', cb));
 
-    const stat = await fcb(cb => fstat(fd!, cb));
-    const hash = await getFileHash(fileHashCache, path, stat, fd);
-
     const read = createReadStream(null as any, {
       fd,
       start: 0,
       autoClose: true,
     });
-    fd = undefined; // read stream is now responsible for fd
 
     if (isImmutable) {
+      fd = undefined; // read stream is now responsible for fd
+
       return h
         .response(read)
         .takeover()
@@ -105,6 +103,10 @@ export async function createDynamicAssetResponse({
         .header('cache-control', 'max-age=31536000')
         .type(request.server.mime.path(path).type);
     }
+
+    const stat = await fcb(cb => fstat(fd!, cb));
+    const hash = await getFileHash(fileHashCache, path, stat, fd);
+    fd = undefined; // read stream is now responsible for fd
 
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
     const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;

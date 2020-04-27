@@ -32,6 +32,8 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../public_path_placeholder';
 
 const chance = new Chance();
 const outputFixture = resolve(__dirname, './fixtures/output');
+const pluginNoPlaceholderFixture = resolve(__dirname, './fixtures/plugin/no_placeholder');
+const pluginPlaceholderFixture = resolve(__dirname, './fixtures/plugin/placeholder');
 
 const randomWordsCache = new Set();
 const uniqueRandomWord = () => {
@@ -58,6 +60,9 @@ describe('optimizer/bundle route', () => {
       dllBundlesPath = outputFixture,
       basePublicPath = '',
       builtCssPath = outputFixture,
+      npUiPluginPublicDirs = [],
+      buildHash = '1234',
+      isDist = false,
     } = options;
 
     const server = new Hapi.Server();
@@ -69,6 +74,9 @@ describe('optimizer/bundle route', () => {
         dllBundlesPath,
         basePublicPath,
         builtCssPath,
+        npUiPluginPublicDirs,
+        buildHash,
+        isDist,
       })
     );
 
@@ -321,7 +329,7 @@ describe('optimizer/bundle route', () => {
       expect(resp2.statusCode).to.be(200);
     });
 
-    it('is unique per basePublicPath although content is the same', async () => {
+    it('is unique per basePublicPath although content is the same (by default)', async () => {
       const basePublicPath1 = `/${uniqueRandomWord()}`;
       const basePublicPath2 = `/${uniqueRandomWord()}`;
 
@@ -364,6 +372,102 @@ describe('optimizer/bundle route', () => {
 
       expect(resp2.statusCode).to.be(304);
       expect(resp2.result).to.have.length(0);
+    });
+  });
+
+  describe('kibana platform assets', () => {
+    describe('caching', () => {
+      describe('for non-distributable mode', () => {
+        it('uses "etag" header to invalidate cache', async () => {
+          const basePublicPath = `/${uniqueRandomWord()}`;
+
+          const npUiPluginPublicDirs = [
+            {
+              id: 'no_placeholder',
+              path: pluginNoPlaceholderFixture,
+            },
+          ];
+          const responce = await createServer({ basePublicPath, npUiPluginPublicDirs }).inject({
+            url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+          });
+
+          expect(responce.statusCode).to.be(200);
+
+          expect(responce.headers.etag).to.be.a('string');
+          expect(responce.headers['cache-control']).to.be('must-revalidate');
+        });
+
+        it('creates the same "etag" header for the same content', async () => {
+          const basePublicPath1 = `/${uniqueRandomWord()}`;
+          const basePublicPath2 = `/${uniqueRandomWord()}`;
+
+          const npUiPluginPublicDirs = [
+            {
+              id: 'no_placeholder',
+              path: pluginNoPlaceholderFixture,
+            },
+          ];
+          const [resp1, resp2] = await Promise.all([
+            createServer({ basePublicPath: basePublicPath1, npUiPluginPublicDirs }).inject({
+              url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            }),
+            createServer({ basePublicPath: basePublicPath2, npUiPluginPublicDirs }).inject({
+              url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            }),
+          ]);
+
+          expect(resp1.statusCode).to.be(200);
+          expect(resp2.statusCode).to.be(200);
+
+          expect(resp1.rawPayload).to.eql(resp2.rawPayload);
+
+          expect(resp1.headers.etag).to.be.a('string');
+          expect(resp2.headers.etag).to.be.a('string');
+          expect(resp1.headers.etag).to.eql(resp2.headers.etag);
+        });
+
+        it('does not replace placeholder', async () => {
+          const basePublicPath = `/${uniqueRandomWord()}`;
+
+          const npUiPluginPublicDirs = [
+            {
+              id: 'placeholder',
+              path: pluginPlaceholderFixture,
+            },
+          ];
+          const response = await createServer({ basePublicPath, npUiPluginPublicDirs }).inject({
+            url: '/bundles/1234/plugin/placeholder/placeholder.plugin.js',
+          });
+
+          expect(response.statusCode).to.be(200);
+          expect(response.result.includes('__REPLACE_WITH_PUBLIC_PATH__/FOO')).to.be(true);
+        });
+      });
+
+      describe('for distributable mode', () => {
+        it('commands to cache assets for each release for a year', async () => {
+          const basePublicPath = `/${uniqueRandomWord()}`;
+
+          const npUiPluginPublicDirs = [
+            {
+              id: 'no_placeholder',
+              path: pluginNoPlaceholderFixture,
+            },
+          ];
+          const responce = await createServer({
+            basePublicPath,
+            npUiPluginPublicDirs,
+            isDist: true,
+          }).inject({
+            url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+          });
+
+          expect(responce.statusCode).to.be(200);
+
+          expect(responce.headers.etag).to.be(undefined);
+          expect(responce.headers['cache-control']).to.be('max-age=31536000');
+        });
+      });
     });
   });
 });
