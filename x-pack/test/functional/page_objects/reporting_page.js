@@ -170,6 +170,5 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
-
   return new ReportingPage();
 }
