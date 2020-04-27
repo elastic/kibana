@@ -47,18 +47,18 @@ export const EmptyIndexPatternPrompt: FunctionComponent<Props> = ({
           <EuiText grow={false}>
             <h2>
               <FormattedMessage
-                id="kbn.management.EmptyIndexPatternPrompt.youHaveData"
+                id="kbn.management.emptyIndexPatternPrompt.youHaveData"
                 defaultMessage="You have data in Elasticsearch."
               />
               <br />
               <FormattedMessage
-                id="kbn.management.EmptyIndexPatternPrompt.nowCreate"
+                id="kbn.management.emptyIndexPatternPrompt.nowCreate"
                 defaultMessage="Now, create an index pattern."
               />
             </h2>
             <p>
               <FormattedMessage
-                id="kbn.management.EmptyIndexPatternPrompt.indexPatternExplanation"
+                id="kbn.management.emptyIndexPatternPrompt.indexPatternExplanation"
                 defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
                 index pattern can point to a specific index, for example, your log data from
                 yesterday, or all indices that contain your log data."
@@ -77,14 +77,14 @@ export const EmptyIndexPatternPrompt: FunctionComponent<Props> = ({
       <EuiDescriptionList className="inpEmptyIndexPatternPrompt__footer" type="responsiveColumn">
         <EuiDescriptionListTitle style={{ width: 'auto' }}>
           <FormattedMessage
-            id="kbn.management.EmptyIndexPatternPrompt.learnMore"
+            id="kbn.management.emptyIndexPatternPrompt.learnMore"
             defaultMessage="Want to learn more?"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>
             <FormattedMessage
-              id="kbn.management.EmptyIndexPatternPrompt.documentation"
+              id="kbn.management.emptyIndexPatternPrompt.documentation"
               defaultMessage="Read documentation"
             />
           </EuiLink>
