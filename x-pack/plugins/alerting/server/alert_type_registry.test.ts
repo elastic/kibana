@@ -231,7 +231,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
-    executor: (params: any): any => {},
+    async executor() {},
   };
 
   if (!context && !state) {

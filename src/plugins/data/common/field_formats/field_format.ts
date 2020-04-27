@@ -22,7 +22,7 @@ import { createCustomFieldFormat } from './converters/custom';
 import {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
-  IFieldFormatType,
+  FieldFormatInstanceType,
   FieldFormatConvert,
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
@@ -199,7 +199,7 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: FieldFormatConvertFunction): IFieldFormatType {
+  static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
     return createCustomFieldFormat(convertFn);
   }
 

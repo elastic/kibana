@@ -18,7 +18,6 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -65,7 +64,7 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourceIndex: 'ft_farequote',
-          sourcePreview: {
+          indexPreview: {
             column: 2,
             values: ['ASA'],
           },
@@ -101,14 +100,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the filtered source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewColumnValues(
-            testData.expected.sourcePreview.column,
-            testData.expected.sourcePreview.values
+        it('shows the filtered index preview', async () => {
+          await transform.wizard.assertIndexPreviewColumnValues(
+            testData.expected.indexPreview.column,
+            testData.expected.indexPreview.values
           );
         });
 

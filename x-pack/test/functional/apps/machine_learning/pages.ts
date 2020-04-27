@@ -10,7 +10,7 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('page navigation', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['includeFirefox', 'mlqa']);
     before(async () => {
       await ml.api.cleanMlIndices();
       await ml.securityUI.loginAsMlPowerUser();
