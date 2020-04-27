@@ -12,7 +12,7 @@ import { esDocumentsLayerWizardConfig } from './sources/es_search_source';
 // @ts-ignore
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from './sources/es_geo_grid_source';
 // @ts-ignore
-import { point2PointLayerWizardConfig } from './sources/es_pew_pew_source/es_pew_pew_source';
+import { point2PointLayerWizardConfig } from './sources/es_pew_pew_source';
 // @ts-ignore
 import { emsBoundariesLayerWizardConfig } from './sources/ems_file_source';
 // @ts-ignore

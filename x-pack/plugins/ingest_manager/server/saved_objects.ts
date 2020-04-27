@@ -15,6 +15,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
 } from './constants';
 
 /*
@@ -22,7 +23,24 @@ import {
  *
  * Please update typings in `/common/types` if mappings are updated.
  */
+
 const savedObjectTypes: { [key: string]: SavedObjectsType } = {
+  [GLOBAL_SETTINGS_SAVED_OBJET_TYPE]: {
+    name: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        agent_auto_upgrade: { type: 'keyword' },
+        package_auto_upgrade: { type: 'keyword' },
+        kibana_url: { type: 'keyword' },
+        kibana_ca_sha256: { type: 'keyword' },
+      },
+    },
+  },
   [AGENT_SAVED_OBJECT_TYPE]: {
     name: AGENT_SAVED_OBJECT_TYPE,
     hidden: false,
@@ -183,6 +201,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             enabled: { type: 'boolean' },
             processors: { type: 'keyword' },
             config: { type: 'flattened' },
+            vars: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
@@ -191,7 +210,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
                 dataset: { type: 'keyword' },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
-                pkg_stream: { type: 'flattened' },
+                agent_stream: { type: 'flattened' },
+                vars: { type: 'flattened' },
               },
             },
           },
