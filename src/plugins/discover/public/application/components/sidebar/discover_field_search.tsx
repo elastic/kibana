@@ -67,16 +67,16 @@ export interface Props {
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
 export function DiscoverFieldSearch({ onChange, value, types }: Props) {
-  const searchPlaceholder = i18n.translate('kbn.discover.fieldChooser.searchPlaceHolder', {
+  const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
-  const aggregatableLabel = i18n.translate('kbn.discover.fieldChooser.filter.aggregatableLabel', {
+  const aggregatableLabel = i18n.translate('discover.fieldChooser.filter.aggregatableLabel', {
     defaultMessage: 'Aggregatable',
   });
-  const searchableLabel = i18n.translate('kbn.discover.fieldChooser.filter.searchableLabel', {
+  const searchableLabel = i18n.translate('discover.fieldChooser.filter.searchableLabel', {
     defaultMessage: 'Searchable',
   });
-  const typeLabel = i18n.translate('kbn.discover.fieldChooser.filter.typeLabel', {
+  const typeLabel = i18n.translate('discover.fieldChooser.filter.typeLabel', {
     defaultMessage: 'Type',
   });
   const typeOptions = types
@@ -101,10 +101,10 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   }
 
   const filterBtnAriaLabel = isPopoverOpen
-    ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
+    ? i18n.translate('discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
         defaultMessage: 'Hide field filter settings',
       })
-    : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
+    : i18n.translate('discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
         defaultMessage: 'Show field filter settings',
       });
 
@@ -172,7 +172,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
       onClick={handleFacetButtonClicked}
     >
       <FormattedMessage
-        id="kbn.discover.fieldChooser.fieldFilterFacetButtonLabel"
+        id="discover.fieldChooser.fieldFilterFacetButtonLabel"
         defaultMessage="Filter by type"
       />
     </EuiFacetButton>
@@ -191,7 +191,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
           handleValueChange(id, e.target.value)
         }
-        aria-label={i18n.translate('kbn.discover.fieldChooser.filter.fieldSelectorLabel', {
+        aria-label={i18n.translate('discover.fieldChooser.filter.fieldSelectorLabel', {
           defaultMessage: 'Selection of {id} filter options',
           values: { id },
         })}
@@ -278,14 +278,14 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             button={buttonContent}
           >
             <EuiPopoverTitle>
-              {i18n.translate('kbn.discover.fieldChooser.filter.filterByTypeLabel', {
+              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
                 defaultMessage: 'Filter by type',
               })}
             </EuiPopoverTitle>
             {selectionPanel}
             <EuiPopoverFooter>
               <EuiSwitch
-                label={i18n.translate('kbn.discover.fieldChooser.filter.hideMissingFieldsLabel', {
+                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
                   defaultMessage: 'Hide missing fields',
                 })}
                 checked={values.missing}

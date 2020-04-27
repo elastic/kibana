@@ -30,18 +30,15 @@ interface Props {
 }
 
 export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
-  const emptyTxt = i18n.translate('kbn.discover.fieldChooser.detailViews.emptyStringText', {
+  const emptyTxt = i18n.translate('discover.fieldChooser.detailViews.emptyStringText', {
     defaultMessage: 'Empty string',
   });
-  const addLabel = i18n.translate(
-    'kbn.discover.fieldChooser.detailViews.filterValueButtonAriaLabel',
-    {
-      defaultMessage: 'Filter for {field}: "{value}"',
-      values: { value: bucket.value, field: field.name },
-    }
-  );
+  const addLabel = i18n.translate('discover.fieldChooser.detailViews.filterValueButtonAriaLabel', {
+    defaultMessage: 'Filter for {field}: "{value}"',
+    values: { value: bucket.value, field: field.name },
+  });
   const removeLabel = i18n.translate(
-    'kbn.discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
+    'discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
     {
       defaultMessage: 'Filter out {field}: "{value}"',
       values: { value: bucket.value, field: field.name },

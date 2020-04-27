@@ -48,7 +48,7 @@ export function OpenSearchPanel(props) {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+              id="discover.topNav.openSearchPanel.openSearchTitle"
               defaultMessage="Open search"
             />
           </h2>
@@ -58,7 +58,7 @@ export function OpenSearchPanel(props) {
         <SavedObjectFinderUi
           noItemsMessage={
             <FormattedMessage
-              id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+              id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
               defaultMessage="No matching searches found."
             />
           }
@@ -66,7 +66,7 @@ export function OpenSearchPanel(props) {
             {
               type: SEARCH_OBJECT_TYPE,
               getIconForSavedObject: () => 'search',
-              name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+              name: i18n.translate('discover.savedSearch.savedObjectName', {
                 defaultMessage: 'Saved search',
               }),
             },
@@ -89,7 +89,7 @@ export function OpenSearchPanel(props) {
               href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
             >
               <FormattedMessage
-                id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+                id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
                 defaultMessage="Manage searches"
               />
             </EuiButton>

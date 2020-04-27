@@ -46,7 +46,7 @@ export function fetchAnchorProvider(indexPatterns, searchSource) {
 
     if (_.get(response, ['hits', 'total'], 0) < 1) {
       throw new Error(
-        i18n.translate('kbn.context.failedToLoadAnchorDocumentErrorDescription', {
+        i18n.translate('discover.context.failedToLoadAnchorDocumentErrorDescription', {
           defaultMessage: 'Failed to load anchor document.',
         })
       );

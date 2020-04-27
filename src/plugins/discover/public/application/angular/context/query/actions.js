@@ -80,7 +80,7 @@ export function QueryActionsProvider(Promise) {
       error => {
         setFailedStatus(state)('anchor', { error });
         getServices().toastNotifications.addDanger({
-          title: i18n.translate('kbn.context.unableToLoadAnchorDocumentDescription', {
+          title: i18n.translate('discover.context.unableToLoadAnchorDocumentDescription', {
             defaultMessage: 'Unable to load the anchor document',
           }),
           text: <MarkdownSimple>{error.message}</MarkdownSimple>,
@@ -133,7 +133,7 @@ export function QueryActionsProvider(Promise) {
       error => {
         setFailedStatus(state)(type, { error });
         getServices().toastNotifications.addDanger({
-          title: i18n.translate('kbn.context.unableToLoadDocumentDescription', {
+          title: i18n.translate('discover.context.unableToLoadDocumentDescription', {
             defaultMessage: 'Unable to load documents',
           }),
           text: <MarkdownSimple>{error.message}</MarkdownSimple>,

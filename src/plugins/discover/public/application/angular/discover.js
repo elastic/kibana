@@ -96,10 +96,10 @@ app.config($routeProvider => {
       }
 
       return {
-        text: i18n.translate('kbn.discover.badge.readOnly.text', {
+        text: i18n.translate('discover.badge.readOnly.text', {
           defaultMessage: 'Read only',
         }),
-        tooltip: i18n.translate('kbn.discover.badge.readOnly.tooltip', {
+        tooltip: i18n.translate('discover.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save searches',
         }),
         iconType: 'glasses',
@@ -330,10 +330,10 @@ function discoverController(
   const getTopNavLinks = () => {
     const newSearch = {
       id: 'new',
-      label: i18n.translate('kbn.discover.localMenu.localMenu.newSearchTitle', {
+      label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
         defaultMessage: 'New',
       }),
-      description: i18n.translate('kbn.discover.localMenu.newSearchDescription', {
+      description: i18n.translate('discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
       run: function() {
@@ -346,10 +346,10 @@ function discoverController(
 
     const saveSearch = {
       id: 'save',
-      label: i18n.translate('kbn.discover.localMenu.saveTitle', {
+      label: i18n.translate('discover.localMenu.saveTitle', {
         defaultMessage: 'Save',
       }),
-      description: i18n.translate('kbn.discover.localMenu.saveSearchDescription', {
+      description: i18n.translate('discover.localMenu.saveSearchDescription', {
         defaultMessage: 'Save Search',
       }),
       testId: 'discoverSaveButton',
@@ -386,7 +386,7 @@ function discoverController(
             title={savedSearch.title}
             showCopyOnSave={!!savedSearch.id}
             objectType="search"
-            description={i18n.translate('kbn.discover.localMenu.saveSaveSearchDescription', {
+            description={i18n.translate('discover.localMenu.saveSaveSearchDescription', {
               defaultMessage:
                 'Save your Discover search so you can use it in visualizations and dashboards',
             })}
@@ -399,10 +399,10 @@ function discoverController(
 
     const openSearch = {
       id: 'open',
-      label: i18n.translate('kbn.discover.localMenu.openTitle', {
+      label: i18n.translate('discover.localMenu.openTitle', {
         defaultMessage: 'Open',
       }),
-      description: i18n.translate('kbn.discover.localMenu.openSavedSearchDescription', {
+      description: i18n.translate('discover.localMenu.openSavedSearchDescription', {
         defaultMessage: 'Open Saved Search',
       }),
       testId: 'discoverOpenButton',
@@ -416,10 +416,10 @@ function discoverController(
 
     const shareSearch = {
       id: 'share',
-      label: i18n.translate('kbn.discover.localMenu.shareTitle', {
+      label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
-      description: i18n.translate('kbn.discover.localMenu.shareSearchDescription', {
+      description: i18n.translate('discover.localMenu.shareSearchDescription', {
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
@@ -443,10 +443,10 @@ function discoverController(
 
     const inspectSearch = {
       id: 'inspect',
-      label: i18n.translate('kbn.discover.localMenu.inspectTitle', {
+      label: i18n.translate('discover.localMenu.inspectTitle', {
         defaultMessage: 'Inspect',
       }),
-      description: i18n.translate('kbn.discover.localMenu.openInspectorForSearchDescription', {
+      description: i18n.translate('discover.localMenu.openInspectorForSearchDescription', {
         defaultMessage: 'Open Inspector for search',
       }),
       testId: 'openInspectorButton',
@@ -489,7 +489,7 @@ function discoverController(
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbTitle', {
+  const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
@@ -603,16 +603,16 @@ function discoverController(
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
   $scope.getBucketIntervalToolTipText = () => {
-    return i18n.translate('kbn.discover.bucketIntervalTooltip', {
+    return i18n.translate('discover.bucketIntervalTooltip', {
       defaultMessage:
         'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
       values: {
         bucketsDescription:
           $scope.bucketInterval.scale > 1
-            ? i18n.translate('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
+            ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
                 defaultMessage: 'buckets that are too large',
               })
-            : i18n.translate('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
+            : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
                 defaultMessage: 'too many buckets',
               }),
         bucketIntervalDescription: $scope.bucketInterval.description,
@@ -745,7 +745,7 @@ function discoverController(
       $scope.$evalAsync(() => {
         if (id) {
           toastNotifications.addSuccess({
-            title: i18n.translate('kbn.discover.notifications.savedSearchTitle', {
+            title: i18n.translate('discover.notifications.savedSearchTitle', {
               defaultMessage: `Search '{savedSearchTitle}' was saved`,
               values: {
                 savedSearchTitle: savedSearch.title,
@@ -766,7 +766,7 @@ function discoverController(
       return { id };
     } catch (saveError) {
       toastNotifications.addDanger({
-        title: i18n.translate('kbn.discover.notifications.notSavedSearchTitle', {
+        title: i18n.translate('discover.notifications.notSavedSearchTitle', {
           defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
           values: {
             savedSearchTitle: savedSearch.title,
@@ -809,7 +809,7 @@ function discoverController(
           $scope.fetchError = fetchError;
         } else {
           toastNotifications.addError(error, {
-            title: i18n.translate('kbn.discover.errorLoadingData', {
+            title: i18n.translate('discover.errorLoadingData', {
               defaultMessage: 'Error loading data',
             }),
             toastMessage: error.shortMessage || error.body?.message,
@@ -900,10 +900,10 @@ function discoverController(
 
   function logInspectorRequest() {
     inspectorAdapters.requests.reset();
-    const title = i18n.translate('kbn.discover.inspectorRequestDataTitle', {
+    const title = i18n.translate('discover.inspectorRequestDataTitle', {
       defaultMessage: 'data',
     });
-    const description = i18n.translate('kbn.discover.inspectorRequestDescription', {
+    const description = i18n.translate('discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
@@ -1046,7 +1046,7 @@ function discoverController(
   }
 
   function getIndexPatternWarning(index) {
-    return i18n.translate('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
+    return i18n.translate('discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
       defaultMessage: '{stateVal} is not a configured index pattern ID',
       values: {
         stateVal: `"${index}"`,
@@ -1073,7 +1073,7 @@ function discoverController(
       if (ownIndexPattern) {
         toastNotifications.addWarning({
           title: warningTitle,
-          text: i18n.translate('kbn.discover.showingSavedIndexPatternWarningDescription', {
+          text: i18n.translate('discover.showingSavedIndexPatternWarningDescription', {
             defaultMessage:
               'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
             values: {
@@ -1087,7 +1087,7 @@ function discoverController(
 
       toastNotifications.addWarning({
         title: warningTitle,
-        text: i18n.translate('kbn.discover.showingDefaultIndexPatternWarningDescription', {
+        text: i18n.translate('discover.showingDefaultIndexPatternWarningDescription', {
           defaultMessage:
             'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
           values: {

@@ -82,21 +82,18 @@ export function DiscoverField({
   selected,
   useShortDots,
 }: DiscoverFieldProps) {
-  const addLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.addButtonLabel', {
+  const addLabel = i18n.translate('discover.fieldChooser.discoverField.addButtonLabel', {
     defaultMessage: 'Add',
   });
-  const addLabelAria = i18n.translate(
-    'kbn.discover.fieldChooser.discoverField.addButtonAriaLabel',
-    {
-      defaultMessage: 'Add {field} to table',
-      values: { field: field.name },
-    }
-  );
-  const removeLabel = i18n.translate('kbn.discover.fieldChooser.discoverField.removeButtonLabel', {
+  const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
+    defaultMessage: 'Add {field} to table',
+    values: { field: field.name },
+  });
+  const removeLabel = i18n.translate('discover.fieldChooser.discoverField.removeButtonLabel', {
     defaultMessage: 'Remove',
   });
   const removeLabelAria = i18n.translate(
-    'kbn.discover.fieldChooser.discoverField.removeButtonAriaLabel',
+    'discover.fieldChooser.discoverField.removeButtonAriaLabel',
     {
       defaultMessage: 'Remove {field} from table',
       values: { field: field.name },

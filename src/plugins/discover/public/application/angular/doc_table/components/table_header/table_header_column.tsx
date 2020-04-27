@@ -80,21 +80,21 @@ export function TableHeaderColumn({
 
   const getSortButtonAriaLabel = () => {
     const sortAscendingMessage = i18n.translate(
-      'kbn.docTable.tableHeader.sortByColumnAscendingAriaLabel',
+      'discover.docTable.tableHeader.sortByColumnAscendingAriaLabel',
       {
         defaultMessage: 'Sort {columnName} ascending',
         values: { columnName: name },
       }
     );
     const sortDescendingMessage = i18n.translate(
-      'kbn.docTable.tableHeader.sortByColumnDescendingAriaLabel',
+      'discover.docTable.tableHeader.sortByColumnDescendingAriaLabel',
       {
         defaultMessage: 'Sort {columnName} descending',
         values: { columnName: name },
       }
     );
     const stopSortingMessage = i18n.translate(
-      'kbn.docTable.tableHeader.sortByColumnUnsortedAriaLabel',
+      'discover.docTable.tableHeader.sortByColumnUnsortedAriaLabel',
       {
         defaultMessage: 'Stop sorting on {columnName}',
         values: { columnName: name },
@@ -126,42 +126,42 @@ export function TableHeaderColumn({
     // Remove Button
     {
       active: isRemoveable && typeof onRemoveColumn === 'function',
-      ariaLabel: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonAriaLabel', {
+      ariaLabel: i18n.translate('discover.docTable.tableHeader.removeColumnButtonAriaLabel', {
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
       className: 'fa fa-remove kbnDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
-      tooltip: i18n.translate('kbn.docTable.tableHeader.removeColumnButtonTooltip', {
+      tooltip: i18n.translate('discover.docTable.tableHeader.removeColumnButtonTooltip', {
         defaultMessage: 'Remove Column',
       }),
     },
     // Move Left Button
     {
       active: colLeftIdx >= 0 && typeof onMoveColumn === 'function',
-      ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
+      ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the left',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-left kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colLeftIdx),
       testSubject: `docTableMoveLeftHeader-${name}`,
-      tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnLeftButtonTooltip', {
+      tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnLeftButtonTooltip', {
         defaultMessage: 'Move column to the left',
       }),
     },
     // Move Right Button
     {
       active: colRightIdx >= 0 && typeof onMoveColumn === 'function',
-      ariaLabel: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
+      ariaLabel: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonAriaLabel', {
         defaultMessage: 'Move {columnName} column to the right',
         values: { columnName: name },
       }),
       className: 'fa fa-angle-double-right kbnDocTableHeader__move',
       onClick: () => onMoveColumn && onMoveColumn(name, colRightIdx),
       testSubject: `docTableMoveRightHeader-${name}`,
-      tooltip: i18n.translate('kbn.docTable.tableHeader.moveColumnRightButtonTooltip', {
+      tooltip: i18n.translate('discover.docTable.tableHeader.moveColumnRightButtonTooltip', {
         defaultMessage: 'Move column to the right',
       }),
     },

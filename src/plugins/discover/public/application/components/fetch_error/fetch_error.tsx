@@ -46,21 +46,21 @@ const DiscoverFetchError = ({ fetchError }: Props) => {
     body = (
       <p>
         <FormattedMessage
-          id="kbn.discover.fetchError.howToAddressErrorDescription"
+          id="discover.fetchError.howToAddressErrorDescription"
           defaultMessage="You can address this error by editing the {fetchErrorScript} field
             in {managementLink}, under the {scriptedFields} tab."
           values={{
             fetchErrorScript: `'${fetchError.script}'`,
             scriptedFields: (
               <FormattedMessage
-                id="kbn.discover.fetchError.scriptedFieldsText"
+                id="discover.fetchError.scriptedFieldsText"
                 defaultMessage="&ldquo;Scripted fields&rdquo;"
               />
             ),
             managementLink: (
               <a href={url}>
                 <FormattedMessage
-                  id="kbn.discover.fetchError.managmentLinkText"
+                  id="discover.fetchError.managmentLinkText"
                   defaultMessage="Management &gt; Index Patterns"
                 />
               </a>

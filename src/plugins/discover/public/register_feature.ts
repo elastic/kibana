@@ -22,10 +22,10 @@ import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/publ
 export function registerFeature(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({
     id: 'discover',
-    title: i18n.translate('kbn.discover.discoverTitle', {
+    title: i18n.translate('discover.discoverTitle', {
       defaultMessage: 'Discover',
     }),
-    description: i18n.translate('kbn.discover.discoverDescription', {
+    description: i18n.translate('discover.discoverDescription', {
       defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
     }),
     icon: 'discoverApp',

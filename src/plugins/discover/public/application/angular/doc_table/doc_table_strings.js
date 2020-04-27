@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
  * @param resultCount {Number}
  */
 export function getLimitedSearchResultsMessage(resultCount) {
-  return i18n.translate('kbn.docTable.limitedSearchResultLabel', {
+  return i18n.translate('discover.docTable.limitedSearchResultLabel', {
     defaultMessage: 'Limited to {resultCount} results. Refine your search.',
     values: { resultCount },
   });

@@ -37,7 +37,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               title={
                 <h2>
                   <FormattedMessage
-                    id="kbn.discover.uninitializedTitle"
+                    id="discover.uninitializedTitle"
                     defaultMessage="Start searching"
                   />
                 </h2>
@@ -45,7 +45,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               body={
                 <p>
                   <FormattedMessage
-                    id="kbn.discover.uninitializedText"
+                    id="discover.uninitializedText"
                     defaultMessage="Write a query, add some filters, or simply hit Refresh to retrieve results for the current query."
                   />
                 </p>
@@ -53,7 +53,7 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
               actions={
                 <EuiButton color="primary" fill onClick={onRefresh}>
                   <FormattedMessage
-                    id="kbn.discover.uninitializedRefreshButtonText"
+                    id="discover.uninitializedRefreshButtonText"
                     defaultMessage="Refresh data"
                   />
                 </EuiButton>
