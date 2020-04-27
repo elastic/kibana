@@ -100,16 +100,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     it('encodes portions of the URL as necessary', async () => {
       await PageObjects.common.navigateToApp('home');
       const basePath = getBasePath();
-      await browser.get(`${basePath}/app/kibana#/home`, false);
+      await browser.get(`${basePath}/app/home#/`, false);
       await retry.waitFor(
         'navigation to home app',
-        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home`
+        async () => (await browser.getCurrentUrl()) === `${basePath}/app/home#/`
       );
 
-      await browser.get(`${basePath}/app/kibana#/home?_g=()&a=b/c`, false);
+      await browser.get(`${basePath}/app/home#/?_g=()&a=b/c`, false);
       await retry.waitFor(
         'hash to be properly encoded',
-        async () => (await browser.getCurrentUrl()) === `${basePath}/app/kibana#/home?_g=()&a=b%2Fc`
+        async () => (await browser.getCurrentUrl()) === `${basePath}/app/home#/?_g=()&a=b%2Fc`
       );
     });
   });
