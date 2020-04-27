@@ -6,7 +6,7 @@
 
 import { buildRouteValidation } from './route_validation';
 import * as rt from 'io-ts';
-import { RouteValidationResultFactory } from '../../../../../../src/core/server/http';
+import { RouteValidationResultFactory } from 'src/core/server';
 
 describe('buildRouteValidation', () => {
   const schema = rt.exact(
