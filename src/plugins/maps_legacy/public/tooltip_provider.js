@@ -17,24 +17,27 @@
  * under the License.
  */
 
-export function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
-  if (!metric) {
-    return [];
-  }
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
-  const details = [];
-  if (fieldName && metric) {
-    details.push({
-      label: fieldName,
-      value: metric.term,
-    });
-  }
+function getToolTipContent(details) {
+  return ReactDOMServer.renderToStaticMarkup(
+    <table>
+      <tbody>
+        {details.map((detail, i) => (
+          <tr key={i}>
+            <td className="visTooltip__label">{detail.label}</td>
+            <td className="visTooltip__value">{detail.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
-  if (metric) {
-    details.push({
-      label: metricName,
-      value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
-    });
-  }
-  return details;
+export function mapTooltipProvider(element, formatter) {
+  return (...args) => {
+    const details = formatter(...args);
+    return getToolTipContent(details);
+  };
 }

@@ -17,24 +17,29 @@
  * under the License.
  */
 
-export function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
-  if (!metric) {
+import { i18n } from '@kbn/i18n';
+
+export function tooltipFormatter(metricTitle, metricFormat, feature) {
+  if (!feature) {
     return [];
   }
 
-  const details = [];
-  if (fieldName && metric) {
-    details.push({
-      label: fieldName,
-      value: metric.term,
-    });
-  }
-
-  if (metric) {
-    details.push({
-      label: metricName,
-      value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
-    });
-  }
-  return details;
+  return [
+    {
+      label: metricTitle,
+      value: metricFormat(feature.properties.value),
+    },
+    {
+      label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
+        defaultMessage: 'Latitude',
+      }),
+      value: feature.geometry.coordinates[1],
+    },
+    {
+      label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', {
+        defaultMessage: 'Longitude',
+      }),
+      value: feature.geometry.coordinates[0],
+    },
+  ];
 }

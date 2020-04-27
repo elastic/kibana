@@ -38,6 +38,8 @@ import {
   TmsLayer,
   IServiceSettings,
 } from './map/service_settings';
+// @ts-ignore
+import { mapTooltipProvider } from './tooltip_provider';
 
 export function plugin() {
   return new MapsLegacyPlugin();
@@ -56,6 +58,7 @@ export {
   FileLayerField,
   FileLayer,
   TmsLayer,
+  mapTooltipProvider,
 };
 
 // Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control
