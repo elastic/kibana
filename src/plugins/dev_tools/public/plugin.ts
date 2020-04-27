@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { App, CoreSetup, Plugin } from 'kibana/public';
+import { App, CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
@@ -105,12 +105,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       }),
       euiIconType: 'devToolsApp',
       order: 9001,
-      category: {
-        label: i18n.translate('core.ui.managementNavList.label', {
-          defaultMessage: 'Management',
-        }),
-        euiIconType: 'managementApp',
-      },
+      category: DEFAULT_APP_CATEGORIES.management,
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {
           throw new Error('not started yet');

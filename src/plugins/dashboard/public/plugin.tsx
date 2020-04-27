@@ -30,6 +30,7 @@ import {
   PluginInitializerContext,
   Plugin,
   SavedObjectsClientContract,
+  DEFAULT_APP_CATEGORIES,
 } from 'src/core/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
@@ -220,6 +221,7 @@ export class DashboardPlugin
       title: 'Dashboard',
       order: -1001,
       euiIconType: 'dashboardApp',
+      category: DEFAULT_APP_CATEGORIES.analyze,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();
