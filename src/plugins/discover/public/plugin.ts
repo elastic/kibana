@@ -193,6 +193,7 @@ export class DiscoverPlugin
       updater$: this.appStateUpdater.asObservable(),
       order: -1004,
       euiIconType: 'discoverApp',
+      defaultPath: '#/',
       category: {
         label: i18n.translate('core.ui.analyzeNavList.label', {
           defaultMessage: 'Analyze',

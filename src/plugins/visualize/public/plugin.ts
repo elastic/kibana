@@ -102,6 +102,7 @@ export class VisualizePlugin
       title: 'Visualize',
       order: -1002,
       euiIconType: 'visualizeApp',
+      defaultPath: '#/',
       category: {
         label: i18n.translate('core.ui.analyzeNavList.label', {
           defaultMessage: 'Analyze',

@@ -219,6 +219,7 @@ export class DashboardPlugin
       title: 'Dashboard',
       order: -1001,
       euiIconType: 'dashboardApp',
+      defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();
