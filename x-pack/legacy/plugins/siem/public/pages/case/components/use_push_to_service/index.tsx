@@ -48,6 +48,7 @@ export const usePushToService = ({
 
   const { isLoading, postPushToService } = usePostPushToService();
 
+  const { connectorId, connectorName, loading: loadingCaseConfigure } = useCaseConfigure();
   const { loading: loadingCaseConfigure } = useCaseConfigure();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();

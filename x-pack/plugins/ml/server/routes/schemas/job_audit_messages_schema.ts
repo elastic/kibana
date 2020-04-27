@@ -6,7 +6,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const jobIdSchema = schema.object({ jobId: schema.maybe(schema.string()) });
+export const jobAuditMessagesJobIdSchema = schema.object({
+  /** Job ID. */
+  jobId: schema.maybe(schema.string()),
+});
 
 export const jobAuditMessagesQuerySchema = schema.maybe(
   schema.object({ from: schema.maybe(schema.any()) })

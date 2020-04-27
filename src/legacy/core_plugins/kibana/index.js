@@ -118,25 +118,6 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectsManagement: {
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-      },
-
-      savedObjectSchemas: {
-        'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
-
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
         const tilemap = mapConfig.tilemap;
@@ -159,61 +140,6 @@ export default function(kibana) {
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
-    },
-
-    uiCapabilities: async function() {
-      return {
-        discover: {
-          show: true,
-          createShortUrl: true,
-          save: true,
-          saveQuery: true,
-        },
-        visualize: {
-          show: true,
-          createShortUrl: true,
-          delete: true,
-          save: true,
-          saveQuery: true,
-        },
-        dashboard: {
-          createNew: true,
-          show: true,
-          showWriteControls: true,
-          saveQuery: true,
-        },
-        catalogue: {
-          discover: true,
-          dashboard: true,
-          visualize: true,
-          console: true,
-          advanced_settings: true,
-          index_patterns: true,
-        },
-        advancedSettings: {
-          show: true,
-          save: true,
-        },
-        indexPatterns: {
-          save: true,
-        },
-        savedObjectsManagement: {
-          delete: true,
-          edit: true,
-          read: true,
-        },
-        management: {
-          /*
-           * Management settings correspond to management section/link ids, and should not be changed
-           * without also updating those definitions.
-           */
-          kibana: {
-            settings: true,
-            index_patterns: true,
-            objects: true,
-          },
-        },
-      };
     },
 
     preInit: async function(server) {

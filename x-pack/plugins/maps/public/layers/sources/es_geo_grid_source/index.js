@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ESGeoGridSource,
-  clustersLayerWizardConfig,
-  heatmapLayerWizardConfig,
-} from './es_geo_grid_source';
+export { clustersLayerWizardConfig } from './clusters_layer_wizard';
+export { ESGeoGridSource } from './es_geo_grid_source';
+export { heatmapLayerWizardConfig } from './heatmap_layer_wizard';
