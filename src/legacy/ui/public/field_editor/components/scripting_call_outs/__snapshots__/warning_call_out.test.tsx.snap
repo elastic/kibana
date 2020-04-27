@@ -20,7 +20,6 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
         values={
           Object {
             "scripFields": <ForwardRef
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html"
               target="_blank"
             >
               <FormattedMessage
@@ -34,7 +33,6 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               />
             </ForwardRef>,
             "scriptsInAggregation": <ForwardRef
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source"
               target="_blank"
             >
               <FormattedMessage

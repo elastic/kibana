@@ -48,7 +48,8 @@ describe('ScriptingHelpFlyout', () => {
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
         getHttpStart={() => (({} as unknown) as HttpStart)}
-        docLinksScriptedFields={docLinksScriptedFields}
+        // docLinksScriptedFields={docLinksScriptedFields}
+        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
       />
     );
 
@@ -64,7 +65,7 @@ describe('ScriptingHelpFlyout', () => {
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
         getHttpStart={() => (({} as unknown) as HttpStart)}
-        docLinksScriptedFields={docLinksScriptedFields}
+        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
       />
     );
 

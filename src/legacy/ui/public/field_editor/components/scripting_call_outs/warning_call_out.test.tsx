@@ -28,7 +28,10 @@ describe('ScriptingWarningCallOut', () => {
   const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;
   it('should render normally', async () => {
     const component = shallow(
-      <ScriptingWarningCallOut isVisible={true} docLinksScriptedFields={docLinksScriptedFields} />
+      <ScriptingWarningCallOut
+        isVisible={true}
+        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
+      />
     );
 
     expect(component).toMatchSnapshot();
@@ -36,7 +39,10 @@ describe('ScriptingWarningCallOut', () => {
 
   it('should render nothing if not visible', async () => {
     const component = shallow(
-      <ScriptingWarningCallOut isVisible={false} docLinksScriptedFields={docLinksScriptedFields} />
+      <ScriptingWarningCallOut
+        isVisible={false}
+        docLinksScriptedFields={{} as typeof docLinksScriptedFields}
+      />
     );
 
     expect(component).toMatchSnapshot();

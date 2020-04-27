@@ -16,16 +16,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
       initialSelectedTab={
         Object {
           "content": <ScriptingSyntax
-            docLinksScriptedFields={
-              Object {
-                "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-                "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-                "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-                "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-                "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-                "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-              }
-            }
+            docLinksScriptedFields={Object {}}
           />,
           "data-test-subj": "syntaxTab",
           "id": "syntax",
@@ -36,16 +27,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
         Array [
           Object {
             "content": <ScriptingSyntax
-              docLinksScriptedFields={
-                Object {
-                  "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-                  "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-                  "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-                  "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-                  "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-                  "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-                }
-              }
+              docLinksScriptedFields={Object {}}
             />,
             "data-test-subj": "syntaxTab",
             "id": "syntax",
@@ -85,16 +67,7 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
       initialSelectedTab={
         Object {
           "content": <ScriptingSyntax
-            docLinksScriptedFields={
-              Object {
-                "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-                "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-                "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-                "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-                "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-                "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-              }
-            }
+            docLinksScriptedFields={Object {}}
           />,
           "data-test-subj": "syntaxTab",
           "id": "syntax",
@@ -105,16 +78,7 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
         Array [
           Object {
             "content": <ScriptingSyntax
-              docLinksScriptedFields={
-                Object {
-                  "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-                  "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-                  "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-                  "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-                  "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-                  "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-                }
-              }
+              docLinksScriptedFields={Object {}}
             />,
             "data-test-subj": "syntaxTab",
             "id": "syntax",

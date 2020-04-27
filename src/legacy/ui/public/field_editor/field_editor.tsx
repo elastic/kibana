@@ -218,8 +218,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFieldChange = (fieldName: string, value: string | number) => {
     const { field } = this.state;
-    // @ts-ignore
-    field[fieldName] = value;
+    (field as any)[fieldName] = value;
     this.forceUpdate();
   };
 
