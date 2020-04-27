@@ -52,60 +52,11 @@ describe('tls alert', () => {
       );
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "aging": Array [],
-          "expiring": Array [
-            Object {
-              "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-24T03:15:39.000Z",
-              "common_name": "Common-One",
-              "monitors": Array [
-                Object {
-                  "id": "monitor1",
-                  "name": "monitor-one",
-                },
-              ],
-              "sha256": "abc",
-            },
-            Object {
-              "certificate_not_valid_after": "2020-07-18T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-20T03:15:39.000Z",
-              "common_name": "Common-Two",
-              "monitors": Array [
-                Object {
-                  "id": "monitor2",
-                  "name": "monitor-two",
-                },
-              ],
-              "sha256": "bcd",
-            },
-            Object {
-              "certificate_not_valid_after": "2020-07-19T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-22T03:15:39.000Z",
-              "common_name": "Common-Three",
-              "monitors": Array [
-                Object {
-                  "id": "monitor3",
-                  "name": "monitor-three",
-                },
-              ],
-              "sha256": "cde",
-            },
-          ],
-          "topAging": Array [],
-          "topExpiring": Array [
-            Object {
-              "commonName": "Common-One",
-              "validUntil": "2020-07-16T03:15:39.000Z",
-            },
-            Object {
-              "commonName": "Common-Two",
-              "validUntil": "2020-07-18T03:15:39.000Z",
-            },
-            Object {
-              "commonName": "Common-Three",
-              "validUntil": "2020-07-19T03:15:39.000Z",
-            },
-          ],
+          "agingCommonNameAndDate": "",
+          "agingCount": 0,
+          "count": 4,
+          "expiringCommonNameAndDate": "Common-One, expires: 2020-07-16T03:15:39.000Z; Common-Two, expires: 2020-07-18T03:15:39.000Z; Common-Three, expires: 2020-07-19T03:15:39.000Z",
+          "expiringCount": 3,
         }
       `);
     });
@@ -118,72 +69,11 @@ describe('tls alert', () => {
       );
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "aging": Array [
-            Object {
-              "certificate_not_valid_after": "2020-07-18T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-20T03:15:39.000Z",
-              "common_name": "Common-Two",
-              "monitors": Array [
-                Object {
-                  "id": "monitor2",
-                  "name": "monitor-two",
-                },
-              ],
-              "sha256": "bcd",
-            },
-            Object {
-              "certificate_not_valid_after": "2020-07-19T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-22T03:15:39.000Z",
-              "common_name": "Common-Three",
-              "monitors": Array [
-                Object {
-                  "id": "monitor3",
-                  "name": "monitor-three",
-                },
-              ],
-              "sha256": "cde",
-            },
-            Object {
-              "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-24T03:15:39.000Z",
-              "common_name": "Common-One",
-              "monitors": Array [
-                Object {
-                  "id": "monitor1",
-                  "name": "monitor-one",
-                },
-              ],
-              "sha256": "abc",
-            },
-            Object {
-              "certificate_not_valid_after": "2020-07-25T03:15:39.000Z",
-              "certificate_not_valid_before": "2019-07-25T03:15:39.000Z",
-              "common_name": "Common-Four",
-              "monitors": Array [
-                Object {
-                  "id": "monitor4",
-                  "name": "monitor-four",
-                },
-              ],
-              "sha256": "def",
-            },
-          ],
-          "expiring": Array [],
-          "topAging": Array [
-            Object {
-              "commonName": "Common-Two",
-              "validAfter": "2019-07-20T03:15:39.000Z",
-            },
-            Object {
-              "commonName": "Common-Three",
-              "validAfter": "2019-07-22T03:15:39.000Z",
-            },
-            Object {
-              "commonName": "Common-One",
-              "validAfter": "2019-07-24T03:15:39.000Z",
-            },
-          ],
-          "topExpiring": Array [],
+          "agingCommonNameAndDate": "Common-Two, expires: 2020-07-18T03:15:39.000Z; Common-Three, expires: 2020-07-19T03:15:39.000Z; Common-One, expires: 2020-07-16T03:15:39.000Z",
+          "agingCount": 4,
+          "count": 4,
+          "expiringCommonNameAndDate": "",
+          "expiringCount": 0,
         }
       `);
     });
