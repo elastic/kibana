@@ -26,7 +26,7 @@ import { Utils } from '../data_model/utils';
 import { VISUALIZATION_COLORS } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
-import { esFilters } from '../../../../../plugins/data/public';
+import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls } from '../services';
 
