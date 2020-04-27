@@ -31,6 +31,7 @@ import {
   ChartTooltipService,
   ChartTooltipValue,
 } from '../components/chart_tooltip/chart_tooltip_service';
+import { OverallSwimlaneData } from './explorer_utils';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -58,14 +59,7 @@ export interface ExplorerSwimlaneProps {
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick?: Function;
-  swimlaneData: {
-    laneLabels: any[];
-    earliest: number;
-    latest: number;
-    interval: number;
-    points: any[];
-    fieldName?: string;
-  };
+  swimlaneData: OverallSwimlaneData;
   swimlaneType: string;
   selection?: {
     lanes: any[];
