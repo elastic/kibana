@@ -94,29 +94,22 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     params.body.query.bool.minimum_should_match = 1;
     params.body.query.bool.should = [
       {
+        multi_match: {
+          query: searchWrapper,
+          type: 'phrase_prefix',
+          fields: ['monitor.id.text', 'monitor.name.text'],
+        },
+      },
+      {
         wildcard: {
-          'tls.server.issuer': {
+          'tls.server.x509.subject.common_name.text': {
             value: searchWrapper,
           },
         },
       },
       {
         wildcard: {
-          'tls.server.x509.issuer.common_name': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'monitor.id': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'monitor.name': {
+          'tls.server.x509.issuer.common_name.text': {
             value: searchWrapper,
           },
         },
