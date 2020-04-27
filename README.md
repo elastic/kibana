@@ -7,7 +7,9 @@
 
 A simple CLI tool that automates the process of backporting commits on a GitHub repo.
 
-![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
+![backport-demo](https://user-images.githubusercontent.com/209966/80359514-371b1500-887e-11ea-96e4-7026005ad206.gif)
+
+
 
 ## Requirements
 
@@ -19,6 +21,8 @@ A simple CLI tool that automates the process of backporting commits on a GitHub 
 ```sh
 npm install -g backport
 ```
+
+
 
 After installation you should update the [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) in `~/.backport/config.json` with your Github username and a Github access token. See the [documentation](https://github.com/sqren/backport/blob/master/docs/configuration.md#accesstoken-required) for how the access token is generated.
 
