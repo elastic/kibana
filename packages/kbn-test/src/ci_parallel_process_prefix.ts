@@ -25,7 +25,7 @@ const randomHash =
   job || num
     ? Math.random()
         .toString()
-        .substring(2)
+        .substring(2) + '-'
     : '';
 
 /**
