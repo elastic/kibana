@@ -9,8 +9,12 @@ import { getComputedFieldName } from '../style_util';
 
 export class DynamicTextProperty extends DynamicStyleProperty {
   syncTextFieldWithMb(mbLayerId, mbMap) {
+    console.log('synctextfieldwithmb');
     if (this._field && this._field.isValid()) {
-      const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+      // Fields that don't support auto-domain, are not normalized with a field-formatter and stored into a computed-field
+      const targetName = this._field.supportsAutoDomain()
+        ? getComputedFieldName(this._styleName, this._field.getName())
+        : this._field.getName();
       mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
     } else {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', null);

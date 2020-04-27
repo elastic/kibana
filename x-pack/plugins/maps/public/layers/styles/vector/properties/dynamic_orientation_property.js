@@ -11,10 +11,9 @@ import { VECTOR_STYLES } from '../../../../../common/constants';
 export class DynamicOrientationProperty extends DynamicStyleProperty {
   syncIconRotationWithMb(symbolLayerId, mbMap) {
     if (this._options.field && this._options.field.name) {
-      const targetName = getComputedFieldName(
-        VECTOR_STYLES.ICON_ORIENTATION,
-        this._options.field.name
-      );
+      const targetName = this._field.supportsAutoDomain()
+        ? getComputedFieldName(VECTOR_STYLES.ICON_ORIENTATION, this._field.getName())
+        : this._field.getName();
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
     } else {
