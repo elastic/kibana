@@ -260,12 +260,7 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
   const response = await Promise.all(
     timelineIds.map(timelineId =>
       Promise.all([
-        savedObjectsClient.update(
-          timelineSavedObjectType,
-          timelineId,
-          omit(['dateRange'], draftTimelineDefaults)
-          // omit(['title', 'description', 'dateRange'], timelineDefaults)
-        ),
+        savedObjectsClient.update(timelineSavedObjectType, timelineId, draftTimelineDefaults),
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
