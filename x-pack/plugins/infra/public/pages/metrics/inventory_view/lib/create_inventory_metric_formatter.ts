@@ -5,7 +5,6 @@
  */
 
 import { get } from 'lodash';
-// import { createFormatter } from '../../../../utils/formatters';
 import { InfraFormatterType } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
