@@ -5,15 +5,15 @@
  */
 
 import Boom from 'boom';
-import { AlertType } from '../types';
+import { AlertType, AlertExecutorOptions } from '../types';
 
-export function validateAlertTypeParams<T extends Record<string, any>>(
+export function validateAlertTypeParams(
   alertType: AlertType,
-  params: T
-): T {
+  params: Record<string, unknown>
+): AlertExecutorOptions['params'] {
   const validator = alertType.validate && alertType.validate.params;
   if (!validator) {
-    return params;
+    return params as AlertExecutorOptions['params'];
   }
 
   try {
