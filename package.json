@@ -436,7 +436,7 @@
     "gulp-babel": "^8.0.0",
     "gulp-sourcemaps": "2.6.5",
     "has-ansi": "^3.0.0",
-    "iedriver": "^3.14.1",
+    "iedriver": "^3.14.2",
     "intl-messageformat-parser": "^1.4.0",
     "is-path-inside": "^2.1.0",
     "istanbul-instrumenter-loader": "3.0.1",
