@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
-import { AdvancedStep, ConfigurationStep, DetailsStep } from './components';
+import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
 
 enum ANALYTICS_STEPS {
   CONFIGURATION = 'Configuration',
@@ -82,7 +82,9 @@ export const Page: FC = () => {
       title: i18n.translate('xpack.dataframe.analytics.creation.createStepTitle', {
         defaultMessage: ANALYTICS_STEPS.CREATE,
       }),
-      children: currentStep === ANALYTICS_STEP_NUMBERS.create ? <div>create</div> : <span />,
+      children: (
+        <CreateStep {...createAnalyticsForm} setCurrentStep={setCurrentStep} step={currentStep} />
+      ),
       step: ANALYTICS_STEP_NUMBERS.create,
     },
   ];

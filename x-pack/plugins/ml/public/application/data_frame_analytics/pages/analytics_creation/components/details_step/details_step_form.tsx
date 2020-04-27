@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useRef } from 'react';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -21,11 +21,13 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }
   const { setFormState } = actions;
   const { form, isJobCreated } = state;
   const {
+    createIndexPattern,
     description,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
     destinationIndexNameValid,
+    destinationIndexPatternTitleExists,
     jobId,
     jobIdEmpty,
     jobIdExists,
@@ -167,6 +169,28 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }
           )}
           isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
           data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        isInvalid={createIndexPattern && destinationIndexPatternTitleExists}
+        error={
+          createIndexPattern &&
+          destinationIndexPatternTitleExists && [
+            i18n.translate('xpack.ml.dataframe.analytics.create.indexPatternExistsError', {
+              defaultMessage: 'An index pattern with this title already exists.',
+            }),
+          ]
+        }
+      >
+        <EuiSwitch
+          disabled={isJobCreated}
+          name="mlDataFrameAnalyticsCreateIndexPattern"
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.createIndexPatternLabel', {
+            defaultMessage: 'Create index pattern',
+          })}
+          checked={createIndexPattern === true}
+          onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
+          data-test-subj="mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch"
         />
       </EuiFormRow>
     </Fragment>
