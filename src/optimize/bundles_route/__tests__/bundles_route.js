@@ -33,7 +33,6 @@ import { PUBLIC_PATH_PLACEHOLDER } from '../../public_path_placeholder';
 const chance = new Chance();
 const outputFixture = resolve(__dirname, './fixtures/output');
 const pluginNoPlaceholderFixture = resolve(__dirname, './fixtures/plugin/no_placeholder');
-const pluginPlaceholderFixture = resolve(__dirname, './fixtures/plugin/placeholder');
 
 const randomWordsCache = new Set();
 const uniqueRandomWord = () => {
@@ -166,7 +165,7 @@ describe('optimizer/bundle route', () => {
     it('responds with exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/image.png',
+        url: '/1234/bundles/image.png',
       });
 
       expect(response.statusCode).to.be(200);
@@ -181,7 +180,7 @@ describe('optimizer/bundle route', () => {
     it('responds with no content-length and exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/no_placeholder.js',
+        url: '/1234/bundles/no_placeholder.js',
       });
 
       expect(response.statusCode).to.be(200);
@@ -195,12 +194,12 @@ describe('optimizer/bundle route', () => {
   });
 
   describe('js file with placeholder', () => {
-    it('responds with no content-length and modified file data', async () => {
+    it('responds with no content-length and modifiedfile data ', async () => {
       const basePublicPath = `/${uniqueRandomWord()}`;
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.js',
+        url: '/1234/bundles/with_placeholder.js',
       });
 
       expect(response.statusCode).to.be(200);
@@ -212,7 +211,7 @@ describe('optimizer/bundle route', () => {
       );
       expect(response.result.indexOf(source)).to.be(-1);
       expect(response.result).to.be(
-        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/bundles/`)
+        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/1234/bundles/`)
       );
     });
   });
@@ -221,7 +220,7 @@ describe('optimizer/bundle route', () => {
     it('responds with no content-length and exact file data', async () => {
       const server = createServer();
       const response = await server.inject({
-        url: '/bundles/no_placeholder.css',
+        url: '/1234/bundles/no_placeholder.css',
       });
 
       expect(response.statusCode).to.be(200);
@@ -239,7 +238,7 @@ describe('optimizer/bundle route', () => {
       const server = createServer({ basePublicPath });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.css',
+        url: '/1234/bundles/with_placeholder.css',
       });
 
       expect(response.statusCode).to.be(200);
@@ -248,7 +247,7 @@ describe('optimizer/bundle route', () => {
       expect(response.headers).to.have.property('content-type', 'text/css; charset=utf-8');
       expect(response.result.indexOf(source)).to.be(-1);
       expect(response.result).to.be(
-        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/bundles/`)
+        replaceAll(source, PUBLIC_PATH_PLACEHOLDER, `${basePublicPath}/1234/bundles/`)
       );
     });
   });
@@ -258,7 +257,7 @@ describe('optimizer/bundle route', () => {
       const server = createServer();
 
       const response = await server.inject({
-        url: '/bundles/../outside_output.js',
+        url: '/1234/bundles/../outside_output.js',
       });
 
       expect(response.statusCode).to.be(404);
@@ -275,7 +274,7 @@ describe('optimizer/bundle route', () => {
       const server = createServer();
 
       const response = await server.inject({
-        url: '/bundles/non_existent.js',
+        url: '/1234/bundles/non_existent.js',
       });
 
       expect(response.statusCode).to.be(404);
@@ -294,7 +293,7 @@ describe('optimizer/bundle route', () => {
       });
 
       const response = await server.inject({
-        url: '/bundles/with_placeholder.js',
+        url: '/1234/bundles/with_placeholder.js',
       });
 
       expect(response.statusCode).to.be(404);
@@ -314,7 +313,7 @@ describe('optimizer/bundle route', () => {
 
       sinon.assert.notCalled(createHash);
       const resp1 = await server.inject({
-        url: '/bundles/no_placeholder.js',
+        url: '/1234/bundles/no_placeholder.js',
       });
 
       sinon.assert.calledOnce(createHash);
@@ -322,7 +321,7 @@ describe('optimizer/bundle route', () => {
       expect(resp1.statusCode).to.be(200);
 
       const resp2 = await server.inject({
-        url: '/bundles/no_placeholder.js',
+        url: '/1234/bundles/no_placeholder.js',
       });
 
       sinon.assert.notCalled(createHash);
@@ -335,10 +334,10 @@ describe('optimizer/bundle route', () => {
 
       const [resp1, resp2] = await Promise.all([
         createServer({ basePublicPath: basePublicPath1 }).inject({
-          url: '/bundles/no_placeholder.js',
+          url: '/1234/bundles/no_placeholder.js',
         }),
         createServer({ basePublicPath: basePublicPath2 }).inject({
-          url: '/bundles/no_placeholder.js',
+          url: '/1234/bundles/no_placeholder.js',
         }),
       ]);
 
@@ -357,13 +356,13 @@ describe('optimizer/bundle route', () => {
     it('responds with 304 when etag and last modified are sent back', async () => {
       const server = createServer();
       const resp = await server.inject({
-        url: '/bundles/with_placeholder.js',
+        url: '/1234/bundles/with_placeholder.js',
       });
 
       expect(resp.statusCode).to.be(200);
 
       const resp2 = await server.inject({
-        url: '/bundles/with_placeholder.js',
+        url: '/1234/bundles/with_placeholder.js',
         headers: {
           'if-modified-since': resp.headers['last-modified'],
           'if-none-match': resp.headers.etag,
@@ -388,7 +387,7 @@ describe('optimizer/bundle route', () => {
             },
           ];
           const responce = await createServer({ basePublicPath, npUiPluginPublicDirs }).inject({
-            url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            url: '/1234/bundles/plugin/no_placeholder/no_placeholder.plugin.js',
           });
 
           expect(responce.statusCode).to.be(200);
@@ -397,10 +396,7 @@ describe('optimizer/bundle route', () => {
           expect(responce.headers['cache-control']).to.be('must-revalidate');
         });
 
-        it('creates the same "etag" header for the same content', async () => {
-          const basePublicPath1 = `/${uniqueRandomWord()}`;
-          const basePublicPath2 = `/${uniqueRandomWord()}`;
-
+        it('creates the same "etag" header for the same content with the same basePath', async () => {
           const npUiPluginPublicDirs = [
             {
               id: 'no_placeholder',
@@ -408,11 +404,11 @@ describe('optimizer/bundle route', () => {
             },
           ];
           const [resp1, resp2] = await Promise.all([
-            createServer({ basePublicPath: basePublicPath1, npUiPluginPublicDirs }).inject({
-              url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            createServer({ basePublicPath: '', npUiPluginPublicDirs }).inject({
+              url: '/1234/bundles/plugin/no_placeholder/no_placeholder.plugin.js',
             }),
-            createServer({ basePublicPath: basePublicPath2, npUiPluginPublicDirs }).inject({
-              url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            createServer({ basePublicPath: '', npUiPluginPublicDirs }).inject({
+              url: '/1234/bundles/plugin/no_placeholder/no_placeholder.plugin.js',
             }),
           ]);
 
@@ -424,23 +420,6 @@ describe('optimizer/bundle route', () => {
           expect(resp1.headers.etag).to.be.a('string');
           expect(resp2.headers.etag).to.be.a('string');
           expect(resp1.headers.etag).to.eql(resp2.headers.etag);
-        });
-
-        it('does not replace placeholder', async () => {
-          const basePublicPath = `/${uniqueRandomWord()}`;
-
-          const npUiPluginPublicDirs = [
-            {
-              id: 'placeholder',
-              path: pluginPlaceholderFixture,
-            },
-          ];
-          const response = await createServer({ basePublicPath, npUiPluginPublicDirs }).inject({
-            url: '/bundles/1234/plugin/placeholder/placeholder.plugin.js',
-          });
-
-          expect(response.statusCode).to.be(200);
-          expect(response.result.includes('__REPLACE_WITH_PUBLIC_PATH__/FOO')).to.be(true);
         });
       });
 
@@ -459,7 +438,7 @@ describe('optimizer/bundle route', () => {
             npUiPluginPublicDirs,
             isDist: true,
           }).inject({
-            url: '/bundles/1234/plugin/no_placeholder/no_placeholder.plugin.js',
+            url: '/1234/bundles/plugin/no_placeholder/no_placeholder.plugin.js',
           });
 
           expect(responce.statusCode).to.be(200);
