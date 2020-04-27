@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-baseFormattersPublic: (import("../../common").IFieldFormatType | typeof DateFormat)[]
+baseFormattersPublic: (import("../../common").FieldFormatInstanceType | typeof DateFormat)[]
 ```
