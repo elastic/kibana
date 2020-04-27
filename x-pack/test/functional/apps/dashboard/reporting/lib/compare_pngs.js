@@ -7,7 +7,7 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
+import { comparePngs } from '../../../../../../../test/functional/services/lib/compare_pngs';
 
 const mkdirAsync = promisify(fs.mkdir);
 
