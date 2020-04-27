@@ -57,9 +57,10 @@ module.exports = function(grunt) {
       'http://localhost:5610/test_bundle/karma/globals.js',
 
       ...UiSharedDeps.jsDepFilenames.map(
-        chunkFilename => `http://localhost:5610/bundles/kbn-ui-shared-deps/${chunkFilename}`
+        chunkFilename =>
+          `http://localhost:5610/bundles/9007199254740991/kbn-ui-shared-deps/${chunkFilename}`
       ),
-      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+      `http://localhost:5610/bundles/9007199254740991/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
 
       'http://localhost:5610/built_assets/dlls/vendors_runtime.bundle.dll.js',
       ...DllCompiler.getRawDllConfig().chunks.map(
@@ -70,7 +71,7 @@ module.exports = function(grunt) {
         ? `http://localhost:5610/bundles/tests.bundle.js`
         : `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
 
-      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+      `http://localhost:5610/bundles/9007199254740991/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
       // this causes tilemap tests to fail, probably because the eui styles haven't been
       // included in the karma harness a long some time, if ever
       // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
