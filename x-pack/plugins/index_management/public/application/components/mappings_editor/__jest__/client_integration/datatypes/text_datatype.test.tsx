@@ -13,7 +13,7 @@ const onChangeHandler = jest.fn();
 const getDataForwarded = getDataForwardedFactory(onChangeHandler);
 
 // Parameters automatically added to the text datatype when saved (with their default values)
-const defaultTextParameters = {
+export const defaultTextParameters = {
   eager_global_ordinals: false,
   fielddata: false,
   index: true,
@@ -35,20 +35,18 @@ describe('text datatype', () => {
     onChangeHandler.mockReset();
   });
 
-  test('flyout details initial view', async () => {
+  test('initial view and default parameters values', async () => {
     const defaultMappings = {
+      _meta: {},
+      _source: {},
       properties: {
-        user: {
-          properties: {
-            address: {
-              properties: {
-                street: { type: 'text' },
-              },
-            },
-          },
+        myTextField: {
+          type: 'text',
         },
       },
     };
+
+    const updatedMappings = { ...defaultMappings };
 
     await act(async () => {
       testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
@@ -57,72 +55,28 @@ describe('text datatype', () => {
     });
 
     const {
-      find,
-      actions: { startEditField, getToggleValue, showAdvancedSettings, updateFieldAndCloseFlyout },
+      actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
-    const fieldPathToEdit = ['user', 'address', 'street'];
-    const fieldName = fieldPathToEdit[fieldPathToEdit.length - 1];
 
     // Open the flyout to edit the field
     await act(async () => {
-      await startEditField(fieldPathToEdit.join('.'));
+      await startEditField('myTextField');
     });
-
-    // It should have the correct title
-    expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field '${fieldName}'`);
-
-    // It should have the correct field path
-    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual(fieldPathToEdit.join(' > '));
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
     expect(getToggleValue('indexParameter.formRowToggle')).toBe(indexFieldConfig.defaultValue);
-
-    // The advanced settings should be hidden initially
-    expect(find('mappingsEditorFieldEdit.advancedSettings').props().style.display).toEqual('none');
-
-    await act(async () => {
-      await showAdvancedSettings();
-    });
-
-    // TODO: find a way to automate testing that all expected fields are present
-    // and have their default value correctly set
-
-    const updatedMappings = {
-      _meta: {}, // Was not defined so an empty object is returned by the editor
-      _source: {}, // Was not defined so an empty object is returned by the editor
-      ...defaultMappings,
-      properties: {
-        user: {
-          type: 'object', // Was not defined so it defaults to "object" type
-          properties: {
-            address: {
-              type: 'object', // Was not defined so it defaults to "object" type
-              properties: {
-                street: { type: 'text' },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    await act(async () => {
-      ({ data } = await getDataForwarded());
-    });
-    expect(data).toEqual(updatedMappings);
 
     // Save the field and close the flyout
     await act(async () => {
       await updateFieldAndCloseFlyout();
     });
 
-    const streetField = {
+    // It should have the default parameters values added
+    updatedMappings.properties.myTextField = {
       type: 'text',
-      // All the default parameters values have been added
       ...defaultTextParameters,
     };
-    updatedMappings.properties.user.properties.address.properties.street = streetField;
 
     ({ data } = await getDataForwarded());
     expect(data).toEqual(updatedMappings);

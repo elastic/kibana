@@ -10,7 +10,7 @@ import { componentHelpers, MappingsEditorTestBed, DomFields, nextTick } from './
 const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 
-describe('Mapped fields', () => {
+describe('Mappings editor: mapped fields', () => {
   afterEach(() => {
     onChangeHandler.mockReset();
   });

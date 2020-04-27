@@ -11,7 +11,7 @@ const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 const getDataForwarded = getDataForwardedFactory(onChangeHandler);
 
-describe('<MappingsEditor />', () => {
+describe('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
@@ -19,6 +19,38 @@ describe('<MappingsEditor />', () => {
 
   afterEach(() => {
     onChangeHandler.mockReset();
+  });
+
+  test('default behaviour', async () => {
+    const defaultMappings = {
+      properties: {
+        user: {
+          // No type defined for user
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+      },
+    };
+
+    await setup({ value: defaultMappings, onChange: onChangeHandler });
+
+    const expectedMappings = {
+      _meta: {}, // Was not defined so an empty object is returned
+      _source: {}, // Was not defined so an empty object is returned
+      ...defaultMappings,
+      properties: {
+        user: {
+          type: 'object', // Was not defined so it defaults to "object" type
+          ...defaultMappings.properties.user,
+        },
+      },
+    };
+
+    await act(async () => {
+      ({ data } = await getDataForwarded());
+    });
+    expect(data).toEqual(expectedMappings);
   });
 
   describe('multiple mappings detection', () => {
@@ -186,7 +218,7 @@ describe('<MappingsEditor />', () => {
 
   describe('component props', () => {
     /**
-     * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a field,
+     * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a text datatype field,
      * as it is the only place where it is consumed by the mappings editor.
      */
     const defaultMappings: any = {
