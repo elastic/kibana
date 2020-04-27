@@ -5,11 +5,11 @@
  */
 import Boom from 'boom';
 import { SavedObjectsClientContract } from 'kibana/server';
-import { GLOBAL_SETTINGS_SAVED_OBJET_TYPE, SettingsSOAttributes, Settings } from '../../common';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, SettingsSOAttributes, Settings } from '../../common';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
-    type: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+    type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
 
   if (res.total === 0) {
@@ -30,7 +30,7 @@ export async function saveSettings(
     const settings = await getSettings(soClient);
 
     const res = await soClient.update<SettingsSOAttributes>(
-      GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+      GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
       newData
     );
@@ -42,7 +42,7 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const res = await soClient.create<SettingsSOAttributes>(
-        GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+        GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         newData
       );
 

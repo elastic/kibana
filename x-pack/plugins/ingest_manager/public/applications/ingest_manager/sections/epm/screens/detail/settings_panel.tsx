@@ -8,10 +8,11 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus, PackageInfo } from '../../../../types';
-import { InstallationButton } from './installation_button';
 import { useGetDatasources } from '../../../../hooks';
+import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { useGetPackageInstallStatus } from '../../hooks';
+import { InstallationButton } from './installation_button';
 
 const NoteLabel = () => (
   <FormattedMessage
@@ -26,7 +27,7 @@ export const SettingsPanel = (
   const { data: datasourcesData } = useGetDatasources({
     perPage: 0,
     page: 1,
-    kuery: `datasources.package.name:${props.name}`,
+    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
   const { name, title, removable } = props;
   const packageInstallStatus = getPackageInstallStatus(name);

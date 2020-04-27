@@ -5,6 +5,7 @@
  */
 export * from './common';
 export * from './datasource';
+export * from './data_stream';
 export * from './agent';
 export * from './agent_config';
 export * from './fleet_setup';

@@ -7,6 +7,7 @@
 export * from './agent';
 export * from './agent_config';
 export * from './datasource';
+export * from './data_stream';
 export * from './output';
 export * from './epm';
 export * from './enrollment_api_key';

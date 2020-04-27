@@ -9,6 +9,7 @@ export { getFlattenedObject } from '../../../../../../../src/core/utils';
 export {
   agentConfigRouteService,
   datasourceRouteService,
+  dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
   enrollmentAPIKeyRouteService,

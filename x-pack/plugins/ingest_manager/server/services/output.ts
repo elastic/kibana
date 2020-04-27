@@ -14,7 +14,7 @@ class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (!outputs.saved_objects.length) {
@@ -44,7 +44,7 @@ class OutputService {
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (!outputs.saved_objects.length) {

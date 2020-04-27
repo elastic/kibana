@@ -22,6 +22,7 @@ export {
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,
+  DataStream,
   Output,
   NewOutput,
   OutputType,
