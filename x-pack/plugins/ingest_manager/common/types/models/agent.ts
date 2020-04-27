@@ -20,15 +20,18 @@ export interface NewAgentAction {
   sent_at?: string;
 }
 
-export type AgentAction = NewAgentAction & {
+export interface AgentAction extends NewAgentAction {
   id: string;
   agent_id: string;
   created_at: string;
-} & SavedObjectAttributes;
+}
 
-export interface AgentActionSOAttributes extends NewAgentAction, SavedObjectAttributes {
+export interface AgentActionSOAttributes extends SavedObjectAttributes {
+  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  sent_at?: string;
   created_at: string;
   agent_id: string;
+  data?: string;
 }
 
 export interface AgentEvent {
@@ -64,6 +67,7 @@ interface AgentBase {
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
+  default_api_key_id?: string;
   config_id?: string;
   config_revision?: number | null;
   config_newest_revision?: number;
