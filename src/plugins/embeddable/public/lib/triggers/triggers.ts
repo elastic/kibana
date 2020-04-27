@@ -27,7 +27,7 @@ export interface EmbeddableContext {
 
 export interface EditPanelContext {
   embeddable: IEmbeddable;
-  originatingApp: string;
+  originatingApp?: string;
 }
 
 export interface ValueClickTriggerContext {

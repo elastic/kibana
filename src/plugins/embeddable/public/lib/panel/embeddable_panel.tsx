@@ -232,7 +232,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     // These actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
-    const extraActions: Action[] = [
+    const extraActions: Array<Action<EmbeddableContext>> = [
       new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
       new AddPanelAction(
         this.props.getEmbeddableFactory,
@@ -246,11 +246,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       new EditPanelAction(this.props.getEmbeddableFactory),
     ];
 
-    const sorted = actions.concat(extraActions).sort((a: Action, b: Action) => {
-      const bOrder = b.order || 0;
-      const aOrder = a.order || 0;
-      return bOrder - aOrder;
-    });
+    const sorted = actions
+      .concat(extraActions)
+      .sort((a: Action<EmbeddableContext>, b: Action<EmbeddableContext>) => {
+        const bOrder = b.order || 0;
+        const aOrder = a.order || 0;
+        return bOrder - aOrder;
+      });
 
     return await buildContextMenuForActions({
       actions: sorted,

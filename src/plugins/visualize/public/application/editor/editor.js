@@ -153,7 +153,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
 
   const editOriginatingApp = $route.current.params[EDIT_PANEL_ORIGINATING_APP];
   removeQueryParam(history, EDIT_PANEL_ORIGINATING_APP);
-  console.log('edit originating app var name: ', EDIT_PANEL_ORIGINATING_APP);
 
   $scope.getEditOriginatingApp = () => editOriginatingApp;
 
