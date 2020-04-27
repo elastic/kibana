@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
 } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
@@ -44,8 +44,13 @@ import {
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
-import { appContextService, ESIndexPatternSavedObjectService } from './services';
-import { ESIndexPatternService, AgentService } from './services';
+import {
+  appContextService,
+  licenseService,
+  ESIndexPatternSavedObjectService,
+  ESIndexPatternService,
+  AgentService,
+} from './services';
 import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
@@ -92,6 +97,7 @@ export class IngestManagerPlugin
       IngestManagerSetupDeps,
       IngestManagerStartDeps
     > {
+  private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -100,6 +106,7 @@ export class IngestManagerPlugin
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
     }
@@ -178,6 +185,7 @@ export class IngestManagerPlugin
       config$: this.config$,
       savedObjects: core.savedObjects,
     });
+    licenseService.start(this.licensing$);
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
@@ -188,5 +196,6 @@ export class IngestManagerPlugin
 
   public async stop() {
     appContextService.stop();
+    licenseService.stop();
   }
 }

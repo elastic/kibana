@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
-export const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
-export const DEFAULT_REGISTRY_URL = 'https://epr.elastic.co';
+import { DynamicSettings } from '../runtime_types';
+
+export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
+  heartbeatIndices: 'heartbeat-7*',
+  certThresholds: {
+    expiration: 30,
+    age: 365,
+  },
+};

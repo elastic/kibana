@@ -36,4 +36,5 @@ export {
   // Defaults
   DEFAULT_AGENT_CONFIG,
   DEFAULT_OUTPUT,
+  DEFAULT_REGISTRY_URL,
 } from '../../common';
