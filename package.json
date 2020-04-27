@@ -320,6 +320,7 @@
     "@types/classnames": "^2.2.9",
     "@types/color": "^3.0.0",
     "@types/d3": "^3.5.43",
+    "@types/d3-cloud": "^1.2.3",
     "@types/dedent": "^0.7.0",
     "@types/deep-freeze-strict": "^1.1.0",
     "@types/delete-empty": "^2.0.0",
