@@ -60,7 +60,6 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.exists(dataTestSubj);
       const Elements = await testSubjects.findAll(dataTestSubj);
       const $ = [];
-      // console.log(Elements.length);
       for (const value of Elements) {
         $.push(await value.getAttribute(element));
       }
