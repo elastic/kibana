@@ -136,7 +136,7 @@ Array [
               className="euiSpacer euiSpacer--l"
             />
             <div
-              className="euiPanel euiPanel--paddingMedium canvasAssetManager__emptyPanel"
+              className="canvasAssetManager__emptyPanel"
             >
               <div
                 className="euiEmptyPrompt"
