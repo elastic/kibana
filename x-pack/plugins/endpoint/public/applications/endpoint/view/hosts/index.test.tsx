@@ -50,8 +50,10 @@ describe('when on the hosts page', () => {
         reactTestingLibrary.act(() => {
           const hostListData = mockHostResultList({ total: 3 });
           [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
-            // @ts-ignore
-            hostListData.hosts[index].host_status = status;
+            hostListData.hosts[index] = {
+              metadata: hostListData.hosts[index].metadata,
+              host_status: status,
+            };
           });
           const action: AppAction = {
             type: 'serverReturnedHostList',
