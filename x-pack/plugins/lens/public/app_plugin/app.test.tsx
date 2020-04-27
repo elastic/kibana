@@ -215,7 +215,7 @@ describe('Lens App', () => {
     instance = mount(<App {...defaultArgs} />);
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/visualize#/' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Create' },
     ]);
 

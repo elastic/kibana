@@ -25,7 +25,7 @@ describe('UiNavLink', () => {
   describe('constructor', () => {
     it('initializes the object properties as expected', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',
@@ -56,7 +56,7 @@ describe('UiNavLink', () => {
 
     it('initializes the order property to 0 when order is not specified in the spec', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         url: '/app/discover#/',
       };
@@ -67,7 +67,7 @@ describe('UiNavLink', () => {
 
     it('initializes the linkToLastSubUrl property to false when false is specified in the spec', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',
@@ -80,7 +80,7 @@ describe('UiNavLink', () => {
 
     it('initializes the linkToLastSubUrl property to true by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',
@@ -92,7 +92,7 @@ describe('UiNavLink', () => {
 
     it('initializes the hidden property to false by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',
@@ -104,7 +104,7 @@ describe('UiNavLink', () => {
 
     it('initializes the disabled property to false by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',
@@ -116,7 +116,7 @@ describe('UiNavLink', () => {
 
     it('initializes the tooltip property to an empty string by default', () => {
       const spec = {
-        id: 'kibana:discover',
+        id: 'discover',
         title: 'Discover',
         order: -1003,
         url: '/app/discover#/',

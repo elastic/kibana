@@ -217,7 +217,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
-      title: 'Dashboards',
+      title: 'Dashboard',
       order: -1001,
       euiIconType: 'dashboardApp',
       mount: async (params: AppMountParameters) => {

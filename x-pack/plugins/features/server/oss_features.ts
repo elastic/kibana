@@ -20,7 +20,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 100,
       icon: 'discoverApp',
-      navLinkId: 'kibana:discover',
+      navLinkId: 'discover',
       app: ['kibana'],
       catalogue: ['discover'],
       privileges: {
@@ -80,7 +80,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 200,
       icon: 'visualizeApp',
-      navLinkId: 'kibana:visualize',
+      navLinkId: 'visualize',
       app: ['kibana', 'lens'],
       catalogue: ['visualize'],
       privileges: {
@@ -140,7 +140,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 300,
       icon: 'dashboardApp',
-      navLinkId: 'kibana:dashboard',
+      navLinkId: 'dashboards',
       app: ['kibana'],
       catalogue: ['dashboard'],
       privileges: {
@@ -217,7 +217,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       }),
       order: 1300,
       icon: 'devToolsApp',
-      navLinkId: 'kibana:dev_tools',
+      navLinkId: 'dev_tools',
       app: ['kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {

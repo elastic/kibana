@@ -109,7 +109,7 @@ export class VisualizePlugin
         order: 1000,
       },
       updater$: this.appStateUpdater.asObservable(),
-      // remove all references to kibana:visualize
+      // remove all references to visualize
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 

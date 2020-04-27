@@ -117,19 +117,19 @@ describe('chrome nav apis', function() {
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
         {
-          id: 'kibana:discover',
+          id: 'discover',
           baseUrl: `${baseUrl}/app/kibana#discover`,
           subUrlBase: '/app/kibana#discover',
           legacy: true,
         },
         {
-          id: 'kibana:visualize',
+          id: 'visualize',
           baseUrl: `${baseUrl}/app/visualize#`,
           subUrlBase: '/app/visualize#',
           legacy: true,
         },
         {
-          id: 'kibana:dashboard',
+          id: 'dashboards',
           baseUrl: `${baseUrl}/app/kibana#dashboards`,
           subUrlBase: '/app/kibana#dashboard',
           legacy: true,
@@ -155,7 +155,7 @@ describe('chrome nav apis', function() {
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
         {
-          id: 'kibana:visualize',
+          id: 'visualize',
           baseUrl: `${baseUrl}/app/visualize#`,
           url: `${baseUrl}/app/visualize#`,
           subUrlBase: '/app/visualize#',
@@ -168,9 +168,9 @@ describe('chrome nav apis', function() {
         `${baseUrl}/xyz/app/visualize#/1234?_g=globalstate`,
         '/xyz'
       );
-      chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
+      chrome.trackSubUrlForApp('visualize', kibanaParsedUrl);
       expect(
-        coreNavLinks.update.calledWith('kibana:visualize', {
+        coreNavLinks.update.calledWith('visualize', {
           url: `${baseUrl}/xyz/app/visualize#/1234?_g=globalstate`,
         })
       ).to.be(true);
