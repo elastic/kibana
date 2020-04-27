@@ -9,6 +9,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { LicenseType } from '../../../../plugins/licensing/server';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -41,6 +42,9 @@ describe('listActionTypesRoute', () => {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
@@ -51,7 +55,10 @@ describe('listActionTypesRoute', () => {
         "body": Array [
           Object {
             "enabled": true,
+            "enabledInConfig": true,
+            "enabledInLicense": true,
             "id": "1",
+            "minimumLicenseRequired": "gold",
             "name": "name",
           },
         ],
@@ -87,6 +94,9 @@ describe('listActionTypesRoute', () => {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
@@ -129,6 +139,9 @@ describe('listActionTypesRoute', () => {
         id: '1',
         name: 'name',
         enabled: true,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold' as LicenseType,
       },
     ];
 
