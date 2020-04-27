@@ -7,42 +7,42 @@
 <b>Signature:</b>
 
 ```typescript
-search: {
-    aggs: {
-        AggConfigs: typeof AggConfigs;
-        aggGroupNamesMap: () => Record<"metrics" | "buckets", string>;
-        aggTypeFilters: import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
-        CidrMask: typeof CidrMask;
-        convertDateRangeToString: typeof convertDateRangeToString;
-        convertIPRangeToString: (range: import("./search").IpRangeKey, format: (val: any) => string) => string;
-        dateHistogramInterval: typeof dateHistogramInterval;
-        intervalOptions: ({
+{
+    {
+        typeof AggConfigs;
+        () => Record<"buckets" | "metrics", string>;
+        import("./search/aggs/filter/agg_type_filters").AggTypeFilters;
+        typeof CidrMask;
+        typeof convertDateRangeToString;
+        (range: import("./search").IpRangeKey, format: (val: any) => string) => string;
+        typeof dateHistogramInterval;
+        ({
             display: string;
-            val: string;
-            enabled(agg: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig): boolean | "" | undefined;
+            string;
+            enabled(agg;: import("./search/aggs/buckets/bucket_agg_type").IBucketAggConfig;): boolean | "" | undefined;
         } | {
-            display: string;
-            val: string;
+            string;
+            string;
         })[];
-        InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
-        InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
-        isDateHistogramBucketAggConfig: typeof isDateHistogramBucketAggConfig;
-        isNumberType: (agg: import("./search").AggConfig) => boolean;
-        isStringType: (agg: import("./search").AggConfig) => boolean;
-        isType: (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
-        isValidEsInterval: typeof isValidEsInterval;
-        isValidInterval: typeof isValidInterval;
-        parentPipelineType: string;
-        parseEsInterval: typeof parseEsInterval;
-        parseInterval: typeof parseInterval;
-        propFilter: typeof propFilter;
-        siblingPipelineType: string;
-        termsAggFilter: string[];
-        toAbsoluteDates: typeof toAbsoluteDates;
-    };
-    getRequestInspectorStats: typeof getRequestInspectorStats;
-    getResponseInspectorStats: typeof getResponseInspectorStats;
-    tabifyAggResponse: typeof tabifyAggResponse;
-    tabifyGetColumns: typeof tabifyGetColumns;
+        typeof InvalidEsCalendarIntervalError;
+        typeof InvalidEsIntervalFormatError;
+        typeof isDateHistogramBucketAggConfig;
+        (agg: import("./search").AggConfig) => boolean;
+        (agg: import("./search").AggConfig) => boolean;
+        (...types: string[]) => (agg: import("./search").AggConfig) => boolean;
+        typeof isValidEsInterval;
+        typeof isValidInterval;
+        string;
+        typeof parseEsInterval;
+        typeof parseInterval;
+        typeof propFilter;
+        string;
+        string[];
+        typeof toAbsoluteDates;
+    }
+    typeof getRequestInspectorStats;
+    typeof getResponseInspectorStats;
+    typeof tabifyAggResponse;
+    typeof tabifyGetColumns;
 }
 ```

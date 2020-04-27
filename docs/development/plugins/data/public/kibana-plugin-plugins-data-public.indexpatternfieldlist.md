@@ -14,7 +14,7 @@ export declare class FieldList extends Array<Field> implements IFieldList
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, specs, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfieldlist._constructor_.md) |  | Constructs a new instance of the <code>FieldList</code> class |
+|  [(constructor)({ fieldFormats, toastNotifications }, indexPattern, specs, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfieldlist._constructor_.md) |  | Constructs a new instance of the <code>FieldList</code> class |
 
 ## Properties
 
