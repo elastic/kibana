@@ -18,6 +18,7 @@ import {
   KibanaResponseFactory,
   IScopedClusterClient,
 } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 import { Service } from '../../../types';
 
 const bodySchema = schema.object({
@@ -40,7 +41,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, RequestBody, any>,
+    req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
@@ -102,12 +103,14 @@ async function getIndicesFromPattern(
       },
     },
   };
-  const response = await dataClient.callAsCurrentUser('search', params);
-  if (response.status === 404 || !response.aggregations) {
+  const response: SearchResponse<unknown> = await dataClient.callAsCurrentUser('search', params);
+  // TODO: Investigate when the status field might appear here, type suggests it shouldn't ever happen
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((response as any).status === 404 || !response.aggregations) {
     return [];
   }
 
-  return response.aggregations.indices.buckets.map((bucket: any) => bucket.key);
+  return (response.aggregations as IndiciesAggregation).indices.buckets.map(bucket => bucket.key);
 }
 
 async function getAliasesFromPattern(
@@ -136,4 +139,10 @@ async function getAliasesFromPattern(
   }
 
   return result;
+}
+
+interface IndiciesAggregation {
+  indices: {
+    buckets: Array<{ key: string }>;
+  };
 }

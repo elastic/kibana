@@ -11,7 +11,7 @@ import {
 } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
 import { PluginSetupContract } from '../../features/server';
-import { createMockIngestManagerStartupContract } from './mocks';
+import { createMockIngestManagerStartContract } from './mocks';
 
 describe('test endpoint plugin', () => {
   let plugin: EndpointPlugin;
@@ -51,7 +51,7 @@ describe('test endpoint plugin', () => {
 
   it('test properly start plugin', async () => {
     mockedEndpointPluginStartDependencies = {
-      ingestManager: createMockIngestManagerStartupContract(''),
+      ingestManager: createMockIngestManagerStartContract(''),
     };
     await plugin.start(mockCoreStart, mockedEndpointPluginStartDependencies);
     expect(plugin.getEndpointAppContextService().getAgentService()).toBeTruthy();

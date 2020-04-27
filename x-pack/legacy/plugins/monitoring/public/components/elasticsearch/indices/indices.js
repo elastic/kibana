@@ -8,6 +8,7 @@ import React from 'react';
 import { capitalize } from 'lodash';
 import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
 import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -33,7 +34,10 @@ const columns = [
     sortable: true,
     render: value => (
       <div data-test-subj="name">
-        <EuiLink href={`#/elasticsearch/indices/${value}`} data-test-subj={`indexLink-${value}`}>
+        <EuiLink
+          href={getSafeForExternalLink(`#/elasticsearch/indices/${value}`)}
+          data-test-subj={`indexLink-${value}`}
+        >
           {value}
         </EuiLink>
       </div>
