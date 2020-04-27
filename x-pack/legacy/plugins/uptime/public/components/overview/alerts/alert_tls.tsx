@@ -57,6 +57,8 @@ const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressionPopove
         defaultMessage="You can edit these thresholds on the {settingsPageLink}."
         values={{
           settingsPageLink: (
+            // this link is wrapped around a span so we can also change the UI state
+            // and hide the alert flyout before triggering the navigation to the settings page
             <EuiLink href={href}>
               <span
                 onClick={() => {
