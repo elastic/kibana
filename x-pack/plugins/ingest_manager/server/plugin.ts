@@ -39,6 +39,8 @@ import {
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
+  registerOutputRoutes,
+  registerSettingsRoutes,
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
@@ -143,6 +145,8 @@ export class IngestManagerPlugin
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerOutputRoutes(router);
+    registerSettingsRoutes(router);
     registerDataStreamRoutes(router);
 
     // Conditional routes
