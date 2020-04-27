@@ -27,7 +27,7 @@ const LogFilterStateProvider: React.FC = ({ children }) => {
 
 const ViewLogInContextProvider: React.FC = ({ children }) => {
   const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
-  const { sourceId } = useContext(Source.Context);
+  const { sourceId } = useLogSourceContext();
 
   if (!startTimestamp || !endTimestamp) {
     return null;
