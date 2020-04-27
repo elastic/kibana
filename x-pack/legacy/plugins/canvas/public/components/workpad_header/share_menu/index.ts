@@ -8,8 +8,6 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { jobCompletionNotifications } from '../../../../../../../plugins/reporting/public';
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
-// @ts-ignore Untyped local
-import { notify } from '../../../lib/notify';
 import { getWindow } from '../../../lib/get_window';
 import { downloadWorkpad } from '../../../lib/download_workpad';
 import { ShareMenu as Component, Props as ComponentProps } from './share_menu';
@@ -59,10 +57,10 @@ export const ShareMenu = compose<ComponentProps, {}>(
       onCopy: type => {
         switch (type) {
           case 'pdf':
-            notify.info(strings.getCopyPDFMessage());
+            kibana.services.canvas.notify.info(strings.getCopyPDFMessage());
             break;
           case 'reportingConfig':
-            notify.info(strings.getCopyReportingConfigMessage());
+            kibana.services.canvas.notify.info(strings.getCopyReportingConfigMessage());
             break;
           default:
             throw new Error(strings.getUnknownExportErrorMessage(type));
@@ -73,7 +71,7 @@ export const ShareMenu = compose<ComponentProps, {}>(
           case 'pdf':
             return createPdf(workpad, { pageCount }, kibana.services.http.basePath)
               .then(({ data }: { data: { job: { id: string } } }) => {
-                notify.info(strings.getExportPDFMessage(), {
+                kibana.services.canvas.notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),
                 });
 
@@ -81,7 +79,9 @@ export const ShareMenu = compose<ComponentProps, {}>(
                 jobCompletionNotifications.add(data.job.id);
               })
               .catch((err: Error) => {
-                notify.error(err, { title: strings.getExportPDFErrorTitle(workpad.name) });
+                kibana.services.canvas.notify.error(err, {
+                  title: strings.getExportPDFErrorTitle(workpad.name),
+                });
               });
           case 'json':
             downloadWorkpad(workpad.id);
