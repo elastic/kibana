@@ -105,12 +105,13 @@ const OptionList = React.memo(
   }
 );
 
-const NodeSubMenu = React.memo(
+const NodeSubMenu = styled(React.memo(
   ({
     menuTitle,
     menuAction,
     optionsWithActions,
-  }: { menuTitle: string } & (
+    className,
+  }: { menuTitle: string; className?: string } & (
     | {
         menuAction?: undefined;
         optionsWithActions: ResolverSubmenuOptionList;
@@ -140,9 +141,11 @@ const NodeSubMenu = React.memo(
        * Render without dropdown and call the supplied action when host button is clicked
        */
       return (
-        <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
-          {menuTitle}
-        </EuiButton>
+        <div className={className}>
+          <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+            {menuTitle}
+          </EuiButton>
+        </div>
       );
     }
     /**
@@ -150,22 +153,32 @@ const NodeSubMenu = React.memo(
      * Render with a panel of options that appear when the menu host button is clicked
      */
     return (
-      <>
+      <div className={className + (menuIsOpen ? ' is-open' : '')}>
         <EuiButton
           onClick={handleMenuOpenClick}
           color="ghost"
           size="s"
-          iconType="arrowDown"
+          iconType="arrowUp"
           iconSide="right"
           tabIndex={-1}
         >
           {menuTitle}
         </EuiButton>
         {menuIsOpen && <OptionList subMenuOptions={optionsWithActions} />}
-      </>
+      </div>
     );
   }
-);
+))`
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-flow: column;
+  &.is-open .euiButton {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+`
 
 /**
  * An artefact that represents a process node.
@@ -479,6 +492,10 @@ export const ProcessEventDot = styled(
     stroke-dashoffset: 0;
   }
 
+  & .euiSelectableList-bordered {
+    border-top-right-radius: 0px;
+    border-top-left-radius: 0px;
+  }
   & .euiSelectableListItem {
     background-color: black;
   }
