@@ -5,8 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { promisify } from 'util';
 import { checkIfPngsMatch } from './lib/compare_pngs';
 
@@ -15,7 +16,7 @@ const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
@@ -85,14 +86,14 @@ export default function({ getService, getPageObjects }) {
 
     describe('Preserve Layout', () => {
       it('matches baseline report', async function() {
-        const writeSessionReport = async (name, rawPdf, reportExt) => {
+        const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
           const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
           await mkdirAsync(sessionDirectory, { recursive: true });
           const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
           await writeFileAsync(sessionReportPath, rawPdf);
           return sessionReportPath;
         };
-        const getBaselineReportPath = (fileName, reportExt) => {
+        const getBaselineReportPath = (fileName: string, reportExt: string) => {
           const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
           const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
           log.debug(`getBaselineReportPath (${fullPath})`);

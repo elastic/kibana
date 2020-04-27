@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import http, { IncomingMessage } from 'http';
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { parse } from 'url';
-import http from 'http';
 
 /*
  * NOTE: Reporting is a service, not an app. The page objects that are
@@ -14,15 +15,15 @@ import http from 'http';
  * apps that need it for testing their integration.
  * Issue: https://github.com/elastic/kibana/issues/52927
  */
-export function ReportingPageProvider({ getService, getPageObjects }) {
+export function ReportingPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'security', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common' as any, 'security', 'share', 'timePicker']);
 
   class ReportingPage {
-    async forceSharedItemsContainerSize({ width }) {
+    async forceSharedItemsContainerSize({ width }: { width: number }) {
       await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
         el.style.flex="none";
@@ -30,7 +31,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       `);
     }
 
-    async getReportURL(timeout) {
+    async getReportURL(timeout: number) {
       log.debug('getReportURL');
 
       const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href', timeout);
@@ -48,7 +49,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       `);
     }
 
-    getResponse(url) {
+    getResponse(url: string): Promise<IncomingMessage> {
       log.debug(`getResponse for ${url}`);
       const auth = 'test_user:changeme'; // FIXME not sure why there is no config that can be read for this
       const headers = {
@@ -62,29 +63,30 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
               hostname: parsedUrl.hostname,
               path: parsedUrl.path,
               port: parsedUrl.port,
-              responseType: 'arraybuffer',
               headers,
             },
-            res => {
+            (res: IncomingMessage) => {
               resolve(res);
             }
           )
-          .on('error', e => {
+          .on('error', (e: Error) => {
             log.error(e);
             reject(e);
           });
       });
     }
 
-    async getRawPdfReportData(url) {
-      const data = []; // List of Buffer objects
+    async getRawPdfReportData(url: string) {
+      const data: Buffer[] = []; // List of Buffer objects
       log.debug(`getRawPdfReportData for ${url}`);
 
       return new Promise(async (resolve, reject) => {
         const response = await this.getResponse(url).catch(reject);
 
-        response.on('data', chunk => data.push(chunk));
-        response.on('end', () => resolve(Buffer.concat(data)));
+        if (response) {
+          response.on('data', (chunk: Buffer) => data.push(chunk));
+          response.on('end', () => resolve(Buffer.concat(data)));
+        }
       });
     }
 
