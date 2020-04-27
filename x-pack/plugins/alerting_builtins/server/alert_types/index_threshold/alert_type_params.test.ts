@@ -6,6 +6,7 @@
 
 import { ParamsSchema, Params } from './alert_type_params';
 import { runTests } from './lib/core_query_types.test';
+import { TypeOf } from '@kbn/config-schema';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',
@@ -21,6 +22,7 @@ const DefaultParams: Writable<Partial<Params>> = {
 describe('alertType Params validate()', () => {
   runTests(ParamsSchema, DefaultParams);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
   beforeEach(() => {
     params = { ...DefaultParams };
@@ -64,7 +66,7 @@ describe('alertType Params validate()', () => {
     return () => validate();
   }
 
-  function validate(): any {
+  function validate(): TypeOf<typeof ParamsSchema> {
     return ParamsSchema.validate(params);
   }
 });
