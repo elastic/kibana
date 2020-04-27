@@ -5,7 +5,7 @@
  */
 
 import { disableAlertRoute } from './disable';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
@@ -23,7 +23,7 @@ beforeEach(() => {
 describe('disableAlertRoute', () => {
   it('disables an alert', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     disableAlertRoute(router, licenseState);
 
