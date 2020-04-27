@@ -176,15 +176,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
+      initializeActionsTelemetry(
+        this.telemetryLogger,
+        plugins.taskManager,
+        core,
+        await this.kibanaIndex
+      );
+
       core.getStartServices().then(async ([, startPlugins]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
-
-        initializeActionsTelemetry(
-          this.telemetryLogger,
-          plugins.taskManager,
-          core,
-          await this.kibanaIndex
-        );
       });
     }
 

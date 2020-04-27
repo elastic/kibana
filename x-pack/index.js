@@ -16,7 +16,6 @@ import { indexManagement } from './legacy/plugins/index_management';
 import { spaces } from './legacy/plugins/spaces';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
-import { taskManager } from './legacy/plugins/task_manager';
 import { siem } from './legacy/plugins/siem';
 import { remoteClusters } from './legacy/plugins/remote_clusters';
 import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
@@ -38,7 +37,6 @@ module.exports = function(kibana) {
     canvas(kibana),
     indexManagement(kibana),
     infra(kibana),
-    taskManager(kibana),
     siem(kibana),
     remoteClusters(kibana),
     upgradeAssistant(kibana),
