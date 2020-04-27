@@ -93,10 +93,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onEditPipelineClick={editPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={clonePipeline}
-        onViewPipelineClick={pipeline => {
-          setShowFlyout(true);
-          setSelectedPipeline(pipeline);
-        }}
         pipelines={data}
       />
     );
@@ -129,6 +125,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           onClose={() => {
             setShowFlyout(false);
           }}
+          pipelineName={pipelineNameFromLocation}
         />
       );
     }

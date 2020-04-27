@@ -6,40 +6,36 @@
 
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiCallOut } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 interface Props {
   onClose: () => void;
+  pipelineName: string | string[] | null | undefined;
 }
 
-export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose }) => {
+export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({ onClose, pipelineName }) => {
   return (
     <EuiFlyout onClose={onClose} size="m" maxWidth={550}>
-      <EuiFlyoutBody>
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="alert" color="danger" />
-          </EuiFlexItem>
+      <EuiFlyoutHeader>
+        {pipelineName && (
+          <EuiTitle id="notFoundFlyoutTitle">
+            <h2>{pipelineName}</h2>
+          </EuiTitle>
+        )}
+      </EuiFlyoutHeader>
 
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.list.notFoundFlyoutMessage"
-                  defaultMessage="Pipeline not found"
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlyoutBody>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.ingestPipelines.list.notFoundFlyoutMessage"
+              defaultMessage="Pipeline not found"
+            />
+          }
+          color="danger"
+          iconType="alert"
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
