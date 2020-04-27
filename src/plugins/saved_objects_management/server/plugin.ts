@@ -23,6 +23,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
+import { capabilitiesProvider } from './capabilities_provider';
 
 export class SavedObjectsManagementPlugin
   implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}> {
@@ -33,12 +34,14 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public async setup({ http }: CoreSetup) {
+  public async setup({ http, capabilities }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
       managementServicePromise: this.managementService$.pipe(first()).toPromise(),
     });
+
+    capabilities.registerProvider(capabilitiesProvider);
 
     return {};
   }

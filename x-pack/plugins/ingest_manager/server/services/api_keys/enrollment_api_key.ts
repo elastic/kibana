@@ -31,7 +31,10 @@ export async function listEnrollmentApiKeys(
     sortOrder: 'DESC',
     filter:
       kuery && kuery !== ''
-        ? kuery.replace(/enrollment_api_keys\./g, 'enrollment_api_keys.attributes.')
+        ? kuery.replace(
+            new RegExp(`${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}\.`, 'g'),
+            `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.attributes.`
+          )
         : undefined,
   });
 
@@ -80,7 +83,7 @@ export async function deleteEnrollmentApiKeyForConfigId(
     const { items } = await listEnrollmentApiKeys(soClient, {
       page: page++,
       perPage: 100,
-      kuery: `enrollment_api_keys.config_id:${configId}`,
+      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.config_id:${configId}`,
     });
 
     if (items.length === 0) {
