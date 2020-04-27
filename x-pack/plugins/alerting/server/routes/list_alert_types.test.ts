@@ -47,6 +47,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: [],
       },
     ];
 
@@ -62,6 +63,7 @@ describe('listAlertTypesRoute', () => {
                 "name": "Default",
               },
             ],
+            "actionVariables": Array [],
             "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
@@ -99,6 +101,14 @@ describe('listAlertTypesRoute', () => {
         id: '1',
         name: 'name',
         enabled: true,
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        actionVariables: [],
       },
     ];
 
@@ -147,6 +157,7 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: [],
       },
     ];
 
