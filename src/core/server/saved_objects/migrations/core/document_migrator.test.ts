@@ -149,13 +149,13 @@ describe('DocumentMigrator', () => {
     expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
   });
 
-  it('migrates meta properties', () => {
+  it('migrates root properties', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
       typeRegistry: createRegistry({
         name: 'acl',
         migrations: {
-          '2.3.5': setAttr('acl', 'admins-only,sucka!'),
+          '2.3.5': setAttr('acl', 'admins-only, sucka!'),
         },
       }),
     });
@@ -165,13 +165,13 @@ describe('DocumentMigrator', () => {
       attributes: { name: 'Tyler' },
       acl: 'anyone',
       migrationVersion: {},
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'me',
       type: 'user',
       attributes: { name: 'Tyler' },
       migrationVersion: { acl: '2.3.5' },
-      acl: 'admins-only,sucka!',
+      acl: 'admins-only, sucka!',
     });
   });
 
@@ -241,7 +241,7 @@ describe('DocumentMigrator', () => {
       type: 'user',
       attributes: { name: 'Tyler' },
       bbb: 'Shazm',
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'me',
       type: 'user',
@@ -405,7 +405,7 @@ describe('DocumentMigrator', () => {
       attributes: { name: 'Callie' },
       dawg: 'Yo',
       migrationVersion: {},
-    });
+    } as SavedObjectUnsanitizedDoc);
     expect(actual).toEqual({
       id: 'smelly',
       type: 'foo',
