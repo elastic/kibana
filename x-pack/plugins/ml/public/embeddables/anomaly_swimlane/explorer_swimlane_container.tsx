@@ -7,8 +7,17 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { catchError, debounceTime, map, skipWhile, startWith, switchMap } from 'rxjs/operators';
-import { throttle } from 'lodash';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  pluck,
+  skipWhile,
+  startWith,
+  switchMap,
+} from 'rxjs/operators';
+import { throttle, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
@@ -40,7 +49,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings, notifications }, , { explorerService }] = services;
+  const [{ uiSettings, notifications }, , { explorerService, mlAnomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
@@ -48,12 +57,24 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
-  const timeBuckets = new TimeBuckets({
-    'histogram:maxBars': uiSettings.get('histogram:maxBars'),
-    'histogram:barTarget': uiSettings.get('histogram:barTarget'),
-    dateFormat: uiSettings.get('dateFormat'),
-    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-  });
+  const timeBuckets = useMemo(() => {
+    return new TimeBuckets({
+      'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+      'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
+  }, []);
+
+  const jobs$ = useMemo(
+    () =>
+      embeddableInput.pipe(
+        pluck('jobIds'),
+        distinctUntilChanged(isEqual),
+        switchMap(jobsIds => mlAnomalyDetectorService.getJobs$(jobsIds))
+      ),
+    []
+  );
 
   useEffect(() => {
     chartWidth$.next(chartWidth);
@@ -61,14 +82,23 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
 
   useEffect(() => {
     const subscription = combineLatest([
+      jobs$,
       embeddableInput,
-      chartWidth$.pipe(skipWhile(v => !v)),
+      chartWidth$.pipe(
+        skipWhile(v => !v),
+        distinctUntilChanged((prev, curr) => {
+          // emit only if the width has been changed significantly
+          const allowedDiff = 20;
+          const diff = Math.abs(curr - prev);
+          return diff < allowedDiff;
+        })
+      ),
       refresh.pipe(startWith(null)),
     ])
       .pipe(
         debounceTime(500),
-        switchMap(([input, swimlaneContainerWidth]) => {
-          const { jobs, viewBy, swimlaneType: swimlaneTypeInput, timeRange } = input;
+        switchMap(([jobs, input, swimlaneContainerWidth]) => {
+          const { viewBy, swimlaneType: swimlaneTypeInput, timeRange } = input;
 
           explorerService.setTimeRange(timeRange);
 

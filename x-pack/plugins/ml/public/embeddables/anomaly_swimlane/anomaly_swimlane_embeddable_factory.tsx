@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'kibana/public';
 
 import moment from 'moment';
-import { forkJoin } from 'rxjs';
 import {
   IContainer,
   EmbeddableFactoryDefinition,
@@ -81,16 +80,14 @@ export class AnomalySwimlaneEmbeddableFactory
                 values: { jobIds: jobIds.join(', ') },
               });
 
-              const jobs = await forkJoin(
-                jobIds.map(jobId => mlAnomalyDetectorService.getJobById$(jobId))
-              ).toPromise();
+              const jobs = await mlAnomalyDetectorService.getJobs$(jobIds).toPromise();
 
               const influencers = mlAnomalyDetectorService.extractInfluencers(jobs);
 
               // only one job selected with no influencers, hence no need to
               // bother the user with swimlane type selection, set to Overall
               if (jobs.length === 1 && influencers.length === 0) {
-                resolve({ jobs, title, swimlaneType: SWIMLANE_TYPE.OVERALL });
+                resolve({ jobIds, title, swimlaneType: SWIMLANE_TYPE.OVERALL });
                 return;
               }
 
@@ -102,7 +99,7 @@ export class AnomalySwimlaneEmbeddableFactory
                     influencers={influencers}
                     onCreate={({ viewBy, swimlaneType }) => {
                       modalSession.close();
-                      resolve({ jobs, title, viewBy, swimlaneType });
+                      resolve({ jobIds, title, viewBy, swimlaneType });
                     }}
                     onCancel={() => {
                       modalSession.close();
