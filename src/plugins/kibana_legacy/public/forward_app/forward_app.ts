@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { App, AppMountParameters, CoreSetup } from 'kibana/public';
-import { AppNavLinkStatus } from '../../../../core/public';
+import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import { ForwardDefinition } from '../plugin';
 
 export const createLegacyUrlForwardApp = (
   core: CoreSetup<{}, { getForwards: () => ForwardDefinition[] }>
-): App => ({
+) => ({
   id: 'url_migrate',
   chromeless: true,
   title: 'Legacy URL migration',
-  navLinkStatus: AppNavLinkStatus.hidden,
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);
 

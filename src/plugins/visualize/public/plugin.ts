@@ -25,7 +25,6 @@ import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
@@ -103,7 +102,12 @@ export class VisualizePlugin
       title: 'Visualize',
       order: -1002,
       euiIconType: 'visualizeApp',
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: {
+        label: i18n.translate('core.ui.analyzeNavList.label', {
+          defaultMessage: 'Analyze',
+        }),
+        order: 1000,
+      },
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

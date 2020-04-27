@@ -10,7 +10,7 @@ import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 
-import { AppMountParameters, AppNavLinkStatus, CoreSetup, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
@@ -100,7 +100,7 @@ export class LensPlugin {
 
     core.application.register({
       id: 'lens',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: 3, // TODO should be fetched by enum
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startDependencies] = await core.getStartServices();
