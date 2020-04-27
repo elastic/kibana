@@ -14,9 +14,11 @@ import {
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
-import { HostInfo } from '../../../../../common/types';
+import { HostInfo, HostPolicyResponseActionStatus } from '../../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 describe('when on the hosts page', () => {
+  const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let store: AppContextTestRender['store'];
@@ -91,6 +93,19 @@ describe('when on the hosts page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
+    const dispatchServerReturnedHostPolicyResponse = (
+      overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
+    ) => {
+      const policyResponse = docGenerator.generatePolicyResponse();
+      policyResponse.endpoint.policy.applied.status = overallStatus;
+      store.dispatch({
+        type: 'serverReturnedHostPolicyResponse',
+        payload: {
+          policy_response: policyResponse,
+        },
+      });
+    };
+
     beforeEach(() => {
       const {
         host_status,
@@ -137,7 +152,6 @@ describe('when on the hosts page', () => {
       const renderResult = render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       expect(policyStatusLink).not.toBeNull();
-      expect(policyStatusLink.textContent).toEqual('Successful');
       expect(policyStatusLink.getAttribute('href')).toEqual(
         '?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
@@ -153,6 +167,58 @@ describe('when on the hosts page', () => {
       expect(changedUrlAction.payload.search).toEqual(
         '?page_index=0&page_size=10&selected_host=1&show=policy_response'
       );
+    });
+    it('should display Success overall policy status', async () => {
+      const renderResult = render();
+      reactTestingLibrary.act(() => {
+        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.success);
+      });
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Success');
+
+      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
+      expect(
+        policyStatusHealth.querySelector('[data-euiicon-type][color="success"]')
+      ).not.toBeNull();
+    });
+    it('should display Warning overall policy status', async () => {
+      const renderResult = render();
+      reactTestingLibrary.act(() => {
+        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
+      });
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Warning');
+
+      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
+      expect(
+        policyStatusHealth.querySelector('[data-euiicon-type][color="warning"]')
+      ).not.toBeNull();
+    });
+    it('should display Failed overall policy status', async () => {
+      const renderResult = render();
+      reactTestingLibrary.act(() => {
+        dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
+      });
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Failed');
+
+      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
+      expect(
+        policyStatusHealth.querySelector('[data-euiicon-type][color="danger"]')
+      ).not.toBeNull();
+    });
+    it('should display Unknown overall policy status', async () => {
+      const renderResult = render();
+      reactTestingLibrary.act(() => {
+        dispatchServerReturnedHostPolicyResponse('' as HostPolicyResponseActionStatus);
+      });
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Unknown');
+
+      const policyStatusHealth = await renderResult.findByTestId('policyStatusHealth');
+      expect(
+        policyStatusHealth.querySelector('[data-euiicon-type][color="subdued"]')
+      ).not.toBeNull();
     });
     it('should include the link to logs', async () => {
       const renderResult = render();
@@ -176,7 +242,7 @@ describe('when on the hosts page', () => {
         expect(coreStart.application.navigateToApp.mock.calls).toHaveLength(1);
       });
     });
-    describe('when showing host Policy Response', () => {
+    describe('when showing host Policy Response panel', () => {
       let renderResult: ReturnType<typeof render>;
       beforeEach(async () => {
         renderResult = render();
