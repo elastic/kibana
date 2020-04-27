@@ -22,7 +22,7 @@ const num = process.env.CI_PARALLEL_PROCESS_NUMBER
   ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
   : '';
 const randomHash =
-  job && num
+  job || num
     ? Math.random()
         .toString()
         .substring(2)
