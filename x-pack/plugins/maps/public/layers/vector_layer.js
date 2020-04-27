@@ -175,8 +175,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    const isStaticLayer =
-      !this.getSource().isBoundsAware() || !this.getSource().isFilterByMapBounds();
+    const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return this._getBoundsBasedOnData();
     }
