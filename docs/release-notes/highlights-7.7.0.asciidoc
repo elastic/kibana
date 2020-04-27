@@ -6,11 +6,118 @@
 
 Explore the new features in Kibana 7.7.
 
+coming::[7.7.0]
+
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
 
-coming::[7.7.0]
+
+[float]
+[[alerting-framework-highlights]]
+=== New alerting framework
+
+beta:[]Alerting allows you to detect complex conditions in
+{kib} apps and trigger actions when those conditions are met.
+Alerting is integrated with {kibana-ref}/xpack-apm.html[APM], {kibana-ref}/xpack-infra.html[Metrics],
+{kibana-ref}/xpack-siem.html[SIEM], and {kibana-ref}/xpack-uptime.html[Uptime] and is
+centrally managed from {kibana-ref}/management.html[Management].
+Alerting has built-in {kibana-ref}/action-types.html[actions] and
+{kibana-ref}/alert-types.html[alerts] for you to use.
+
+[role="screenshot"]
+image:user/alerting/images/alerting-overview.png[Alerts and actions UI]
+
+[float]
+[[canvas-visualizations-highlights]]
+=== Canvas with your visualizations
+
+Visualizations that you created in Lens, Visualize, and
+TSVB can now be embedded in a Canvas workpad. This makes it easier for you
+to brand your Canvas presentation to your executive team and partners.
+
+[role="screenshot"]
+image:release-notes/images/7-7-canvas-and-lens.png[Embedded maps in Canvas]
+
+[float]
+[[lens-filtering-highlights]]
+=== Improved filtering of Lens visualizations in dashboards
+
+Digging into the Lens visualizations on your
+dashboard just got faster. You can now filter the data in one
+Lens visualization, and immediately apply that filter to all
+Lens visualizations on the dashboard.
+
+[role="screenshot"]
+image:release-notes/images/7-7-lens-filter-in-dashboard.png[Filter Lens visualizations in dashboard]
+
+[float]
+[[lens-formatting-highlights]]
+=== Number formatting in Lens
+
+To accurately display the data in Lens visualizations,
+try out the new number formats. The new dropdown has options for formatting
+numbers as percentages
+and bytes. There's also a field for setting how many decimal places to display.
+
+[role="screenshot"]
+image:release-notes/images/7-7-lens-format-values.png[Formatted values in Lens]
+
+[float]
+[[map-points-highlights]]
+=== Individual map points on zoom
+
+*Elastic Maps* improves the way you work with large amounts of coordinate data.
+With the new default setting, points are clustered on a map until you zoom into an area with
+less than 10,000 discrete points.  Then, you'll see
+individual points. This feature is useful for map data
+points that are in both dense urban areas and rural locations.
+
+[role="screenshot"]
+image:release-notes/images/7-7-maps-zoom.png[Individual map points on zoom]
+
+[float]
+[[map-distance-filter-highlights]]
+=== Distance filters in Elastic Maps
+
+The distance filter is a new way
+to filter map data
+within a specific radius.  Simply select a
+central location, and then draw a circle around it with your mouse.
+The distance filter is in addition to the tools for filtering data by custom shape and by rectangular bound.
+
+[role="screenshot"]
+image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elastic Maps]
+
+[float]
+[[file-uploader-highlights]]
+=== {data-viz} now recommends {filebeat} config
+
+experimental[] When you upload a file to the *{data-viz}*, a {filebeat} 
+configuration is recommended for you to use. You can then use {filebeat} to add 
+more data of the same structure to the same index that was created during an 
+initial upload.
+
+[role="screenshot"]
+image:release-notes/images/7-7-file-uploader-filebeat.png[Recommended Filebeat config in Data Vizualizer]
+
+For more information about *{data-viz}*, refer to {kibana-ref}/xpack-ml.html[{ml-cap}].
+
+[float]
+=== Learn more
+
+Get details on these release highlights and more in the {kib} 7.7 release blog.
+For a complete list of enhancements and other changes, check out the
+{kibana-ref}/release-notes-7.7.0.html[Kibana 7.7 release notes].
 
 // end::notable-highlights[]
+
+[float]
+=== Give 7.7 a try
+
+Try 7.7 now by deploying {es} and {kib} on
+https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
+by https://www.elastic.co/start[downloading them].
+Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
+or in our https://discuss.elastic.co/c/elasticsearch[forum].
