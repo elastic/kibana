@@ -78,12 +78,6 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectSchemas: {
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
-
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
         const tilemap = mapConfig.tilemap;
