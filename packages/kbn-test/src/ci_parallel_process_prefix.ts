@@ -21,10 +21,16 @@ const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
 const num = process.env.CI_PARALLEL_PROCESS_NUMBER
   ? `worker-${process.env.CI_PARALLEL_PROCESS_NUMBER}-`
   : '';
+const randomHash =
+  job && num
+    ? Math.random()
+        .toString()
+        .substring(2)
+    : '';
 
 /**
  * A prefix string that is unique for each parallel CI process that
  * is an empty string outside of CI, so it can be safely injected
  * into strings as a prefix
  */
-export const CI_PARALLEL_PROCESS_PREFIX = `${job}${num}`;
+export const CI_PARALLEL_PROCESS_PREFIX = `${job}${num}${randomHash}`;
