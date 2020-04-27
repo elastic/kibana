@@ -30,7 +30,8 @@ import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
-import { PipelineDetails } from './details';
+import { PipelineDetailsFlyout } from './details_flyout';
+import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
 
 const getPipelineNameFromLocation = (location: Location) => {
@@ -46,6 +47,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | undefined>(undefined);
+  const [showFlyout, setShowFlyout] = useState<boolean>(false);
+
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
@@ -59,9 +62,8 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   useEffect(() => {
     if (pipelineNameFromLocation && data?.length) {
       const pipeline = data.find(p => p.name === pipelineNameFromLocation);
-      if (pipeline) {
-        setSelectedPipeline(pipeline);
-      }
+      setSelectedPipeline(pipeline);
+      setShowFlyout(true);
     }
   }, [pipelineNameFromLocation, data]);
 
@@ -91,13 +93,46 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onEditPipelineClick={editPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={clonePipeline}
-        onViewPipelineClick={setSelectedPipeline}
+        onViewPipelineClick={pipeline => {
+          setShowFlyout(true);
+          setSelectedPipeline(pipeline);
+        }}
         pipelines={data}
       />
     );
   } else {
     content = <EmptyList />;
   }
+
+  const renderFlyout = (): React.ReactNode => {
+    if (!showFlyout) {
+      return;
+    }
+    if (selectedPipeline) {
+      return (
+        <PipelineDetailsFlyout
+          pipeline={selectedPipeline}
+          onClose={() => {
+            setSelectedPipeline(undefined);
+            setShowFlyout(false);
+          }}
+          onEditClick={editPipeline}
+          onCloneClick={clonePipeline}
+          onDeleteClick={setPipelinesToDelete}
+        />
+      );
+    } else {
+      // Somehow we triggered show pipeline details, but do not have a pipeline.
+      // We assume not found.
+      return (
+        <PipelineNotFoundFlyout
+          onClose={() => {
+            setShowFlyout(false);
+          }}
+        />
+      );
+    }
+  };
 
   return (
     <>
@@ -151,15 +186,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           )}
         </EuiPageContent>
       </EuiPageBody>
-      {selectedPipeline && (
-        <PipelineDetails
-          pipeline={selectedPipeline}
-          onClose={() => setSelectedPipeline(undefined)}
-          onEditClick={editPipeline}
-          onCloneClick={clonePipeline}
-          onDeleteClick={setPipelinesToDelete}
-        />
-      )}
+      {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal
           callback={deleteResponse => {
