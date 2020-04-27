@@ -339,8 +339,6 @@ export interface LogEntriesAdapter {
     id: string,
     source: InfraSourceConfiguration
   ): Promise<LogItemHit>;
-
-  getLogEntryDatasets(requestContext: RequestHandlerContext, indices: string[]): Promise<string[]>;
 }
 
 export type LogEntryQuery = JsonObject;
