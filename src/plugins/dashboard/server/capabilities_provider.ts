@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { isAutoCreateIndexError, showAutoCreateIndexErrorPage } from './error_auto_create_index';
+export const capabilitiesProvider = () => ({
+  dashboard: {
+    createNew: true,
+    show: true,
+    showWriteControls: true,
+    saveQuery: true,
+  },
+});
