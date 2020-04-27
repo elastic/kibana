@@ -1707,7 +1707,7 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
 
 // @public (undocumented)
@@ -1877,8 +1877,6 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
-    static createEsAutoCreateIndexError(): DecoratedError;
-    // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -1904,8 +1902,6 @@ export class SavedObjectsErrorHelpers {
     static isBadRequestError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isConflictError(error: Error | DecoratedError): boolean;
-    // (undocumented)
-    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)

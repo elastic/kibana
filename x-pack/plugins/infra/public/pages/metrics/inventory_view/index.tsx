@@ -8,7 +8,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 
-import { SnapshotToolbar } from './toolbar';
+import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
@@ -56,7 +56,7 @@ export const SnapshotPage = () => {
         <SourceLoadingPage />
       ) : metricIndicesExist ? (
         <>
-          <SnapshotToolbar />
+          <FilterBar />
           <Layout />
         </>
       ) : hasFailedLoadingSource ? (

@@ -21,9 +21,9 @@
 import { IndexPatternsService } from './index_patterns';
 import {
   SavedObjectsClientContract,
-  IUiSettingsClient,
   HttpSetup,
   SavedObjectsFindResponsePublic,
+  CoreStart,
 } from 'kibana/public';
 
 jest.mock('./index_pattern', () => {
@@ -61,10 +61,10 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    const uiSettings = {} as IUiSettingsClient;
+    const core = {} as CoreStart;
     const http = {} as HttpSetup;
 
-    indexPatterns = new IndexPatternsService(uiSettings, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http);
   });
 
   test('does cache gets for the same id', async () => {

@@ -40,7 +40,11 @@ import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { AgentStatusKueryHelper } from '../../../services';
-import { FLEET_AGENT_DETAIL_PATH, AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
+import {
+  FLEET_AGENT_DETAIL_PATH,
+  AGENT_CONFIG_DETAILS_PATH,
+  AGENT_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -180,7 +184,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     if (kuery) {
       kuery = `(${kuery}) and`;
     }
-    kuery = `${kuery} agents.config_id : (${selectedConfigs
+    kuery = `${kuery} ${AGENT_SAVED_OBJECT_TYPE}.config_id : (${selectedConfigs
       .map(config => `"${config}"`)
       .join(' or ')})`;
   }
@@ -394,7 +398,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   });
                   setSearch(newSearch);
                 }}
-                fieldPrefix="agents"
+                fieldPrefix={AGENT_SAVED_OBJECT_TYPE}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
