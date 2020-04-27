@@ -6,7 +6,7 @@
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { ReindexPollingService } from './polling_service';
-import { httpServiceMock } from 'src/core/public/http/http_service.mock';
+import { httpServiceMock } from 'src/core/public/mocks';
 
 const mockClient = httpServiceMock.createSetupContract();
 

@@ -53,7 +53,7 @@ export const Legend: React.FC<Props> = ({ dataBounds, legend, bounds, formatter 
 
 const LegendContainer = euiStyled.div`
   position: absolute;
-  bottom: 10px;
+  bottom: 0px;
   left: 10px;
   right: 10px;
 `;
