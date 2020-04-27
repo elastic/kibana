@@ -463,6 +463,8 @@ class Field implements IFieldType {
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
+    conflictDescriptions?: Record<string, string[]>;
+    // (undocumented)
     count?: number;
     // (undocumented)
     displayName?: string;

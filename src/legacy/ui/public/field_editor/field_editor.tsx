@@ -420,8 +420,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
    * in case there are indices with different types
    */
   renderTypeConflict() {
-    const { field = {} } = this.state;
-    // @ts-ignore
+    const { field } = this.state;
     if (!field.conflictDescriptions || typeof field.conflictDescriptions !== 'object') {
       return null;
     }
@@ -440,7 +439,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       },
     ];
 
-    // @ts-ignore
     const items = Object.entries(field.conflictDescriptions).map(([type, indices]) => ({
       type,
       indices: Array.isArray(indices) ? indices.join(', ') : 'Index names unavailable',
