@@ -145,7 +145,7 @@ async function waitForCherrypick(
 
     // Run `cherrypick --continue` (similar to `git commit`)
     await cherrypickContinue(options);
-    stagingSpinner.stop();
+    stagingSpinner.succeed();
   } catch (e) {
     stagingSpinner.fail();
     throw e;

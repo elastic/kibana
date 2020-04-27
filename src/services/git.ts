@@ -214,7 +214,7 @@ export async function setCommitAuthor(
       `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
       { cwd: getRepoPath(options) }
     );
-    spinner.stop();
+    spinner.succeed();
     return res;
   } catch (e) {
     spinner.fail();
@@ -238,7 +238,7 @@ export async function createFeatureBranch(
       `git reset --hard && git clean -d --force && git fetch ${options.repoOwner} ${targetBranch} && git checkout -B ${featureBranch} ${options.repoOwner}/${targetBranch} --no-track`,
       { cwd: getRepoPath(options) }
     );
-    spinner.stop();
+    spinner.succeed();
     return res;
   } catch (e) {
     spinner.fail();
@@ -271,7 +271,7 @@ export function getRemoteName(options: BackportOptions) {
   return options.fork ? options.username : options.repoOwner;
 }
 
-export function pushFeatureBranch({
+export async function pushFeatureBranch({
   options,
   featureBranch,
   headBranchName,
@@ -289,10 +289,12 @@ export function pushFeatureBranch({
 
   try {
     const remoteName = getRemoteName(options);
-    return exec(
+    const res = await exec(
       `git push ${remoteName} ${featureBranch}:${featureBranch} --force`,
       { cwd: getRepoPath(options) }
     );
+    spinner.succeed();
+    return res;
   } catch (e) {
     spinner.fail();
     throw e;
