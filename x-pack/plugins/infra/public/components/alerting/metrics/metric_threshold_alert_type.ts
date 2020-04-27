@@ -25,7 +25,8 @@ export function getAlertType(): AlertTypeModel {
       {
         defaultMessage: `\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} is in a state of \\{\\{context.alertState\\}\\}
 
-Because \\{\\{context.reason\\}\\}
+Reason:
+\\{\\{context.reason\\}\\}
 `,
       }
     ),

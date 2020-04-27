@@ -309,19 +309,19 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
 
       let reason;
       if (nextState === AlertStates.ALERT) {
-        reason = alertResults.map(result => buildFiredAlertReason(result[group])).join('; ');
+        reason = alertResults.map(result => buildFiredAlertReason(result[group])).join('\n');
       }
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
           reason = alertResults
             .filter(result => result[group].isNoData)
             .map(result => buildNoDataAlertReason(result[group]))
-            .join('; ');
+            .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = alertResults
             .filter(result => result[group].isError)
             .map(result => buildErrorAlertReason(result[group].metric))
-            .join('; ');
+            .join('\n');
         }
       }
       if (reason) {
