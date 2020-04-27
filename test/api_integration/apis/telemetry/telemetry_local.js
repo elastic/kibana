@@ -54,28 +54,23 @@ export default function({ getService }) {
       expect(body.length).to.be(1);
       const stats = body[0];
       expect(stats.collection).to.be('local');
-
-      expect(stats.stack_stats.kibana.dashboard.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.graph_workspace.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.index_pattern.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.search.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.timelion_sheet.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.visualization.total).to.be.a('number');
-
+      expect(stats.stack_stats.kibana.count).to.be.a('number');
+      expect(stats.stack_stats.kibana.indices).to.be.a('number');
+      expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
+      expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
+      expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
+      expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
       expect(stats.stack_stats.kibana.plugins.telemetry.opt_in_status).to.be(false);
       expect(stats.stack_stats.kibana.plugins.telemetry.usage_fetcher).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins.stack_management).to.be.an('object');
+      expect(stats.stack_stats.kibana.plugins.ui_metric).to.be.an('object');
+      expect(stats.stack_stats.kibana.plugins.application_usage).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
       expect(stats.stack_stats.kibana.plugins['tsvb-validation']).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.localization).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
-
-      expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
-      expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
-      expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
-      expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
     });
 
     it('should pull local stats and validate fields', async () => {
@@ -124,16 +119,10 @@ export default function({ getService }) {
         'collection',
         'collectionSource',
         'stack_stats.kibana.count',
-        'stack_stats.kibana.dashboard',
-        'stack_stats.kibana.graph_workspace',
-        'stack_stats.kibana.index_pattern',
         'stack_stats.kibana.indices',
         'stack_stats.kibana.os',
         'stack_stats.kibana.plugins',
-        'stack_stats.kibana.search',
-        'stack_stats.kibana.timelion_sheet',
         'stack_stats.kibana.versions',
-        'stack_stats.kibana.visualization',
         'timestamp',
         'version',
       ];
