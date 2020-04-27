@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { asset } from './asset';
 import { filtersFunctionFactory } from './filters';
-import { timelion } from './timelion';
+import { timelionFunctionFactory } from './timelion';
 import { toFunctionFactory } from './to';
+import { CanvasSetupDeps, CoreSetup } from '../plugin';
 
 export interface InitializeArguments {
-  typesRegistry: ExpressionsSetup['__LEGACY']['types'];
+  prependBasePath: CoreSetup['http']['basePath']['prepend'];
+  typesRegistry: CanvasSetupDeps['expressions']['__LEGACY']['types'];
+  timefilter: CanvasSetupDeps['data']['query']['timefilter']['timefilter'];
 }
 
 export function initFunctions(initialize: InitializeArguments) {
-  return [asset, filtersFunctionFactory(initialize), timelion, toFunctionFactory(initialize)];
+  return [
+    asset,
+    filtersFunctionFactory(initialize),
+    timelionFunctionFactory(initialize),
+    toFunctionFactory(initialize),
+  ];
 }

@@ -12,9 +12,10 @@ import {
 } from '../../../../src/core/server';
 import { TaskManager } from './task_manager';
 import { Logger } from './types';
+import { TaskManagerConfig } from './config';
 
 export interface LegacyDeps {
-  config: any;
+  config: unknown;
   elasticsearch: Pick<IClusterClient, 'callAsInternalUser'>;
   savedObjectsRepository: ISavedObjectsRepository;
   savedObjectsSerializer: SavedObjectsSerializer;
@@ -33,7 +34,7 @@ export function createTaskManager(
 ) {
   return new TaskManager({
     taskManagerId: core.uuid.getInstanceUuid(),
-    config,
+    config: config as TaskManagerConfig,
     savedObjectsRepository,
     serializer: savedObjectsSerializer,
     callAsInternalUser,
