@@ -1,6 +1,6 @@
 [role="xpack"]
 [[pagerduty-action-type]]
-== PagerDuty action type
+=== PagerDuty action
 
 The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
@@ -10,7 +10,7 @@ The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/event
 
 [float]
 [[pagerduty-benefits]]
-=== PagerDuty + Elastic integration benefits
+==== PagerDuty + Elastic integration benefits
 
 By integrating PagerDuty with alerts, you can:
 
@@ -20,7 +20,7 @@ By integrating PagerDuty with alerts, you can:
 
 [float]
 [[pagerduty-how-it-works]]
-==== How it works
+===== How it works
 
 {kib} allows you to create alerts to notify you of a significant move
 in your dataset.
@@ -28,7 +28,7 @@ You can create alerts for all your Observability, Security, and Elastic Stack us
 Alerts will trigger a new incident on the corresponding PagerDuty service.
 
 [float]
-==== Requirements
+===== Requirements
 
 In the `kibana.yml` configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
 This is required to encrypt parameters that must be secured, for example PagerDuty’s integration key.
@@ -47,18 +47,17 @@ review the <<action-settings, Actions settings>> that are available to you.
 
 [float]
 [[pagerduty-support]]
-==== Support
+===== Support
 If you need help with this integration, get in touch with the {kib} team by visiting
 https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {kib} Help menu.
 You can also select the {kib} category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
-==== Integration with PagerDuty walkthrough
+===== Integration with PagerDuty walkthrough
 
-[float]
 [[pagerduty-in-pagerduty]]
-===== In PagerDuty
+*In PagerDuty*
 
 . From the *Configuration* menu, select *Services*.
 . Add an integration to a service:
@@ -83,9 +82,8 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 
 . Save this key, as you will use it when you configure the integration with Elastic in the next section.
 
-[float]
 [[pagerduty-in-elastic]]
-===== In Elastic
+*In Elastic*
 
 . Create a PagerDuty Connector in Kibana.  You can:
 +
@@ -117,7 +115,7 @@ https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 do
 
 [float]
 [[pagerduty-uninstall]]
-==== How to uninstall
+===== How to uninstall
 To remove a PagerDuty connector from an alert, simply remove it
 from the *Actions* section of that alert, using the remove (x) icon.
 This will disable the integration for the particular alert.
@@ -129,7 +127,7 @@ This is an irreversible action and impacts all alerts that use this connector.
 
 [float]
 [[pagerduty-connector-configuration]]
-=== Connector configuration
+==== Connector configuration
 
 PagerDuty connectors have the following configuration properties:
 
@@ -139,7 +137,7 @@ Routing Key::   A 32 character PagerDuty Integration Key for an integration on a
 
 [float]
 [[pagerduty-action-configuration]]
-=== Action configuration
+==== Action configuration
 
 PagerDuty actions have the following properties:
 

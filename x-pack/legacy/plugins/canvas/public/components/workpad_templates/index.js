@@ -7,9 +7,9 @@
 import PropTypes from 'prop-types';
 import { compose, getContext, withHandlers, withProps } from 'recompose';
 import * as workpadService from '../../lib/workpad_service';
-import { notify } from '../../lib/notify';
 import { getId } from '../../lib/get_id';
 import { templatesRegistry } from '../../lib/templates_registry';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { WorkpadTemplates as Component } from './workpad_templates';
 
 export const WorkpadTemplates = compose(
@@ -19,7 +19,8 @@ export const WorkpadTemplates = compose(
   withProps(() => ({
     templates: templatesRegistry.toJS(),
   })),
-  withHandlers({
+  withKibana,
+  withHandlers(({ kibana }) => ({
     // Clone workpad given an id
     cloneWorkpad: props => workpad => {
       workpad.id = getId('workpad');
@@ -31,7 +32,9 @@ export const WorkpadTemplates = compose(
       return workpadService
         .create(workpad)
         .then(() => props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 }))
-        .catch(err => notify.error(err, { title: `Couldn't clone workpad template` }));
+        .catch(err =>
+          kibana.services.canvas.notify.error(err, { title: `Couldn't clone workpad template` })
+        );
     },
-  })
+  }))
 )(Component);
