@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -35,7 +36,6 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { parseInterval } from '../../../../../src/plugins/data/common';
 import { getExecuteTriggerActions } from './services';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -58,6 +58,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
+  histogramBarTarget: number;
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
 };
 
@@ -110,6 +111,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
+  histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -130,6 +132,7 @@ export const getXyChartRenderer = (dependencies: {
           formatFactory={formatFactory}
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
+          histogramBarTarget={dependencies.histogramBarTarget}
           executeTriggerActions={executeTriggerActions}
         />
       </I18nProvider>,
@@ -169,6 +172,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartTheme,
+  histogramBarTarget,
   executeTriggerActions,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
@@ -212,18 +216,25 @@ export function XYChart({
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
-  // add minInterval only for single row value as it cannot be determined from dataset
+  function calculateMinInterval() {
+    // add minInterval only for single row value as it cannot be determined from dataset
+    if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+      const { fromDate, toDate } = data.dateRange;
+      const duration = moment(toDate).diff(moment(fromDate));
 
-  const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
-    ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
-    : undefined;
+      // simplified version of plugins/data/public/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts
+      const targetMs = duration / histogramBarTarget;
+      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+    }
+    return undefined;
+  }
 
   const xDomain =
     data.dateRange && layers.every(l => l.xScaleType === 'time')
       ? {
           min: data.dateRange.fromDate.getTime(),
           max: data.dateRange.toDate.getTime(),
-          minInterval,
+          minInterval: calculateMinInterval(),
         }
       : undefined;
   return (
