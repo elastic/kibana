@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, ApiParams, ExecutorActionParams } from '../types';
+import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../types';
 
 const createMock = (): jest.Mocked<ExternalService> => ({
   getIncident: jest.fn().mockImplementation(() =>
@@ -41,7 +41,7 @@ const externalServiceMock = {
   create: createMock,
 };
 
-const mapping: Map<string, any> = new Map();
+const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
   target: 'short_description',

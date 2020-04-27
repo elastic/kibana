@@ -32,6 +32,7 @@ const mapping: MapRecord[] = [
   { source: 'comments', target: 'comments', actionType: 'append' },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const finalMapping: Map<string, any> = new Map();
 
 finalMapping.set('title', {

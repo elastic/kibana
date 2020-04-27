@@ -24,6 +24,7 @@ import {
   PipedField,
   TransformFieldsArgs,
   Comment,
+  ExecutorActionParams,
 } from './types';
 
 import * as transformers from './transformers';
@@ -37,7 +38,7 @@ export const normalizeMapping = (supportedFields: string[], mapping: MapRecord[]
   );
 };
 
-export const buildMap = (mapping: MapRecord[]): Map<string, any> => {
+export const buildMap = (mapping: MapRecord[]): Map<string, MapRecord> => {
   return normalizeMapping(SUPPORTED_SOURCE_FIELDS, mapping).reduce((fieldsMap, field) => {
     const { source, target, actionType } = field;
     fieldsMap.set(source, { target, actionType });
@@ -46,14 +47,17 @@ export const buildMap = (mapping: MapRecord[]): Map<string, any> => {
   }, new Map());
 };
 
-export const mapParams = (params: any, mapping: Map<string, any>) => {
+export const mapParams = (
+  params: Partial<ExecutorActionParams>,
+  mapping: Map<string, MapRecord>
+): AnyParams => {
   return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
     const field = mapping.get(curr);
     if (field) {
       prev[field.target] = params[curr];
     }
     return prev;
-  }, {});
+  }, {} as AnyParams);
 };
 
 export const createConnectorExecutor = ({
@@ -72,7 +76,7 @@ export const createConnectorExecutor = ({
   const { comments, externalId, ...restParams } = actionParams;
 
   const mapping = buildMap(configurationMapping);
-  const externalCase = mapParams(restParams, mapping);
+  const externalCase = mapParams(restParams as ExecutorActionParams, mapping);
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
     Pick<ActionTypeExecutorResult, 'actionId'> = {
@@ -147,6 +151,8 @@ export const request = async ({
   axios: AxiosInstance;
   url: string;
   method?: Method;
+  // This will have to remain `any` until we can extend connectors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any;
 }): Promise<AxiosResponse> => {
   const res = await axios(url, { method, data });
@@ -161,6 +167,8 @@ export const patch = ({
 }: {
   axios: AxiosInstance;
   url: string;
+  // This will have to remain `any` until we can extend connectors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 }): Promise<AxiosResponse> => {
   return request({
@@ -180,18 +188,22 @@ export const prepareFieldsForTransformation = ({
   mapping,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  return Object.keys(params.externalCase)
-    .filter(p => mapping.get(p).actionType !== 'nothing')
-    .map(p => ({
-      key: p,
-      value: params.externalCase[p],
-      actionType: mapping.get(p).actionType,
-      pipes: [...defaultPipes],
-    }))
-    .map(p => ({
-      ...p,
-      pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
-    }));
+  return (
+    Object.keys(params.externalCase)
+      // This clears undefined values but typescript does not get it
+      .filter(p => mapping.get(p)?.actionType)
+      .filter(p => mapping.get(p)?.actionType !== 'nothing')
+      .map(p => ({
+        key: p,
+        value: params.externalCase[p],
+        actionType: mapping.get(p)?.actionType ?? 'nothing',
+        pipes: [...defaultPipes],
+      }))
+      .map(p => ({
+        ...p,
+        pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
+      }))
+  );
 };
 
 const t = { ...transformers } as { [index: string]: Function }; // TODO: Find a better solution if exists.
@@ -213,6 +225,8 @@ export const transformFields = ({ params, fields, currentIncident }: TransformFi
       previousValue: currentIncident ? currentIncident[cur.key] : '',
     }).value;
     return prev;
+    // This will have to remain `any` until we can extend connectors with generics
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }, {} as any);
 };
 

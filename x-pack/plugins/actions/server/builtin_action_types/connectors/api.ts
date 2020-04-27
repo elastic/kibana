@@ -64,7 +64,7 @@ const pushToServiceHandler = async ({
     comments &&
     Array.isArray(comments) &&
     comments.length > 0 &&
-    mapping.get('comments').actionType !== 'nothing'
+    mapping.get('comments')?.actionType !== 'nothing'
   ) {
     const commentsTransformed = transformComments(comments, ['informationAdded']);
 
@@ -74,7 +74,7 @@ const pushToServiceHandler = async ({
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
-        field: mapping.get('comments').target,
+        field: mapping.get('comments')?.target ?? 'comments',
       });
       return [...totalComments, comment];
     }, Promise.resolve([] as ExternalServiceCommentResponse[]));
