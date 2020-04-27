@@ -6,8 +6,13 @@
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
 import mappings from './mappings.json';
+import {
+  LegacyPluginApi,
+  LegacyPluginSpec,
+  ArrayOrItem,
+} from '../../../../../src/legacy/plugin_discovery/types';
 
-export function actions(kibana: any) {
+export function actions(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   return new kibana.Plugin({
     id: 'actions',
     configPrefix: 'xpack.actions',
@@ -29,5 +34,5 @@ export function actions(kibana: any) {
     uiExports: {
       mappings,
     },
-  });
+  } as Legacy.PluginSpecOptions);
 }

@@ -27,7 +27,8 @@ import { createRenderer, createAppMounter, createLegacyAppMounter, getUnmounter 
 import { AppStatus } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
-describe('AppContainer', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/64382
+describe.skip('AppContainer', () => {
   let mounters: MockedMounterMap<EitherApp>;
   let globalHistory: History;
   let appStatuses$: BehaviorSubject<Map<string, AppStatus>>;

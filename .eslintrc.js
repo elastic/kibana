@@ -188,9 +188,6 @@ module.exports = {
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
-                  // next folder contains legacy browser tests which can't be migrated to jest
-                  // which import np files
-                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
@@ -220,6 +217,9 @@ module.exports = {
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
                   '!(x-pack/)?test/**/*',
+                  // next folder contains legacy browser tests which can't be migrated to jest
+                  // which import np files
+                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -739,6 +739,19 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 

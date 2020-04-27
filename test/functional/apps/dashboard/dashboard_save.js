@@ -24,7 +24,7 @@ export default function({ getPageObjects, getService }) {
   const listingTable = getService('listingTable');
 
   describe('dashboard save', function describeIndexTests() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
