@@ -46,6 +46,10 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     core: { docLinks, savedObjects, uiSettings, application },
   } = getServices();
 
+  chrome.docTitle.change(
+    i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
+  );
+
   // syncs `_g` portion of url with query services
   const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
     query,

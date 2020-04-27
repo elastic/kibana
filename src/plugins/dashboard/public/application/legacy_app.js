@@ -97,6 +97,9 @@ export function initDashboardApp(app, deps) {
         ...defaults,
         template: dashboardListingTemplate,
         controller: function($scope, kbnUrlStateStorage, history) {
+          deps.core.chrome.docTitle.change(
+            i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+          );
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 

@@ -24,6 +24,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 
 import {
   EnvironmentService,
@@ -97,6 +98,9 @@ export class HomePublicPlugin
           tutorialService: this.tutorialService,
           featureCatalogue: this.featuresCatalogueRegistry,
         });
+        coreStart.chrome.docTitle.change(
+          i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
+        );
         const { renderApp } = await import('./application');
         return await renderApp(params.element);
       },

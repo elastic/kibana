@@ -19,9 +19,11 @@
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
-import { KibanaLegacyStart } from '../plugin';
+import { ForwardDefinition } from '../plugin';
 
-export const createLegacyUrlForwardApp = (core: CoreSetup<{}, KibanaLegacyStart>) => ({
+export const createLegacyUrlForwardApp = (
+  core: CoreSetup<{}, { getForwards: () => ForwardDefinition[] }>
+) => ({
   id: 'url_migrate',
   chromeless: true,
   title: 'Legacy URL migration',

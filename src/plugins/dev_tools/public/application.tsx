@@ -136,6 +136,14 @@ function setBadge(appMountContext: AppMountContext) {
   });
 }
 
+function setTitle(appMountContext: AppMountContext) {
+  appMountContext.core.chrome.docTitle.change(
+    i18n.translate('devTools.pageTitle', {
+      defaultMessage: 'Dev Tools',
+    })
+  );
+}
+
 function setBreadcrumbs(appMountContext: AppMountContext) {
   appMountContext.core.chrome.setBreadcrumbs([
     {
@@ -158,6 +166,7 @@ export function renderApp(
   }
   setBadge(appMountContext);
   setBreadcrumbs(appMountContext);
+  setTitle(appMountContext);
   ReactDOM.render(
     <I18nProvider>
       <Router>

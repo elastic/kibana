@@ -8,6 +8,7 @@ import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
@@ -106,6 +107,10 @@ export class LensPlugin {
         const { data: dataStart, navigation } = startDependencies;
         const savedObjectsClient = coreStart.savedObjects.client;
         addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+
+        coreStart.chrome.docTitle.change(
+          i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
+        );
 
         const instance = await this.createEditorFrame!();
 
