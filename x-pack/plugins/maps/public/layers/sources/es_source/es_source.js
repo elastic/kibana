@@ -175,9 +175,11 @@ export class AbstractESSource extends AbstractVectorSource {
       };
     }
 
+    const minLon = esBounds.top_left.lon;
+    const maxLon = esBounds.bottom_right.lon;
     return {
-      minLon: esBounds.top_left.lon,
-      maxLon: esBounds.bottom_right.lon,
+      minLon: minLon > maxLon ? minLon - 360 : minLon,
+      maxLon,
       minLat: esBounds.bottom_right.lat,
       maxLat: esBounds.top_left.lat,
     };
