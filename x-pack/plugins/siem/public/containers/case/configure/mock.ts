@@ -9,8 +9,25 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
 } from '../../../../../case/common/api';
-import { CaseConfigure } from './types';
+import { CaseConfigure, CasesConfigurationMapping } from './types';
 
+export const mapping: CasesConfigurationMapping[] = [
+  {
+    source: 'title',
+    target: 'short_description',
+    actionType: 'overwrite',
+  },
+  {
+    source: 'description',
+    target: 'description',
+    actionType: 'append',
+  },
+  {
+    source: 'comments',
+    target: 'comments',
+    actionType: 'append',
+  },
+];
 export const connectorsMock: Connector[] = [
   {
     id: '123',
@@ -19,26 +36,10 @@ export const connectorsMock: Connector[] = [
     config: {
       apiUrl: 'https://instance1.service-now.com',
       casesConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'append',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
+        mapping,
       },
     },
-    isPreconfigured: true,
+    isPreconfigured: false,
   },
   {
     id: '456',
@@ -66,7 +67,7 @@ export const connectorsMock: Connector[] = [
         ],
       },
     },
-    isPreconfigured: true,
+    isPreconfigured: false,
   },
 ];
 
@@ -75,7 +76,7 @@ export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   connector_id: '123',
   connector_name: 'My Connector',
-  closure_type: 'close-by-user',
+  closure_type: 'close-by-pushing',
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
@@ -92,7 +93,7 @@ export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   connectorId: '123',
   connectorName: 'My Connector',
-  closureType: 'close-by-user',
+  closureType: 'close-by-pushing',
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
