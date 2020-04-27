@@ -6,11 +6,11 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../types';
+import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../common/types';
 import { JiraPublicConfigurationType, JiraSecretConfigurationType } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../utils';
+import { getErrorMessage, request } from '../common/utils';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { api } from '../api';
+import { ConnectorConfiguration } from '../common/types';
+import * as i18n from './translations';
+
+export const config: ConnectorConfiguration = {
+  id: '.servicenow',
+  name: i18n.NAME,
+};

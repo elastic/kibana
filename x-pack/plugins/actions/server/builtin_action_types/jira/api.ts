@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  ConnectorPublicConfigurationType as ServiceNowPublicConfigurationType,
-  ConnectorSecretConfigurationType as ServiceNowSecretConfigurationType,
-} from '../types';
+export { api } from '../common/api';

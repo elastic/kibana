@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { connector as getServiceNowConnector } from './servicenow';
-export { connector as getJiraConnector } from './jira';
+export { api } from '../common/api';

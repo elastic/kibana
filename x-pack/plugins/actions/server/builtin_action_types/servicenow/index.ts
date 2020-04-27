@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createConnector } from '../utils';
+import { createConnector } from '../common/utils';
 
 import { api } from './api';
 import { config } from './config';
 import { validate } from './validators';
 import { createExternalService } from './service';
-import { ConnectorPublicConfiguration, ConnectorSecretConfiguration } from '../schema';
+import { ConnectorPublicConfiguration, ConnectorSecretConfiguration } from '../common/schema';
 
-export const connector = createConnector({
+export const getActionType = createConnector({
   api,
   config,
   validate,

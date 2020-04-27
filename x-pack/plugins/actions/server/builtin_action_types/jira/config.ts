@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration } from '../types';
+import { ConnectorConfiguration } from '../common/types';
 import * as i18n from './translations';
 
 export const config: ConnectorConfiguration = {
-  id: '.servicenow',
+  id: '.jira',
   name: i18n.NAME,
 };

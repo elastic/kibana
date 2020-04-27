@@ -6,8 +6,8 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../types';
-import { addTimeZoneToDate, patch, request, getErrorMessage } from '../utils';
+import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../common/types';
+import { addTimeZoneToDate, patch, request, getErrorMessage } from '../common/utils';
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';

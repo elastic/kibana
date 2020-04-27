@@ -7,7 +7,7 @@
 import {
   ValidationResult,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../triggers_actions_ui/public/types';
+} from '../../../../../triggers_actions_ui/public/types';
 
 import { connector } from './config';
 import { createActionType } from '../utils';

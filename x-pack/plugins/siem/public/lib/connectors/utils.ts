@@ -9,7 +9,7 @@ import {
   ValidationResult,
   ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/triggers_actions_ui/public/types';
+} from '../../../../triggers_actions_ui/public/types';
 
 import {
   ActionConnector,

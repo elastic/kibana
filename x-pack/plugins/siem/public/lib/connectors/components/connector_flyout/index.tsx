@@ -10,7 +10,7 @@ import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '
 import { isEmpty, get } from 'lodash/fp';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorFieldsProps } from '../../../../../../../../plugins/triggers_actions_ui/public/types';
+import { ActionConnectorFieldsProps } from '../../../../../../triggers_actions_ui/public/types';
 import { FieldMapping } from '../../../../pages/case/components/configure_cases/field_mapping';
 
 import { defaultMapping } from '../../config';

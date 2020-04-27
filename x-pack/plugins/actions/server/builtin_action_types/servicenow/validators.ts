@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateCommonConfig, validateCommonSecrets } from '../validators';
-import { ConnectorValidation } from '../types';
+import { validateCommonConfig, validateCommonSecrets } from '../common/validators';
+import { ConnectorValidation } from '../common/types';
 
 export const validate: ConnectorValidation = {
   config: validateCommonConfig,

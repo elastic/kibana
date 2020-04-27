@@ -4,40 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../types';
+import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../common/types';
 
 const createMock = (): jest.Mocked<ExternalService> => ({
   getIncident: jest.fn().mockImplementation(() =>
     Promise.resolve({
-      id: '1',
-      key: 'CK-1',
-      summary: 'title from jira',
-      description: 'description from jira',
-      created: '2020-04-27T10:59:46.202Z',
-      updated: '2020-04-27T10:59:46.202Z',
+      short_description: 'title from servicenow',
+      description: 'description from servicenow',
     })
   ),
   createIncident: jest.fn().mockImplementation(() =>
     Promise.resolve({
-      id: '1',
-      title: 'CK-1',
-      pushedDate: '2020-04-27T10:59:46.202Z',
-      url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      id: 'incident-1',
+      title: 'INC01',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     })
   ),
   updateIncident: jest.fn().mockImplementation(() =>
     Promise.resolve({
       id: 'incident-2',
       title: 'INC02',
-      pushedDate: '2020-04-27T10:59:46.202Z',
-      url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      pushedDate: '2020-03-10T12:24:20.000Z',
+      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     })
   ),
   createComment: jest.fn().mockImplementation(() =>
     Promise.resolve({
       commentId: 'comment-1',
-      pushedDate: '2020-04-27T10:59:46.202Z',
-      externalCommentId: '1',
+      pushedDate: '2020-03-10T12:24:20.000Z',
     })
   ),
 });
@@ -49,7 +44,7 @@ const externalServiceMock = {
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
-  target: 'summary',
+  target: 'short_description',
   actionType: 'overwrite',
 });
 
@@ -63,7 +58,7 @@ mapping.set('comments', {
   actionType: 'append',
 });
 
-mapping.set('summary', {
+mapping.set('short_description', {
   target: 'title',
   actionType: 'overwrite',
 });
@@ -71,9 +66,9 @@ mapping.set('summary', {
 const executorParams: ExecutorActionParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   externalId: 'incident-3',
-  createdAt: '2020-04-27T10:59:46.202Z',
+  createdAt: '2020-03-13T08:34:53.450Z',
   createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-04-27T10:59:46.202Z',
+  updatedAt: '2020-03-13T08:34:53.450Z',
   updatedBy: { fullName: 'Elastic User', username: 'elastic' },
   title: 'Incident title',
   description: 'Incident description',
@@ -82,18 +77,18 @@ const executorParams: ExecutorActionParams = {
       commentId: 'case-comment-1',
       version: 'WzU3LDFd',
       comment: 'A comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
+      createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
+      updatedAt: '2020-03-13T08:34:53.450Z',
       updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
     {
       commentId: 'case-comment-2',
       version: 'WlK3LDFd',
       comment: 'Another comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
+      createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
+      updatedAt: '2020-03-13T08:34:53.450Z',
       updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
   ],
@@ -101,7 +96,7 @@ const executorParams: ExecutorActionParams = {
 
 const apiParams: ApiParams = {
   ...executorParams,
-  externalCase: { summary: 'Incident title', description: 'Incident description' },
+  externalCase: { short_description: 'Incident title', description: 'Incident description' },
 };
 
 export { externalServiceMock, mapping, executorParams, apiParams };

@@ -31,11 +31,7 @@ import {
 import { ActionConnectorTableItem } from '../../../../../../triggers_actions_ui/public/types';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
-import {
-  ClosureType,
-  CasesConfigurationMapping,
-  CCMapsCombinedActionAttributes,
-} from '../../../../containers/case/configure/types';
+import { CCMapsCombinedActionAttributes } from '../../../../containers/case/configure/types';
 import { connectorsConfiguration } from '../../../../lib/connectors/config';
 
 import { Connectors } from '../configure_cases/connectors';
@@ -59,13 +55,6 @@ const FormWrapper = styled.div`
     padding-bottom: ${theme.eui.paddingSizes.xl};
   `}
 `;
-
-const initialState: State = {
-  connectorId: 'none',
-  closureType: 'close-by-user',
-  mapping: null,
-  currentConfiguration: { connectorId: 'none', closureType: 'close-by-user' },
-};
 
 const actionTypes: ActionType[] = Object.values(connectorsConfiguration);
 

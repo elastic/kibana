@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType } from '../../../../../../plugins/triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ConnectorPublicConfigurationType } from '../../../../../../plugins/actions/common';
+/* eslint-disable no-restricted-imports */
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 
-import {
-  ConfigType,
-  SecretsType,
-} from '../../../../actions/server/builtin_action_types/servicenow/types';
-
-export interface ServiceNowActionConnector {
-  config: ConfigType;
-  secrets: SecretsType;
-}
+import { ActionType } from '../../../../triggers_actions_ui/public';
+import { ConnectorPublicConfigurationType } from '../../../../actions/server/builtin_action_types/common/types';
 
 export interface Connector extends ActionType {
   logo: string;

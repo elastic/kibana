@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConnectorPublicConfiguration } from '../schema';
+import { ConnectorPublicConfiguration } from '../common/schema';
 
 export const JiraPublicConfiguration = {
   projectKey: schema.string(),

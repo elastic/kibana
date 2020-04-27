@@ -10,7 +10,7 @@
 import {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-} from '../../../../../../../plugins/actions/server/builtin_action_types/connectors/jira/types';
+} from '../../../../../actions/server/builtin_action_types/jira/types';
 
 export interface JiraActionConnector {
   config: JiraPublicConfigurationType;

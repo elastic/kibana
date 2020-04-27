@@ -14,9 +14,8 @@ import { getActionType as getPagerDutyActionType } from './pagerduty';
 import { getActionType as getServerLogActionType } from './server_log';
 import { getActionType as getSlackActionType } from './slack';
 import { getActionType as getWebhookActionType } from './webhook';
-
-// Connectors
-import { getServiceNowConnector, getJiraConnector } from './connectors';
+import { getActionType as getServiceNowActionType } from './servicenow';
+import { getActionType as getJiraActionType } from './jira';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
@@ -33,8 +32,6 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServerLogActionType({ logger }));
   actionTypeRegistry.register(getSlackActionType({ configurationUtilities }));
   actionTypeRegistry.register(getWebhookActionType({ logger, configurationUtilities }));
-
-  // Connectors
-  actionTypeRegistry.register(getServiceNowConnector({ configurationUtilities }));
-  actionTypeRegistry.register(getJiraConnector({ configurationUtilities }));
+  actionTypeRegistry.register(getServiceNowActionType({ configurationUtilities }));
+  actionTypeRegistry.register(getJiraActionType({ configurationUtilities }));
 }

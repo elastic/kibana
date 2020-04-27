@@ -7,12 +7,12 @@
 import axios from 'axios';
 
 import { createExternalService } from './service';
-import * as utils from '../utils';
-import { ExternalService } from '../types';
+import * as utils from '../common/utils';
+import { ExternalService } from '../common/types';
 
 jest.mock('axios');
-jest.mock('../utils', () => {
-  const originalUtils = jest.requireActual('../utils');
+jest.mock('../common/utils', () => {
+  const originalUtils = jest.requireActual('../common/utils');
   return {
     ...originalUtils,
     request: jest.fn(),

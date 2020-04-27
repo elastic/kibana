@@ -10,7 +10,7 @@
 import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
-} from '../../../../../../../plugins/actions/common';
+} from '../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export interface ServiceNowActionConnector {
   config: ServiceNowPublicConfigurationType;
