@@ -18,8 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common';
-import { MonitorSummary } from '../../../../common';
+import { HistogramPoint, FetchMonitorStatesQueryArgs, MonitorSummary } from '../../../../common';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';

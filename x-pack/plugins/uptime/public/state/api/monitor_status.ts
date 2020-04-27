@@ -5,8 +5,7 @@
  */
 
 import { QueryParams } from '../actions/types';
-import { Ping } from '../../../common';
-import { API_URLS } from '../../../common';
+import { API_URLS, Ping } from '../../../common';
 import { apiService } from './utils';
 
 export const fetchMonitorStatus = async ({
