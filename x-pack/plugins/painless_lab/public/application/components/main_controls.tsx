@@ -14,7 +14,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import classNames from 'classnames';
 import { Links } from '../../links';
 
 interface Props {
@@ -24,6 +24,7 @@ interface Props {
   reset: () => void;
   links: Links;
   isNavDrawerLocked: boolean;
+  isNavLegacy: boolean;
 }
 
 export function MainControls({
@@ -32,6 +33,7 @@ export function MainControls({
   reset,
   links,
   isNavDrawerLocked,
+  isNavLegacy,
 }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
@@ -86,9 +88,14 @@ export function MainControls({
     </EuiContextMenuItem>,
   ];
 
-  const classes = classNames('painlessLab__bottomBar', {
-    'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
-  });
+  // TODO #64541
+  // Can delete all this class stuff
+  let classes = '';
+  if (isNavLegacy) {
+    classes = classNames('painlessLab__bottomBar', {
+      'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
+    });
+  }
 
   return (
     <EuiBottomBar paddingSize="s" className={classes}>

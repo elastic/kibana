@@ -39,6 +39,7 @@ import { DocLinksStart } from '../doc_links';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { IUiSettingsClient } from '../ui_settings';
+import { NavSetting } from './ui/header';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -165,6 +166,10 @@ export class ChromeService {
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
+    // TODO #64541
+    // Can delete
+    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
+
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
         i18n.translate('core.chrome.legacyBrowserWarning', {
@@ -202,7 +207,7 @@ export class ChromeService {
             navControlsRight$={navControls.getRight$()}
             onIsLockedUpdate={setIsNavDrawerLocked}
             isLocked$={getIsNavDrawerLocked$}
-            navSetting$={uiSettings.get$('pageNavigation')}
+            navSetting$={getNavType$}
           />
         </React.Fragment>
       ),
@@ -263,6 +268,8 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
+
+      getNavType$: () => getNavType$,
     };
   }
 
@@ -409,6 +416,13 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * Get the navigation type
+   * TODO #64541
+   * Can delete
+   */
+  getNavType$(): Observable<NavSetting>;
 }
 
 /** @internal */
