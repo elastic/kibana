@@ -43,6 +43,7 @@ export * from './resize_checker';
 export * from '../common/state_containers';
 export * from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
+export { uuidV4, randomId } from './uuid';
 export {
   createStateHash,
   persistState,
