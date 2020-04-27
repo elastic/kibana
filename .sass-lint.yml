@@ -1,5 +1,6 @@
 files:
   include:
+    - 'src/legacy/core_plugins/kibana/public/management/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/vis_type_vislib/**/*.s+(a|c)ss'

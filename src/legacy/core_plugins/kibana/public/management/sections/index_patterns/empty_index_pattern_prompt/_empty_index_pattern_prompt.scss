@@ -1,9 +1,10 @@
 .inpEmptyIndexPatternPrompt {
-  max-width: $inpEmptyStateMaxWidth !important; // override EUI specificity
+  // override EUI specificity
+  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
 }
 
 .inpEmptyIndexPatternPrompt__footer {
-  @extend %inpEmptyState__footer;
+  @extend %inp-empty-state-footer;
 }
 
 @include euiBreakpoint('xs', 's') {

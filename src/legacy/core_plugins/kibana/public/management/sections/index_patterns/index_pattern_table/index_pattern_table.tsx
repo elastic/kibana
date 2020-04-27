@@ -113,8 +113,8 @@ export const IndexPatternTable: React.FunctionComponent<Props> = ({
                   <FormattedMessage
                     id="kbn.management.indexPatternTable.indexPatternExplanation"
                     defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
-                index pattern can point to a specific index, for example, your log data from
-                yesterday, or all indices that contain your log data."
+                                    index pattern can point to a specific index, for example, your log data from
+                                    yesterday, or all indices that contain your log data."
                   />
                   <br />
                   <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>

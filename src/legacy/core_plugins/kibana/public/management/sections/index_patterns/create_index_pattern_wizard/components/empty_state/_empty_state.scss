@@ -1,5 +1,6 @@
 .inpEmptyState {
-  max-width: $inpEmptyStateMaxWidth !important; // override EUI specificity
+  // override EUI specificity
+  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
 }
 
 .inpEmptyState__cardGrid {
@@ -12,7 +13,7 @@
 }
 
 .inpEmptyState__footer {
-  @extend %inpEmptyState__footer;
+  @extend %inp-empty-state-footer;
 }
 
 .inpEmptyState__footerFlexItem {
