@@ -8,7 +8,6 @@ import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
-import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import { Case } from '../../../../containers/case/types';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
@@ -47,9 +46,6 @@ export const usePushToService = ({
   const urlSearch = useGetUrlSearch(navTabs.case);
 
   const { isLoading, postPushToService } = usePostPushToService();
-
-  const { connectorId, connectorName, loading: loadingCaseConfigure } = useCaseConfigure();
-  const { loading: loadingCaseConfigure } = useCaseConfigure();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
@@ -125,15 +121,7 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
-  }, [
-    actionLicense,
-    caseStatus,
-    connectors.length,
-    caseConnectorId,
-    loadingCaseConfigure,
-    loadingLicense,
-    urlSearch,
-  ]);
+  }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
 
   const pushToServiceButton = useMemo(() => {
     const currentConnectorName = connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
@@ -143,13 +131,7 @@ export const usePushToService = ({
         fill
         iconType="importAction"
         onClick={handlePushToService}
-        disabled={
-          isLoading ||
-          loadingLicense ||
-          loadingCaseConfigure ||
-          errorsMsg.length > 0 ||
-          !userCanCrud
-        }
+        disabled={isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud}
         isLoading={isLoading}
       >
         {isNew ? i18n.PUSH_THIRD(currentConnectorName) : i18n.UPDATE_THIRD(currentConnectorName)}
@@ -162,13 +144,12 @@ export const usePushToService = ({
     handlePushToService,
     isLoading,
     isNew,
-    loadingCaseConfigure,
     loadingLicense,
     userCanCrud,
   ]);
 
-  const objToReturn = useMemo(() => {
-    return {
+  const objToReturn = useMemo(
+    () => ({
       pushButton:
         errorsMsg.length > 0 ? (
           <EuiToolTip
@@ -185,8 +166,9 @@ export const usePushToService = ({
         errorsMsg.length > 0 && connectors.length === 0 ? (
           <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
         ) : null,
-    };
-  }, [errorsMsg, pushToServiceButton]);
+    }),
+    [errorsMsg, pushToServiceButton]
+  );
 
   return objToReturn;
 };

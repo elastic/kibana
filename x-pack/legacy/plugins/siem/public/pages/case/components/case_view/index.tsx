@@ -24,7 +24,7 @@ import { TagList } from '../tag_list';
 import { useGetCase } from '../../../../containers/case/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
-import { UpdateKey, useUpdateCase } from '../../../../containers/case/use_update_case';
+import { useUpdateCase } from '../../../../containers/case/use_update_case';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { WrapperPage } from '../../../../components/wrapper_page';
 import { getTypedPayload } from '../../../../containers/case/utils';

@@ -38,7 +38,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           const connectorId =
             myCaseConfigure.saved_objects.length > 0
               ? myCaseConfigure.saved_objects[0].attributes.connector_id
-              : null;
+              : 'none';
 
           await caseService.patchCase({
             client,

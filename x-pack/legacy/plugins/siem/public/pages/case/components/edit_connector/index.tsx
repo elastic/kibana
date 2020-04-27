@@ -70,11 +70,11 @@ export const EditConnector = React.memo(
           <EuiFlexItem grow={false}>
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
+          {isLoading && <EuiLoadingSpinner data-test-subj="connector-list-loading" />}
           {!isLoading && (
-            <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
+            <EuiFlexItem data-test-subj="connector-list-edit" grow={false}>
               <EuiButtonIcon
-                data-test-subj="tag-list-edit-button"
+                data-test-subj="connector-list-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR}
                 iconType={'pencil'}
