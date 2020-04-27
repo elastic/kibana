@@ -5,6 +5,7 @@
  */
 
 import angular, { IWindowService } from 'angular';
+import '../views/all';
 import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';

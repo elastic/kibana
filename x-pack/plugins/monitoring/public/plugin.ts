@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './views/all';
 import { i18n } from '@kbn/i18n';
 import {
   App,
@@ -18,7 +17,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { initAngularBootstrap } from '../../../../src/plugins/kibana_legacy/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
@@ -27,7 +25,7 @@ import {
 } from '../common/constants';
 
 export class MonitoringPlugin
-  implements Plugin<void, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
+  implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public setup(
@@ -37,14 +35,13 @@ export class MonitoringPlugin
     const { home } = plugins;
     const id = 'monitoring';
     const icon = 'monitoringApp';
-    const path = '/app/monitoring';
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
       defaultMessage: 'Stack Monitoring',
     });
     const monitoring = this.initializerContext.config.get();
 
     if (!monitoring.ui.enabled || !monitoring.enabled) {
-      return;
+      return monitoring.ui.enabled;
     }
 
     if (home) {
@@ -52,7 +49,7 @@ export class MonitoringPlugin
         id,
         title,
         icon,
-        path,
+        path: '/app/monitoring',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
         description: i18n.translate('xpack.monitoring.monitoringDescription', {
@@ -61,13 +58,10 @@ export class MonitoringPlugin
       });
     }
 
-    initAngularBootstrap();
-
     const app: App = {
       id,
       title,
       order: 9002,
-      appRoute: path,
       euiIconType: icon,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
@@ -101,6 +95,7 @@ export class MonitoringPlugin
     };
 
     core.application.register(app);
+    return true;
   }
 
   public start(core: CoreStart, plugins: any) {}
