@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { updateState } from '../common';
 import {
   contextMessage,
   uniqueMonitorIds,
-  updateState,
   statusCheckAlertFactory,
   fullListByIdAndLocation,
 } from '../status_check';
