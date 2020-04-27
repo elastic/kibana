@@ -89,7 +89,6 @@ export function createBundlesRoute({
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
       isImmutable: isDist,
-      replacePublicPath: false,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
@@ -98,7 +97,6 @@ export function createBundlesRoute({
         bundlesPath: path,
         fileHashCache,
         isImmutable: isDist,
-        replacePublicPath: false,
       })
     ),
     buildRouteForBundles({
@@ -107,25 +105,27 @@ export function createBundlesRoute({
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
       isImmutable: isDist,
-      replacePublicPath: false,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/bundles/`,
       routePath: '/bundles/',
       bundlesPath: regularBundlesPath,
       fileHashCache,
+      isImmutable: isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/built_assets/dlls/`,
       routePath: '/built_assets/dlls/',
       bundlesPath: dllBundlesPath,
       fileHashCache,
+      isImmutable: isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/`,
       routePath: '/built_assets/css/',
       bundlesPath: builtCssPath,
       fileHashCache,
+      isImmutable: isDist,
     }),
   ];
 }
@@ -135,15 +135,13 @@ function buildRouteForBundles({
   routePath,
   bundlesPath,
   fileHashCache,
-  isImmutable = false,
-  replacePublicPath = true,
+  isImmutable,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: LruCache<unknown, unknown>;
-  isImmutable?: boolean;
-  replacePublicPath?: boolean;
+  isImmutable: boolean;
 }) {
   return {
     method: 'GET',
@@ -166,7 +164,6 @@ function buildRouteForBundles({
               fileHashCache,
               publicPath,
               isImmutable,
-              replacePublicPath,
             });
           },
         },

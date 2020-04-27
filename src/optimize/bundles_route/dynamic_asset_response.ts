@@ -63,7 +63,6 @@ export async function createDynamicAssetResponse({
   publicPath,
   fileHashCache,
   isImmutable,
-  replacePublicPath,
 }: {
   request: Hapi.Request;
   h: Hapi.ResponseToolkit;
@@ -71,7 +70,6 @@ export async function createDynamicAssetResponse({
   publicPath: string;
   fileHashCache: LruCache<unknown, unknown>;
   isImmutable: boolean;
-  replacePublicPath: boolean;
 }) {
   let fd: number | undefined;
   try {
@@ -93,31 +91,24 @@ export async function createDynamicAssetResponse({
       autoClose: true,
     });
 
-    if (isImmutable) {
-      fd = undefined; // read stream is now responsible for fd
-
-      return h
-        .response(read)
-        .takeover()
-        .code(200)
-        .header('cache-control', 'max-age=31536000')
-        .type(request.server.mime.path(path).type);
-    }
-
     const stat = await fcb(cb => fstat(fd!, cb));
-    const hash = await getFileHash(fileHashCache, path, stat, fd);
+    const hash = isImmutable ? undefined : await getFileHash(fileHashCache, path, stat, fd);
     fd = undefined; // read stream is now responsible for fd
 
-    const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
-    const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;
-
-    return h
-      .response(content)
+    const response = h
+      .response(replacePlaceholder(read, publicPath))
       .takeover()
       .code(200)
-      .etag(etag)
-      .header('cache-control', 'must-revalidate')
       .type(request.server.mime.path(path).type);
+
+    if (isImmutable) {
+      response.header('cache-control', 'max-age=31536000');
+    } else {
+      response.etag(`${hash}-${publicPath}`);
+      response.header('cache-control', 'must-revalidate');
+    }
+
+    return response;
   } catch (error) {
     if (fd) {
       try {
