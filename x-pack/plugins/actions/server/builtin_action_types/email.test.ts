@@ -30,7 +30,7 @@ const NO_OP_FN = () => {};
 
 const services = {
   log: NO_OP_FN,
-  callCluster: async (path: string, opts: any) => {},
+  callCluster: async (path: string, opts: unknown) => {},
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 
@@ -52,7 +52,7 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
     };
@@ -74,7 +74,7 @@ describe('config validation', () => {
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       from: 'bob@example.com',
     };
 
@@ -177,7 +177,7 @@ describe('config validation', () => {
 
 describe('secrets validation', () => {
   test('secrets validation succeeds when secrets is valid', () => {
-    const secrets: Record<string, any> = {
+    const secrets: Record<string, unknown> = {
       user: 'bob',
       password: 'supersecret',
     };
@@ -185,7 +185,7 @@ describe('secrets validation', () => {
   });
 
   test('secrets validation succeeds when secrets props are null/undefined', () => {
-    const secrets: Record<string, any> = {
+    const secrets: Record<string, unknown> = {
       user: null,
       password: null,
     };
@@ -197,7 +197,7 @@ describe('secrets validation', () => {
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       to: ['bob@example.com'],
       subject: 'this is a test',
       message: 'this is the message',
