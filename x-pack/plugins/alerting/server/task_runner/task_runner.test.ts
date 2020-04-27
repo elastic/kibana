@@ -182,6 +182,7 @@ describe('Task Runner', () => {
 
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
