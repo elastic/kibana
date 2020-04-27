@@ -32,7 +32,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
-import { FilterConfig } from '@elastic/eui/src/components/search_bar/filters/filters';
+import { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IBasePath } from 'src/core/public';
@@ -284,7 +284,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
           multiSelect: 'or',
           options: [...filterTypesMap.values()],
         },
-      ] as FilterConfig[],
+      ] as SearchFilterConfig[],
     };
 
     return (

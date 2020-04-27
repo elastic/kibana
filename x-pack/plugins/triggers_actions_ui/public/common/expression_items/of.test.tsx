@@ -45,6 +45,7 @@ describe('of expression', () => {
             "asPlainText": true,
           }
         }
+        sortMatchesBy="none"
       />
     `);
   });
@@ -105,6 +106,7 @@ describe('of expression', () => {
             "asPlainText": true,
           }
         }
+        sortMatchesBy="none"
       />
     `);
   });
