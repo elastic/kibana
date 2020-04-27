@@ -90,7 +90,6 @@ export function createBundlesRoute({
       fileHashCache,
       replacePublicPath: false,
     }),
-    // for plugin.js chunk only
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
         publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
@@ -98,16 +97,6 @@ export function createBundlesRoute({
         bundlesPath: path,
         fileHashCache,
         isImmutable: isDist,
-        replacePublicPath: false,
-      })
-    ),
-    // for async chunks that loaded by webpack.
-    ...npUiPluginPublicDirs.map(({ id, path }) =>
-      buildRouteForBundles({
-        publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
-        routePath: `/bundles/plugin/${id}/`,
-        bundlesPath: path,
-        fileHashCache,
         replacePublicPath: false,
       })
     ),
