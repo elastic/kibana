@@ -159,8 +159,7 @@ export const getElasticsearchMetricQuery = (
   return {
     query: {
       bool: {
-        filter: [...rangeFilters, ...metricFieldFilters],
-        ...parsedFilterQuery,
+        filter: [...rangeFilters, ...metricFieldFilters, parsedFilterQuery],
       },
     },
     size: 0,
