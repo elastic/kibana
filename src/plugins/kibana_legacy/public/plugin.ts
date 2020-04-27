@@ -23,11 +23,13 @@ import {
   PluginInitializerContext,
   AppUpdatableFields,
   CoreStart,
+  CoreSetup,
 } from 'kibana/public';
 import { Observable, Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
 import { navigateToDefaultApp } from './navigate_to_default_app';
+import { createLegacyUrlForwardApp } from './forward_app';
 
 interface LegacyAppAliasDefinition {
   legacyAppId: string;
@@ -68,7 +70,8 @@ export class KibanaLegacyPlugin {
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  public setup() {
+  public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
+    core.application.register(createLegacyUrlForwardApp(core));
     return {
       /**
        * @deprecated
