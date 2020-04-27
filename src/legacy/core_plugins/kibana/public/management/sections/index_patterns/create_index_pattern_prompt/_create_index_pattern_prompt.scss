@@ -1,0 +1,20 @@
+.inpCreateIndexPatternPrompt {
+  max-width: $inpEmptyStateMaxWidth !important; // override EUI specificity
+}
+
+.inpCreateIndexPatternPrompt__footer {
+  @extend %inpEmptyState__footer;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .inpCreateIndexPatternPrompt__illustration > svg {
+    width: $euiSize * 12;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .inpCreateIndexPatternPrompt__text {
+    text-align: center;
+    align-items: center;
+  }
+}

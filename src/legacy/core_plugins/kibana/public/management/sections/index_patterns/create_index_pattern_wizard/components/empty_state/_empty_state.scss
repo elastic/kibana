@@ -1,0 +1,20 @@
+.inpEmptyState {
+  max-width: $inpEmptyStateMaxWidth !important; // override EUI specificity
+}
+
+.inpEmptyState__cardGrid {
+  justify-content: center;
+}
+
+.inpEmptyState__card {
+  min-height: $euiSizeXL * 6;
+  min-width: $euiSizeXL * 6;
+}
+
+.inpEmptyState__footer {
+  @extend %inpEmptyState__footer;
+}
+
+.inpEmptyState__footerFlexItem {
+  min-width: $euiSizeXL * 7;
+}

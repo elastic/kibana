@@ -1,0 +1,10 @@
+%inpEmptyState__footer {
+  background: $euiColorLightestShade;
+  margin: 0 (-$euiSizeL) (-$euiSizeL);
+  padding: $euiSizeL $euiSizeL $euiSizeL;
+  border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
+
+  @include euiBreakpoint('xs', 's') {
+    text-align: center;
+  }
+}

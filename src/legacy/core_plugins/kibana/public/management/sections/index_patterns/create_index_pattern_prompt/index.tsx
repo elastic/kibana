@@ -43,9 +43,16 @@ export const CreateIndexPatternPrompt: FunctionComponent<Props> = ({
   indexPatternCreationOptions,
 }) => {
   return (
-    <EuiPageContent className="inpEmptyState" grow={false} horizontalPosition="center">
-      <EuiFlexGroup wrap gutterSize="xl" alignItems="center">
-        <EuiFlexItem grow={2} className="inpEmptyState__text">
+    <EuiPageContent
+      className="inpCreateIndexPatternPrompt"
+      grow={false}
+      horizontalPosition="center"
+    >
+      <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
+        <EuiFlexItem grow={1} className="inpCreateIndexPatternPrompt__illustration">
+          <Illustration />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} className="inpCreateIndexPatternPrompt__text">
           <EuiText grow={false}>
             <h2>
               You have data in Elasticsearch. <br /> Now, create an index pattern.
@@ -63,12 +70,9 @@ export const CreateIndexPatternPrompt: FunctionComponent<Props> = ({
             </CreateButton>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={1} className="inpEmptyState__illustration">
-          <Illustration />
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
-      <EuiDescriptionList className="inpEmptyState__footer" type="column">
+      <EuiDescriptionList className="inpCreateIndexPatternPrompt__footer" type="responsiveColumn">
         <EuiDescriptionListTitle style={{ width: 'auto' }}>
           Want to learn more?
         </EuiDescriptionListTitle>

@@ -47,9 +47,10 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
     </EuiPageContentHeader>
     <EuiSpacer size="m" />
     <EuiPageContentBody>
-      <EuiFlexGrid columns={3} responsive={true}>
+      <EuiFlexGrid className="inpEmptyState__cardGrid" columns={3} responsive={true}>
         <EuiFlexItem>
           <EuiCard
+            className="inpEmptyState__card"
             href="#/home/tutorial_directory"
             icon={<EuiIcon size="xl" type="database" color="subdued" />}
             title="Add integration"
@@ -58,6 +59,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            className="inpEmptyState__card"
             betaBadgeLabel="Gold license"
             betaBadgeTooltipContent="Requires a different license"
             isDisabled
@@ -68,6 +70,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            className="inpEmptyState__card"
             href="#/home/tutorial_directory/sampleData"
             icon={<EuiIcon size="xl" type="heatmap" color="subdued" />}
             title="Add sample data"
@@ -78,7 +81,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
       <EuiSpacer size="xxl" />
       <div className="inpEmptyState__footer">
         <EuiFlexGrid columns={3}>
-          <EuiFlexItem>
+          <EuiFlexItem className="inpEmptyState__footerFlexItem">
             <EuiDescriptionList
               listItems={[
                 {
@@ -92,7 +95,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
               ]}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem className="inpEmptyState__footerFlexItem">
             <EuiDescriptionList
               listItems={[
                 {
