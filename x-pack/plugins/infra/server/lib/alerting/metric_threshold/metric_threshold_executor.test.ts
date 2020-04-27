@@ -20,7 +20,7 @@ const executor = createMetricThresholdExecutor('test') as (opts: {
 }) => Promise<void>;
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation((_: string, { body, index }: any) => {
+services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
   if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
   const metric = body.query.bool.filter[1]?.exists.field;
   if (body.aggs.groupings) {
