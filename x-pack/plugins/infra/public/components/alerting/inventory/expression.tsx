@@ -31,9 +31,7 @@ import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { toMetricOpt } from '../../../pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';

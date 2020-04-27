@@ -15,7 +15,7 @@ export function getInventoryMetricAlertType(): AlertTypeModel {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertName', {
-      defaultMessage: 'Inventory metric threshold',
+      defaultMessage: 'Inventory',
     }),
     iconClass: 'bell',
     alertParamsExpression: Expressions,
