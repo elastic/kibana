@@ -7,10 +7,11 @@
 import React from 'react';
 import moment from 'moment';
 import { EuiBadge } from '@elastic/eui';
-import { defaultDynamicSettings, Tls } from '../../../../../common/runtime_types';
+import { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 import * as redux from 'react-redux';
 import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 
 describe('SSL Certificate component', () => {
   let monitorTls: Tls;
@@ -28,7 +29,7 @@ describe('SSL Certificate component', () => {
     spy.mockReturnValue(jest.fn());
 
     const spy1 = jest.spyOn(redux, 'useSelector');
-    spy1.mockReturnValue({ settings: defaultDynamicSettings });
+    spy1.mockReturnValue({ settings: DYNAMIC_SETTINGS_DEFAULTS });
   });
 
   it('shallow renders', () => {

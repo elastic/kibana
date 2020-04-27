@@ -13,7 +13,7 @@ import {
   setDynamicSettingsSuccess,
   setDynamicSettingsFail,
 } from '../actions/dynamic_settings';
-import { defaultDynamicSettings, DynamicSettings } from '../../../common/runtime_types';
+import { DynamicSettings } from '../../../common/runtime_types';
 
 export interface DynamicSettingsState {
   settings?: DynamicSettings;
@@ -24,7 +24,6 @@ export interface DynamicSettingsState {
 
 const initialState: DynamicSettingsState = {
   loading: true,
-  settings: defaultDynamicSettings,
 };
 
 export const dynamicSettingsReducer = handleActions<DynamicSettingsState, any>(
