@@ -105,3 +105,7 @@ export const monitorListSelector = ({ monitorList, ui: { lastRefresh } }: AppSta
   monitorList,
   lastRefresh,
 });
+
+export const overviewFiltersSelector = ({ overviewFilters }: AppState) => {
+  return overviewFilters.filters;
+};

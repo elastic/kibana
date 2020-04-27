@@ -5,12 +5,9 @@
  */
 
 import React from 'react';
-import {
-  selectedLocationsToString,
-  AlertFieldNumber,
-  handleAlertFieldNumberChange,
-} from '../alert_monitor_status';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { AlertFieldNumber, handleAlertFieldNumberChange } from '../alert_field_number';
+import { selectedLocationsToString } from '../monitor_expressions/location_expression_select';
 
 describe('alert monitor status component', () => {
   describe('handleAlertFieldNumberChange', () => {
