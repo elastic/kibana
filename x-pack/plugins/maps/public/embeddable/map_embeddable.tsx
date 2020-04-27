@@ -27,7 +27,6 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-// import GisMap from '../connected_components/gis_map/lazy';
 import { createMapStore, MapStore } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
 import {
@@ -87,7 +86,7 @@ export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
-const GisMap = lazy(() => import('../connected_components/gis_map/lazy'));
+const GisMap = lazy(() => import('../connected_components/gis_map/shim'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
