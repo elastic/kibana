@@ -36,7 +36,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['xpack_main', 'actions'],
+    require: ['xpack_main'],
     name: NAME,
     init: (server: Hapi.Server) => {
       // this action is specifically NOT enabled in ../../config.ts
@@ -52,7 +52,7 @@ export default function(kibana: any) {
         notEnabledActionType
       );
       server.plugins.xpack_main.registerFeature({
-        id: 'actions',
+        id: 'actions_simulators',
         name: 'Actions',
         app: ['actions', 'kibana'],
         privileges: {
