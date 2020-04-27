@@ -26,6 +26,7 @@ const StyledPanel = styled(Panel)`
   overflow: auto;
   width: 25em;
   max-width: 50%;
+  user-select: none;
 `;
 
 const StyledGraphControls = styled(GraphControls)`
