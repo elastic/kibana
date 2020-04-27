@@ -74,7 +74,7 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
-      BaseMapsVisualization: getBaseMapsVis(core),
+      BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
       ...(await __LEGACY.setup()),
     };
 

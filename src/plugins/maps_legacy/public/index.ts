@@ -38,8 +38,6 @@ import {
   TmsLayer,
   IServiceSettings,
 } from './map/service_settings';
-// @ts-ignore
-import { ServiceSettings } from './map/service_settings';
 
 export function plugin() {
   return new MapsLegacyPlugin();
@@ -69,9 +67,8 @@ export function getKibanaMapFactoryProvider(core: CoreSetup) {
   return (...args: any) => new KibanaMap(...args);
 }
 
-export function getBaseMapsVis(core: CoreSetup) {
+export function getBaseMapsVis(core: CoreSetup, serviceSettings: IServiceSettings) {
   const getKibanaMap = getKibanaMapFactoryProvider(core);
-  const serviceSettings = new ServiceSettings();
   return new BaseMapsVisualizationProvider(getKibanaMap, serviceSettings);
 }
 
