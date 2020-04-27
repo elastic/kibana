@@ -12,6 +12,7 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+  GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
 } from './constants';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 
@@ -20,7 +21,23 @@ import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/
  *
  * Please update typings in `/common/types` if mappings are updated.
  */
-export const savedObjectMappings = {
+const savedObjectTypes: { [key: string]: SavedObjectsType } = {
+  [GLOBAL_SETTINGS_SAVED_OBJET_TYPE]: {
+    name: GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
+    hidden: false,
+    namespaceType: 'agnostic',
+    management: {
+      importableAndExportable: false,
+    },
+    mappings: {
+      properties: {
+        agent_auto_upgrade: { type: 'keyword' },
+        package_auto_upgrade: { type: 'keyword' },
+        kibana_url: { type: 'keyword' },
+        kibana_ca_sha256: { type: 'keyword' },
+      },
+    },
+  },
   [AGENT_SAVED_OBJECT_TYPE]: {
     properties: {
       shared_id: { type: 'keyword' },
