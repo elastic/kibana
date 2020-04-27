@@ -59,8 +59,8 @@ const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => 
       { value: Comparator.GT_OR_EQ, text: ComparatorToi18nMap[Comparator.GT_OR_EQ] },
       { value: Comparator.LT, text: ComparatorToi18nMap[Comparator.LT] },
       { value: Comparator.LT_OR_EQ, text: ComparatorToi18nMap[Comparator.LT_OR_EQ] },
-      { value: Comparator.EQ, text: ComparatorToi18nMap[Comparator.EQ] },
-      { value: Comparator.NOT_EQ, text: ComparatorToi18nMap[Comparator.NOT_EQ] },
+      { value: Comparator.EQ, text: ComparatorToi18nMap[`${Comparator.EQ}:number`] },
+      { value: Comparator.NOT_EQ, text: ComparatorToi18nMap[`${Comparator.NOT_EQ}:number`] },
     ];
   } else if (fieldInfo?.aggregatable) {
     return [
@@ -189,7 +189,11 @@ export const Criterion: React.FC<Props> = ({
               id="criterion-comparator-value"
               button={
                 <EuiExpression
-                  description={criterion.comparator}
+                  description={
+                    ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
+                      : ComparatorToi18nMap[criterion.comparator]
+                  }
                   uppercase={true}
                   value={criterion.value}
                   isActive={isComparatorPopoverOpen}

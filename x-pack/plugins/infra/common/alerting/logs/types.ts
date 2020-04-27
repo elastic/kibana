@@ -20,6 +20,8 @@ export enum Comparator {
   NOT_MATCH_PHRASE = 'does not match phrase',
 }
 
+// Maps our comparators to i18n strings, some comparators have more specific wording
+// depending on the field type the comparator is being used with.
 export const ComparatorToi18nMap = {
   [Comparator.GT]: i18n.translate('xpack.infra.logs.alerting.comparator.gt', {
     defaultMessage: 'more than',
@@ -34,9 +36,15 @@ export const ComparatorToi18nMap = {
     defaultMessage: 'less than or equals',
   }),
   [Comparator.EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
-    defaultMessage: 'equals',
+    defaultMessage: 'is',
   }),
   [Comparator.NOT_EQ]: i18n.translate('xpack.infra.logs.alerting.comparator.notEq', {
+    defaultMessage: 'is not',
+  }),
+  [`${Comparator.EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
+    defaultMessage: 'equals',
+  }),
+  [`${Comparator.NOT_EQ}:number`]: i18n.translate('xpack.infra.logs.alerting.comparator.eq', {
     defaultMessage: 'does not equal',
   }),
   [Comparator.MATCH]: i18n.translate('xpack.infra.logs.alerting.comparator.match', {
