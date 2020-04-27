@@ -36,6 +36,7 @@ export interface AppBase {
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    defaultPath?: string;
     euiIconType?: string;
     icon?: string;
     id: string;
@@ -168,7 +169,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;

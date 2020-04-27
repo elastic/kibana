@@ -20,6 +20,7 @@
 import { App, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
+import { removeSlashes } from '../../application/utils';
 
 export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
@@ -30,11 +31,26 @@ export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWra
       : app.navLinkStatus === AppNavLinkStatus.hidden,
     disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
     legacy: isLegacyApp(app),
-    baseUrl: isLegacyApp(app)
-      ? relativeToAbsolute(basePath.prepend(app.appUrl))
-      : relativeToAbsolute(basePath.prepend(app.appRoute!)),
+    baseUrl: getBaseUrl(app, basePath),
   });
 }
+
+const getBaseUrl = (app: App | LegacyApp, basePath: IBasePath): string => {
+  if (isLegacyApp(app)) {
+    return relativeToAbsolute(basePath.prepend(app.appUrl));
+  }
+  let baseUrl = basePath.prepend(app.appRoute!);
+  if (app.defaultPath) {
+    baseUrl = `${baseUrl}/${app.defaultPath}`;
+  }
+  return relativeToAbsolute(
+    removeSlashes(baseUrl, {
+      trailing: true,
+      duplicates: true,
+      leading: false,
+    })
+  );
+};
 
 function relativeToAbsolute(url: string) {
   // convert all link urls to absolute urls

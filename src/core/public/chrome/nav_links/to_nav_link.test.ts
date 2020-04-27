@@ -85,6 +85,30 @@ describe('toNavLink', () => {
     expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
   });
 
+  it('appends the defaultPath when present on app', () => {
+    const link = toNavLink(
+      app({
+        appRoute: '/my-route/my-path',
+        defaultPath: 'some/default/path',
+      }),
+      basePath
+    );
+    expect(link.properties.baseUrl).toEqual(
+      'http://localhost/base-path/my-route/my-path/some/default/path'
+    );
+  });
+
+  it('does not use defaultPath for legacy apps', () => {
+    const link = toNavLink(
+      legacyApp({
+        appUrl: '/my-legacy-app/#foo',
+        defaultPath: '/some/default/path',
+      }),
+      basePath
+    );
+    expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-legacy-app/#foo');
+  });
+
   it('uses appUrl when converting legacy applications', () => {
     expect(
       toNavLink(
