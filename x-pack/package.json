@@ -126,7 +126,7 @@
     "cheerio": "0.22.0",
     "commander": "3.0.2",
     "copy-webpack-plugin": "^5.0.4",
-    "cypress": "^4.2.0",
+    "cypress": "^4.4.1",
     "cypress-multi-reporters": "^1.2.3",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
