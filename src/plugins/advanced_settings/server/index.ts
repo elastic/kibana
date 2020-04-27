@@ -17,23 +17,8 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
-import { url } from './saved_objects';
+import { PluginInitializerContext } from 'kibana/server';
+import { AdvancedSettingsServerPlugin } from './plugin';
 
-export class SharePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  public async setup(core: CoreSetup) {
-    createRoutes(core, this.initializerContext.logger.get());
-    core.savedObjects.registerType(url);
-  }
-
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
-
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
-  }
-}
+export const plugin = (initContext: PluginInitializerContext) =>
+  new AdvancedSettingsServerPlugin(initContext);

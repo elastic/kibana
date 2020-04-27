@@ -17,6 +17,9 @@
  * under the License.
  */
 
-import { setup } from '../../../../test_utils/public/http_test_setup';
-
-jest.doMock('ui/new_platform', () => ({ npSetup: { core: setup() } }));
+export const capabilitiesProvider = () => ({
+  advancedSettings: {
+    show: true,
+    save: true,
+  },
+});

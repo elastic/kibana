@@ -17,23 +17,28 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
-import { url } from './saved_objects';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { capabilitiesProvider } from './capabilities_provider';
 
-export class SharePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
+export class VisualizeServerPlugin implements Plugin<object, object> {
+  private readonly logger: Logger;
 
-  public async setup(core: CoreSetup) {
-    createRoutes(core, this.initializerContext.logger.get());
-    core.savedObjects.registerType(url);
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
   }
 
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
+  public setup(core: CoreSetup) {
+    this.logger.debug('visualize: Setup');
+
+    core.capabilities.registerProvider(capabilitiesProvider);
+
+    return {};
   }
 
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
+  public start(core: CoreStart) {
+    this.logger.debug('visualize: Started');
+    return {};
   }
+
+  public stop() {}
 }

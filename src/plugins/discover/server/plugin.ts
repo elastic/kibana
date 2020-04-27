@@ -17,31 +17,28 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { capabilitiesProvider } from './capabilities_provider';
 
-import uiRoutes from '../routes';
+export class DiscoverServerPlugin implements Plugin<object, object> {
+  private readonly logger: Logger;
 
-import template from './error_auto_create_index.html';
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
-uiRoutes.when('/error/action.auto_create_index', {
-  template,
-  k7Breadcrumbs: () => [
-    {
-      text: i18n.translate('common.ui.errorAutoCreateIndex.breadcrumbs.errorText', {
-        defaultMessage: 'Error',
-      }),
-    },
-  ],
-});
+  public setup(core: CoreSetup) {
+    this.logger.debug('discover: Setup');
 
-export function isAutoCreateIndexError(error: object) {
-  return (
-    get(error, 'res.status') === 503 &&
-    get(error, 'body.attributes.code') === 'ES_AUTO_CREATE_INDEX_ERROR'
-  );
-}
+    core.capabilities.registerProvider(capabilitiesProvider);
 
-export function showAutoCreateIndexErrorPage() {
-  window.location.hash = '/error/action.auto_create_index';
+    return {};
+  }
+
+  public start(core: CoreStart) {
+    this.logger.debug('discover: Started');
+    return {};
+  }
+
+  public stop() {}
 }
