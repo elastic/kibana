@@ -76,4 +76,4 @@ function mapDispatchToProps(dispatch) {
 const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
   forwardRef: true,
 })(MBMapContainer);
-export { connectedMBMapContainer as MBMapContainer };
+export { connectedMBMapContainer as default };
