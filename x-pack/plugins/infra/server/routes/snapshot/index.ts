@@ -42,7 +42,10 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const source = await libs.sources.getSourceConfiguration(requestContext, sourceId);
+        const source = await libs.sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
         UsageCollector.countNode(nodeType);
         const options = {
           filterQuery: parseFilterQuery(filterQuery),
