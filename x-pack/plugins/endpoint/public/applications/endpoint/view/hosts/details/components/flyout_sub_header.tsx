@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React, { memo, MouseEventHandler } from 'react';
 import { EuiFlyoutHeader, CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ export type FlyoutSubHeaderProps = CommonProps & {
   children: React.ReactNode;
   backButton?: {
     title: string;
-    onClick: (event: React.MouseEvent) => void;
+    onClick: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
     href?: string;
   };
 };

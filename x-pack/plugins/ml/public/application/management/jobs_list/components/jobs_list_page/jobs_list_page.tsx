@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { checkGetManagementMlJobs } from '../../../../privilege/check_privilege';
+import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
 import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
@@ -75,7 +75,7 @@ export const JobsListPage: FC<{ I18nContext: CoreStart['i18n']['Context'] }> = (
 
   const check = async () => {
     try {
-      const checkPrivilege = await checkGetManagementMlJobs();
+      const checkPrivilege = await checkGetManagementMlJobsResolver();
       setInitialized(true);
       setIsMlEnabledInSpace(checkPrivilege.mlFeatureEnabledInSpace);
     } catch (e) {
