@@ -39,7 +39,7 @@ export const buildMap = (mapping: MapEntry[]): Mapping => {
   }, new Map());
 };
 
-export const mapParams = (params: any, mapping: Mapping) => {
+export const mapParams = (params: Record<string, unknown>, mapping: Mapping) => {
   return Object.keys(params).reduce((prev: KeyAny, curr: string): KeyAny => {
     const field = mapping.get(curr);
     if (field) {
@@ -61,11 +61,11 @@ export const prepareFieldsForTransformation = ({
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
   return Object.keys(params.incident)
-    .filter(p => mapping.get(p).actionType !== 'nothing')
+    .filter(p => mapping.get(p)!.actionType !== 'nothing')
     .map(p => ({
       key: p,
-      value: params.incident[p],
-      actionType: mapping.get(p).actionType,
+      value: params.incident[p] as string,
+      actionType: mapping.get(p)!.actionType,
       pipes: [...defaultPipes],
     }))
     .map(p => ({
