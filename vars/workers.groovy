@@ -66,7 +66,7 @@ def base(Map params, Closure closure) {
           )
           mergeBase = sh(
             script: "cd kibana && git merge-base HEAD FETCH_HEAD",
-            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'"
+            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'",
             returnStdout: true
           ).trim()
         }
