@@ -118,7 +118,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                       },
                     });
                   }}
-                  errors={inputStreamValidationResults.config![varName]}
+                  errors={inputStreamValidationResults.pkg_variables![varName]}
                   forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
@@ -162,7 +162,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={inputStreamValidationResults.config![varName]}
+                          errors={inputStreamValidationResults.pkg_variables![varName]}
                           forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>

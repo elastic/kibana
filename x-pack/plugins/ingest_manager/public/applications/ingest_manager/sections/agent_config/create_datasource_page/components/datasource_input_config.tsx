@@ -114,7 +114,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                       },
                     });
                   }}
-                  errors={inputVarsValidationResults.config![varName]}
+                  errors={inputVarsValidationResults.pkg_variables![varName]}
                   forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
@@ -158,7 +158,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={inputVarsValidationResults.config![varName]}
+                          errors={inputVarsValidationResults.pkg_variables![varName]}
                           forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>

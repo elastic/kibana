@@ -21,7 +21,7 @@ type Errors = string[] | null;
 type ValidationEntry = Record<string, Errors>;
 
 export interface DatasourceConfigValidationResults {
-  config?: ValidationEntry;
+  pkg_variables?: ValidationEntry;
 }
 
 export type DatasourceInputValidationResults = DatasourceConfigValidationResults & {
@@ -82,7 +82,7 @@ export const validateDatasource = (
     }
 
     const inputValidationResults: DatasourceInputValidationResults = {
-      config: undefined,
+      pkg_variables: undefined,
       streams: {},
     };
 
@@ -97,14 +97,14 @@ export const validateDatasource = (
     // Validate input-level config fields
     const inputConfigs = Object.entries(input.pkg_variables || {});
     if (inputConfigs.length) {
-      inputValidationResults.config = inputConfigs.reduce((results, [name, configEntry]) => {
+      inputValidationResults.pkg_variables = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
           ? validateDatasourceConfig(configEntry, inputVarsByName[name])
           : null;
         return results;
       }, {} as ValidationEntry);
     } else {
-      delete inputValidationResults.config;
+      delete inputValidationResults.pkg_variables;
     }
 
     // Validate each input stream with config fields
@@ -115,7 +115,7 @@ export const validateDatasource = (
         }
 
         const streamValidationResults: DatasourceConfigValidationResults = {
-          config: undefined,
+          pkg_variables: undefined,
         };
 
         const streamVarsByName = (
@@ -130,7 +130,7 @@ export const validateDatasource = (
         }, {} as Record<string, RegistryVarsEntry>);
 
         // Validate stream-level config fields
-        streamValidationResults.config = Object.entries(stream.pkg_variables).reduce(
+        streamValidationResults.pkg_variables = Object.entries(stream.pkg_variables).reduce(
           (results, [name, configEntry]) => {
             results[name] =
               input.enabled && stream.enabled
@@ -147,7 +147,7 @@ export const validateDatasource = (
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.config || inputValidationResults.streams) {
+    if (inputValidationResults.pkg_variables || inputValidationResults.streams) {
       validationResults.inputs![input.type] = inputValidationResults;
     }
   });
