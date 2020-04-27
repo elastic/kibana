@@ -65,7 +65,7 @@ export class Plugin
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
 
-        await this.registerAlertType(pluginsSetup);
+        await this.registerLogsAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -92,7 +92,7 @@ export class Plugin
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
 
-        await this.registerAlertType(pluginsSetup);
+        await this.registerMetricsAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -140,13 +140,17 @@ export class Plugin
 
   // NOTE: apm is importing from `infra/public` and async importing that
   // allow us to reduce the apm bundle size
-  private async registerAlertType(pluginsSetup: ClientPluginsSetup) {
-    const logThreshold = await import('./components/alerting/logs/log_threshold_alert_type');
-    const metricThreshold = await import(
+  private async registerLogsAlertType(pluginsSetup: ClientPluginsSetup) {
+    const { getAlertType } = await import('./components/alerting/logs/log_threshold_alert_type');
+
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+  }
+
+  private async registerMetricsAlertType(pluginsSetup: ClientPluginsSetup) {
+    const { getAlertType } = await import(
       './components/alerting/metrics/metric_threshold_alert_type'
     );
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(metricThreshold.getAlertType());
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(logThreshold.getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
   }
 }
