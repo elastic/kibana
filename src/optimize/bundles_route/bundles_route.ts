@@ -84,45 +84,45 @@ export function createBundlesRoute({
 
   return [
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/kbn-ui-shared-deps/`,
-      routePath: `/bundles/${buildHash}/kbn-ui-shared-deps/`,
+      publicPath: `${basePublicPath}/${buildHash}/bundles/kbn-ui-shared-deps/`,
+      routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
       isImmutable: isDist,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
-        publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
-        routePath: `/bundles/${buildHash}/plugin/${id}/`,
+        publicPath: `${basePublicPath}/${buildHash}/bundles/plugin/${id}/`,
+        routePath: `/${buildHash}/bundles/plugin/${id}/`,
         bundlesPath: path,
         fileHashCache,
         isImmutable: isDist,
       })
     ),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/core/`,
-      routePath: `/bundles/${buildHash}/core/`,
+      publicPath: `${basePublicPath}/${buildHash}/bundles/core/`,
+      routePath: `/${buildHash}/bundles/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
       isImmutable: isDist,
     }),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/`,
-      routePath: '/bundles/',
+      publicPath: `${basePublicPath}/${buildHash}/bundles/`,
+      routePath: `/${buildHash}/bundles/`,
       bundlesPath: regularBundlesPath,
       fileHashCache,
       isImmutable: isDist,
     }),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/built_assets/dlls/`,
-      routePath: '/built_assets/dlls/',
+      publicPath: `${basePublicPath}/${buildHash}/built_assets/dlls/`,
+      routePath: `/${buildHash}/built_assets/dlls/`,
       bundlesPath: dllBundlesPath,
       fileHashCache,
       isImmutable: isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/`,
-      routePath: '/built_assets/css/',
+      routePath: `/${buildHash}/built_assets/css/`,
       bundlesPath: builtCssPath,
       fileHashCache,
       isImmutable: isDist,
