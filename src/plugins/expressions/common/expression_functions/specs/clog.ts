@@ -19,7 +19,9 @@
 
 import { ExpressionFunctionDefinition } from '../types';
 
-export const clog: ExpressionFunctionDefinition<'clog', unknown, {}, unknown> = {
+export type ExpressionFunctionClog = ExpressionFunctionDefinition<'clog', unknown, {}, unknown>;
+
+export const clog: ExpressionFunctionClog = {
   name: 'clog',
   args: {},
   help: 'Outputs the context to the console',
