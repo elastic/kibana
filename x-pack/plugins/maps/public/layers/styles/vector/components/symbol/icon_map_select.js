@@ -40,8 +40,6 @@ export function IconMapSelect({
       />
     );
   }
-
-  console.log('render stylemap select');
   return (
     <StyleMapSelect
       onChange={onMapSelectChange}

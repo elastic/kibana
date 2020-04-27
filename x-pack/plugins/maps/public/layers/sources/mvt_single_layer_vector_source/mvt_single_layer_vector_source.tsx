@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
+import { GeoJsonProperties, Geometry } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
 import { TiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
@@ -26,6 +27,7 @@ import {
 import { VectorLayerArguments } from '../../vector_layer';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -133,8 +135,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     searchFilters: unknown[],
     registerCancelCallback: (callback: () => void) => void
   ): Promise<GeoJsonWithMeta> {
-    // todo: remove this method
-    // This is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
+    // Having this method here is a consequence of ITiledSingleLayerVectorSource extending IVectorSource.
     throw new Error('Does not implement getGeoJsonWithMeta');
   }
 
@@ -187,7 +188,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
   }
 
   canFormatFeatureProperties() {
-    return false;
+    return true;
   }
 
   getMinZoom() {
@@ -196,6 +197,18 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getMaxZoom() {
     return this._descriptor.maxSourceZoom;
+  }
+
+  getFeatureProperties(
+    id: string | number,
+    mbProperties: GeoJsonProperties
+  ): GeoJsonProperties | null {
+    // Just echo the properties back
+    return mbProperties;
+  }
+  getFeatureGeometry(id: string | number, mbProperties: GeoJsonProperties): Geometry | null {
+    // Cannot get the raw geometry for a simple tiled service
+    return null;
   }
 
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {
@@ -217,6 +230,26 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   supportsFieldMeta(): boolean {
     return false;
+  }
+
+  async filterAndFormatPropertiesToHtml(
+    properties: GeoJsonProperties,
+    featureId?: string | number
+  ): Promise<ITooltipProperty[]> {
+    const tooltips = [];
+    for (const key in properties) {
+      if (properties.hasOwnProperty(key)) {
+        const field = this._tooltipFields.find((mvtField: MVTField) => {
+          return mvtField.getName() === key;
+        });
+
+        if (field) {
+          const tooltip = new TooltipProperty(key, key, properties[key]);
+          tooltips.push(tooltip);
+        }
+      }
+    }
+    return tooltips;
   }
 }
 

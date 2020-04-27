@@ -104,6 +104,7 @@ export class FeaturesTooltip extends React.Component {
     const currentFeatureGeometry = this.props.loadFeatureGeometry({
       layerId: this.state.currentFeature.layerId,
       featureId: this.state.currentFeature.id,
+      meta: this.state.currentFeature.meta,
     });
     const geoFields = this._filterGeoFields(currentFeatureGeometry);
 
@@ -132,6 +133,7 @@ export class FeaturesTooltip extends React.Component {
         <FeatureProperties
           featureId={this.state.currentFeature.id}
           layerId={this.state.currentFeature.layerId}
+          meta={this.state.currentFeature.meta}
           loadFeatureProperties={this.props.loadFeatureProperties}
           showFilterButtons={!!this.props.addFilters && this.props.isLocked}
           onCloseTooltip={this.props.closeTooltip}

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { Feature, GeoJsonProperties } from 'geojson';
 import { VectorStyle } from './styles/vector/vector_style';
 import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
 import { VectorLayer, VectorLayerArguments } from './vector_layer';
@@ -166,5 +167,16 @@ export class TiledVectorLayer extends VectorLayer {
   getMinZoom() {
     // higher resolution vector tiles cannot be displayed at lower-res
     return Math.max(this._source.getMinZoom(), super.getMinZoom());
+  }
+
+  getFeatureById(
+    id: string | number | undefined,
+    meta: { mbProperties: GeoJsonProperties }
+  ): Feature {
+    return {
+      properties: this._source.getFeatureProperties(id, meta.mbProperties),
+      geometry: this._source.getFeatureGeometry(id, meta.mbProperties),
+      id,
+    };
   }
 }

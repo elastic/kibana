@@ -5,7 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
@@ -15,6 +15,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -38,6 +39,8 @@ export interface IVectorSource extends ISource {
   getApplyGlobalQuery(): boolean;
   createField({ fieldName }: { fieldName: string }): IField;
   supportsFieldMeta(): boolean;
+  canFormatFeatureProperties(): boolean;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -57,6 +60,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getFieldNames(): string[];
   createField({ fieldName }: { fieldName: string }): IField;
   supportsFieldMeta(): boolean;
+  filterAndFormatPropertiesToHtml(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
 }
 
 export interface ITiledSingleLayerVectorSource extends IVectorSource {
@@ -68,4 +72,10 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
   }>;
   getMinZoom(): number;
   getMaxZoom(): number;
+
+  getFeatureProperties(
+    id: string | number,
+    mbProperties: GeoJsonProperties
+  ): GeoJsonProperties | null;
+  getFeatureGeometry(id: string | number, mbProperties: GeoJsonProperties): Geometry | null;
 }

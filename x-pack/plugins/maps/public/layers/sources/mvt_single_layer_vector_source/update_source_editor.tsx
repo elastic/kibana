@@ -42,14 +42,12 @@ export class UpdateSourceEditor extends Component<Props, State> {
 
   async _loadFields() {
     const fields = await this.props.source.getFields();
-    console.log('load fields', fields);
     if (this._isMounted) {
       this.setState({ fields });
     }
   }
 
   _onTooltipPropertiesSelect = (propertyNames: string[]) => {
-    console.log('propertiy names', propertyNames);
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
@@ -69,9 +67,9 @@ export class UpdateSourceEditor extends Component<Props, State> {
           <EuiSpacer size="m" />
 
           <TooltipSelector
-            tooltipFields={this.props.tooltipFields} //selected fields in the tooltip
+            tooltipFields={this.props.tooltipFields} // selected fields in the tooltip
             onChange={this._onTooltipPropertiesSelect}
-            fields={this.state.fields ? this.state.fields : []} //all the fields in the source
+            fields={this.state.fields ? this.state.fields : []} // all the fields in the source
           />
         </EuiPanel>
 

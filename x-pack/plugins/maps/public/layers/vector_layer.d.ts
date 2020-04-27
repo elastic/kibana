@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { GeoJsonProperties, Feature } from 'geojson';
 import { AbstractLayer } from './layer';
 import { IVectorSource } from './sources/vector_source';
 import {
@@ -30,6 +31,11 @@ export interface IVectorLayer extends ILayer {
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
   getSource(): IVectorSource;
+  getFeatureById(
+    id: string | number | undefined,
+    meta: { mbProperties: GeoJsonProperties }
+  ): Feature;
+  getPropertiesForTooltip(properties: GeoJsonProperties, featureId?: string | number);
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -66,4 +72,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   _setMbLinePolygonProperties(mbMap: unknown, mvtSourceLayer?: string): void;
   getSource(): IVectorSource;
+  getFeatureById(
+    id: string | number | undefined,
+    meta: { mbProperties: GeoJsonProperties }
+  ): Feature;
+  getPropertiesForTooltip(properties: GeoJsonProperties, featureId?: string | number);
 }

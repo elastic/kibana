@@ -93,7 +93,7 @@ export class TooltipControl extends React.Component {
 
     this._updateHoverTooltipState.cancel(); //ignore any possible moves
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       // No features at click location so there is no tooltip to open
       return;
@@ -115,7 +115,7 @@ export class TooltipControl extends React.Component {
       return;
     }
 
-    const mbFeatures = this._getFeaturesUnderPointer(e.point);
+    const mbFeatures = this._getMbFeaturesUnderPointer(e.point);
     if (!mbFeatures.length) {
       this.props.closeOnHoverTooltip();
       return;
@@ -154,7 +154,7 @@ export class TooltipControl extends React.Component {
     });
   }
 
-  _getFeaturesUnderPointer(mbLngLatPoint) {
+  _getMbFeaturesUnderPointer(mbLngLatPoint) {
     if (!this.props.mbMap) {
       return [];
     }
