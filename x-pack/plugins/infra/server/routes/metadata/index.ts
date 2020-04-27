@@ -44,7 +44,7 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         );
 
         const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext,
+          requestContext.core.savedObjects.client,
           sourceId
         );
         const metricsMetadata = await getMetricMetadata(
