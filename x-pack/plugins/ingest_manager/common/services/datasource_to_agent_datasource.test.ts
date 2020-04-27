@@ -26,7 +26,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
   const mockInput: DatasourceInput = {
     type: 'test-logs',
     enabled: true,
-    pkg_variables: {
+    vars: {
       inputVar: { value: 'input-value' },
       inputVar2: { value: undefined },
       inputVar3: {
@@ -40,11 +40,11 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-foo',
         enabled: true,
         dataset: 'foo',
-        pkg_variables: {
+        vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
         },
-        pkg_stream: {
+        agent_stream: {
           fooKey: 'fooValue1',
           fooKey2: ['fooValue2'],
         },
@@ -53,7 +53,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-bar',
         enabled: true,
         dataset: 'bar',
-        pkg_variables: {
+        vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },
           barVar3: {

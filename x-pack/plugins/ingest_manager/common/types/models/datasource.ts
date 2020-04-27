@@ -23,8 +23,8 @@ export interface DatasourceInputStream {
   dataset: string;
   processors?: string[];
   config?: DatasourceConfigRecord;
-  pkg_variables?: DatasourceConfigRecord;
-  pkg_stream?: any;
+  vars?: DatasourceConfigRecord;
+  agent_stream?: any;
 }
 
 export interface DatasourceInput {
@@ -32,7 +32,7 @@ export interface DatasourceInput {
   enabled: boolean;
   processors?: string[];
   config?: DatasourceConfigRecord;
-  pkg_variables?: DatasourceConfigRecord;
+  vars?: DatasourceConfigRecord;
   streams: DatasourceInputStream[];
 }
 

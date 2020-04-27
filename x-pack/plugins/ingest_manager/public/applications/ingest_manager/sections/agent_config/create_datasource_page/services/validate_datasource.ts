@@ -21,7 +21,7 @@ type Errors = string[] | null;
 type ValidationEntry = Record<string, Errors>;
 
 export interface DatasourceConfigValidationResults {
-  pkg_variables?: ValidationEntry;
+  vars?: ValidationEntry;
 }
 
 export type DatasourceInputValidationResults = DatasourceConfigValidationResults & {
@@ -77,12 +77,12 @@ export const validateDatasource = (
 
   // Validate each datasource input with either its own config fields or streams
   datasource.inputs.forEach(input => {
-    if (!input.pkg_variables && !input.streams) {
+    if (!input.vars && !input.streams) {
       return;
     }
 
     const inputValidationResults: DatasourceInputValidationResults = {
-      pkg_variables: undefined,
+      vars: undefined,
       streams: {},
     };
 
@@ -95,27 +95,27 @@ export const validateDatasource = (
     );
 
     // Validate input-level config fields
-    const inputConfigs = Object.entries(input.pkg_variables || {});
+    const inputConfigs = Object.entries(input.vars || {});
     if (inputConfigs.length) {
-      inputValidationResults.pkg_variables = inputConfigs.reduce((results, [name, configEntry]) => {
+      inputValidationResults.vars = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
           ? validateDatasourceConfig(configEntry, inputVarsByName[name])
           : null;
         return results;
       }, {} as ValidationEntry);
     } else {
-      delete inputValidationResults.pkg_variables;
+      delete inputValidationResults.vars;
     }
 
     // Validate each input stream with config fields
     if (input.streams.length) {
       input.streams.forEach(stream => {
-        if (!stream.pkg_variables) {
+        if (!stream.vars) {
           return;
         }
 
         const streamValidationResults: DatasourceConfigValidationResults = {
-          pkg_variables: undefined,
+          vars: undefined,
         };
 
         const streamVarsByName = (
@@ -130,7 +130,7 @@ export const validateDatasource = (
         }, {} as Record<string, RegistryVarsEntry>);
 
         // Validate stream-level config fields
-        streamValidationResults.pkg_variables = Object.entries(stream.pkg_variables).reduce(
+        streamValidationResults.vars = Object.entries(stream.vars).reduce(
           (results, [name, configEntry]) => {
             results[name] =
               input.enabled && stream.enabled
@@ -147,7 +147,7 @@ export const validateDatasource = (
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.pkg_variables || inputValidationResults.streams) {
+    if (inputValidationResults.vars || inputValidationResults.streams) {
       validationResults.inputs![input.type] = inputValidationResults;
     }
   });

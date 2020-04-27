@@ -101,7 +101,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
-            const value = datasourceInputStream.pkg_variables![varName].value;
+            const value = datasourceInputStream.vars![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -109,8 +109,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                   value={value}
                   onChange={(newValue: any) => {
                     updateDatasourceInputStream({
-                      pkg_variables: {
-                        ...datasourceInputStream.pkg_variables,
+                      vars: {
+                        ...datasourceInputStream.vars,
                         [varName]: {
                           type: varType,
                           value: newValue,
@@ -118,7 +118,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                       },
                     });
                   }}
-                  errors={inputStreamValidationResults.pkg_variables![varName]}
+                  errors={inputStreamValidationResults.vars![varName]}
                   forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
@@ -145,7 +145,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
                     const { name: varName, type: varType } = varDef;
-                    const value = datasourceInputStream.pkg_variables![varName].value;
+                    const value = datasourceInputStream.vars![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -153,8 +153,8 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                           value={value}
                           onChange={(newValue: any) => {
                             updateDatasourceInputStream({
-                              pkg_variables: {
-                                ...datasourceInputStream.pkg_variables,
+                              vars: {
+                                ...datasourceInputStream.vars,
                                 [varName]: {
                                   type: varType,
                                   value: newValue,
@@ -162,7 +162,7 @@ export const DatasourceInputStreamConfig: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={inputStreamValidationResults.pkg_variables![varName]}
+                          errors={inputStreamValidationResults.vars![varName]}
                           forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>

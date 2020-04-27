@@ -47,7 +47,7 @@ describe('Datasource service', () => {
                 id: 'dataset01',
                 dataset: 'package.dataset1',
                 enabled: true,
-                pkg_variables: {
+                vars: {
                   paths: {
                     value: ['/var/log/set.log'],
                   },
@@ -67,12 +67,12 @@ describe('Datasource service', () => {
               id: 'dataset01',
               dataset: 'package.dataset1',
               enabled: true,
-              pkg_variables: {
+              vars: {
                 paths: {
                   value: ['/var/log/set.log'],
                 },
               },
-              pkg_stream: {
+              agent_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',
@@ -93,7 +93,7 @@ describe('Datasource service', () => {
           {
             type: 'log',
             enabled: true,
-            pkg_variables: {
+            vars: {
               paths: {
                 value: ['/var/log/set.log'],
               },
@@ -113,7 +113,7 @@ describe('Datasource service', () => {
         {
           type: 'log',
           enabled: true,
-          pkg_variables: {
+          vars: {
             paths: {
               value: ['/var/log/set.log'],
             },
@@ -123,7 +123,7 @@ describe('Datasource service', () => {
               id: 'dataset01',
               dataset: 'package.dataset1',
               enabled: true,
-              pkg_stream: {
+              agent_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
                 type: 'log',
