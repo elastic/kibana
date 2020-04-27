@@ -8,13 +8,6 @@ import http, { IncomingMessage } from 'http';
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { parse } from 'url';
 
-/*
- * NOTE: Reporting is a service, not an app. The page objects that are
- * important for generating reports belong to the apps that integrate with the
- * Reporting service. Eventually, this file should be dissolved across the
- * apps that need it for testing their integration.
- * Issue: https://github.com/elastic/kibana/issues/52927
- */
 export function ReportingPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
