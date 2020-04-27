@@ -14,13 +14,7 @@ import mappings from './mappings.json';
 
 export const apm: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
-    require: [
-      'kibana',
-      'elasticsearch',
-      'xpack_main',
-      'apm_oss',
-      'task_manager'
-    ],
+    require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
     configPrefix: 'xpack.apm',
     publicDir: resolve(__dirname, 'public'),

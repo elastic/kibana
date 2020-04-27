@@ -148,15 +148,15 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
+      initializeAlertingTelemetry(
+        this.telemetryLogger,
+        core,
+        plugins.taskManager,
+        await this.kibanaIndex
+      );
+
       core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
-
-        initializeAlertingTelemetry(
-          this.telemetryLogger,
-          core,
-          plugins.taskManager,
-          await this.kibanaIndex
-        );
       });
     }
 
