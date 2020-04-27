@@ -28,8 +28,8 @@ const sortCerts = (a: string, b: string) => new Date(a).valueOf() - new Date(b).
 const mapCertsToSummaryString = (certs: Cert[], maxSummaryItems: number): string =>
   certs
     .slice(0, maxSummaryItems)
-    .map(cert => `${cert.common_name} expiration date ${cert.certificate_not_valid_after}`)
-    .reduce((prev, cur) => prev.concat(`, ${cur}`), '');
+    .map(cert => `${cert.common_name}, expires: ${cert.certificate_not_valid_after}`)
+    .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 interface TlsAlertState {
   count: number;
