@@ -81,13 +81,18 @@ export async function createDynamicAssetResponse(options) {
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
     const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;
 
-    return h
-      .response(content)
-      .takeover()
-      .code(200)
-      .etag(etag)
-      .header('cache-control', 'must-revalidate')
-      .type(request.server.mime.path(path).type);
+    return (
+      h
+        .response(content)
+        .takeover()
+        .code(200)
+        .etag(etag)
+        // We want to allow the browsers to use the cached versions onload,
+        // but they must-revalidate and download the newer versions in the background
+        // (https://github.com/elastic/support-known-issues/issues/18)
+        .header('cache-control', 'stale-while-revalidate=86400; max-age=0; must-revalidate')
+        .type(request.server.mime.path(path).type)
+    );
   } catch (error) {
     if (fd) {
       try {
