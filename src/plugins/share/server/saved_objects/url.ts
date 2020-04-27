@@ -16,24 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsType } from 'kibana/server';
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
-import { createRoutes } from './routes/create_routes';
-import { url } from './saved_objects';
-
-export class SharePlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  public async setup(core: CoreSetup) {
-    createRoutes(core, this.initializerContext.logger.get());
-    core.savedObjects.registerType(url);
-  }
-
-  public start() {
-    this.initializerContext.logger.get().debug('Starting plugin');
-  }
-
-  public stop() {
-    this.initializerContext.logger.get().debug('Stopping plugin');
-  }
-}
+export const url: SavedObjectsType = {
+  name: 'url',
+  namespaceType: 'single',
+  hidden: false,
+  management: {
+    icon: 'link',
+    defaultSearchField: 'url',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return `/goto/${encodeURIComponent(obj.id)}`;
+    },
+  },
+  mappings: {
+    properties: {
+      accessCount: {
+        type: 'long',
+      },
+      accessDate: {
+        type: 'date',
+      },
+      createDate: {
+        type: 'date',
+      },
+      url: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
+};
