@@ -148,6 +148,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                 ...dllJsChunks,
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
+          `${regularBundlePath}/plugin/data/data.plugin.js`,
           `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
           `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
           `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
