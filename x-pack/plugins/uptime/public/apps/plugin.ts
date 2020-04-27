@@ -30,9 +30,12 @@ export interface ClientPluginsStart {
 }
 
 export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, ClientPluginsStart> {
-  constructor(context: PluginInitializerContext) {}
+  constructor(_context: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup) {
+  public async setup(
+    core: CoreSetup<ClientPluginsStart, unknown>,
+    plugins: ClientPluginsSetup
+  ): Promise<void> {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -65,5 +68,5 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
 
   public start(_start: CoreStart, _plugins: {}): void {}
 
-  public stop() {}
+  public stop(): void {}
 }
