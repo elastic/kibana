@@ -96,7 +96,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.feedbackSectionText"
-            defaultMessage="If you have input or suggestions regarding your experience with Machine Learning please feel free to submit {feedbackLink}."
+            defaultMessage="If you have input or suggestions regarding your experience with Machine Learning, please submit {feedbackLink}."
             values={{
               feedbackLink: (
                 <EuiLink href={feedbackLink} target="blank">

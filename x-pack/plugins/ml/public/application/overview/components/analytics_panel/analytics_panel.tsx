@@ -89,7 +89,7 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
           body={
             <p>
               {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
-                defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. The analytics job stores the annotated data, as well as a copy of the source data, in a new index.`,
+                defaultMessage: `Data frame analytics enable you to perform different analyses of your data, such as regression, classification, and outlier detection. The analytics job stores the annotated data in a new index.`,
               })}
             </p>
           }
