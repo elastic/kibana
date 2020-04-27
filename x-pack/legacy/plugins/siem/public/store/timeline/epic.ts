@@ -59,7 +59,7 @@ import {
   updateSort,
   upsertColumn,
   updateTimeline,
-  getDefaultTimeline,
+  getDraftTimeline,
   updateTitle,
   updateAutoSaveMsg,
   setFilters,
@@ -82,7 +82,7 @@ import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
 import { inputsModel } from '../inputs';
-import { epicDefaultTimeline } from './epic_default_timeline';
+import { epicDraftTimeline } from './epic_draft_timeline';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -158,7 +158,7 @@ export const createTimelineEpic = <State>(): Epic<
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
-        } else if (action.type === getDefaultTimeline.type && isItAtimelineAction(timelineId)) {
+        } else if (action.type === getDraftTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
@@ -194,10 +194,10 @@ export const createTimelineEpic = <State>(): Epic<
           return epicPersistPinnedEvent(apolloClient, action, timeline, action$, timeline$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
           return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
-        } else if (action.type === getDefaultTimeline.type) {
-          return epicDefaultTimeline(action, timeline, action$, timeline$, false);
+        } else if (action.type === getDraftTimeline.type) {
+          return epicDraftTimeline(action, timeline, action$, timeline$, false);
         } else if (action.type === createTimeline.type) {
-          return epicDefaultTimeline(action, timeline, action$, timeline$, true);
+          return epicDraftTimeline(action, timeline, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({
@@ -237,7 +237,7 @@ export const createTimelineEpic = <State>(): Epic<
                 }),
               ];
             }),
-            startWith(startTimelineSaving({ id: action.payload.id })),
+            // startWith(startTimelineSaving({ id: action.payload.id })),
             takeUntil(
               action$.pipe(
                 withLatestFrom(timeline$),
@@ -278,6 +278,7 @@ const timelineInput: TimelineInput = {
   dateRange: null,
   savedQueryId: null,
   sort: null,
+  timelineType: null,
 };
 
 export const convertTimelineAsInput = (
@@ -285,8 +286,11 @@ export const convertTimelineAsInput = (
   timelineTimeRange: TimeRange
 ): TimelineInput =>
   Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
+    console.error('sssss', timeline);
     if (has(key, timeline)) {
-      if (key === 'kqlQuery') {
+      if (key === 'timelineType') {
+        return set(key, get(key, timeline), acc);
+      } else if (key === 'kqlQuery') {
         return set(`${key}.filterQuery`, get(`${key}.filterQuery`, timeline), acc);
       } else if (key === 'dateRange') {
         return set(`${key}`, { start: timelineTimeRange.from, end: timelineTimeRange.to }, acc);

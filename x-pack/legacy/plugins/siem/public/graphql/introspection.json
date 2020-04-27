@@ -10371,6 +10371,7 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
+          { "name": "draft", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "template",
             "description": "",

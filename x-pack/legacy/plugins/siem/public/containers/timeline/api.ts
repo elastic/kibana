@@ -16,7 +16,7 @@ import {
 } from '../../../../../../plugins/siem/common/types/timeline';
 import {
   TIMELINE_URL,
-  TIMELINE_DEFAULT_URL,
+  TIMELINE_DRAFT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
 } from '../../../../../../plugins/siem/common/constants';
@@ -122,8 +122,8 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   return response.body!;
 };
 
-export const getDefaultTimeline = async (query: HttpFetchQuery): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DEFAULT_URL, {
+export const getDraftTimeline = async (query: HttpFetchQuery): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL, {
     query,
   });
 

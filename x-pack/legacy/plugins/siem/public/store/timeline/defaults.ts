@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction } from '../../graphql/types';
+import { Direction, TimelineType } from '../../graphql/types';
 import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/constants';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { SubsetTimelineModel, TimelineModel } from './model';
@@ -51,4 +51,5 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   },
   width: DEFAULT_TIMELINE_WIDTH,
   version: null,
+  timelineType: TimelineType.draft,
 };

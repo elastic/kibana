@@ -89,7 +89,7 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     In case timelineById[timelineId]?.dataProviders is an empty array it will cause unnecessary rerender
     of StatefulTimeline which can be expensive, so to avoid that return DEFAULT_DATA_PROVIDERS
   */
-  const dataProviders = timelineById[timelineId]?.dataProviders.length
+  const dataProviders = timelineById[timelineId]?.dataProviders?.length
     ? timelineById[timelineId]?.dataProviders
     : DEFAULT_DATA_PROVIDERS;
   const show = timelineById[timelineId]?.show ?? false;

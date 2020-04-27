@@ -4,30 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from 'lodash/fp';
-
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { TIMELINE_DEFAULT_URL } from '../../../../common/constants';
+import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { getAllTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
-import { SortFieldTimeline, Direction } from '../../../graphql/types';
-import { defaultTimelinesQuerySchema } from './schemas/default_timelines_schema';
-import { timelineDefaults } from '../default_timeline';
+import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
+import { draftTimelinesQuerySchema } from './schemas/draft_timelines_schema';
+import { draftTimelineDefaults } from '../default_timeline';
+import { TimelineType } from '../../../graphql/types';
 
-export const defaultTimelinesRoute = (
+export const draftTimelinesRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
     {
-      path: TIMELINE_DEFAULT_URL,
+      path: TIMELINE_DRAFT_URL,
       validate: {
-        query: buildRouteValidation(defaultTimelinesQuerySchema),
+        query: buildRouteValidation(draftTimelinesQuerySchema),
       },
       options: {
         tags: ['access:siem'],
@@ -38,25 +36,23 @@ export const defaultTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         // const siemResponse = buildSiemResponse(response);
 
-        const allTimelines = await getAllTimeline(frameworkRequest, null, null, null, {
-          sortField: SortFieldTimeline.updated,
-          sortOrder: Direction.desc,
-        });
-        const defaultTimeline = find(['title', ''], allTimelines.timeline);
+        const {
+          timeline: [draftTimeline],
+        } = await getDraftTimeline(frameworkRequest);
 
-        if (defaultTimeline?.savedObjectId) {
+        if (draftTimeline?.savedObjectId) {
           if (request.query?.clean === 'true') {
-            await resetTimeline(frameworkRequest, [defaultTimeline.savedObjectId]);
-            const cleanedTimeline = await getTimeline(
+            await resetTimeline(frameworkRequest, [draftTimeline.savedObjectId]);
+            const cleanedDraftTimeline = await getTimeline(
               frameworkRequest,
-              defaultTimeline.savedObjectId
+              draftTimeline.savedObjectId
             );
 
             return response.ok({
               body: {
                 data: {
                   persistTimeline: {
-                    timeline: cleanedTimeline,
+                    timeline: cleanedDraftTimeline,
                   },
                 },
               },
@@ -67,7 +63,7 @@ export const defaultTimelinesRoute = (
             body: {
               data: {
                 persistTimeline: {
-                  timeline: defaultTimeline,
+                  timeline: draftTimeline,
                 },
               },
             },
@@ -78,7 +74,7 @@ export const defaultTimelinesRoute = (
           frameworkRequest,
           null,
           null,
-          timelineDefaults
+          draftTimelineDefaults
         );
 
         if (newTimelineResponse.code === 200) {

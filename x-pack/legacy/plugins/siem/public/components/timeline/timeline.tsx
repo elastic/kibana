@@ -149,6 +149,18 @@ export const TimelineComponent: React.FC<Props> = ({
 }) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
+  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+  const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
+  const timelineQuerySortField = useMemo(
+    () => ({
+      sortFieldId: sort?.columnId,
+      direction: sort?.sortDirection as Direction,
+    }),
+    [sort]
+  );
+
+  if (!dataProviders) return <div />;
+
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -160,15 +172,6 @@ export const TimelineComponent: React.FC<Props> = ({
     start,
     end,
   });
-  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
-  const timelineQuerySortField = useMemo(
-    () => ({
-      sortFieldId: sort.columnId,
-      direction: sort.sortDirection as Direction,
-    }),
-    [sort.columnId, sort.sortDirection]
-  );
 
   return (
     <TimelineContainer data-test-subj="timeline">

@@ -90,7 +90,7 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_RESET_URL = `${TIMELINE_URL}/_reset`;
-export const TIMELINE_DEFAULT_URL = `${TIMELINE_URL}/_default`;
+export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 

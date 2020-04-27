@@ -38,6 +38,7 @@ export interface TimelineActionsOverflowColumns {
 
 enum TimelineTypes {
   default = 'default',
+  draft = 'draft',
   template = 'template',
 }
 /** The results of the query run by the OpenTimeline component */
@@ -52,7 +53,7 @@ export interface OpenTimelineResult {
   savedObjectId?: string | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypes.template | TimelineTypes.default;
+  type?: TimelineTypes.template | TimelineTypes.draft | TimelineTypes.default;
   updated?: number | null;
   updatedBy?: string | null;
 }

@@ -35,8 +35,12 @@ export const pickSavedTimeline = (
     if (savedTimeline.templateTimelineVersion == null) {
       savedTimeline.templateTimelineVersion = 1;
     }
+  } else if (savedTimeline.timelineType === TimelineType.draft) {
+    savedTimeline.timelineType = savedTimeline.title ? TimelineType.default : TimelineType.draft;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
   } else {
-    savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }

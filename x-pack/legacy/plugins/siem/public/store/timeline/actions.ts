@@ -69,7 +69,7 @@ export const createTimeline = actionCreator<{
   showRowRenderers?: boolean;
 }>('CREATE_TIMELINE');
 
-export const getDefaultTimeline = actionCreator<{ id: string }>('GET_DEFAULT_TIMELINE');
+export const getDraftTimeline = actionCreator<{ id: string }>('GET_DRAFT_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 

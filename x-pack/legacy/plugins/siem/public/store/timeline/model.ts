@@ -7,7 +7,7 @@
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import { PinnedEvent, TimelineNonEcsData } from '../../graphql/types';
+import { PinnedEvent, TimelineNonEcsData, TimelineType } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
@@ -104,6 +104,7 @@ export interface TimelineModel {
   isSaving: boolean;
   isLoading: boolean;
   version: string | null;
+  timelineType: TimelineType;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -140,6 +141,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isLoading'
     | 'savedObjectId'
     | 'version'
+    | 'timelineType'
   >
 >;
 

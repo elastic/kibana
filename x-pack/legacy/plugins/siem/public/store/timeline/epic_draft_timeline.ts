@@ -10,12 +10,12 @@ import { filter, withLatestFrom, mergeMap, startWith, takeUntil } from 'rxjs/ope
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import {
-  getDefaultTimeline as getDefaultTimelineAction,
+  getDraftTimeline as getDraftTimelineAction,
   showCallOutUnauthorizedMsg,
   endTimelineSaving,
   startTimelineSaving,
 } from './actions';
-import { getDefaultTimeline } from '../../containers/timeline/api';
+import { getDraftTimeline } from '../../containers/timeline/api';
 import { ActionTimeline, TimelineById } from './types';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { addError } from '../app/actions';
@@ -26,7 +26,7 @@ import {
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 import { ResponseTimeline } from '../../graphql/types';
 
-export const epicDefaultTimeline = (
+export const epicDraftTimeline = (
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
@@ -35,7 +35,7 @@ export const epicDefaultTimeline = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   // !!myEpicTimelineId.getTimelineId()
-  from(getDefaultTimeline({ clean })).pipe(
+  from(getDraftTimeline({ clean })).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimelines]) => {
       const savedTimeline = recentTimelines[action.payload.id];
@@ -52,21 +52,21 @@ export const epicDefaultTimeline = (
         ...callOutMsg,
         ...epicUpdateTimeline({
           duplicate: false,
-          from: savedTimeline.dateRange.start ?? settingsFrom,
+          from: savedTimeline?.dateRange.start ?? settingsFrom,
           id: 'timeline-1',
           notes,
           timeline: {
             ...timelineModel,
             show: savedTimeline?.show ?? false,
           },
-          to: savedTimeline.dateRange.end ?? settingsTo,
+          to: savedTimeline?.dateRange.end ?? settingsTo,
         }),
         endTimelineSaving({
           id: action.payload.id,
         }),
       ];
     }),
-    startWith(startTimelineSaving({ id: action.payload.id })),
+    // startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),
@@ -92,5 +92,5 @@ export const epicDefaultTimeline = (
     )
   );
 
-export const createDefaultTimelineEpic = <State>(): Epic<Action, Action, State> => () =>
-  of(getDefaultTimelineAction({ id: 'timeline-1' }));
+export const createDraftTimelineEpic = <State>(): Epic<Action, Action, State> => () =>
+  of(getDraftTimelineAction({ id: 'timeline-1' }));

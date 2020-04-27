@@ -9,7 +9,7 @@ import { createTimelineEpic } from './timeline/epic';
 import { createTimelineFavoriteEpic } from './timeline/epic_favorite';
 import { createTimelineNoteEpic } from './timeline/epic_note';
 import { createTimelinePinnedEventEpic } from './timeline/epic_pinned_event';
-import { createDefaultTimelineEpic } from './timeline/epic_default_timeline';
+import { createDraftTimelineEpic } from './timeline/epic_draft_timeline';
 
 export const createRootEpic = <State>() =>
   combineEpics(
@@ -17,5 +17,5 @@ export const createRootEpic = <State>() =>
     createTimelineFavoriteEpic<State>(),
     createTimelineNoteEpic<State>(),
     createTimelinePinnedEventEpic<State>(),
-    createDefaultTimelineEpic<State>()
+    createDraftTimelineEpic<State>()
   );

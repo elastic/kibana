@@ -25,7 +25,7 @@ import * as pinnedEvent from '../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
-import { timelineDefaults } from './default_timeline';
+import { draftTimelineDefaults } from './default_timeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -112,6 +112,16 @@ export const getAllTimeline = async (
       : ['title', 'description'],
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
+    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.default}`,
+  };
+  return getAllSavedTimeline(request, options);
+};
+
+export const getDraftTimeline = async (request: FrameworkRequest): Promise<ResponseTimelines> => {
+  const options: SavedObjectsFindOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`,
   };
   return getAllSavedTimeline(request, options);
 };
@@ -253,7 +263,7 @@ export const resetTimeline = async (request: FrameworkRequest, timelineIds: stri
         savedObjectsClient.update(
           timelineSavedObjectType,
           timelineId,
-          omit(['dateRange'], timelineDefaults)
+          omit(['dateRange'], draftTimelineDefaults)
           // omit(['title', 'description', 'dateRange'], timelineDefaults)
         ),
         note.deleteNoteByTimelineId(request, timelineId),

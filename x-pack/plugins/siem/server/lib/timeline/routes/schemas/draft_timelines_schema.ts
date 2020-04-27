@@ -6,6 +6,6 @@
 
 import * as rt from 'io-ts';
 
-export const defaultTimelinesQuerySchema = rt.type({
+export const draftTimelinesQuerySchema = rt.type({
   clean: rt.union([rt.literal('true'), rt.literal('false'), rt.undefined]),
 });
