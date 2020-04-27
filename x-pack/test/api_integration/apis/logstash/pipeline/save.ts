@@ -28,7 +28,6 @@ export default function({ getService }: FtrProviderContext) {
         .send({
           id: 'fast_generator',
           description: 'foobar baz',
-          username: 'seger',
           pipeline: 'input { generator {} }\n\n output { stdout {} }',
         })
         .expect(204);

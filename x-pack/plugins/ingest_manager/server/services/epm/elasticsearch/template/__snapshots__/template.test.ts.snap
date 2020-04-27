@@ -28,9 +28,6 @@ exports[`tests loading base.yml: base.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {
@@ -123,9 +120,6 @@ exports[`tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {
@@ -218,9 +212,6 @@ exports[`tests loading system.yml: system.yml 1`] = `
     }
   },
   "mappings": {
-    "_meta": {
-      "package": "foo"
-    },
     "dynamic_templates": [
       {
         "strings_as_keyword": {

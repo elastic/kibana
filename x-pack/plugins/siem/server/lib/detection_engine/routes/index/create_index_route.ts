@@ -37,7 +37,7 @@ export const createIndexRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const index = siemClient.signalsIndex;
+        const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(callCluster, index);
         if (indexExists) {
           return siemResponse.error({

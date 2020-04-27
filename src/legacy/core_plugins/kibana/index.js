@@ -21,7 +21,6 @@ import Fs from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
 
-import { migrations } from './migrations';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import mappings from './mappings.json';
@@ -119,30 +118,7 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectsManagement: {
-        dashboard: {
-          icon: 'dashboardApp',
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getEditUrl(obj) {
-            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
-              uiCapabilitiesPath: 'dashboard.show',
-            };
-          },
-        },
-      },
-
       savedObjectSchemas: {
-        'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
-        },
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
@@ -170,8 +146,6 @@ export default function(kibana) {
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
-
-      migrations,
     },
 
     uiCapabilities: async function() {
