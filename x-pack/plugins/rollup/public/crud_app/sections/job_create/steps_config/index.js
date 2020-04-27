@@ -42,7 +42,7 @@ export const stepIds = [
  *  1. getDefaultFields: (overrides) => object
  *  2. fieldValidations
  *
- * See x-pack/plugins/rollup/public/crud_app/services/jobs.js for more information on override's shape
+ * See rollup/public/crud_app/services/jobs.js for more information on override's shape
  */
 export const stepIdToStepConfigMap = {
   [STEP_LOGISTICS]: {

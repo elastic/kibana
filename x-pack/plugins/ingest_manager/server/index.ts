@@ -22,7 +22,7 @@ export const config = {
     enabled: schema.boolean({ defaultValue: false }),
     epm: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
-      registryUrl: schema.uri({ defaultValue: 'https://epr-staging.elastic.co' }),
+      registryUrl: schema.maybe(schema.uri()),
     }),
     fleet: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -43,13 +43,3 @@ export type IngestManagerConfigType = TypeOf<typeof config.schema>;
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IngestManagerPlugin(initializerContext);
 };
-
-// Saved object information bootstrapped by legacy `ingest_manager` plugin
-// TODO: Remove once saved object mappings can be done from NP
-export { savedObjectMappings } from './saved_objects';
-export {
-  OUTPUT_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  DATASOURCE_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from './constants';
