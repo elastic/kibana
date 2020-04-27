@@ -11,6 +11,7 @@ export const taskManagerMock = {
     const mocked: jest.Mocked<TaskManagerSetupContract> = {
       registerTaskDefinitions: jest.fn(),
       addMiddleware: jest.fn(),
+      registerLegacyAPI: jest.fn(),
       ...overrides,
     };
     return mocked;

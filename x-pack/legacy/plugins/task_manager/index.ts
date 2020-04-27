@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { SampleTaskManagerFixturePlugin } from './plugin';
-
-export const plugin = (initContext: PluginInitializerContext) =>
-  new SampleTaskManagerFixturePlugin(initContext);
+export * from './server/';

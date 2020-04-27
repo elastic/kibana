@@ -8,6 +8,7 @@ import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 
 const createSetupMock = () => {
   const mock: jest.Mocked<TaskManagerSetupContract> = {
+    registerLegacyAPI: jest.fn(),
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
   };
