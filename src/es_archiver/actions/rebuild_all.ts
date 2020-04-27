@@ -18,7 +18,7 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { stat, rename, createReadStream, createWriteStream } from 'fs';
+import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
 import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
 import { ToolingLog } from '@kbn/dev-utils';
@@ -33,7 +33,7 @@ import {
 } from '../lib';
 
 async function isDirectory(path: string): Promise<boolean> {
-  const stats = await fromNode(cb => stat(path, cb));
+  const stats: Stats = await fromNode(cb => stat(path, cb));
   return stats.isDirectory();
 }
 

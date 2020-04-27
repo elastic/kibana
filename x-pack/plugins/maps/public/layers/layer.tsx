@@ -62,7 +62,6 @@ export interface ILayer {
   isLayerLoading(): boolean;
   hasErrors(): boolean;
   getErrors(): string;
-  toLayerDescriptor(): LayerDescriptor;
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
@@ -411,10 +410,6 @@ export class AbstractLayer implements ILayer {
     return this.hasErrors() && this._descriptor.__errorMessage
       ? this._descriptor.__errorMessage
       : '';
-  }
-
-  toLayerDescriptor(): LayerDescriptor {
-    return this._descriptor;
   }
 
   async syncData(syncContext: SyncContext) {

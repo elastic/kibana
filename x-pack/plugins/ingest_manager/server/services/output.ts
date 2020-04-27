@@ -14,7 +14,7 @@ class OutputService {
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find<Output>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (!outputs.saved_objects.length) {
@@ -44,7 +44,7 @@ class OutputService {
   public async getDefaultOutputId(soClient: SavedObjectsClientContract) {
     const outputs = await soClient.find({
       type: OUTPUT_SAVED_OBJECT_TYPE,
-      filter: 'outputs.attributes.is_default:true',
+      filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
 
     if (!outputs.saved_objects.length) {
@@ -93,6 +93,34 @@ class OutputService {
     return {
       id: outputSO.id,
       ...outputSO.attributes,
+    };
+  }
+
+  public async update(soClient: SavedObjectsClientContract, id: string, data: Partial<Output>) {
+    const outputSO = await soClient.update<Output>(SAVED_OBJECT_TYPE, id, data);
+
+    if (outputSO.error) {
+      throw new Error(outputSO.error.message);
+    }
+  }
+
+  public async list(soClient: SavedObjectsClientContract) {
+    const outputs = await soClient.find<Output>({
+      type: SAVED_OBJECT_TYPE,
+      page: 1,
+      perPage: 1000,
+    });
+
+    return {
+      items: outputs.saved_objects.map<Output>(outputSO => {
+        return {
+          id: outputSO.id,
+          ...outputSO.attributes,
+        };
+      }),
+      total: outputs.total,
+      page: 1,
+      perPage: 1000,
     };
   }
 }
