@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'src/core/server';
-import { safeLoad } from 'js-yaml';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeleteDatasourcesResponse,
