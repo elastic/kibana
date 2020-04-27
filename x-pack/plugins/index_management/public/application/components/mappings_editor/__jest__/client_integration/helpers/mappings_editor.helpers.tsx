@@ -172,11 +172,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
   const updateFieldAndCloseFlyout = async () => {
     find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
+    component.update();
   };
 
   const showAdvancedSettings = async () => {
@@ -332,6 +328,7 @@ export type TestSubjects =
   | 'createFieldForm.fieldType'
   | 'createFieldForm.addButton'
   | 'mappingsEditorFieldEdit'
+  | 'mappingsEditorFieldEdit.fieldType'
   | 'mappingsEditorFieldEdit.editFieldUpdateButton'
   | 'mappingsEditorFieldEdit.flyoutTitle'
   | 'mappingsEditorFieldEdit.documentationLink'

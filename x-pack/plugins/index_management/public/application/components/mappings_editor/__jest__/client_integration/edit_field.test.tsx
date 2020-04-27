@@ -6,7 +6,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
-
+import { defaultTextParameters, defaultShapeParameters } from './datatypes';
 const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 const getDataForwarded = getDataForwardedFactory(onChangeHandler);
@@ -67,4 +67,66 @@ describe('Mappings editor: edit field', () => {
     expect(find('mappingsEditorFieldEdit.advancedSettings').props().style.display).toEqual('none');
   });
 
+  test('should update form parameters when changing the field datatype', async () => {
+    const defaultMappings = {
+      _meta: {},
+      _source: {},
+      properties: {
+        myField: {
+          type: 'text',
+          ...defaultTextParameters,
+        },
+      },
+    };
+
+    let updatedMappings: any = { ...defaultMappings };
+
+    await act(async () => {
+      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+
+    const {
+      find,
+      exists,
+      waitForFn,
+      component,
+      actions: { startEditField, updateFieldAndCloseFlyout },
+    } = testBed;
+
+    // Open the flyout, change the field type and save it
+    await act(async () => {
+      await startEditField('myField');
+    });
+
+    await act(async () => {
+      // Change the field type
+      find('mappingsEditorFieldEdit.fieldType').simulate('change', [
+        { label: 'Shape', value: 'shape' },
+      ]);
+      component.update();
+    });
+
+    await act(async () => {
+      await updateFieldAndCloseFlyout();
+    });
+
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
+    ({ data } = await getDataForwarded());
+
+    updatedMappings = {
+      ...updatedMappings,
+      properties: {
+        myField: {
+          type: 'shape',
+          ...defaultShapeParameters,
+        },
+      },
+    };
+
+    expect(data).toEqual(updatedMappings);
+  }, 15000);
 });

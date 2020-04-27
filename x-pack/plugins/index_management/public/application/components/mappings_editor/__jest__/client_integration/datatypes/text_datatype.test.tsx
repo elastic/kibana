@@ -12,7 +12,7 @@ const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 const getDataForwarded = getDataForwardedFactory(onChangeHandler);
 
-// Parameters automatically added to the text datatype when saved (with their default values)
+// Parameters automatically added to the text datatype when saved (with the default values)
 export const defaultTextParameters = {
   eager_global_ordinals: false,
   fielddata: false,
@@ -23,7 +23,7 @@ export const defaultTextParameters = {
   store: false,
 };
 
-describe('text datatype', () => {
+describe('Mappings editor: text datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   /**
@@ -40,7 +40,7 @@ describe('text datatype', () => {
       _meta: {},
       _source: {},
       properties: {
-        myTextField: {
+        myField: {
           type: 'text',
         },
       },
@@ -50,17 +50,17 @@ describe('text datatype', () => {
 
     await act(async () => {
       testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
-      // Make sure all the fields are expanded and present in the DOM
-      await testBed.actions.expandAllFieldsAndReturnMetadata();
     });
 
     const {
+      exists,
+      waitForFn,
       actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
 
     // Open the flyout to edit the field
     await act(async () => {
-      await startEditField('myTextField');
+      await startEditField('myField');
     });
 
     // It should have searchable ("index" param) active by default
@@ -72,8 +72,13 @@ describe('text datatype', () => {
       await updateFieldAndCloseFlyout();
     });
 
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
     // It should have the default parameters values added
-    updatedMappings.properties.myTextField = {
+    updatedMappings.properties.myField = {
       type: 'text',
       ...defaultTextParameters,
     };
@@ -87,7 +92,7 @@ describe('text datatype', () => {
       _meta: {},
       _source: {},
       properties: {
-        myTextField: {
+        myField: {
           type: 'text',
           // Should have 2 dropdown selects:
           // The first one set to 'language' and the second one set to 'french
@@ -99,8 +104,8 @@ describe('text datatype', () => {
     let updatedMappings: any = {
       ...defaultMappings,
       properties: {
-        myTextField: {
-          ...defaultMappings.properties.myTextField,
+        myField: {
+          ...defaultMappings.properties.myField,
           ...defaultTextParameters,
         },
       },
@@ -121,7 +126,7 @@ describe('text datatype', () => {
         updateFieldAndCloseFlyout,
       },
     } = testBed;
-    const fieldToEdit = 'myTextField';
+    const fieldToEdit = 'myField';
 
     // Start edit and immediately save to have all the default values
     await startEditField(fieldToEdit);
@@ -129,8 +134,14 @@ describe('text datatype', () => {
 
     await act(async () => {
       await updateFieldAndCloseFlyout();
-      ({ data } = await getDataForwarded());
     });
+
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
+    ({ data } = await getDataForwarded());
 
     expect(data).toEqual(updatedMappings);
 
@@ -147,7 +158,7 @@ describe('text datatype', () => {
     expect(searchQuoteAnalyzerSelects.length).toBe(2);
     expect(searchQuoteAnalyzerSelects.at(0).props().value).toBe('language');
     expect(searchQuoteAnalyzerSelects.at(1).props().value).toBe(
-      defaultMappings.properties.myTextField.search_quote_analyzer
+      defaultMappings.properties.myField.search_quote_analyzer
     );
 
     // When no "search_analyzer" is defined, the checkBox should be checked
@@ -186,11 +197,16 @@ describe('text datatype', () => {
       await updateFieldAndCloseFlyout();
     });
 
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
     updatedMappings = {
       ...updatedMappings,
       properties: {
-        myTextField: {
-          ...updatedMappings.properties.myTextField,
+        myField: {
+          ...updatedMappings.properties.myField,
           analyzer: 'standard',
           search_analyzer: 'simple',
           search_quote_analyzer: 'whitespace',
@@ -222,7 +238,7 @@ describe('text datatype', () => {
       _meta: {},
       _source: {},
       properties: {
-        myTextField: {
+        myField: {
           type: 'text',
           analyzer: 'myCustomIndexAnalyzer',
           search_analyzer: 'myCustomSearchAnalyzer',
@@ -234,8 +250,8 @@ describe('text datatype', () => {
     let updatedMappings: any = {
       ...defaultMappings,
       properties: {
-        myTextField: {
-          ...defaultMappings.properties.myTextField,
+        myField: {
+          ...defaultMappings.properties.myField,
           ...defaultTextParameters,
         },
       },
@@ -247,10 +263,11 @@ describe('text datatype', () => {
       find,
       exists,
       waitFor,
+      waitForFn,
       form: { setInputValue, setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
-    const fieldToEdit = 'myTextField';
+    const fieldToEdit = 'myField';
 
     await startEditField(fieldToEdit);
     await showAdvancedSettings();
@@ -263,11 +280,9 @@ describe('text datatype', () => {
     const searchAnalyzerValue = find('searchAnalyzer-custom.input').props().value;
     const searchQuoteAnalyzerValue = find('searchQuoteAnalyzer-custom.input').props().value;
 
-    expect(indexAnalyzerValue).toBe(defaultMappings.properties.myTextField.analyzer);
-    expect(searchAnalyzerValue).toBe(defaultMappings.properties.myTextField.search_analyzer);
-    expect(searchQuoteAnalyzerValue).toBe(
-      defaultMappings.properties.myTextField.search_quote_analyzer
-    );
+    expect(indexAnalyzerValue).toBe(defaultMappings.properties.myField.analyzer);
+    expect(searchAnalyzerValue).toBe(defaultMappings.properties.myField.search_analyzer);
+    expect(searchQuoteAnalyzerValue).toBe(defaultMappings.properties.myField.search_quote_analyzer);
 
     const updatedIndexAnalyzer = 'updatedAnalyzer';
     const updatedSearchAnalyzer = 'whitespace';
@@ -288,14 +303,20 @@ describe('text datatype', () => {
 
       // Save & close
       await updateFieldAndCloseFlyout();
-      ({ data } = await getDataForwarded());
     });
+
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
+    ({ data } = await getDataForwarded());
 
     updatedMappings = {
       ...updatedMappings,
       properties: {
-        myTextField: {
-          ...updatedMappings.properties.myTextField,
+        myField: {
+          ...updatedMappings.properties.myField,
           analyzer: updatedIndexAnalyzer,
           search_analyzer: updatedSearchAnalyzer,
           search_quote_analyzer: undefined, // Index default means not declaring the analyzer
@@ -323,7 +344,7 @@ describe('text datatype', () => {
       _meta: {},
       _source: {},
       properties: {
-        myTextField: {
+        myField: {
           type: 'text',
           analyzer: customAnalyzers[0],
         },
@@ -333,8 +354,8 @@ describe('text datatype', () => {
     let updatedMappings: any = {
       ...defaultMappings,
       properties: {
-        myTextField: {
-          ...defaultMappings.properties.myTextField,
+        myField: {
+          ...defaultMappings.properties.myField,
           ...defaultTextParameters,
         },
       },
@@ -348,10 +369,12 @@ describe('text datatype', () => {
 
     const {
       find,
+      exists,
+      waitForFn,
       form: { setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
-    const fieldToEdit = 'myTextField';
+    const fieldToEdit = 'myField';
 
     await startEditField(fieldToEdit);
     await showAdvancedSettings();
@@ -362,7 +385,7 @@ describe('text datatype', () => {
     expect(indexAnalyzerSelects.length).toBe(2);
     expect(indexAnalyzerSelects.at(0).props().value).toBe('custom');
     expect(indexAnalyzerSelects.at(1).props().value).toBe(
-      defaultMappings.properties.myTextField.analyzer
+      defaultMappings.properties.myField.analyzer
     );
 
     // Access the list of option of the second dropdown select
@@ -379,14 +402,20 @@ describe('text datatype', () => {
 
       // Save & close
       await updateFieldAndCloseFlyout();
-      ({ data } = await getDataForwarded());
     });
+
+    await waitForFn(
+      async () => exists('mappingsEditorFieldEdit') === false,
+      'Error waiting for the details flyout to close'
+    );
+
+    ({ data } = await getDataForwarded());
 
     updatedMappings = {
       ...updatedMappings,
       properties: {
-        myTextField: {
-          ...updatedMappings.properties.myTextField,
+        myField: {
+          ...updatedMappings.properties.myField,
           analyzer: customAnalyzers[2],
         },
       },
