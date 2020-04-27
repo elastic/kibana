@@ -19,7 +19,7 @@
 
 export function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
   if (!metric) {
-    return [];
+    return '';
   }
 
   const details = [];

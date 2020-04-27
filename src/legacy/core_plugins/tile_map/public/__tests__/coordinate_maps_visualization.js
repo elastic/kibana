@@ -130,7 +130,6 @@ describe('CoordinateMapsVisualizationTest', function() {
       const uiSettings = $injector.get('config');
 
       dependencies = {
-        $injector,
         getZoomPrecision,
         getPrecision,
         BaseMapsVisualization,

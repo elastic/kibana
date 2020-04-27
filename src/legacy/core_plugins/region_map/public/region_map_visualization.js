@@ -27,7 +27,6 @@ import { mapTooltipProvider } from '../../../../plugins/maps_legacy/public';
 
 export function createRegionMapVisualization({
   serviceSettings,
-  $injector,
   uiSettings,
   BaseMapsVisualization,
 }) {

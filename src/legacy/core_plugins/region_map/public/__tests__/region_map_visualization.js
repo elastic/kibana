@@ -102,7 +102,7 @@ describe('RegionMapsVisualizationTests', function() {
 
   let getManifestStub;
   beforeEach(
-    ngMock.inject((Private, $injector) => {
+    ngMock.inject(() => {
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
           case 'mapConfig':
@@ -128,7 +128,6 @@ describe('RegionMapsVisualizationTests', function() {
         }
       });
       const serviceSettings = new ServiceSettings();
-      const uiSettings = $injector.get('config');
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
@@ -146,9 +145,8 @@ describe('RegionMapsVisualizationTests', function() {
 
       dependencies = {
         serviceSettings,
-        $injector,
         regionmapsConfig,
-        uiSettings,
+        uiSettings: coreSetupMock.uiSettings,
         BaseMapsVisualization,
       };
 

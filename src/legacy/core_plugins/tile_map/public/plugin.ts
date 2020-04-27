@@ -25,8 +25,8 @@ import {
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
+// TODO: Determine why visualizations don't populate without this
+import 'angular-sanitize';
 
 // @ts-ignore
 import { createTileMapFn } from './tile_map_fn';
@@ -35,7 +35,7 @@ import { createTileMapTypeDefinition } from './tile_map_type';
 import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 /** @private */
-interface TileMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
+interface TileMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   getZoomPrecision: any;
   getPrecision: any;
@@ -47,7 +47,6 @@ export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
-  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -60,7 +59,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy, __LEGACY }: TileMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
   ) {
     const { getZoomPrecision, getPrecision } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
@@ -68,7 +67,6 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
       getPrecision,
       BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
       uiSettings: core.uiSettings,
-      ...(await __LEGACY.setup()),
     };
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));

@@ -38,6 +38,6 @@ function getToolTipContent(details) {
 export function mapTooltipProvider(element, formatter) {
   return (...args) => {
     const details = formatter(...args);
-    return getToolTipContent(details);
+    return details && getToolTipContent(details);
   };
 }

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 
 export function tooltipFormatter(metricTitle, metricFormat, feature) {
   if (!feature) {
-    return [];
+    return '';
   }
 
   return [

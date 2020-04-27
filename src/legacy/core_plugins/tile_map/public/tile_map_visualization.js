@@ -29,7 +29,7 @@ import {
 import { tooltipFormatter } from './tooltip_formatter';
 
 export const createTileMapVisualization = dependencies => {
-  const { $injector, getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
+  const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
     constructor(element, vis) {
