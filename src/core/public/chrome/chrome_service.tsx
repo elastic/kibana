@@ -39,7 +39,7 @@ import { DocLinksStart } from '../doc_links';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { IUiSettingsClient } from '../ui_settings';
-import { NavSetting } from './ui/header';
+import { NavType } from './ui/header';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -207,7 +207,7 @@ export class ChromeService {
             navControlsRight$={navControls.getRight$()}
             onIsLockedUpdate={setIsNavDrawerLocked}
             isLocked$={getIsNavDrawerLocked$}
-            navSetting$={getNavType$}
+            navType$={getNavType$}
           />
         </React.Fragment>
       ),
@@ -422,7 +422,7 @@ export interface ChromeStart {
    * TODO #64541
    * Can delete
    */
-  getNavType$(): Observable<NavSetting>;
+  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

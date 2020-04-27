@@ -17,13 +17,5 @@
  * under the License.
  */
 
-export { LoadingIndicator } from './loading_indicator';
-export {
-  Header,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  NavType,
-} from './header';
+export type OnIsLockedUpdate = (isLocked: boolean) => void;
+export type NavType = 'modern' | 'legacy';

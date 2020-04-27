@@ -133,6 +133,7 @@ describe('getNavLinks', () => {
               id: 'app-a',
               title: 'AppA',
               category: {
+                id: 'foo',
                 label: 'My Category',
               },
               order: 42,
@@ -211,6 +212,7 @@ describe('getNavLinks', () => {
               id: 'link-a',
               title: 'AppA',
               category: {
+                id: 'foo',
                 label: 'My Second Cat',
               },
               order: 72,

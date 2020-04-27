@@ -43,7 +43,7 @@ import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { HeaderBadge } from './header_badge';
-import { NavSetting, OnIsLockedUpdate } from './';
+import { NavType, OnIsLockedUpdate } from './';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
@@ -71,7 +71,7 @@ export interface HeaderProps {
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Rx.Observable<boolean>;
-  navSetting$: Rx.Observable<NavSetting>;
+  navType$: Rx.Observable<NavType>;
   onIsLockedUpdate: OnIsLockedUpdate;
 }
 
@@ -85,7 +85,7 @@ interface State {
   navControlsRight: readonly ChromeNavControl[];
   currentAppId: string | undefined;
   isLocked: boolean;
-  navSetting: NavSetting;
+  navType: NavType;
   isOpen: boolean;
 }
 
@@ -109,7 +109,7 @@ export class Header extends Component<HeaderProps, State> {
       navControlsRight: [],
       currentAppId: '',
       isLocked,
-      navSetting: 'modern',
+      navType: 'modern',
       isOpen: false,
     };
   }
@@ -127,7 +127,7 @@ export class Header extends Component<HeaderProps, State> {
         this.props.navControlsRight$,
         this.props.application.currentAppId$,
         this.props.isLocked$,
-        this.props.navSetting$
+        this.props.navType$
       )
     ).subscribe({
       next: ([
@@ -136,7 +136,7 @@ export class Header extends Component<HeaderProps, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight, currentAppId, isLocked, navSetting],
+        [navControlsLeft, navControlsRight, currentAppId, isLocked, navType],
       ]) => {
         this.setState({
           appTitle,
@@ -148,7 +148,7 @@ export class Header extends Component<HeaderProps, State> {
           navControlsRight,
           currentAppId,
           isLocked,
-          navSetting,
+          navType,
         });
       },
     });
@@ -205,7 +205,7 @@ export class Header extends Component<HeaderProps, State> {
       'hide-for-sharing',
       {
         'chrHeaderWrapper--navIsLocked': this.state.isLocked,
-        headerWrapper: this.state.navSetting === 'modern',
+        headerWrapper: this.state.navType === 'modern',
       }
     );
     const navId = htmlIdGenerator()();
@@ -213,7 +213,7 @@ export class Header extends Component<HeaderProps, State> {
       <header className={className} data-test-subj="headerGlobalNav">
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
-            {this.state.navSetting === 'modern' ? (
+            {this.state.navType === 'modern' ? (
               !this.state.isLocked && (
                 <EuiHeaderSectionItem border="right">
                   <EuiHeaderSectionItemButton
@@ -272,7 +272,7 @@ export class Header extends Component<HeaderProps, State> {
             <HeaderNavControls side="right" navControls={navControlsRight} />
           </EuiHeaderSection>
         </EuiHeader>
-        {this.state.navSetting === 'modern' ? (
+        {this.state.navType === 'modern' ? (
           <CollapsibleNav
             id={navId}
             isLocked={this.state.isLocked}

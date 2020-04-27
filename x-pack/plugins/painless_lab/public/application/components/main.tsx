@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NavSetting } from 'src/core/public';
+import { NavType } from 'src/core/public';
 import { formatRequestPayload, formatJson } from '../lib/format';
 import { exampleScript } from '../constants';
 import { PayloadFormat } from '../types';
@@ -55,7 +55,7 @@ export const Main: React.FunctionComponent = () => {
   });
 
   useEffect(() => {
-    const subscription = getNavType$().subscribe((navType: NavSetting) => {
+    const subscription = getNavType$().subscribe((navType: NavType) => {
       setIsNavLegacy(navType === 'legacy');
     });
 

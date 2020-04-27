@@ -20,6 +20,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiImage } from '@elastic/eui';
+import { AppCategory } from 'src/core/types';
 import { ChromeNavLink, CoreStart, ChromeRecentlyAccessedHistoryItem } from '../../../';
 import { HttpStart } from '../../../http';
 
@@ -31,7 +32,19 @@ function LinkIcon({ url }: { url: string }) {
   return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
 }
 
-export type NavLink = ReturnType<typeof createNavLink>;
+export interface NavLink {
+  key: string;
+  label: string;
+  href: string;
+  isActive: boolean;
+  onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void;
+  category?: AppCategory;
+  isDisabled?: boolean;
+  iconType?: string;
+  icon?: JSX.Element;
+  order?: number;
+  'data-test-subj': string;
+}
 
 export function createNavLink(
   navLink: ChromeNavLink,
@@ -39,7 +52,7 @@ export function createNavLink(
   currentAppId: string | undefined,
   basePath: HttpStart['basePath'],
   navigateToApp: CoreStart['application']['navigateToApp']
-) {
+): NavLink {
   const {
     legacy,
     url,
@@ -65,7 +78,7 @@ export function createNavLink(
     key: id,
     label: tooltip ?? title,
     href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    onClick(event) {
       if (
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps

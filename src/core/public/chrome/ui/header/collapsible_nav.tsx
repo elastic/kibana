@@ -54,18 +54,18 @@ function getOrderedCategories(
   );
 }
 
-function getCategoryLocalStorageKey(label: string) {
-  return `core.navGroup.${label}`;
+function getCategoryLocalStorageKey(id: string) {
+  return `core.navGroup.${id}`;
 }
 
-function getIsCategoryOpen(label: string) {
-  const value = localStorage.getItem(getCategoryLocalStorageKey(label)) ?? 'true';
+function getIsCategoryOpen(id: string) {
+  const value = localStorage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
 
   return value === 'true';
 }
 
-function setIsCategoryOpen(label: string, isOpen: boolean) {
-  localStorage.setItem(getCategoryLocalStorageKey(label), `${isOpen}`);
+function setIsCategoryOpen(id: string, isOpen: boolean) {
+  localStorage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
 }
 
 interface Props {
@@ -89,7 +89,7 @@ export function CollapsibleNav({
   homeHref,
   id,
 }: Props) {
-  const groupedNavLinks = groupBy(navLinks, link => link?.category?.label);
+  const groupedNavLinks = groupBy(navLinks, link => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -121,9 +121,7 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
-                onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                  onIsOpenUpdate(false);
-                },
+                onClick: () => onIsOpenUpdate(false),
               },
             ]}
             maxWidth="none"
@@ -184,12 +182,12 @@ export function CollapsibleNav({
 
           return (
             <EuiCollapsibleNavGroup
-              key={category.label}
+              key={category.id}
               iconType={category.euiIconType}
               title={category.label}
               isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.label)}
-              onToggle={isCategoryOpen => setIsCategoryOpen(category.label, isCategoryOpen)}
+              initialIsOpen={getIsCategoryOpen(category.id)}
+              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen)}
             >
               <EuiListGroup
                 aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {

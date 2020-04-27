@@ -8,6 +8,7 @@
   min-height: 100%;
 
   // TODO remove when EUI is updated
+  // Patch from eui#3386 or v23.2.0
   &.euiBody--headerIsFixed {
     padding-top: 49px;
   }
