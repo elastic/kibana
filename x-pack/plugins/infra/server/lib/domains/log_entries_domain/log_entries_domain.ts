@@ -169,14 +169,7 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
-        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
-          // Users might have different types here in their mappings.
-          const value = doc.fields[field];
-          if (typeof value === 'string') {
-            ctx[field] = value;
-          }
-          return ctx;
-        }, {}),
+        context: getContextFromDoc(doc),
       };
     });
 
@@ -406,3 +399,20 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
     type: 'phrase',
   },
 });
+
+const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
+  // Get all context fields, then test for the presence and type of the ones that go together
+  const containerId = doc.fields['container.id'];
+  const hostName = doc.fields['host.name'];
+  const logFilePath = doc.fields['log.file.path'];
+
+  if (typeof containerId === 'string') {
+    return { 'container.id': containerId };
+  }
+
+  if (typeof hostName === 'string' && typeof logFilePath === 'string') {
+    return { 'host.name': hostName, 'log.file.path': logFilePath };
+  }
+
+  return {};
+};

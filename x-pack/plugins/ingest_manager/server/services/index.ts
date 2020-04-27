@@ -6,7 +6,6 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AgentStatus } from '../../common/types/models';
 
-export { appContextService } from './app_context';
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
 /**
@@ -36,3 +35,7 @@ export interface AgentService {
 export { datasourceService } from './datasource';
 export { agentConfigService } from './agent_config';
 export { outputService } from './output';
+
+// Plugin services
+export { appContextService } from './app_context';
+export { licenseService } from './license';
