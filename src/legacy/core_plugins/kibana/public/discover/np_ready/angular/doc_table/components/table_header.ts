@@ -40,9 +40,9 @@ export function createTableHeaderDirective(reactDirective: any) {
     ],
     { restrict: 'A' },
     {
-      hideTimeColumn: config.get(DOC_HIDE_TIME_COLUMN_SETTING),
+      hideTimeColumn: config.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       isShortDots: config.get('shortDots:enable'),
-      defaultSortOrder: config.get(SORT_DEFAULT_ORDER_SETTING),
+      defaultSortOrder: config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
     }
   );
 }

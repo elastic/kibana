@@ -134,7 +134,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
+        const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({

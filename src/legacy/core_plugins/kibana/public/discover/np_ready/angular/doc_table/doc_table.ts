@@ -65,7 +65,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
       };
 
       $scope.limitedResultsWarning = getLimitedSearchResultsMessage(
-        getServices().uiSettings.get(SAMPLE_SIZE_SETTING)
+        getServices().uiSettings.get(SAMPLE_SIZE_SETTING, 500)
       );
 
       $scope.addRows = function() {
