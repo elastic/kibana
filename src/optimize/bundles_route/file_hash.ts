@@ -18,20 +18,17 @@
  */
 
 import { createHash } from 'crypto';
-import { createReadStream } from 'fs';
+import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { merge, mergeMap, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
+
+import { FileHashCache } from './file_hash_cache';
 
 /**
  *  Get the hash of a file via a file descriptor
- *  @param  {LruCache} cache
- *  @param  {string} path
- *  @param  {Fs.Stat} stat
- *  @param  {Fs.FileDescriptor} fd
- *  @return {Promise<string>}
  */
-export async function getFileHash(cache, path, stat, fd) {
+export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.Stats, fd: number) {
   const key = `${path}:${stat.ino}:${stat.size}:${stat.mtime.getTime()}`;
 
   const cached = cache.get(key);
@@ -40,17 +37,17 @@ export async function getFileHash(cache, path, stat, fd) {
   }
 
   const hash = createHash('sha1');
-  const read = createReadStream(null, {
+  const read = Fs.createReadStream(null as any, {
     fd,
     start: 0,
     autoClose: false,
   });
 
-  const promise = Rx.fromEvent(read, 'data')
-    .pipe(
-      merge(Rx.fromEvent(read, 'error').pipe(mergeMap(Rx.throwError))),
-      takeUntil(Rx.fromEvent(read, 'end'))
-    )
+  const promise = Rx.merge(
+    Rx.fromEvent<Buffer>(read, 'data'),
+    Rx.fromEvent<Error>(read, 'error').pipe(Rx.throwError)
+  )
+    .pipe(takeUntil(Rx.fromEvent(read, 'end')))
     .forEach(chunk => hash.update(chunk))
     .then(() => hash.digest('hex'))
     .catch(error => {
