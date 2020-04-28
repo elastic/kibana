@@ -57,6 +57,11 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // TODO fix file names in APM to remove these
+  'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/apm/scripts/**/*',
+  'x-pack/plugins/apm/e2e/**/*',
 ];
 
 /**
