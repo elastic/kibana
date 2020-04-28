@@ -13,7 +13,7 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common' as any, 'security', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
 
   class ReportingPage {
     async forceSharedItemsContainerSize({ width }: { width: number }) {
