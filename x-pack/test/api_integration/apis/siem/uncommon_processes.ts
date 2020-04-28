@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { uncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/containers/uncommon_processes/index.gql_query';
-import { GetUncommonProcessesQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { uncommonProcessesQuery } from '../../../../plugins/siem/public/containers/uncommon_processes/index.gql_query';
+import { GetUncommonProcessesQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
