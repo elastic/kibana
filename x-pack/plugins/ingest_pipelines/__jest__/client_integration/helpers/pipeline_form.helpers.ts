@@ -33,19 +33,10 @@ export const formSetup = async (initTestBed: SetupFunc<PipelineFormTestSubjects>
     testBed.form.toggleEuiSwitch('onFailureToggle');
   };
 
-  const setEditorInputValue = async (testSubject: PipelineFormTestSubjects, value: string) => {
-    testBed.find(testSubject).simulate('change', {
-      jsonString: value,
-    });
-    await nextTick();
-    testBed.component.update();
-  };
-
   return {
     ...testBed,
     actions: {
       clickSubmitButton,
-      setEditorInputValue,
       clickShowRequestLink,
       toggleVersionSwitch,
       toggleOnFailureSwitch,
