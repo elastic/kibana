@@ -4,10 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import { EndpointAppConstants } from '../../../../common/types';
-import { paginate, paginatedResults, PaginationParams } from '../utils/pagination';
+import { ResolverEvent } from '../../../../common/types';
+import {
+  paginate,
+  paginatedResults,
+  PaginationParams,
+  PaginatedResults,
+} from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 export abstract class ResolverQuery {
   constructor(
@@ -16,22 +23,28 @@ export abstract class ResolverQuery {
     private readonly pagination?: PaginationParams
   ) {}
 
-  protected paginateBy(field: string, query: JsonObject) {
-    if (!this.pagination) {
-      return query;
-    }
-    return paginate(this.pagination, field, query);
+  protected paginateBy(tiebreaker: string, aggregator: string) {
+    return (query: JsonObject) => {
+      if (!this.pagination) {
+        return query;
+      }
+      return paginate(this.pagination, tiebreaker, aggregator, query);
+    };
   }
 
   build(...ids: string[]) {
     if (this.endpointID) {
-      return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
+      return this.legacyQuery(this.endpointID, ids, legacyEventIndexPattern);
     }
     return this.query(ids, this.indexPattern);
   }
 
   async search(client: IScopedClusterClient, ...ids: string[]) {
-    return paginatedResults(await client.callAsCurrentUser('search', this.build(...ids)));
+    return this.postSearch(await client.callAsCurrentUser('search', this.build(...ids)));
+  }
+
+  protected postSearch(response: SearchResponse<ResolverEvent>): PaginatedResults {
+    return paginatedResults(response);
   }
 
   protected abstract legacyQuery(
