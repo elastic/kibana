@@ -9,8 +9,7 @@ import { safeLoad } from 'js-yaml';
 import { DatasourceConfigRecord } from '../../../../common';
 
 function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) {
-  const yamlKeys = Object.keys(yamlVariables);
-  if (yamlKeys.length === 0) {
+  if (Object.keys(yamlVariables).length === 0) {
     return yaml;
   }
 
@@ -19,7 +18,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
       yaml[key] = replaceVariablesInYaml(yamlVariables, value);
     }
 
-    if (typeof value === 'string' && yamlKeys.indexOf(value) >= 0) {
+    if (typeof value === 'string' && value in yamlVariables) {
       yaml[key] = yamlVariables[value];
     }
   });
@@ -27,7 +26,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
+function buildTemplateVariables(variables: DatasourceConfigRecord) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
@@ -56,8 +55,15 @@ export function createStream(variables: DatasourceConfigRecord, streamTemplate: 
     return acc;
   }, {} as { [k: string]: any });
 
+  return { vars, yamlValues };
+}
+
+export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
+  const { vars, yamlValues } = buildTemplateVariables(variables);
+
   const template = Handlebars.compile(streamTemplate, { noEscape: true });
   const stream = template(vars);
+
   const yamlFromStream = safeLoad(stream, {});
 
   return replaceVariablesInYaml(yamlValues, yamlFromStream);
