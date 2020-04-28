@@ -260,9 +260,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   search={
     Object {
       "__LEGACY": Object {
-        "aggTypeFieldFilters": AggTypeFieldFilters {
-          "filters": Set {},
-        },
         "esClient": Object {
           "msearch": [MockFunction],
           "search": [MockFunction],

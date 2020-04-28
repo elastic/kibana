@@ -288,9 +288,8 @@ export {
 
 import {
   // aggs
-  aggTypeFilters,
   CidrMask,
-  intervalOptions, // only used in Discover
+  intervalOptions,
   isDateHistogramBucketAggConfig,
   isNumberType,
   isStringType,
@@ -327,8 +326,6 @@ export {
   AggParam,
   AggParamOption,
   AggParamType,
-  AggTypeFieldFilters, // TODO convert to interface
-  AggTypeFilters, // TODO convert to interface
   AggConfigOptions,
   BUCKET_TYPES,
   IAggConfig,
@@ -376,12 +373,11 @@ export {
 // Search namespace
 export const search = {
   aggs: {
-    aggTypeFilters,
     CidrMask,
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    isDateHistogramBucketAggConfig,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
     isType,

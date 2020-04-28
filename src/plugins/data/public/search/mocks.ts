@@ -18,7 +18,6 @@
  */
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { AggTypeFieldFilters } from './aggs/param_types/filter';
 import { ISearchStart } from './types';
 import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
 
@@ -34,7 +33,6 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   search: jest.fn(),
   searchSource: searchSourceMock,
   __LEGACY: {
-    aggTypeFieldFilters: new AggTypeFieldFilters(),
     esClient: {
       search: jest.fn(),
       msearch: jest.fn(),

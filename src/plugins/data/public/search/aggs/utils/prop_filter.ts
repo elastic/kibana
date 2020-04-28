@@ -28,7 +28,7 @@ type FilterFunc<P extends keyof T, T> = (item: T[P]) => boolean;
  *
  * @returns the filter function which can be registered with angular
  */
-function propFilter<P extends string>(prop: P) {
+export function propFilter<P extends string>(prop: P) {
   /**
    * List filtering function which accepts an array or list of values that a property
    * must contain
@@ -93,4 +93,4 @@ function propFilter<P extends string>(prop: P) {
   };
 }
 
-export { propFilter };
+export const filterByName = propFilter('name');

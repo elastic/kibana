@@ -42,7 +42,6 @@ import {
   AggTypesRegistry,
   AggConfigs,
   getCalculateAutoTimeExpression,
-  aggTypeFieldFilters,
 } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
@@ -150,7 +149,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const legacySearch = {
       esClient: this.esClient!,
-      aggTypeFieldFilters,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {

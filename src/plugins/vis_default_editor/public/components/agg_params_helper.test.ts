@@ -23,7 +23,6 @@ import {
   IAggConfig,
   IAggType,
   IndexPattern,
-  IndexPatternField,
 } from 'src/plugins/data/public';
 import {
   getAggParamsToRender,
@@ -38,12 +37,6 @@ import { EditorVisState } from './sidebar/state/reducers';
 jest.mock('../utils', () => ({
   groupAndSortBy: jest.fn(() => ['indexedFields']),
 }));
-
-const mockFilter: any = {
-  filter(fields: IndexPatternField[]): IndexPatternField[] {
-    return fields;
-  },
-};
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {
@@ -72,20 +65,14 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric',
       } as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
 
     it('should not create any param if there is no agg type', () => {
       agg = { schema: 'metric' } as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -101,10 +88,7 @@ describe('DefaultEditorAggParams helpers', () => {
           hidden: true,
         },
       };
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -116,10 +100,7 @@ describe('DefaultEditorAggParams helpers', () => {
         },
         schema: 'metric2',
       } as any) as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual(emptyParams);
     });
@@ -158,10 +139,7 @@ describe('DefaultEditorAggParams helpers', () => {
           field: 'field',
         },
       } as any) as IAggConfig;
-      const params = getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas },
-        mockFilter
-      );
+      const params = getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas });
 
       expect(params).toEqual({
         basic: [
@@ -190,7 +168,6 @@ describe('DefaultEditorAggParams helpers', () => {
         ],
         advanced: [],
       });
-      expect(agg.getIndexPattern).toBeCalledTimes(1);
     });
   });
 

@@ -112,20 +112,8 @@ function DefaultEditorAggParams({
     fieldName,
   ]);
   const params = useMemo(
-    () =>
-      getAggParamsToRender(
-        { agg, editorConfig, metricAggs, state, schemas, hideCustomLabel },
-        services.data.search.__LEGACY.aggTypeFieldFilters
-      ),
-    [
-      agg,
-      editorConfig,
-      metricAggs,
-      state,
-      schemas,
-      hideCustomLabel,
-      services.data.search.__LEGACY.aggTypeFieldFilters,
-    ]
+    () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
+    [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
   );
   const allParams = [...params.basic, ...params.advanced];
   const [paramsState, onChangeParamsState] = useReducer(

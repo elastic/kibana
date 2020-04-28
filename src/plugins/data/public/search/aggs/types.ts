@@ -22,7 +22,6 @@ import {
   AggConfigSerialized,
   AggConfigs,
   AggParamsTerms,
-  aggTypeFieldFilters,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
@@ -43,11 +42,6 @@ export { OptionedValueProp } from './param_types/optioned';
 export interface SearchAggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
-}
-
-/** @internal */
-export interface SearchAggsStartLegacy {
-  aggTypeFieldFilters: typeof aggTypeFieldFilters;
 }
 
 /** @internal */
