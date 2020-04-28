@@ -4,32 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useCallback, useMemo } from 'react';
-import { noop } from 'lodash';
 import {
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalBody,
-  EuiText,
-  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiOverlayMask,
+  EuiText,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { noop } from 'lodash';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/http_api';
-import { Source } from '../../../containers/source';
-import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
+import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
 
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const { source } = useContext(Source.Context);
+  const { sourceConfiguration } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
-  const columnConfigurations = useMemo(() => (source && source.configuration.logColumns) || [], [
-    source,
+  const columnConfigurations = useMemo(() => sourceConfiguration?.configuration.logColumns ?? [], [
+    sourceConfiguration,
   ]);
   const [{ contextEntry, entries, isLoading }, { setContextEntry }] = useContext(
     ViewLogInContext.Context

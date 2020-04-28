@@ -19,21 +19,21 @@ export const throwErrors = (createError: ErrorFactory) => (errors: Errors) => {
   throw createError(failure(errors).join('\n'));
 };
 
-export const decodeOrThrow = <A, O, I>(
-  runtimeType: Type<A, O, I>,
+export const decodeOrThrow = <DecodedValue, EncodedValue, InputValue>(
+  runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
   createError: ErrorFactory = createPlainError
-) => (inputValue: I) =>
+) => (inputValue: InputValue) =>
   pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
 
-export const createValidationFunction = <A, O, I>(
-  runtimeType: Type<A, O, I>
-): RouteValidationFunction<A> => (inputValue, { badRequest, ok }) =>
+export const createValidationFunction = <DecodedValue, EncodedValue, InputValue>(
+  runtimeType: Type<DecodedValue, EncodedValue, InputValue>
+): RouteValidationFunction<DecodedValue> => (inputValue, { badRequest, ok }) =>
   pipe(
     runtimeType.decode(inputValue),
-    fold<Errors, A, ValdidationResult<A>>(
+    fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
       (errors: Errors) => badRequest(failure(errors).join('\n')),
-      (result: A) => ok(result)
+      (result: DecodedValue) => ok(result)
     )
   );
