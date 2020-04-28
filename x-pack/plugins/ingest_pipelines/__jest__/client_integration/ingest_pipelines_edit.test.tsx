@@ -8,9 +8,9 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { PipelineFormTestBed } from './helpers/pipeline_form.helpers';
-import { PIPELINE_TO_CLONE } from './helpers/pipelines_clone.helpers';
+import { PIPELINE_TO_EDIT } from './helpers/pipelines_edit.helpers';
 
-const { setup } = pageHelpers.pipelinesClone;
+const { setup } = pageHelpers.pipelinesEdit;
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -25,7 +25,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-describe('<PipelinesClone />', () => {
+describe('<PipelinesEdit />', () => {
   let testBed: PipelineFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -35,7 +35,7 @@ describe('<PipelinesClone />', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_CLONE);
+    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT);
 
     await act(async () => {
       testBed = await setup();
@@ -48,16 +48,27 @@ describe('<PipelinesClone />', () => {
 
     // Verify page title
     expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual('Create pipeline');
+    expect(find('pageTitle').text()).toEqual(`Edit pipeline '${PIPELINE_TO_EDIT.name}'`);
 
     // Verify documentation link
     expect(exists('documentationLink')).toBe(true);
-    expect(find('documentationLink').text()).toBe('Create pipeline docs');
+    expect(find('documentationLink').text()).toBe('Edit pipeline docs');
+  });
+
+  it('should disable the name field', () => {
+    const { find } = testBed;
+
+    const nameInput = find('nameField.input');
+    expect(nameInput.props().disabled).toEqual(true);
   });
 
   describe('form submission', () => {
-    it('should send the correct payload', async () => {
-      const { actions } = testBed;
+    it('should send the correct payload with changed values', async () => {
+      const UPDATED_DESCRIPTION = 'updated pipeline description';
+      const { actions, form } = testBed;
+
+      // Make change to description field
+      form.setInputValue('descriptionField.input', UPDATED_DESCRIPTION);
 
       await act(async () => {
         actions.clickSubmitButton();
@@ -66,9 +77,11 @@ describe('<PipelinesClone />', () => {
 
       const latestRequest = server.requests[server.requests.length - 1];
 
+      const { name, ...pipelineDefinition } = PIPELINE_TO_EDIT;
+
       const expected = {
-        ...PIPELINE_TO_CLONE,
-        name: `${PIPELINE_TO_CLONE.name}-copy`,
+        ...pipelineDefinition,
+        description: UPDATED_DESCRIPTION,
       };
 
       expect(JSON.parse(latestRequest.requestBody)).toEqual(expected);

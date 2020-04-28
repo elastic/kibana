@@ -7,6 +7,7 @@
 import { setup as ingestPipelinesListSetup } from './ingest_pipelines_list.helpers';
 import { setup as pipelinesCreateSetup } from './pipelines_create.helpers';
 import { setup as pipelinesCloneSetup } from './pipelines_clone.helpers';
+import { setup as pipelinesEditSetup } from './pipelines_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -16,4 +17,5 @@ export const pageHelpers = {
   ingestPipelinesList: { setup: ingestPipelinesListSetup },
   pipelinesCreate: { setup: pipelinesCreateSetup },
   pipelinesClone: { setup: pipelinesCloneSetup },
+  pipelinesEdit: { setup: pipelinesEditSetup },
 };

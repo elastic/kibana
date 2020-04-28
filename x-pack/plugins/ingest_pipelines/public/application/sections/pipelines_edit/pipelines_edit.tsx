@@ -132,6 +132,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
                 href={services.documentation.getPutPipelineApiUrl()}
                 target="_blank"
                 iconType="help"
+                data-test-subj="documentationLink"
               >
                 <FormattedMessage
                   id="xpack.ingestPipelines.edit.docsButtonLabel"
