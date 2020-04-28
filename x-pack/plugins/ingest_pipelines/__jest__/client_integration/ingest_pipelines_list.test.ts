@@ -9,9 +9,9 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { ListTestBed } from './helpers/ingest_pipelines_list.helpers';
+import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
 
-const { setup } = pageHelpers.ingestPipelinesList;
+const { setup } = pageHelpers.pipelinesList;
 
 jest.mock('ui/i18n', () => {
   const I18nContext = ({ children }: any) => children;
@@ -20,7 +20,7 @@ jest.mock('ui/i18n', () => {
 
 describe('<PipelinesList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: ListTestBed;
+  let testBed: PipelineListTestBed;
 
   afterAll(() => {
     server.restore();
@@ -47,14 +47,13 @@ describe('<PipelinesList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        const { component } = testBed;
+        const { waitFor } = testBed;
 
-        await nextTick(100);
-        component.update();
+        await waitFor('pipelinesTable');
       });
     });
 
-    test('should render the table', async () => {
+    test('should render the list view', async () => {
       const { exists, find, table } = testBed;
 
       // Verify app title
@@ -143,18 +142,18 @@ describe('<PipelinesList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        const { component } = testBed;
+        const { waitFor } = testBed;
 
-        await nextTick(100);
-        component.update();
+        await waitFor('emptyList');
       });
     });
 
     test('should display an empty prompt', async () => {
-      const { exists } = testBed;
+      const { exists, find } = testBed;
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyList')).toBe(true);
+      expect(find('emptyList.title').text()).toEqual('Start by creating a pipeline');
     });
   });
 
@@ -171,17 +170,19 @@ describe('<PipelinesList />', () => {
       testBed = await setup();
 
       await act(async () => {
-        const { component } = testBed;
+        const { waitFor } = testBed;
 
-        await nextTick(100);
-        component.update();
+        await waitFor('pipelineLoadError');
       });
     });
 
     test('should render an error message if error fetching pipelines', async () => {
-      const { exists } = testBed;
+      const { exists, find } = testBed;
 
       expect(exists('pipelineLoadError')).toBe(true);
+      expect(find('pipelineLoadError').text()).toEqual(
+        'Cannot load pipelines, please refresh the page to try again.'
+      );
     });
   });
 });

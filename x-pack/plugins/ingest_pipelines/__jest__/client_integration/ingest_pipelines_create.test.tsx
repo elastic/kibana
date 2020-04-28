@@ -193,12 +193,11 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should open the test pipeline flyout', async () => {
-        const { actions, component, exists, find } = testBed;
+        const { actions, exists, find, waitFor } = testBed;
 
         await act(async () => {
           actions.clickTestPipelineButton();
-          await nextTick();
-          component.update();
+          await waitFor('testPipelineFlyout');
         });
 
         // Verify test pipeline flyout opens

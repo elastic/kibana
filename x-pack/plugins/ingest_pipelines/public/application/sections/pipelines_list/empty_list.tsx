@@ -13,7 +13,7 @@ export const EmptyList: FunctionComponent = () => (
     data-test-subj="emptyList"
     iconType="managementApp"
     title={
-      <h2>
+      <h2 data-test-subj="title">
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptTitle', {
           defaultMessage: 'Start by creating a pipeline',
         })}

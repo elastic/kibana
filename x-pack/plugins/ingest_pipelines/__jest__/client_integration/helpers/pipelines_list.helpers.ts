@@ -27,7 +27,7 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(PipelinesList), testBedConfig);
 
-export interface ListTestBed extends TestBed<TestSubjects> {
+export interface PipelineListTestBed extends TestBed<PipelineListTestSubjects> {
   actions: {
     clickReloadButton: () => void;
     clickPipelineAt: (index: number) => Promise<void>;
@@ -36,7 +36,7 @@ export interface ListTestBed extends TestBed<TestSubjects> {
   };
 }
 
-export const setup = async (): Promise<ListTestBed> => {
+export const setup = async (): Promise<PipelineListTestBed> => {
   const testBed = await initTestBed();
   const { find } = testBed;
 
@@ -90,7 +90,7 @@ export const setup = async (): Promise<ListTestBed> => {
   };
 };
 
-export type TestSubjects =
+export type PipelineListTestSubjects =
   | 'appTitle'
   | 'documentationLink'
   | 'createPipelineButton'
@@ -99,6 +99,7 @@ export type TestSubjects =
   | 'pipelineDetails.title'
   | 'deletePipelinesConfirmation'
   | 'emptyList'
+  | 'emptyList.title'
   | 'sectionLoading'
   | 'pipelineLoadError'
   | 'reloadButton';
