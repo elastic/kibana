@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import header from './header.png';
-
 import { ElementFactory } from '../../../types';
 export const markdown: ElementFactory = () => ({
   name: 'markdown',
-  displayName: 'Markdown',
-  tags: ['text'],
-  help: 'Markup from Markdown',
-  image: header,
+  displayName: 'Text',
+  type: 'text',
+  help: 'Add text using Markdown',
+  icon: 'visText',
   expression: `filters
 | demodata
 | markdown "### Welcome to the Markdown element

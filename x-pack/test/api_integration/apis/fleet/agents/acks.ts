@@ -32,12 +32,12 @@ export default function(providerContext: FtrProviderContext) {
         body: { _source: agentDoc },
       } = await esClient.get({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
       });
-      agentDoc.agents.access_api_key_id = apiKey.id;
+      agentDoc['fleet-agents'].access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
         refresh: 'true',
         body: {
           doc: agentDoc,

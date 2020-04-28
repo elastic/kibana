@@ -5,8 +5,6 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import header from './header.png';
-
 import { ElementFactory } from '../../../types';
 import { SetupInitializer } from '../../plugin';
 
@@ -14,11 +12,11 @@ export const metricElementInitializer: SetupInitializer<ElementFactory> = (core,
   return () => ({
     name: 'metric',
     displayName: 'Metric',
-    tags: ['text'],
+    type: 'chart',
     help: 'A number with a label',
     width: 200,
     height: 100,
-    image: header,
+    icon: 'visMetric',
     expression: `filters
   | demodata
   | math "unique(country)"

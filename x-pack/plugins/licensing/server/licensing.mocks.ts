@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { LicensingPluginSetup } from './types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { licenseMock } from '../common/licensing.mock';
+import { featureUsageMock } from './services/feature_usage_service.mock';
 
 const createSetupMock = () => {
   const license = licenseMock.createLicense();
@@ -13,6 +14,7 @@ const createSetupMock = () => {
     license$: new BehaviorSubject(license),
     refresh: jest.fn(),
     createLicensePoller: jest.fn(),
+    featureUsage: featureUsageMock.createSetup(),
   };
   mock.refresh.mockResolvedValue(license);
   mock.createLicensePoller.mockReturnValue({
@@ -23,7 +25,16 @@ const createSetupMock = () => {
   return mock;
 };
 
+const createStartMock = (): jest.Mocked<LicensingPluginStart> => {
+  const mock = {
+    featureUsage: featureUsageMock.createStart(),
+  };
+
+  return mock;
+};
+
 export const licensingMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
   createLicense: licenseMock.createLicense,
 };
