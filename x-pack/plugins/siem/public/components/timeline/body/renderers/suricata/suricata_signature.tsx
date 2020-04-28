@@ -28,9 +28,9 @@ const SignatureFlexItem = styled(EuiFlexItem)`
 
 SignatureFlexItem.displayName = 'SignatureFlexItem';
 
-const Badge = styled(EuiBadge)`
+const Badge = (styled(EuiBadge)`
   vertical-align: top;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 
