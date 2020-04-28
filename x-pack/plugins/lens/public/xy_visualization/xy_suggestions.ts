@@ -175,6 +175,17 @@ function getSuggestionsForLayer({
     keptLayerIds,
   };
 
+  if (!currentState && changeType === 'unchanged') {
+    return [
+      buildSuggestion({
+        ...options,
+        title: i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+          defaultMessage: 'Bar chart',
+        }),
+      }),
+    ];
+  }
+
   const isSameState = currentState && changeType === 'unchanged';
 
   if (!isSameState) {
@@ -377,7 +388,7 @@ function buildSuggestion({
       ? getScore(yValues, splitBy, changeType)
       : getScore(yValues, splitBy, changeType) / 2, // Lower score for non-XY charts
     // don't advertise chart of same type but with less data
-    hide: currentState && changeType === 'reduced',
+    hide: (!currentState && changeType === 'reorder') || (currentState && changeType === 'reduced'),
     state,
     previewIcon: getIconForSeries(seriesType),
   };

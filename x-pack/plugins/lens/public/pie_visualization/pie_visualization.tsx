@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
 import { pieSuggestions } from './suggestions';
-import { CHART_NAMES, MAX_PIE_BUCKETS } from './constants';
+import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { SettingsWidget } from './settings_widget';
 
 function newLayerState(layerId: string): LayerState {
   return {
     layerId,
     slices: [],
     metric: undefined,
+    numberDisplay: 'hidden',
+    categoryDisplay: 'default',
+    legendDisplay: 'default',
   };
 }
 
@@ -37,6 +44,11 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       largeIcon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
     },
+    {
+      id: 'treemap',
+      largeIcon: CHART_NAMES.treemap.icon,
+      label: CHART_NAMES.treemap.label,
+    },
   ],
 
   getLayerIds(state) {
@@ -51,6 +63,9 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
   },
 
   getDescription(state) {
+    if (state.shape === 'treemap') {
+      return CHART_NAMES.treemap;
+    }
     if (state.shape === 'donut') {
       return CHART_NAMES.donut;
     }
@@ -89,12 +104,47 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     // When we add a column it could be empty, and therefore have no order
     const sortedColumns = Array.from(new Set(originalOrder.concat(layer.slices)));
 
+    if (state.shape === 'treemap') {
+      return {
+        groups: [
+          {
+            groupId: 'slices',
+            // groupLabel: i18n.translate('xpack.lens.treemap.rectangle', {
+            //   defaultMessage: 'Rectangle',
+            // }),
+            groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
+              defaultMessage: 'Group by',
+            }),
+            layerId,
+            accessors: sortedColumns,
+            supportsMoreColumns: sortedColumns.length < MAX_TREEMAP_BUCKETS,
+            filterOperations: bucketedOperations,
+            required: true,
+          },
+          {
+            groupId: 'metric',
+            // groupLabel: i18n.translate('xpack.lens.pie.metric', {
+            //   defaultMessage: 'Metric',
+            // }),
+            groupLabel: i18n.translate('xpack.lens.pie.sliceSizeLabel', {
+              defaultMessage: 'Size by',
+            }),
+            layerId,
+            accessors: layer.metric ? [layer.metric] : [],
+            supportsMoreColumns: !layer.metric,
+            filterOperations: numberMetricOperations,
+            required: true,
+          },
+        ],
+      };
+    }
+
     return {
       groups: [
         {
           groupId: 'slices',
-          groupLabel: i18n.translate('xpack.lens.pie.slices', {
-            defaultMessage: 'Slices',
+          groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+            defaultMessage: 'Slice by',
           }),
           layerId,
           accessors: sortedColumns,
@@ -104,8 +154,8 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
         },
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.pie.metric', {
-            defaultMessage: 'Metric',
+          groupLabel: i18n.translate('xpack.lens.pie.sliceSizeLabel', {
+            defaultMessage: 'Size by',
           }),
           layerId,
           accessors: layer.metric ? [layer.metric] : [],
@@ -163,4 +213,13 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
 
   toExpression,
   toPreviewExpression,
+
+  renderLayerContextMenu(domElement, props) {
+    render(
+      <I18nProvider>
+        <SettingsWidget {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
 };

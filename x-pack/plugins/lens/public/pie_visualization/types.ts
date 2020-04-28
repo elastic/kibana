@@ -7,23 +7,27 @@
 import { KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
-export interface LayerState {
-  layerId: string;
+export interface SharedLayerState {
   slices: string[];
   metric?: string;
+  numberDisplay: 'hidden' | 'percent' | 'value';
+  categoryDisplay: 'default' | 'link' | 'inside' | 'hide';
+  legendDisplay: 'default' | 'nested' | 'hide';
 }
+
+export type LayerState = SharedLayerState & {
+  layerId: string;
+};
 
 export interface PieVisualizationState {
   shape: 'donut' | 'pie' | 'treemap';
   layers: LayerState[];
 }
 
-export interface PieExpressionArgs {
-  slices: string[];
-  metric?: string;
+export type PieExpressionArgs = SharedLayerState & {
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
-}
+};
 
 export interface PieExpressionProps {
   data: LensMultiTable;

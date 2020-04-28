@@ -122,8 +122,8 @@ export const datatableVisualization: Visualization<
           ],
         },
         previewIcon: chartTableSVG,
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced' || !table.isMultiRow,
+        // don't show table suggestions on bottom row, but keep when doing chart switching
+        hide: true,
       },
     ];
   },

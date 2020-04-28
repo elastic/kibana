@@ -54,6 +54,21 @@ export const pie: ExpressionFunctionDefinition<
       types: ['boolean'],
       help: '',
     },
+    numberDisplay: {
+      types: ['string'],
+      options: ['hidden', 'percent', 'value'],
+      help: '',
+    },
+    categoryDisplay: {
+      types: ['string'],
+      options: ['default', 'link', 'inside', 'hide'],
+      help: '',
+    },
+    legendDisplay: {
+      types: ['string'],
+      options: ['default', 'nested', 'hide'],
+      help: '',
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: PieExpressionArgs) {

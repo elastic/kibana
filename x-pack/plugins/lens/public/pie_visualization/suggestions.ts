@@ -33,7 +33,8 @@ export function pieSuggestions({
 
   const [slices, metrics] = partition(table.columns, col => col.operation.isBucketed);
 
-  if (slices.length === 0 || slices.length > MAX_PIE_BUCKETS || metrics.length !== 1) {
+  const MAX_GROUPS = state?.shape === 'treemap' ? MAX_TREEMAP_BUCKETS : MAX_PIE_BUCKETS;
+  if (slices.length === 0 || slices.length > MAX_GROUPS || metrics.length !== 1) {
     return [];
   }
 
@@ -72,74 +73,15 @@ export function pieSuggestions({
             layerId: table.layerId,
             slices: slices.map(col => col.columnId),
             metric: metrics[0].columnId,
+            numberDisplay: state?.layers[0]?.numberDisplay || 'hidden',
+            categoryDisplay: state?.layers[0]?.categoryDisplay || 'default',
+            legendDisplay: state?.layers[0]?.legendDisplay || 'default',
           },
         ],
       },
       previewIcon: 'bullseye',
       // dont show suggestions for same type
-      hide: !state && table.changeType === 'reduced',
-    },
-  ];
-}
-
-export function treemapSuggestions({
-  table,
-  state,
-  keptLayerIds,
-}: SuggestionRequest<PieVisualizationState>): Array<
-  VisualizationSuggestion<PieVisualizationState>
-> {
-  if (shouldReject({ table, state, keptLayerIds })) {
-    return [];
-  }
-
-  const [slices, metrics] = partition(table.columns, col => col.operation.isBucketed);
-
-  if (slices.length === 0 || slices.length > MAX_TREEMAP_BUCKETS || metrics.length !== 1) {
-    return [];
-  }
-
-  const title =
-    table.changeType === 'unchanged'
-      ? i18n.translate('xpack.lens.pie.suggestionLabel', {
-          defaultMessage: 'As {chartName}',
-          values: { chartName: CHART_NAMES.treemap.label },
-        })
-      : i18n.translate('xpack.lens.pie.suggestionOf', {
-          defaultMessage: '{chartName} {operations}',
-          values: {
-            chartName: CHART_NAMES.treemap.label,
-            operations:
-              table.label ||
-              table.columns
-                .map(col => col.operation.label)
-                .join(
-                  i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                    defaultMessage: ' & ',
-                    description:
-                      'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                  })
-                ),
-          },
-        });
-
-  return [
-    {
-      title,
-      score: 0.6,
-      state: {
-        shape: 'treemap',
-        layers: [
-          {
-            layerId: table.layerId,
-            slices: slices.map(col => col.columnId),
-            metric: metrics[0].columnId,
-          },
-        ],
-      },
-      previewIcon: 'bullseye',
-      // dont show suggestions for reduced versions or single-line tables
-      hide: !state && table.changeType === 'reduced',
+      hide: table.changeType === 'reduced',
     },
   ];
 }
