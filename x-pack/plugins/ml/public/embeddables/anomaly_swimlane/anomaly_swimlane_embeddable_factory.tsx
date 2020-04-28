@@ -97,9 +97,9 @@ export class AnomalySwimlaneEmbeddableFactory
                 toMountPoint(
                   <AnomalySwimlaneInitializer
                     influencers={influencers}
-                    onCreate={({ viewBy, swimlaneType }) => {
+                    onCreate={({ viewBy, swimlaneType, limit }) => {
                       modalSession.close();
-                      resolve({ jobIds, title, viewBy, swimlaneType });
+                      resolve({ jobIds, title, swimlaneType, viewBy, limit });
                     }}
                     onCancel={() => {
                       modalSession.close();

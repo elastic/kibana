@@ -98,7 +98,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       .pipe(
         debounceTime(500),
         switchMap(([jobs, input, swimlaneContainerWidth]) => {
-          const { viewBy, swimlaneType: swimlaneTypeInput, timeRange } = input;
+          const { viewBy, swimlaneType: swimlaneTypeInput, limit, timeRange } = input;
 
           explorerService.setTimeRange(timeRange);
 
@@ -126,7 +126,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
                     { earliest, latest },
                     explorerJobs,
                     viewBy!,
-                    5,
+                    limit!,
                     swimlaneContainerWidth
                   )
                 ).pipe(

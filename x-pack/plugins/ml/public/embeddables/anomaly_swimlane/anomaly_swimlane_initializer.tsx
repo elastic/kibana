@@ -23,9 +23,14 @@ import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 export interface AnomalySwimlaneInitializerProps {
   influencers: string[];
-  onCreate: (swimlaneProps: { swimlaneType: string; viewBy?: string }) => void;
+  onCreate: (swimlaneProps: { swimlaneType: string; viewBy?: string; limit?: number }) => void;
   onCancel: () => void;
 }
+
+const limitOptions = [5, 10, 25, 50].map(limit => ({
+  value: limit,
+  text: `${limit}`,
+}));
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
   influencers,
@@ -34,6 +39,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 }) => {
   const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(SWIMLANE_TYPE.OVERALL);
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState();
+  const [limit, setLimit] = useState(5);
 
   const swimlaneTypeOptions = [
     {
@@ -97,19 +103,34 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
           </EuiFormRow>
 
           {swimlaneType === SWIMLANE_TYPE.VIEW_BY && (
-            <EuiFormRow
-              label={
-                <FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />
-              }
-            >
-              <EuiSelect
-                id="selectViewBy"
-                name="selectViewBy"
-                options={viewBySwimlaneOptions}
-                value={viewBySwimlaneFieldName}
-                onChange={e => setViewBySwimlaneFieldName(e.target.value)}
-              />
-            </EuiFormRow>
+            <>
+              <EuiFormRow
+                label={
+                  <FormattedMessage id="xpack.ml.explorer.viewByLabel" defaultMessage="View by" />
+                }
+              >
+                <EuiSelect
+                  id="selectViewBy"
+                  name="selectViewBy"
+                  options={viewBySwimlaneOptions}
+                  value={viewBySwimlaneFieldName}
+                  onChange={e => setViewBySwimlaneFieldName(e.target.value)}
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={
+                  <FormattedMessage id="xpack.ml.explorer.limitLabel" defaultMessage="Limit" />
+                }
+              >
+                <EuiSelect
+                  id="limit"
+                  name="limit"
+                  options={limitOptions}
+                  value={limit}
+                  onChange={e => setLimit(Number(e.target.value))}
+                />
+              </EuiFormRow>
+            </>
           )}
         </EuiForm>
       </EuiModalBody>
@@ -119,7 +140,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
         <EuiButton
           isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, { swimlaneType, viewBy: viewBySwimlaneFieldName })}
+          onClick={onCreate.bind(null, { swimlaneType, viewBy: viewBySwimlaneFieldName, limit })}
           fill
         >
           Create

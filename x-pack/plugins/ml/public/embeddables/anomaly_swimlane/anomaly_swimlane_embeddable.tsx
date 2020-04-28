@@ -30,8 +30,9 @@ export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
-  viewBy?: string;
   swimlaneType: string;
+  viewBy?: string;
+  limit?: number;
 
   // Embeddable inputs which are not included in the default interface
   filters: Filter[];
@@ -46,6 +47,7 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   jobIds: JobId[];
   swimlaneType: string;
   viewBy?: string;
+  limit?: number;
 }
 
 export interface MlServices {
