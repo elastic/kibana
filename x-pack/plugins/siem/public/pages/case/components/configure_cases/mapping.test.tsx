@@ -21,6 +21,7 @@ describe('Mapping', () => {
     updateConnectorDisabled: false,
     onChangeMapping,
     setEditFlyoutVisibility,
+    connectorActionTypeId: '.servicenow',
   };
 
   beforeAll(() => {

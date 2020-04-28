@@ -10,12 +10,9 @@
 import { ActionType } from '../../../../triggers_actions_ui/public';
 import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
-import {
-  ActionType as ThirdPartySupportedActions,
-  CaseField,
-} from '../../../../../../plugins/case/common/api';
+import { ActionType as ThirdPartySupportedActions, CaseField } from '../../../../case/common/api';
 
-export { ThirdPartyField as AllThirdPartyFields } from '../../../../../../plugins/case/common/api';
+export { ThirdPartyField as AllThirdPartyFields } from '../../../../case/common/api';
 
 export interface ThirdPartyField {
   label: string;

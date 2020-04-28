@@ -12,7 +12,7 @@ import {
   JiraSecretConfigurationType,
 } from '../../../../../actions/server/builtin_action_types/jira/types';
 
-export { JiraFieldsType } from '../../../../../../../plugins/case/common/api/connectors';
+export { JiraFieldsType } from '../../../../../case/common/api/connectors';
 
 export * from '../types';
 

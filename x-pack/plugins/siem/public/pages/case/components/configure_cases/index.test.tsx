@@ -190,6 +190,26 @@ describe('ConfigureCases', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'platinum',
+          fields: {
+            short_description: {
+              label: 'Short Description',
+              validSourceFields: ['title', 'description'],
+              defaultSourceField: 'title',
+              defaultActionType: 'overwrite',
+            },
+            description: {
+              label: 'Description',
+              validSourceFields: ['title', 'description'],
+              defaultSourceField: 'description',
+              defaultActionType: 'overwrite',
+            },
+            comments: {
+              label: 'Comments',
+              validSourceFields: ['comments'],
+              defaultSourceField: 'comments',
+              defaultActionType: 'append',
+            },
+          },
         },
         {
           id: '.jira',
@@ -199,6 +219,26 @@ describe('ConfigureCases', () => {
           enabledInConfig: true,
           enabledInLicense: true,
           minimumLicenseRequired: 'platinum',
+          fields: {
+            summary: {
+              label: 'Summary',
+              validSourceFields: ['title', 'description'],
+              defaultSourceField: 'title',
+              defaultActionType: 'overwrite',
+            },
+            description: {
+              label: 'Description',
+              validSourceFields: ['title', 'description'],
+              defaultSourceField: 'description',
+              defaultActionType: 'overwrite',
+            },
+            comments: {
+              label: 'Comments',
+              validSourceFields: ['comments'],
+              defaultSourceField: 'comments',
+              defaultActionType: 'append',
+            },
+          },
         },
       ]);
 
