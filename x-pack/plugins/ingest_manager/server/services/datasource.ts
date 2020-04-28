@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'src/core/server';
+import { safeLoad } from 'js-yaml';
 import { AuthenticatedUser } from '../../../security/server';
-import { DeleteDatasourcesResponse, packageToConfigDatasource } from '../../common';
+import {
+  DeleteDatasourcesResponse,
+  packageToConfigDatasource,
+  DatasourceInput,
+  DatasourceInputStream,
+} from '../../common';
 import { DATASOURCE_SAVED_OBJECT_TYPE } from '../constants';
 import { NewDatasource, Datasource, ListWithKuery } from '../types';
 import { agentConfigService } from './agent_config';
 import { getPackageInfo, getInstallation } from './epm/packages';
 import { outputService } from './output';
+import { getAssetsDataForPackageKey } from './epm/packages/assets';
+import { createStream } from './epm/agent/agent';
 
 const SAVED_OBJECT_TYPE = DATASOURCE_SAVED_OBJECT_TYPE;
+
+function getDataset(st: string) {
+  return st.split('.')[1];
+}
 
 class DatasourceService {
   public async create(
@@ -187,6 +199,61 @@ class DatasourceService {
       }
     }
   }
+
+  public async assignPackageStream(
+    pkgInfo: { pkgName: string; pkgVersion: string },
+    inputs: DatasourceInput[]
+  ): Promise<DatasourceInput[]> {
+    const inputsPromises = inputs.map(input => _assignPackageStreamToInput(pkgInfo, input));
+    return Promise.all(inputsPromises);
+  }
+}
+
+const _isAgentStream = (p: string) => !!p.match(/agent\/stream\/stream\.yml/);
+
+async function _assignPackageStreamToInput(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput
+) {
+  const streamsPromises = input.streams.map(stream =>
+    _assignPackageStreamToStream(pkgInfo, input, stream)
+  );
+
+  const streams = await Promise.all(streamsPromises);
+  return { ...input, streams };
+}
+
+async function _assignPackageStreamToStream(
+  pkgInfo: { pkgName: string; pkgVersion: string },
+  input: DatasourceInput,
+  stream: DatasourceInputStream
+) {
+  if (!stream.enabled) {
+    return { ...stream, agent_stream: undefined };
+  }
+  const dataset = getDataset(stream.dataset);
+  const assetsData = await getAssetsDataForPackageKey(pkgInfo, _isAgentStream, dataset);
+
+  const [pkgStream] = assetsData;
+  if (!pkgStream || !pkgStream.buffer) {
+    throw new Error(`Stream template not found for dataset ${dataset}`);
+  }
+
+  // Populate template variables from input config and stream config
+  const data: { [k: string]: string | string[] } = {};
+  if (input.vars) {
+    for (const key of Object.keys(input.vars)) {
+      data[key] = input.vars[key].value;
+    }
+  }
+  if (stream.vars) {
+    for (const key of Object.keys(stream.vars)) {
+      data[key] = stream.vars[key].value;
+    }
+  }
+  const yaml = safeLoad(createStream(data, pkgStream.buffer.toString()));
+  stream.agent_stream = yaml;
+  return { ...stream };
 }
 
 export const datasourceService = new DatasourceService();

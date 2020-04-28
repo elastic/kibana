@@ -21,6 +21,8 @@ import {
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
 import { generateEnrollmentAPIKey } from './api_keys';
+import { settingsService } from '.';
+import { appContextService } from './app_context';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -34,6 +36,17 @@ export async function setupIngestManager(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentConfigService.ensureDefaultAgentConfig(soClient),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: appContextService.getConfig()?.fleet?.kibana?.host,
+        });
+      }
+
+      return Promise.reject(e);
+    }),
   ]);
 
   // ensure default packages are added to the default conifg
@@ -123,8 +136,18 @@ async function addPackageToConfig(
     pkgName: packageToInstall.name,
     pkgVersion: packageToInstall.version,
   });
-  await datasourceService.create(
-    soClient,
-    packageToConfigDatasource(packageInfo, config.id, defaultOutput.id, undefined, config.namespace)
+
+  const newDatasource = packageToConfigDatasource(
+    packageInfo,
+    config.id,
+    defaultOutput.id,
+    undefined,
+    config.namespace
   );
+  newDatasource.inputs = await datasourceService.assignPackageStream(
+    { pkgName: packageToInstall.name, pkgVersion: packageToInstall.version },
+    newDatasource.inputs
+  );
+
+  await datasourceService.create(soClient, newDatasource);
 }

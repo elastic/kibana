@@ -80,7 +80,6 @@ export class ManagementService {
     );
 
     register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
-    register({ id: 'logstash', title: 'Logstash', order: 30, euiIconType: 'logoLogstash' });
     register({
       id: 'elasticsearch',
       title: 'Elasticsearch',

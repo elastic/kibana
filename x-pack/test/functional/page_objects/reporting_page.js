@@ -17,26 +17,11 @@ import http from 'http';
 export function ReportingPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
-  const config = getService('config');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'settings', 'share', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'security', 'share', 'timePicker']);
 
   class ReportingPage {
-    async initTests() {
-      log.debug('ReportingPage:initTests');
-      await PageObjects.settings.navigateTo();
-      await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
-      await esArchiver.load('reporting/historic');
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
-      await browser.setWindowSize(1600, 850);
-    }
-
     async forceSharedItemsContainerSize({ width }) {
       await browser.execute(`
         var el = document.querySelector('[data-shared-items-container]');
@@ -65,7 +50,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     getResponse(url) {
       log.debug(`getResponse for ${url}`);
-      const auth = config.get('servers.elasticsearch.auth');
+      const auth = 'test_user:changeme'; // FIXME not sure why there is no config that can be read for this
       const headers = {
         Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
       };
@@ -85,6 +70,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
             }
           )
           .on('error', e => {
+            log.error(e);
             reject(e);
           });
       });
@@ -130,6 +116,20 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => await testSubjects.find('generateReportButton'));
     }
 
+    async isGenerateReportButtonDisabled() {
+      const generateReportButton = await this.getGenerateReportButton();
+      return await retry.try(async () => {
+        const isDisabled = await generateReportButton.getAttribute('disabled');
+        return isDisabled;
+      });
+    }
+
+    async canReportBeCreated() {
+      await this.clickGenerateReportButton();
+      const success = await this.checkForReportingToasts();
+      return success;
+    }
+
     async checkUsePrintLayout() {
       // The print layout checkbox slides in as part of an animation, and tests can
       // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
@@ -170,6 +170,5 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     }
   }
-
   return new ReportingPage();
 }

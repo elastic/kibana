@@ -21,12 +21,16 @@ const shimCoreStart = {
 };
 
 const shimSetupPlugins: CanvasSetupDeps = {
+  data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
   home: npSetup.plugins.home,
+  usageCollection: npSetup.plugins.usageCollection,
 };
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
+  embeddable: npStart.plugins.embeddable,
   expressions: npStart.plugins.expressions,
+  inspector: npStart.plugins.inspector,
   uiActions: npStart.plugins.uiActions,
   __LEGACY: {
     // ToDo: Copy directly into canvas

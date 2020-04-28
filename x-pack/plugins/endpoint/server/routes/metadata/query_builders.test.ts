@@ -6,7 +6,8 @@
 import { httpServerMock, loggingServiceMock } from '../../../../../../src/core/server/mocks';
 import { EndpointConfigSchema } from '../../config';
 import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from './query_builders';
-import { EndpointAppConstants } from '../../../common/types';
+import { MetadataIndexPattern } from '../../mocks';
+import { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 describe('query builder', () => {
   describe('MetadataListESQuery', () => {
@@ -14,17 +15,22 @@ describe('query builder', () => {
       const mockRequest = httpServerMock.createKibanaRequest({
         body: {},
       });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = await kibanaRequestToMetadataListESQuery(
+        mockRequest,
+        {
+          logFactory: loggingServiceMock.create(),
+          service: new EndpointAppContextService(),
+          config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+        },
+        MetadataIndexPattern
+      );
       expect(query).toEqual({
         body: {
           query: {
             match_all: {},
           },
           collapse: {
-            field: 'host.id.keyword',
+            field: 'host.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -34,7 +40,7 @@ describe('query builder', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id.keyword',
+                field: 'host.id',
               },
             },
           },
@@ -48,7 +54,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: MetadataIndexPattern,
       } as Record<string, any>);
     });
   });
@@ -60,10 +66,15 @@ describe('query builder', () => {
           filter: 'not host.ip:10.140.73.246',
         },
       });
-      const query = await kibanaRequestToMetadataListESQuery(mockRequest, {
-        logFactory: loggingServiceMock.create(),
-        config: () => Promise.resolve(EndpointConfigSchema.validate({})),
-      });
+      const query = await kibanaRequestToMetadataListESQuery(
+        mockRequest,
+        {
+          logFactory: loggingServiceMock.create(),
+          service: new EndpointAppContextService(),
+          config: () => Promise.resolve(EndpointConfigSchema.validate({})),
+        },
+        MetadataIndexPattern
+      );
       expect(query).toEqual({
         body: {
           query: {
@@ -83,7 +94,7 @@ describe('query builder', () => {
             },
           },
           collapse: {
-            field: 'host.id.keyword',
+            field: 'host.id',
             inner_hits: {
               name: 'most_recent',
               size: 1,
@@ -93,7 +104,7 @@ describe('query builder', () => {
           aggs: {
             total: {
               cardinality: {
-                field: 'host.id.keyword',
+                field: 'host.id',
               },
             },
           },
@@ -107,7 +118,7 @@ describe('query builder', () => {
         },
         from: 0,
         size: 10,
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: MetadataIndexPattern,
       } as Record<string, any>);
     });
   });
@@ -115,14 +126,15 @@ describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID);
+      const query = getESQueryHostMetadataByID(mockID, MetadataIndexPattern);
+
       expect(query).toEqual({
         body: {
-          query: { match: { 'host.id.keyword': mockID } },
+          query: { match: { 'host.id': mockID } },
           sort: [{ 'event.created': { order: 'desc' } }],
           size: 1,
         },
-        index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+        index: MetadataIndexPattern,
       });
     });
   });

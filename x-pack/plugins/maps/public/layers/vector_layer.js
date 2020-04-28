@@ -175,8 +175,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    const isStaticLayer =
-      !this.getSource().isBoundsAware() || !this.getSource().isFilterByMapBounds();
+    const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return this._getBoundsBasedOnData();
     }
@@ -484,6 +483,8 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
+
+      //todo: cast source to ESSource when migrating to TS
       const styleMeta = await source.loadStylePropsMeta(
         layerName,
         style,
@@ -641,7 +642,7 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _setMbPointsProperties(mbMap) {
+  _setMbPointsProperties(mbMap, mvtSourceLayer) {
     const pointLayerId = this._getMbPointLayerId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
@@ -658,7 +659,7 @@ export class VectorLayer extends AbstractLayer {
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
-      this._setMbCircleProperties(mbMap);
+      this._setMbCircleProperties(mbMap, mvtSourceLayer);
     } else {
       markerLayerId = symbolLayerId;
       textLayerId = symbolLayerId;
@@ -666,7 +667,7 @@ export class VectorLayer extends AbstractLayer {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
         mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
       }
-      this._setMbSymbolProperties(mbMap);
+      this._setMbSymbolProperties(mbMap, mvtSourceLayer);
     }
 
     this.syncVisibilityWithMb(mbMap, markerLayerId);
@@ -677,27 +678,36 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _setMbCircleProperties(mbMap) {
+  _setMbCircleProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     if (!pointLayer) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: pointLayerId,
         type: 'circle',
         source: sourceId,
         paint: {},
-      });
+      };
+
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
 
     const textLayerId = this._getMbTextLayerId();
     const textLayer = mbMap.getLayer(textLayerId);
     if (!textLayer) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: textLayerId,
         type: 'symbol',
         source: sourceId,
-      });
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
 
     const filterExpr = getPointFilterExpression(this._hasJoins());
@@ -719,17 +729,21 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbSymbolProperties(mbMap) {
+  _setMbSymbolProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const symbolLayerId = this._getMbSymbolLayerId();
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
     if (!symbolLayer) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: symbolLayerId,
         type: 'symbol',
         source: sourceId,
-      });
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
 
     const filterExpr = getPointFilterExpression(this._hasJoins());
@@ -750,26 +764,34 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _setMbLinePolygonProperties(mbMap) {
+  _setMbLinePolygonProperties(mbMap, mvtSourceLayer) {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
     const hasJoins = this._hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: fillLayerId,
         type: 'fill',
         source: sourceId,
         paint: {},
-      });
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
     if (!mbMap.getLayer(lineLayerId)) {
-      mbMap.addLayer({
+      const mbLayer = {
         id: lineLayerId,
         type: 'line',
         source: sourceId,
         paint: {},
-      });
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
     }
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),

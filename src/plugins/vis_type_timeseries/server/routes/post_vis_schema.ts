@@ -36,6 +36,7 @@ const queryObject = Joi.object({
   language: Joi.string().allow(''),
   query: Joi.string().allow(''),
 });
+const stringOrNumberOptionalNullable = Joi.alternatives([stringOptionalNullable, numberOptional]);
 const numberOptionalOrEmptyString = Joi.alternatives(numberOptional, Joi.string().valid(''));
 
 const annotationsItems = Joi.object({
@@ -78,7 +79,7 @@ const metricsItems = Joi.object({
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
   mode: stringOptionalNullable,
-  lag: numberOptional,
+  lag: numberOptionalOrEmptyString,
   alpha: numberOptional,
   beta: numberOptional,
   gamma: numberOptional,
@@ -130,8 +131,8 @@ const seriesItems = Joi.object({
   aggregate_by: stringOptionalNullable,
   aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
-  axis_max: stringOptionalNullable,
-  axis_min: stringOptionalNullable,
+  axis_max: stringOrNumberOptionalNullable,
+  axis_min: stringOrNumberOptionalNullable,
   chart_type: stringRequired,
   color: stringRequired,
   color_rules: Joi.array()
@@ -198,8 +199,8 @@ export const visPayloadSchema = Joi.object({
       axis_formatter: stringRequired,
       axis_position: stringRequired,
       axis_scale: stringRequired,
-      axis_min: stringOptionalNullable,
-      axis_max: stringOptionalNullable,
+      axis_min: stringOrNumberOptionalNullable,
+      axis_max: stringOrNumberOptionalNullable,
       bar_color_rules: arrayNullable.optional(),
       background_color: stringOptionalNullable,
       background_color_rules: Joi.array()
@@ -221,9 +222,9 @@ export const visPayloadSchema = Joi.object({
         .optional(),
       gauge_width: [stringOptionalNullable, numberOptional],
       gauge_inner_color: stringOptionalNullable,
-      gauge_inner_width: Joi.alternatives(stringOptionalNullable, numberIntegerOptional),
+      gauge_inner_width: stringOrNumberOptionalNullable,
       gauge_style: stringOptionalNullable,
-      gauge_max: stringOptionalNullable,
+      gauge_max: stringOrNumberOptionalNullable,
       id: stringRequired,
       ignore_global_filters: numberOptional,
       ignore_global_filter: numberOptional,

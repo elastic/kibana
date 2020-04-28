@@ -9,12 +9,16 @@ import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 import {
-  ABSOLUTE_MAX_BYTES,
+  MAX_FILE_SIZE,
+  MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
 } from '../../../../../../common/constants/file_datavisualizer';
-import { getMlConfig } from '../../../../util/dependency_cache';
+import { getUiSettings } from '../../../../util/dependency_cache';
+import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
 
 const DEFAULT_LINES_TO_SAMPLE = 1000;
+const UPLOAD_SIZE_MB = 5;
 
 const overrideDefaults = {
   timestampFormat: undefined,
@@ -34,15 +38,22 @@ export function readFile(file: File) {
   return new Promise((resolve, reject) => {
     if (file && file.size) {
       const reader = new FileReader();
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
 
       reader.onload = (() => {
         return () => {
+          const decoder = new TextDecoder();
           const data = reader.result;
-          if (data === '') {
+          if (data === null || typeof data === 'string') {
+            return reject();
+          }
+          const size = UPLOAD_SIZE_MB * Math.pow(2, 20);
+          const fileContents = decoder.decode(data.slice(0, size));
+
+          if (fileContents === '') {
             reject();
           } else {
-            resolve({ data });
+            resolve({ fileContents, data });
           }
         };
       })();
@@ -52,17 +63,14 @@ export function readFile(file: File) {
   });
 }
 
-export function reduceData(data: string, mb: number) {
-  // assuming ascii characters in the file where 1 char is 1 byte
-  // TODO -  change this when other non UTF-8 formats are
-  // supported for the read data
-  const size = mb * Math.pow(2, 20);
-  return data.length >= size ? data.slice(0, size) : data;
-}
-
 export function getMaxBytes() {
-  const maxBytes = getMlConfig().file_data_visualizer.max_file_size_bytes;
-  return maxBytes < ABSOLUTE_MAX_BYTES ? maxBytes : ABSOLUTE_MAX_BYTES;
+  const maxFileSize = getUiSettings().get(FILE_DATA_VISUALIZER_MAX_FILE_SIZE, MAX_FILE_SIZE);
+  // @ts-ignore
+  const maxBytes = numeral(maxFileSize.toUpperCase()).value();
+  if (maxBytes < MAX_FILE_SIZE_BYTES) {
+    return MAX_FILE_SIZE_BYTES;
+  }
+  return maxBytes <= ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
 }
 
 export function getMaxBytesFormatted() {

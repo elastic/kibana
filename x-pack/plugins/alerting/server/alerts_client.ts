@@ -24,6 +24,7 @@ import {
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
+  RawAlertAction,
 } from './types';
 import { validateAlertTypeParams } from './lib';
 import {
@@ -34,6 +35,7 @@ import {
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
+import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
@@ -82,7 +84,7 @@ export interface FindResult {
   data: SanitizedAlert[];
 }
 
-interface CreateOptions {
+export interface CreateOptions {
   data: Omit<
     Alert,
     | 'id'
@@ -108,7 +110,7 @@ interface UpdateOptions {
     tags: string[];
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     throttle: string | null;
   };
 }
@@ -171,7 +173,7 @@ export class AlertsClient {
       createdBy: username,
       updatedBy: username,
       createdAt: new Date().toISOString(),
-      params: validatedAlertTypeParams,
+      params: validatedAlertTypeParams as RawAlert['params'],
       muteAll: false,
       mutedInstanceIds: [],
     };
@@ -268,7 +270,7 @@ export class AlertsClient {
     const removeResult = await this.savedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? this.taskManager.remove(taskIdToRemove) : null,
+      taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
       apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
     ]);
 
@@ -336,7 +338,7 @@ export class AlertsClient {
         ...attributes,
         ...data,
         ...apiKeyAttributes,
-        params: validatedAlertTypeParams,
+        params: validatedAlertTypeParams as RawAlert['params'],
         actions,
         updatedBy: username,
       },
@@ -510,7 +512,9 @@ export class AlertsClient {
       );
 
       await Promise.all([
-        attributes.scheduledTaskId ? this.taskManager.remove(attributes.scheduledTaskId) : null,
+        attributes.scheduledTaskId
+          ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
+          : null,
         apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
       ]);
     }
@@ -664,7 +668,7 @@ export class AlertsClient {
   private async denormalizeActions(
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
-    const actionMap = new Map<string, any>();
+    const actionMap = new Map<string, unknown>();
     // map preconfigured actions
     for (const alertAction of alertActions) {
       const action = this.preconfiguredActions.find(
@@ -709,8 +713,8 @@ export class AlertsClient {
       // if action is a save object, than actionTypeId should be under attributes property
       // if action is a preconfigured, than actionTypeId is the action property
       const actionTypeId = actionIds.find(actionId => actionId === id)
-        ? actionMapValue.attributes.actionTypeId
-        : actionMapValue.actionTypeId;
+        ? (actionMapValue as SavedObject<Record<string, string>>).attributes.actionTypeId
+        : (actionMapValue as RawAlertAction).actionTypeId;
       return {
         ...alertAction,
         actionRef,

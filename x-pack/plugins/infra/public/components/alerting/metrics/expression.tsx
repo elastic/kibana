@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -20,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import {
   MetricExpressionParams,
   Comparator,
+  Aggregators,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
 import { euiStyled } from '../../../../../observability/public';
@@ -31,15 +33,17 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { builtInComparators } from '../../../../../triggers_actions_ui/public/common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricsExplorerOptions } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
-import { MetricsExplorerKueryBar } from '../../metrics_explorer/kuery_bar';
 import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
-import { useSource } from '../../../containers/source';
-import { MetricsExplorerGroupBy } from '../../metrics_explorer/group_by';
+import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
+import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
+import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 
 interface AlertContextMeta {
   currentOptions?: Partial<MetricsExplorerOptions>;
@@ -64,27 +68,33 @@ type MetricExpression = Omit<MetricExpressionParams, 'metric'> & {
   metric?: string;
 };
 
-enum AGGREGATION_TYPES {
-  COUNT = 'count',
-  AVERAGE = 'avg',
-  SUM = 'sum',
-  MIN = 'min',
-  MAX = 'max',
-  RATE = 'rate',
-  CARDINALITY = 'cardinality',
-}
-
 const defaultExpression = {
-  aggType: AGGREGATION_TYPES.AVERAGE,
+  aggType: Aggregators.AVERAGE,
   comparator: Comparator.GT,
   threshold: [],
   timeSize: 1,
   timeUnit: 'm',
 } as MetricExpression;
 
+const customComparators = {
+  ...builtInComparators,
+  [Comparator.OUTSIDE_RANGE]: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.outsideRangeLabel', {
+      defaultMessage: 'Is not between',
+    }),
+    value: Comparator.OUTSIDE_RANGE,
+    requiredValues: 2,
+  },
+};
+
 export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
-  const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
+  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+    sourceId: 'default',
+    type: 'metrics',
+    fetch: alertsContext.http.fetch,
+    toastWarning: alertsContext.toastNotifications.addWarning,
+  });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
 
@@ -138,7 +148,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
-      setAlertParams('groupBy', group || undefined);
+      setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
   );
@@ -205,8 +215,20 @@ export const Expressions: React.FC<Props> = props => {
         setAlertParams('groupBy', md.currentOptions.groupBy);
       }
       setAlertParams('sourceId', source?.id);
+    } else {
+      if (!alertParams.criteria) {
+        setAlertParams('criteria', [defaultExpression]);
+      }
+      if (!alertParams.sourceId) {
+        setAlertParams('sourceId', source?.id || 'default');
+      }
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFieldSearchChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onFilterQuerySubmit(e.target.value),
+    [onFilterQuerySubmit]
+  );
 
   return (
     <>
@@ -264,44 +286,50 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiFormRow
         label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
-          defaultMessage: 'Filter',
+          defaultMessage: 'Filter (optional)',
         })}
         helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
-          defaultMessage: 'Filter help text',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
         fullWidth
         compressed
       >
-        <MetricsExplorerKueryBar
-          derivedIndexPattern={derivedIndexPattern}
-          onSubmit={onFilterQuerySubmit}
-          value={alertParams.filterQuery}
-        />
+        {(alertsContext.metadata && (
+          <MetricsExplorerKueryBar
+            derivedIndexPattern={derivedIndexPattern}
+            onSubmit={onFilterQuerySubmit}
+            value={alertParams.filterQuery}
+          />
+        )) || (
+          <EuiFieldSearch
+            onChange={handleFieldSearchChange}
+            value={alertParams.filterQuery}
+            fullWidth
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
-
-      {alertsContext.metadata && (
-        <EuiFormRow
-          label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-            defaultMessage: 'Create alert per',
-          })}
-          helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
-            defaultMessage: 'Create alert help text',
-          })}
-          fullWidth
-          compressed
-        >
-          <MetricsExplorerGroupBy
-            onChange={onGroupByChange}
-            fields={derivedIndexPattern.fields}
-            options={{
-              ...options,
-              groupBy: alertParams.groupBy || undefined,
-            }}
-          />
-        </EuiFormRow>
-      )}
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
+          defaultMessage: 'Create alert per (optional)',
+        })}
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
+          defaultMessage:
+            'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
+        })}
+        fullWidth
+        compressed
+      >
+        <MetricsExplorerGroupBy
+          onChange={onGroupByChange}
+          fields={derivedIndexPattern.fields}
+          options={{
+            ...options,
+            groupBy: alertParams.groupBy || undefined,
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 };
@@ -330,7 +358,7 @@ const StyledExpression = euiStyled.div`
 export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
   const { setAlertParams, expression, errors, expressionId, remove, fields, canDelete } = props;
   const {
-    aggType = AGGREGATION_TYPES.MAX,
+    aggType = Aggregators.MAX,
     metric,
     comparator = Comparator.GT,
     threshold = [],
@@ -338,7 +366,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, { ...expression, aggType: at as MetricExpression['aggType'] });
+      setAlertParams(expressionId, {
+        ...expression,
+        aggType: at as MetricExpression['aggType'],
+        metric: at === 'count' ? undefined : expression.metric,
+      });
     },
     [expressionId, expression, setAlertParams]
   );
@@ -359,7 +391,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
 
   const updateThreshold = useCallback(
     t => {
-      setAlertParams(expressionId, { ...expression, threshold: t });
+      if (t.join() !== expression.threshold.join()) {
+        setAlertParams(expressionId, { ...expression, threshold: t });
+      }
     },
     [expressionId, expression, setAlertParams]
   );
@@ -395,6 +429,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               <ThresholdExpression
                 thresholdComparator={comparator || Comparator.GT}
                 threshold={threshold}
+                customComparators={customComparators}
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}
                 errors={errors}
@@ -427,7 +462,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number'],
-    value: AGGREGATION_TYPES.AVERAGE,
+    value: Aggregators.AVERAGE,
   },
   max: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.max', {
@@ -435,7 +470,7 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MAX,
+    value: Aggregators.MAX,
   },
   min: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.min', {
@@ -443,14 +478,14 @@ export const aggregationType: { [key: string]: any } = {
     }),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date'],
-    value: AGGREGATION_TYPES.MIN,
+    value: Aggregators.MIN,
   },
   cardinality: {
     text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.cardinality', {
       defaultMessage: 'Cardinality',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.CARDINALITY,
+    value: Aggregators.CARDINALITY,
     validNormalizedTypes: ['number'],
   },
   rate: {
@@ -458,7 +493,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Rate',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.RATE,
+    value: Aggregators.RATE,
     validNormalizedTypes: ['number'],
   },
   count: {
@@ -466,7 +501,7 @@ export const aggregationType: { [key: string]: any } = {
       defaultMessage: 'Document count',
     }),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
+    value: Aggregators.COUNT,
     validNormalizedTypes: ['number'],
   },
 };

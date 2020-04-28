@@ -6,11 +6,17 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PolicyData } from '../public/applications/endpoint/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { generatePolicy } from '../public/applications/endpoint/models/policy';
+import {
+  AlertEvent,
+  EndpointEvent,
+  Host,
+  HostMetadata,
+  HostOS,
+  PolicyData,
+  HostPolicyResponse,
+  HostPolicyResponseActionStatus,
+} from './types';
+import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -23,7 +29,7 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -50,11 +56,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -96,7 +102,7 @@ interface HostInfo {
     version: string;
     id: string;
   };
-  host: HostFields;
+  host: Host;
   endpoint: {
     policy: {
       id: string;
@@ -474,7 +480,7 @@ export class EndpointDocGenerator {
           streams: [],
           config: {
             policy: {
-              value: generatePolicy(),
+              value: policyFactory(),
             },
           },
         },
@@ -486,6 +492,112 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
+    };
+  }
+
+  /**
+   * Generates a Host Policy response message
+   */
+  generatePolicyResponse(): HostPolicyResponse {
+    return {
+      '@timestamp': new Date().toISOString(),
+      elastic: {
+        agent: {
+          id: 'c2a9093e-e289-4c0a-aa44-8c32a414fa7a',
+        },
+      },
+      ecs: {
+        version: '1.0.0',
+      },
+      event: {
+        created: '2015-01-01T12:10:30Z',
+        kind: 'policy_response',
+      },
+      agent: {
+        version: '6.0.0-rc2',
+        id: '8a4f500d',
+      },
+      endpoint: {
+        artifacts: {
+          'global-manifest': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'endpointpe-v4-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'user-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'global-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+        },
+        policy: {
+          applied: {
+            version: '1.0.0',
+            id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
+            status: HostPolicyResponseActionStatus.success,
+            response: {
+              configurations: {
+                malware: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['download_model', 'workflow', 'a_custom_future_action'],
+                },
+                events: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['ingest_events_config', 'workflow'],
+                },
+                logging: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['configure_elasticsearch_connection'],
+                },
+                streaming: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: [
+                    'detect_file_open_events',
+                    'download_global_artifacts',
+                    'a_custom_future_action',
+                  ],
+                },
+              },
+              actions: {
+                download_model: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'model downloaded',
+                },
+                ingest_events_config: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'no action taken',
+                },
+                workflow: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'the flow worked well',
+                },
+                a_custom_future_action: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'future message',
+                },
+                configure_elasticsearch_connection: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                detect_file_open_events: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                download_global_artifacts: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+              },
+            },
+          },
+        },
+      },
     };
   }
 

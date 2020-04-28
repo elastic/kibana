@@ -35,20 +35,19 @@ export class TaskManagerPlugin
     this.currentConfig = {} as TaskManagerConfig;
   }
 
-  public setup(core: CoreSetup, plugins: any): TaskManagerSetupContract {
+  public setup(core: CoreSetup, plugins: unknown): TaskManagerSetupContract {
     const logger = this.initContext.logger.get('taskManager');
     const config$ = this.initContext.config.create<TaskManagerConfig>();
-    const elasticsearch = core.elasticsearch.adminClient;
     return {
       registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
         config$.subscribe(async config => {
-          const [{ savedObjects }] = await core.getStartServices();
+          const [{ savedObjects, elasticsearch }] = await core.getStartServices();
           const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
           this.legacyTaskManager$.next(
             createTaskManager(core, {
               logger,
               config,
-              elasticsearch,
+              elasticsearch: elasticsearch.legacy.client,
               savedObjectsRepository,
               savedObjectsSerializer: savedObjects.createSerializer(),
             })

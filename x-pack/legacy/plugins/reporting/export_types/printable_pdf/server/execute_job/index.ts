@@ -27,7 +27,6 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   parentLogger: Logger
 ) {
   const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
 
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
@@ -35,10 +34,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
-    let apmGeneratePdf: any;
-
-    const browserDriverFactory = await reporting.getBrowserDriverFactory();
-    const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
+    let apmGeneratePdf: any; // Note: Type can not be imported from apm module
 
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(

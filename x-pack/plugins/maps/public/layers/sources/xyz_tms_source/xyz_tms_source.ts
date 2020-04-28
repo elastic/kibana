@@ -5,12 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TileLayer } from '../../tile_layer';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
-import { EMS_XYZ } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { AbstractTMSSource } from '../tms_source';
-import { LayerDescriptor, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
 
@@ -19,7 +18,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
 });
 
 export class XYZTMSSource extends AbstractTMSSource {
-  static type = EMS_XYZ;
+  static type = SOURCE_TYPES.EMS_XYZ;
 
   readonly _descriptor: XYZTMSSourceDescriptor;
 
@@ -48,17 +47,6 @@ export class XYZTMSSource extends AbstractTMSSource {
     ];
   }
 
-  createDefaultLayer(options?: LayerDescriptor): TileLayer {
-    const layerDescriptor: LayerDescriptor = TileLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-    return new TileLayer({
-      layerDescriptor,
-      source: this,
-    });
-  }
-
   async getDisplayName(): Promise<string> {
     return this._descriptor.urlTemplate;
   }
@@ -83,5 +71,5 @@ export class XYZTMSSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: XYZTMSSource,
-  type: EMS_XYZ,
+  type: SOURCE_TYPES.EMS_XYZ,
 });

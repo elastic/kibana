@@ -186,6 +186,7 @@ export default function({ getService }: FtrProviderContext) {
       const indexedRecord = searchResult.hits.hits[0];
       expect(indexedRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...indexedRecord._source.state.savedObjectsClientError,
