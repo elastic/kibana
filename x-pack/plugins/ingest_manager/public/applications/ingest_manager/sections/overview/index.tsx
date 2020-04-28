@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiBetaBadge,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -19,10 +20,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { WithHeaderLayout } from '../../layouts';
 import { useLink, useGetAgentConfigs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/agent_list_page/components';
-import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from '../../constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from '../../constants';
 
 const OverviewPanel = styled(EuiPanel).attrs(props => ({
   paddingSize: 'm',
@@ -57,6 +59,11 @@ const OverviewStats = styled(EuiDescriptionList).attrs(props => ({
   }
 `;
 
+const AlphaBadge = styled(EuiBetaBadge)`
+  vertical-align: top;
+  margin-left: ${props => props.theme.eui.paddingSizes.s};
+`;
+
 export const IngestManagerOverview: React.FunctionComponent = () => {
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
@@ -78,6 +85,18 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPageTitle"
                   defaultMessage="Ingest Manager"
+                />
+                <AlphaBadge
+                  label={i18n.translate('xpack.IngestManager.alphaBadge.label', {
+                    defaultMessage: 'Alpha',
+                  })}
+                  title={i18n.translate('xpack.IngestManager.alphaBadge.title', {
+                    defaultMessage: 'Alpha release',
+                  })}
+                  tooltipContent={i18n.translate('xpack.IngestManager.alphaBadge.title', {
+                    defaultMessage:
+                      'Ingest Manager is under active development and is not intended for production purposes.',
+                  })}
                 />
               </h1>
             </EuiText>
@@ -213,7 +232,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   />
                 </h2>
               </EuiTitle>
-              <EuiButtonEmpty size="xs" flush="right">
+              <EuiButtonEmpty size="xs" flush="right" href={useLink(DATA_STREAM_PATH)}>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewPageDataStreamsPanelAction"
                   defaultMessage="View data streams"
