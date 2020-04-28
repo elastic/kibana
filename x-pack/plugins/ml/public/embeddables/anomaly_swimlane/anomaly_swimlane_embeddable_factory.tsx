@@ -26,7 +26,7 @@ import { MlStartDependencies } from '../../plugin';
 import { JobSelectorFlyout } from '../../application/components/job_selector/job_selector_flyout';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { HttpService } from '../../application/services/http_service';
-import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
+import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { ExplorerService } from '../../application/services/explorer.service';
@@ -52,7 +52,7 @@ export class AnomalySwimlaneEmbeddableFactory
     const services = await this.getServices();
 
     return new Promise(async (resolve, reject) => {
-      const [{ overlays, uiSettings }, , { mlAnomalyDetectorService }] = services;
+      const [{ overlays, uiSettings }, , { anomalyDetectorService }] = services;
 
       const maps = {
         groupsMap: getInitialGroupsMap([]),
@@ -80,9 +80,9 @@ export class AnomalySwimlaneEmbeddableFactory
                 values: { jobIds: jobIds.join(', ') },
               });
 
-              const jobs = await mlAnomalyDetectorService.getJobs$(jobIds).toPromise();
+              const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 
-              const influencers = mlAnomalyDetectorService.extractInfluencers(jobs);
+              const influencers = anomalyDetectorService.extractInfluencers(jobs);
 
               // only one job selected with no influencers, hence no need to
               // bother the user with swimlane type selection, set to Overall
@@ -123,7 +123,7 @@ export class AnomalySwimlaneEmbeddableFactory
     const [coreStart, pluginsStart] = await this.getStartServices();
 
     const httpService = new HttpService(coreStart.http);
-    const mlAnomalyDetectorService = new MlAnomalyDetectorService(httpService);
+    const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const explorerService = new ExplorerService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
@@ -131,7 +131,7 @@ export class AnomalySwimlaneEmbeddableFactory
       mlResultsService
     );
 
-    return [coreStart, pluginsStart, { mlAnomalyDetectorService, explorerService }];
+    return [coreStart, pluginsStart, { anomalyDetectorService, explorerService }];
   }
 
   public async create(

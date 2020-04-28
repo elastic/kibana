@@ -34,7 +34,7 @@ import { MlStartDependencies } from '../../plugin';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
-  MlServices,
+  AnomalySwimlaneServices,
 } from './anomaly_swimlane_embeddable';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
@@ -47,7 +47,7 @@ const RESIZE_THROTTLE_TIME_MS = 500;
 export interface ExplorerSwimlaneContainerProps {
   id: string;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
-  services: [CoreStart, MlStartDependencies, MlServices];
+  services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
   onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
@@ -58,7 +58,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings }, , { explorerService, mlAnomalyDetectorService }] = services;
+  const [{ uiSettings }, , { explorerService, anomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
@@ -81,7 +81,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       embeddableInput.pipe(
         pluck('jobIds'),
         distinctUntilChanged(isEqual),
-        switchMap(jobsIds => mlAnomalyDetectorService.getJobs$(jobsIds))
+        switchMap(jobsIds => anomalyDetectorService.getJobs$(jobsIds))
       ),
     []
   );

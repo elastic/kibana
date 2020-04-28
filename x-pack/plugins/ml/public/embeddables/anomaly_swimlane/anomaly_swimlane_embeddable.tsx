@@ -16,7 +16,7 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
-import { MlAnomalyDetectorService } from '../../application/services/ml_anomanly_detector.service';
+import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { ExplorerService } from '../../application/services/explorer.service';
 import {
@@ -50,12 +50,16 @@ export interface AnomalySwimlaneEmbeddableOutput extends EmbeddableOutput {
   limit?: number;
 }
 
-export interface MlServices {
-  mlAnomalyDetectorService: MlAnomalyDetectorService;
+export interface AnomalySwimlaneServices {
+  anomalyDetectorService: AnomalyDetectorService;
   explorerService: ExplorerService;
 }
 
-export type AnomalySwimlaneEmbeddableServices = [CoreStart, MlStartDependencies, MlServices];
+export type AnomalySwimlaneEmbeddableServices = [
+  CoreStart,
+  MlStartDependencies,
+  AnomalySwimlaneServices
+];
 
 export class AnomalySwimlaneEmbeddable extends Embeddable<
   AnomalySwimlaneEmbeddableInput,
@@ -67,7 +71,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
 
   constructor(
     initialInput: AnomalySwimlaneEmbeddableInput,
-    private services: [CoreStart, MlStartDependencies, MlServices],
+    private services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
     parent?: IContainer
   ) {
     super(

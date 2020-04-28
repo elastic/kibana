@@ -10,7 +10,7 @@ import { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { basePath } from './ml_api_service';
 import { HttpService } from './http_service';
 
-export class MlAnomalyDetectorService {
+export class AnomalyDetectorService {
   private readonly apiBasePath = basePath() + '/anomaly_detectors';
 
   constructor(private httpService: HttpService) {}
