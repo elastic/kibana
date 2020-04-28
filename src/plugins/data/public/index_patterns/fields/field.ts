@@ -47,6 +47,7 @@ export class Field implements IFieldType {
   indexPattern?: IndexPattern;
   format: any;
   $$spec: FieldSpec;
+  conflictDescriptions?: Record<string, string[]>;
 
   constructor(
     indexPattern: IndexPattern,
