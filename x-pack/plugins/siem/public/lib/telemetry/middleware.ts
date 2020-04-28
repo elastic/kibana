@@ -7,7 +7,7 @@
 import { Action, Dispatch, MiddlewareAPI } from 'redux';
 
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from './';
-import { timelineActions } from '../../store/actions';
+import * as timelineActions from '../../store/timeline/actions';
 
 export const telemetryMiddleware = (api: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
   if (timelineActions.endTimelineSaving.match(action)) {
