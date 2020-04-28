@@ -38,7 +38,7 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
-  getType: (type: string) => IAggType;
+  getType: (name: string) => IAggType;
 };
 
 export interface DatatableRender {
@@ -113,7 +113,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  getType: Promise<(type: string) => IAggType>;
+  getType: Promise<(name: string) => IAggType>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
