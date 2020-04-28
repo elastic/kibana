@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -225,6 +225,11 @@ export const Expressions: React.FC<Props> = props => {
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleFieldSearchChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onFilterQuerySubmit(e.target.value),
+    [onFilterQuerySubmit]
+  );
+
   return (
     <>
       <EuiSpacer size={'m'} />
@@ -297,7 +302,7 @@ export const Expressions: React.FC<Props> = props => {
           />
         )) || (
           <EuiFieldSearch
-            onSearch={onFilterQuerySubmit}
+            onChange={handleFieldSearchChange}
             value={alertParams.filterQuery}
             fullWidth
           />
