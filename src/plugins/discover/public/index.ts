@@ -17,5 +17,18 @@
  * under the License.
  */
 
+import { DiscoverPlugin } from './plugin';
+
+export { DiscoverSetup, DiscoverStart } from './plugin';
+export { DocViewTable } from './components/table/table';
+export { JsonCodeBlock } from './components/json_code_block/json_code_block';
+export { DocViewInput, DocViewInputFn, DocViewerComponent } from './doc_views/doc_views_types';
+export { FieldName } from './components/field_name/field_name';
+export * from './doc_views/doc_views_types';
+
+export function plugin() {
+  return new DiscoverPlugin();
+}
+
 export { createSavedSearchesLoader } from './saved_searches/saved_searches';
 export { SavedSearchLoader, SavedSearch } from './saved_searches/types';

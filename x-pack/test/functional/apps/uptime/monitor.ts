@@ -8,22 +8,28 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['uptime']);
+  const uptimeService = getService('uptime');
+  const { uptime } = getPageObjects(['uptime']);
   const archive = 'uptime/full_heartbeat';
 
   describe('monitor page', function() {
     this.tags(['skipFirefox']);
+    const dateStart = 'Sep 10, 2019 @ 12:40:08.078';
+    const dateEnd = 'Sep 11, 2019 @ 19:40:08.078';
+    const monitorId = '0000-intermittent';
+    const monitorName = '0000-intermittent';
+
     before(async () => {
-      await esArchiver.load(archive);
+      await esArchiver.loadIfNeeded(archive);
+      await uptimeService.navigation.goToUptime();
     });
-    after(async () => await esArchiver.unload(archive));
+
+    after(async () => {
+      await esArchiver.unload(archive);
+    });
+
     it('loads and displays uptime data based on date range', async () => {
-      await pageObjects.uptime.loadDataAndGoToMonitorPage(
-        'Sep 10, 2019 @ 12:40:08.078',
-        'Sep 11, 2019 @ 19:40:08.078',
-        '0000-intermittent',
-        '0000-intermittent'
-      );
+      await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId, monitorName);
     });
   });
 };

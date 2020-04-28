@@ -35,7 +35,7 @@ describe('loggedOutApp', () => {
   it('properly renders application', async () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
-    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}]);
+    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
 
     const containerMock = document.createElement('div');
 

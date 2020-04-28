@@ -265,6 +265,7 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,

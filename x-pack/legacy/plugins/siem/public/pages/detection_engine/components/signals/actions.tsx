@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { updateSignalStatus } from '../../../../containers/detection_engine/signals/api';
 import { SendSignalToTimelineActionProps, UpdateSignalStatusActionProps } from './types';
-import { TimelineNonEcsData, GetOneTimeline, TimelineResult } from '../../../../graphql/types';
+import { TimelineNonEcsData, GetOneTimeline, TimelineResult, Ecs } from '../../../../graphql/types';
 import { oneTimelineQuery } from '../../../../containers/timeline/one/index.gql_query';
 import {
   omitTypenameInTimeline,
@@ -72,16 +72,7 @@ export const updateSignalStatusAction = async ({
   }
 };
 
-export const sendSignalToTimelineAction = async ({
-  apolloClient,
-  createTimeline,
-  ecsData,
-  updateTimelineIsLoading,
-}: SendSignalToTimelineActionProps) => {
-  let openSignalInBasicTimeline = true;
-  const timelineId =
-    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
-
+export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
   const ellapsedTimeRule = moment.duration(
     moment().diff(
       dateMath.parse(ecsData.signal?.rule?.from != null ? ecsData.signal?.rule?.from[0] : 'now-0s')
@@ -92,6 +83,21 @@ export const sendSignalToTimelineAction = async ({
     .subtract(ellapsedTimeRule)
     .valueOf();
   const to = moment(ecsData.timestamp ?? new Date()).valueOf();
+
+  return { to, from };
+};
+
+export const sendSignalToTimelineAction = async ({
+  apolloClient,
+  createTimeline,
+  ecsData,
+  updateTimelineIsLoading,
+}: SendSignalToTimelineActionProps) => {
+  let openSignalInBasicTimeline = true;
+  const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
+  const timelineId =
+    ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
+  const { to, from } = determineToAndFrom({ ecsData });
 
   if (timelineId !== '' && apolloClient != null) {
     try {
@@ -106,10 +112,10 @@ export const sendSignalToTimelineAction = async ({
           id: timelineId,
         },
       });
-      const timelineTemplate: TimelineResult = omitTypenameInTimeline(
-        getOr({}, 'data.getOneTimeline', responseTimeline)
-      );
-      if (!isEmpty(timelineTemplate)) {
+      const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
+
+      if (!isEmpty(resultingTimeline)) {
+        const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
         openSignalInBasicTimeline = false;
         const { timeline } = formatTimelineResultToModel(timelineTemplate, true);
         const query = replaceTemplateFieldFromQuery(
@@ -148,6 +154,7 @@ export const sendSignalToTimelineAction = async ({
             show: true,
           },
           to,
+          ruleNote: noteContent,
         });
       }
     } catch {
@@ -197,6 +204,7 @@ export const sendSignalToTimelineAction = async ({
         },
       },
       to,
+      ruleNote: noteContent,
     });
   }
 };

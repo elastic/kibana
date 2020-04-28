@@ -11,17 +11,15 @@ import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
+import { KIBANA_TILEMAP } from '../../../../common/constants';
+import { registerSource } from '../source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
+  defaultMessage: 'Configured Tile Map Service',
+});
 
 export class KibanaTilemapSource extends AbstractTMSSource {
-  static type = 'KIBANA_TILEMAP';
-  static title = i18n.translate('xpack.maps.source.kbnTMSTitle', {
-    defaultMessage: 'Configured Tile Map Service',
-  });
-  static description = i18n.translate('xpack.maps.source.kbnTMSDescription', {
-    defaultMessage: 'Tile map service configured in kibana.yml',
-  });
-
-  static icon = 'logoKibana';
+  static type = KIBANA_TILEMAP;
 
   static createDescriptor() {
     return {
@@ -29,20 +27,11 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = () => {
-      const sourceDescriptor = KibanaTilemapSource.createDescriptor();
-      const source = new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  };
-
   async getImmutableProperties() {
     return [
       {
         label: getDataSourceLabel(),
-        value: KibanaTilemapSource.title,
+        value: sourceTitle,
       },
       {
         label: i18n.translate('xpack.maps.source.kbnTMS.urlLabel', {
@@ -94,3 +83,24 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     }
   }
 }
+
+registerSource({
+  ConstructorFunction: KibanaTilemapSource,
+  type: KIBANA_TILEMAP,
+});
+
+export const kibanaBasemapLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
+    defaultMessage: 'Tile map service configured in kibana.yml',
+  }),
+  icon: 'logoKibana',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = () => {
+      const sourceDescriptor = KibanaTilemapSource.createDescriptor();
+      const source = new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

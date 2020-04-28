@@ -41,7 +41,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the policy page when Policy tab is selected', async () => {
       await (await testSubjects.find('policiesEndpointTab')).click();
-      await testSubjects.existOrFail('policyViewTitle');
+      await testSubjects.existOrFail('policyListPage');
     });
 
     it('renders the home page when Home tab is selected after selecting another tab', async () => {

@@ -23,7 +23,6 @@ import {
   FIELD_ORIGIN,
 } from '../../common/constants';
 import { ESGeoGridSource } from './sources/es_geo_grid_source/es_geo_grid_source';
-// @ts-ignore
 import { canSkipSourceUpdate } from './util/can_skip_fetch';
 import { IVectorLayer, VectorLayerArguments } from './vector_layer';
 import { IESSource } from './sources/es_source';
@@ -35,7 +34,7 @@ import {
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
-} from '../../common/style_property_descriptor_types';
+} from '../../common/descriptor_types';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 

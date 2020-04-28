@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiTitle,
@@ -16,97 +16,59 @@ import {
 } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useFetcher } from '../../../../hooks/useFetcher';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentConfigurationListAPIResponse } from '../../../../../../../../plugins/apm/server/lib/settings/agent_configuration/list_configurations';
-import { AgentConfigurationList } from './AgentConfigurationList';
+import { AgentConfigurationList } from './List';
 import { useTrackPageview } from '../../../../../../../../plugins/observability/public';
-import { AddEditFlyout } from './AddEditFlyout';
-
-export type Config = AgentConfigurationListAPIResponse[0];
+import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 
 export function AgentConfigurations() {
-  const { data = [], status, refetch } = useFetcher(
+  const { refetch, data = [], status } = useFetcher(
     callApmApi =>
-      callApmApi({ pathname: `/api/apm/settings/agent-configuration` }),
+      callApmApi({ pathname: '/api/apm/settings/agent-configuration' }),
     [],
     { preservePreviousData: false }
   );
-  const [selectedConfig, setSelectedConfig] = useState<Config | null>(null);
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
   useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
   const hasConfigurations = !isEmpty(data);
 
-  const onClose = () => {
-    setSelectedConfig(null);
-    setIsFlyoutOpen(false);
-  };
-
   return (
     <>
-      {isFlyoutOpen && (
-        <AddEditFlyout
-          selectedConfig={selectedConfig}
-          onClose={onClose}
-          onSaved={() => {
-            onClose();
-            refetch();
-          }}
-          onDeleted={() => {
-            onClose();
-            refetch();
-          }}
-        />
-      )}
-
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle>
               <h2>
                 {i18n.translate(
-                  'xpack.apm.settings.agentConf.configurationsPanelTitle',
+                  'xpack.apm.agentConfig.configurationsPanelTitle',
                   { defaultMessage: 'Agent remote configuration' }
                 )}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
 
-          {hasConfigurations ? (
-            <CreateConfigurationButton onClick={() => setIsFlyoutOpen(true)} />
-          ) : null}
+          {hasConfigurations ? <CreateConfigurationButton /> : null}
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 
-        <AgentConfigurationList
-          status={status}
-          data={data}
-          setIsFlyoutOpen={setIsFlyoutOpen}
-          setSelectedConfig={setSelectedConfig}
-        />
+        <AgentConfigurationList status={status} data={data} refetch={refetch} />
       </EuiPanel>
     </>
   );
 }
 
-function CreateConfigurationButton({ onClick }: { onClick: () => void }) {
+function CreateConfigurationButton() {
+  const href = createAgentConfigurationHref();
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            iconType="plusInCircle"
-            onClick={onClick}
-          >
-            {i18n.translate(
-              'xpack.apm.settings.agentConf.createConfigButtonLabel',
-              { defaultMessage: 'Create configuration' }
-            )}
+          <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
+            {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
+              defaultMessage: 'Create configuration'
+            })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -3,8 +3,8 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["monitoring"],
-  "requiredPlugins": ["usageCollection", "licensing", "features"],
-  "optionalPlugins": ["alerting", "actions", "infra"],
+  "requiredPlugins": ["licensing", "features"],
+  "optionalPlugins": ["alerting", "actions", "infra", "telemetryCollectionManager", "usageCollection"],
   "server": true,
   "ui": false
 }

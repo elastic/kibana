@@ -25,7 +25,7 @@ import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
 import { ComponentStrings } from '../../../i18n';
-import { AdvancedSettings } from '../../lib/kibana_advanced_settings';
+import { getAdvancedSettings } from '../../lib/kibana_advanced_settings';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
@@ -33,7 +33,7 @@ import { uploadWorkpad } from './upload_workpad';
 
 const { WorkpadLoader: strings } = ComponentStrings;
 
-const formatDate = date => date && moment(date).format(AdvancedSettings.get('dateFormat'));
+const formatDate = date => date && moment(date).format(getAdvancedSettings().get('dateFormat'));
 
 const getDisplayName = (name, workpad, loadedWorkpad) => {
   const workpadName = name.length ? name : <em>{workpad.id}</em>;

@@ -5,8 +5,15 @@
  */
 
 import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
-import { SavedMapInput } from '../../functions/common/saved_map';
-import { SavedLensInput } from '../../functions/common/saved_lens';
+import { toExpression as mapToExpression } from './input_type_to_expression/map';
+import { toExpression as visualizationToExpression } from './input_type_to_expression/visualization';
+import { toExpression as lensToExpression } from './input_type_to_expression/lens';
+
+export const inputToExpressionTypeMap = {
+  [EmbeddableTypes.map]: mapToExpression,
+  [EmbeddableTypes.visualization]: visualizationToExpression,
+  [EmbeddableTypes.lens]: lensToExpression,
+};
 
 /*
   Take the input from an embeddable and the type of embeddable and convert it into an expression
@@ -14,56 +21,8 @@ import { SavedLensInput } from '../../functions/common/saved_lens';
 export function embeddableInputToExpression(
   input: EmbeddableInput,
   embeddableType: string
-): string {
-  const expressionParts: string[] = [];
-
-  if (embeddableType === EmbeddableTypes.map) {
-    const mapInput = input as SavedMapInput;
-
-    expressionParts.push('savedMap');
-
-    expressionParts.push(`id="${input.id}"`);
-
-    if (input.title) {
-      expressionParts.push(`title="${input.title}"`);
-    }
-
-    if (mapInput.mapCenter) {
-      expressionParts.push(
-        `center={mapCenter lat=${mapInput.mapCenter.lat} lon=${mapInput.mapCenter.lon} zoom=${mapInput.mapCenter.zoom}}`
-      );
-    }
-
-    if (mapInput.timeRange) {
-      expressionParts.push(
-        `timerange={timerange from="${mapInput.timeRange.from}" to="${mapInput.timeRange.to}"}`
-      );
-    }
-
-    if (mapInput.hiddenLayers && mapInput.hiddenLayers.length) {
-      for (const layerId of mapInput.hiddenLayers) {
-        expressionParts.push(`hideLayer="${layerId}"`);
-      }
-    }
+): string | undefined {
+  if (inputToExpressionTypeMap[embeddableType]) {
+    return inputToExpressionTypeMap[embeddableType](input as any);
   }
-
-  if (embeddableType === EmbeddableTypes.lens) {
-    const lensInput = input as SavedLensInput;
-
-    expressionParts.push('savedLens');
-
-    expressionParts.push(`id="${input.id}"`);
-
-    if (input.title) {
-      expressionParts.push(`title="${input.title}"`);
-    }
-
-    if (lensInput.timeRange) {
-      expressionParts.push(
-        `timerange={timerange from="${lensInput.timeRange.from}" to="${lensInput.timeRange.to}"}`
-      );
-    }
-  }
-
-  return expressionParts.join(' ');
 }

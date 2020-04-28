@@ -15,8 +15,9 @@ export function initGetTagsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const tags = await caseService.getTags({
-          client: context.core.savedObjects.client,
+          client,
         });
         return response.ok({ body: tags });
       } catch (error) {

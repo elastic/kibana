@@ -118,6 +118,9 @@ async function getPaginatedThroughputData(pipelines, req, lsIndexPattern, throug
     for (const pipeline of pipelines) {
       if (pipelineAggregationData.id === pipeline.id) {
         const dataSeries = get(pipelineAggregationData, `metrics.${throughputMetric}.data`, [[]]);
+        if (dataSeries.length === 0) {
+          continue;
+        }
         pipeline[throughputMetric] = dataSeries.pop()[1];
       }
     }

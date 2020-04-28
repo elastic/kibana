@@ -21,7 +21,7 @@ const FlexGroup = styled(EuiFlexGroup)`
   margin-right: 16px;
 `;
 
-const IconWithCount = React.memo<{ count: number; icon: string; tooltip: string }>(
+export const IconWithCount = React.memo<{ count: number; icon: string; tooltip: string }>(
   ({ count, icon, tooltip }) => (
     <EuiToolTip content={tooltip}>
       <FlexGroup alignItems="center" gutterSize="none">

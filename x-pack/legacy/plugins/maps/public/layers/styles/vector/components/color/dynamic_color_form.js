@@ -18,6 +18,7 @@ export function DynamicColorForm({
   onDynamicStyleChange,
   staticDynamicSelect,
   styleProperty,
+  swatches,
 }) {
   const styleOptions = styleProperty.getOptions();
 
@@ -28,12 +29,20 @@ export function DynamicColorForm({
     };
     if (type === COLOR_MAP_TYPE.ORDINAL) {
       newColorOptions.useCustomColorRamp = useCustomColorMap;
-      newColorOptions.customColorRamp = customColorMap;
-      newColorOptions.color = color;
+      if (customColorMap) {
+        newColorOptions.customColorRamp = customColorMap;
+      }
+      if (color) {
+        newColorOptions.color = color;
+      }
     } else {
       newColorOptions.useCustomColorPalette = useCustomColorMap;
-      newColorOptions.customColorPalette = customColorMap;
-      newColorOptions.colorCategory = color;
+      if (customColorMap) {
+        newColorOptions.customColorPalette = customColorMap;
+      }
+      if (color) {
+        newColorOptions.colorCategory = color;
+      }
     }
 
     onDynamicStyleChange(styleProperty.getStyleName(), newColorOptions);
@@ -93,6 +102,7 @@ export function DynamicColorForm({
           useCustomColorMap={_.get(styleOptions, 'useCustomColorRamp', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
         />
       );
     } else if (styleProperty.isCategorical()) {
@@ -110,6 +120,7 @@ export function DynamicColorForm({
           useCustomColorMap={_.get(styleOptions, 'useCustomColorPalette', false)}
           styleProperty={styleProperty}
           showColorMapTypeToggle={showColorMapTypeToggle}
+          swatches={swatches}
         />
       );
     }
@@ -123,6 +134,7 @@ export function DynamicColorForm({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
+            styleName={styleProperty.getStyleName()}
             fields={fields}
             selectedFieldName={styleProperty.getFieldName()}
             onChange={onFieldChange}

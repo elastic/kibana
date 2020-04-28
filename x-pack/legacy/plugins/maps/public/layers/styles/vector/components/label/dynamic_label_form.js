@@ -27,6 +27,7 @@ export function DynamicLabelForm({
       </EuiFlexItem>
       <EuiFlexItem>
         <FieldSelect
+          styleName={styleProperty.getStyleName()}
           fields={fields}
           selectedFieldName={styleProperty.getFieldName()}
           onChange={onFieldChange}

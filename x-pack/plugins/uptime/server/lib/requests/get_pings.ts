@@ -32,6 +32,9 @@ export interface GetPingsParams {
 
   /** @member location optional location value for use in filtering*/
   location?: string | null;
+
+  /** @member page the number to provide to Elasticsearch as the "from" parameter */
+  page?: number;
 }
 
 export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
@@ -44,6 +47,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
   sort,
   size,
   location,
+  page,
 }) => {
   const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
   const sizeParam = size ? { size } : undefined;
@@ -60,7 +64,7 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
   }
   const queryContext = { bool: { filter } };
-  const params = {
+  const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
@@ -80,6 +84,10 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
       ...postFilterClause,
     },
   };
+
+  if (page) {
+    params.body.from = page * (size ?? 25);
+  }
 
   const {
     hits: { hits, total },

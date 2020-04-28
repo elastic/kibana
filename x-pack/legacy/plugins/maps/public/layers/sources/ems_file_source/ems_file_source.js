@@ -14,16 +14,14 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
+import { registerSource } from '../source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
+  defaultMessage: 'EMS Boundaries',
+});
 
 export class EMSFileSource extends AbstractVectorSource {
   static type = EMS_FILE;
-  static title = i18n.translate('xpack.maps.source.emsFileTitle', {
-    defaultMessage: 'EMS Boundaries',
-  });
-  static description = i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
-  });
-  static icon = 'emsApp';
 
   static createDescriptor({ id, tooltipProperties = [] }) {
     return {
@@ -31,15 +29,6 @@ export class EMSFileSource extends AbstractVectorSource {
       id,
       tooltipProperties,
     };
-  }
-
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
-      const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   }
 
   constructor(descriptor, inspectorAdapters) {
@@ -118,7 +107,7 @@ export class EMSFileSource extends AbstractVectorSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: EMSFileSource.title,
+        value: sourceTitle,
       },
       {
         label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
@@ -167,3 +156,24 @@ export class EMSFileSource extends AbstractVectorSource {
     return [VECTOR_SHAPE_TYPES.POLYGON];
   }
 }
+
+registerSource({
+  ConstructorFunction: EMSFileSource,
+  type: EMS_FILE,
+});
+
+export const emsBoundariesLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.emsFileDescription', {
+    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
+  }),
+  icon: 'emsApp',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
+      const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

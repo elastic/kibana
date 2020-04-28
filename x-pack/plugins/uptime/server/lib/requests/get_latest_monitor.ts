@@ -26,8 +26,6 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   dateEnd,
   monitorId,
 }) => {
-  // TODO: Write tests for this function
-
   const params = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -46,33 +44,20 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
           ],
         },
       },
-      size: 0,
-      aggs: {
-        by_id: {
-          terms: {
-            field: 'monitor.id',
-            size: 1000,
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                size: 1,
-                sort: {
-                  '@timestamp': { order: 'desc' },
-                },
-              },
-            },
-          },
-        },
+      size: 1,
+      _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+      sort: {
+        '@timestamp': { order: 'desc' },
       },
     },
   };
 
   const result = await callES('search', params);
-  const ping: any = result.aggregations.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
+  const ping: any = result.hits?.hits?.[0] ?? {};
+  const { '@timestamp': timestamp, ...monitorResult } = ping?._source ?? {};
 
   return {
-    ...ping?._source,
-    timestamp: ping?._source?.['@timestamp'],
+    timestamp,
+    ...monitorResult,
   };
 };

@@ -743,6 +743,34 @@ describe('#bulkGet', () => {
       undefined
     );
   });
+
+  it('redirects request to underlying base client and return errors result if type is registered', async () => {
+    const mockedResponse = {
+      saved_objects: [
+        {
+          id: 'bad',
+          type: 'known-type',
+          error: { statusCode: 404, message: 'Not found' },
+        },
+      ],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    };
+    mockBaseClient.bulkGet.mockResolvedValue(mockedResponse as any);
+    const bulkGetParams = [{ type: 'known-type', id: 'bad' }];
+
+    const options = { namespace: 'some-ns' };
+    await expect(wrapper.bulkGet(bulkGetParams, options)).resolves.toEqual({
+      ...mockedResponse,
+      saved_objects: [
+        {
+          ...mockedResponse.saved_objects[0],
+        },
+      ],
+    });
+    expect(mockBaseClient.bulkGet).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#get', () => {

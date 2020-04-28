@@ -48,8 +48,6 @@ describe('Range Agg', () => {
     mockDataServices();
   });
 
-  const typesRegistry = mockAggTypesRegistry([rangeBucketAgg]);
-
   const getConfig = (() => {}) as FieldFormatsGetConfigFn;
   const getAggConfigs = () => {
     const field = {
@@ -86,7 +84,7 @@ describe('Range Agg', () => {
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry: mockAggTypesRegistry([rangeBucketAgg]) }
     );
   };
 

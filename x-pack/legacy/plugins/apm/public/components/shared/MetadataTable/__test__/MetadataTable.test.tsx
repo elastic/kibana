@@ -7,11 +7,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { MetadataTable } from '..';
-import {
-  expectTextsInDocument,
-  MockApmPluginContextWrapper
-} from '../../../../utils/testHelpers';
+import { expectTextsInDocument } from '../../../../utils/testHelpers';
 import { SectionsWithRows } from '../helper';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 const renderOptions = {
   wrapper: MockApmPluginContextWrapper

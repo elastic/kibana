@@ -104,6 +104,7 @@ exports[`apmUiEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
+                data-test-subj="logsData"
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage
@@ -369,6 +370,7 @@ exports[`isNewKibanaInstance 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
+                data-test-subj="logsData"
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage
@@ -665,6 +667,7 @@ exports[`mlEnabled 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
+                data-test-subj="logsData"
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage
@@ -966,6 +969,7 @@ exports[`render 1`] = `
               <EuiButton
                 aria-describedby="aria-describedby.addLogDataButtonLabel"
                 className="homAddData__button"
+                data-test-subj="logsData"
                 href="#/home/tutorial_directory/logging"
               >
                 <FormattedMessage

@@ -47,6 +47,7 @@ export class EndpointPlugin
       title: i18n.translate('xpack.endpoint.pluginTitle', {
         defaultMessage: 'Endpoint',
       }),
+      euiIconType: 'securityApp',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');

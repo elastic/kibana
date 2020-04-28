@@ -10,7 +10,8 @@ import { mountHook } from 'test_utils/enzyme_helpers';
 import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
-import { getErrorMessage, useCreateAnalyticsForm } from './use_create_analytics_form';
+import { useCreateAnalyticsForm } from './use_create_analytics_form';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 
 const getMountedHook = () =>
   mountHook(

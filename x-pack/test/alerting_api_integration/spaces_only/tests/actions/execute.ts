@@ -66,7 +66,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
       expect(searchResult.hits.total.value).to.eql(1);
@@ -110,7 +110,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         actionId: createdAction.id,
         status: 'error',
@@ -180,7 +180,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
       expect(searchResult.hits.total.value).to.eql(1);
       const indexedRecord = searchResult.hits.hits[0];

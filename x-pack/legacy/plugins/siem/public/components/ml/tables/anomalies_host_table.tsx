@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
@@ -16,7 +16,7 @@ import { Loader } from '../../loader';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { AnomaliesHostTableProps } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
-import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
+import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { hostEquality } from './host_equality';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
@@ -37,7 +37,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   skip,
   type,
 }) => {
-  const capabilities = useContext(MlCapabilitiesContext);
+  const capabilities = useMlCapabilities();
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,

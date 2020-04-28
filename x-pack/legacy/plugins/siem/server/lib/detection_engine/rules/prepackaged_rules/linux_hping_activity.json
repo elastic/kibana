@@ -7,9 +7,8 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Hping Process Activity",
-  "query": "process.name: (hping3 or hping2 or hping) and event.action:executed",
+  "query": "process.name:(hping or hping2 or hping3) and event.action:executed",
   "references": [
     "https://en.wikipedia.org/wiki/Hping"
   ],

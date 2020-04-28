@@ -72,8 +72,8 @@ interface EmailConfig {
 }
 
 interface EmailSecrets {
-  user: string;
-  password: string;
+  user: string | null;
+  password: string | null;
 }
 
 export interface EmailActionConnector extends ActionConnector {
@@ -83,7 +83,7 @@ export interface EmailActionConnector extends ActionConnector {
 
 interface EsIndexConfig {
   index: string;
-  executionTimeField?: string;
+  executionTimeField?: string | null;
   refresh?: boolean;
 }
 

@@ -27,6 +27,9 @@ export const WHITELISTED_JOB_CONTENT_TYPES = [
   'image/png',
 ];
 
+// See:
+// https://github.com/chromium/chromium/blob/3611052c055897e5ebbc5b73ea295092e0c20141/services/network/public/cpp/header_util_unittest.cc#L50
+// For a list of headers that chromium doesn't like
 export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   'accept-encoding',
   'connection',
@@ -38,7 +41,13 @@ export const KBN_SCREENSHOT_HEADER_BLACKLIST = [
   // only for a single transport-level connection, and shouldn't
   // be stored by caches or forwarded by proxies.
   'transfer-encoding',
+  'trailer',
+  'te',
+  'upgrade',
+  'keep-alive',
 ];
+
+export const KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN = ['proxy-'];
 
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 

@@ -28,7 +28,6 @@ import {
   IndexPattern,
   IndexPatternField,
 } from 'src/plugins/data/public';
-import { VisState } from 'src/legacy/core_plugins/visualizations/public';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
@@ -36,12 +35,13 @@ import { aggParamsMap } from './agg_params_map';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
 import { search } from '../../../../../plugins/data/public';
+import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
   agg: IAggConfig;
   editorConfig: EditorConfig;
   metricAggs: IAggConfig[];
-  state: VisState;
+  state: EditorVisState;
   schemas: Schema[];
   hideCustomLabel?: boolean;
 }
@@ -174,4 +174,17 @@ function isInvalidParamsTouched(
   return invalidParams.every(param => param.touched);
 }
 
-export { getAggParamsToRender, getAggTypeOptions, isInvalidParamsTouched };
+function buildAggDescription(agg: IAggConfig) {
+  let description = '';
+  if (agg.type && agg.type.makeLabel) {
+    try {
+      description = agg.type.makeLabel(agg);
+    } catch (e) {
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
+      // which throws an error when interval is undefined.
+    }
+  }
+  return description;
+}
+
+export { getAggParamsToRender, getAggTypeOptions, isInvalidParamsTouched, buildAggDescription };

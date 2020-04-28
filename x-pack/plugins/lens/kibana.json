@@ -4,5 +4,6 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": false,
-  "optionalPlugins": ["usageCollection", "taskManager"]
+  "optionalPlugins": ["usageCollection", "taskManager"],
+  "configPath": ["xpack", "lens"]
 }

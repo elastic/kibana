@@ -9,15 +9,28 @@ import { ILayer } from '../layer';
 
 export interface ISource {
   createDefaultLayer(): ILayer;
-  getDisplayName(): Promise<string>;
   destroy(): void;
+  getDisplayName(): Promise<string>;
   getInspectorAdapters(): object;
+  isFieldAware(): boolean;
+  isFilterByMapBounds(): boolean;
+  isGeoGridPrecisionAware(): boolean;
+  isQueryAware(): boolean;
+  isRefreshTimerAware(): Promise<boolean>;
+  isTimeAware(): Promise<boolean>;
 }
 
 export class AbstractSource implements ISource {
   constructor(sourceDescriptor: AbstractSourceDescriptor, inspectorAdapters: object);
+
+  destroy(): void;
   createDefaultLayer(): ILayer;
   getDisplayName(): Promise<string>;
-  destroy(): void;
   getInspectorAdapters(): object;
+  isFieldAware(): boolean;
+  isFilterByMapBounds(): boolean;
+  isGeoGridPrecisionAware(): boolean;
+  isQueryAware(): boolean;
+  isRefreshTimerAware(): Promise<boolean>;
+  isTimeAware(): Promise<boolean>;
 }

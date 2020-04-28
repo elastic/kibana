@@ -130,7 +130,15 @@ export const StepSelectPackage: React.FunctionComponent<{
             return {
               label: title || name,
               key: pkgkey,
-              prepend: <PackageIcon packageName={name} version={version} icons={icons} size="m" />,
+              prepend: (
+                <PackageIcon
+                  packageName={name}
+                  version={version}
+                  icons={icons}
+                  size="m"
+                  tryApi={true}
+                />
+              ),
               checked: selectedPkgKey === pkgkey ? 'on' : undefined,
             };
           })}

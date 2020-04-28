@@ -9,7 +9,7 @@ import { appStoreFactory } from '../../store';
 import { fireEvent } from '@testing-library/react';
 import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
-import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
+import { mockAlertDetailsResult } from '../../store/alerts/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 
 describe('when the alert details flyout is open', () => {
@@ -34,7 +34,7 @@ describe('when the alert details flyout is open', () => {
         reactTestingLibrary.act(() => {
           const action: AppAction = {
             type: 'serverReturnedAlertDetailsData',
-            payload: mockAlertResultList().alerts[0],
+            payload: mockAlertDetailsResult(),
           };
           store.dispatch(action);
         });

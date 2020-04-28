@@ -10,13 +10,14 @@ import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../alerts_client.mock';
 
 export function mockHandlerArguments(
-  { alertsClient, listTypes: listTypesRes = [] }: any,
+  { alertsClient, listTypes: listTypesRes = [], elasticsearch }: any,
   req: any,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
+      core: { elasticsearch },
       alerting: {
         listTypes,
         getAlertsClient() {

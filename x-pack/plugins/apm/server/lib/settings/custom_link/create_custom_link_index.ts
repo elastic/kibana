@@ -26,6 +26,7 @@ export const createApmCustomLinkIndex = async ({
 };
 
 const mappings: Mappings = {
+  dynamic: 'strict',
   properties: {
     '@timestamp': {
       type: 'date'

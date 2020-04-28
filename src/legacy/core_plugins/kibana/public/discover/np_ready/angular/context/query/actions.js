@@ -26,7 +26,7 @@ import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
 import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
-import { MarkdownSimple } from '../../../../../../../kibana_react/public';
+import { MarkdownSimple } from '../../../../../../../../../plugins/kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
   const { filterManager, indexPatterns } = getServices();

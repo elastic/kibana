@@ -13,6 +13,7 @@ import { Direction } from '../../../common/types';
 export interface AlertSortParam {
   [key: string]: {
     order: Direction;
+    missing?: UndefinedResultPosition;
   };
 }
 
@@ -40,6 +41,7 @@ export interface AlertSearchQuery {
   order: Direction;
   searchAfter?: SearchCursor;
   searchBefore?: SearchCursor;
+  emptyStringIsUndefined?: boolean;
 }
 
 /**
@@ -84,4 +86,14 @@ export interface AlertListRequestQuery {
   order: Direction;
   after?: SearchCursor;
   before?: SearchCursor;
+  empty_string_is_undefined?: boolean;
+}
+
+/**
+ * Indicates whether undefined results are sorted to the beginning (_first) or end (_last)
+ * of a result set.
+ */
+export enum UndefinedResultPosition {
+  first = '_first',
+  last = '_last',
 }

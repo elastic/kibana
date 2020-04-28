@@ -2,7 +2,7 @@
 
 exports[`FeatureProperties should not show filter button 1`] = `
 <table
-  className="mapFeatureTooltip_table"
+  className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
   <tbody>
     <tr
@@ -58,7 +58,7 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 
 exports[`FeatureProperties should show only filter button for filterable properties 1`] = `
 <table
-  className="mapFeatureTooltip_table"
+  className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
   <tbody>
     <tr

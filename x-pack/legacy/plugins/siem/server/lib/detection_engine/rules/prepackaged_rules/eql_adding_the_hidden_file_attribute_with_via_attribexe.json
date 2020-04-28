@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Adding Hidden File Attribute via Attrib",
-  "query": "    event.action:\"Process Create (rule: ProcessCreate)\" and process.name:\"attrib.exe\" and process.args:\"+h\"",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:attrib.exe and process.args:+h",
   "risk_score": 21,
   "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
   "severity": "low",

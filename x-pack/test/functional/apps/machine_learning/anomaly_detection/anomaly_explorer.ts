@@ -34,6 +34,23 @@ const DATAFEED_CONFIG: Datafeed = {
   query: { bool: { must: [{ match_all: {} }] } },
 };
 
+const testDataList = [
+  {
+    suiteSuffix: 'with farequote based multi metric job',
+    jobConfig: JOB_CONFIG,
+    datafeedConfig: DATAFEED_CONFIG,
+    expected: {
+      influencers: [
+        {
+          field: 'airline',
+          count: 10,
+          labelsContained: ['AAL'],
+        },
+      ],
+    },
+  },
+];
+
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -43,51 +60,73 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
-      await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await esArchiver.unload('ml/farequote');
-      await ml.api.cleanMlIndices();
     });
 
-    it('loads from job list row link', async () => {
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+    for (const testData of testDataList) {
+      describe(testData.suiteSuffix, function() {
+        before(async () => {
+          await ml.api.createAndRunAnomalyDetectionLookbackJob(
+            testData.jobConfig,
+            testData.datafeedConfig
+          );
+        });
 
-      await ml.jobTable.waitForJobsToLoad();
-      await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id);
-      const rows = await ml.jobTable.parseJobTable();
-      expect(rows.filter(row => row.id === JOB_CONFIG.job_id)).to.have.length(1);
+        after(async () => {
+          await ml.api.cleanMlIndices();
+        });
 
-      await ml.jobTable.clickOpenJobInAnomalyExplorerButton(JOB_CONFIG.job_id);
-      await ml.common.waitForMlLoadingIndicatorToDisappear();
-    });
+        it('loads from job list row link', async () => {
+          await ml.navigation.navigateToMl();
+          await ml.navigation.navigateToJobManagement();
 
-    it('pre-fills the job selection', async () => {
-      await ml.jobSelection.assertJobSelection([JOB_CONFIG.job_id]);
-    });
+          await ml.jobTable.waitForJobsToLoad();
+          await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id);
+          const rows = await ml.jobTable.parseJobTable();
+          expect(rows.filter(row => row.id === testData.jobConfig.job_id)).to.have.length(1);
 
-    it('displays the influencers list', async () => {
-      await ml.anomalyExplorer.assertInfluencerListExists();
-      for (const influencerField of JOB_CONFIG.analysis_config.influencers) {
-        await ml.anomalyExplorer.assertInfluencerFieldExists(influencerField);
-        await ml.anomalyExplorer.assertInfluencerFieldListNotEmpty(influencerField);
-      }
-    });
+          await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
+          await ml.common.waitForMlLoadingIndicatorToDisappear();
+        });
 
-    it('displays the swimlanes', async () => {
-      await ml.anomalyExplorer.assertOverallSwimlaneExists();
-      await ml.anomalyExplorer.assertSwimlaneViewByExists();
-    });
+        it('pre-fills the job selection', async () => {
+          await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
+        });
 
-    it('displays the anomalies table', async () => {
-      await ml.anomaliesTable.assertTableExists();
-    });
+        it('displays the influencers list', async () => {
+          await ml.anomalyExplorer.assertInfluencerListExists();
+          for (const influencerBlock of testData.expected.influencers) {
+            await ml.anomalyExplorer.assertInfluencerFieldExists(influencerBlock.field);
+            await ml.anomalyExplorer.assertInfluencerFieldListLength(
+              influencerBlock.field,
+              influencerBlock.count
+            );
+            for (const influencerLabel of influencerBlock.labelsContained) {
+              await ml.anomalyExplorer.assertInfluencerListContainsLabel(
+                influencerBlock.field,
+                influencerLabel
+              );
+            }
+          }
+        });
 
-    it('anomalies table is not empty', async () => {
-      await ml.anomaliesTable.assertTableNotEmpty();
-    });
+        it('displays the swimlanes', async () => {
+          await ml.anomalyExplorer.assertOverallSwimlaneExists();
+          await ml.anomalyExplorer.assertSwimlaneViewByExists();
+        });
+
+        it('displays the anomalies table', async () => {
+          await ml.anomaliesTable.assertTableExists();
+        });
+
+        it('anomalies table is not empty', async () => {
+          await ml.anomaliesTable.assertTableNotEmpty();
+        });
+      });
+    }
   });
 }

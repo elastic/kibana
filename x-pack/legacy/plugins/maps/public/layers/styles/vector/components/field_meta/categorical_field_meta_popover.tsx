@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldMetaPopover } from './field_meta_popover';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
-import { FieldMetaOptions } from '../../../../../../common/style_property_descriptor_types';
+import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 
 type Props = {
   styleProperty: IDynamicStyleProperty;

@@ -44,6 +44,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
+  getUrlTracker,
   unhashUrl,
   subscribeWithScope,
   tabifyAggResponse,
@@ -160,6 +161,9 @@ app.config($routeProvider => {
                       '/management/kibana/objects/savedSearches/' + $route.current.params.id,
                   },
                   toastNotifications,
+                  onBeforeRedirect() {
+                    getUrlTracker().setTrackedUrl('/discover');
+                  },
                 })
               ),
           });
@@ -194,6 +198,8 @@ function discoverController(
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
   $scope.indexPattern = resolveIndexPatternLoading();
+  //used for functional testing
+  $scope.fetchCounter = 0;
 
   const getTimeField = () => {
     return isDefaultType($scope.indexPattern) ? $scope.indexPattern.timeFieldName : undefined;
@@ -275,6 +281,7 @@ function discoverController(
       filterManager.getUpdates$(),
       {
         next: () => {
+          $scope.state.filters = filterManager.getAppFilters();
           $scope.updateDataSource();
         },
       },
@@ -672,7 +679,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
         if (!getTimeField() || !$scope.vis) return;
 
-        const buckets = $scope.vis.getAggConfig().byTypeName('buckets');
+        const buckets = $scope.vis.data.aggs.byTypeName('buckets');
 
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -784,7 +791,7 @@ function discoverController(
   $scope.opts.fetch = $scope.fetch = function() {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
-
+    $scope.fetchCounter++;
     $scope.fetchError = undefined;
 
     // Abort any in-progress requests before fetching again
@@ -821,9 +828,11 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query }) {
-    setAppState({ query });
-    $fetchObservable.next();
+  $scope.updateQuery = function({ query }, isUpdate = true) {
+    if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
+      setAppState({ query });
+      $fetchObservable.next();
+    }
   };
 
   $scope.updateSavedQueryId = newSavedQueryId => {
@@ -876,11 +885,11 @@ function discoverController(
     inspectorRequest.stats(getResponseInspectorStats($scope.searchSource, resp)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
       );
     }
 
@@ -1023,41 +1032,27 @@ function discoverController(
       },
     ];
 
-    if ($scope.vis) {
-      const visState = $scope.vis.getEnabledState();
-      visState.aggs = visStateAggs;
-
-      $scope.vis.setState(visState);
-      return;
-    }
-
-    const visSavedObject = {
-      indexPattern: $scope.indexPattern.id,
-      visState: {
-        type: 'histogram',
-        title: savedSearch.title,
-        params: {
-          addLegend: false,
-          addTimeMarker: true,
-        },
-        aggs: visStateAggs,
+    $scope.vis = visualizations.createVis('histogram', {
+      title: savedSearch.title,
+      params: {
+        addLegend: false,
+        addTimeMarker: true,
       },
-    };
-
-    $scope.vis = visualizations.createVis(
-      $scope.searchSource.getField('index'),
-      visSavedObject.visState
-    );
-    visSavedObject.vis = $scope.vis;
+      data: {
+        aggs: visStateAggs,
+        indexPattern: $scope.searchSource.getField('index').id,
+        searchSource: $scope.searchSource,
+      },
+    });
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
       if (!$scope.vis) return;
-      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, options);
+      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function() {
       if (!$scope.vis) return;
-      return $scope.vis.getAggConfig().toDsl();
+      return $scope.vis.data.aggs.toDsl();
     });
   }
 

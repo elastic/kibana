@@ -27,7 +27,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       const {
         body: legacyInitialLicense,
-        headers: legacyInitialLicenseHeaders,
+        header: legacyInitialLicenseHeaders,
       } = await supertest.get('/api/xpack/v1/info').expect(200);
 
       expect(legacyInitialLicense.license?.type).to.be('basic');
@@ -37,7 +37,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startTrial();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyTrialLicense, headers: legacyTrialLicenseHeaders } = await supertest
+      const { body: legacyTrialLicense, header: legacyTrialLicenseHeaders } = await supertest
         .get('/api/xpack/v1/info')
         .expect(200);
 
@@ -50,7 +50,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startBasic();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyBasicLicense, headers: legacyBasicLicenseHeaders } = await supertest
+      const { body: legacyBasicLicense, header: legacyBasicLicenseHeaders } = await supertest
         .get('/api/xpack/v1/info')
         .expect(200);
       expect(legacyBasicLicense.license?.type).to.be('basic');

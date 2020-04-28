@@ -9,15 +9,17 @@ import React from 'react';
 
 import { FilterMode } from '../types';
 
+import * as i18n from '../translations';
+
 const toggleButtonIcons: EuiButtonGroupOption[] = [
   {
     id: 'favorites',
-    label: 'Favorites',
+    label: i18n.FAVORITES,
     iconType: 'starFilled',
   },
   {
     id: `recently-updated`,
-    label: 'Last updated',
+    label: i18n.LAST_UPDATED,
     iconType: 'documentEdit',
   },
 ];

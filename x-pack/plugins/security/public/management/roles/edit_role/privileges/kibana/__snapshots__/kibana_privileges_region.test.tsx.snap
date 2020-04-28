@@ -5,33 +5,17 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
   iconType="logoKibana"
   title="Kibana"
 >
-  <InjectIntl(SpaceAwarePrivilegeSectionUI)
+  <SpaceAwarePrivilegeSection
+    canCustomizeSubFeaturePrivileges={true}
     editable={true}
-    features={Array []}
     kibanaPrivileges={
       KibanaPrivileges {
-        "rawKibanaPrivileges": Object {
-          "features": Object {},
-          "global": Object {},
-          "reserved": Object {},
-          "space": Object {},
-        },
+        "feature": Map {},
+        "global": Map {},
+        "spaces": Map {},
       }
     }
     onChange={[MockFunction]}
-    privilegeCalculatorFactory={
-      KibanaPrivilegeCalculatorFactory {
-        "kibanaPrivileges": KibanaPrivileges {
-          "rawKibanaPrivileges": Object {
-            "features": Object {},
-            "global": Object {},
-            "reserved": Object {},
-            "space": Object {},
-          },
-        },
-        "rankedFeaturePrivileges": Object {},
-      }
-    }
     role={
       Object {
         "elasticsearch": Object {

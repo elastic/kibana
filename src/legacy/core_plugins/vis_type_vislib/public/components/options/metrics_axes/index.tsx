@@ -299,7 +299,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
   }, [stateParams.seriesParams]);
 
   useEffect(() => {
-    vis.setVisType(visType);
+    vis.setState({ type: visType } as any);
   }, [vis, visType]);
 
   return isTabSelected ? (

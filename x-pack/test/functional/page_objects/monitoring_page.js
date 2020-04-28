@@ -8,7 +8,6 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'header', 'security', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const retry = getService('retry');
   const find = getService('find');
 
   return new (class MonitoringPage {
@@ -44,11 +43,9 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async assertTableNoData(subj) {
-      await retry.try(async () => {
-        if (!(await testSubjects.exists(subj))) {
-          throw new Error('Expected to find the no data message');
-        }
-      });
+      if (!(await testSubjects.exists(subj))) {
+        throw new Error('Expected to find the no data message');
+      }
     }
 
     async tableGetRows(subj) {

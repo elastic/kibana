@@ -18,7 +18,6 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -269,9 +268,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         defaultFindTimeout * 2
       );
       return await Promise.all(
-        legendEntries.map(
-          async (chart: WebElementWrapper) => await chart.getAttribute('data-label')
-        )
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
       );
     }
 

@@ -17,18 +17,12 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
 
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { xJsonMode } from '../../../../../components/custom_hooks';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
-  const {
-    resetAdvancedEditorMessages,
-    setAdvancedEditorRawString,
-    setFormState,
-    setJobConfig,
-  } = actions;
+  const { setAdvancedEditorRawString, setFormState } = actions;
 
   const { advancedEditorMessages, advancedEditorRawString, isJobCreated, requestMessages } = state;
 
@@ -45,12 +39,6 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ ac
 
   const onChange = (str: string) => {
     setAdvancedEditorRawString(str);
-    try {
-      const resultJobConfig = JSON.parse(collapseLiteralStrings(str));
-      setJobConfig(resultJobConfig);
-    } catch (e) {
-      resetAdvancedEditorMessages();
-    }
   };
 
   // Temp effect to close the context menu popover on Clone button click

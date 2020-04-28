@@ -20,14 +20,18 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { MetricVisComponent, MetricVisComponentProps } from './metric_vis_component';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { npStart } from 'ui/new_platform';
-import { fieldFormats } from '../../../../../plugins/data/public';
-import { identity } from 'lodash';
+import { ExprVis } from '../../../../../plugins/visualizations/public';
 
-jest.mock('ui/new_platform');
+jest.mock('../services', () => ({
+  getFormatService: () => ({
+    deserialize: () => {
+      return {
+        convert: (x: unknown) => x,
+      };
+    },
+  }),
+}));
 
 type Props = MetricVisComponentProps;
 
@@ -37,7 +41,7 @@ const baseVisData = {
 } as any;
 
 describe('MetricVisComponent', function() {
-  const vis: Vis = {
+  const vis: ExprVis = {
     params: {
       metric: {
         colorSchema: 'Green to Red',
@@ -57,7 +61,7 @@ describe('MetricVisComponent', function() {
   const getComponent = (propOverrides: Partial<Props> = {} as Partial<Props>) => {
     const props: Props = {
       vis,
-      visParams: vis.params,
+      visParams: vis.params as any,
       visData: baseVisData,
       renderComplete: jest.fn(),
       ...propOverrides,
@@ -65,12 +69,6 @@ describe('MetricVisComponent', function() {
 
     return shallow(<MetricVisComponent {...props} />);
   };
-
-  beforeAll(() => {
-    (npStart.plugins.data.fieldFormats.deserialize as jest.Mock).mockImplementation(() => {
-      return new (fieldFormats.FieldFormat.from(identity))();
-    });
-  });
 
   it('should render component', () => {
     expect(getComponent().exists()).toBe(true);

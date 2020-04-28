@@ -70,6 +70,7 @@ export class IconSelect extends Component {
         fullWidth
         compressed
         onKeyDown={this._handleKeyboardActivity}
+        append={this.props.append}
       >
         <EuiFieldText
           onClick={this._togglePopover}

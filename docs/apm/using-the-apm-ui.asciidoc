@@ -37,6 +37,8 @@ include::metrics.asciidoc[]
 
 include::agent-configuration.asciidoc[]
 
+include::custom-links.asciidoc[]
+
 include::advanced-queries.asciidoc[]
 
 include::settings.asciidoc[]

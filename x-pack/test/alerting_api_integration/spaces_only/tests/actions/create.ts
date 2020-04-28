@@ -33,7 +33,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           },
         });
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'action');
       expect(response.body).to.eql({
         id: response.body.id,

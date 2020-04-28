@@ -59,6 +59,7 @@ export const AlertsList: React.FunctionComponent = () => {
     alertTypeRegistry,
     actionTypeRegistry,
     uiSettings,
+    docLinks,
     charts,
     dataPlugin,
   } = useAppDependencies();
@@ -120,7 +121,7 @@ export const AlertsList: React.FunctionComponent = () => {
     (async () => {
       try {
         const result = await loadActionTypes({ http });
-        setActionTypes(result);
+        setActionTypes(result.filter(actionType => actionTypeRegistry.has(actionType.id)));
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -285,7 +286,7 @@ export const AlertsList: React.FunctionComponent = () => {
       >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-          defaultMessage="Create"
+          defaultMessage="Create alert"
         />
       </EuiButton>
     );
@@ -307,7 +308,7 @@ export const AlertsList: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.emptyDesc"
-            defaultMessage="Recieve an alert through email, slack or other connectors when a certain trigger is hit"
+            defaultMessage="Receive an alert through email, Slack, or another connector when a trigger is hit."
           />
         </p>
       }
@@ -445,15 +446,13 @@ export const AlertsList: React.FunctionComponent = () => {
           }
           setAlertsToDelete([]);
         }}
-        onCancel={async () => {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertsList.failedToDeleteAlertsMessage',
-              { defaultMessage: 'Failed to delete alert(s)' }
-            ),
-          });
+        onErrors={async () => {
           // Refresh the alerts from the server, some alerts may have beend deleted
           await loadAlertsData();
+          setAlertsToDelete([]);
+        }}
+        onCancel={async () => {
+          setAlertsToDelete([]);
         }}
         apiDeleteCall={deleteAlerts}
         idsToDelete={alertsToDelete}
@@ -468,7 +467,11 @@ export const AlertsList: React.FunctionComponent = () => {
       {loadedItems.length || isFilterApplied ? (
         table
       ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <EuiLoadingSpinner size="xl" />
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         emptyPrompt
       )}
@@ -480,6 +483,7 @@ export const AlertsList: React.FunctionComponent = () => {
           alertTypeRegistry,
           toastNotifications,
           uiSettings,
+          docLinks,
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
         }}

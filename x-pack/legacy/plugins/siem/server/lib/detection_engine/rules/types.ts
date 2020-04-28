@@ -16,7 +16,6 @@ import {
 import { AlertsClient, PartialAlert } from '../../../../../../../plugins/alerting/server';
 import { Alert } from '../../../../../../../plugins/alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { LegacyRequest } from '../../../types';
 import { ActionsClient } from '../../../../../../../plugins/actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
@@ -39,14 +38,6 @@ export interface FindParamsRest {
   filter: string;
 }
 
-export interface PatchRulesRequest extends LegacyRequest {
-  payload: PatchRuleAlertParamsRest;
-}
-
-export interface UpdateRulesRequest extends LegacyRequest {
-  payload: UpdateRuleAlertParamsRest;
-}
-
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
 }
@@ -60,6 +51,10 @@ export interface IRuleStatusAttributes extends Record<string, any> {
   lastSuccessAt: string | null | undefined;
   lastSuccessMessage: string | null | undefined;
   status: RuleStatusString | null | undefined;
+  lastLookBackDate: string | null | undefined;
+  gap: string | null | undefined;
+  bulkCreateTimeDurations: string[] | null | undefined;
+  searchAfterTimeDurations: string[] | null | undefined;
 }
 
 export interface RuleStatusResponse {
@@ -89,7 +84,7 @@ export interface IRuleStatusFindType {
   saved_objects: IRuleStatusSavedObject[];
 }
 
-export type RuleStatusString = 'succeeded' | 'failed' | 'going to run' | 'executing';
+export type RuleStatusString = 'succeeded' | 'failed' | 'going to run';
 
 export interface HapiReadableStream extends Readable {
   hapi: {
@@ -147,12 +142,12 @@ export interface Clients {
   actionsClient: ActionsClient;
 }
 
-export type PatchRuleParams = Partial<RuleAlertParams> & {
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'actions' | 'throttle'>> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
-export type UpdateRuleParams = RuleAlertParams & {
+export type UpdateRuleParams = Omit<RuleAlertParams, 'immutable' | 'actions' | 'throttle'> & {
   id: string | undefined | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
@@ -162,7 +157,9 @@ export type DeleteRuleParams = Clients & {
   ruleId: string | undefined | null;
 };
 
-export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId'> & { ruleId: string } & Clients;
+export type CreateRuleParams = Omit<RuleAlertParams, 'ruleId' | 'actions' | 'throttle'> & {
+  ruleId: string;
+} & Clients;
 
 export interface ReadRuleParams {
   alertsClient: AlertsClient;

@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import { EuiColorPicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MbValidatedColorPicker } from './mb_validated_color_picker';
 
 export function StaticColorForm({
   onStaticStyleChange,
@@ -23,11 +24,10 @@ export function StaticColorForm({
         {staticDynamicSelect}
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiColorPicker
+        <MbValidatedColorPicker
           onChange={onColorChange}
           color={styleProperty.getOptions().color}
           swatches={swatches}
-          compressed
         />
       </EuiFlexItem>
     </EuiFlexGroup>

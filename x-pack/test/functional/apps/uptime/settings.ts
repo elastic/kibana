@@ -9,64 +9,71 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   defaultDynamicSettings,
   DynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
+} from '../../../../legacy/plugins/uptime/common/runtime_types';
 import { makeChecks } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['uptime']);
+  const { uptime: uptimePage } = getPageObjects(['uptime']);
+  const uptimeService = getService('uptime');
+
   const es = getService('es');
 
   // Flaky https://github.com/elastic/kibana/issues/60866
-  describe.skip('uptime settings page', () => {
-    const settingsPage = () => pageObjects.uptime.settings;
+  describe('uptime settings page', () => {
     beforeEach('navigate to clean app root', async () => {
       // make 10 checks
       await makeChecks(es, 'myMonitor', 1, 1, 1);
-      await pageObjects.uptime.goToRoot();
+      await uptimePage.goToRoot();
     });
 
     it('loads the default settings', async () => {
-      await pageObjects.uptime.settings.go();
+      const settings = uptimeService.settings;
 
-      const fields = await settingsPage().loadFields();
+      await settings.go();
+
+      const fields = await settings.loadFields();
       expect(fields).to.eql(defaultDynamicSettings);
     });
 
     it('should disable the apply button when invalid or unchanged', async () => {
-      await pageObjects.uptime.settings.go();
+      const settings = uptimeService.settings;
+
+      await settings.go();
 
       // Disabled because it's the original value
-      expect(await settingsPage().applyButtonIsDisabled()).to.eql(true);
+      expect(await settings.applyButtonIsDisabled()).to.eql(true);
 
       // Enabled because it's a new, different, value
-      await settingsPage().changeHeartbeatIndicesInput('somethingNew');
-      expect(await settingsPage().applyButtonIsDisabled()).to.eql(false);
+      await settings.changeHeartbeatIndicesInput('somethingNew');
+      expect(await settings.applyButtonIsDisabled()).to.eql(false);
 
       // Disabled because it's blank
-      await settingsPage().changeHeartbeatIndicesInput('');
-      expect(await settingsPage().applyButtonIsDisabled()).to.eql(true);
+      await settings.changeHeartbeatIndicesInput('');
+      expect(await settings.applyButtonIsDisabled()).to.eql(true);
     });
 
     // Failing: https://github.com/elastic/kibana/issues/60863
-    it.skip('changing index pattern setting is reflected elsewhere in UI', async () => {
-      const originalCount = await pageObjects.uptime.getSnapshotCount();
+    it('changing index pattern setting is reflected elsewhere in UI', async () => {
+      const settings = uptimeService.settings;
+
+      const originalCount = await uptimePage.getSnapshotCount();
       // We should find 1 monitor up with the default index pattern
       expect(originalCount.up).to.eql(1);
 
-      await pageObjects.uptime.settings.go();
+      await settings.go();
 
       const newFieldValues: DynamicSettings = { heartbeatIndices: 'new*' };
-      await settingsPage().changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
-      await settingsPage().apply();
+      await settings.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
+      await settings.apply();
 
-      await pageObjects.uptime.goToRoot();
+      await uptimePage.goToRoot();
 
       // We should no longer find any monitors since the new pattern matches nothing
-      await pageObjects.uptime.pageHasDataMissing();
+      await uptimePage.pageHasDataMissing();
 
       // Verify that the settings page shows the value we previously saved
-      await pageObjects.uptime.settings.go();
-      const fields = await settingsPage().loadFields();
+      await settings.go();
+      const fields = await settings.loadFields();
       expect(fields).to.eql(newFieldValues);
     });
   });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIMELINE_EXPORT_URL } from '../../../../../common/constants';
+import { TIMELINE_EXPORT_URL, TIMELINE_IMPORT_URL } from '../../../../../common/constants';
 import { requestMock } from '../../../detection_engine/routes/__mocks__';
 
 export const getExportTimelinesRequest = () =>
@@ -13,6 +13,26 @@ export const getExportTimelinesRequest = () =>
     path: TIMELINE_EXPORT_URL,
     body: {
       ids: ['f0e58720-57b6-11ea-b88d-3f1a31716be8', '890b8ae0-57df-11ea-a7c9-3976b7f1cb37'],
+    },
+  });
+
+export const getImportTimelinesRequest = (filename?: string) =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_IMPORT_URL,
+    query: { overwrite: false },
+    body: {
+      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
+    },
+  });
+
+export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_IMPORT_URL,
+    query: { overwrite: true },
+    body: {
+      file: { hapi: { filename: filename ?? 'filename.ndjson' } },
     },
   });
 

@@ -6,12 +6,20 @@
 
 import * as t from 'io-ts';
 
-export const RuleTypeSchema = t.keyof({
-  query: null,
-  saved_query: null,
-  machine_learning: null,
-});
-export type RuleType = t.TypeOf<typeof RuleTypeSchema>;
+import { RuleTypeSchema } from '../../../../common/detection_engine/types';
+
+/**
+ * Params is an "record", since it is a type of AlertActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/alert.ts
+ */
+export const action = t.exact(
+  t.type({
+    group: t.string,
+    id: t.string,
+    action_type_id: t.string,
+    params: t.record(t.string, t.any),
+  })
+);
 
 export const NewRuleSchema = t.intersection([
   t.type({
@@ -24,6 +32,7 @@ export const NewRuleSchema = t.intersection([
     type: RuleTypeSchema,
   }),
   t.partial({
+    actions: t.array(action),
     anomaly_threshold: t.number,
     created_by: t.string,
     false_positives: t.array(t.string),
@@ -40,6 +49,7 @@ export const NewRuleSchema = t.intersection([
     saved_id: t.string,
     tags: t.array(t.string),
     threat: t.array(t.unknown),
+    throttle: t.union([t.string, t.null]),
     to: t.string,
     updated_by: t.string,
     note: t.string,
@@ -54,9 +64,15 @@ export interface AddRulesProps {
   signal: AbortSignal;
 }
 
-const MetaRule = t.type({
-  from: t.string,
-});
+const MetaRule = t.intersection([
+  t.type({
+    from: t.string,
+  }),
+  t.partial({
+    throttle: t.string,
+    kibanaSiemAppUrl: t.string,
+  }),
+]);
 
 export const RuleSchema = t.intersection([
   t.type({
@@ -81,6 +97,8 @@ export const RuleSchema = t.intersection([
     threat: t.array(t.unknown),
     updated_at: t.string,
     updated_by: t.string,
+    actions: t.array(action),
+    throttle: t.union([t.string, t.null]),
   }),
   t.partial({
     anomaly_threshold: t.number,
@@ -171,7 +189,7 @@ export interface BasicFetchProps {
   signal: AbortSignal;
 }
 
-export interface ImportRulesProps {
+export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
   signal: AbortSignal;
@@ -185,7 +203,7 @@ export interface ImportRulesResponseError {
   };
 }
 
-export interface ImportRulesResponse {
+export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: ImportRulesResponseError[];
@@ -212,6 +230,10 @@ export interface RuleInfoStatus {
   last_success_at: string | null;
   last_failure_message: string | null;
   last_success_message: string | null;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
 }
 
 export type RuleStatusResponse = Record<string, RuleStatus>;

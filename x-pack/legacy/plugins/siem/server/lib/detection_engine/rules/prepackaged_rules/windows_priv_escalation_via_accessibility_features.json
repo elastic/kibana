@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Potential Modification of Accessibility Binaries",
-  "query": "event.code:1 and process.parent.name:winlogon.exe and (process.name:atbroker.exe or process.name:displayswitch.exe or process.name:magnify.exe or process.name:narrator.exe or process.name:osk.exe or process.name:sethc.exe or process.name:utilman.exe)",
+  "query": "event.code:1 and process.parent.name:winlogon.exe and process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
   "risk_score": 21,
   "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
   "severity": "low",

@@ -992,7 +992,6 @@ export const mockUserPrivilege: Privilege = {
     monitor_watcher: true,
     monitor_transform: true,
     read_ilm: true,
-    manage_api_key: true,
     manage_security: true,
     manage_own_api_key: false,
     manage_saml: true,

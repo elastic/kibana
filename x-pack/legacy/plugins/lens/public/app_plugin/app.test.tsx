@@ -77,6 +77,20 @@ function createMockFilterManager() {
   };
 }
 
+function createMockTimefilter() {
+  const unsubscribe = jest.fn();
+
+  return {
+    getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
+    setTime: jest.fn(),
+    getTimeUpdate$: () => ({
+      subscribe: ({ next }: { next: () => void }) => {
+        return unsubscribe;
+      },
+    }),
+  };
+}
+
 describe('Lens App', () => {
   let frame: jest.Mocked<EditorFrameInstance>;
   let core: ReturnType<typeof coreMock['createStart']>;
@@ -108,10 +122,7 @@ describe('Lens App', () => {
         query: {
           filterManager: createMockFilterManager(),
           timefilter: {
-            timefilter: {
-              getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
-              setTime: jest.fn(),
-            },
+            timefilter: createMockTimefilter(),
           },
         },
         indexPatterns: {

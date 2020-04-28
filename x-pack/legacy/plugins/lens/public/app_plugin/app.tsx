@@ -94,8 +94,23 @@ export function App({
         trackUiEvent('app_filters_updated');
       },
     });
+
+    const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
+      next: () => {
+        const currentRange = data.query.timefilter.timefilter.getTime();
+        setState(s => ({
+          ...s,
+          dateRange: {
+            fromDate: currentRange.from,
+            toDate: currentRange.to,
+          },
+        }));
+      },
+    });
+
     return () => {
       filterSubscription.unsubscribe();
+      timeSubscription.unsubscribe();
     };
   }, []);
 

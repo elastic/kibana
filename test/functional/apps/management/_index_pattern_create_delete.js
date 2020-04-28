@@ -42,7 +42,7 @@ export default function({ getService, getPageObjects }) {
 
     describe('special character handling', () => {
       it('should handle special charaters in template input', async () => {
-        await PageObjects.settings.clickOptionalAddNewButton();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.setIndexPatternField({
           indexPatternName: '❤️',
@@ -71,8 +71,8 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should have index pattern in page header', async function() {
-        const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-        expect(indexPageHeading).to.be('logstash-*');
+        const patternName = await PageObjects.settings.getIndexPageHeading();
+        expect(patternName).to.be('logstash-*');
       });
 
       it('should have index pattern in url', function url() {

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import angular from 'angular'; // just used in embeddables and discover controller
 import { DiscoverServices } from './build_services';
 
 let angularModule: any = null;
@@ -47,10 +46,14 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
+export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
+  setTrackedUrl: (url: string) => void;
+}>('urlTracker');
+
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
-export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
 import { search } from '../../../../../plugins/data/public';
+import { createGetterSetter } from '../../../../../plugins/kibana_utils/common';
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export {
   unhashUrl,
@@ -75,7 +78,5 @@ export {
   EsQuerySortValue,
   SortDirection,
 } from '../../../../../plugins/data/public';
-export { ElasticSearchHit } from './np_ready/doc_views/doc_views_types';
-export { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 // @ts-ignore
 export { buildPointSeriesData } from 'ui/agg_response/point_series/point_series';

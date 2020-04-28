@@ -10,10 +10,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
-import { AppDependencies } from './application';
 import { httpService } from './application/services/http';
-import { breadcrumbService } from './application/services/breadcrumbs';
-import { documentationService } from './application/services/documentation';
 import { notificationService } from './application/services/notification';
 import { UiMetricService } from './application/services/ui_metric';
 
@@ -44,7 +41,7 @@ export class IndexMgmtUIPlugin {
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
-    const { http, notifications, getStartServices } = coreSetup;
+    const { http, notifications } = coreSetup;
     const { usageCollection, management } = plugins;
 
     httpService.setup(http);
@@ -55,30 +52,15 @@ export class IndexMgmtUIPlugin {
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
       order: 1,
-      mount: async ({ element, setBreadcrumbs }) => {
-        const [core] = await getStartServices();
-        const { docLinks, fatalErrors } = core;
-
-        breadcrumbService.setup(setBreadcrumbs);
-        documentationService.setup(docLinks);
-
-        const appDependencies: AppDependencies = {
-          core: {
-            fatalErrors,
-          },
-          plugins: {
-            usageCollection,
-          },
-          services: {
-            uiMetricService: this.uiMetricService,
-            extensionsService: this.extensionsService,
-            httpService,
-            notificationService,
-          },
+      mount: async params => {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const services = {
+          httpService,
+          notificationService,
+          uiMetricService: this.uiMetricService,
+          extensionsService: this.extensionsService,
         };
-
-        const { renderApp } = await import('./application');
-        return renderApp(element, { core, dependencies: appDependencies });
+        return mountManagementSection(coreSetup, usageCollection, services, params);
       },
     });
 

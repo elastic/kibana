@@ -16,6 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import Path from 'path';
+import { fromRoot } from '../../../core/server/utils';
+
 import { InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -29,6 +32,7 @@ export class CoreApp {
   setup(coreSetup: InternalCoreSetup) {
     this.logger.debug('Setting up core app.');
     this.registerDefaultRoutes(coreSetup);
+    this.registerStaticDirs(coreSetup);
   }
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup) {
@@ -47,6 +51,14 @@ export class CoreApp {
     });
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
+    );
+  }
+  private registerStaticDirs(coreSetup: InternalCoreSetup) {
+    coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
+
+    coreSetup.http.registerStaticDir(
+      '/node_modules/@kbn/ui-framework/dist/{path*}',
+      fromRoot('node_modules/@kbn/ui-framework/dist')
     );
   }
 }

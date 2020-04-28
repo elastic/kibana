@@ -1,12 +1,12 @@
 [role="xpack"]
 [[workpad-share-options]]
-== Share your workpad
+=== Share your workpad
 
 When you've finished your workpad, you can share it outside of {kib}.
 
 [float]
 [[export-single-workpad]]
-=== Export workpads
+==== Export workpads
 
 Create a JSON file of your workpad that you can export outside of {kib}.
 
@@ -21,7 +21,7 @@ Want to export multiple workpads? Go to the *Canvas workpads* view, select the w
 
 [float]
 [[create-workpad-pdf]]
-=== Create a PDF
+==== Create a PDF
 
 If you have a license that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
 
@@ -36,7 +36,7 @@ image::images/canvas-generate-pdf.gif[Generate PDF]
 
 [float]
 [[create-workpad-URL]]
-=== Create a POST URL
+==== Create a POST URL
 
 If you have a license that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using Watcher or a script.
 
@@ -51,7 +51,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 
 [float]
 [[add-workpad-website]]
-=== Share the workpad on a website
+==== Share the workpad on a website
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
@@ -70,13 +70,11 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 
 [float]
 [[change-the-workpad-settings]]
-=== Change the settings
+==== Change the settings
 
 After you've added the workpad to your website, you can change the autoplay and toolbar settings.
 
-[float]
-[[shareable-workpad-enable-autoplay]]
-==== Change the autoplay settings
+To change the autoplay settings:
 
 . In the lower right corner of the shareable workpad, click the settings icon.
 
@@ -85,9 +83,7 @@ After you've added the workpad to your website, you can change the autoplay and 
 [role="screenshot"]
 image::images/canvas_share_autoplay_480.gif[Autoplay settings]
 
-[float]
-[[hide-workpad-toolbar]]
-==== Change the toolbar settings
+To change the toolbar settings:
 
 . In the lower right corner, click the settings icon.
 

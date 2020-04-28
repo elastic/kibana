@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
+import { Vis } from '../../../../../../../plugins/visualizations/public';
 import { SeriesParam, ValueAxis } from '../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from './';

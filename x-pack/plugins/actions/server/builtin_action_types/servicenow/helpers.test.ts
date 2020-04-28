@@ -191,13 +191,21 @@ describe('transformFields', () => {
 
   test('transform fields for update correctly', () => {
     const fields = prepareFieldsForTransformation({
-      params: fullParams,
+      params: {
+        ...fullParams,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+      },
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
     });
 
     const res = transformFields({
-      params: fullParams,
+      params: {
+        ...fullParams,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+      },
       fields,
       currentIncident: {
         short_description: 'first title (created at 2020-03-13T08:34:53.450Z by Elastic User)',
@@ -205,9 +213,9 @@ describe('transformFields', () => {
       },
     });
     expect(res).toEqual({
-      short_description: 'a title (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+      short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by Another User)',
       description:
-        'first description (created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+        'first description (created at 2020-03-13T08:34:53.450Z by Elastic User) \r\na description (updated at 2020-03-15T08:34:53.450Z by Another User)',
     });
   });
 
@@ -229,7 +237,7 @@ describe('transformFields', () => {
     expect(res.description?.includes('\r\n')).toBe(true);
   });
 
-  test('append username if fullname is undefined', () => {
+  test('append username if fullname is undefined when create', () => {
     const fields = prepareFieldsForTransformation({
       params: fullParams,
       mapping: finalMapping,
@@ -243,6 +251,32 @@ describe('transformFields', () => {
     expect(res).toEqual({
       short_description: 'a title (created at 2020-03-13T08:34:53.450Z by elastic)',
       description: 'a description (created at 2020-03-13T08:34:53.450Z by elastic)',
+    });
+  });
+
+  test('append username if fullname is undefined when update', () => {
+    const fields = prepareFieldsForTransformation({
+      params: {
+        ...fullParams,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+      },
+      mapping: finalMapping,
+      defaultPipes: ['informationUpdated'],
+    });
+
+    const res = transformFields({
+      params: {
+        ...fullParams,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { username: 'anotherUser', fullName: null },
+      },
+      fields,
+    });
+
+    expect(res).toEqual({
+      short_description: 'a title (updated at 2020-03-15T08:34:53.450Z by anotherUser)',
+      description: 'a description (updated at 2020-03-15T08:34:53.450Z by anotherUser)',
     });
   });
 });
@@ -330,8 +364,8 @@ describe('transformComments', () => {
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
-        updatedAt: null,
-        updatedBy: null,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
       },
     ];
     const res = transformComments(comments, fullParams, ['informationUpdated']);
@@ -339,11 +373,11 @@ describe('transformComments', () => {
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
         version: 'WzU3LDFd',
-        comment: 'first comment (updated at 2020-03-13T08:34:53.450Z by Elastic User)',
+        comment: 'first comment (updated at 2020-03-15T08:34:53.450Z by Another User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
-        updatedAt: null,
-        updatedBy: null,
+        updatedAt: '2020-03-15T08:34:53.450Z',
+        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
       },
     ]);
   });

@@ -18,7 +18,7 @@ import {
   Filter,
   FilterManager,
 } from '../../../../../../../../../../src/plugins/data/public';
-import { mockAboutStepRule } from '../../all/__mocks__/mock';
+import { mockAboutStepRule, mockDefineStepRule } from '../../all/__mocks__/mock';
 import { coreMock } from '../../../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
 import * as i18n from './translations';
@@ -26,6 +26,8 @@ import * as i18n from './translations';
 import { schema } from '../step_about_rule/schema';
 import { ListItems } from './types';
 import { AboutStepRule } from '../../types';
+
+jest.mock('../../../../../lib/kibana');
 
 describe('description_step', () => {
   const setupMock = coreMock.createSetup();
@@ -41,13 +43,6 @@ describe('description_step', () => {
   let mockAboutStep: AboutStepRule;
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-
     setupMock.uiSettings.get.mockImplementation(uiSettingsMock(true));
     mockFilterManager = new FilterManager(setupMock.uiSettings);
     mockAboutStep = mockAboutStepRule();
@@ -263,7 +258,7 @@ describe('description_step', () => {
     test('returns expected ListItems array when given valid inputs', () => {
       const result: ListItems[] = buildListItems(mockAboutStep, schema, mockFilterManager);
 
-      expect(result.length).toEqual(10);
+      expect(result.length).toEqual(9);
     });
   });
 
@@ -431,10 +426,11 @@ describe('description_step', () => {
 
     describe('timeline', () => {
       test('returns timeline title if one exists', () => {
+        const mockDefineStep = mockDefineStepRule();
         const result: ListItems[] = getDescriptionItem(
           'timeline',
           'Timeline label',
-          mockAboutStep,
+          mockDefineStep,
           mockFilterManager
         );
 
@@ -444,7 +440,7 @@ describe('description_step', () => {
 
       test('returns default timeline title if none exists', () => {
         const mockStep = {
-          ...mockAboutStep,
+          ...mockDefineStepRule(),
           timeline: {
             id: '12345',
           },
@@ -465,12 +461,12 @@ describe('description_step', () => {
       test('returns default "note" description', () => {
         const result: ListItems[] = getDescriptionItem(
           'note',
-          'Investigation notes',
+          'Investigation guide',
           mockAboutStep,
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual('Investigation notes');
+        expect(result[0].title).toEqual('Investigation guide');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
       });
     });

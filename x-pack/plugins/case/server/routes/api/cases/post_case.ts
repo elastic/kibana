@@ -11,10 +11,11 @@ import { identity } from 'fp-ts/lib/function';
 
 import { flattenCaseSavedObject, transformNewCase, wrapError, escapeHatch } from '../utils';
 
-import { CaseRequestRt, throwErrors, CaseResponseRt } from '../../../../common/api';
+import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../../../common/api';
+import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 
-export function initPostCaseApi({ caseService, router }: RouteDeps) {
+export function initPostCaseApi({ caseService, router, userActionService }: RouteDeps) {
   router.post(
     {
       path: '/api/cases',
@@ -24,21 +25,39 @@ export function initPostCaseApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const query = pipe(
-          CaseRequestRt.decode(request.body),
+          excess(CasePostRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const createdBy = await caseService.getUser({ request, response });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const newCase = await caseService.postNewCase({
-          client: context.core.savedObjects.client,
+          client,
           attributes: transformNewCase({
             createdDate,
             newCase: query,
-            ...createdBy,
+            username,
+            full_name,
+            email,
           }),
         });
+
+        await userActionService.postUserActions({
+          client,
+          actions: [
+            buildCaseUserActionItem({
+              action: 'create',
+              actionAt: createdDate,
+              actionBy: { username, full_name, email },
+              caseId: newCase.id,
+              fields: ['description', 'status', 'tags', 'title'],
+              newValue: JSON.stringify(query),
+            }),
+          ],
+        });
+
         return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(newCase, [])) });
       } catch (error) {
         return response.customError(wrapError(error));

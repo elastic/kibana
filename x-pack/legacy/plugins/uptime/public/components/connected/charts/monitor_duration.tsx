@@ -7,10 +7,21 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useUrlParams } from '../../../hooks';
-import { getMonitorDurationAction } from '../../../state/actions';
+import {
+  getAnomalyRecordsAction,
+  getMLCapabilitiesAction,
+  getMonitorDurationAction,
+} from '../../../state/actions';
 import { DurationChartComponent } from '../../functional/charts';
-import { selectDurationLines } from '../../../state/selectors';
+import {
+  anomaliesSelector,
+  hasMLFeatureAvailable,
+  hasMLJobSelector,
+  selectDurationLines,
+} from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
+import { getMLJobId } from '../../../state/api/ml_anomaly';
+import { JobStat } from '../../../../../../../plugins/ml/common/types/data_recognizer';
 
 interface Props {
   monitorId: string;
@@ -18,24 +29,58 @@ interface Props {
 
 export const DurationChart: React.FC<Props> = ({ monitorId }: Props) => {
   const [getUrlParams] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const {
+    dateRangeStart,
+    dateRangeEnd,
+    absoluteDateRangeStart,
+    absoluteDateRangeEnd,
+  } = getUrlParams();
 
-  const { monitor_duration, loading } = useSelector(selectDurationLines);
+  const { durationLines, loading } = useSelector(selectDurationLines);
+
+  const isMLAvailable = useSelector(hasMLFeatureAvailable);
+
+  const { data: mlJobs, loading: jobsLoading } = useSelector(hasMLJobSelector);
+
+  const hasMLJob =
+    !!mlJobs?.jobsExist &&
+    !!mlJobs.jobs.find((job: JobStat) => job.id === getMLJobId(monitorId as string));
+
+  const anomalies = useSelector(anomaliesSelector);
 
   const dispatch = useDispatch();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
   useEffect(() => {
-    dispatch(
-      getMonitorDurationAction({ monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd })
-    );
+    if (isMLAvailable) {
+      const anomalyParams = {
+        listOfMonitorIds: [monitorId],
+        dateStart: absoluteDateRangeStart,
+        dateEnd: absoluteDateRangeEnd,
+      };
+
+      dispatch(getAnomalyRecordsAction.get(anomalyParams));
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId, isMLAvailable]);
+
+  useEffect(() => {
+    const params = { monitorId, dateStart: dateRangeStart, dateEnd: dateRangeEnd };
+    dispatch(getMonitorDurationAction(params));
   }, [dateRangeStart, dateRangeEnd, dispatch, lastRefresh, monitorId]);
+
+  useEffect(() => {
+    dispatch(getMLCapabilitiesAction.get());
+  }, [dispatch]);
 
   return (
     <DurationChartComponent
-      locationDurationLines={monitor_duration?.locationDurationLines ?? []}
-      loading={loading}
+      anomalies={anomalies}
+      hasMLJob={hasMLJob}
+      loading={loading || jobsLoading}
+      locationDurationLines={durationLines?.locationDurationLines ?? []}
     />
   );
 };

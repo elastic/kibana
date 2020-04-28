@@ -79,6 +79,39 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`launchSampleDataSet${id}`);
     }
 
+    async clickAllKibanaPlugins() {
+      await testSubjects.click('allPlugins');
+    }
+
+    async clickVisualizeExplorePlugins() {
+      await testSubjects.click('tab-data');
+    }
+
+    async clickAdminPlugin() {
+      await testSubjects.click('tab-admin');
+    }
+
+    async clickOnConsole() {
+      await testSubjects.click('homeSynopsisLinkconsole');
+    }
+    async clickOnLogo() {
+      await testSubjects.click('logo');
+    }
+
+    async ClickOnLogsData() {
+      await testSubjects.click('logsData');
+    }
+
+    // clicks on Active MQ logs
+    async clickOnLogsTutorial() {
+      await testSubjects.click('homeSynopsisLinkactivemq logs');
+    }
+
+    // clicks on cloud tutorial link
+    async clickOnCloudTutorial() {
+      await testSubjects.click('onCloudTutorial');
+    }
+
     async loadSavedObjects() {
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');

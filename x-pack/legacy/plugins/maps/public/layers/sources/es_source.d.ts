@@ -7,7 +7,7 @@
 import { AbstractVectorSource } from './vector_source';
 import { IVectorSource } from './vector_source';
 import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/public';
-import { VectorLayerRequestMeta } from '../../../common/data_request_descriptor_types';
+import { VectorSourceRequestMeta } from '../../../common/descriptor_types';
 
 export interface IESSource extends IVectorSource {
   getId(): string;
@@ -16,7 +16,7 @@ export interface IESSource extends IVectorSource {
   getGeoFieldName(): string;
   getMaxResultWindow(): Promise<number>;
   makeSearchSource(
-    searchFilters: VectorLayerRequestMeta,
+    searchFilters: VectorSourceRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<SearchSource>;
@@ -29,7 +29,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   getGeoFieldName(): string;
   getMaxResultWindow(): Promise<number>;
   makeSearchSource(
-    searchFilters: VectorLayerRequestMeta,
+    searchFilters: VectorSourceRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<SearchSource>;

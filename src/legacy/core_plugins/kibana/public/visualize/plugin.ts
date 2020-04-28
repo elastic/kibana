@@ -43,7 +43,7 @@ import {
   KibanaLegacySetup,
   AngularRenderedAppUpdater,
 } from '../../../../../plugins/kibana_legacy/public';
-import { VisualizationsStart } from '../../../visualizations/public';
+import { VisualizationsStart } from '../../../../../plugins/visualizations/public';
 import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
@@ -89,7 +89,7 @@ export class VisualizePlugin implements Plugin {
     const { appMounted, appUnMounted, stop: stopUrlTracker, setActiveUrl } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/visualize',
-      storageKey: 'lastUrl:visualize',
+      storageKey: `lastUrl:${core.http.basePath.get()}:visualize`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -140,7 +140,6 @@ export class VisualizePlugin implements Plugin {
           chrome: coreStart.chrome,
           data: dataStart,
           embeddable,
-          getBasePath: core.http.basePath.get,
           indexPatterns: dataStart.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
@@ -157,6 +156,7 @@ export class VisualizePlugin implements Plugin {
           I18nContext: coreStart.i18n.Context,
           setActiveUrl,
           DefaultVisualizationEditor: DefaultEditorController,
+          createVisEmbeddableFromObject: visualizations.__LEGACY.createVisEmbeddableFromObject,
         };
         setServices(deps);
 

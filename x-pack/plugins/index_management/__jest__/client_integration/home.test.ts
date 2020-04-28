@@ -115,11 +115,13 @@ describe('<IndexManagementHome />', () => {
         const template1 = fixtures.getTemplate({
           name: `a${getRandomString()}`,
           indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-          settings: {
-            index: {
-              number_of_shards: '1',
-              lifecycle: {
-                name: 'my_ilm_policy',
+          template: {
+            settings: {
+              index: {
+                number_of_shards: '1',
+                lifecycle: {
+                  name: 'my_ilm_policy',
+                },
               },
             },
           },
@@ -302,7 +304,10 @@ describe('<IndexManagementHome />', () => {
 
             const templateId = rows[0].columns[2].value;
 
-            const { name: templateName } = template1;
+            const {
+              name: templateName,
+              _kbnMeta: { formatVersion },
+            } = template1;
             await actions.clickTemplateAction(templateName, 'delete');
 
             const modal = document.body.querySelector(
@@ -327,8 +332,11 @@ describe('<IndexManagementHome />', () => {
 
             const latestRequest = server.requests[server.requests.length - 1];
 
-            expect(latestRequest.method).toBe('DELETE');
-            expect(latestRequest.url).toBe(`${API_BASE_PATH}/templates/${template1.name}`);
+            expect(latestRequest.method).toBe('POST');
+            expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete-templates`);
+            expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
+              templates: [{ name: template1.name, formatVersion }],
+            });
           });
         });
 
@@ -396,24 +404,26 @@ describe('<IndexManagementHome />', () => {
               const template = fixtures.getTemplate({
                 name: `a${getRandomString()}`,
                 indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
-                settings: {
-                  index: {
-                    number_of_shards: '1',
-                  },
-                },
-                mappings: {
-                  _source: {
-                    enabled: false,
-                  },
-                  properties: {
-                    created_at: {
-                      type: 'date',
-                      format: 'EEE MMM dd HH:mm:ss Z yyyy',
+                template: {
+                  settings: {
+                    index: {
+                      number_of_shards: '1',
                     },
                   },
-                },
-                aliases: {
-                  alias1: {},
+                  mappings: {
+                    _source: {
+                      enabled: false,
+                    },
+                    properties: {
+                      created_at: {
+                        type: 'date',
+                        format: 'EEE MMM dd HH:mm:ss Z yyyy',
+                      },
+                    },
+                  },
+                  aliases: {
+                    alias1: {},
+                  },
                 },
               });
 

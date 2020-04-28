@@ -18,7 +18,7 @@
  */
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
 
 import { createMetricsFn } from './metrics_fn';
 import { metricsVisDefinition } from './metrics_type';

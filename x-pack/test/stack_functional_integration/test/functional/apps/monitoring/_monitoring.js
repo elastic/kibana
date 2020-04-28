@@ -5,7 +5,7 @@
  */
 
 export default ({ getService, getPageObjects }) => {
-  describe('monitoring app', () => {
+  describe('monitoring app - stack functional integration - suite', () => {
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const log = getService('log');

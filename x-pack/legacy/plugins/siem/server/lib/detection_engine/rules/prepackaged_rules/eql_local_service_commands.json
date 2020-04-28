@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Local Service Commands",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and  process.name:sc.exe and process.args:(\"create\" or \"config\" or \"failure\" or \"start\")",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:sc.exe and process.args:(config or create or failure or start)",
   "risk_score": 21,
   "rule_id": "e8571d5f-bea1-46c2-9f56-998de2d3ed95",
   "severity": "low",

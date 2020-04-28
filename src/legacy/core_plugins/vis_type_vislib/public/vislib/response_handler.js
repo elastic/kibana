@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { buildHierarchicalData, buildPointSeriesData, getFormat } from '../legacy_imports';
+import { buildHierarchicalData, buildPointSeriesData } from '../legacy_imports';
+import { getFormatService } from '../services';
 
 function tableResponseHandler(table, dimensions) {
   const converted = { tables: [] };
@@ -26,7 +27,7 @@ function tableResponseHandler(table, dimensions) {
   if (split) {
     converted.direction = dimensions.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getFormat(split[0].format);
+    const splitColumnFormatter = getFormatService().deserialize(split[0].format);
     const splitColumn = table.columns[splitColumnIndex];
     const splitMap = {};
     let splitIndex = 0;

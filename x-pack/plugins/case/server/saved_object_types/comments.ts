@@ -33,6 +33,22 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      pushed_at: {
+        type: 'date',
+      },
+      pushed_by: {
+        properties: {
+          username: {
+            type: 'keyword',
+          },
+          full_name: {
+            type: 'keyword',
+          },
+          email: {
+            type: 'keyword',
+          },
+        },
+      },
       updated_at: {
         type: 'date',
       },

@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { combineLatest, Observable, ReplaySubject, Subject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, startWith, tap } from 'rxjs/operators';
 import {
   basicJobValidation,
   basicDatafeedValidation,
@@ -17,11 +17,12 @@ import { populateValidationMessages, checkForExistingJobAndGroupIds } from './ut
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
 import { cardinalityValidator, CardinalityValidatorResult } from './validators';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate
 // after every keystroke
-const VALIDATION_DELAY_MS = 500;
+export const VALIDATION_DELAY_MS = 500;
 
 type AsyncValidatorsResult = Partial<CardinalityValidatorResult>;
 
@@ -109,7 +110,8 @@ export class JobValidator {
             ...(curr ? curr : {}),
           };
         }, {});
-      })
+      }),
+      startWith({})
     );
 
     this.validationResult$ = combineLatest([
@@ -135,6 +137,7 @@ export class JobValidator {
     const formattedJobConfig = this._jobCreator.formattedJobJson;
     const formattedDatafeedConfig = this._jobCreator.formattedDatafeedJson;
 
+    this._runAdvancedValidation();
     // only validate if the config has changed
     if (
       forceValidate ||
@@ -149,7 +152,6 @@ export class JobValidator {
       this._lastDatafeedConfig = formattedDatafeedConfig;
       this._validateTimeout = setTimeout(() => {
         this._runBasicValidation();
-        this._runAdvancedValidation();
 
         this._jobCreatorSubject$.next(this._jobCreator);
 
@@ -269,5 +271,31 @@ export class JobValidator {
 
   public set categorizationField(valid: boolean) {
     this._advancedValidations.categorizationFieldValid.valid = valid;
+  }
+
+  /**
+   * Indicates if the Pick Fields step has a valid input
+   */
+  public get isPickFieldsStepValid(): boolean {
+    return (
+      this._jobCreator.detectors.length > 0 &&
+      (this._jobCreator.type !== JOB_TYPE.ADVANCED ||
+        (this._jobCreator.type === JOB_TYPE.ADVANCED && this.modelMemoryLimit.valid)) &&
+      this.bucketSpan.valid &&
+      this.duplicateDetectors.valid &&
+      !this.validating &&
+      (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
+    );
+  }
+
+  public get isModelMemoryEstimationPayloadValid(): boolean {
+    return (
+      this._jobCreator.detectors.length > 0 &&
+      this.bucketSpan.valid &&
+      this.duplicateDetectors.valid &&
+      (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
+        (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))
+    );
   }
 }

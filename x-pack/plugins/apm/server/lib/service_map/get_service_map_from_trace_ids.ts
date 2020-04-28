@@ -65,7 +65,7 @@ export async function getServiceMapFromTraceIds({
                   'parent.id',
                   'service.name',
                   'service.environment',
-                  'destination.address',
+                  'span.destination.service.resource',
                   'trace.id',
                   'processor.event',
                   'span.type',
@@ -103,7 +103,7 @@ export async function getServiceMapFromTraceIds({
               source: `
               def getDestination ( def event ) {
                 def destination = new HashMap();
-                destination['destination.address'] = event['destination.address'];
+                destination['span.destination.service.resource'] = event['span.destination.service.resource'];
                 destination['span.type'] = event['span.type'];
                 destination['span.subtype'] = event['span.subtype'];
                 return destination;
@@ -138,13 +138,11 @@ export async function getServiceMapFromTraceIds({
                     /* flag parent path for removal, as it has children */
                     context.locationsToRemove.add(parent.path);
 
-                    /* if the parent has 'destination.address' set, and the service is different,
+                    /* if the parent has 'span.destination.service.resource' set, and the service is different,
                     we've discovered a service */
 
-                    if (parent['destination.address'] != null
-                      && parent['destination.address'] != ""
-                      && (parent['span.type'] == 'external'
-                        || parent['span.type'] == 'messaging')
+                    if (parent['span.destination.service.resource'] != null
+                      && parent['span.destination.service.resource'] != ""
                       && (parent['service.name'] != event['service.name']
                         || parent['service.environment'] != event['service.environment']
                       )
@@ -165,8 +163,8 @@ export async function getServiceMapFromTraceIds({
                 }
 
                 /* if there is an outgoing span, create a new path */
-                if (event['destination.address'] != null
-                  && event['destination.address'] != '') {
+                if (event['span.destination.service.resource'] != null
+                  && event['span.destination.service.resource'] != '') {
                   def outgoingLocation = getDestination(event);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);

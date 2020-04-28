@@ -10,6 +10,7 @@ import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
@@ -31,6 +32,7 @@ export interface CanvasSetupDeps {
 
 export interface CanvasStartDeps {
   expressions: ExpressionsStart;
+  uiActions: UiActionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
     formatMsg: any;
@@ -70,7 +72,7 @@ export class CanvasPlugin
 
         return () => {
           unmount();
-          teardownCanvas(coreStart);
+          teardownCanvas(coreStart, depsStart);
         };
       },
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import {
@@ -20,12 +20,12 @@ import * as i18n from './translations';
 import { FieldMapping } from './field_mapping';
 import { CasesConfigurationMapping } from '../../../../containers/case/configure/types';
 
-interface MappingProps {
+export interface MappingProps {
   disabled: boolean;
   updateConnectorDisabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditFlyoutVisibility: () => void;
 }
 
 const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
@@ -40,24 +40,32 @@ const MappingComponent: React.FC<MappingProps> = ({
   onChangeMapping,
   setEditFlyoutVisibility,
 }) => {
-  const onClick = useCallback(() => setEditFlyoutVisibility(true), []);
-
   return (
     <EuiDescribedFormGroup
       fullWidth
       title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
       description={i18n.FIELD_MAPPING_DESC}
+      data-test-subj="case-mapping-form-group"
     >
-      <EuiFormRow fullWidth>
+      <EuiFormRow fullWidth data-test-subj="case-mapping-form-row">
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false} className="euiFormLabel">
-            <EuiButtonEmptyExtended onClick={onClick} disabled={updateConnectorDisabled}>
+            <EuiButtonEmptyExtended
+              onClick={setEditFlyoutVisibility}
+              disabled={updateConnectorDisabled}
+              data-test-subj="case-mapping-update-connector-button"
+            >
               {i18n.UPDATE_CONNECTOR}
             </EuiButtonEmptyExtended>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <FieldMapping disabled={disabled} mapping={mapping} onChangeMapping={onChangeMapping} />
+      <FieldMapping
+        disabled={disabled}
+        mapping={mapping}
+        onChangeMapping={onChangeMapping}
+        data-test-subj="case-mapping-field"
+      />
     </EuiDescribedFormGroup>
   );
 };

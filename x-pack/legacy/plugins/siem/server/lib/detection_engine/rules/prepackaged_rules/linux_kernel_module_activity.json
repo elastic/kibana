@@ -7,9 +7,8 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Persistence via Kernel Module Modification",
-  "query": "process.name: (insmod or kmod or modprobe or rmod) and event.action:executed",
+  "query": "process.name:(insmod or kmod or modprobe or rmod) and event.action:executed",
   "references": [
     "https://www.hackers-arise.com/single-post/2017/11/03/Linux-for-Hackers-Part-10-Loadable-Kernel-Modules-LKM"
   ],

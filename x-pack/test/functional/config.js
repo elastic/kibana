@@ -233,6 +233,21 @@ export default async function({ readConfigFile }) {
           },
           kibana: [],
         },
+
+        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        test_api_keys: {
+          elasticsearch: {
+            cluster: ['manage_security', 'manage_api_key'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
       },
       defaultRoles: ['superuser'],
     },

@@ -6,45 +6,26 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import { safeLoad } from 'js-yaml';
-
-const RANGE_FROM = '2019-09-04T18:00:00.000Z';
-const RANGE_TO = '2019-09-05T06:00:00.000Z';
+const RANGE_FROM = '2020-03-04T12:30:00.000Z';
+const RANGE_TO = '2020-03-04T13:00:00.000Z';
 const BASE_URL = Cypress.config().baseUrl;
 
-/**
- * Credentials in the `kibana.dev.yml` config file will be used to authenticate with Kibana
- */
-const KIBANA_DEV_YML_PATH = '../../../../../config/kibana.dev.yml';
-
 /** The default time in ms to wait for a Cypress command to complete */
-export const DEFAULT_TIMEOUT = 30 * 1000;
+export const DEFAULT_TIMEOUT = 60 * 1000;
 
 export function loginAndWaitForPage(url: string) {
-  // read the login details from `kibana.dev.yml`
-  cy.readFile(KIBANA_DEV_YML_PATH).then(kibanaDevYml => {
-    const config = safeLoad(kibanaDevYml);
-    const username = config['elasticsearch.username'];
-    const password = config['elasticsearch.password'];
+  const username = Cypress.env('elasticsearch_username');
+  const password = Cypress.env('elasticsearch_password');
 
-    const hasCredentials = username && password;
+  cy.log(`Authenticating via ${username} / ${password}`);
 
-    cy.log(
-      `Authenticating via config credentials from "${KIBANA_DEV_YML_PATH}". username: ${username}, password: ${password}`
-    );
-
-    const options = hasCredentials
-      ? {
-          auth: { username, password }
-        }
-      : {};
-
-    const fullUrl = `${BASE_URL}${url}?rangeFrom=${RANGE_FROM}&rangeTo=${RANGE_TO}`;
-    cy.visit(fullUrl, options);
-  });
+  const fullUrl = `${BASE_URL}${url}?rangeFrom=${RANGE_FROM}&rangeTo=${RANGE_TO}`;
+  cy.visit(fullUrl, { auth: { username, password } });
 
   cy.viewport('macbook-15');
 
   // wait for loading spinner to disappear
-  cy.get('.kibanaLoaderWrap', { timeout: DEFAULT_TIMEOUT }).should('not.exist');
+  cy.get('#kbn_loading_message', { timeout: DEFAULT_TIMEOUT }).should(
+    'not.exist'
+  );
 }

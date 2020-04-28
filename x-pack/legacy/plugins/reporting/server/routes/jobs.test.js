@@ -5,7 +5,6 @@
  */
 
 import Hapi from 'hapi';
-import { memoize } from 'lodash';
 import { createMockReportingCore } from '../../test_helpers';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 
@@ -23,6 +22,7 @@ import { registerJobInfoRoutes } from './jobs';
 let mockServer;
 let exportTypesRegistry;
 let mockReportingPlugin;
+let mockReportingConfig;
 const mockLogger = {
   error: jest.fn(),
   debug: jest.fn(),
@@ -30,7 +30,6 @@ const mockLogger = {
 
 beforeEach(async () => {
   mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
-  mockServer.config = memoize(() => ({ get: jest.fn() }));
   exportTypesRegistry = new ExportTypesRegistry();
   exportTypesRegistry.register({
     id: 'unencoded',
@@ -43,7 +42,9 @@ beforeEach(async () => {
     jobContentEncoding: 'base64',
     jobContentExtension: 'pdf',
   });
-  mockReportingPlugin = await createMockReportingCore();
+
+  mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
+  mockReportingPlugin = await createMockReportingCore(mockReportingConfig);
   mockReportingPlugin.getExportTypesRegistry = () => exportTypesRegistry;
 });
 

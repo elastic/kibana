@@ -29,7 +29,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public/plugin';
+import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
@@ -121,15 +121,16 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
   public render() {
     const SavedObjectFinder = this.props.SavedObjectFinder;
+    const metaData = [...this.props.getAllFactories()]
+      .filter(
+        embeddableFactory =>
+          Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
+      )
+      .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
     const savedObjectsFinder = (
       <SavedObjectFinder
         onChoose={this.onAddPanel}
-        savedObjectMetaData={[...this.props.getAllFactories()]
-          .filter(
-            embeddableFactory =>
-              Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
-          )
-          .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
+        savedObjectMetaData={metaData}
         showFilter={true}
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',

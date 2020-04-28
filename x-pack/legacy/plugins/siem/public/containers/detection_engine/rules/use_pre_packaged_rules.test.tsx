@@ -22,7 +22,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: null,
           hasIndexWrite: null,
-          hasManageApiKey: null,
           isAuthenticated: null,
           hasEncryptionKey: null,
           isSignalIndexExists: null,
@@ -50,7 +49,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: null,
           hasIndexWrite: null,
-          hasManageApiKey: null,
           isAuthenticated: null,
           hasEncryptionKey: null,
           isSignalIndexExists: null,
@@ -79,7 +77,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: true,
           hasEncryptionKey: true,
           isSignalIndexExists: true,
@@ -116,7 +113,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: true,
           hasEncryptionKey: true,
           isSignalIndexExists: true,
@@ -139,7 +135,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: false,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: true,
           hasEncryptionKey: true,
           isSignalIndexExists: true,
@@ -161,29 +156,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: false,
-          hasManageApiKey: true,
-          isAuthenticated: true,
-          hasEncryptionKey: true,
-          isSignalIndexExists: true,
-        })
-      );
-      await waitForNextUpdate();
-      await waitForNextUpdate();
-      let resp = null;
-      if (result.current.createPrePackagedRules) {
-        resp = await result.current.createPrePackagedRules();
-      }
-      expect(resp).toEqual(false);
-    });
-  });
-
-  test('can NOT createPrePackagedRules because hasManageApiKey === false', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<unknown, ReturnPrePackagedRules>(() =>
-        usePrePackagedRules({
-          canUserCRUD: true,
-          hasIndexWrite: true,
-          hasManageApiKey: false,
           isAuthenticated: true,
           hasEncryptionKey: true,
           isSignalIndexExists: true,
@@ -205,7 +177,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: false,
           hasEncryptionKey: true,
           isSignalIndexExists: true,
@@ -227,7 +198,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: true,
           hasEncryptionKey: false,
           isSignalIndexExists: true,
@@ -249,7 +219,6 @@ describe('usePersistRule', () => {
         usePrePackagedRules({
           canUserCRUD: true,
           hasIndexWrite: true,
-          hasManageApiKey: true,
           isAuthenticated: true,
           hasEncryptionKey: true,
           isSignalIndexExists: false,

@@ -126,6 +126,32 @@ export default function({ getService }: FtrProviderContext) {
           expect(messageColumn.message.length).to.be.greaterThan(0);
         });
 
+        it('Returns the context fields', async () => {
+          const { body } = await supertest
+            .post(LOG_ENTRIES_PATH)
+            .set(COMMON_HEADERS)
+            .send(
+              logEntriesRequestRT.encode({
+                sourceId: 'default',
+                startTimestamp: EARLIEST_KEY_WITH_DATA.time,
+                endTimestamp: LATEST_KEY_WITH_DATA.time,
+                center: KEY_WITHIN_DATA_RANGE,
+              })
+            )
+            .expect(200);
+
+          const logEntriesResponse = pipe(
+            logEntriesResponseRT.decode(body),
+            fold(throwErrors(createPlainError), identity)
+          );
+
+          const entries = logEntriesResponse.data.entries;
+          const entry = entries[0];
+
+          expect(entry.context).to.have.property('host.name');
+          expect(entry.context['host.name']).to.be('demo-stack-nginx-01');
+        });
+
         it('Paginates correctly with `after`', async () => {
           const { body: firstPageBody } = await supertest
             .post(LOG_ENTRIES_PATH)

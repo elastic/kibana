@@ -41,7 +41,6 @@ const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
   coreMock.createStart()
 );
-const start = doStart();
 
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const factory = new SlowContactCardEmbeddableFactory({
@@ -50,6 +49,8 @@ const factory = new SlowContactCardEmbeddableFactory({
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
 setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+
+const start = doStart();
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const derivedFilter: Filter = {

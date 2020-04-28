@@ -55,3 +55,10 @@ export const IMPORT_TIMELINE_QUERY = i18n.translate(
     defaultMessage: 'Import query from saved timeline',
   }
 );
+
+export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText',
+  {
+    defaultMessage: 'Select a job',
+  }
+);

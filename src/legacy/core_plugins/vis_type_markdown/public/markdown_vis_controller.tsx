@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { Markdown } from '../../kibana_react/public';
+import { Markdown } from '../../../../plugins/kibana_react/public';
 import { MarkdownVisParams } from './types';
 
 interface MarkdownVisComponentProps extends MarkdownVisParams {

@@ -4,22 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
 import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
-import * as RuleI18n from '../../translations';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreThreat } from '../mitre';
@@ -37,8 +28,8 @@ import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from './helpers';
 import { schema } from './schema';
 import * as I18n from './translations';
-import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
+import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../../components/markdown_editor/form';
 
 const CommonUseField = getUseField({ component: Field });
@@ -217,15 +208,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           >
             <EuiSpacer size="m" />
             <UseField
-              path="timeline"
-              component={PickTimeline}
-              componentProps={{
-                idAria: 'detectionEngineStepAboutRuleTimeline',
-                isDisabled: isLoading,
-                dataTestSubj: 'detectionEngineStepAboutRuleTimeline',
-              }}
-            />
-            <UseField
               path="references"
               component={AddItem}
               componentProps={{
@@ -286,27 +268,9 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
           </FormDataProvider>
         </Form>
       </StepContentWrapper>
+
       {!isUpdateView && (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="about-continue"
-                fill
-                onClick={onSubmit}
-                isDisabled={isLoading}
-              >
-                {RuleI18n.CONTINUE}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <NextStep dataTestSubj="about-continue" onClick={onSubmit} isDisabled={isLoading} />
       )}
     </>
   );

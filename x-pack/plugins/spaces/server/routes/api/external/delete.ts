@@ -5,13 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, getSavedObjects, spacesService } = deps;
+  const { externalRouter, spacesService } = deps;
 
   externalRouter.delete(
     {
@@ -23,7 +24,6 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { SavedObjectsClient } = getSavedObjects();
       const spacesClient: SpacesClient = await spacesService.scopedClient(request);
 
       const id = request.params.id;
@@ -31,7 +31,7 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
       try {
         await spacesClient.delete(id);
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();
         }
         return response.customError(wrapError(error));

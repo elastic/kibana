@@ -10,7 +10,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
-import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration_constants';
+import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration/all_option';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
