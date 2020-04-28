@@ -17,6 +17,7 @@ interface Props {
   visible?: boolean;
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
+  filter?: string;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -29,7 +30,7 @@ export const AlertFlyout = (props: Props) => {
       {triggersActionsUI && (
         <AlertsContextProvider
           value={{
-            metadata: { options: props.options, nodeType: props.nodeType },
+            metadata: { options: props.options, nodeType: props.nodeType, filter: props.filter },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
             docLinks: services.docLinks,

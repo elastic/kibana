@@ -77,7 +77,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         }
       } else {
         if (options.fields) {
-          const { id } = findInventoryFields(nodeType, options.fields); // TODO: This will give me what I need to be able to filter alerts
+          const { id } = findInventoryFields(nodeType, options.fields);
           return {
             label: <EuiCode>{id}</EuiCode>,
             value: node.id,
@@ -200,6 +200,11 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
           </div>
         </ActionMenu>
         <AlertFlyout
+          filter={
+            options.fields
+              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+              : ''
+          }
           options={options}
           nodeType={nodeType}
           setVisible={setFlyoutVisible}

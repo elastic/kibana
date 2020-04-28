@@ -52,6 +52,7 @@ import { InfraWaffleMapOptions } from '../../../lib/lib';
 interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
+  filter?: string;
 }
 
 interface Props {
@@ -188,16 +189,12 @@ export const Expressions: React.FC<Props> = props => {
       }
     }
 
-    // if (md.currentOptions) {
-    //   if (md.currentOptions.filterQuery) {
-    //     setAlertParams('filterQuery', md.currentOptions.filterQuery);
-    //   } else if (md.currentOptions.groupBy && md.series) {
-    //     const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-    //     setAlertParams('filterQuery', filter);
-    //   }
+    if (!alertParams.filterQuery) {
+      if (md && md.filter) {
+        setAlertParams('filterQuery', md.filter);
+      }
+    }
 
-    //   setAlertParams('groupBy', md.currentOptions.groupBy);
-    // }
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id);
     }
