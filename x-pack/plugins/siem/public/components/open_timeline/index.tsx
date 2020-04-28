@@ -135,45 +135,41 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     // }
     // };
 
-    const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
-      (timelineIds: string[]) => {
-        deleteTimelines(timelineIds, {
-          search,
-          pageInfo: {
-            pageIndex: pageIndex + 1,
-            pageSize,
-          },
-          sort: {
-            sortField: sortField as SortFieldTimeline,
-            sortOrder: sortDirection as Direction,
-          },
-          onlyUserFavorite: onlyFavorites,
+    const deleteTimelines: DeleteTimelines = useCallback(
+      async (timelineIds: string[]) => {
+        if (timelineIds.includes(timeline.savedObjectId || '')) {
+          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
+        }
+        await apolloClient.mutate<
+          DeleteTimelineMutation.Mutation,
+          DeleteTimelineMutation.Variables
+        >({
+          mutation: deleteTimelineMutation,
+          fetchPolicy: 'no-cache',
+          variables: { id: timelineIds },
         });
+        refetch();
       },
-      [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]
+      [apolloClient, createNewTimeline, refetch, timeline]
+    );
+
+    const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
+      async (timelineIds: string[]) => {
+        await deleteTimelines(timelineIds);
+      },
+      [deleteTimelines]
     );
 
     /** Invoked when the user clicks the action to delete the selected timelines */
     const onDeleteSelected: OnDeleteSelected = useCallback(() => {
-      deleteTimelines(getSelectedTimelineIds(selectedItems), {
-        search,
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        sort: {
-          sortField: sortField as SortFieldTimeline,
-          sortOrder: sortDirection as Direction,
-        },
-        onlyUserFavorite: onlyFavorites,
-      });
+      deleteTimelines(getSelectedTimelineIds(selectedItems));
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
-    }, [selectedItems, search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]);
+    }, [selectedItems, deleteTimelines]);
 
     /** Invoked when the user selects (or de-selects) timelines */
     const onSelectionChange: OnSelectionChange = useCallback(
@@ -227,24 +223,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
       },
       [apolloClient, updateIsLoading, updateTimeline]
-    );
-
-    const deleteTimelines: DeleteTimelines = useCallback(
-      async (timelineIds: string[], variables?: AllTimelinesVariables) => {
-        if (timelineIds.includes(timeline.savedObjectId || '')) {
-          createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
-        }
-        await apolloClient.mutate<
-          DeleteTimelineMutation.Mutation,
-          DeleteTimelineMutation.Variables
-        >({
-          mutation: deleteTimelineMutation,
-          fetchPolicy: 'no-cache',
-          variables: { id: timelineIds },
-        });
-        refetch();
-      },
-      [apolloClient, createNewTimeline, refetch, timeline]
     );
 
     useEffect(() => {
