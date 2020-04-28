@@ -106,7 +106,7 @@ export async function installPackage(options: {
     try {
       await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
     } catch (err) {
-      // some assets may not exist if deleting during a failed update
+      // log these errors, some assets may not exist if deleted during a failed update
     }
   }
 
