@@ -42,7 +42,6 @@ export class StatsQuery extends ResolverQuery {
               {
                 bool: {
                   should: [
-                    // event part of the filter
                     {
                       bool: {
                         filter: [
@@ -58,7 +57,6 @@ export class StatsQuery extends ResolverQuery {
                         ],
                       },
                     },
-                    // alert part of the filter
                     {
                       bool: {
                         filter: [
@@ -107,7 +105,6 @@ export class StatsQuery extends ResolverQuery {
               {
                 bool: {
                   should: [
-                    // event part of the filter
                     {
                       bool: {
                         filter: [
@@ -122,7 +119,6 @@ export class StatsQuery extends ResolverQuery {
                         ],
                       },
                     },
-                    // alert part of the filter
                     { term: { 'event.kind': 'alert' } },
                   ],
                 },

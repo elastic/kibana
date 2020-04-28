@@ -27,10 +27,6 @@ export class ChildrenQuery extends ResolverQuery {
               },
               {
                 bool: {
-                  // Ideally we'd look for one of process_start or process_running, not both
-                  // so to solve this we'll probably want to either search for all of them and only return one if that's
-                  // possible in elastic search or in memory pull out a single event to return
-                  // https://github.com/elastic/endpoint-app-team/issues/168
                   should: [
                     {
                       term: { 'event.type': 'process_start' },
