@@ -2309,7 +2309,7 @@ export class SavedObjectTypeRegistry {
     }
 
 // @public
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
