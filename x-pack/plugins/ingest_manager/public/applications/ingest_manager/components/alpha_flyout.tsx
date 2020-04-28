@@ -44,7 +44,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiText size="m">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.intro"
+              id="xpack.ingestManager.alphaMessaging.introText"
               defaultMessage="This Alpha release is designed for users to test and offer feedback on the new Ingest
             Manager and Elastic Agent. It is not intended for use in a production environments and
             these features are not officially supported. We encourage you to read our {docsLink} or to ask for help and other feedback in our {forumLink}."
