@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckbox, EuiCode, EuiToolTip } from '@elastic/eui';
+import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
+import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
 import { DatasetFilter, ValidatedIndex, ValidationIndicesUIError } from './validation';
-import { euiStyled } from '../../../../../../observability/public';
 
 export const IndexSetupRow: React.FC<{
   index: ValidatedIndex;
@@ -16,38 +16,46 @@ export const IndexSetupRow: React.FC<{
   onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
   onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
 }> = ({ index, isDisabled, onChangeDatasetFilter, onChangeIsSelected }) => {
-  const handleCheckboxChange = useCallback(
+  const changeIsSelected = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeIsSelected(index.name, event.currentTarget.checked);
     },
     [index.name, onChangeIsSelected]
   );
 
-  const checkbox = (
-    <EuiCheckbox
-      key={index.name}
-      id={index.name}
-      label={<EuiCode>{index.name}</EuiCode>}
-      onChange={handleCheckboxChange}
-      checked={index.validity === 'valid' && index.isSelected}
-      disabled={isDisabled || index.validity === 'invalid'}
-    />
+  const changeDatasetFilter = useCallback(
+    (datasetFilter: DatasetFilter) => onChangeDatasetFilter(index.name, datasetFilter),
+    [index.name, onChangeDatasetFilter]
   );
 
   return (
-    <IndexSetupRowWrapper>
-      {index.validity === 'valid' ? (
-        checkbox
-      ) : (
-        <EuiToolTip content={formatValidationError(index.errors)}>{checkbox}</EuiToolTip>
-      )}
-    </IndexSetupRowWrapper>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <EuiCheckbox
+          key={index.name}
+          id={index.name}
+          label={<EuiCode>{index.name}</EuiCode>}
+          onChange={changeIsSelected}
+          checked={index.validity === 'valid' && index.isSelected}
+          disabled={isDisabled || index.validity === 'invalid'}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {index.validity === 'invalid' ? (
+          <EuiToolTip content={formatValidationError(index.errors)}>
+            <EuiIcon type="alert" color="danger" />
+          </EuiToolTip>
+        ) : (
+          <IndexSetupDatasetFilter
+            availableDatasets={index.availableDatasets}
+            datasetFilter={index.datasetFilter}
+            onChangeDatasetFilter={changeDatasetFilter}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
-
-const IndexSetupRowWrapper = euiStyled.div`
-  padding: ${props => props.theme.eui.paddingSizes.xs};
-`;
 
 const formatValidationError = (errors: ValidationIndicesUIError[]): React.ReactNode => {
   return errors.map(error => {

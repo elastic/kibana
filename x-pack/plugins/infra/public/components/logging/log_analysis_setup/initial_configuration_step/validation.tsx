@@ -24,6 +24,7 @@ interface ValidIndex {
   validity: 'valid';
   name: string;
   isSelected: boolean;
+  availableDatasets: string[];
   datasetFilter: DatasetFilter;
 }
 

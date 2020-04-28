@@ -67,6 +67,10 @@ export const useAnalysisSetupState = <JobType extends string>({
                   previousValidatedIndex?.validity === 'valid'
                     ? previousValidatedIndex?.isSelected
                     : !isExampleDataIndex(indexName),
+                availableDatasets: ['a', 'b', 'c'],
+                datasetFilter: {
+                  include: 'all',
+                },
               };
             }
           })

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
-import { IndexSetupRow } from './index_form_row';
+import { IndexSetupRow } from './index_setup_row';
 import { ValidatedIndex } from './validation';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
@@ -40,31 +40,6 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     },
     [indices, onChangeSelectedIndices]
   );
-
-  // const choices = useMemo(
-  //   () =>
-  //     indices.map(index => {
-  //       const checkbox = (
-  //         <EuiCheckbox
-  //           key={index.name}
-  //           id={index.name}
-  //           label={<EuiCode>{index.name}</EuiCode>}
-  //           onChange={handleCheckboxChange}
-  //           checked={index.validity === 'valid' && index.isSelected}
-  //           disabled={disabled || index.validity === 'invalid'}
-  //         />
-  //       );
-
-  //       return index.validity === 'valid' ? (
-  //         checkbox
-  //       ) : (
-  //         <div key={index.name}>
-  //           <EuiToolTip content={formatValidationError(index.errors)}>{checkbox}</EuiToolTip>
-  //         </div>
-  //       );
-  //     }),
-  //   [disabled, indices]
-  // );
 
   return (
     <EuiDescribedFormGroup
