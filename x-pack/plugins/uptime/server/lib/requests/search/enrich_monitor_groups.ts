@@ -6,15 +6,8 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import {
-  QUERY,
-  STATES,
-  Check,
-  Histogram,
-  MonitorSummary,
-  CursorDirection,
-  SortOrder,
-} from '../../../../common';
+import { QUERY, STATES } from '../../../../common';
+import { Check, Histogram, MonitorSummary, CursorDirection, SortOrder } from '../../../../common';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (

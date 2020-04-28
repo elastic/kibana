@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CONTEXT_DEFAULTS } from '../../../common';
 import { fetchPage } from './search';
 import { UMElasticsearchQueryFn } from '../adapters';
-import { CONTEXT_DEFAULTS, MonitorSummary, SortOrder, CursorDirection } from '../../../common';
+import { MonitorSummary, SortOrder, CursorDirection } from '../../../common';
 import { QueryContext } from './search';
 
 export interface CursorPagination {
