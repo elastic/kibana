@@ -57,7 +57,7 @@ describe('HostList store concerns', () => {
       });
 
       const currentState = store.getState();
-      expect(currentState.hosts).toEqual(payload.hosts.map(hostInfo => hostInfo.metadata));
+      expect(currentState.hosts).toEqual(payload.hosts);
       expect(currentState.pageSize).toEqual(payload.request_page_size);
       expect(currentState.pageIndex).toEqual(payload.request_page_index);
       expect(currentState.total).toEqual(payload.total);
