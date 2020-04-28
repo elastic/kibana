@@ -20,7 +20,7 @@ const executor = createMetricThresholdExecutor('test') as (opts: {
 }) => Promise<void>;
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation((_: string, { body, index }: any) => {
+services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
   if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
   const metric = body.query.bool.filter[1]?.exists.field;
   if (body.aggs.groupings) {
@@ -146,6 +146,14 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute(Comparator.BETWEEN, [0, 0.75]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+    test('alerts as expected with the outside range comparator', async () => {
+      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });

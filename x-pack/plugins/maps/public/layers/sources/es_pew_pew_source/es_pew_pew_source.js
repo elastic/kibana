@@ -8,29 +8,18 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { VectorLayer } from '../../vector_layer';
-import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import {
-  FIELD_ORIGIN,
-  SOURCE_TYPES,
-  COUNT_PROP_NAME,
-  VECTOR_STYLES,
-} from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
-import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { registerSource } from '../source_registry';
 
 const MAX_GEOTILE_LEVEL = 29;
 
-const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
   defaultMessage: 'Point to point',
 });
 
@@ -107,43 +96,6 @@ export class ESPewPewSource extends AbstractESAggSource {
         value: this._descriptor.destGeoField,
       },
     ];
-  }
-
-  createDefaultLayer(options) {
-    const defaultDynamicProperties = getDefaultDynamicProperties();
-    const styleDescriptor = VectorStyle.createDescriptor({
-      [VECTOR_STYLES.LINE_COLOR]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LINE_COLOR].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: FIELD_ORIGIN.SOURCE,
-          },
-          color: COLOR_GRADIENTS[0].value,
-        },
-      },
-      [VECTOR_STYLES.LINE_WIDTH]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LINE_WIDTH].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: FIELD_ORIGIN.SOURCE,
-          },
-        },
-      },
-    });
-
-    return new VectorLayer({
-      layerDescriptor: VectorLayer.createDescriptor({
-        ...options,
-        sourceDescriptor: this._descriptor,
-        style: styleDescriptor,
-      }),
-      source: this,
-      style: new VectorStyle(styleDescriptor, this),
-    });
   }
 
   getGeoGridPrecision(zoom) {
@@ -234,25 +186,3 @@ registerSource({
   ConstructorFunction: ESPewPewSource,
   type: SOURCE_TYPES.ES_PEW_PEW,
 });
-
-export const point2PointLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the source and destination',
-  }),
-  icon: 'logoElasticsearch',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESPewPewSource.createDescriptor(sourceConfig);
-      const source = new ESPewPewSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

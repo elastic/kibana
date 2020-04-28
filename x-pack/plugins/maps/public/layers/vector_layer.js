@@ -175,8 +175,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getBounds(dataFilters) {
-    const isStaticLayer =
-      !this.getSource().isBoundsAware() || !this.getSource().isFilterByMapBounds();
+    const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return this._getBoundsBasedOnData();
     }
@@ -484,6 +483,8 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
+
+      //todo: cast source to ESSource when migrating to TS
       const styleMeta = await source.loadStylePropsMeta(
         layerName,
         style,

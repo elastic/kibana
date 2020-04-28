@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from '../../../../../src/core/server';
 import { SiemClient } from './client';
-import { ConfigType } from '..';
+import { ConfigType } from '../config';
 
 interface SetupDependencies {
   getSpaceId?: (request: KibanaRequest) => string | undefined;

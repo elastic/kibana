@@ -15,11 +15,12 @@ import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } from '../../utils';
 import { RouteDeps } from '../../types';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),

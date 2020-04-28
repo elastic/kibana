@@ -96,7 +96,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/cross_cluster_replication/**/*.{js,ts,tsx}'],
       rules: {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
@@ -185,31 +185,40 @@ module.exports = {
             zones: [
               {
                 target: [
-                  'src/legacy/**/*',
-                  'x-pack/**/*',
-                  '!x-pack/**/*.test.*',
-                  '!x-pack/test/**/*',
+                  '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
-                  'src/core/(public|server)/**/*',
                   'examples/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index.ts',
-                  '!src/core/public/mocks.ts',
-                  '!src/core/public/*.test.mocks.ts',
+                  '!src/core/public/index.ts', // relative import
+                  '!src/core/public/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
                   '!src/core/public/utils/**/*',
+                  '!src/core/public/*.test.mocks{,.ts}',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index.ts',
-                  '!src/core/server/mocks.ts',
-                  '!src/core/server/types.ts',
-                  '!src/core/server/test_utils.ts',
+                  '!src/core/server/index.ts', // relative import
+                  '!src/core/server/mocks{,.ts}',
+                  '!src/core/server/types{,.ts}',
+                  '!src/core/server/test_utils',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
-                  '!src/core/server/types',
-                  '!src/core/server/*.test.mocks.ts',
-
+                  '!src/core/server/*.test.mocks{,.ts}',
+                ],
+                allowSameFolder: true,
+                errorMessage:
+                  'Plugins may only import from top-level public and server modules in core.',
+              },
+              {
+                target: [
+                  '(src|x-pack)/legacy/**/*',
+                  '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  'examples/**/*',
+                  '!(src|x-pack)/**/*.test.*',
+                  '!(x-pack/)?test/**/*',
+                ],
+                from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
@@ -553,7 +562,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -602,7 +611,7 @@ module.exports = {
     // {
     //   // will introduced after the other warns are fixed
     //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/legacy/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   files: ['x-pack/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
     //   plugins: ['react-perf'],
     //   rules: {
     //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -727,6 +736,19 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 

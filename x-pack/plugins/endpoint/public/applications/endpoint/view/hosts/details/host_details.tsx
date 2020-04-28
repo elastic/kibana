@@ -16,13 +16,13 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { HostMetadata } from '../../../../../../common/types';
+import { HostMetadata, HostPolicyResponseActionStatus } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
-import { useHostListSelector, useHostLogsUrl } from '../hooks';
+import { useHostSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
-import { uiQueryParams } from '../../../store/hosts/selectors';
+import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
+import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -31,10 +31,20 @@ const HostIds = styled(EuiListGroupItem)`
   }
 `;
 
+const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
+  { [key in keyof typeof HostPolicyResponseActionStatus]: string }
+>({
+  success: 'success',
+  warning: 'warning',
+  failure: 'danger',
+});
+
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);
-  const queryParams = useHostListSelector(uiQueryParams);
-  const history = useHistory();
+  const queryParams = useHostSelector(uiQueryParams);
+  const policyStatus = useHostSelector(
+    policyResponseStatus
+  ) as keyof typeof POLICY_STATUS_TO_HEALTH_COLOR;
   const detailsResultsUpper = useMemo(() => {
     return [
       {
@@ -65,6 +75,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
       show: 'policy_response',
     });
   }, [details.host.id, queryParams]);
+  const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseUri);
 
   const detailsResultsLower = useMemo(() => {
     return [
@@ -79,19 +90,20 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           defaultMessage: 'Policy Status',
         }),
         description: (
-          <EuiHealth color="success">
+          <EuiHealth
+            color={POLICY_STATUS_TO_HEALTH_COLOR[policyStatus] || 'subdued'}
+            data-test-subj="policyStatusHealth"
+          >
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
               data-test-subj="policyStatusValue"
               href={'?' + policyResponseUri.search}
-              onClick={(ev: React.MouseEvent) => {
-                ev.preventDefault();
-                history.push(policyResponseUri);
-              }}
+              onClick={policyStatusClickHandler}
             >
               <FormattedMessage
-                id="xpack.endpoint.host.details.policyStatus.success"
-                defaultMessage="Successful"
+                id="xpack.endpoint.host.details.policyStatusValue"
+                defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
+                values={{ policyStatus }}
               />
             </EuiLink>
           </EuiHealth>
@@ -127,8 +139,9 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
     details.endpoint.policy.id,
     details.host.hostname,
     details.host.ip,
-    history,
-    policyResponseUri,
+    policyResponseUri.search,
+    policyStatusClickHandler,
+    policyStatus,
   ]);
 
   return (
