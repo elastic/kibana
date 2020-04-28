@@ -88,6 +88,7 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   const $injector = mountDashboardApp(appBasePath, element);
 
   return () => {
+    ($injector.get('kbnUrlStateStorage') as any).cancel();
     $injector.get('$rootScope').$destroy();
   };
 };

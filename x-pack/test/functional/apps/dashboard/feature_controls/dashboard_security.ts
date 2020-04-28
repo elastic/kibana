@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'dashboards',
+          'dashboard',
           DashboardConstants.LANDING_PAGE_PATH,
           {
             ensureCurrentUrl: false,
@@ -115,7 +115,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can view existing Dashboard`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'dashboards',
+          'dashboard',
           createDashboardEditUrl('i-exist'),
           {
             ensureCurrentUrl: false,
@@ -301,7 +301,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can view existing Dashboard`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'dashboards',
+          'dashboard',
           createDashboardEditUrl('i-exist'),
           {
             ensureCurrentUrl: false,
@@ -418,7 +418,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can view existing Dashboard`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'dashboards',
+          'dashboard',
           createDashboardEditUrl('i-exist'),
           {
             ensureCurrentUrl: false,
@@ -538,7 +538,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'dashboards',
+          'dashboard',
           createDashboardEditUrl('i-exist'),
           {
             ensureCurrentUrl: false,
