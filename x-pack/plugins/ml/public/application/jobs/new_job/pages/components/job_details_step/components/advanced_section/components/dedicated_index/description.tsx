@@ -22,7 +22,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.useDedicatedIndex.description"
-          defaultMessage="Select to store results in a separate index for this job."
+          defaultMessage="Store results in a separate index for this job."
         />
       }
     >
