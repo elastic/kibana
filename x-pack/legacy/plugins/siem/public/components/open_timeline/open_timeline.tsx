@@ -114,6 +114,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         refetch();
       }
     }, [setImportDataModalToggle, refetch]);
+    const tabs =
 
     return (
       <>

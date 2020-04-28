@@ -24,7 +24,9 @@ const tabs: Array<{ id: 'default' | 'template'; name: string; disabled: boolean;
   },
 ];
 
-export const useTimelineTabs = (enableRouting?: boolean) => {
+export const useTimelineTabs = (
+  type: 'tab' | 'filter'
+): { timelineType: 'default' | 'template'; timelineTypeActions: JSX.Element } => {
   const [timelineTypes, setTimelineTypes] = useState<'default' | 'template'>('default');
 
   const history = useHistory();
@@ -35,9 +37,9 @@ export const useTimelineTabs = (enableRouting?: boolean) => {
     }
   }, [setTimelineTypes, tab]);
 
-  const renderTabs = useCallback(
-    (enableRouting: false) => {
-      return (
+  const timelineTypeActions = useMemo(() => {
+    return (
+      type === 'tab' && (
         <>
           <EuiTabs>
             {tabs.map((tab, index) => (
@@ -45,7 +47,7 @@ export const useTimelineTabs = (enableRouting?: boolean) => {
                 isSelected={tab.id === timelineTypes}
                 disabled={tab.disabled}
                 key={index}
-                onClick={handleTabClicked}
+                href=""
               >
                 {tab.name}
               </EuiTab>
@@ -53,10 +55,9 @@ export const useTimelineTabs = (enableRouting?: boolean) => {
           </EuiTabs>
           <EuiSpacer size="m" />
         </>
-      );
-    },
-    [tabs, timelineTypes, history]
-  );
+      )
+    );
+  }, [tabs, timelineTypes, type, history]);
 
-  return { timelineTypes, renderTabs };
+  return { timelineTypes, timelineTypeActions };
 };

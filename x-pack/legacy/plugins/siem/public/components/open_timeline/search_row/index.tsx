@@ -63,6 +63,7 @@ export const SearchRow = React.memo<Props>(
               >
                 {i18n.ONLY_FAVORITES}
               </EuiFilterButton>
+              {TimetypeAction}
             </EuiFilterGroup>
           </EuiFlexItem>
         </SearchRowFlexGroup>
