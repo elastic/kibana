@@ -68,16 +68,16 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (name: string) => {
-    history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
+    history.push(`${BASE_PATH}/edit/${encodeURIComponent(name)}`);
   };
 
   const goToClonePipeline = (name: string) => {
-    history.push(encodeURI(`${BASE_PATH}/create/${encodeURIComponent(name)}`));
+    history.push(`${BASE_PATH}/create/${encodeURIComponent(name)}`);
   };
 
   const goHome = () => {
     setShowFlyout(false);
-    history.push(encodeURI(BASE_PATH));
+    history.push(BASE_PATH);
   };
 
   let content: React.ReactNode;
