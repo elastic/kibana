@@ -28,7 +28,7 @@ exports[`datatable_expression DatatableComponent it renders the title and value 
       Array [
         Object {
           "a": 10110,
-          "b": 2,
+          "b": 1588024800000,
           "c": 3,
         },
       ]

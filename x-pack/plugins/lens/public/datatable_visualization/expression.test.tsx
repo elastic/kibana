@@ -12,7 +12,7 @@ import { LensMultiTable } from '../types';
 import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
-
+import { IAggType } from 'src/plugins/data/public';
 const executeTriggerActions = jest.fn();
 
 function sampleArgs() {
@@ -23,10 +23,10 @@ function sampleArgs() {
         type: 'kibana_datatable',
         columns: [
           { id: 'a', name: 'a', meta: { type: 'count' } },
-          { id: 'b', name: 'b', meta: { type: 'date_histogram' } },
+          { id: 'b', name: 'b', meta: { type: 'date_histogram', aggConfigParams: { field: 'b' } } },
           { id: 'c', name: 'c', meta: { type: 'cardinality' } },
         ],
-        rows: [{ a: 10110, b: 2, c: 3 }],
+        rows: [{ a: 10110, b: 1588024800000, c: 3 }],
       },
     },
   };
@@ -73,16 +73,22 @@ describe('datatable_expression', () => {
       ).toMatchSnapshot();
     });
 
-    test('it invokes executeTriggerActions with correct context', () => {
+    test('it invokes executeTriggerActions with correct context on click on top value', () => {
       const { args, data } = sampleArgs();
 
       const wrapper = mountWithIntl(
         <DatatableComponent
-          data={data}
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2020-04-20T05:00:00.000Z'),
+              toDate: new Date('2020-05-03T05:00:00.000Z'),
+            },
+          }}
           args={args}
           formatFactory={x => x as IFieldFormat}
           executeTriggerActions={executeTriggerActions}
-          getType={jest.fn(() => ({ type: 'buckets' }))}
+          getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
 
@@ -104,6 +110,46 @@ describe('datatable_expression', () => {
           negate: true,
         },
         timeFieldName: undefined,
+      });
+    });
+
+    test('it invokes executeTriggerActions with correct context on click on timefield', () => {
+      const { args, data } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <DatatableComponent
+          data={{
+            ...data,
+            dateRange: {
+              fromDate: new Date('2020-04-20T05:00:00.000Z'),
+              toDate: new Date('2020-05-03T05:00:00.000Z'),
+            },
+          }}
+          args={args}
+          formatFactory={x => x as IFieldFormat}
+          executeTriggerActions={executeTriggerActions}
+          getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        />
+      );
+
+      wrapper
+        .find('[data-test-subj="lensDatatableFilterFor"]')
+        .at(3)
+        .simulate('click');
+
+      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
+        data: {
+          data: [
+            {
+              column: 1,
+              row: 0,
+              table: data.tables.l1,
+              value: 1588024800000,
+            },
+          ],
+          negate: false,
+        },
+        timeFieldName: 'b',
       });
     });
   });

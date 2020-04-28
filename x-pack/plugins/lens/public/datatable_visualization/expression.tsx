@@ -7,8 +7,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { IAggType } from 'src/plugins/data/public';
 import { FormatFactory, LensMultiTable } from '../types';
 import {
   ExpressionFunctionDefinition,
@@ -20,7 +21,6 @@ import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getExecuteTriggerActions } from '../services';
-
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -38,7 +38,7 @@ export interface DatatableProps {
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
-  getType: Function;
+  getType: (type: string) => IAggType;
 };
 
 export interface DatatableRender {
@@ -113,7 +113,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
-  getType: Promise<Function>;
+  getType: Promise<(type: string) => IAggType>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -156,11 +156,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
-  const handleFilterClick = (field: string, value: unknown, index: number, negate = false) => {
-    const timeFieldName = negate
-      ? undefined
-      : firstTable.columns.find(col => col?.meta?.type === 'date_histogram')?.meta?.aggConfigParams
-          ?.field;
+  const handleFilterClick = (field: string, value: unknown, colIndex: number, negate = false) => {
+    const col = firstTable.columns[colIndex];
+    const isDateHistogram = col.meta?.type === 'date_histogram';
+    const timeFieldName = negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
     const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
 
     const context: ValueClickTriggerContext = {
@@ -169,7 +168,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
         data: [
           {
             row: rowIndex,
-            column: index,
+            column: colIndex,
             value,
             table: firstTable,
           },
@@ -197,7 +196,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field]?.convert(value);
-                if (filterable && value) {
+                if (filterable) {
                   return (
                     <EuiFlexGroup
                       className="lnsDataTable__cell"
@@ -214,12 +213,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
                         >
                           <EuiToolTip
                             position="bottom"
-                            content={
-                              <FormattedMessage
-                                id="xpack.lens.filterForValueButtonTooltip"
-                                defaultMessage="Filter for value"
-                              />
-                            }
+                            content={i18n.translate('xpack.lens.filterForValueButtonTooltip', {
+                              defaultMessage: 'Filter for value',
+                            })}
                           >
                             <EuiButtonIcon
                               iconType="plusInCircle"
@@ -237,12 +233,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
                           <EuiFlexItem grow={false}>
                             <EuiToolTip
                               position="bottom"
-                              content={
-                                <FormattedMessage
-                                  id="xpack.lens.filterOutValueButtonTooltip"
-                                  defaultMessage="Filter out value"
-                                />
-                              }
+                              content={i18n.translate('xpack.lens.filterOutValueButtonTooltip', {
+                                defaultMessage: 'Filter out value',
+                              })}
                             >
                               <EuiButtonIcon
                                 iconType="minusInCircle"
