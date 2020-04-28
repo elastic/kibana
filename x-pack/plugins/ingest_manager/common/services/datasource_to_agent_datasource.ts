@@ -22,18 +22,28 @@ export const storedDatasourceToAgentDatasource = (
       .map(input => {
         const fullInput = {
           ...input,
+          ...Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
+            acc[key] = value;
+            return acc;
+          }, {} as { [k: string]: any }),
           streams: input.streams
             .filter(stream => stream.enabled)
             .map(stream => {
               const fullStream = {
                 ...stream,
-                ...stream.pkg_stream,
+                ...stream.agent_stream,
+                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
+                  acc[key] = value;
+                  return acc;
+                }, {} as { [k: string]: any }),
               };
-              delete fullStream.pkg_stream;
+              delete fullStream.agent_stream;
+              delete fullStream.vars;
               delete fullStream.config;
               return fullStream;
             }),
         };
+        delete fullInput.vars;
         delete fullInput.config;
         return fullInput;
       }),
