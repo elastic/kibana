@@ -67,12 +67,17 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     }
   }, [pipelineNameFromLocation, data]);
 
-  const editPipeline = (name: string) => {
+  const goToEditPipeline = (name: string) => {
     history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
   };
 
-  const clonePipeline = (name: string) => {
+  const goToClonePipeline = (name: string) => {
     history.push(encodeURI(`${BASE_PATH}/create/${encodeURIComponent(name)}`));
+  };
+
+  const goHome = () => {
+    setShowFlyout(false);
+    history.push(encodeURI(BASE_PATH));
   };
 
   let content: React.ReactNode;
@@ -90,9 +95,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     content = (
       <PipelineTable
         onReloadClick={sendRequest}
-        onEditPipelineClick={editPipeline}
+        onEditPipelineClick={goToEditPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
-        onClonePipelineClick={clonePipeline}
+        onClonePipelineClick={goToClonePipeline}
         pipelines={data}
       />
     );
@@ -110,10 +115,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           pipeline={selectedPipeline}
           onClose={() => {
             setSelectedPipeline(undefined);
-            setShowFlyout(false);
+            goHome();
           }}
-          onEditClick={editPipeline}
-          onCloneClick={clonePipeline}
+          onEditClick={goToEditPipeline}
+          onCloneClick={goToClonePipeline}
           onDeleteClick={setPipelinesToDelete}
         />
       );
@@ -123,7 +128,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       return (
         <PipelineNotFoundFlyout
           onClose={() => {
-            setShowFlyout(false);
+            goHome();
           }}
           pipelineName={pipelineNameFromLocation}
         />
