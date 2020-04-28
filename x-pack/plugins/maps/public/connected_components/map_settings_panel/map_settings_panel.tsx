@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
+import { SpatialFiltersPanel } from './spatial_filters_panel';
 
 interface Props {
   cancelChanges: () => void;
@@ -60,6 +61,8 @@ export function MapSettingsPanel({
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
           <NavigationPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <EuiSpacer size="s" />
+          <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
         </div>
       </div>
 

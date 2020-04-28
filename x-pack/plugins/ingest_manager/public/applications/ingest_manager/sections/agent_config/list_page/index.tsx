@@ -191,7 +191,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Name',
         }),
         width: '20%',
-        // FIXME: use version once available - see: https://github.com/elastic/kibana/issues/56750
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>

@@ -158,7 +158,7 @@ export const DatasourceInputPanel: React.FunctionComponent<{
             packageInputVars={packageInput.vars}
             datasourceInput={datasourceInput}
             updateDatasourceInput={updateDatasourceInput}
-            inputVarsValidationResults={{ config: inputValidationResults.config }}
+            inputVarsValidationResults={{ vars: inputValidationResults.vars }}
             forceShowErrors={forceShowErrors}
           />
           <EuiHorizontalRule margin="m" />

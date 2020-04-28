@@ -46,6 +46,7 @@ export function selectRangeAction(
   return createAction<typeof ACTION_SELECT_RANGE>({
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
+    getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {
         defaultMessage: 'Apply filter to current view',

@@ -5,6 +5,7 @@
  */
 
 import { getCerts } from '../get_certs';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
 
 describe('getCerts', () => {
   let mockHits: any;
@@ -86,7 +87,10 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const result = await getCerts({
       callES: mockCallES,
-      dynamicSettings: { heartbeatIndices: 'heartbeat*' },
+      dynamicSettings: {
+        heartbeatIndices: 'heartbeat*',
+        certThresholds: DYNAMIC_SETTINGS_DEFAULTS.certThresholds,
+      },
       index: 1,
       from: 'now-2d',
       to: 'now+1h',

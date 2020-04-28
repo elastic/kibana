@@ -9,21 +9,15 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { savedObjectsClientMock, loggingServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
+import { actionsMock } from '../mocks';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
-const savedObjectsClient = savedObjectsClientMock.create();
-
-function getServices() {
-  return {
-    savedObjectsClient,
-    log: jest.fn(),
-    callCluster: jest.fn(),
-  };
-}
+const services = actionsMock.createServices();
+const savedObjectsClient = services.savedObjectsClient;
 const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
@@ -39,7 +33,7 @@ const spacesMock = spacesServiceMock.createSetupContract();
 actionExecutor.initialize({
   logger: loggingServiceMock.create().get(),
   spaces: spacesMock,
-  getServices,
+  getServices: () => services,
   actionTypeRegistry,
   encryptedSavedObjectsPlugin,
   eventLogger: eventLoggerMock.create(),
@@ -224,12 +218,56 @@ test('throws an error if actionType is not enabled', async () => {
   expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledWith('test');
 });
 
+test('should not throws an error if actionType is preconfigured', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+    throw new Error('not enabled for test');
+  });
+  actionTypeRegistry.isActionExecutable.mockImplementationOnce(() => true);
+  await actionExecutor.execute(executeParams);
+
+  expect(actionTypeRegistry.ensureActionTypeEnabled).toHaveBeenCalledTimes(0);
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+  });
+});
+
 test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
   const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
   customActionExecutor.initialize({
     logger: loggingServiceMock.create().get(),
     spaces: spacesMock,
-    getServices,
+    getServices: () => services,
     actionTypeRegistry,
     encryptedSavedObjectsPlugin,
     eventLogger: eventLoggerMock.create(),
