@@ -10,12 +10,12 @@ import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError } from './encryption_error';
-import { EncryptedSavedObjectTypeDefinition } from './encrypted_saved_object_type_definition';
+import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 
 /**
- * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users and
- * can only be consumed by the internal Kibana server. If end-users should have access to the encrypted values
- * use `dangerouslyExposeValue: true`
+ * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users
+ * and can only be consumed by the internal Kibana server. If end-users should have access to the
+ * encrypted values use `dangerouslyExposeValue: true`
  */
 export interface AttributeToEncrypt {
   readonly key: string;
@@ -65,7 +65,10 @@ export class EncryptedSavedObjectsService {
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeDefinitions: Map<string, EncryptedSavedObjectTypeDefinition> = new Map();
+  private readonly typeDefinitions: Map<
+    string,
+    EncryptedSavedObjectAttributesDefinition
+  > = new Map();
 
   /**
    * @param encryptionKey The key used to encrypt and decrypt saved objects attributes.
@@ -98,7 +101,7 @@ export class EncryptedSavedObjectsService {
 
     this.typeDefinitions.set(
       typeRegistration.type,
-      new EncryptedSavedObjectTypeDefinition(typeRegistration)
+      new EncryptedSavedObjectAttributesDefinition(typeRegistration)
     );
   }
 
@@ -112,50 +115,71 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
-   * Takes saved object attributes for the specified type and strips any of them that are supposed
-   * to be encrypted and returns that __NEW__ attributes dictionary back.
-   * @param type Type of the saved object to strip encrypted attributes from.
-   * @param attributes Dictionary of __ALL__ saved object attributes.
+   * Takes saved object attributes for the specified type and, depending on the type definition,
+   * either strips or decrypts encrypted attributes.
+   * @param descriptor Saved object descriptor (ID, type and optional namespace)
+   * @param attributes Object that includes a dictionary of __ALL__ saved object attributes stored
+   * in Elasticsearch.
+   * @param [originalAttributes] An optional dictionary of __ALL__ saved object original attributes
+   * that were used to create that saved object (i.e. values are NOT encrypted).
+   * @param [options] Options that control the way encrypted attributes are handled.
+   * @param [options.stripOnDecryptionError] If this flag is set then this method won't throw if
+   * decryption of encrypted attributes fails for whatever reason (e.g. changed AAD or encryption key).
+   * All encrypted attributes will be stripped instead.
    */
-  public async handleEncryptedAttributes<T extends Record<string, unknown>>(
-    type: string,
-    id: string,
-    namespace: string | undefined,
-    responseAttributes: T,
-    originalAttributes?: T
-  ): Promise<Record<string, unknown>> {
-    const typeDefinition = this.typeDefinitions.get(type);
+  public async stripOrDecryptAttributes<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    originalAttributes?: T,
+    options?: { stripOnDecryptionError: boolean }
+  ) {
+    const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
-      return responseAttributes;
+      return { attributes };
     }
 
+    const stripOnDecryptionFailure = options?.stripOnDecryptionError ?? false;
     let decryptedAttributes: T | null = null;
+    let decryptionError: Error | undefined;
     const clonedAttributes: Record<string, unknown> = {};
-    for (const [attributeName, attributeValue] of Object.entries(responseAttributes)) {
-      if (typeDefinition.attributesToStrip.has(attributeName)) {
+    for (const [attributeName, attributeValue] of Object.entries(attributes)) {
+      // We should strip encrypted attribute if definition explicitly mandates that or if consumer
+      // requested that in case decryption fails.
+      if (
+        typeDefinition.shouldBeStripped(attributeName) ||
+        (stripOnDecryptionFailure && decryptionError != null)
+      ) {
         continue;
       }
 
-      if (!typeDefinition.attributesToEncrypt.has(attributeName)) {
+      // If attribute isn't supposed to be encrypted, just copy it to the resulting attribute set.
+      if (!typeDefinition.shouldBeEncrypted(attributeName)) {
         clonedAttributes[attributeName] = attributeValue;
-        continue;
-      }
-
-      if (originalAttributes) {
+      } else if (originalAttributes) {
+        // If attribute should be decrypted, but we have original attributes used to create object
+        // we should get raw unencrypted value from there to avoid performance penalty.
         clonedAttributes[attributeName] = originalAttributes[attributeName];
-        continue;
-      }
+      } else {
+        // Otherwise just try to decrypt attribute. We decrypt all attributes at once, cache it and
+        // reuse for any other attributes.
+        if (decryptedAttributes === null) {
+          try {
+            decryptedAttributes = await this.decryptAttributes(descriptor, attributes);
+          } catch (err) {
+            if (!stripOnDecryptionFailure) {
+              throw err;
+            }
 
-      if (decryptedAttributes === null) {
-        decryptedAttributes = await this.decryptAttributes(
-          { type, id, namespace },
-          responseAttributes
-        );
+            decryptionError = err;
+            continue;
+          }
+        }
+
+        clonedAttributes[attributeName] = decryptedAttributes[attributeName];
       }
-      clonedAttributes[attributeName] = decryptedAttributes[attributeName];
     }
 
-    return clonedAttributes;
+    return { attributes: clonedAttributes as T, error: decryptionError };
   }
 
   /**
@@ -305,23 +329,19 @@ export class EncryptedSavedObjectsService {
   /**
    * Generates string representation of the Additional Authenticated Data based on the specified saved
    * object type and attributes.
-   * @param typeRegistration Saved object type registration parameters.
+   * @param typeDefinition Encrypted saved object type definition.
    * @param descriptor Descriptor of the saved object to get AAD for.
    * @param attributes All attributes of the saved object instance of the specified type.
    */
   private getAAD(
-    typeDefinition: EncryptedSavedObjectTypeDefinition,
+    typeDefinition: EncryptedSavedObjectAttributesDefinition,
     descriptor: SavedObjectDescriptor,
     attributes: Record<string, unknown>
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
     const attributesAAD: Record<string, unknown> = {};
     for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (
-        !typeDefinition.attributesToEncrypt.has(attributeKey) &&
-        (typeDefinition.attributesToExcludeFromAAD == null ||
-          !typeDefinition.attributesToExcludeFromAAD.has(attributeKey))
-      ) {
+      if (!typeDefinition.shouldBeExcludedFromAAD(attributeKey)) {
         attributesAAD[attributeKey] = attributeValue;
       }
     }

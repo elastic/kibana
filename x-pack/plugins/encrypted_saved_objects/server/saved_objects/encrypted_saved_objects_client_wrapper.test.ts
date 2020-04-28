@@ -23,7 +23,10 @@ beforeEach(() => {
   encryptedSavedObjectsServiceMockInstance = encryptedSavedObjectsServiceMock.create([
     {
       type: 'known-type',
-      attributesToEncrypt: new Set(['attrSecret']),
+      attributesToEncrypt: new Set([
+        'attrSecret',
+        { key: 'attrNotSoSecret', dangerouslyExposeValue: true },
+      ]),
     },
   ]);
 
@@ -63,13 +66,23 @@ describe('#create', () => {
     expect(mockBaseClient.create).not.toHaveBeenCalled();
   });
 
-  it('generates ID, encrypts attributes and strips them from response', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+  it('generates ID, encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    };
     const options = { overwrite: true };
     const mockedResponse = {
       id: 'uuid-v4-id',
       type: 'known-type',
-      attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      attributes: {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
       references: [],
     };
 
@@ -77,19 +90,24 @@ describe('#create', () => {
 
     expect(await wrapper.create('known-type', attributes, options)).toEqual({
       ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
     });
 
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
     );
 
     expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.create).toHaveBeenCalledWith(
       'known-type',
-      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
       { id: 'uuid-v4-id', overwrite: true }
     );
   });
@@ -221,14 +239,19 @@ describe('#bulkCreate', () => {
     expect(mockBaseClient.bulkCreate).not.toHaveBeenCalled();
   });
 
-  it('generates ID, encrypts attributes and strips them from response', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+  it('generates ID, encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    };
     const mockedResponse = {
       saved_objects: [
         {
           id: 'uuid-v4-id',
           type: 'known-type',
-          attributes,
+          attributes: { ...attributes, attrSecret: '*secret*', attrNotSoSecret: '*not-so-secret*' },
           references: [],
         },
         {
@@ -249,7 +272,10 @@ describe('#bulkCreate', () => {
 
     await expect(wrapper.bulkCreate(bulkCreateParams)).resolves.toEqual({
       saved_objects: [
-        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
+        {
+          ...mockedResponse.saved_objects[0],
+          attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
+        },
         mockedResponse.saved_objects[1],
       ],
     });
@@ -257,7 +283,7 @@ describe('#bulkCreate', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
     );
 
     expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -266,7 +292,12 @@ describe('#bulkCreate', () => {
         {
           ...bulkCreateParams[0],
           id: 'uuid-v4-id',
-          attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
         },
         bulkCreateParams[1],
       ],
@@ -377,7 +408,7 @@ describe('#bulkUpdate', () => {
     );
   });
 
-  it('encrypts attributes and strips them from response', async () => {
+  it('encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {
     const docs = [
       {
         id: 'some-id',
@@ -385,6 +416,7 @@ describe('#bulkUpdate', () => {
         attributes: {
           attrOne: 'one',
           attrSecret: 'secret',
+          attrNotSoSecret: 'not-so-secret',
           attrThree: 'three',
         },
       },
@@ -394,13 +426,22 @@ describe('#bulkUpdate', () => {
         attributes: {
           attrOne: 'one 2',
           attrSecret: 'secret 2',
+          attrNotSoSecret: 'not-so-secret 2',
           attrThree: 'three 2',
         },
       },
     ];
 
     const mockedResponse = {
-      saved_objects: docs.map(doc => ({ ...doc, references: undefined })),
+      saved_objects: docs.map(doc => ({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          attrSecret: `*${doc.attributes.attrSecret}*`,
+          attrNotSoSecret: `*${doc.attributes.attrNotSoSecret}*`,
+        },
+        references: undefined,
+      })),
     };
 
     mockBaseClient.bulkUpdate.mockResolvedValue(mockedResponse);
@@ -417,6 +458,7 @@ describe('#bulkUpdate', () => {
           type: 'known-type',
           attributes: {
             attrOne: 'one',
+            attrNotSoSecret: 'not-so-secret',
             attrThree: 'three',
           },
         },
@@ -425,6 +467,7 @@ describe('#bulkUpdate', () => {
           type: 'known-type',
           attributes: {
             attrOne: 'one 2',
+            attrNotSoSecret: 'not-so-secret 2',
             attrThree: 'three 2',
           },
         },
@@ -434,11 +477,16 @@ describe('#bulkUpdate', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(2);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
     );
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id-2' },
-      { attrOne: 'one 2', attrSecret: 'secret 2', attrThree: 'three 2' }
+      {
+        attrOne: 'one 2',
+        attrSecret: 'secret 2',
+        attrNotSoSecret: 'not-so-secret 2',
+        attrThree: 'three 2',
+      }
     );
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -450,6 +498,7 @@ describe('#bulkUpdate', () => {
           attributes: {
             attrOne: 'one',
             attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
             attrThree: 'three',
           },
         },
@@ -459,6 +508,7 @@ describe('#bulkUpdate', () => {
           attributes: {
             attrOne: 'one 2',
             attrSecret: '*secret 2*',
+            attrNotSoSecret: '*not-so-secret 2*',
             attrThree: 'three 2',
           },
         },
@@ -635,19 +685,29 @@ describe('#find', () => {
     expect(mockBaseClient.find).toHaveBeenCalledWith(options);
   });
 
-  it('redirects request to underlying base client and strips encrypted attributes if type is registered', async () => {
+  it('redirects request to underlying base client and strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
     const mockedResponse = {
       saved_objects: [
         {
           id: 'some-id',
           type: 'unknown-type',
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
           references: [],
         },
         {
           id: 'some-id-2',
           type: 'known-type',
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
           references: [],
         },
       ],
@@ -664,11 +724,16 @@ describe('#find', () => {
       saved_objects: [
         {
           ...mockedResponse.saved_objects[0],
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
         },
         {
           ...mockedResponse.saved_objects[1],
-          attributes: { attrOne: 'one', attrThree: 'three' },
+          attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
         },
       ],
     });
@@ -734,19 +799,29 @@ describe('#bulkGet', () => {
     expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(bulkGetParams, options);
   });
 
-  it('redirects request to underlying base client and strips encrypted attributes if type is registered', async () => {
+  it('redirects request to underlying base client and strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
     const mockedResponse = {
       saved_objects: [
         {
           id: 'some-id',
           type: 'unknown-type',
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
           references: [],
         },
         {
           id: 'some-id-2',
           type: 'known-type',
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
           references: [],
         },
       ],
@@ -768,11 +843,16 @@ describe('#bulkGet', () => {
       saved_objects: [
         {
           ...mockedResponse.saved_objects[0],
-          attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
         },
         {
           ...mockedResponse.saved_objects[1],
-          attributes: { attrOne: 'one', attrThree: 'three' },
+          attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
         },
       ],
     });
@@ -844,11 +924,16 @@ describe('#get', () => {
     expect(mockBaseClient.get).toHaveBeenCalledWith('unknown-type', 'some-id', options);
   });
 
-  it('redirects request to underlying base client and strips encrypted attributes if type is registered', async () => {
+  it('redirects request to underlying base client and strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
     const mockedResponse = {
       id: 'some-id',
       type: 'known-type',
-      attributes: { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+      attributes: {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
       references: [],
     };
 
@@ -857,7 +942,7 @@ describe('#get', () => {
     const options = { namespace: 'some-ns' };
     await expect(wrapper.get('known-type', 'some-id', options)).resolves.toEqual({
       ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
     });
     expect(mockBaseClient.get).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.get).toHaveBeenCalledWith('known-type', 'some-id', options);
@@ -895,29 +980,48 @@ describe('#update', () => {
     );
   });
 
-  it('encrypts attributes and strips them from response', async () => {
-    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+  it('encrypts attributes and strips them from response except for ones with `dangerouslyExposeValue` set to `true`', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrSecret: 'secret',
+      attrNotSoSecret: 'not-so-secret',
+      attrThree: 'three',
+    };
     const options = { version: 'some-version' };
-    const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
+    const mockedResponse = {
+      id: 'some-id',
+      type: 'known-type',
+      attributes: {
+        ...attributes,
+        attrSecret: `*${attributes.attrSecret}*`,
+        attrNotSoSecret: `*${attributes.attrNotSoSecret}*`,
+      },
+      references: [],
+    };
 
     mockBaseClient.update.mockResolvedValue(mockedResponse);
 
     await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
       ...mockedResponse,
-      attributes: { attrOne: 'one', attrThree: 'three' },
+      attributes: { attrOne: 'one', attrNotSoSecret: 'not-so-secret', attrThree: 'three' },
     });
 
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
     );
 
     expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.update).toHaveBeenCalledWith(
       'known-type',
       'some-id',
-      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
       options
     );
   });

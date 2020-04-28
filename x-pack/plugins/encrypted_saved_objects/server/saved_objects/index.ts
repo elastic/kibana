@@ -9,6 +9,8 @@ import {
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsServiceSetup,
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
 } from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
@@ -44,21 +46,30 @@ export function setupSavedObjects({
       new EncryptedSavedObjectsClientWrapper({ baseClient, baseTypeRegistry, service })
   );
 
-  const internalRepositoryPromise = getStartServices().then(([core]) =>
-    core.savedObjects.createInternalRepository()
+  const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
+    ([core]) =>
+      [core.savedObjects.createInternalRepository(), core.savedObjects.getTypeRegistry()] as [
+        ISavedObjectsRepository,
+        ISavedObjectTypeRegistry
+      ]
   );
+
   return {
     getDecryptedAsInternalUser: async <T = unknown>(
       type: string,
       id: string,
       options?: SavedObjectsBaseOptions
     ): Promise<SavedObject<T>> => {
-      const internalRepository = await internalRepositoryPromise;
+      const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
       const savedObject = await internalRepository.get(type, id, options);
       return {
         ...savedObject,
         attributes: (await service.decryptAttributes(
-          { type, id, namespace: options && options.namespace },
+          {
+            type,
+            id,
+            namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
+          },
           savedObject.attributes as Record<string, unknown>
         )) as T,
       };

@@ -22,7 +22,8 @@ import {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   ISavedObjectTypeRegistry,
-} from 'src/core/server';
+  SavedObjectsErrorHelpers,
+} from '../../../../../src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 
 interface EncryptedSavedObjectsClientOptions {
@@ -49,7 +50,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   private getDescriptorNamespace = (type: string, namespace?: string) =>
     this.options.baseTypeRegistry.isSingleNamespace(type) ? namespace : undefined;
 
-  public async create<T = unknown>(
+  public async create<T>(
     type: string,
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
@@ -69,23 +70,21 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     const id = generateID();
     const namespace = this.getDescriptorNamespace(type, options.namespace);
-    return (await this.handleEncryptedAttributesInResponse(
-      this.stripEncryptedAttributesFromResponse(
-        await this.options.baseClient.create(
-          type,
-          await this.options.service.encryptAttributes(
-            { type, id, namespace },
-            attributes as Record<string, unknown>
-          ),
-          { ...options, id }
-        )
+    return await this.handleEncryptedAttributesInResponse(
+      await this.options.baseClient.create(
+        type,
+        (await this.options.service.encryptAttributes(
+          { type, id, namespace },
+          attributes as Record<string, unknown>
+        )) as T,
+        { ...options, id }
       ),
-      namespace,
-      attributes
-    )) as SavedObject<T>;
+      attributes,
+      namespace
+    );
   }
 
-  public async bulkCreate<T = unknown>(
+  public async bulkCreate<T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
@@ -120,15 +119,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       })
     );
 
-    return await this.stripEncryptedAttributesFromBulkResponse(
+    return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkCreate<T>(encryptedObjects, options),
-      namespace,
-      objects
+      objects,
+      options?.namespace
     );
   }
 
-  public async bulkUpdate(
-    objects: SavedObjectsBulkUpdateObject[],
+  public async bulkUpdate<T>(
+    objects: Array<SavedObjectsBulkUpdateObject<T>>,
     options?: SavedObjectsBaseOptions
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
@@ -151,10 +150,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       })
     );
 
-    return await this.stripEncryptedAttributesFromBulkResponse(
+    return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkUpdate(encryptedObjects, options),
-      options?.namespace,
-      objects
+      objects,
+      options?.namespace
     );
   }
 
@@ -162,31 +161,34 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.delete(type, id, options);
   }
 
-  public async find<T = unknown>(options: SavedObjectsFindOptions) {
-    return await this.stripEncryptedAttributesFromBulkResponse(
+  public async find<T>(options: SavedObjectsFindOptions) {
+    return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.find<T>(options),
-      this.getDescriptorNamespace(type, options.namespace)
+      undefined,
+      options.namespace
     );
   }
 
-  public async bulkGet<T = unknown>(
+  public async bulkGet<T>(
     objects: SavedObjectsBulkGetObject[] = [],
     options?: SavedObjectsBaseOptions
   ) {
-    return await this.stripEncryptedAttributesFromBulkResponse(
+    return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkGet<T>(objects, options),
-      this.getDescriptorNamespace(type, options.namespace)
+      undefined,
+      options?.namespace
     );
   }
 
-  public async get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) {
+  public async get<T>(type: string, id: string, options?: SavedObjectsBaseOptions) {
     return await this.handleEncryptedAttributesInResponse(
       await this.options.baseClient.get<T>(type, id, options),
-      this.getDescriptorNamespace(type, options.namespace)
+      undefined as unknown,
+      this.getDescriptorNamespace(type, options?.namespace)
     );
   }
 
-  public async update<T = unknown>(
+  public async update<T>(
     type: string,
     id: string,
     attributes: Partial<T>,
@@ -203,8 +205,8 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         await this.options.service.encryptAttributes({ type, id, namespace }, attributes),
         options
       ),
-      namespace,
-      attributes
+      attributes,
+      namespace
     );
   }
 
@@ -230,19 +232,27 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * Strips encrypted attributes from any non-bulk Saved Objects API response. If type isn't
    * registered, response is returned as is.
    * @param response Raw response returned by the underlying base client.
+   * @param [originalAttributes] Optional list of original attributes of the saved object.
+   * @param [namespace] Optional namespace that was used for the saved objects operation.
    */
   private async handleEncryptedAttributesInResponse<
-    R extends SavedObjectsUpdateResponse | SavedObject,
-    A extends SavedObjectAttributes
-  >(response: R, namespace: string | undefined, originalAttributes?: A): Promise<R> {
-    if (this.options.service.isRegistered(response.type) && response.attributes) {
-      response.attributes = await this.options.service.handleEncryptedAttributes(
-        response.type,
-        response.id,
-        namespace,
-        response.attributes,
-        originalAttributes
+    T,
+    R extends SavedObjectsUpdateResponse<T> | SavedObject<T>
+  >(response: R, originalAttributes?: T, namespace?: string): Promise<R> {
+    if (response.attributes && this.options.service.isRegistered(response.type)) {
+      const { attributes, error } = await this.options.service.stripOrDecryptAttributes(
+        { id: response.id, type: response.type, namespace },
+        response.attributes as Record<string, unknown>,
+        originalAttributes as Record<string, unknown>,
+        // If we cannot decrypt encrypted attributes let's strip them off and record the error to
+        // let consumer decide whether to fail or handle recovery gracefully.
+        { stripOnDecryptionError: true }
       );
+
+      response.attributes = attributes as T;
+      if (error) {
+        response.error = SavedObjectsErrorHelpers.decorateGeneralError(error) as any;
+      }
     }
 
     return response;
@@ -252,21 +262,23 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * Strips encrypted attributes from any bulk Saved Objects API response. If type for any bulk
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
+   * @param [objects] Optional list of saved objects with original attributes.
+   * @param [namespace] Optional namespace that was used for the saved objects operation.
    */
-  private async stripEncryptedAttributesFromBulkResponse<
-    R extends SavedObjectsBulkResponse | SavedObjectsFindResponse | SavedObjectsBulkUpdateResponse,
-    O extends SavedObjectsBulkCreateObject[] | SavedObjectsBulkUpdateObject[]
-  >(response: R, namespace: string | undefined, objects?: O): Promise<R> {
-    for (const [i, savedObject] of Object.entries(response.saved_objects)) {
-      if (this.options.service.isRegistered(savedObject.type)) {
-        savedObject.attributes = await this.options.service.handleEncryptedAttributes(
-          savedObject.type,
-          savedObject.id,
-          namespace,
-          savedObject.attributes,
-          objects ? objects[+i].attributes : undefined
-        );
-      }
+  private async handleEncryptedAttributesInBulkResponse<
+    T,
+    R extends
+      | SavedObjectsBulkResponse<T>
+      | SavedObjectsFindResponse<T>
+      | SavedObjectsBulkUpdateResponse<T>,
+    O extends Array<SavedObjectsBulkCreateObject<T>> | Array<SavedObjectsBulkUpdateObject<T>>
+  >(response: R, objects?: O, namespace?: string) {
+    for (const [index, savedObject] of response.saved_objects.entries()) {
+      await this.handleEncryptedAttributesInResponse(
+        savedObject,
+        objects?.[index].attributes ?? undefined,
+        this.getDescriptorNamespace(savedObject.type, namespace)
+      );
     }
 
     return response;

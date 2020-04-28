@@ -19,7 +19,7 @@ export const encryptedSavedObjectsServiceMock = {
     function processAttributes<T extends Record<string, any>>(
       descriptor: Pick<SavedObjectDescriptor, 'type'>,
       attrs: T,
-      action: (attrs: T, attrName: string) => void
+      action: (attrs: T, attrName: string, shouldExpose: boolean) => void
     ) {
       const registration = registrations.find(r => r.type === descriptor.type);
       if (!registration) {
@@ -27,9 +27,13 @@ export const encryptedSavedObjectsServiceMock = {
       }
 
       const clonedAttrs = { ...attrs };
-      for (const attrName of registration.attributesToEncrypt) {
+      for (const attr of registration.attributesToEncrypt) {
+        const [attrName, shouldExpose] =
+          typeof attr === 'string'
+            ? [attr, false]
+            : [attr.key, attr.dangerouslyExposeValue === true];
         if (attrName in clonedAttrs) {
-          action(clonedAttrs, attrName);
+          action(clonedAttrs, attrName, shouldExpose);
         }
       }
       return clonedAttrs;
@@ -53,8 +57,16 @@ export const encryptedSavedObjectsServiceMock = {
           (clonedAttrs[attrName] = (clonedAttrs[attrName] as string).slice(1, -1))
       )
     );
-    mock.stripEncryptedAttributes.mockImplementation((type, attrs) =>
-      processAttributes({ type }, attrs, (clonedAttrs, attrName) => delete clonedAttrs[attrName])
+    mock.stripOrDecryptAttributes.mockImplementation((descriptor, attrs) =>
+      Promise.resolve({
+        attributes: processAttributes(descriptor, attrs, (clonedAttrs, attrName, shouldExpose) => {
+          if (shouldExpose) {
+            clonedAttrs[attrName] = (clonedAttrs[attrName] as string).slice(1, -1);
+          } else {
+            delete clonedAttrs[attrName];
+          }
+        }),
+      })
     );
 
     return mock;

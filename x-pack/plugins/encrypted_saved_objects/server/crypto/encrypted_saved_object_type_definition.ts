@@ -6,10 +6,16 @@
 
 import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
-export class EncryptedSavedObjectTypeDefinition {
+/**
+ * Represents the definition of the attributes of the specific saved object that are supposed to be
+ * encrypted. The definition also dictates which attributes should be excluded from AAD and/or
+ * stripped from response.
+ */
+export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
-  public readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
-  public readonly attributesToStrip: ReadonlySet<string>;
+  private readonly attributesToExcludeFromAAD: ReadonlySet<string> | undefined;
+  private readonly attributesToStrip: ReadonlySet<string>;
+
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
     const attributesToEncrypt = new Set<string>();
     const attributesToStrip = new Set<string>();
@@ -24,8 +30,38 @@ export class EncryptedSavedObjectTypeDefinition {
         }
       }
     }
+
     this.attributesToEncrypt = attributesToEncrypt;
-    this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
     this.attributesToStrip = attributesToStrip;
+    this.attributesToExcludeFromAAD = typeRegistration.attributesToExcludeFromAAD;
+  }
+
+  /**
+   * Determines whether particular attribute should be encrypted. Full list of attributes that
+   * should be encrypted can be retrieved via `attributesToEncrypt` property.
+   * @param attributeName Name of the attribute.
+   */
+  public shouldBeEncrypted(attributeName: string) {
+    return this.attributesToEncrypt.has(attributeName);
+  }
+
+  /**
+   * Determines whether particular attribute should be excluded from AAD.
+   * @param attributeName Name of the attribute.
+   */
+  public shouldBeExcludedFromAAD(attributeName: string) {
+    return (
+      this.shouldBeEncrypted(attributeName) ||
+      (this.attributesToExcludeFromAAD != null &&
+        this.attributesToExcludeFromAAD.has(attributeName))
+    );
+  }
+
+  /**
+   * Determines whether particular attribute should be stripped from the attribute list.
+   * @param attributeName Name of the attribute.
+   */
+  public shouldBeStripped(attributeName: string) {
+    return this.attributesToStrip.has(attributeName);
   }
 }
