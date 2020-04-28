@@ -153,13 +153,7 @@ describe('useCamera on an unpainted element', () => {
         }
         const serverResponseAction: ResolverAction = {
           type: 'serverReturnedResolverData',
-          payload: {
-            data: {
-              result: {
-                search_results: events,
-              },
-            },
-          },
+          payload: events,
         };
         act(() => {
           store.dispatch(serverResponseAction);
