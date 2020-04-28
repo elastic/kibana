@@ -32,7 +32,7 @@ import { Kibana } from '../utils/kibana';
 
 export type ChecksumMap = Map<string, string | undefined>;
 /** map of [repo relative path to changed file, type of change] */
-type Changes = Map<string, 'modified' | 'deleted' | 'invalid'>;
+type Changes = Map<string, 'modified' | 'deleted' | 'invalid' | 'untracked'>;
 
 const statAsync = promisify(Fs.stat);
 const projectBySpecificitySorter = (a: Project, b: Project) => b.path.length - a.path.length;
@@ -45,7 +45,8 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
     'git',
     [
       'ls-files',
-      '-dmt',
+      '-dmto',
+      '--exclude-standard',
       '--',
       ...Array.from(projects.values())
         .filter(p => kbn.isPartOfRepo(p))
@@ -78,10 +79,13 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
           unassignedChanges.set(path, 'deleted');
           break;
 
+        case '?':
+          unassignedChanges.set(path, 'untracked');
+          break;
+
         case 'H':
         case 'S':
         case 'K':
-        case '?':
         default:
           log.warning(`unexpected modification status "${tag}" for ${path}, please report this!`);
           unassignedChanges.set(path, 'invalid');
