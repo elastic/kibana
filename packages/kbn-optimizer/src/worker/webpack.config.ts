@@ -60,13 +60,8 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
     return;
   }
 
-  // don't allow any static bundle to rely on other static bundles
-  if (STATIC_BUNDLE_PLUGINS.some(p => bundle.id === p.id)) {
-    return;
-  }
-
-  // ignore requests that don't include a /data/public, /kibana_react/public, or
-  // /kibana_utils/public segment as a cheap way to avoid doing path resolution
+  // ignore requests that don't include a /{dirname}/public for one of our
+  // "static" bundles as a cheap way to avoid doing path resolution
   // for paths that couldn't possibly resolve to what we're looking for
   const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
     request.includes(`/${p.dirname}/public`)

@@ -148,10 +148,12 @@ export function uiRenderMixin(kbnServer, server, config) {
                 ...dllJsChunks,
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
-          `${regularBundlePath}/plugin/data/data.plugin.js`,
+
+          // load "static" bundles produced by @kbn/optimizer, order is important here
           `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
-          `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
           `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
+          `${regularBundlePath}/plugin/data/data.plugin.js`,
+          `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
         ];
 
         const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
