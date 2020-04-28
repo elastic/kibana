@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { EngineOverviewHeader } from '../engine_overview_header';
 import { getUserName } from '../../utils/get_username';
 
@@ -19,6 +20,7 @@ export const NoUserState: React.FC<> = () => {
   return (
     <EuiPage restrictWidth className="empty-state">
       <SetBreadcrumbs isRoot />
+      <SendTelemetry action="error" metric="no_as_account" />
 
       <EuiPageBody>
         <EngineOverviewHeader />

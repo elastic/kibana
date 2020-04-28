@@ -9,8 +9,8 @@ import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiCode } from '@
 
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
-
 import { EngineOverviewHeader } from '../engine_overview_header';
 
 import './empty_states.scss';
@@ -21,6 +21,7 @@ export const ErrorState: ReactFC<> = () => {
   return (
     <EuiPage restrictWidth className="empty-state">
       <SetBreadcrumbs isRoot />
+      <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageBody>
         <EngineOverviewHeader />

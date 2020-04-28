@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import GettingStarted from '../../assets/getting_started.png';
 import './setup_guide.scss';
@@ -32,6 +33,8 @@ export const SetupGuide: React.FC<> = () => {
   return (
     <EuiPage className="setup-guide">
       <SetBreadcrumbs text="Setup Guide" />
+      <SendTelemetry action="viewed" metric="setup_guide" />
+
       <EuiPageSideBar>
         <EuiText color="subdued" size="s">
           <strong>Setup Guide</strong>

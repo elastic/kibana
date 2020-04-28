@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": ["home"],
   "configPath": ["enterpriseSearch"],
+  "optionalPlugins": ["usageCollection"],
   "server": true,
   "ui": true
 }

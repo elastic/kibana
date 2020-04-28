@@ -7,10 +7,11 @@
 import React, { useContext } from 'react';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiButton } from '@elastic/eui';
 
+import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 export const EngineOverviewHeader: React.FC<> = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
     fill: true,
@@ -20,6 +21,13 @@ export const EngineOverviewHeader: React.FC<> = () => {
   if (enterpriseSearchUrl) {
     buttonProps.href = `${enterpriseSearchUrl}/as`;
     buttonProps.target = '_blank';
+    buttonProps.onClick = () =>
+      sendTelemetry({
+        http,
+        product: 'app_search',
+        action: 'clicked',
+        metric: 'header_launch_button',
+      });
   } else {
     buttonProps.isDisabled = true;
   }
