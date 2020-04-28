@@ -36,6 +36,8 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
     let apmGeneratePdf: any; // Note: Type can not be imported from apm module
 
+    const generatePdfObservable = await generatePdfObservableFactory(reporting);
+
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),

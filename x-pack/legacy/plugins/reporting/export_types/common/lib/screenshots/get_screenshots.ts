@@ -25,7 +25,7 @@ export const getScreenshots = async (
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
-    const base64EncodedData = (await browser.screenshot(item.position)).toString('base64');
+    const base64EncodedData = await browser.screenshot(item.position);
 
     screenshots.push({
       base64EncodedData,
