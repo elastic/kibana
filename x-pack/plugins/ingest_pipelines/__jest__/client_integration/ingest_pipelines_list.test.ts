@@ -5,6 +5,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
+
+import { API_BASE_PATH } from '../../common/constants';
+
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { ListTestBed } from './helpers/ingest_pipelines_list.helpers';
 
@@ -23,7 +26,7 @@ describe('<PipelinesList />', () => {
     server.restore();
   });
 
-  describe('On component mount', () => {
+  describe('With pipelines', () => {
     const pipeline1 = {
       name: 'test_pipeline1',
       description: 'test_pipeline1 description',
@@ -73,12 +76,112 @@ describe('<PipelinesList />', () => {
         expect(row).toEqual(['', pipeline.name, '']);
       });
     });
+
+    test('should reload the pipeline data', async () => {
+      const { component, actions } = testBed;
+      const totalRequests = server.requests.length;
+
+      await act(async () => {
+        actions.clickReloadButton();
+        await nextTick(100);
+        component.update();
+      });
+
+      expect(server.requests.length).toBe(totalRequests + 1);
+      expect(server.requests[server.requests.length - 1].url).toBe(API_BASE_PATH);
+    });
+
+    test('should show the details of a pipeline', async () => {
+      const { find, exists, actions } = testBed;
+
+      await actions.clickPipelineAt(0);
+
+      expect(exists('pipelinesTable')).toBe(true);
+      expect(exists('pipelineDetails')).toBe(true);
+      expect(find('pipelineDetails.title').text()).toBe(pipeline1.name);
+    });
+
+    test('should delete a pipeline', async () => {
+      const { actions, component } = testBed;
+      const { name: pipelineName } = pipeline1;
+
+      httpRequestsMockHelpers.setDeletePipelineResponse({
+        itemsDeleted: [pipelineName],
+        errors: [],
+      });
+
+      actions.clickPipelineAction(pipelineName, 'delete');
+
+      // We need to read the document "body" as the modal is added there and not inside
+      // the component DOM tree.
+      const modal = document.body.querySelector('[data-test-subj="deletePipelinesConfirmation"]');
+      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+        '[data-test-subj="confirmModalConfirmButton"]'
+      );
+
+      expect(modal).not.toBe(null);
+      expect(modal!.textContent).toContain('Delete pipeline');
+
+      await act(async () => {
+        confirmButton!.click();
+        await nextTick();
+        component.update();
+      });
+
+      const latestRequest = server.requests[server.requests.length - 1];
+
+      expect(latestRequest.method).toBe('DELETE');
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/${pipelineName}`);
+      expect(latestRequest.status).toEqual(200);
+    });
   });
 
-  // test: loading
-  // test: empty prompt
-  // test: reload pipeline
-  // test: delete pipeline
-  // test: detail panel
-  // test: error callout
+  describe('No pipelines', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadPipelinesResponse([]);
+
+      testBed = await setup();
+
+      await act(async () => {
+        const { component } = testBed;
+
+        await nextTick(100);
+        component.update();
+      });
+    });
+
+    test('should display an empty prompt', async () => {
+      const { exists } = testBed;
+
+      expect(exists('sectionLoading')).toBe(false);
+      expect(exists('emptyList')).toBe(true);
+    });
+  });
+
+  describe('Error handling', () => {
+    beforeEach(async () => {
+      const error = {
+        status: 500,
+        error: 'Internal server error',
+        message: 'Internal server error',
+      };
+
+      httpRequestsMockHelpers.setLoadPipelinesResponse(undefined, { body: error });
+
+      testBed = await setup();
+
+      await act(async () => {
+        const { component } = testBed;
+
+        await nextTick(100);
+        component.update();
+      });
+    });
+
+    test('should render an error message if error fetching pipelines', async () => {
+      const { exists } = testBed;
+
+      expect(exists('pipelineLoadError')).toBe(true);
+    });
+  });
 });

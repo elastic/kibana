@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { act } from 'react-dom/test-utils';
+
 import { BASE_PATH } from '../../../common/constants';
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
+import {
+  registerTestBed,
+  TestBed,
+  TestBedConfig,
+  findTestSubject,
+  nextTick,
+} from '../../../../../test_utils';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 
@@ -22,6 +30,9 @@ const initTestBed = registerTestBed(WithAppDependencies(PipelinesList), testBedC
 export interface ListTestBed extends TestBed<TestSubjects> {
   actions: {
     clickReloadButton: () => void;
+    clickPipelineAt: (index: number) => Promise<void>;
+    clickPipelineAction: (name: string, action: 'edit' | 'clone' | 'delete') => void;
+    clickActionMenu: (name: string) => void;
   };
 }
 
@@ -36,10 +47,44 @@ export const setup = async (): Promise<ListTestBed> => {
     find('reloadButton').simulate('click');
   };
 
+  const clickPipelineAt = async (index: number) => {
+    const { component, table } = testBed;
+    const { rows } = table.getMetaData('pipelinesTable');
+    const pipelineLink = findTestSubject(rows[index].reactWrapper, 'pipelineDetailsLink');
+
+    await act(async () => {
+      pipelineLink.simulate('click');
+      await nextTick();
+      component.update();
+    });
+  };
+
+  const clickActionMenu = (pipelineName: string) => {
+    const { component } = testBed;
+
+    // When a table has > 2 actions, EUI displays an overflow menu with an id "<pipeline_name>-actions"
+    component.find(`div[id="${pipelineName}-actions"] button`).simulate('click');
+  };
+
+  const clickPipelineAction = (pipelineName: string, action: 'edit' | 'clone' | 'delete') => {
+    const actions = ['edit', 'clone', 'delete'];
+    const { component } = testBed;
+
+    clickActionMenu(pipelineName);
+
+    component
+      .find('.euiContextMenuItem')
+      .at(actions.indexOf(action))
+      .simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
       clickReloadButton,
+      clickPipelineAt,
+      clickPipelineAction,
+      clickActionMenu,
     },
   };
 };
@@ -49,4 +94,10 @@ export type TestSubjects =
   | 'documentationLink'
   | 'createPipelineButton'
   | 'pipelinesTable'
+  | 'pipelineDetails'
+  | 'pipelineDetails.title'
+  | 'deletePipelinesConfirmation'
+  | 'emptyList'
+  | 'sectionLoading'
+  | 'pipelineLoadError'
   | 'reloadButton';

@@ -84,7 +84,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.ingestPipelines.list.loadingMessage"
           defaultMessage="Loading pipelines..."
@@ -183,6 +183,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
               title={i18n.translate('xpack.ingestPipelines.list.loadErrorTitle', {
                 defaultMessage: 'Cannot load pipelines, please refresh the page to try again.',
               })}
+              data-test-subj="pipelineLoadError"
             />
           ) : (
             content

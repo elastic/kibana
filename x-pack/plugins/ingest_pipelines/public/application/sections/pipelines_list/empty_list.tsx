@@ -10,6 +10,7 @@ import { BASE_PATH } from '../../../../common/constants';
 
 export const EmptyList: FunctionComponent = () => (
   <EuiEmptyPrompt
+    data-test-subj="emptyList"
     iconType="managementApp"
     title={
       <h2>
