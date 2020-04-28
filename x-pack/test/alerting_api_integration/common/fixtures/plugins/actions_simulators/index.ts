@@ -52,7 +52,7 @@ export default function(kibana: any) {
         notEnabledActionType
       );
       server.plugins.xpack_main.registerFeature({
-        id: 'actions_simulators',
+        id: 'actions',
         name: 'Actions',
         app: ['actions', 'kibana'],
         privileges: {
