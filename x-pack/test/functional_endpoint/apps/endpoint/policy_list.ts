@@ -10,39 +10,33 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
 
-  // FIXME: Skipped until we can figure out how to load data for Ingest
-  describe.skip('Endpoint Policy List', function() {
+  describe('When on the Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
-      await pageObjects.endpoint.waitForTableToHaveData('policyTable');
+      // await pageObjects.endpoint.waitForTableToHaveData('policyTable');
     });
 
     it('loads the Policy List Page', async () => {
       await testSubjects.existOrFail('policyListPage');
     });
     it('displays page title', async () => {
-      const policyTitle = await testSubjects.getVisibleText('policyViewTitle');
+      const policyTitle = await testSubjects.getVisibleText('pageViewHeaderLeftTitle');
       expect(policyTitle).to.equal('Policies');
     });
     it('shows policy count total', async () => {
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
-      expect(policyTotal).to.equal('100 Policies');
+      expect(policyTotal).to.equal('0 Policies');
     });
-    it('includes policy list table', async () => {
-      await testSubjects.existOrFail('policyTable');
-    });
+
     it('has correct table headers', async () => {
       const allHeaderCells = await pageObjects.endpoint.tableHeaderVisibleText('policyTable');
       expect(allHeaderCells).to.eql([
         'Policy Name',
-        'Total',
-        'Pending',
-        'Failed',
-        'Created By',
-        'Created',
-        'Last Updated By',
-        'Last Updated',
+        'Revision',
+        'Version',
+        'Description',
+        'Agent Configuration',
       ]);
     });
   });
