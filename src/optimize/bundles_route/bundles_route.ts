@@ -88,7 +88,7 @@ export function createBundlesRoute({
       routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
-      isImmutable: isDist,
+      isDist,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
@@ -96,7 +96,7 @@ export function createBundlesRoute({
         routePath: `/${buildHash}/bundles/plugin/${id}/`,
         bundlesPath: path,
         fileHashCache,
-        isImmutable: isDist,
+        isDist,
       })
     ),
     buildRouteForBundles({
@@ -104,28 +104,28 @@ export function createBundlesRoute({
       routePath: `/${buildHash}/bundles/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
-      isImmutable: isDist,
+      isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/${buildHash}/bundles/`,
       routePath: `/${buildHash}/bundles/`,
       bundlesPath: regularBundlesPath,
       fileHashCache,
-      isImmutable: isDist,
+      isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/${buildHash}/built_assets/dlls/`,
       routePath: `/${buildHash}/built_assets/dlls/`,
       bundlesPath: dllBundlesPath,
       fileHashCache,
-      isImmutable: isDist,
+      isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/`,
       routePath: `/${buildHash}/built_assets/css/`,
       bundlesPath: builtCssPath,
       fileHashCache,
-      isImmutable: isDist,
+      isDist,
     }),
   ];
 }
@@ -135,13 +135,13 @@ function buildRouteForBundles({
   routePath,
   bundlesPath,
   fileHashCache,
-  isImmutable,
+  isDist,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: LruCache<unknown, unknown>;
-  isImmutable: boolean;
+  isDist: boolean;
 }) {
   return {
     method: 'GET',
@@ -163,7 +163,7 @@ function buildRouteForBundles({
               bundlesPath,
               fileHashCache,
               publicPath,
-              isImmutable,
+              isDist,
             });
           },
         },

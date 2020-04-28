@@ -62,14 +62,14 @@ export async function createDynamicAssetResponse({
   bundlesPath,
   publicPath,
   fileHashCache,
-  isImmutable,
+  isDist,
 }: {
   request: Hapi.Request;
   h: Hapi.ResponseToolkit;
   bundlesPath: string;
   publicPath: string;
   fileHashCache: LruCache<unknown, unknown>;
-  isImmutable: boolean;
+  isDist: boolean;
 }) {
   let fd: number | undefined;
   try {
@@ -92,7 +92,7 @@ export async function createDynamicAssetResponse({
     });
 
     const stat = await fcb(cb => fstat(fd!, cb));
-    const hash = isImmutable ? undefined : await getFileHash(fileHashCache, path, stat, fd);
+    const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
     fd = undefined; // read stream is now responsible for fd
 
     const response = h
@@ -101,7 +101,7 @@ export async function createDynamicAssetResponse({
       .code(200)
       .type(request.server.mime.path(path).type);
 
-    if (isImmutable) {
+    if (isDist) {
       response.header('cache-control', 'max-age=31536000');
     } else {
       response.etag(`${hash}-${publicPath}`);
