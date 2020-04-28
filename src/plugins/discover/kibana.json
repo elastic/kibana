@@ -1,6 +1,6 @@
 {
   "id": "discover",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true
 }

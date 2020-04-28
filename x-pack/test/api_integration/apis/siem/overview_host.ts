@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/siem/common/constants';
-import { overviewHostQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_host/index.gql_query';
-import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { overviewHostQuery } from '../../../../plugins/siem/public/containers/overview/overview_host/index.gql_query';
+import { GetOverviewHostQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
