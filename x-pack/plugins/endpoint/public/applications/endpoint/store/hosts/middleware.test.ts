@@ -9,21 +9,23 @@ import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { hostListReducer, hostMiddlewareFactory } from './index';
 import { HostResultList, Immutable } from '../../../../../common/types';
-import { HostListState } from '../../types';
+import { HostState } from '../../types';
 import { AppAction } from '../action';
 import { listData } from './selectors';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { mockHostResultList } from './mock_host_result_list';
+import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../test_utils';
 
 describe('host list middleware', () => {
-  const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let depsStart: DepsStartMock;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
-  type HostListStore = Store<Immutable<HostListState>, Immutable<AppAction>>;
+  type HostListStore = Store<Immutable<HostState>, Immutable<AppAction>>;
   let store: HostListStore;
   let getState: HostListStore['getState'];
   let dispatch: HostListStore['dispatch'];
+  let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
+  let actionSpyMiddleware;
 
   let history: History<never>;
   const getEndpointListApiResponse = (): HostResultList => {
@@ -33,15 +35,16 @@ describe('host list middleware', () => {
     fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
     depsStart = depsStartMock();
     fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+    ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
     store = createStore(
       hostListReducer,
-      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart))
+      applyMiddleware(hostMiddlewareFactory(fakeCoreStart, depsStart), actionSpyMiddleware)
     );
     getState = store.getState;
     dispatch = store.dispatch;
     history = createBrowserHistory();
   });
-  test('handles `userChangedUrl`', async () => {
+  it('handles `userChangedUrl`', async () => {
     const apiResponse = getEndpointListApiResponse();
     fakeHttpServices.post.mockResolvedValue(apiResponse);
     expect(fakeHttpServices.post).not.toHaveBeenCalled();
@@ -53,12 +56,12 @@ describe('host list middleware', () => {
         pathname: '/hosts',
       },
     });
-    await sleep();
+    await waitForAction('serverReturnedHostList');
     expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
       body: JSON.stringify({
-        paging_properties: [{ page_index: 0 }, { page_size: 10 }],
+        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
       }),
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts.map(hostInfo => hostInfo.metadata));
+    expect(listData(getState())).toEqual(apiResponse.hosts);
   });
 });

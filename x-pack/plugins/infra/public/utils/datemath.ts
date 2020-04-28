@@ -68,7 +68,8 @@ function extendRelativeDatemath(
     return undefined;
   }
 
-  const mustIncreaseAmount = operator === '-' && direction === 'before';
+  const mustIncreaseAmount =
+    (operator === '-' && direction === 'before') || (operator === '+' && direction === 'after');
   const parsedAmount = parseInt(amount, 10);
   let newUnit: Unit = unit as Unit;
   let newAmount: number;
