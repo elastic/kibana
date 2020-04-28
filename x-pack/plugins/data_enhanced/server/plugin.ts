@@ -9,6 +9,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  Logger,
 } from '../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';

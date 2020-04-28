@@ -32,7 +32,7 @@ export interface AsyncSearchResponse<T> {
 
 export interface IEnhancedSearchContext extends ISearchContext {
   backgroundSearchService?: BackgroundSearchService;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
@@ -61,11 +61,38 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   return { search, cancel };
 };
 
+function trackBackgroundSearch(
+  request: IEnhancedEsSearchRequest,
+  asyncId: string,
+  options?: ISearchOptions,
+  context?: IEnhancedSearchContext
+) {
+  if (
+    context &&
+    context.backgroundSearchService &&
+    context.security &&
+    options?.rawRequest &&
+    !!request.sessionId &&
+    !!asyncId &&
+    !request.id
+  ) {
+    const user = context?.security?.authc.getCurrentUser(options.rawRequest);
+    if (user) {
+      context.backgroundSearchService.trackId(
+        user.email,
+        request.sessionId,
+        request.params,
+        asyncId
+      );
+    }
+  }
+}
+
 async function asyncSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
   options?: ISearchOptions,
-  context: IEnhancedSearchContext
+  context?: IEnhancedSearchContext
 ) {
   const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
     trackTotalHits: true, // Get the exact count of hits
@@ -87,20 +114,7 @@ async function asyncSearch(
     options
   )) as AsyncSearchResponse<any>;
 
-  if (
-    context.backgroundSearchService &&
-    context.security &&
-    !!request.sessionId &&
-    !!id &&
-    !request.id
-  ) {
-    context.backgroundSearchService.trackId(
-      context.security.authc.getCurrentUser(options?.rawRequest)?.email,
-      request.sessionId,
-      request.params,
-      id
-    );
-  }
+  trackBackgroundSearch(request, id, options, context);
 
   return {
     id,
