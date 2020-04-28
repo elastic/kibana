@@ -79,14 +79,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
                   />
                 </EuiLink>
               ),
-              whatIsMachineLearning: (
-                <EuiLink href={whatIsMachineLearningLink} target="blank">
-                  <FormattedMessage
-                    id="xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning"
-                    defaultMessage="here"
-                  />
-                </EuiLink>
-              ),
             }}
           />
         </p>
