@@ -453,7 +453,7 @@
     "karma-firefox-launcher": "1.1.0",
     "karma-ie-launcher": "1.0.0",
     "karma-junit-reporter": "1.2.0",
-    "karma-mocha": "1.3.0",
+    "karma-mocha": "2.0.0",
     "karma-safari-launcher": "1.0.0",
     "license-checker": "^16.0.0",
     "listr": "^0.14.1",
