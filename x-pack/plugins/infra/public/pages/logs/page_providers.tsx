@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
 import { LogSourceProvider } from '../../containers/logs/log_source';
 // import { SourceProvider } from '../../containers/source';
@@ -12,9 +13,9 @@ import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
-
+  const { services } = useKibana();
   return (
-    <LogSourceProvider sourceId={sourceId}>
+    <LogSourceProvider sourceId={sourceId} fetch={services.http.fetch}>
       <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
     </LogSourceProvider>
   );

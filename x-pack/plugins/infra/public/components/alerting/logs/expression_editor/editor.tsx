@@ -6,6 +6,7 @@
 
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { useMount } from 'react-use';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ForLastExpression,
@@ -13,6 +14,8 @@ import {
 } from '../../../../../../triggers_actions_ui/public/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { useSource } from '../../../../containers/source';
 import {
   LogDocumentCountAlertParams,
@@ -21,6 +24,8 @@ import {
 } from '../../../../../common/alerting/logs/types';
 import { DocumentCount } from './document_count';
 import { Criteria } from './criteria';
+import { useSourceId } from '../../../../containers/source_id';
+import { LogSourceProvider, useLogSourceContext } from '../../../../containers/logs/log_source';
 
 export interface ExpressionCriteria {
   field?: string;
@@ -28,11 +33,16 @@ export interface ExpressionCriteria {
   value?: string | number;
 }
 
+interface LogsContextMeta {
+  isInternal?: boolean;
+}
+
 interface Props {
   errors: IErrorObject;
   alertParams: Partial<LogDocumentCountAlertParams>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
+  alertsContext: AlertsContextValue<LogsContextMeta>;
 }
 
 const DEFAULT_CRITERIA = { field: 'log.level', comparator: Comparator.EQ, value: 'error' };
@@ -48,32 +58,68 @@ const DEFAULT_EXPRESSION = {
 };
 
 export const ExpressionEditor: React.FC<Props> = props => {
+  const isInternal = props.alertsContext.metadata?.isInternal;
+  const [sourceId] = useSourceId();
+
+  return (
+    <>
+      {isInternal ? (
+        <SourceConfigStatus {...props}>
+          <Editor {...props} />
+        </SourceConfigStatus>
+      ) : (
+        <LogSourceProvider sourceId={sourceId} fetch={props.alertsContext.http.fetch}>
+          <SourceConfigStatus {...props}>
+            <Editor {...props} />
+          </SourceConfigStatus>
+        </LogSourceProvider>
+      )}
+    </>
+  );
+};
+
+export const SourceConfigStatus: React.FC<Props> = props => {
+  const { initialize, isLoading, isUninitialized, hasFailedLoadingSource } = useLogSourceContext();
+  const { children } = props;
+
+  useMount(() => {
+    initialize();
+  });
+
+  return (
+    <>
+      {isLoading || isUninitialized
+        ? 'Loading source data'
+        : hasFailedLoadingSource
+        ? 'Error loading source data'
+        : children}
+    </>
+  );
+};
+
+export const Editor: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors } = props;
-  const { createDerivedIndexPattern } = useSource({ sourceId: 'default' });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('logs'), [
-    createDerivedIndexPattern,
-  ]);
+  const { sourceStatus } = useLogSourceContext();
+
+  useMount(() => {
+    for (const [key, value] of Object.entries(DEFAULT_EXPRESSION)) {
+      setAlertParams(key, value);
+      setHasSetDefaults(true);
+    }
+  });
 
   const supportedFields = useMemo(() => {
-    if (derivedIndexPattern?.fields) {
-      return derivedIndexPattern.fields.filter(field => {
+    if (sourceStatus?.logIndexFields) {
+      return sourceStatus.logIndexFields.filter(field => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
       return [];
     }
-  }, [derivedIndexPattern]);
-
-  // Set the default expression (disables exhaustive-deps as we only want to run this once on mount)
-  useEffect(() => {
-    for (const [key, value] of Object.entries(DEFAULT_EXPRESSION)) {
-      setAlertParams(key, value);
-      setHasSetDefaults(true);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sourceStatus]);
 
   const updateCount = useCallback(
     countParams => {
@@ -127,7 +173,7 @@ export const ExpressionEditor: React.FC<Props> = props => {
   );
 
   // Wait until field info has loaded
-  if (supportedFields.length === 0) return null;
+  // if (supportedFields.length === 0) return null;
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 
