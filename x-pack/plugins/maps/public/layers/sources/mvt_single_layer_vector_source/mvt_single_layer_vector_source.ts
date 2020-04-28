@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
-import { TiledVectorLayer } from '../../tiled_vector_layer';
 import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
@@ -15,13 +14,12 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
-  LayerDescriptor,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
-import { VectorLayerArguments } from '../../vector_layer';
+import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -37,7 +35,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     layerName,
     minSourceZoom,
     maxSourceZoom,
-  }: TiledSingleLayerVectorSourceDescriptor) {
+  }: MVTSingleLayerVectorSourceConfig) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
       id: uuid(),
@@ -64,19 +62,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getFieldNames(): string[] {
     return [];
-  }
-
-  createDefaultLayer(options: LayerDescriptor): TiledVectorLayer {
-    const layerDescriptor = {
-      sourceDescriptor: this._descriptor,
-      ...options,
-    };
-    const normalizedLayerDescriptor = TiledVectorLayer.createDescriptor(layerDescriptor, []);
-    const vectorLayerArguments: VectorLayerArguments = {
-      layerDescriptor: normalizedLayerDescriptor,
-      source: this,
-    };
-    return new TiledVectorLayer(vectorLayerArguments);
   }
 
   getGeoJsonWithMeta(

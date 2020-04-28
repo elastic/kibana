@@ -19,7 +19,7 @@
 
 import { APICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
-import { tsvbTelemetrySavedObjectType } from './saved_object_type';
+import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
 export interface ValidationTelemetryServiceSetup {
   logFailedValidation: () => void;
