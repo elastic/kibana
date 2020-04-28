@@ -49,6 +49,11 @@ export interface SecurityLicenseFeatures {
   readonly allowRbac: boolean;
 
   /**
+   * Indicates whether we allow sub-feature privileges.
+   */
+  readonly allowSubFeaturePrivileges: boolean;
+
+  /**
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;

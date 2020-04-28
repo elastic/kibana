@@ -32,6 +32,11 @@ import { BlendedVectorLayer } from '../../blended_vector_layer';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { getField, addFieldToDSL } from '../../util/es_agg_utils';
+import { registerSource } from '../source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
+  defaultMessage: 'Documents',
+});
 
 function getDocValueAndSourceFields(indexPattern, fieldNames) {
   const docValueFields = [];
@@ -65,31 +70,6 @@ function getDocValueAndSourceFields(indexPattern, fieldNames) {
 
 export class ESSearchSource extends AbstractESSource {
   static type = ES_SEARCH;
-  static title = i18n.translate('xpack.maps.source.esSearchTitle', {
-    defaultMessage: 'Documents',
-  });
-  static description = i18n.translate('xpack.maps.source.esSearchDescription', {
-    defaultMessage: 'Vector data from a Kibana index pattern',
-  });
-
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const source = new ESSearchSource(
-        {
-          id: uuid(),
-          ...sourceConfig,
-        },
-        inspectorAdapters
-      );
-      onPreviewSource(source);
-    };
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  }
 
   constructor(descriptor, inspectorAdapters) {
     super(
@@ -149,11 +129,14 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   renderSourceSettingsEditor({ onChange }) {
+    const getGeoField = () => {
+      return this._getGeoField();
+    };
     return (
       <UpdateSourceEditor
         source={this}
         indexPatternId={this.getIndexPatternId()}
-        getGeoField={this._getGeoField}
+        getGeoField={getGeoField}
         onChange={onChange}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
@@ -203,7 +186,7 @@ export class ESSearchSource extends AbstractESSource {
     return [
       {
         label: getDataSourceLabel(),
-        value: ESSearchSource.title,
+        value: sourceTitle,
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
@@ -584,3 +567,34 @@ export class ESSearchSource extends AbstractESSource {
     };
   }
 }
+
+registerSource({
+  ConstructorFunction: ESSearchSource,
+  type: ES_SEARCH,
+});
+
+export const esDocumentsLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.esSearchDescription', {
+    defaultMessage: 'Vector data from a Kibana index pattern',
+  }),
+  icon: 'logoElasticsearch',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const source = new ESSearchSource(
+        {
+          id: uuid(),
+          ...sourceConfig,
+        },
+        inspectorAdapters
+      );
+      onPreviewSource(source);
+    };
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

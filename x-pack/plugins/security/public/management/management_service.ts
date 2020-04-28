@@ -6,7 +6,7 @@
 
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, FatalErrorsSetup } from 'src/core/public';
+import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import {
   ManagementApp,
   ManagementSetup,
@@ -25,7 +25,7 @@ interface SetupParams {
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 interface StartParams {

@@ -16,6 +16,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['ciGroup7']);
     before(async () => {
       await esArchiver.load('endpoint/alerts/api_feature');
+      await esArchiver.load('endpoint/alerts/host_api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
     });
     it('loads the Alert List Page', async () => {
@@ -66,6 +67,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('endpoint/alerts/api_feature');
+      await esArchiver.unload('endpoint/alerts/host_api_feature');
     });
   });
 }

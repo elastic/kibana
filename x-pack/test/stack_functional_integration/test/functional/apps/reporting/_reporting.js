@@ -14,7 +14,7 @@ export default function({ getService, getPageObjects }) {
   describe('reporting app', () => {
     before(async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.common.navigateToApp('visualize');
+      await PageObjects.common.navigateToApp('visualize', { insertTimestamp: false });
       await PageObjects.visualize.openSavedVisualization(visName1);
       await PageObjects.common.sleep(3000);
     });

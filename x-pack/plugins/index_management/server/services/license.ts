@@ -12,7 +12,7 @@ import {
 } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
+import { LicenseType } from '../../../licensing/common/types';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -37,7 +37,7 @@ export class License {
   ) {
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
 
       if (hasRequiredLicense) {
         this.licenseStatus = { isValid: true };

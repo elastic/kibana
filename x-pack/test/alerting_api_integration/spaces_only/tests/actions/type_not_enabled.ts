@@ -29,7 +29,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           actionTypeId: DISABLED_ACTION_TYPE,
         });
 
-      expect(response.statusCode).to.eql(403);
+      expect(response.status).to.eql(403);
       expect(response.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
@@ -46,7 +46,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           params: {},
         });
 
-      expect(response.statusCode).to.eql(403);
+      expect(response.status).to.eql(403);
       expect(response.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
@@ -58,7 +58,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
     it('should handle get action request with disabled actionType appropriately', async () => {
       const response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         actionTypeId: 'test.not-enabled',
         config: {},
@@ -75,7 +75,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
           name: 'an action created before test.not-enabled was disabled (updated)',
         });
 
-      expect(responseUpdate.statusCode).to.eql(403);
+      expect(responseUpdate.status).to.eql(403);
       expect(responseUpdate.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
@@ -84,7 +84,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
       });
 
       const response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body).to.eql({
         actionTypeId: 'test.not-enabled',
         config: {},
@@ -99,10 +99,10 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
       response = await supertest
         .delete(`/api/action/${PREWRITTEN_ACTION_ID}`)
         .set('kbn-xsrf', 'foo');
-      expect(response.statusCode).to.eql(204);
+      expect(response.status).to.eql(204);
 
       response = await supertest.get(`/api/action/${PREWRITTEN_ACTION_ID}`);
-      expect(response.statusCode).to.eql(404);
+      expect(response.status).to.eql(404);
     });
   });
 }

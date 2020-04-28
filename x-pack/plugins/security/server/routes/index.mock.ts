@@ -11,17 +11,19 @@ import {
 } from '../../../../../src/core/server/mocks';
 import { authenticationMock } from '../authentication/index.mock';
 import { authorizationMock } from '../authorization/index.mock';
-import { ConfigSchema } from '../config';
+import { ConfigSchema, createConfig } from '../config';
 import { licenseMock } from '../../common/licensing/index.mock';
 
 export const routeDefinitionParamsMock = {
-  create: () => ({
+  create: (config: Record<string, unknown> = {}) => ({
     router: httpServiceMock.createRouter(),
     basePath: httpServiceMock.createBasePath(),
     csp: httpServiceMock.createSetupContract().csp,
     logger: loggingServiceMock.create().get(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
-    config: { ...ConfigSchema.validate({}), encryptionKey: 'some-enc-key' },
+    config: createConfig(ConfigSchema.validate(config), loggingServiceMock.create().get(), {
+      isTLSEnabled: false,
+    }),
     authc: authenticationMock.create(),
     authz: authorizationMock.create(),
     license: licenseMock.create(),

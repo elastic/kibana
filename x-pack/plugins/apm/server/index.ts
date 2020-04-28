@@ -29,7 +29,8 @@ export const config = {
       enabled: schema.boolean({ defaultValue: true }),
       transactionGroupBucketSize: schema.number({ defaultValue: 100 }),
       maxTraceItems: schema.number({ defaultValue: 1000 })
-    })
+    }),
+    telemetryCollectionEnabled: schema.boolean({ defaultValue: true })
   })
 };
 
@@ -62,7 +63,8 @@ export function mergeConfigs(
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,
-    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern
+    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
+    'xpack.apm.telemetryCollectionEnabled': apmConfig.telemetryCollectionEnabled
   };
 }
 

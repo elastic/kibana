@@ -7,9 +7,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Local Scheduled Task Commands",
-  "query": " event.action:\"Process Create (rule: ProcessCreate)\" and process.name:schtasks.exe and process.args:(\"/create\" or \"-create\" or \"/S\" or \"-s\" or \"/run\" or \"-run\" or \"/change\" or \"-change\")",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:schtasks.exe and process.args:(-change or -create or -run or -s or /S or /change or /create or /run)",
   "risk_score": 21,
   "rule_id": "afcce5ad-65de-4ed2-8516-5e093d3ac99a",
   "severity": "low",

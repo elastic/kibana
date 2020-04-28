@@ -12,7 +12,7 @@ export default function({ getService, getPageObjects }) {
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      await PageObjects.common.navigateToApp('sampledata');
+      await PageObjects.common.navigateToApp('sampledata', { insertTimestamp: false });
       await PageObjects.common.sleep(3000);
     });
 

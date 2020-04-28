@@ -8,9 +8,9 @@ import React, { useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AppState } from '../../../state';
-import { monitorLocationsSelector, selectMonitorStatus } from '../../../state/selectors';
+import { monitorLocationsSelector, monitorStatusSelector } from '../../../state/selectors';
 import { MonitorStatusBarComponent } from '../../functional/monitor_status_details/monitor_status_bar';
-import { getMonitorStatusAction, getSelectedMonitorAction } from '../../../state/actions';
+import { getMonitorStatusAction } from '../../../state/actions';
 import { useUrlParams } from '../../../hooks';
 import { Ping } from '../../../../common/graphql/types';
 import { MonitorLocations } from '../../../../common/runtime_types/monitor';
@@ -22,7 +22,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => void;
+  loadMonitorStatus: typeof getMonitorStatusAction;
 }
 
 interface OwnProps {
@@ -43,7 +43,7 @@ const Container: React.FC<Props> = ({
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
 
   useEffect(() => {
-    loadMonitorStatus(dateStart, dateEnd, monitorId);
+    loadMonitorStatus({ dateStart, dateEnd, monitorId });
   }, [monitorId, dateStart, dateEnd, loadMonitorStatus, lastRefresh]);
 
   return (
@@ -56,25 +56,12 @@ const Container: React.FC<Props> = ({
 };
 
 const mapStateToProps = (state: AppState, ownProps: OwnProps) => ({
-  monitorStatus: selectMonitorStatus(state),
+  monitorStatus: monitorStatusSelector(state),
   monitorLocations: monitorLocationsSelector(state, ownProps.monitorId),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch<any>): DispatchProps => ({
-  loadMonitorStatus: (dateStart: string, dateEnd: string, monitorId: string) => {
-    dispatch(
-      getMonitorStatusAction({
-        monitorId,
-        dateStart,
-        dateEnd,
-      })
-    );
-    dispatch(
-      getSelectedMonitorAction({
-        monitorId,
-      })
-    );
-  },
+  loadMonitorStatus: params => dispatch(getMonitorStatusAction(params)),
 });
 
 // @ts-ignore TODO: Investigate typescript issues here

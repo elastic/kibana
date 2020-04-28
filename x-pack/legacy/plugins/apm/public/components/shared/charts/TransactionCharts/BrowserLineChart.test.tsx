@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { BrowserLineChart } from './BrowserLineChart';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('BrowserLineChart', () => {
   describe('render', () => {

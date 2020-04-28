@@ -10,12 +10,13 @@ import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
 import { DataMissing } from './data_missing';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
+import { IHttpFetchError } from '../../../../../../../../target/types/core/public/http';
 
 interface EmptyStateProps {
   children: JSX.Element[] | JSX.Element;
   statesIndexStatus: StatesIndexStatus | null;
   loading: boolean;
-  errors?: Error[];
+  errors?: IHttpFetchError[];
 }
 
 export const EmptyStateComponent = ({

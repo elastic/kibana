@@ -83,6 +83,10 @@ a| <<advanced-options, *Advanced Settings*>>
 Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
 set the timespan for notification messages, and much more.
 
+| <<managing-alerts-and-actions, *Alerts and Actions*>>
+
+Centrally manage your alerts from across {kib}. Create and manage re-usable connectors for triggering actions. 
+
 | <<managing-fields, *Index Patterns*>>
 
 Create and manage the index patterns that help you retrieve your data from {es}.
@@ -110,6 +114,14 @@ so you can tailor it to your needs without impacting others.
 --
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alert-management.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
+
+include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 

@@ -10,14 +10,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
         },
         "node": Object {
           "_id": "2fe3bdf168af35b9e0ce5dc583bab007c40d47de",
-          "alternativeNames": Array [
-            "*.elastic.co",
-            "elastic.co",
-          ],
-          "commonNames": Array [
-            "*.elastic.co",
-          ],
-          "issuerNames": Array [
+          "issuers": Array [
             "DigiCert SHA2 Secure Server CA",
           ],
           "ja3": Array [
@@ -27,6 +20,9 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
           "notAfter": Array [
             "2021-04-22T12:00:00.000Z",
           ],
+          "subjects": Array [
+            "*.elastic.co",
+          ],
         },
       },
       Object {
@@ -35,13 +31,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
         },
         "node": Object {
           "_id": "61749734b3246f1584029deb4f5276c64da00ada",
-          "alternativeNames": Array [
-            "api.snapcraft.io",
-          ],
-          "commonNames": Array [
-            "api.snapcraft.io",
-          ],
-          "issuerNames": Array [
+          "issuers": Array [
             "DigiCert SHA2 Secure Server CA",
           ],
           "ja3": Array [
@@ -49,6 +39,9 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
           ],
           "notAfter": Array [
             "2019-05-22T12:00:00.000Z",
+          ],
+          "subjects": Array [
+            "api.snapcraft.io",
           ],
         },
       },
@@ -58,14 +51,7 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
         },
         "node": Object {
           "_id": "6560d3b7dd001c989b85962fa64beb778cdae47a",
-          "alternativeNames": Array [
-            "changelogs.ubuntu.com",
-            "manpages.ubuntu.com",
-          ],
-          "commonNames": Array [
-            "changelogs.ubuntu.com",
-          ],
-          "issuerNames": Array [
+          "issuers": Array [
             "Let's Encrypt Authority X3",
           ],
           "ja3": Array [
@@ -73,6 +59,9 @@ exports[`Tls Table Component Rendering it renders the default Domains table 1`] 
           ],
           "notAfter": Array [
             "2019-06-27T01:09:59.000Z",
+          ],
+          "subjects": Array [
+            "changelogs.ubuntu.com",
           ],
         },
       },

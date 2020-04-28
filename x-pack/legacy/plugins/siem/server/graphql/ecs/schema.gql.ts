@@ -410,6 +410,7 @@ export const ecsSchema = gql`
     created_by: ToStringArray
     updated_by: ToStringArray
     version: ToStringArray
+    note: ToStringArray
   }
 
   type SignalField {

@@ -53,6 +53,7 @@ exports[`Relationships should render dashboards normally 1`] = `
               "width": "50px",
             },
             Object {
+              "data-test-subj": "directRelationship",
               "dataType": "string",
               "field": "relationship",
               "name": "Direct relationship",
@@ -72,6 +73,7 @@ exports[`Relationships should render dashboards normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
+                  "data-test-subj": "relationshipsTableAction-inspect",
                   "description": "Inspect this saved object",
                   "icon": "inspect",
                   "name": "Inspect",
@@ -117,6 +119,7 @@ exports[`Relationships should render dashboards normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        rowProps={[Function]}
         search={
           Object {
             "filters": Array [
@@ -263,6 +266,7 @@ exports[`Relationships should render index patterns normally 1`] = `
               "width": "50px",
             },
             Object {
+              "data-test-subj": "directRelationship",
               "dataType": "string",
               "field": "relationship",
               "name": "Direct relationship",
@@ -282,6 +286,7 @@ exports[`Relationships should render index patterns normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
+                  "data-test-subj": "relationshipsTableAction-inspect",
                   "description": "Inspect this saved object",
                   "icon": "inspect",
                   "name": "Inspect",
@@ -327,6 +332,7 @@ exports[`Relationships should render index patterns normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        rowProps={[Function]}
         search={
           Object {
             "filters": Array [
@@ -429,6 +435,7 @@ exports[`Relationships should render searches normally 1`] = `
               "width": "50px",
             },
             Object {
+              "data-test-subj": "directRelationship",
               "dataType": "string",
               "field": "relationship",
               "name": "Direct relationship",
@@ -448,6 +455,7 @@ exports[`Relationships should render searches normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
+                  "data-test-subj": "relationshipsTableAction-inspect",
                   "description": "Inspect this saved object",
                   "icon": "inspect",
                   "name": "Inspect",
@@ -493,6 +501,7 @@ exports[`Relationships should render searches normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        rowProps={[Function]}
         search={
           Object {
             "filters": Array [
@@ -595,6 +604,7 @@ exports[`Relationships should render visualizations normally 1`] = `
               "width": "50px",
             },
             Object {
+              "data-test-subj": "directRelationship",
               "dataType": "string",
               "field": "relationship",
               "name": "Direct relationship",
@@ -614,6 +624,7 @@ exports[`Relationships should render visualizations normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
+                  "data-test-subj": "relationshipsTableAction-inspect",
                   "description": "Inspect this saved object",
                   "icon": "inspect",
                   "name": "Inspect",
@@ -659,6 +670,7 @@ exports[`Relationships should render visualizations normally 1`] = `
         }
         pagination={true}
         responsive={true}
+        rowProps={[Function]}
         search={
           Object {
             "filters": Array [

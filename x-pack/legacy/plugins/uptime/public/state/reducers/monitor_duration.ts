@@ -13,13 +13,13 @@ import {
 import { MonitorDurationResult } from '../../../common/types';
 
 export interface MonitorDuration {
-  monitor_duration: MonitorDurationResult | null;
+  durationLines: MonitorDurationResult | null;
   errors: any[];
   loading: boolean;
 }
 
 const initialState: MonitorDuration = {
-  monitor_duration: null,
+  durationLines: null,
   loading: false,
   errors: [],
 };
@@ -39,7 +39,7 @@ export const monitorDurationReducer = handleActions<MonitorDuration, PayLoad>(
     ) => ({
       ...state,
       loading: false,
-      monitor_duration: { ...action.payload },
+      durationLines: { ...action.payload },
     }),
 
     [String(getMonitorDurationActionFail)]: (state: MonitorDuration, action: Action<Error>) => ({

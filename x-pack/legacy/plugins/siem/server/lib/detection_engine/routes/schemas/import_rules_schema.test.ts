@@ -10,7 +10,8 @@ import {
   importRulesQuerySchema,
   importRulesPayloadSchema,
 } from './import_rules_schema';
-import { ThreatParams, ImportRuleAlertRest, RuleAlertAction } from '../../types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { ThreatParams, ImportRuleAlertRest } from '../../types';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 

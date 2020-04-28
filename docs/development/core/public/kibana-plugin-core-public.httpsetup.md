@@ -16,7 +16,7 @@ export interface HttpSetup
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [anonymousPaths](./kibana-plugin-core-public.httpsetup.anonymouspaths.md) | <code>IAnonymousPaths</code> | APIs for denoting certain paths for not requiring authentication |
-|  [basePath](./kibana-plugin-core-public.httpsetup.basepath.md) | <code>IBasePath</code> | APIs for manipulating the basePath on URL segments. |
+|  [basePath](./kibana-plugin-core-public.httpsetup.basepath.md) | <code>IBasePath</code> | APIs for manipulating the basePath on URL segments. See [IBasePath](./kibana-plugin-core-public.ibasepath.md) |
 |  [delete](./kibana-plugin-core-public.httpsetup.delete.md) | <code>HttpHandler</code> | Makes an HTTP request with the DELETE method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
 |  [fetch](./kibana-plugin-core-public.httpsetup.fetch.md) | <code>HttpHandler</code> | Makes an HTTP request. Defaults to a GET request unless overriden. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |
 |  [get](./kibana-plugin-core-public.httpsetup.get.md) | <code>HttpHandler</code> | Makes an HTTP request with the GET method. See [HttpHandler](./kibana-plugin-core-public.httphandler.md) for options. |

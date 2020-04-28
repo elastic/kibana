@@ -16,16 +16,11 @@ import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { registerSource } from '../source_registry';
 
 export class GeojsonFileSource extends AbstractVectorSource {
   static type = GEOJSON_FILE;
-  static title = i18n.translate('xpack.maps.source.geojsonFileTitle', {
-    defaultMessage: 'Uploaded GeoJSON',
-  });
-  static description = i18n.translate('xpack.maps.source.geojsonFileDescription', {
-    defaultMessage: 'Upload and index GeoJSON data in Elasticsearch',
-  });
-  static icon = 'importAction';
+
   static isIndexingSource = true;
 
   static createDescriptor(geoJson, name) {
@@ -59,90 +54,6 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   }
 
-  static viewIndexedData = (
-    addAndViewSource,
-    inspectorAdapters,
-    importSuccessHandler,
-    importErrorHandler
-  ) => {
-    return (indexResponses = {}) => {
-      const { indexDataResp, indexPatternResp } = indexResponses;
-
-      const indexCreationFailed = !(indexDataResp && indexDataResp.success);
-      const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
-      const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
-
-      if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
-        importErrorHandler(indexResponses);
-        return;
-      }
-      const { fields, id } = indexPatternResp;
-      const geoFieldArr = fields.filter(field =>
-        Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
-      );
-      const geoField = _.get(geoFieldArr, '[0].name');
-      const indexPatternId = id;
-      if (!indexPatternId || !geoField) {
-        addAndViewSource(null);
-      } else {
-        // Only turn on bounds filter for large doc counts
-        const filterByMapBounds = indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW;
-        const source = new ESSearchSource(
-          {
-            id: uuid(),
-            indexPatternId,
-            geoField,
-            filterByMapBounds,
-          },
-          inspectorAdapters
-        );
-        addAndViewSource(source);
-        importSuccessHandler(indexResponses);
-      }
-    };
-  };
-
-  static previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
-    return (geojsonFile, name) => {
-      if (!geojsonFile) {
-        onPreviewSource(null);
-        return;
-      }
-      const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
-      const source = new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-  };
-
-  static renderEditor({
-    onPreviewSource,
-    inspectorAdapters,
-    addAndViewSource,
-    isIndexingTriggered,
-    onRemove,
-    onIndexReady,
-    importSuccessHandler,
-    importErrorHandler,
-  }) {
-    return (
-      <ClientFileCreateSourceEditor
-        previewGeojsonFile={GeojsonFileSource.previewGeojsonFile(
-          onPreviewSource,
-          inspectorAdapters
-        )}
-        isIndexingTriggered={isIndexingTriggered}
-        onIndexingComplete={GeojsonFileSource.viewIndexedData(
-          addAndViewSource,
-          inspectorAdapters,
-          importSuccessHandler,
-          importErrorHandler
-        )}
-        onRemove={onRemove}
-        onIndexReady={onIndexReady}
-      />
-    );
-  }
-
   async getGeoJsonWithMeta() {
     return {
       data: this._descriptor.__featureCollection,
@@ -162,3 +73,99 @@ export class GeojsonFileSource extends AbstractVectorSource {
     return GeojsonFileSource.isIndexingSource;
   }
 }
+
+const viewIndexedData = (
+  addAndViewSource,
+  inspectorAdapters,
+  importSuccessHandler,
+  importErrorHandler
+) => {
+  return (indexResponses = {}) => {
+    const { indexDataResp, indexPatternResp } = indexResponses;
+
+    const indexCreationFailed = !(indexDataResp && indexDataResp.success);
+    const allDocsFailed = indexDataResp.failures.length === indexDataResp.docCount;
+    const indexPatternCreationFailed = !(indexPatternResp && indexPatternResp.success);
+
+    if (indexCreationFailed || allDocsFailed || indexPatternCreationFailed) {
+      importErrorHandler(indexResponses);
+      return;
+    }
+    const { fields, id } = indexPatternResp;
+    const geoFieldArr = fields.filter(field =>
+      Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
+    );
+    const geoField = _.get(geoFieldArr, '[0].name');
+    const indexPatternId = id;
+    if (!indexPatternId || !geoField) {
+      addAndViewSource(null);
+    } else {
+      // Only turn on bounds filter for large doc counts
+      const filterByMapBounds = indexDataResp.docCount > DEFAULT_MAX_RESULT_WINDOW;
+      const source = new ESSearchSource(
+        {
+          id: uuid(),
+          indexPatternId,
+          geoField,
+          filterByMapBounds,
+        },
+        inspectorAdapters
+      );
+      addAndViewSource(source);
+      importSuccessHandler(indexResponses);
+    }
+  };
+};
+
+const previewGeojsonFile = (onPreviewSource, inspectorAdapters) => {
+  return (geojsonFile, name) => {
+    if (!geojsonFile) {
+      onPreviewSource(null);
+      return;
+    }
+    const sourceDescriptor = GeojsonFileSource.createDescriptor(geojsonFile, name);
+    const source = new GeojsonFileSource(sourceDescriptor, inspectorAdapters);
+    onPreviewSource(source);
+  };
+};
+
+registerSource({
+  ConstructorFunction: GeojsonFileSource,
+  type: GEOJSON_FILE,
+});
+
+export const uploadLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.geojsonFileDescription', {
+    defaultMessage: 'Index GeoJSON data in Elasticsearch',
+  }),
+  icon: 'importAction',
+  isIndexingSource: true,
+  renderWizard: ({
+    onPreviewSource,
+    inspectorAdapters,
+    addAndViewSource,
+    isIndexingTriggered,
+    onRemove,
+    onIndexReady,
+    importSuccessHandler,
+    importErrorHandler,
+  }) => {
+    return (
+      <ClientFileCreateSourceEditor
+        previewGeojsonFile={previewGeojsonFile(onPreviewSource, inspectorAdapters)}
+        isIndexingTriggered={isIndexingTriggered}
+        onIndexingComplete={viewIndexedData(
+          addAndViewSource,
+          inspectorAdapters,
+          importSuccessHandler,
+          importErrorHandler
+        )}
+        onRemove={onRemove}
+        onIndexReady={onIndexReady}
+      />
+    );
+  },
+  title: i18n.translate('xpack.maps.source.geojsonFileTitle', {
+    defaultMessage: 'Upload GeoJSON',
+  }),
+};

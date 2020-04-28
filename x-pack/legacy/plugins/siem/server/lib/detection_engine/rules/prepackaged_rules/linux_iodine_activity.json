@@ -7,9 +7,8 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Potential DNS Tunneling via Iodine",
-  "query": "process.name: (iodine or iodined) and event.action:executed",
+  "query": "process.name:(iodine or iodined) and event.action:executed",
   "references": [
     "https://code.kryo.se/iodine/"
   ],

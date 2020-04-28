@@ -7,7 +7,8 @@
 import { AlertAction } from '../../../../../../../../plugins/alerting/common';
 import { updateRulesSchema } from './update_rules_schema';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import { ThreatParams, RuleAlertParamsRest, RuleAlertAction } from '../../types';
+import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { ThreatParams, RuleAlertParamsRest } from '../../types';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
 describe('create rules schema', () => {

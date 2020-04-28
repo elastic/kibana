@@ -175,7 +175,7 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = getInternalUserSOClient(request);
-    const res = APIKeyService.parseApiKey(request.headers);
+    const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const agent = await AgentService.getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
     const { actions } = await AgentService.agentCheckin(
       soClient,
@@ -216,7 +216,7 @@ export const postAgentEnrollHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = getInternalUserSOClient(request);
-    const { apiKeyId } = APIKeyService.parseApiKey(request.headers);
+    const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
     const enrollmentAPIKey = await APIKeyService.getEnrollmentAPIKeyById(soClient, apiKeyId);
 
     if (!enrollmentAPIKey || !enrollmentAPIKey.active) {

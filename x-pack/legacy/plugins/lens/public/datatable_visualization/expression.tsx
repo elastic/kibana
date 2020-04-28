@@ -8,13 +8,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable } from '@elastic/eui';
-import { LensMultiTable } from '../types';
+import { FormatFactory, LensMultiTable } from '../types';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../../src/plugins/expressions/public';
-import { FormatFactory } from '../../../../../../src/legacy/ui/public/visualize/loader/pipeline_helpers/utilities';
 import { VisualizationContainer } from '../visualization_container';
 
 export interface DatatableColumns {
@@ -102,7 +101,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 };
 
 export const getDatatableRenderer = (
-  formatFactory: FormatFactory
+  formatFactory: Promise<FormatFactory>
 ): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -116,8 +115,9 @@ export const getDatatableRenderer = (
     config: DatatableProps,
     handlers: IInterpreterRenderHandlers
   ) => {
+    const resolvedFormatFactory = await formatFactory;
     ReactDOM.render(
-      <DatatableComponent {...config} formatFactory={formatFactory} />,
+      <DatatableComponent {...config} formatFactory={resolvedFormatFactory} />,
       domNode,
       () => {
         handlers.done();

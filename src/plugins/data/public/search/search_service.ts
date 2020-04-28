@@ -25,6 +25,7 @@ import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './es_client';
 import { ES_SEARCH_STRATEGY, DEFAULT_SEARCH_STRATEGY } from '../../common/search';
 import { esSearchStrategyProvider } from './es_search/es_search_strategy';
+import { QuerySetup } from '../query/query_service';
 import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
@@ -39,6 +40,11 @@ import {
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
 } from './aggs';
+
+interface SearchServiceSetupDependencies {
+  packageInfo: PackageInfo;
+  query: QuerySetup;
+}
 
 /**
  * The search plugin exposes two registration methods for other plugins:
@@ -58,6 +64,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
+  private searchInterceptor!: SearchInterceptor;
 
   private registerSearchStrategyProvider = <T extends TStrategyTypes>(
     name: T,
@@ -72,13 +79,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategyProvider;
   };
 
-  public setup(core: CoreSetup, packageInfo: PackageInfo): ISearchSetup {
+  public setup(
+    core: CoreSetup,
+    { packageInfo, query }: SearchServiceSetupDependencies
+  ): ISearchSetup {
     this.esClient = getEsClient(core.injectedMetadata, core.http, packageInfo);
     this.registerSearchStrategyProvider(SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider);
     this.registerSearchStrategyProvider(ES_SEARCH_STRATEGY, esSearchStrategyProvider);
 
     const aggTypesSetup = this.aggTypesRegistry.setup();
-    const aggTypes = getAggTypes({ uiSettings: core.uiSettings });
+    const aggTypes = getAggTypes({
+      query,
+      uiSettings: core.uiSettings,
+      notifications: core.notifications,
+    });
+
     aggTypes.buckets.forEach(b => aggTypesSetup.registerBucket(b));
     aggTypes.metrics.forEach(m => aggTypesSetup.registerMetric(m));
 
@@ -98,7 +113,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * TODO: Make this modular so that apps can opt in/out of search collection, or even provide
      * their own search collector instances
      */
-    const searchInterceptor = new SearchInterceptor(
+    this.searchInterceptor = new SearchInterceptor(
+      core.notifications.toasts,
+      core.application,
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
 
@@ -114,16 +131,17 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         },
         types: aggTypesStart,
       },
-      cancel: () => searchInterceptor.cancelPending(),
-      getPendingCount$: () => searchInterceptor.getPendingCount$(),
-      runBeyondTimeout: () => searchInterceptor.runBeyondTimeout(),
       search: (request, options, strategyName) => {
         const strategyProvider = this.getSearchStrategy(strategyName || DEFAULT_SEARCH_STRATEGY);
         const { search } = strategyProvider({
           core,
           getSearchStrategy: this.getSearchStrategy,
         });
-        return searchInterceptor.search(search as any, request, options);
+        return this.searchInterceptor.search(search as any, request, options);
+      },
+      setInterceptor: (searchInterceptor: SearchInterceptor) => {
+        // TODO: should an intercepror have a destroy method?
+        this.searchInterceptor = searchInterceptor;
       },
       __LEGACY: {
         esClient: this.esClient!,

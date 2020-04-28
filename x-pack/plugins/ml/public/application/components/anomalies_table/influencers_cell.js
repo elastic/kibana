@@ -56,7 +56,7 @@ export class InfluencersCell extends Component {
               }
             >
               <EuiButtonIcon
-                size="xs"
+                size="s"
                 className="filter-button"
                 onClick={() =>
                   influencerFilter(
@@ -83,7 +83,7 @@ export class InfluencersCell extends Component {
               }
             >
               <EuiButtonIcon
-                size="xs"
+                size="s"
                 className="filter-button"
                 onClick={() =>
                   influencerFilter(

@@ -22,7 +22,7 @@ describe('DELETE case', () => {
   beforeAll(async () => {
     routeHandler = await createRoute(initDeleteCasesApi, 'delete');
   });
-  it(`deletes the case. responds with 200`, async () => {
+  it(`deletes the case. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: '/api/cases',
       method: 'delete',
@@ -39,7 +39,7 @@ describe('DELETE case', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteCase service`, async () => {
     const request = httpServerMock.createKibanaRequest({

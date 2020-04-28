@@ -7,7 +7,6 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Web Application Suspicious Activity: sqlmap User Agent",
   "query": "user_agent.original:\"sqlmap/1.3.11#stable (http://sqlmap.org)\"",
   "references": [
@@ -17,8 +16,8 @@
   "rule_id": "d49cc73f-7a16-4def-89ce-9fc7127d7820",
   "severity": "medium",
   "tags": [
-    "Elastic",
-    "APM"
+    "APM",
+    "Elastic"
   ],
   "type": "query",
   "version": 1

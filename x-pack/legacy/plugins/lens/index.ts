@@ -7,12 +7,7 @@
 import * as Joi from 'joi';
 import { resolve } from 'path';
 import { LegacyPluginInitializer } from 'src/legacy/types';
-import mappings from './mappings.json';
-import {
-  PLUGIN_ID,
-  getEditPath,
-  NOT_INTERNATIONALIZED_PRODUCT_NAME,
-} from '../../../plugins/lens/common';
+import { PLUGIN_ID, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../../plugins/lens/common';
 
 export const lens: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
@@ -32,18 +27,6 @@ export const lens: LegacyPluginInitializer = kibana => {
       visualize: [`plugins/${PLUGIN_ID}/legacy`],
       embeddableFactories: [`plugins/${PLUGIN_ID}/legacy`],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      mappings,
-      savedObjectsManagement: {
-        lens: {
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
-          getInAppUrl: (obj: { id: string }) => ({
-            path: getEditPath(obj.id),
-            uiCapabilitiesPath: 'lens.show',
-          }),
-        },
-      },
     },
 
     config: () => {

@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment-timezone';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,6 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
+
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
@@ -30,6 +32,7 @@ import {
   euiDataGridToolbarSettings,
   EsFieldName,
   PivotQuery,
+  INIT_MAX_COLUMNS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 import { useToastNotifications } from '../../../../app_dependencies';
@@ -74,7 +77,12 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
   });
 
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
+  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>([]);
+
+  useEffect(() => {
+    setVisibleColumns(indexPatternFields.splice(0, INIT_MAX_COLUMNS));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPatternFields.join()]);
 
   const {
     errorMessage,
@@ -97,13 +105,14 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       let schema;
 
       switch (field?.type) {
-        case 'date':
+        case KBN_FIELD_TYPES.DATE:
           schema = 'datetime';
           break;
-        case 'geo_point':
+        case KBN_FIELD_TYPES.GEO_POINT:
+        case KBN_FIELD_TYPES.GEO_SHAPE:
           schema = 'json';
           break;
-        case 'number':
+        case KBN_FIELD_TYPES.NUMBER:
           schema = 'numeric';
           break;
       }
@@ -177,7 +186,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ indexPattern, q
       }
 
       const field = indexPattern.fields.getByName(columnId);
-      if (field?.type === 'date') {
+      if (field?.type === KBN_FIELD_TYPES.DATE) {
         return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
       }
 

@@ -123,5 +123,3 @@ export interface FeatureKibanaPrivileges {
    */
   ui: string[];
 }
-
-export type FeatureKibanaPrivilegesSet = Record<string, FeatureKibanaPrivileges>;

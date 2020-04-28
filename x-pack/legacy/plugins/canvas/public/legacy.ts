@@ -27,6 +27,7 @@ const shimSetupPlugins: CanvasSetupDeps = {
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
   expressions: npStart.plugins.expressions,
+  uiActions: npStart.plugins.uiActions,
   __LEGACY: {
     // ToDo: Copy directly into canvas
     absoluteToParsedUrl,

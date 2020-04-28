@@ -33,4 +33,4 @@ export { TStrategyTypes } from './strategy_types';
 
 export { TSearchStrategyProvider } from './i_search_strategy';
 
-export { getDefaultSearchParams } from './es_search';
+export { getDefaultSearchParams, getTotalLoaded } from './es_search';

@@ -17,7 +17,6 @@ export default ({ getService, getPageObjects }) => {
       log.debug('monitoring');
       await browser.setWindowSize(1200, 800);
       await appsMenu.clickLink('Stack Monitoring');
-      // await PageObjects.common.navigateToApp('monitoring');
     });
 
     it('should show banner Help us improve Kibana and Elasticsearch', async () => {

@@ -26,7 +26,10 @@ import {
 } from 'kibana/public';
 
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../plugins/visualizations/public';
 import { ChartsPluginSetup } from '../../../../plugins/charts/public';
 
 export interface VisTypeXyDependencies {
@@ -47,10 +50,10 @@ export interface VisTypeXyPluginStartDependencies {
   visualizations: VisualizationsStart;
 }
 
-type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies>;
+type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, void>;
 
 /** @internal */
-export class VisTypeXyPlugin implements Plugin<Promise<void>, void> {
+export class VisTypeXyPlugin implements Plugin<void, void> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
   public async setup(

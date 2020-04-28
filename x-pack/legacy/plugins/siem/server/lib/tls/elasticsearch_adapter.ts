@@ -66,10 +66,9 @@ export const formatTlsEdges = (buckets: TlsBuckets[]): TlsEdges[] => {
     const edge: TlsEdges = {
       node: {
         _id: bucket.key,
-        alternativeNames: bucket.alternative_names.buckets.map(({ key }) => key),
-        commonNames: bucket.common_names.buckets.map(({ key }) => key),
+        subjects: bucket.subjects.buckets.map(({ key }) => key),
         ja3: bucket.ja3.buckets.map(({ key }) => key),
-        issuerNames: bucket.issuer_names.buckets.map(({ key }) => key),
+        issuers: bucket.issuers.buckets.map(({ key }) => key),
         // eslint-disable-next-line @typescript-eslint/camelcase
         notAfter: bucket.not_after.buckets.map(({ key_as_string }) => key_as_string),
       },

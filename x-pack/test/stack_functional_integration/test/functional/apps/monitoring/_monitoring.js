@@ -5,7 +5,7 @@
  */
 
 export default ({ getService, getPageObjects }) => {
-  describe('monitoring app', () => {
+  describe('monitoring app - stack functional integration - suite', () => {
     const browser = getService('browser');
     const PageObjects = getPageObjects(['security', 'monitoring', 'common']);
     const log = getService('log');
@@ -23,7 +23,7 @@ export default ({ getService, getPageObjects }) => {
         // navigate and logs in as the saml user.
       }
       // navigateToApp without a username and password will default to the superuser
-      await PageObjects.common.navigateToApp('monitoring');
+      await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });
     });
 
     it('should enable Monitoring', async () => {

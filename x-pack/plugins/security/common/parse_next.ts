@@ -40,5 +40,5 @@ export function parseNext(href: string, basePath = '') {
     return `${basePath}/`;
   }
 
-  return query.next + (hash || '');
+  return next + (hash || '');
 }

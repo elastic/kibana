@@ -53,6 +53,7 @@ describe('alert_form', () => {
         uiSettings: mockes.uiSettings,
         actionTypeRegistry: actionTypeRegistry as any,
         alertTypeRegistry: alertTypeRegistry as any,
+        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -80,6 +81,7 @@ describe('alert_form', () => {
               return new Promise<void>(() => {});
             },
             http: deps!.http,
+            docLinks: deps.docLinks,
             actionTypeRegistry: deps!.actionTypeRegistry,
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
@@ -159,6 +161,7 @@ describe('alert_form', () => {
               return new Promise<void>(() => {});
             },
             http: deps!.http,
+            docLinks: deps.docLinks,
             actionTypeRegistry: deps!.actionTypeRegistry,
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,

@@ -10,4 +10,13 @@ export * from './alert_instance';
 export * from './alert_task_instance';
 export * from './alert_navigation';
 
+export interface ActionGroup {
+  id: string;
+  name: string;
+}
+
+export interface AlertingFrameworkHealth {
+  isSufficientlySecure: boolean;
+}
+
 export const BASE_ALERT_API_PATH = '/api/alert';

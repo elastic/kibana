@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { getPivotQuery } from '../../../../common';
+import { getPivotQuery, isDefaultQuery, isMatchAllQuery } from '../../../../common';
 import { PivotPreview } from '../../../../components/pivot_preview';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
@@ -60,24 +60,29 @@ export const StepDefineSummary: FC<Props> = ({
                     <span>{searchString}</span>
                   </EuiFormRow>
                 )}
-                {typeof searchString === 'undefined' && (
-                  <EuiFormRow
-                    label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                  >
-                    <EuiCodeBlock
-                      language="js"
-                      fontSize="s"
-                      paddingSize="s"
-                      color="light"
-                      overflowHeight={300}
-                      isCopyable
+                {typeof searchString === 'undefined' &&
+                  !isDefaultQuery(pivotQuery) &&
+                  !isMatchAllQuery(pivotQuery) && (
+                    <EuiFormRow
+                      label={i18n.translate(
+                        'xpack.transform.stepDefineSummary.queryCodeBlockLabel',
+                        {
+                          defaultMessage: 'Query',
+                        }
+                      )}
                     >
-                      {JSON.stringify(searchQuery, null, 2)}
-                    </EuiCodeBlock>
-                  </EuiFormRow>
-                )}
+                      <EuiCodeBlock
+                        language="js"
+                        fontSize="s"
+                        paddingSize="s"
+                        color="light"
+                        overflowHeight={300}
+                        isCopyable
+                      >
+                        {JSON.stringify(pivotQuery, null, 2)}
+                      </EuiCodeBlock>
+                    </EuiFormRow>
+                  )}
               </Fragment>
             )}
 

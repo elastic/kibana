@@ -104,7 +104,11 @@ export const fullListByIdAndLocation = (
         return -1;
       })
       .slice(0, sizeLimit)
-      .reduce((cur, { monitor_id: id, location }) => cur + `${id} from ${location}; `, '') +
+      .reduce(
+        (cur, { monitor_id: id, location }) =>
+          cur + `${id} from ${location ?? 'Unnamed location'}; `,
+        ''
+      ) +
     (sizeLimit < list.length
       ? i18n.translate('xpack.uptime.alerts.message.fullListOverflow', {
           defaultMessage: '...and {overflowCount} other {pluralizedMonitor}',
@@ -172,7 +176,7 @@ const DEFAULT_MAX_MESSAGE_ROWS = 3;
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
-    defaultMessage: 'Uptime Monitor Status',
+    defaultMessage: 'Uptime monitor status',
   }),
   validate: {
     params: schema.object({
@@ -192,6 +196,95 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       name: MONITOR_STATUS.name,
     },
   ],
+  actionVariables: {
+    context: [
+      {
+        name: 'message',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.message.description',
+          {
+            defaultMessage: 'A generated message summarizing the currently down monitors',
+          }
+        ),
+      },
+      {
+        name: 'downMonitorsWithGeo',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.context.downMonitorsWithGeo.description',
+          {
+            defaultMessage:
+              'A generated summary that shows some or all of the monitors detected as "down" by the alert',
+          }
+        ),
+      },
+    ],
+    state: [
+      {
+        name: 'firstCheckedAt',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
+          {
+            defaultMessage: 'Timestamp indicating when this alert first checked',
+          }
+        ),
+      },
+      {
+        name: 'firstTriggeredAt',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
+          {
+            defaultMessage: 'Timestamp indicating when the alert first triggered',
+          }
+        ),
+      },
+      {
+        name: 'currentTriggerStarted',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
+          {
+            defaultMessage:
+              'Timestamp indicating when the current trigger state began, if alert is triggered',
+          }
+        ),
+      },
+      {
+        name: 'isTriggered',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.isTriggered',
+          {
+            defaultMessage: `Flag indicating if the alert is currently triggering`,
+          }
+        ),
+      },
+      {
+        name: 'lastCheckedAt',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
+          {
+            defaultMessage: `Timestamp indicating the alert's most recent check time`,
+          }
+        ),
+      },
+      {
+        name: 'lastResolvedAt',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
+          {
+            defaultMessage: `Timestamp indicating the most recent resolution time for this alert`,
+          }
+        ),
+      },
+      {
+        name: 'lastTriggeredAt',
+        description: i18n.translate(
+          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
+          {
+            defaultMessage: `Timestamp indicating the alert's most recent trigger time`,
+          }
+        ),
+      },
+    ],
+  },
   async executor(options: AlertExecutorOptions) {
     const { params: rawParams } = options;
     const decoded = StatusCheckExecutorParamsType.decode(rawParams);
@@ -204,8 +297,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
 
     const params = decoded.right;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
-      options.services.savedObjectsClient,
-      undefined
+      options.services.savedObjectsClient
     );
     /* This is called `monitorsByLocation` but it's really
      * monitors by location by status. The query we run to generate this
@@ -224,16 +316,14 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (server, libs) =>
       alertInstance.replaceState({
         ...options.state,
         monitors: monitorsByLocation,
+        ...updateState(options.state, true),
       });
       alertInstance.scheduleActions(MONITOR_STATUS.id, {
         message: contextMessage(Array.from(uniqueIds.keys()), DEFAULT_MAX_MESSAGE_ROWS),
-        server,
-        completeIdList: fullListByIdAndLocation(monitorsByLocation),
+        downMonitorsWithGeo: fullListByIdAndLocation(monitorsByLocation),
       });
     }
 
-    // this stateful data is at the cluster level, not an alert instance level,
-    // so any alert of this type will flush/overwrite the state when they return
     return updateState(options.state, monitorsByLocation.length > 0);
   },
 });

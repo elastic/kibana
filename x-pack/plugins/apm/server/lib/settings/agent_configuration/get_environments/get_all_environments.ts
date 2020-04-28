@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT
 } from '../../../../../common/elasticsearch_fieldnames';
-import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration_constants';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export async function getAllEnvironments({
   serviceName,

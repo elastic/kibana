@@ -23,21 +23,10 @@ import { compact, uniq, map, every, isUndefined } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiPopoverProps, EuiIcon, keyCodes, htmlIdGenerator } from '@elastic/eui';
 
-import { IAggConfig } from '../../../../../../../plugins/data/public';
+import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { getPieNames } from './pie_utils';
-
-import { Vis } from '../../../../../visualizations/public';
-import { createFiltersFromEvent, tabifyGetColumns } from '../../../legacy_imports';
-
-const getTableAggs = (vis: Vis): IAggConfig[] => {
-  if (!vis.aggs || !vis.aggs.getResponseAggs) {
-    return [];
-  }
-  const columns = tabifyGetColumns(vis.aggs.getResponseAggs(), !vis.isHierarchical());
-  return columns.map(c => c.aggConfig);
-};
 
 export interface VisLegendProps {
   vis: any;
@@ -50,7 +39,6 @@ export interface VisLegendProps {
 export interface VisLegendState {
   open: boolean;
   labels: any[];
-  tableAggs: any[];
   filterableLabels: Set<string>;
   selectedLabel: string | null;
 }
@@ -66,7 +54,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     this.state = {
       open,
       labels: [],
-      tableAggs: [],
       filterableLabels: new Set(),
       selectedLabel: null,
     };
@@ -114,7 +101,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await createFiltersFromEvent(item.values);
+    const filters = await getDataActions().createFiltersFromEvent(item.values);
     return Boolean(filters.length);
   };
 
@@ -200,7 +187,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       this.getColor = this.props.vislibVis.visConfig.data.getColorFunc();
     }
 
-    this.setState({ tableAggs: getTableAggs(this.props.vis) });
     this.setLabels(this.props.visData, vislibVis.visConfigArgs.type);
   };
 

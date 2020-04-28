@@ -20,62 +20,75 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
+import { TelemetryPluginConfig } from '../plugin';
 
 interface TelemetryServiceConstructor {
+  config: TelemetryPluginConfig;
   http: CoreStart['http'];
-  injectedMetadata: CoreStart['injectedMetadata'];
   notifications: CoreStart['notifications'];
   reportOptInStatusChange?: boolean;
 }
 
 export class TelemetryService {
   private readonly http: CoreStart['http'];
-  private readonly injectedMetadata: CoreStart['injectedMetadata'];
   private readonly reportOptInStatusChange: boolean;
   private readonly notifications: CoreStart['notifications'];
-  private isOptedIn: boolean | null;
-  private userHasSeenOptedInNotice: boolean;
+  private readonly defaultConfig: TelemetryPluginConfig;
+  private updatedConfig?: TelemetryPluginConfig;
 
   constructor({
+    config,
     http,
-    injectedMetadata,
     notifications,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
-    const isOptedIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean | null;
-    const userHasSeenOptedInNotice = injectedMetadata.getInjectedVar(
-      'telemetryNotifyUserAboutOptInDefault'
-    ) as boolean;
+    this.defaultConfig = config;
     this.reportOptInStatusChange = reportOptInStatusChange;
-    this.injectedMetadata = injectedMetadata;
     this.notifications = notifications;
     this.http = http;
+  }
 
-    this.isOptedIn = isOptedIn;
-    this.userHasSeenOptedInNotice = userHasSeenOptedInNotice;
+  public set config(updatedConfig: TelemetryPluginConfig) {
+    this.updatedConfig = updatedConfig;
+  }
+
+  public get config() {
+    return { ...this.defaultConfig, ...this.updatedConfig };
+  }
+
+  public get isOptedIn() {
+    return this.config.optIn;
+  }
+
+  public set isOptedIn(optIn) {
+    this.config = { ...this.config, optIn };
+  }
+
+  public get userHasSeenOptedInNotice() {
+    return this.config.telemetryNotifyUserAboutOptInDefault;
+  }
+
+  public set userHasSeenOptedInNotice(telemetryNotifyUserAboutOptInDefault) {
+    this.config = { ...this.config, telemetryNotifyUserAboutOptInDefault };
   }
 
   public getCanChangeOptInStatus = () => {
-    const allowChangingOptInStatus = this.injectedMetadata.getInjectedVar(
-      'allowChangingOptInStatus'
-    ) as boolean;
+    const allowChangingOptInStatus = this.config.allowChangingOptInStatus;
     return allowChangingOptInStatus;
   };
 
   public getOptInStatusUrl = () => {
-    const telemetryOptInStatusUrl = this.injectedMetadata.getInjectedVar(
-      'telemetryOptInStatusUrl'
-    ) as string;
+    const telemetryOptInStatusUrl = this.config.optInStatusUrl;
     return telemetryOptInStatusUrl;
   };
 
   public getTelemetryUrl = () => {
-    const telemetryUrl = this.injectedMetadata.getInjectedVar('telemetryUrl') as string;
+    const telemetryUrl = this.config.url;
     return telemetryUrl;
   };
 
   public getUserHasSeenOptedInNotice = () => {
-    return this.userHasSeenOptedInNotice;
+    return this.config.telemetryNotifyUserAboutOptInDefault || false;
   };
 
   public getIsOptedIn = () => {

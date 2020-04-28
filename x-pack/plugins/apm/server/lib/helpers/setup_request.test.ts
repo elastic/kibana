@@ -39,6 +39,19 @@ function getMockRequest() {
         _debug: false
       }
     },
+    __LEGACY: {
+      server: {
+        plugins: {
+          elasticsearch: {
+            getCluster: jest.fn().mockReturnValue({ callWithInternalUser: {} })
+          }
+        },
+        savedObjects: {
+          SavedObjectsClient: jest.fn(),
+          getSavedObjectsRepository: jest.fn()
+        }
+      }
+    },
     core: {
       elasticsearch: {
         dataClient: {

@@ -42,6 +42,7 @@ function getCalendarsByIds(context: RequestHandlerContext, calendarIds: string) 
 }
 
 export function calendars({ router, mlLicense }: RouteInitialization) {
+  // Gets calendars - size limit has been explicitly set to 1000
   router.get(
     {
       path: '/api/ml/calendars',

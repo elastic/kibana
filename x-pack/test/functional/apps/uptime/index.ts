@@ -28,10 +28,16 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
           id: settingsObjectId,
         });
       } catch (e) {
-        // If it's not found that's fine, we just want to ensure
-        // this is the default state
-        if (e.response?.status !== 404) {
-          throw e;
+        // a 404 just means the doc is already missing
+        if (e.response.status !== 404) {
+          const { status, statusText, data, headers, config } = e.response;
+          throw new Error(
+            `error attempting to delete settings:\n${JSON.stringify(
+              { status, statusText, data, headers, config },
+              null,
+              2
+            )}`
+          );
         }
       }
     });

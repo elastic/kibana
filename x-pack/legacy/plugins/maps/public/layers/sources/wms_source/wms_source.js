@@ -12,16 +12,15 @@ import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
+import { WMS } from '../../../../common/constants';
+import { registerSource } from '../source_registry';
+
+const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
+  defaultMessage: 'Web Map Service',
+});
 
 export class WMSSource extends AbstractTMSSource {
-  static type = 'WMS';
-  static title = i18n.translate('xpack.maps.source.wmsTitle', {
-    defaultMessage: 'Web Map Service',
-  });
-  static description = i18n.translate('xpack.maps.source.wmsDescription', {
-    defaultMessage: 'Maps from OGC Standard WMS',
-  });
-  static icon = 'grid';
+  static type = WMS;
 
   static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
     return {
@@ -34,23 +33,9 @@ export class WMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = WMSSource.createDescriptor(sourceConfig);
-      const source = new WMSSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  }
-
   async getImmutableProperties() {
     return [
-      { label: getDataSourceLabel(), value: WMSSource.title },
+      { label: getDataSourceLabel(), value: sourceTitle },
       { label: getUrlLabel(), value: this._descriptor.serviceUrl },
       {
         label: i18n.translate('xpack.maps.source.wms.layersLabel', {
@@ -104,3 +89,29 @@ export class WMSSource extends AbstractTMSSource {
     return client.getUrlTemplate(this._descriptor.layers, this._descriptor.styles || '');
   }
 }
+
+registerSource({
+  ConstructorFunction: WMSSource,
+  type: WMS,
+});
+
+export const wmsLayerWizardConfig = {
+  description: i18n.translate('xpack.maps.source.wmsDescription', {
+    defaultMessage: 'Maps from OGC Standard WMS',
+  }),
+  icon: 'grid',
+  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
+    const onSourceConfigChange = sourceConfig => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const sourceDescriptor = WMSSource.createDescriptor(sourceConfig);
+      const source = new WMSSource(sourceDescriptor, inspectorAdapters);
+      onPreviewSource(source);
+    };
+    return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
+  },
+  title: sourceTitle,
+};

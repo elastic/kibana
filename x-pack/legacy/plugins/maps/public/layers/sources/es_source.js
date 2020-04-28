@@ -23,8 +23,6 @@ import { DataRequestAbortError } from '../util/data_request';
 import { expandToTileBoundaries } from './es_geo_grid_source/geo_tile_utils';
 
 export class AbstractESSource extends AbstractVectorSource {
-  static icon = 'logoElasticsearch';
-
   constructor(descriptor, inspectorAdapters) {
     super(
       {
@@ -177,10 +175,10 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     return {
-      min_lon: esBounds.top_left.lon,
-      max_lon: esBounds.bottom_right.lon,
-      min_lat: esBounds.bottom_right.lat,
-      max_lat: esBounds.top_left.lat,
+      minLon: esBounds.top_left.lon,
+      maxLon: esBounds.bottom_right.lon,
+      minLat: esBounds.bottom_right.lat,
+      maxLat: esBounds.top_left.lat,
     };
   }
 
@@ -231,7 +229,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  _getGeoField = async () => {
+  async _getGeoField() {
     const indexPattern = await this.getIndexPattern();
     const geoField = indexPattern.fields.getByName(this._descriptor.geoField);
     if (!geoField) {
@@ -243,7 +241,7 @@ export class AbstractESSource extends AbstractVectorSource {
       );
     }
     return geoField;
-  };
+  }
 
   async getDisplayName() {
     try {

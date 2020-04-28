@@ -11,7 +11,7 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 
 import { LicenseStatus } from '../common/types/license_status';
 
-import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/public';
+import { ILicense } from '../../licensing/public';
 import { TimeBuckets } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
@@ -19,7 +19,7 @@ import { Dependencies } from './types';
 const licenseToLicenseStatus = (license: ILicense): LicenseStatus => {
   const { state, message } = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
   return {
-    valid: state === LICENSE_CHECK_STATE.Valid && license.getFeature(PLUGIN.ID).isAvailable,
+    valid: state === 'valid' && license.getFeature(PLUGIN.ID).isAvailable,
     message,
   };
 };

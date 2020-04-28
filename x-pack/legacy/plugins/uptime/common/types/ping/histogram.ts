@@ -5,15 +5,15 @@
  */
 
 export interface HistogramDataPoint {
-  upCount?: number | null;
+  upCount?: number;
 
-  downCount?: number | null;
+  downCount?: number;
 
-  x?: number | null;
+  x?: number;
 
-  x0?: number | null;
+  x0?: number;
 
-  y?: number | null;
+  y?: number;
 }
 
 export interface GetPingHistogramParams {

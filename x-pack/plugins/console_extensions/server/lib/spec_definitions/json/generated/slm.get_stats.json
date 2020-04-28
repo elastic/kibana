@@ -1,0 +1,11 @@
+{
+  "slm.get_stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_slm/stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/slm-api-get-stats.html"
+  }
+}

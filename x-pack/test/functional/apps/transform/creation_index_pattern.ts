@@ -89,7 +89,61 @@ export default function({ getService }: FtrProviderContext) {
             progress: '100',
           },
           sourcePreview: {
-            columns: 45,
+            columns: 20,
+            rows: 5,
+          },
+        },
+      },
+      {
+        suiteTitle: 'batch transform with terms group and percentiles agg',
+        source: 'ecommerce',
+        groupByEntries: [
+          {
+            identifier: 'terms(geoip.country_iso_code)',
+            label: 'geoip.country_iso_code',
+          } as GroupByEntry,
+        ],
+        aggregationEntries: [
+          {
+            identifier: 'percentiles(products.base_price)',
+            label: 'products.base_price.percentiles',
+          },
+        ],
+        transformId: `ec_2_${Date.now()}`,
+        transformDescription:
+          'ecommerce batch transform with group by terms(geoip.country_iso_code) and aggregation percentiles(products.base_price)',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          pivotAdvancedEditorValue: {
+            group_by: {
+              'geoip.country_iso_code': {
+                terms: {
+                  field: 'geoip.country_iso_code',
+                },
+              },
+            },
+            aggregations: {
+              'products.base_price.percentiles': {
+                percentiles: {
+                  field: 'products.base_price',
+                  percents: [1, 5, 25, 50, 75, 95, 99],
+                },
+              },
+            },
+          },
+          pivotPreview: {
+            column: 0,
+            values: ['AE', 'CO', 'EG', 'FR', 'GB'],
+          },
+          row: {
+            status: 'stopped',
+            mode: 'batch',
+            progress: '100',
+          },
+          sourcePreview: {
+            columns: 20,
             rows: 5,
           },
         },

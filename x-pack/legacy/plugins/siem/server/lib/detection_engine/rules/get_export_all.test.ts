@@ -76,6 +76,7 @@ describe('getExportAll', () => {
             ],
           },
         ],
+        throttle: 'no_actions',
         note: '# Investigative notes',
         version: 1,
         lists: [

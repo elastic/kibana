@@ -70,7 +70,7 @@ export const Expressions: React.FC<Props> = props => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSource({ sourceId: 'default' });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<TimeUnit>('s');
+  const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
 
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
@@ -89,11 +89,11 @@ export const Expressions: React.FC<Props> = props => {
 
   const defaultExpression = useMemo<MetricExpression>(
     () => ({
-      aggType: AGGREGATION_TYPES.MAX,
+      aggType: AGGREGATION_TYPES.AVERAGE,
       comparator: '>',
       threshold: [],
       timeSize: 1,
-      timeUnit: 's',
+      timeUnit: 'm',
       indexPattern: source?.configuration.metricAlias,
     }),
     [source]

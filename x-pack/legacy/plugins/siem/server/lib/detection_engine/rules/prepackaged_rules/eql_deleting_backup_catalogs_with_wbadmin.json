@@ -4,9 +4,8 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Deleting Backup Catalogs with Wbadmin",
-  "query": "event.action:\"Process Create (rule: ProcessCreate)\"  and process.name:\"wbadmin.exe\" and  process.args:(\"delete\" and \"catalog\")",
+  "query": "event.action:\"Process Create (rule: ProcessCreate)\" and process.name:wbadmin.exe and process.args:(catalog and delete)",
   "risk_score": 21,
   "rule_id": "581add16-df76-42bb-af8e-c979bfb39a59",
   "severity": "low",

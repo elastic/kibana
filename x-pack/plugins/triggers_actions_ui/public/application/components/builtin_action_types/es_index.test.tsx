@@ -52,6 +52,26 @@ describe('index connector validation', () => {
   });
 });
 
+describe('index connector validation with minimal config', () => {
+  test('connector validation succeeds when connector config is valid', () => {
+    const actionConnector = {
+      secrets: {},
+      id: 'test',
+      actionTypeId: '.index',
+      name: 'es_index',
+      config: {
+        index: 'test_es_index',
+      },
+    } as EsIndexActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        index: [],
+      },
+    });
+  });
+});
+
 describe('action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {

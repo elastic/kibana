@@ -18,7 +18,7 @@ export default function({ getService, getPageObjects }) {
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
       } else if (!url.includes('discover')) {
         await appsMenu.clickLink('Discover');
       }

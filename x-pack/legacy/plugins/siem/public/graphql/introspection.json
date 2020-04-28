@@ -4696,6 +4696,14 @@
             "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "note",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -9214,22 +9222,6 @@
             "deprecationReason": null
           },
           {
-            "name": "alternativeNames",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "notAfter",
             "description": "",
             "args": [],
@@ -9246,7 +9238,7 @@
             "deprecationReason": null
           },
           {
-            "name": "commonNames",
+            "name": "subjects",
             "description": "",
             "args": [],
             "type": {
@@ -9278,7 +9270,7 @@
             "deprecationReason": null
           },
           {
-            "name": "issuerNames",
+            "name": "issuers",
             "description": "",
             "args": [],
             "type": {

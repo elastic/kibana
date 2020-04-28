@@ -45,14 +45,21 @@ export async function getSAMLResponse({
   inResponseTo,
   sessionIndex,
   username = 'a@b.c',
-}: { destination?: string; inResponseTo?: string; sessionIndex?: string; username?: string } = {}) {
+  issuer = 'http://www.elastic.co/saml1',
+}: {
+  destination?: string;
+  inResponseTo?: string;
+  sessionIndex?: string;
+  username?: string;
+  issuer?: string;
+} = {}) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
   const samlAssertionTemplateXML = `
     <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0"
                     ID="_RPs1WfOkul8lZ72DtJtes0BKyPgaCamg" IssueInstant="${issueInstant}">
-      <saml:Issuer>http://www.elastic.co</saml:Issuer>
+      <saml:Issuer>${issuer}</saml:Issuer>
       <saml:Subject>
         <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">a@b.c</saml:NameID>
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
@@ -99,7 +106,7 @@ export async function getSAMLResponse({
                   ${inResponseTo ? `InResponseTo="${inResponseTo}"` : ''} Version="2.0"
                   IssueInstant="${issueInstant}"
                   Destination="${destination}">
-      <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">http://www.elastic.co</saml:Issuer>
+      <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">${issuer}</saml:Issuer>
       <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
       </samlp:Status>${signature.getSignedXml()}
@@ -111,9 +118,11 @@ export async function getSAMLResponse({
 export async function getLogoutRequest({
   destination,
   sessionIndex,
+  issuer = 'http://www.elastic.co/saml1',
 }: {
   destination: string;
   sessionIndex: string;
+  issuer?: string;
 }) {
   const issueInstant = new Date().toISOString();
   const logoutRequestTemplateXML = `
@@ -121,7 +130,7 @@ export async function getLogoutRequest({
                          Destination="${destination}"
                          Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified"
                          xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
-      <Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion">http://www.elastic.co</Issuer>
+      <Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion">${issuer}</Issuer>
       <NameID xmlns="urn:oasis:names:tc:SAML:2.0:assertion"
               Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">a@b.c</NameID>
       <samlp:SessionIndex>${sessionIndex}</samlp:SessionIndex>

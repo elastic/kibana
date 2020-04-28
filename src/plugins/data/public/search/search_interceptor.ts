@@ -17,51 +17,59 @@
  * under the License.
  */
 
-import { BehaviorSubject, fromEvent, throwError } from 'rxjs';
-import { mergeMap, takeUntil, finalize } from 'rxjs/operators';
+import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent } from 'rxjs';
+import { takeUntil, finalize, filter, mergeMapTo } from 'rxjs/operators';
+import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
 import { ISearchGeneric, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
+import { getLongQueryNotification } from './long_query_notification';
 
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
    */
-  private abortController = new AbortController();
+  protected abortController = new AbortController();
+
+  /**
+   * The number of pending search requests.
+   */
+  private pendingCount = 0;
 
   /**
    * Observable that emits when the number of pending requests changes.
    */
-  private pendingCount$ = new BehaviorSubject(0);
+  private pendingCount$ = new BehaviorSubject(this.pendingCount);
 
   /**
-   * The IDs from `setTimeout` when scheduling the automatic timeout for each request.
+   * The subscriptions from scheduling the automatic timeout for each request.
    */
-  private timeoutIds: Set<number> = new Set();
+  protected timeoutSubscriptions: Set<Subscription> = new Set();
+
+  /**
+   * The current long-running toast (if there is one).
+   */
+  protected longRunningToast?: Toast;
 
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
+   * @param toasts The `core.notifications.toasts` service
+   * @param application  The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
    */
-  constructor(private readonly requestTimeout?: number) {}
-
-  /**
-   * Abort our `AbortController`, which in turn aborts any intercepted searches.
-   */
-  public cancelPending = () => {
-    this.abortController.abort();
-    this.abortController = new AbortController();
-  };
-
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.timeoutIds.forEach(clearTimeout);
-    this.timeoutIds.clear();
-  };
+  constructor(
+    protected readonly toasts: ToastsStart,
+    protected readonly application: ApplicationStart,
+    protected readonly requestTimeout?: number
+  ) {
+    // When search requests go out, a notification is scheduled allowing users to continue the
+    // request past the timeout. When all search requests complete, we remove the notification.
+    this.getPendingCount$()
+      .pipe(filter(count => count === 0))
+      .subscribe(this.hideToast);
+  }
 
   /**
    * Returns an `Observable` over the current number of pending searches. This could mean that one
@@ -81,41 +89,66 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options?: ISearchOptions
   ) => {
-    // Schedule this request to automatically timeout after some interval
-    const timeoutController = new AbortController();
-    const { signal: timeoutSignal } = timeoutController;
-    const timeoutId = window.setTimeout(() => {
-      timeoutController.abort();
-    }, this.requestTimeout);
-    this.addTimeoutId(timeoutId);
+    // Defer the following logic until `subscribe` is actually called
+    return defer(() => {
+      this.pendingCount$.next(++this.pendingCount);
 
-    // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
-    // 1. The user manually aborts (via `cancelPending`)
-    // 2. The request times out
-    // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
-    const signals = [this.abortController.signal, timeoutSignal, options?.signal].filter(
-      Boolean
-    ) as AbortSignal[];
-    const combinedSignal = getCombinedSignal(signals);
+      // Schedule this request to automatically timeout after some interval
+      const timeoutController = new AbortController();
+      const { signal: timeoutSignal } = timeoutController;
+      const timeout$ = timer(this.requestTimeout);
+      const subscription = timeout$.subscribe(() => timeoutController.abort());
+      this.timeoutSubscriptions.add(subscription);
 
-    // If the request timed out, throw a `RequestTimeoutError`
-    const timeoutError$ = fromEvent(timeoutSignal, 'abort').pipe(
-      mergeMap(() => throwError(new RequestTimeoutError()))
-    );
+      // If the request timed out, throw a `RequestTimeoutError`
+      const timeoutError$ = fromEvent(timeoutSignal, 'abort').pipe(
+        mergeMapTo(throwError(new RequestTimeoutError()))
+      );
 
-    return search(request as any, { ...options, signal: combinedSignal }).pipe(
-      takeUntil(timeoutError$),
-      finalize(() => this.removeTimeoutId(timeoutId))
+      // Schedule the notification to allow users to cancel or wait beyond the timeout
+      const notificationSubscription = timer(10000).subscribe(this.showToast);
+
+      // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
+      // 1. The user manually aborts (via `cancelPending`)
+      // 2. The request times out
+      // 3. The passed-in signal aborts (e.g. when re-fetching, or whenever the app determines)
+      const signals = [
+        this.abortController.signal,
+        timeoutSignal,
+        ...(options?.signal ? [options.signal] : []),
+      ];
+      const combinedSignal = getCombinedSignal(signals);
+
+      return search(request as any, { ...options, signal: combinedSignal }).pipe(
+        takeUntil(timeoutError$),
+        finalize(() => {
+          this.pendingCount$.next(--this.pendingCount);
+          this.timeoutSubscriptions.delete(subscription);
+          notificationSubscription.unsubscribe();
+        })
+      );
+    });
+  };
+
+  protected showToast = () => {
+    if (this.longRunningToast) return;
+    this.longRunningToast = this.toasts.addInfo(
+      {
+        title: 'Your query is taking awhile',
+        text: getLongQueryNotification({
+          application: this.application,
+        }),
+      },
+      {
+        toastLifeTimeMs: 1000000,
+      }
     );
   };
 
-  private addTimeoutId(id: number) {
-    this.timeoutIds.add(id);
-    this.pendingCount$.next(this.timeoutIds.size);
-  }
-
-  private removeTimeoutId(id: number) {
-    this.timeoutIds.delete(id);
-    this.pendingCount$.next(this.timeoutIds.size);
-  }
+  protected hideToast = () => {
+    if (this.longRunningToast) {
+      this.toasts.remove(this.longRunningToast);
+      delete this.longRunningToast;
+    }
+  };
 }

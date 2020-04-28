@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 export const ColorStopsOrdinal = ({
   colorStops = [{ stop: 0, color: DEFAULT_CUSTOM_COLOR }],
   onChange,
+  swatches,
 }) => {
   const getStopError = (stop, index) => {
     let error;
@@ -69,6 +70,7 @@ export const ColorStopsOrdinal = ({
       renderStopInput={renderStopInput}
       canDeleteStop={canDeleteStop}
       addNewRow={addOrdinalRow}
+      swatches={swatches}
     />
   );
 };

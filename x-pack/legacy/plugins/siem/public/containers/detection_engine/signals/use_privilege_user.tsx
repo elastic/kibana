@@ -15,7 +15,6 @@ export interface ReturnPrivilegeUser {
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
-  hasManageApiKey: boolean | null;
   hasIndexWrite: boolean | null;
 }
 /**
@@ -27,17 +26,12 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [privilegeUser, setPrivilegeUser] = useState<
     Pick<
       ReturnPrivilegeUser,
-      | 'isAuthenticated'
-      | 'hasEncryptionKey'
-      | 'hasIndexManage'
-      | 'hasManageApiKey'
-      | 'hasIndexWrite'
+      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
     >
   >({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,
-    hasManageApiKey: null,
     hasIndexWrite: null,
   });
   const [, dispatchToaster] = useStateToaster();
@@ -65,10 +59,6 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
                 privilege.index[indexName].create_doc ||
                 privilege.index[indexName].index ||
                 privilege.index[indexName].write,
-              hasManageApiKey:
-                privilege.cluster.manage_security ||
-                privilege.cluster.manage_api_key ||
-                privilege.cluster.manage_own_api_key,
             });
           }
         }
@@ -78,7 +68,6 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             isAuthenticated: false,
             hasEncryptionKey: false,
             hasIndexManage: false,
-            hasManageApiKey: false,
             hasIndexWrite: false,
           });
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });

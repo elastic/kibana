@@ -7,9 +7,8 @@
     "auditbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Netcat Network Activity",
-  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action: (connected-to or bound-socket or socket_opened)",
+  "query": "process.name:(nc or ncat or netcat or netcat.openbsd or netcat.traditional) and event.action:(bound-socket or connected-to or socket_opened)",
   "references": [
     "http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet",
     "https://www.sans.org/security-resources/sec560/netcat_cheat_sheet_v1.pdf",

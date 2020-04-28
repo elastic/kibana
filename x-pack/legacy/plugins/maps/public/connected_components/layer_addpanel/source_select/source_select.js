@@ -5,30 +5,33 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALL_SOURCES } from '../../../layers/sources/all_sources';
+import { getLayerWizards } from '../../../layers/layer_wizard_registry';
 import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
-  const sourceCards = ALL_SOURCES.map(Source => {
-    const icon = Source.icon ? <EuiIcon type={Source.icon} size="l" /> : null;
+  const sourceCards = getLayerWizards().map(layerWizard => {
+    const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : null;
 
-    const sourceTitle = Source.title;
+    const onClick = () => {
+      updateSourceSelection({
+        layerWizard: layerWizard,
+        isIndexingSource: !!layerWizard.isIndexingSource,
+      });
+    };
 
     return (
-      <Fragment key={Source.type}>
+      <Fragment key={layerWizard.title}>
         <EuiSpacer size="s" />
         <EuiCard
           className="mapLayerAddpanel__card"
-          title={sourceTitle}
+          title={layerWizard.title}
           icon={icon}
-          onClick={() =>
-            updateSourceSelection({ type: Source.type, isIndexingSource: Source.isIndexingSource })
-          }
-          description={Source.description}
+          onClick={onClick}
+          description={layerWizard.description}
           layout="horizontal"
-          data-test-subj={_.camelCase(Source.title)}
+          data-test-subj={_.camelCase(layerWizard.title)}
         />
       </Fragment>
     );

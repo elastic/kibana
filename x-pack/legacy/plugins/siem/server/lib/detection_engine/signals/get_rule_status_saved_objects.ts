@@ -5,24 +5,21 @@
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { AlertServices } from '../../../../../../../plugins/alerting/server';
-import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { IRuleStatusAttributes } from '../rules/types';
+import { MAX_RULE_STATUSES } from './rule_status_service';
+import { RuleStatusSavedObjectsClient } from './rule_status_saved_objects_client';
 
 interface GetRuleStatusSavedObject {
   alertId: string;
-  services: AlertServices;
+  ruleStatusClient: RuleStatusSavedObjectsClient;
 }
 
 export const getRuleStatusSavedObjects = async ({
   alertId,
-  services,
-}: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<
-  IRuleSavedAttributesSavedObjectAttributes
->> => {
-  return services.savedObjectsClient.find<IRuleSavedAttributesSavedObjectAttributes>({
-    type: ruleStatusSavedObjectType,
-    perPage: 6, // 0th element is current status, 1-5 is last 5 failures.
+  ruleStatusClient,
+}: GetRuleStatusSavedObject): Promise<SavedObjectsFindResponse<IRuleStatusAttributes>> => {
+  return ruleStatusClient.find({
+    perPage: MAX_RULE_STATUSES,
     sortField: 'statusDate',
     sortOrder: 'desc',
     search: `${alertId}`,

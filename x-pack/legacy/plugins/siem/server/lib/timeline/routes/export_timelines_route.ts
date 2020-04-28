@@ -21,7 +21,7 @@ import {
   exportTimelinesQuerySchema,
 } from './schemas/export_timelines_schema';
 
-import { getExportTimelineByObjectIds } from './utils';
+import { getExportTimelineByObjectIds } from './utils/export_timelines';
 
 export const exportTimelinesRoute = (router: IRouter, config: LegacyServices['config']) => {
   router.post(

@@ -64,3 +64,10 @@ export const UP = i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel'
 export const DOWN = i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
   defaultMessage: 'Down',
 });
+
+export const RESPONSE_ANOMALY_SCORE = i18n.translate(
+  'xpack.uptime.monitorList.anomalyColumn.label',
+  {
+    defaultMessage: 'Response Anomaly Score',
+  }
+);

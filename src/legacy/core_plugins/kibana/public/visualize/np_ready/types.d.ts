@@ -27,10 +27,11 @@ import {
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 import { LegacyCoreStart } from 'kibana/public';
-import { Vis } from 'src/legacy/core_plugins/visualizations/public';
 import { VisSavedObject } from '../legacy_imports';
+import { SavedVisState } from '../../../../../../plugins/visualizations/public';
+import { SavedSearch } from '../../../../../../plugins/discover/public';
 
-export type PureVisState = ReturnType<Vis['getCurrentState']>;
+export type PureVisState = SavedVisState;
 
 export interface VisualizeAppState {
   filters: Filter[];
@@ -58,14 +59,13 @@ export interface VisualizeAppStateTransitions {
 }
 
 export interface EditorRenderProps {
-  appState: { save(): void };
   core: LegacyCoreStart;
   data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
   filters: Filter[];
-  uiState: PersistedState;
   timeRange: TimeRange;
   query?: Query;
+  savedSearch?: SavedSearch;
+  uiState: PersistedState;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */

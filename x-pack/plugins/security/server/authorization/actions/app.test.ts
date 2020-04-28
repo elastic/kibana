@@ -8,13 +8,6 @@ import { AppActions } from './app';
 
 const version = '1.0.0-zeta1';
 
-describe('#all', () => {
-  test('returns `app:${version}:*`', () => {
-    const appActions = new AppActions(version);
-    expect(appActions.all).toBe('app:1.0.0-zeta1:*');
-  });
-});
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((appid: any) => {
     test(`appId of ${JSON.stringify(appid)} throws error`, () => {

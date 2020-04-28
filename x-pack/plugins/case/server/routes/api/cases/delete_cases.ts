@@ -5,10 +5,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 
-export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
+export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
       path: '/api/cases',
@@ -20,10 +22,11 @@ export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         await Promise.all(
           request.query.ids.map(id =>
             caseService.deleteCase({
-              client: context.core.savedObjects.client,
+              client,
               caseId: id,
             })
           )
@@ -31,7 +34,7 @@ export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
         const comments = await Promise.all(
           request.query.ids.map(id =>
             caseService.getAllCaseComments({
-              client: context.core.savedObjects.client,
+              client,
               caseId: id,
             })
           )
@@ -43,7 +46,7 @@ export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
               Promise.all(
                 c.saved_objects.map(({ id }) =>
                   caseService.deleteComment({
-                    client: context.core.savedObjects.client,
+                    client,
                     commentId: id,
                   })
                 )
@@ -51,7 +54,23 @@ export function initDeleteCasesApi({ caseService, router }: RouteDeps) {
             )
           );
         }
-        return response.ok({ body: 'true' });
+        const { username, full_name, email } = await caseService.getUser({ request, response });
+        const deleteDate = new Date().toISOString();
+
+        await userActionService.postUserActions({
+          client,
+          actions: request.query.ids.map(id =>
+            buildCaseUserActionItem({
+              action: 'create',
+              actionAt: deleteDate,
+              actionBy: { username, full_name, email },
+              caseId: id,
+              fields: ['comment', 'description', 'status', 'tags', 'title'],
+            })
+          ),
+        });
+
+        return response.noContent();
       } catch (error) {
         return response.customError(wrapError(error));
       }

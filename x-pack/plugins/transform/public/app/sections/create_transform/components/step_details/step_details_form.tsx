@@ -10,9 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSwitch, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
+import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
+
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { TransformId } from '../../../../../../common';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
+
+import { getErrorMessage } from '../../../../../shared_imports';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
@@ -114,7 +118,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -125,7 +131,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
             title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
 
@@ -139,7 +147,9 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 defaultMessage: 'An error occurred getting the existing index pattern titles:',
               }
             ),
-            text: toMountPoint(<ToastNotificationText text={e} />),
+            text: toMountPoint(
+              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+            ),
           });
         }
       })();
@@ -148,7 +158,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
     }, []);
 
     const dateFieldNames = searchItems.indexPattern.fields
-      .filter(f => f.type === 'date')
+      .filter(f => f.type === KBN_FIELD_TYPES.DATE)
       .map(f => f.name)
       .sort();
     const isContinuousModeAvailable = dateFieldNames.length > 0;

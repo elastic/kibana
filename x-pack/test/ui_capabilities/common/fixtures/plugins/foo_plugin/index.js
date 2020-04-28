@@ -28,6 +28,8 @@ export default function(kibana) {
         catalogue: ['foo'],
         privileges: {
           all: {
+            app: ['kibana'],
+            catalogue: ['foo'],
             savedObject: {
               all: ['foo'],
               read: ['index-pattern'],
@@ -35,6 +37,8 @@ export default function(kibana) {
             ui: ['create', 'edit', 'delete', 'show'],
           },
           read: {
+            app: ['kibana'],
+            catalogue: ['foo'],
             savedObject: {
               all: [],
               read: ['foo', 'index-pattern'],

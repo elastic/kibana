@@ -47,6 +47,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaSavedObjects() {
       await testSubjects.click('objects');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickKibanaIndexPatterns() {
@@ -318,20 +319,22 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async createIndexPattern(
       indexPatternName: string,
       timefield = '@timestamp',
-      isStandardIndexPattern = true
+      isStandardIndexPattern = true,
+      expectWildcard = true
     ) {
+      log.debug(`createIndexPattern expectWildcard = ${expectWildcard}`);
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickOptionalAddNewButton();
+        await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
           await this.clickCreateNewRollupButton();
         }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField({ indexPatternName });
+          await this.setIndexPatternField({ indexPatternName, expectWildcard });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -355,11 +358,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await this.getIndexPatternIdFromUrl();
     }
 
-    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
-    async clickOptionalAddNewButton() {
-      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
-        await testSubjects.click('createIndexPatternButton');
-      }
+    async clickAddNewIndexPatternButton() {
+      await testSubjects.click('createIndexPatternButton');
     }
 
     async clickCreateNewRollupButton() {
@@ -376,7 +376,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
-      log.debug(`setIndexPatternField(${indexPatternName})`);
+      log.debug(`setIndexPatternField(${indexPatternName}) with expectWilcard = ${expectWildcard}`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName, { charByChar: true });
@@ -648,6 +648,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
 
     async clickConfirmChanges() {
@@ -681,9 +682,38 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       });
     }
 
+    async getSavedObjectElementsInTable() {
+      const rows = await testSubjects.findAll('~savedObjectsTableRow');
+      return mapAsync(rows, async row => {
+        const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
+        // return the object type aria-label="index patterns"
+        const objectType = await row.findByTestSubject('objectType');
+        const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
+        // not all rows have inspect button - Advanced Settings objects don't
+        let inspectElement;
+        const innerHtml = await row.getAttribute('innerHTML');
+        if (innerHtml.includes('Inspect')) {
+          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
+        } else {
+          inspectElement = null;
+        }
+        const relationshipsElement = await row.findByTestSubject(
+          'savedObjectsTableAction-relationships'
+        );
+        return {
+          checkbox,
+          objectType: await objectType.getAttribute('aria-label'),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
+          relationshipsElement,
+        };
+      });
+    }
+
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAllByCssSelector('td:nth-child(3)');
+      const cells = await table.findAllByTestSubject('savedObjectsTableRowTitle');
 
       const objects = [];
       for (const cell of cells) {
@@ -691,6 +721,23 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       }
 
       return objects;
+    }
+
+    async getRelationshipFlyout() {
+      const rows = await testSubjects.findAll('relationshipsTableRow');
+      return mapAsync(rows, async row => {
+        const objectType = await row.findByTestSubject('relationshipsObjectType');
+        const relationship = await row.findByTestSubject('directRelationship');
+        const titleElement = await row.findByTestSubject('relationshipsTitle');
+        const inspectElement = await row.findByTestSubject('relationshipsTableAction-inspect');
+        return {
+          objectType: await objectType.getAttribute('aria-label'),
+          relationship: await relationship.getVisibleText(),
+          titleElement,
+          title: await titleElement.getVisibleText(),
+          inspectElement,
+        };
+      });
     }
 
     async getSavedObjectsTableSummary() {
@@ -723,17 +770,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await deleteButton.isEnabled();
     }
 
-    async canSavedObjectBeDeleted(id: string) {
-      const allCheckBoxes = await testSubjects.findAll('checkboxSelectRow*');
-      for (const checkBox of allCheckBoxes) {
-        if (await checkBox.isSelected()) {
-          await checkBox.click();
-        }
-      }
-
-      const checkBox = await testSubjects.find(`checkboxSelectRow-${id}`);
-      await checkBox.click();
-      return await this.canSavedObjectsBeDeleted();
+    async clickSavedObjectsDelete() {
+      await testSubjects.click('savedObjectsManagementDelete');
+      await testSubjects.click('confirmModalConfirmButton');
+      await this.waitUntilSavedObjectsTableIsNotLoading();
     }
   }
 

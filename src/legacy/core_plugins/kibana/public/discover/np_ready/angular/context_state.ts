@@ -109,7 +109,7 @@ interface GetStateReturn {
   /**
    * sync state to URL, used for testing
    */
-  flushToUrl: () => void;
+  flushToUrl: (replace?: boolean) => void;
 }
 const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
@@ -205,7 +205,7 @@ export function getState({
       }
     },
     // helper function just needed for testing
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: (replace?: boolean) => stateStorage.flush({ replace }),
   };
 }
 

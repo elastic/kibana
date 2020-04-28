@@ -5,8 +5,8 @@
  */
 import React from 'react';
 import Mustache from 'mustache';
+import { CustomLink } from '../../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
-import { CustomLink } from '../../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
 import {
   SectionLinks,
   SectionLink

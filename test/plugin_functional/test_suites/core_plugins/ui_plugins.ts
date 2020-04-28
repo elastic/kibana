@@ -25,6 +25,7 @@ import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
+  const supertest = getService('supertest');
 
   describe('ui plugins', function() {
     describe('loading', function describeIndexTests() {
@@ -95,6 +96,48 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
             window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? false"');
+      });
+    });
+
+    describe('Plugin static assets', function() {
+      it('exposes static assets from "public/assets" folder', async () => {
+        await supertest.get('/plugins/corePluginStaticAssets/assets/chart.svg').expect(200);
+      });
+
+      it('returns 404 if not found', async function() {
+        await supertest.get('/plugins/corePluginStaticAssets/assets/not-a-chart.svg').expect(404);
+      });
+
+      it('does not expose folder content', async function() {
+        await supertest.get('/plugins/corePluginStaticAssets/assets/').expect(403);
+      });
+
+      it('does not allow file tree traversing', async function() {
+        await supertest.get('/plugins/corePluginStaticAssets/assets/../../kibana.json').expect(404);
+      });
+
+      it('generates "etag" & "last-modified" headers', async () => {
+        const response = await supertest
+          .get('/plugins/corePluginStaticAssets/assets/chart.svg')
+          .expect(200);
+
+        expect(response.header).to.have.property('etag');
+        expect(response.header).to.have.property('last-modified');
+      });
+
+      it('generates the same "etag" & "last-modified" for the same asset', async () => {
+        const firstResponse = await supertest
+          .get('/plugins/corePluginStaticAssets/assets/chart.svg')
+          .expect(200);
+
+        expect(firstResponse.header).to.have.property('etag');
+
+        const secondResponse = await supertest
+          .get('/plugins/corePluginStaticAssets/assets/chart.svg')
+          .expect(200);
+
+        expect(secondResponse.header.etag).to.be(firstResponse.header.etag);
+        expect(secondResponse.header['last-modified']).to.be(firstResponse.header['last-modified']);
       });
     });
   });

@@ -50,6 +50,7 @@ Unix/Linux based distributions. This module is not available on Windows. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-system.html',
       },
     }),
+    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/system.svg',
     artifacts: {
       dashboards: [
         {

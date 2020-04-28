@@ -5,18 +5,24 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { FeatureCollection } from 'geojson';
 import { AbstractSource, ISource } from './source';
 import { IField } from '../fields/field';
-import { ESSearchSourceResponseMeta } from '../../../common/data_request_descriptor_types';
+import {
+  ESSearchSourceResponseMeta,
+  MapExtent,
+  VectorSourceRequestMeta,
+} from '../../../common/descriptor_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
 export type GeoJsonWithMeta = {
-  data: unknown; // geojson feature collection
+  data: FeatureCollection;
   meta?: GeoJsonFetchMeta;
 };
 
 export interface IVectorSource extends ISource {
+  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -28,6 +34,7 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
+  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],

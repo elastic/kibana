@@ -17,6 +17,7 @@ import React, {
 import { SERVICE_NAME } from '../../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
 import { Contents } from './Contents';
+import { animationOptions } from '../cytoscapeOptions';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -88,7 +89,10 @@ export function Popover({ focusedServiceName }: PopoverProps) {
 
   const centerSelectedNode = useCallback(() => {
     if (cy) {
-      cy.center(cy.getElementById(selectedNodeServiceName));
+      cy.animate({
+        ...animationOptions,
+        center: { eles: cy.getElementById(selectedNodeServiceName) }
+      });
     }
   }, [cy, selectedNodeServiceName]);
 

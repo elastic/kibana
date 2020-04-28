@@ -230,7 +230,9 @@ export class DetailPanel extends Component {
 
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailSeeds">
               {seeds.map(seed => (
-                <EuiText key={seed}>{seed}</EuiText>
+                <EuiText size="s" key={seed}>
+                  {seed}
+                </EuiText>
               ))}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
@@ -296,6 +298,7 @@ export class DetailPanel extends Component {
     proxySocketConnections,
     connectedSocketsCount,
     mode,
+    serverName,
   }) {
     return (
       <EuiDescriptionList data-test-subj="remoteClusterDetailPanelStatusValues">
@@ -395,6 +398,25 @@ export class DetailPanel extends Component {
 
             <EuiDescriptionListDescription data-test-subj="remoteClusterDetailInitialConnectTimeout">
               {initialConnectTimeout}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.serverNameLabel"
+                  defaultMessage="Server name"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription data-test-subj="remoteClusterDetailServerName">
+              {serverName ? serverName : '-'}
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         </EuiFlexGroup>

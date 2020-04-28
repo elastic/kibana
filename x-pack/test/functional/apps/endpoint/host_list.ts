@@ -8,15 +8,17 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'endpoint']);
+  const pageObjects = getPageObjects(['common', 'endpoint', 'header']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
   describe('host list', function() {
     this.tags('ciGroup7');
+    const sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms));
     before(async () => {
       await esArchiver.load('endpoint/metadata/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('finds title', async () => {
@@ -37,32 +39,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           'Last Active',
         ],
         [
-          'Host-cxz5glsoup',
-          'Policy Name',
-          'Policy Status',
-          '0',
-          'windows 6.2',
-          '10.48.181.222, 10.116.62.62, 10.102.83.30',
-          'version',
-          'xxxx',
-        ],
-        [
-          'Host-frl2otafoa',
+          'cadmann-4.example.com',
           'Policy Name',
           'Policy Status',
           '0',
           'windows 10.0',
-          '10.198.70.21, 10.252.10.66, 10.128.235.38',
+          '10.192.213.130, 10.70.28.129',
           'version',
           'xxxx',
         ],
         [
-          'Host-abmfhmc5ku',
+          'thurlow-9.example.com',
           'Policy Name',
           'Policy Status',
           '0',
-          'windows 6.2',
-          '10.100.170.247, 10.113.203.29, 10.83.81.146',
+          'windows 10.0',
+          '10.46.229.234',
+          'version',
+          'xxxx',
+        ],
+        [
+          'rezzani-7.example.com',
+          'Policy Name',
+          'Policy Status',
+          '0',
+          'windows 10.0',
+          '10.101.149.26, 2606:a000:ffc0:39:11ef:37b9:3371:578c',
           'version',
           'xxxx',
         ],
@@ -71,21 +73,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(tableData).to.eql(expectedData);
     });
 
+    it('no details flyout when host page displayed', async () => {
+      await testSubjects.missingOrFail('hostDetailsFlyout');
+    });
+
     it('display details flyout when the hostname is clicked on', async () => {
       await (await testSubjects.find('hostnameCellLink')).click();
       await testSubjects.existOrFail('hostDetailsUpperList');
       await testSubjects.existOrFail('hostDetailsLowerList');
     });
 
-    it('displays no items found when empty', async () => {
-      // clear out the data and reload the page
-      await esArchiver.unload('endpoint/metadata/api_feature');
-      await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
-      // get the table data and verify no entries appear
-      const tableData = await pageObjects.endpoint.getEndpointAppTableData('hostListTable');
-      expect(tableData[1][0]).to.equal('No items found');
-      // reload the data so the other tests continue to pass
-      await esArchiver.load('endpoint/metadata/api_feature');
+    it('update details flyout when new hostname is clicked on', async () => {
+      // display flyout for the first host in the list
+      await (await testSubjects.findAll('hostnameCellLink'))[0].click();
+      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+      const hostDetailTitle0 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+      // select the 2nd host in the host list
+      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+      await pageObjects.endpoint.waitForVisibleTextToChange(
+        'hostDetailsFlyoutTitle',
+        hostDetailTitle0
+      );
+      const hostDetailTitle1 = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+      expect(hostDetailTitle1).to.not.eql(hostDetailTitle0);
+    });
+
+    it('details flyout remains the same when current hostname is clicked on', async () => {
+      // display flyout for the first host in the list
+      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+      await testSubjects.existOrFail('hostDetailsFlyoutTitle');
+      const hostDetailTitleInitial = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+      // select the same host in the host list
+      await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+      await sleep(500); // give page time to refresh and verify it did not change
+      const hostDetailTitleNew = await testSubjects.getVisibleText('hostDetailsFlyoutTitle');
+      expect(hostDetailTitleNew).to.eql(hostDetailTitleInitial);
+    });
+
+    describe('no data', () => {
+      before(async () => {
+        // clear out the data and reload the page
+        await esArchiver.unload('endpoint/metadata/api_feature');
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/hosts');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+      after(async () => {
+        // reload the data so the other tests continue to pass
+        await esArchiver.load('endpoint/metadata/api_feature');
+      });
+      it('displays no items found when empty', async () => {
+        // get the host list table data and verify message
+        const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
+          'hostListTable'
+        );
+        expect(noItemsFoundMessage).to.equal('No items found');
+      });
     });
 
     describe('has a url with a host id', () => {
@@ -93,8 +135,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToUrlWithBrowserHistory(
           'endpoint',
           '/hosts',
-          'selected_host=cbe80003-6964-4e0f-aba1-f94c32b44e95'
+          'selected_host=fc0ff548-feba-41b6-8367-65e8790d0eaf'
         );
+        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('shows a flyout', async () => {
@@ -120,14 +163,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const values = await pageObjects.endpoint.hostFlyoutDescriptionValues('hostDetailsFlyout');
 
         expect(values).to.eql([
-          'Windows Server 2012',
+          'Windows 10',
           '',
           '0',
-          'C2A9093E-E289-4C0A-AA44-8C32A414FA7A',
+          '00000000-0000-0000-0000-000000000000',
           'active',
-          '10.48.181.22210.116.62.6210.102.83.30',
-          'Host-cxz5glsoup',
-          '6.6.9',
+          '10.101.149.262606:a000:ffc0:39:11ef:37b9:3371:578c',
+          'rezzani-7.example.com',
+          '6.8.0',
         ]);
       });
     });

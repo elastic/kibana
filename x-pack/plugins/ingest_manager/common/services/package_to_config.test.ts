@@ -298,6 +298,31 @@ describe('Ingest Manager - packageToConfig', () => {
         },
       });
     });
+    it('returns datasource with namespace and description', () => {
+      expect(
+        packageToConfigDatasource(
+          mockPackage,
+          '1',
+          '2',
+          'ds-1',
+          'mock-namespace',
+          'Test description'
+        )
+      ).toEqual({
+        config_id: '1',
+        enabled: true,
+        inputs: [],
+        name: 'ds-1',
+        namespace: 'mock-namespace',
+        description: 'Test description',
+        output_id: '2',
+        package: {
+          name: 'mock-package',
+          title: 'Mock package',
+          version: '0.0.0',
+        },
+      });
+    });
     it('returns datasource with inputs', () => {
       const mockPackageWithDatasources = ({
         ...mockPackage,

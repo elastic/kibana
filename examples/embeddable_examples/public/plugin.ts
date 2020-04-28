@@ -28,11 +28,11 @@ import {
 } from './searchable_list_container';
 import { LIST_CONTAINER, ListContainerFactory } from './list_container';
 
-interface EmbeddableExamplesSetupDependencies {
+export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
 }
 
-interface EmbeddableExamplesStartDependencies {
+export interface EmbeddableExamplesStartDependencies {
   embeddable: EmbeddableStart;
 }
 
@@ -53,20 +53,17 @@ export class EmbeddableExamplesPlugin
       new MultiTaskTodoEmbeddableFactory()
     );
 
-    // These are registered in the start method because `getEmbeddableFactory `
-    // is only available in start. We could reconsider this I think and make it
-    // available in both.
     deps.embeddable.registerEmbeddableFactory(
       SEARCHABLE_LIST_CONTAINER,
       new SearchableListContainerFactory(async () => ({
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        embeddableServices: (await core.getStartServices())[1].embeddable,
       }))
     );
 
     deps.embeddable.registerEmbeddableFactory(
       LIST_CONTAINER,
       new ListContainerFactory(async () => ({
-        getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
+        embeddableServices: (await core.getStartServices())[1].embeddable,
       }))
     );
 

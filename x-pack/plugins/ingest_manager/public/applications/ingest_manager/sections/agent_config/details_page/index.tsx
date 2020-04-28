@@ -31,6 +31,7 @@ import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from './hooks/use_details_uri';
 import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 import { ConfigDatasourcesView } from './components/datasources';
+import { ConfigYamlView } from './components/yaml';
 
 const Divider = styled.div`
   width: 0;
@@ -282,8 +283,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}/yaml`}
               render={() => {
-                // TODO: YAML implementation tracked via https://github.com/elastic/kibana/issues/57958
-                return <div>YAML placeholder</div>;
+                return <ConfigYamlView config={agentConfig} />;
               }}
             />
             <Route

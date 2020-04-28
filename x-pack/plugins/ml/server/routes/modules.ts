@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
@@ -36,16 +36,17 @@ function getModule(context: RequestHandlerContext, moduleId: string) {
 function saveModuleItems(
   context: RequestHandlerContext,
   moduleId: string,
-  prefix: string,
-  groups: string[],
-  indexPatternName: string,
-  query: any,
-  useDedicatedIndex: boolean,
-  startDatafeed: boolean,
-  start: number,
-  end: number,
-  jobOverrides: JobOverride[],
-  datafeedOverrides: DatafeedOverride[]
+  prefix?: string,
+  groups?: string[],
+  indexPatternName?: string,
+  query?: any,
+  useDedicatedIndex?: boolean,
+  startDatafeed?: boolean,
+  start?: number,
+  end?: number,
+  jobOverrides?: JobOverride | JobOverride[],
+  datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
+  estimateModelMemory?: boolean
 ) {
   const dr = new DataRecognizer(
     context.ml!.mlClient.callAsCurrentUser,
@@ -62,7 +63,8 @@ function saveModuleItems(
     start,
     end,
     jobOverrides,
-    datafeedOverrides
+    datafeedOverrides,
+    estimateModelMemory
   );
 }
 
@@ -156,9 +158,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/setup/{moduleId}',
       validate: {
-        params: schema.object({
-          ...getModuleIdParamSchema(),
-        }),
+        params: schema.object(getModuleIdParamSchema()),
         body: setupModuleBodySchema,
       },
     },
@@ -177,7 +177,8 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           end,
           jobOverrides,
           datafeedOverrides,
-        } = request.body;
+          estimateModelMemory,
+        } = request.body as TypeOf<typeof setupModuleBodySchema>;
 
         const result = await saveModuleItems(
           context,
@@ -191,7 +192,8 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           start,
           end,
           jobOverrides,
-          datafeedOverrides
+          datafeedOverrides,
+          estimateModelMemory
         );
 
         return response.ok({ body: result });
@@ -214,9 +216,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/jobs_exist/{moduleId}',
       validate: {
-        params: schema.object({
-          ...getModuleIdParamSchema(),
-        }),
+        params: schema.object(getModuleIdParamSchema()),
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

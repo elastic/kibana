@@ -5,7 +5,7 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { AlertResultList, AlertData } from '../../../../../common/types';
+import { AlertResultList, AlertDetails } from '../../../../../common/types';
 import { AppAction } from '../action';
 import { MiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
@@ -40,7 +40,7 @@ export const alertMiddlewareFactory: MiddlewareFactory<AlertListState> = (coreSt
 
     if (action.type === 'userChangedUrl' && isOnAlertPage(state) && hasSelectedAlert(state)) {
       const uiParams = uiQueryParams(state);
-      const response: AlertData = await coreStart.http.get(
+      const response: AlertDetails = await coreStart.http.get(
         `/api/endpoint/alerts/${uiParams.selected_alert}`
       );
       api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });

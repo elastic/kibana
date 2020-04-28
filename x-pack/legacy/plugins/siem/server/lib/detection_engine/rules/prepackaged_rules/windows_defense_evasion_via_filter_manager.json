@@ -4,7 +4,6 @@
     "winlogbeat-*"
   ],
   "language": "kuery",
-  "max_signals": 100,
   "name": "Potential Evasion via Filter Manager",
   "query": "event.code:1 and process.name:fltMC.exe",
   "risk_score": 21,

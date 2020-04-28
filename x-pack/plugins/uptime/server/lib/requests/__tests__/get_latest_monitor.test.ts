@@ -31,49 +31,25 @@ describe('getLatestMonitor', () => {
             ],
           },
         },
-        aggs: {
-          by_id: {
-            terms: {
-              field: 'monitor.id',
-              size: 1000,
-            },
-            aggs: {
-              latest: {
-                top_hits: {
-                  size: 1,
-                  sort: {
-                    '@timestamp': { order: 'desc' },
-                  },
-                },
-              },
-            },
-          },
+        size: 1,
+        _source: ['url', 'monitor', 'observer', 'tls', '@timestamp'],
+        sort: {
+          '@timestamp': { order: 'desc' },
         },
-        size: 0,
       },
     };
     mockEsSearchResult = {
-      aggregations: {
-        by_id: {
-          buckets: [
-            {
-              latest: {
-                hits: {
-                  hits: [
-                    {
-                      _source: {
-                        '@timestamp': 123456,
-                        monitor: {
-                          id: 'testMonitor',
-                        },
-                      },
-                    },
-                  ],
-                },
+      hits: {
+        hits: [
+          {
+            _source: {
+              timestamp: 123456,
+              monitor: {
+                id: 'testMonitor',
               },
             },
-          ],
-        },
+          },
+        ],
       },
     };
   });
@@ -87,6 +63,7 @@ describe('getLatestMonitor', () => {
       dateEnd: 'now',
       monitorId: 'testMonitor',
     });
+
     expect(result.timestamp).toBe(123456);
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');

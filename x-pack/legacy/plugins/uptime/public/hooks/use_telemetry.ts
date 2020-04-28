@@ -5,33 +5,31 @@
  */
 
 import { useEffect } from 'react';
-import { HttpHandler } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useUrlParams } from './use_url_params';
+import { apiService } from '../state/api/utils';
+import { API_URLS } from '../../common/constants';
 
 export enum UptimePage {
-  Overview = '/api/uptime/logOverview',
-  Monitor = '/api/uptime/logMonitor',
+  Overview = 'Overview',
+  Monitor = 'Monitor',
+  Settings = 'Settings',
   NotFound = '__not-found__',
 }
 
-const getApiPath = (page?: UptimePage) => {
-  if (!page) throw new Error('Telemetry logging for this page not yet implemented');
-  if (page === '__not-found__')
-    throw new Error('Telemetry logging for 404 page not yet implemented');
-  return page.valueOf();
-};
-
-const logPageLoad = async (fetch: HttpHandler, page?: UptimePage) => {
-  await fetch(getApiPath(page), {
-    method: 'POST',
-  });
-};
-
 export const useUptimeTelemetry = (page?: UptimePage) => {
-  const kibana = useKibana();
-  const fetch = kibana.services.http?.fetch;
+  const [getUrlParams] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd, autorefreshInterval, autorefreshIsPaused } = getUrlParams();
+
   useEffect(() => {
-    if (!fetch) throw new Error('Core http services are not defined');
-    logPageLoad(fetch, page);
-  }, [fetch, page]);
+    if (!apiService.http) throw new Error('Core http services are not defined');
+
+    const params = {
+      page,
+      autorefreshInterval: autorefreshInterval / 1000, // divide by 1000 to keep it in secs
+      dateStart: dateRangeStart,
+      dateEnd: dateRangeEnd,
+      autoRefreshEnabled: !autorefreshIsPaused,
+    };
+    apiService.post(API_URLS.logPageView, params);
+  }, [autorefreshInterval, autorefreshIsPaused, dateRangeEnd, dateRangeStart, page]);
 };

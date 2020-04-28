@@ -5,7 +5,7 @@
  */
 
 export default function({ loadTestFile }) {
-  describe('monitoring app', function() {
+  describe('monitoring app - stack functional integration - index', function() {
     loadTestFile(require.resolve('./_monitoring'));
   });
 }

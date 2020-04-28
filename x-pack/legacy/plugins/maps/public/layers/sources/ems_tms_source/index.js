@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EMSTMSSource } from './ems_tms_source';
+export { EMSTMSSource, emsBaseMapLayerWizardConfig } from './ems_tms_source';

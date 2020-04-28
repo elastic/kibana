@@ -57,7 +57,7 @@ export function statusMixin(kbnServer, server, config) {
   // init routes
   registerStatusPage(kbnServer, server, config);
   registerStatusApi(kbnServer, server, config);
-  registerStatsApi(usageCollection, server, config);
+  registerStatsApi(usageCollection, server, config, kbnServer);
 
   // expore shared functionality
   server.decorate('server', 'getOSInfo', getOSInfo);

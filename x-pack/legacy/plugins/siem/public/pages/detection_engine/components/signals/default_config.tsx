@@ -23,7 +23,12 @@ import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { FILTER_OPEN } from './signals_filter_group';
 import { sendSignalToTimelineAction, updateSignalStatusAction } from './actions';
 import * as i18n from './translations';
-import { CreateTimeline, SetEventsDeletedProps, SetEventsLoadingProps } from './types';
+import {
+  CreateTimeline,
+  SetEventsDeletedProps,
+  SetEventsLoadingProps,
+  UpdateTimelineLoading,
+} from './types';
 
 export const signalsOpenFilters: Filter[] = [
   {
@@ -198,13 +203,13 @@ export const getSignalsActions = ({
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
   createTimeline: CreateTimeline;
   status: 'open' | 'closed';
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
+  updateTimelineIsLoading: UpdateTimelineLoading;
 }): TimelineAction[] => [
   {
     getAction: ({ ecsData }: TimelineActionProps): JSX.Element => (
       <EuiToolTip
         data-test-subj="send-signal-to-timeline-tool-tip"
-        content={i18n.ACTION_VIEW_IN_TIMELINE}
+        content={i18n.ACTION_INVESTIGATE_IN_TIMELINE}
       >
         <EuiButtonIcon
           data-test-subj="send-signal-to-timeline-button"

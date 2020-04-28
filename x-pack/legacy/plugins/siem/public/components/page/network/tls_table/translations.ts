@@ -16,7 +16,7 @@ export const TRANSPORT_LAYER_SECURITY = i18n.translate(
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.siem.network.ipDetails.tlsTable.unit', {
     values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {issuer} other {issuers}}`,
+    defaultMessage: `{totalCount, plural, =1 {server certificate} other {server certificates}}`,
   });
 
 // Columns

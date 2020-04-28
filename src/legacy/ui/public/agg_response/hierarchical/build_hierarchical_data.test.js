@@ -18,7 +18,58 @@
  */
 
 import { buildHierarchicalData } from './build_hierarchical_data';
-import { tableVisResponseHandler } from '../../../../core_plugins/vis_type_table/public/table_vis_response_handler';
+
+function tableVisResponseHandler(table, dimensions) {
+  const converted = {
+    tables: [],
+  };
+
+  const split = dimensions.splitColumn || dimensions.splitRow;
+
+  if (split) {
+    converted.direction = dimensions.splitRow ? 'row' : 'column';
+    const splitColumnIndex = split[0].accessor;
+    const splitColumn = table.columns[splitColumnIndex];
+    const splitMap = {};
+    let splitIndex = 0;
+
+    table.rows.forEach((row, rowIndex) => {
+      const splitValue = row[splitColumn.id];
+
+      if (!splitMap.hasOwnProperty(splitValue)) {
+        splitMap[splitValue] = splitIndex++;
+        const tableGroup = {
+          $parent: converted,
+          title: `splitValue: ${splitColumn.name}`,
+          name: splitColumn.name,
+          key: splitValue,
+          column: splitColumnIndex,
+          row: rowIndex,
+          table,
+          tables: [],
+        };
+
+        tableGroup.tables.push({
+          $parent: tableGroup,
+          columns: table.columns,
+          rows: [],
+        });
+
+        converted.tables.push(tableGroup);
+      }
+
+      const tableIndex = splitMap[splitValue];
+      converted.tables[tableIndex].tables[0].rows.push(row);
+    });
+  } else {
+    converted.tables.push({
+      columns: table.columns,
+      rows: table.rows,
+    });
+  }
+
+  return converted;
+}
 
 jest.mock('ui/new_platform');
 jest.mock('ui/chrome', () => ({

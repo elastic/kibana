@@ -47,6 +47,7 @@ module.exports = params => {
       case 'date':
       case 'string':
       case 'number':
+      case 'number|string':
         result[param] = defaultValue || '';
         break;
       case 'list':

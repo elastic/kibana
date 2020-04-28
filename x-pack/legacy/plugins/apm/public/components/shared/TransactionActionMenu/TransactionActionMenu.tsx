@@ -7,8 +7,7 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useMemo, useState } from 'react';
-import { FilterOptions } from '../../../../../../../plugins/apm/common/custom_link_filter_options';
-import { CustomLink as CustomLinkType } from '../../../../../../../plugins/apm/server/lib/settings/custom_link/custom_link_types';
+import { Filter } from '../../../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../../plugins/apm/typings/es_schemas/ui/transaction';
 import {
   ActionMenu,
@@ -29,6 +28,7 @@ import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
 import { useLicense } from '../../../hooks/useLicense';
 import { px } from '../../../style/variables';
+import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
   readonly transaction: Transaction;
@@ -58,20 +58,22 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
   );
   const [isCustomLinkFlyoutOpen, setIsCustomLinkFlyoutOpen] = useState(false);
 
-  const filters: FilterOptions = useMemo(
-    () => ({
-      'service.name': transaction?.service.name,
-      'service.environment': transaction?.service.environment,
-      'transaction.name': transaction?.transaction.name,
-      'transaction.type': transaction?.transaction.type
-    }),
+  const filters = useMemo(
+    () =>
+      [
+        { key: 'service.name', value: transaction?.service.name },
+        { key: 'service.environment', value: transaction?.service.environment },
+        { key: 'transaction.name', value: transaction?.transaction.name },
+        { key: 'transaction.type', value: transaction?.transaction.type }
+      ].filter((filter): filter is Filter => typeof filter.value === 'string'),
     [transaction]
   );
+
   const { data: customLinks = [], status, refetch } = useFetcher(
     callApmApi =>
       callApmApi({
         pathname: '/api/apm/settings/custom_links',
-        params: { query: filters }
+        params: { query: convertFiltersToQuery(filters) }
       }),
     [filters]
   );
@@ -95,7 +97,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     <>
       {isCustomLinkFlyoutOpen && (
         <CustomLinkFlyout
-          customLinkSelected={{ ...filters } as CustomLinkType}
+          defaults={{ filters }}
           onClose={toggleCustomLinkFlyout}
           onSave={() => {
             toggleCustomLinkFlyout();

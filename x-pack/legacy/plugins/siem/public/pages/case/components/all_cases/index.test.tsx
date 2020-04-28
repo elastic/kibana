@@ -87,7 +87,7 @@ describe('AllCases', () => {
   it('should render AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(
@@ -95,7 +95,9 @@ describe('AllCases', () => {
         .find(`a[data-test-subj="case-details-link"]`)
         .first()
         .prop('href')
-    ).toEqual(`#/link-to/case/${useGetCasesMockState.data.cases[0].id}`);
+    ).toEqual(
+      `#/link-to/case/${useGetCasesMockState.data.cases[0].id}?timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))`
+    );
     expect(
       wrapper
         .find(`a[data-test-subj="case-details-link"]`)
@@ -130,7 +132,7 @@ describe('AllCases', () => {
   it('should tableHeaderSortButton AllCases', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -147,7 +149,7 @@ describe('AllCases', () => {
   it('closes case when row action icon clicked', () => {
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -180,7 +182,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -200,7 +202,7 @@ describe('AllCases', () => {
       .last()
       .simulate('click');
     expect(handleOnDeleteConfirm.mock.calls[0][0]).toStrictEqual(
-      useGetCasesMockState.data.cases.map(theCase => theCase.id)
+      useGetCasesMockState.data.cases.map(({ id }) => ({ id }))
     );
   });
   it('Bulk close status update', () => {
@@ -211,7 +213,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -236,7 +238,7 @@ describe('AllCases', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     wrapper
@@ -257,7 +259,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();
@@ -272,7 +274,7 @@ describe('AllCases', () => {
 
     mount(
       <TestProviders>
-        <AllCases />
+        <AllCases userCanCrud={true} />
       </TestProviders>
     );
     expect(refetchCases).toBeCalled();

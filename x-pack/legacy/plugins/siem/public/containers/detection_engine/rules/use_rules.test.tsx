@@ -58,6 +58,7 @@ describe('useRules', () => {
         {
           data: [
             {
+              actions: [],
               created_at: '2020-02-14T19:49:28.178Z',
               created_by: 'elastic',
               description:
@@ -82,6 +83,7 @@ describe('useRules', () => {
               severity: 'high',
               tags: ['Elastic', 'Endpoint'],
               threat: [],
+              throttle: null,
               to: 'now',
               type: 'query',
               updated_at: '2020-02-14T19:49:28.320Z',
@@ -89,6 +91,7 @@ describe('useRules', () => {
               version: 1,
             },
             {
+              actions: [],
               created_at: '2020-02-14T19:49:28.189Z',
               created_by: 'elastic',
               description:
@@ -113,6 +116,7 @@ describe('useRules', () => {
               severity: 'medium',
               tags: ['Elastic', 'Endpoint'],
               threat: [],
+              throttle: null,
               to: 'now',
               type: 'query',
               updated_at: '2020-02-14T19:49:28.326Z',

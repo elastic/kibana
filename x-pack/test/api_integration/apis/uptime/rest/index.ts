@@ -17,15 +17,20 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   describe('uptime REST endpoints', () => {
     beforeEach('clear settings', async () => {
       try {
-        server.savedObjects.delete({
+        await server.savedObjects.delete({
           type: settingsObjectType,
           id: settingsObjectId,
         });
       } catch (e) {
         // a 404 just means the doc is already missing
-        if (e.statuscode !== 404) {
+        if (e.response.status !== 404) {
+          const { status, statusText, data, headers, config } = e.response;
           throw new Error(
-            `error attempting to delete settings (${e.statuscode}): ${JSON.stringify(e)}`
+            `error attempting to delete settings:\n${JSON.stringify(
+              { status, statusText, data, headers, config },
+              null,
+              2
+            )}`
           );
         }
       }
@@ -42,7 +47,6 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       before('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
       after('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
       loadTestFile(require.resolve('./monitor_latest_status'));
-      loadTestFile(require.resolve('./selected_monitor'));
       loadTestFile(require.resolve('./ping_histogram'));
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./doc_count'));

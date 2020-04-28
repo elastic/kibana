@@ -34,12 +34,18 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface Props {
+  disabled?: boolean;
   isLoading: boolean;
   title: string | React.ReactNode;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title }) => {
+const EditableTitleComponent: React.FC<Props> = ({
+  disabled = false,
+  onSubmit,
+  isLoading,
+  title,
+}) => {
   const [editMode, setEditMode] = useState(false);
   const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
 
@@ -104,6 +110,7 @@ const EditableTitleComponent: React.FC<Props> = ({ onSubmit, isLoading, title })
         {isLoading && <MySpinner />}
         {!isLoading && (
           <MyEuiButtonIcon
+            isDisabled={disabled}
             aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
             iconType="pencil"
             onClick={onClickEditIcon}

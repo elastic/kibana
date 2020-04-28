@@ -57,7 +57,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
     ({ workpad, pageCount, kibana }: Props & WithKibanaProps): ComponentProps => ({
       getExportUrl: type => {
         if (type === 'pdf') {
-          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath.prepend);
+          const pdfUrl = getPdfUrl(workpad, { pageCount }, kibana.services.http.basePath);
           return getAbsoluteUrl(pdfUrl);
         }
 
@@ -78,7 +78,7 @@ export const WorkpadExport = compose<ComponentProps, {}>(
       onExport: type => {
         switch (type) {
           case 'pdf':
-            return createPdf(workpad, { pageCount }, kibana.services.http.basePath.prepend)
+            return createPdf(workpad, { pageCount }, kibana.services.http.basePath)
               .then(({ data }: { data: { job: { id: string } } }) => {
                 notify.info(strings.getExportPDFMessage(), {
                   title: strings.getExportPDFTitle(workpad.name),

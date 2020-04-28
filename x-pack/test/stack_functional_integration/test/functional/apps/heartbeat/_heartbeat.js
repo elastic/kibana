@@ -7,21 +7,12 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'uptime']);
 
   describe('check heartbeat', function() {
     it('Uptime app should show snapshot count  greater than zero', async function() {
-      const url = await browser.getCurrentUrl();
-      log.debug(url);
-      if (!url.includes('kibana')) {
-        await PageObjects.common.navigateToApp('uptime');
-      } else if (!url.includes('uptime')) {
-        await appsMenu.clickLink('Uptime');
-      }
+      await PageObjects.common.navigateToApp('uptime', { insertTimestamp: false });
 
       await retry.try(async function() {
         const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up);

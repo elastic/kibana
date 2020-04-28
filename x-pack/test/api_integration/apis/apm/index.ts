@@ -10,5 +10,6 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
   describe('APM specs', () => {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./agent_configuration'));
+    loadTestFile(require.resolve('./custom_link'));
   });
 }

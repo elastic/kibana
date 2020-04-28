@@ -15,5 +15,6 @@ export const AGENT_CONFIG_DETAILS_PATH = `${AGENT_CONFIG_PATH}/`;
 export const FLEET_PATH = '/fleet';
 export const FLEET_AGENTS_PATH = `${FLEET_PATH}/agents`;
 export const FLEET_AGENT_DETAIL_PATH = `${FLEET_AGENTS_PATH}/`;
+export const FLEET_ENROLLMENT_TOKENS_PATH = `/fleet/enrollment-tokens`;
 
 export const INDEX_NAME = '.kibana';

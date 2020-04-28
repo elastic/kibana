@@ -320,12 +320,12 @@ export class AbstractLayer {
     return sourceDataRequest && sourceDataRequest.hasData();
   }
 
-  async getBounds() {
+  async getBounds(/* mapFilters: MapFilters */) {
     return {
-      min_lon: -180,
-      max_lon: 180,
-      min_lat: -89,
-      max_lat: 89,
+      minLon: -180,
+      maxLon: 180,
+      minLat: -89,
+      maxLat: 89,
     };
   }
 

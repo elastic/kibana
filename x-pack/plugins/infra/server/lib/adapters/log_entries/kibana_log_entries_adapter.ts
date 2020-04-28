@@ -112,7 +112,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     );
 
     const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
-    return mapHitsToLogEntryDocuments(hits, sourceConfiguration.fields.timestamp, fields);
+    return mapHitsToLogEntryDocuments(hits, fields);
   }
 
   public async getContainedLogSummaryBuckets(
@@ -226,11 +226,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 }
 
-function mapHitsToLogEntryDocuments(
-  hits: SortedSearchHit[],
-  timestampField: string,
-  fields: string[]
-): LogEntryDocument[] {
+function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): LogEntryDocument[] {
   return hits.map(hit => {
     const logFields = fields.reduce<{ [fieldName: string]: JsonValue }>(
       (flattenedFields, field) => {
@@ -243,10 +239,8 @@ function mapHitsToLogEntryDocuments(
     );
 
     return {
-      gid: hit._id,
-      // timestamp: hit._source[timestampField],
-      // FIXME s/key/cursor/g
-      key: { time: hit.sort[0], tiebreaker: hit.sort[1] },
+      id: hit._id,
+      cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},
     };

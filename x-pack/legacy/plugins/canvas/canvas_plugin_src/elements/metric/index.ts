@@ -6,7 +6,7 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import header from './header.png';
-import { AdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
+import { getAdvancedSettings } from '../../../public/lib/kibana_advanced_settings';
 
 import { ElementFactory } from '../../../types';
 export const metric: ElementFactory = () => ({
@@ -23,6 +23,6 @@ export const metric: ElementFactory = () => ({
 | metric "Countries" 
   metricFont={font size=48 family="${openSans.value}" color="#000000" align="center" lHeight=48} 
   labelFont={font size=14 family="${openSans.value}" color="#000000" align="center"}
-  metricFormat="${AdvancedSettings.get('format:number:defaultPattern')}"
+  metricFormat="${getAdvancedSettings().get('format:number:defaultPattern')}"
 | render`,
 });

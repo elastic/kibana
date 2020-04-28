@@ -38,7 +38,7 @@ Log entries for the specified time appear in the middle of the page. To quickly 
 [[logs-customize]]
 === Customize your view
 Click *Customize* to customize the view.
-Here, you can set the scale to use for the minimap timeline, choose whether to wrap long lines, and choose your preferred text size.
+Here, you can choose whether to wrap long lines, and choose your preferred text size.
 
 [float]
 === Configuring the data to use for your logs
