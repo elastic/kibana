@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRequest, UseRequestConfig, sendRequest, useConditionnalRequest } from './use_request';
+import {
+  useRequest,
+  UseRequestConfig,
+  sendRequest,
+  useConditionalRequest,
+  SendConditionalRequestConfig,
+} from './use_request';
 import { enrollmentAPIKeyRouteService } from '../../services';
 import {
   GetOneEnrollmentAPIKeyResponse,
@@ -15,17 +21,11 @@ import {
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 
 export function useGetOneEnrollmentAPIKey(keyId: string | undefined) {
-  return useConditionnalRequest<GetOneEnrollmentAPIKeyResponse>(
-    keyId
-      ? {
-          method: 'get',
-          path: enrollmentAPIKeyRouteService.getInfoPath(keyId),
-          shouldSendRequest: true,
-        }
-      : {
-          shouldSendRequest: false,
-        }
-  );
+  return useConditionalRequest<GetOneEnrollmentAPIKeyResponse>({
+    method: 'get',
+    path: keyId ? enrollmentAPIKeyRouteService.getInfoPath(keyId) : undefined,
+    shouldSendRequest: !!keyId,
+  } as SendConditionalRequestConfig);
 }
 
 export function sendGetOneEnrollmentAPIKey(keyId: string, options?: RequestOptions) {

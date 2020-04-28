@@ -25,7 +25,7 @@ interface Props {
   agentConfigs: AgentConfig[];
 }
 
-function useCreateApiKeyForm(configId: string | null, onSuccess: (keyId: string) => void) {
+function useCreateApiKeyForm(configId: string | undefined, onSuccess: (keyId: string) => void) {
   const { notifications } = useCore();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
@@ -67,11 +67,10 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
   });
 
   const [selectedState, setSelectedState] = useState<{
-    agentConfigId: string | null;
-    enrollmentAPIKeyId: string | undefined;
+    agentConfigId?: string;
+    enrollmentAPIKeyId?: string;
   }>({
-    agentConfigId: agentConfigs.length ? agentConfigs[0].id : null,
-    enrollmentAPIKeyId: undefined,
+    agentConfigId: agentConfigs.length ? agentConfigs[0].id : undefined,
   });
   const filteredEnrollmentAPIKeys = React.useMemo(() => {
     if (!selectedState.agentConfigId || !enrollmentAPIKeysRequest.data) {

@@ -37,11 +37,11 @@ export const useRequest = <D = any>(config: UseRequestConfig) => {
   return _useRequest<D>(httpClient, config);
 };
 
-type SendConditionnalRequestConfig =
+export type SendConditionalRequestConfig =
   | (SendRequestConfig & { shouldSendRequest: true })
   | (Partial<SendRequestConfig> & { shouldSendRequest: false });
 
-export const useConditionnalRequest = <D = any>(config: SendConditionnalRequestConfig) => {
+export const useConditionalRequest = <D = any>(config: SendConditionalRequestConfig) => {
   const [state, setState] = useState<{
     error: Error | null;
     data: D | null;
