@@ -12,7 +12,11 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
+import {
+  MAX_ZOOM_LEVEL,
+  MIN_ZOOM_LEVEL,
+  CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+} from '../../../../common/lib/constants';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
@@ -162,22 +166,6 @@ export const ViewMenu: FunctionComponent<Props> = ({
     title: strings.getViewMenuLabel(),
     items: [
       {
-        name: strings.getFullscreenMenuItemLabel(),
-        icon: <EuiIcon type="fullScreen" size="m" />,
-        onClick: () => {
-          enterFullscreen();
-          closePopover();
-        },
-      },
-      {
-        name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
-        onClick: () => {
-          toggleWriteable();
-          closePopover();
-        },
-      },
-      {
         name: strings.getRefreshMenuItemLabel(),
         icon: 'refresh',
         onClick: () => {
@@ -200,10 +188,19 @@ export const ViewMenu: FunctionComponent<Props> = ({
         },
       },
       {
+        name: strings.getFullscreenMenuItemLabel(),
+        icon: <EuiIcon type="fullScreen" size="m" />,
+        className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+        onClick: () => {
+          enterFullscreen();
+          closePopover();
+        },
+      },
+      {
         name: autoplayEnabled
           ? strings.getAutoplayOffMenuItemLabel()
           : strings.getAutoplayOnMenuItemLabel(),
-        icon: autoplayEnabled ? 'pause' : 'play',
+        icon: autoplayEnabled ? 'stop' : 'play',
         onClick: () => {
           enableAutoplay(!autoplayEnabled);
           closePopover();
@@ -221,6 +218,15 @@ export const ViewMenu: FunctionComponent<Props> = ({
               onSetInterval={setAutoplayInterval}
             />
           ),
+        },
+      },
+      {
+        name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
+        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
+        className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+        onClick: () => {
+          toggleWriteable();
+          closePopover();
         },
       },
       {

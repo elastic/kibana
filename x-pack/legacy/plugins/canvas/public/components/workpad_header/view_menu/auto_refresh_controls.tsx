@@ -118,11 +118,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
               descriptionId={intervalTitleId}
             />
             <RefreshItem
-              duration={15000}
-              label={getSecondsText(15)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
               duration={30000}
               label={getSecondsText(30)}
               descriptionId={intervalTitleId}
@@ -133,16 +128,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
               descriptionId={intervalTitleId}
             />
             <RefreshItem
-              duration={300000}
-              label={getMinutesText(5)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={900000}
-              label={getMinutesText(15)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
               duration={1800000}
               label={getMinutesText(30)}
               descriptionId={intervalTitleId}
@@ -150,21 +135,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <RefreshItem
               duration={3600000}
               label={getHoursText(1)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={7200000}
-              label={getHoursText(2)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={21600000}
-              label={getHoursText(6)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={43200000}
-              label={getHoursText(12)}
               descriptionId={intervalTitleId}
             />
             <RefreshItem

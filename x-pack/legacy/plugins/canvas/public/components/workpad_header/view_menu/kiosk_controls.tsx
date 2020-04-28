@@ -77,9 +77,6 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
         <EuiHorizontalRule margin="m" />
-
-        <EuiSpacer size="m" />
-
         <EuiTitle size="xxxs" id={intervalTitleId}>
           <p>{strings.getCycleFormLabel()}</p>
         </EuiTitle>
