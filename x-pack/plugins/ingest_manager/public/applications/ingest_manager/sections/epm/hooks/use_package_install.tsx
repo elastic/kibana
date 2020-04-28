@@ -62,7 +62,13 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
 
       const res = await sendInstallPackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        if (fromUpdate) {
+          // if there is an error during update, set it back to the previous version
+          // as handling of bad update is not implemented yet
+          setPackageInstallStatus({ ...currStatus, name });
+        } else {
+          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        }
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
