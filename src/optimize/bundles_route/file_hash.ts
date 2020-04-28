@@ -21,7 +21,7 @@ import { createHash } from 'crypto';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, mergeMap } from 'rxjs/operators';
 
 import { FileHashCache } from './file_hash_cache';
 
@@ -45,7 +45,7 @@ export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.S
 
   const promise = Rx.merge(
     Rx.fromEvent<Buffer>(read, 'data'),
-    Rx.fromEvent<Error>(read, 'error').pipe(Rx.throwError)
+    Rx.fromEvent<Error>(read, 'error').pipe(mergeMap(error => Rx.throwError(error)))
   )
     .pipe(takeUntil(Rx.fromEvent(read, 'end')))
     .forEach(chunk => hash.update(chunk))
