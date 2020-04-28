@@ -31,6 +31,7 @@ import { savedObjectsClientProviderMock } from './service/lib/scoped_client_prov
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
@@ -105,4 +106,5 @@ export const savedObjectsServiceMock = {
   createSetupContract: createSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
   createStartContract: createStartContractMock,
+  createMigrationContext: migrationMocks.createContext,
 };

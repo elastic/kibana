@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 
 export const graphMigrations = {
-  '7.0.0': (doc: SavedObjectUnsanitizedDoc) => {
+  '7.0.0': (doc: SavedObjectUnsanitizedDoc<any>) => {
     // Set new "references" attribute
     doc.references = doc.references || [];
     // Migrate index pattern

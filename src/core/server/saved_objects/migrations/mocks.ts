@@ -17,9 +17,27 @@
  * under the License.
  */
 
-export { DocumentMigrator } from './document_migrator';
-export { IndexMigrator } from './index_migrator';
-export { buildActiveMappings } from './build_active_mappings';
-export { CallCluster } from './call_cluster';
-export { LogFn, SavedObjectsMigrationLogger } from './migration_logger';
-export { MigrationResult, MigrationStatus } from './migration_coordinator';
+import { SavedObjectMigrationContext } from './types';
+import { SavedObjectsMigrationLogger } from './core';
+
+const createLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
+  const mock = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warning: jest.fn(),
+    warn: jest.fn(),
+  };
+
+  return mock;
+};
+
+const createContextMock = (): jest.Mocked<SavedObjectMigrationContext> => {
+  const mock = {
+    log: createLoggerMock(),
+  };
+  return mock;
+};
+
+export const migrationMocks = {
+  createContext: createContextMock,
+};

@@ -19,7 +19,7 @@
 
 import { get, flow } from 'lodash';
 
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationFn } from 'kibana/server';
 import { migrations730 } from './migrations_730';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
 import { DashboardDoc700To720 } from '../../common';
@@ -62,7 +62,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
 }
 
-const migrations700: SavedObjectMigrationFn = (doc): DashboardDoc700To720 => {
+const migrations700: SavedObjectMigrationFn<any, any> = (doc): DashboardDoc700To720 => {
   // Set new "references" attribute
   doc.references = doc.references || [];
 
@@ -111,7 +111,7 @@ export const dashboardSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery),
-  '7.0.0': flow<(doc: SavedObjectUnsanitizedDoc) => DashboardDoc700To720>(migrations700),
-  '7.3.0': flow<SavedObjectMigrationFn>(migrations730),
+  '6.7.2': flow<SavedObjectMigrationFn<any, any>>(migrateMatchAllQuery),
+  '7.0.0': flow<SavedObjectMigrationFn<any, DashboardDoc700To720['attributes']>>(migrations700),
+  '7.3.0': flow<SavedObjectMigrationFn<any, any>>(migrations730),
 };

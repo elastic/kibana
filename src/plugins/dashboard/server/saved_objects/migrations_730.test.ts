@@ -17,19 +17,13 @@
  * under the License.
  */
 
+import { savedObjectsServiceMock } from '../../../../core/server/mocks';
 import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
 import { migrations730 } from './migrations_730';
 import { DashboardDoc700To720, DashboardDoc730ToLatest, DashboardDocPre700 } from '../../common';
 import { RawSavedDashboardPanel730ToLatest } from '../../common';
 
-const mockContext = {
-  log: {
-    warning: () => {},
-    warn: () => {},
-    debug: () => {},
-    info: () => {},
-  },
-};
+const mockContext = savedObjectsServiceMock.createMigrationContext();
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {
   const doc: DashboardDoc700To720 = {
@@ -95,7 +89,7 @@ test('dashboard migration 7.3.0 migrates filters to query on search source when 
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations['7.0.0'](doc);
+  const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
@@ -127,7 +121,7 @@ test('dashboard migration works when panelsJSON is missing panelIndex', () => {
     },
   };
 
-  const doc700: DashboardDoc700To720 = migrations['7.0.0'](doc);
+  const doc700 = migrations['7.0.0'](doc, mockContext);
   const newDoc = migrations['7.3.0'](doc700, mockContext);
 
   const parsedSearchSource = JSON.parse(newDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
