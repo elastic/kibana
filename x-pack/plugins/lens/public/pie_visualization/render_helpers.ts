@@ -6,7 +6,7 @@
 
 import { Datum, LayerValue } from '@elastic/charts';
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
-import { EmbeddableVisTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { ColumnGroups } from './types';
 
 export function getSliceValueWithFallback(
@@ -28,7 +28,7 @@ export function getFilterContext(
   clickedLayers: LayerValue[],
   layerColumnIds: string[],
   table: KibanaDatatable
-): EmbeddableVisTriggerContext {
+): ValueClickTriggerContext {
   const matchingIndex = table.rows.findIndex(row =>
     clickedLayers.every((layer, index) => {
       const columnId = layerColumnIds[index];
