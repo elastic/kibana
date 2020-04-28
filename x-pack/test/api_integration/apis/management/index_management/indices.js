@@ -198,7 +198,9 @@ export default function({ getService }) {
           'ilm', // data enricher
           'isRollupIndex', // data enricher
         ];
-        expect(Object.keys(body[0])).to.eql(expectedKeys);
+        expectedKeys.map(key => {
+          expect(Object.keys(body[0]).contain(key));
+        });
       });
     });
 
