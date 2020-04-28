@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpFetchQuery } from 'src/core/public';
-import { useRequest, sendRequest } from './use_request';
+import {
+  useRequest,
+  sendRequest,
+  useConditionalRequest,
+  SendConditionalRequestConfig,
+} from './use_request';
 import { agentConfigRouteService } from '../../services';
 import {
   GetAgentConfigsResponse,
@@ -25,11 +30,12 @@ export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
   });
 };
 
-export const useGetOneAgentConfig = (agentConfigId: string) => {
-  return useRequest<GetOneAgentConfigResponse>({
-    path: agentConfigRouteService.getInfoPath(agentConfigId),
+export const useGetOneAgentConfig = (agentConfigId: string | undefined) => {
+  return useConditionalRequest<GetOneAgentConfigResponse>({
+    path: agentConfigId ? agentConfigRouteService.getInfoPath(agentConfigId) : undefined,
     method: 'get',
-  });
+    shouldSendRequest: !!agentConfigId,
+  } as SendConditionalRequestConfig);
 };
 
 export const useGetOneAgentConfigFull = (agentConfigId: string) => {
