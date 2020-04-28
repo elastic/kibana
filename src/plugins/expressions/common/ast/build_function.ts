@@ -18,12 +18,39 @@
  */
 
 import { ExpressionAstArgument, ExpressionAstFunction } from './types';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
+} from '../expression_functions/types';
 
-export interface ExpressionAstFunctionBuilder {
+// Gets all optional string keys from an interface.
+type OptionalKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? (K extends string ? K : never) : never;
+}[keyof T];
+
+// Infers the expression arguments from an ExpressionFunctionDefinition.
+type FunctionArgs<
+  Name extends string
+> = ExpressionFunctionDefinitions[Name] extends ExpressionFunctionDefinition<
+  infer Name,
+  infer Input,
+  infer Arguments,
+  infer Output,
+  infer Context
+>
+  ? Arguments
+  : never;
+
+// Gets a list of possible arg names for a given function.
+type FunctionArgName<F extends string> = {
+  [A in keyof FunctionArgs<F>]: A extends string ? A : never;
+}[keyof FunctionArgs<F>];
+
+export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
   /**
    * Name of this expression function.
    */
-  name: string;
+  name: Fn;
   /**
    * AST representation of all args currently added to the function.
    */
@@ -37,7 +64,7 @@ export interface ExpressionAstFunctionBuilder {
    * @param value The value of the argument. Can be a single value or an array.
    * @return `this`
    */
-  addArgument: (name: string, value: ExpressionAstArgument | ExpressionAstArgument[]) => this;
+  addArgument: <A extends FunctionArgName<Fn>>(name: A, value: FunctionArgs<Fn>[A]) => this;
   /**
    * Retrieves an existing argument by name.
    * Useful when you want to retrieve the current array of args and add
@@ -46,7 +73,7 @@ export interface ExpressionAstFunctionBuilder {
    * @param name The name of the argument to retrieve.
    * @return `ExpressionAstArgument[]`
    */
-  getArgument: (name: string) => ExpressionAstArgument[] | undefined;
+  getArgument: <A extends FunctionArgName<Fn>>(name: A) => ExpressionAstArgument[] | undefined;
   /**
    * Overwrites an existing argument with a new value.
    * In order to support multi-args, the value given must always be
@@ -56,18 +83,20 @@ export interface ExpressionAstFunctionBuilder {
    * @param value The value of the argument. Must always be an array.
    * @return `this`
    */
-  replaceArgument: (name: string, value: ExpressionAstArgument[]) => this;
+  replaceArgument: <A extends FunctionArgName<Fn>>(
+    name: A,
+    value: Array<FunctionArgs<Fn>[A]>
+  ) => this;
   /**
-   * Removes an argument from the function.
+   * Removes an (optional) argument from the function.
    *
-   * Use this carefully as the builder will not prevent you from removing
-   * an argument which is actually required for that function.
-   * TODO: Try to enforce the above scenario with TS
+   * TypeScript will enforce that you only remove optional
+   * arguments. For manipulating required args, use `replaceArgument`.
    *
    * @param name The name of the argument to remove.
    * @return `this`
    */
-  removeArgument: (name: string) => this;
+  removeArgument: <A extends OptionalKeys<FunctionArgs<Fn>>>(name: A) => this;
   /**
    * Converts function to an AST.
    *
@@ -75,15 +104,6 @@ export interface ExpressionAstFunctionBuilder {
    */
   toAst: () => ExpressionAstFunction;
 }
-
-const generateFunction = (
-  name: string,
-  args: ExpressionAstFunction['arguments']
-): ExpressionAstFunction => ({
-  type: 'function',
-  function: name,
-  arguments: args,
-});
 
 /**
  * Manages an AST for a single expression function. The return value
@@ -98,12 +118,14 @@ const generateFunction = (
  * @param initialArgs Object containing the arguments to this function.
  * @return `this`
  */
-export function buildExpressionFunction(
-  fnName: string,
-  // TODO: use typings from global mapping
-  initialArgs: ExpressionAstFunction['arguments']
-): ExpressionAstFunctionBuilder {
-  const args = initialArgs;
+export function buildExpressionFunction<F extends string>(
+  fnName: F,
+  initialArgs: FunctionArgs<F>
+): ExpressionAstFunctionBuilder<F> {
+  const args: ExpressionAstFunction['arguments'] = initialArgs;
+  Object.entries(initialArgs).forEach(([key, value]) => {
+    args[key] = Array.isArray(value) ? value : [value];
+  });
 
   return {
     name: fnName,
@@ -138,7 +160,11 @@ export function buildExpressionFunction(
     },
 
     toAst() {
-      return generateFunction(fnName, args);
+      return {
+        type: 'function',
+        function: fnName,
+        arguments: args,
+      };
     },
   };
 }

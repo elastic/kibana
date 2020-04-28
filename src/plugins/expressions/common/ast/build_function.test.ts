@@ -68,6 +68,17 @@ describe('buildExpressionFunction()', () => {
     `);
   });
 
+  test('wraps any args in initial state in an array', () => {
+    const fn = buildExpressionFunction('hello', { world: true });
+    expect(fn.arguments).toMatchInlineSnapshot(`
+      Object {
+        "world": Array [
+          true,
+        ],
+      }
+    `);
+  });
+
   test('returns all expected properties', () => {
     const fn = buildExpressionFunction('hello', { world: [true] });
     expect(Object.keys(fn)).toMatchInlineSnapshot(`
