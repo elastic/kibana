@@ -34,6 +34,15 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
       '^(!!)?file-loader!': fileMockPath,
     },
+    collectCoverageFrom: [
+      'legacy/plugins/**/*.{js,jsx,ts,tsx}',
+      'legacy/server/**/*.{js,jsx,ts,tsx}',
+      'plugins/**/*.{js,jsx,ts,tsx}',
+      '!{legacy,plugins}/**/{__test__,__snapshots__}/**/*',
+      '!{legacy,plugins}/**/*.test.{js,ts,tsx}',
+      '!**/node_modules/**',
+    ],
+    coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
     coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html'],
     setupFiles: [
