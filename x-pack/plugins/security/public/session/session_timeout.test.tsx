@@ -74,6 +74,7 @@ describe('Session Timeout', () => {
     now,
     idleTimeoutExpiration: now + 2 * 60 * 1000,
     lifespanExpiration: null,
+    provider: { type: 'basic', name: 'basic1' },
   };
   let notifications: ReturnType<typeof coreMock.createSetup>['notifications'];
   let http: ReturnType<typeof coreMock.createSetup>['http'];
@@ -192,6 +193,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: null,
         lifespanExpiration: now + 2 * 60 * 1000,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.start();
@@ -225,6 +227,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: null,
         lifespanExpiration: now + 2 * 60 * 1000,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.start();
@@ -251,6 +254,7 @@ describe('Session Timeout', () => {
         now: now + elapsed,
         idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.extend('/foo');
       expect(http.fetch).toHaveBeenCalledTimes(3);
@@ -303,6 +307,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: now + 64 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.start();
       expect(http.fetch).toHaveBeenCalled();
@@ -336,6 +341,7 @@ describe('Session Timeout', () => {
         now: now + elapsed,
         idleTimeoutExpiration: now + elapsed + 2 * 60 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       };
       http.fetch.mockResolvedValue(sessionInfo);
       await sessionTimeout.extend('/foo');
@@ -358,6 +364,7 @@ describe('Session Timeout', () => {
         now,
         idleTimeoutExpiration: now + 4 * 1000,
         lifespanExpiration: null,
+        provider: { type: 'basic', name: 'basic1' },
       });
       await sessionTimeout.start();
 
