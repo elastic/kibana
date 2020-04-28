@@ -16,6 +16,7 @@ import { setPolicyListApiMockImplementation } from './test_mock_utils';
 import { INGEST_API_DATASOURCES } from './services/ingest';
 import { Immutable } from '../../../../../common/types';
 import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../test_utils';
+import { DATASOURCE_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
 
 describe('policy list store concerns', () => {
   let fakeCoreStart: ReturnType<typeof coreMock.createStart>;
@@ -121,7 +122,11 @@ describe('policy list store concerns', () => {
     });
     await waitForAction('serverReturnedPolicyListData');
     expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
-      query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+      query: {
+        kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        page: 1,
+        perPage: 10,
+      },
     });
   });
 
@@ -140,7 +145,11 @@ describe('policy list store concerns', () => {
       dispatchUserChangedUrl('?page_size=50&page_index=0');
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
-        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 50 },
+        query: {
+          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          page: 1,
+          perPage: 50,
+        },
       });
     });
     it('uses defaults for params not in url', async () => {
@@ -159,21 +168,33 @@ describe('policy list store concerns', () => {
       dispatchUserChangedUrl('?page_size=-50&page_index=-99');
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
-        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+        query: {
+          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          page: 1,
+          perPage: 10,
+        },
       });
     });
     it('it ignores non-numeric values for page_index and page_size', async () => {
       dispatchUserChangedUrl('?page_size=fifty&page_index=ten');
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
-        query: { kuery: 'datasources.package.name: endpoint', page: 1, perPage: 10 },
+        query: {
+          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          page: 1,
+          perPage: 10,
+        },
       });
     });
     it('accepts only known values for `page_size`', async () => {
       dispatchUserChangedUrl('?page_size=300&page_index=10');
       await waitForAction('serverReturnedPolicyListData');
       expect(fakeCoreStart.http.get).toHaveBeenCalledWith(INGEST_API_DATASOURCES, {
-        query: { kuery: 'datasources.package.name: endpoint', page: 11, perPage: 10 },
+        query: {
+          kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          page: 11,
+          perPage: 10,
+        },
       });
     });
     it(`ignores unknown url search params`, async () => {
@@ -186,8 +207,8 @@ describe('policy list store concerns', () => {
     it(`uses last param value if param is defined multiple times`, async () => {
       dispatchUserChangedUrl('?page_size=20&page_size=50&page_index=20&page_index=40');
       expect(urlSearchParams(getState())).toEqual({
-        page_index: 20,
-        page_size: 20,
+        page_index: 40,
+        page_size: 50,
       });
     });
   });
