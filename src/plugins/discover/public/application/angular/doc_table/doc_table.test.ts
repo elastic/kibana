@@ -51,7 +51,7 @@ const destroy = function() {
   $parentScope.$destroy();
 };
 
-describe('docTable', function() {
+describe.skip('docTable', function() {
   let $elem: JQuery;
 
   beforeEach(() => {

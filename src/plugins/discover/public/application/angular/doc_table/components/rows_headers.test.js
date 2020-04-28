@@ -49,7 +49,7 @@ jest.mock('../../../../kibana_services', () => ({
   }),
 }));
 
-describe('Doc Table', function() {
+describe.skip('Doc Table', function() {
   let $parentScope;
   let $scope;
 

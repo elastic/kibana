@@ -103,7 +103,7 @@ function getCompProps() {
   };
 }
 
-describe('discover sidebar', function() {
+describe.skip('discover sidebar', function() {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
