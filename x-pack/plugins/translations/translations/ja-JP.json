@@ -15936,7 +15936,6 @@
     "xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel": "アクションタイプ",
     "xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel": "アラートの作成",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle": "タイプ",
-    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle": "編集",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.intervalTitle": "次の間隔で実行",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名前",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.tagsText": "タグ",

@@ -15941,7 +15941,6 @@
     "xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel": "操作类型",
     "xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel": "创建告警",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle": "类型",
-    "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle": "编辑",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.intervalTitle": "运行间隔",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle": "名称",
     "xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.tagsText": "标记",
