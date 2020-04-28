@@ -6,11 +6,11 @@
 
 import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
-import { PipelinesClone } from '../../../public/application/sections/pipelines_clone'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { formSetup } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
 
-export const PIPELINE_TO_CLONE = {
+export const PIPELINE_TO_EDIT = {
   name: 'my_pipeline',
   description: 'pipeline description',
   processors: [
@@ -22,14 +22,15 @@ export const PIPELINE_TO_CLONE = {
     },
   ],
 };
+
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}create/${PIPELINE_TO_CLONE.name}`],
-    componentRoutePath: `${BASE_PATH}create/:name`,
+    initialEntries: [`${BASE_PATH}edit/${PIPELINE_TO_EDIT.name}`],
+    componentRoutePath: `${BASE_PATH}edit/:name`,
   },
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(PipelinesClone), testBedConfig);
+const initTestBed = registerTestBed(WithAppDependencies(PipelinesEdit), testBedConfig);
 
 export const setup = formSetup.bind(null, initTestBed);
