@@ -19,7 +19,8 @@
 
 import { CLIEngine } from 'eslint';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { File } from '../file';
 import { REPO_ROOT } from '../constants';
 
 /**
@@ -30,7 +31,7 @@ import { REPO_ROOT } from '../constants';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log, files, { fix } = {}) {
+export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
   const cli = new CLIEngine({
     cache: true,
     cwd: REPO_ROOT,

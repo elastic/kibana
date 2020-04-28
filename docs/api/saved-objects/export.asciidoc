@@ -9,9 +9,9 @@ experimental[] Retrieve sets of saved objects that you want to import into {kib}
 [[saved-objects-api-export-request]]
 ==== Request
 
-`POST /api/saved_objects/_export`
+`POST <kibana host>:<port>/api/saved_objects/_export`
 
-`POST /s/<space_id>/api/saved_objects/_export`
+`POST <kibana host>:<port>/s/<space_id>/api/saved_objects/_export`
 
 [[saved-objects-api-export-path-params]]
 ==== Path parameters
@@ -39,7 +39,7 @@ TIP: You must include `type` or `objects` in the request body.
 [[saved-objects-api-export-request-response-body]]
 ==== Response body
 
-The format of the response body is newline delimited JSON. Each exported object is exported as a valid JSON record and separated by the newline character '\n'. 
+The format of the response body is newline delimited JSON. Each exported object is exported as a valid JSON record and separated by the newline character '\n'.
 
 When `excludeExportDetails=false` (the default) we append an export result details record at the end of the file after all the saved object records. The export result details object has the following format:
 
@@ -66,9 +66,9 @@ When `excludeExportDetails=false` (the default) we append an export result detai
 
 Export all index pattern saved objects:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_export
+$ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
   "type": "index-pattern"
 }
@@ -77,9 +77,9 @@ POST api/saved_objects/_export
 
 Export all index pattern saved objects and exclude the export summary from the stream:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_export
+$ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
   "type": "index-pattern",
   "excludeExportDetails": true
@@ -89,9 +89,9 @@ POST api/saved_objects/_export
 
 Export a specific saved object:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_export
+$ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
   "objects": [
     {
@@ -105,9 +105,9 @@ POST api/saved_objects/_export
 
 Export a specific saved object and it's related objects :
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/saved_objects/_export
+$ curl -X POST "localhost:5601/api/saved_objects/_export"
 {
   "objects": [
     {

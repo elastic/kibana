@@ -139,11 +139,13 @@ export const MachineLearningFlyout: React.FC<Props> = ({ onClose }) => {
   ]);
 
   useEffect(() => {
-    if (hasExistingMLJob) {
+    if (hasExistingMLJob && !isMLJobCreating && !hasMLJob && heartbeatIndices) {
       setIsCreatingJob(true);
       dispatch(createMLJobAction.get({ monitorId: monitorId as string, heartbeatIndices }));
     }
-  }, [dispatch, hasExistingMLJob, heartbeatIndices, monitorId]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, hasExistingMLJob, heartbeatIndices, monitorId, hasMLJob]);
 
   if (hasExistingMLJob) {
     return null;

@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { CiStatsReporter } from '@kbn/dev-utils';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  reportOptimizerStats,
+} from '@kbn/optimizer';
 
 export const BuildKibanaPlatformPluginsTask = {
   description: 'Building distributable versions of Kibana platform plugins',
@@ -31,8 +37,14 @@ export const BuildKibanaPlatformPluginsTask = {
       dist: true,
     });
 
+    const reporter = CiStatsReporter.fromEnv(log);
+    const reportStatsName = build.isOss() ? 'oss distributable' : 'default distributable';
+
     await runOptimizer(optimizerConfig)
-      .pipe(logOptimizerState(log, optimizerConfig))
+      .pipe(
+        reportOptimizerStats(reporter, reportStatsName),
+        logOptimizerState(log, optimizerConfig)
+      )
       .toPromise();
   },
 };
