@@ -221,27 +221,6 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       name: '',
-      width: '50px',
-      render(item: AlertTableItem) {
-        if (!canSave || !alertTypeRegistry.has(item.alertTypeId)) {
-          return;
-        }
-        return (
-          <EuiLink
-            data-test-subj="alertsTableCell-editLink"
-            color="primary"
-            onClick={() => editItem(item)}
-          >
-            <FormattedMessage
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.editLinkTitle"
-            />
-          </EuiLink>
-        );
-      },
-    },
-    {
-      name: '',
       width: '40px',
       render(item: AlertTableItem) {
         return (

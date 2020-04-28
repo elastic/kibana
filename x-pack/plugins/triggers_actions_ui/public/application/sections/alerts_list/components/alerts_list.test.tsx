@@ -245,10 +245,6 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
   });
-  it('renders edit button for registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
-  });
 });
 
 describe('alerts_list component empty with show only capability', () => {
@@ -441,9 +437,5 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
-  });
-  it('not renders edit button for non registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
   });
 });
