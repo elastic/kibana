@@ -22,7 +22,7 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
   return formatter ? formatter(headerData) : headerData.label;
 };
 
-const Tooltip: FC<{ service: ChartTooltipService }> = ({ service }) => {
+const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
   const refCallback = useRef<ChildrenArg['triggerRef']>();
 
@@ -104,7 +104,7 @@ const Tooltip: FC<{ service: ChartTooltipService }> = ({ service }) => {
       {triggerCallback}
     </TooltipTrigger>
   );
-};
+});
 
 interface MlTooltipComponentProps {
   children: (tooltipService: ChartTooltipService) => React.ReactElement;

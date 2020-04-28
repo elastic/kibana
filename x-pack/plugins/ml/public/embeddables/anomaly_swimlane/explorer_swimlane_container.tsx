@@ -5,7 +5,13 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { EuiResizeObserver, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiSpacer,
+} from '@elastic/eui';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
 import {
   catchError,
@@ -33,7 +39,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 
-const RESIZE_THROTTLE_TIME_MS = 200;
+const RESIZE_THROTTLE_TIME_MS = 500;
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
@@ -176,21 +182,26 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             resizeRef(el);
           }}
         >
-          {chartWidth > 0 && swimlaneData && swimlaneType && (
-            <>
-              <EuiSpacer size="m" />
-              <MlTooltipComponent>
-                {tooltipService => (
-                  <ExplorerSwimlane
-                    chartWidth={chartWidth}
-                    timeBuckets={timeBuckets}
-                    swimlaneData={swimlaneData}
-                    swimlaneType={swimlaneType}
-                    tooltipService={tooltipService}
-                  />
-                )}
-              </MlTooltipComponent>
-            </>
+          <EuiSpacer size="m" />
+
+          {chartWidth > 0 && swimlaneData && swimlaneType ? (
+            <MlTooltipComponent>
+              {tooltipService => (
+                <ExplorerSwimlane
+                  chartWidth={chartWidth}
+                  timeBuckets={timeBuckets}
+                  swimlaneData={swimlaneData}
+                  swimlaneType={swimlaneType}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          ) : (
+            <EuiFlexGroup justifyContent="spaceAround">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingChart size="xl" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
         </div>
       )}
