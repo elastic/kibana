@@ -10,6 +10,28 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 
 export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const parseStyle = styles =>
+    styles
+      .split(';')
+      .filter(style => style.split(':')[0] && style.split(':')[1])
+      .map(style => [
+        style
+          .split(':')[0]
+          .trim()
+          .replace(/-./g, c => c.substr(1).toUpperCase()),
+        style
+          .split(':')
+          .slice(1)
+          .join(':')
+          .trim(),
+      ])
+      .reduce(
+        (styleObj, style) => ({
+          ...styleObj,
+          [style[0]]: style[1],
+        }),
+        {}
+      );
 
   return {
     async enterSearchBarQuery(query: string) {
@@ -29,6 +51,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
      * Finds a table and returns the data in a nested array with row 0 is the headers if they exist.
      * It uses euiTableCellContent to avoid poluting the array data with the euiTableRowCell__mobileHeader data.
      * @param dataTestSubj
+     * @param element
      * @returns Promise<string[][]>
      */
     async getEndpointAlertResolverTableData(dataTestSubj: string, element: string) {
@@ -62,6 +85,20 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
       const $ = [];
       for (const value of Elements) {
         $.push(await value.getAttribute(element));
+      }
+      return $;
+    },
+    /**
+     * Finds a table and returns the data in a nested array with row 0 is the headers if they exist.
+     * It uses euiTableCellContent to avoid poluting the array data with the euiTableRowCell__mobileHeader data.
+     * @returns Promise<string[][]>
+     * @param style
+     */
+    async parseStyles(style: string) {
+      const $ = [];
+      for (let i = 1; i < style.length; i++) {
+        const eachStyle = parseStyle(style[i]);
+        $.push(eachStyle);
       }
       return $;
     },
