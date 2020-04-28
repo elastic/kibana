@@ -112,7 +112,7 @@ export class LoginForm extends Component<Props, State> {
     }
 
     return (
-      <div className="lgnAssistanceMessage">
+      <div className="secLoginAssistanceMessage">
         <EuiHorizontalRule size="half" />
         <EuiText size="xs">
           <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
@@ -268,9 +268,9 @@ export class LoginForm extends Component<Props, State> {
                 ? this.onPageModeChange(PageMode.Form)
                 : this.loginWithSelector(provider.type, provider.name)
             }
-            className={`lgnCard ${
+            className={`secLoginCard ${
               this.isLoadingState(LoadingStateType.Selector, provider.name)
-                ? 'lgnCard-isLoading'
+                ? 'secLoginCard-isLoading'
                 : ''
             }`}
           >
@@ -279,7 +279,7 @@ export class LoginForm extends Component<Props, State> {
                 <EuiIcon size="xl" type={provider.icon ? provider.icon : 'empty'} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs" className="lgnCard__title">
+                <EuiTitle size="xs" className="secLoginCard__title">
                   <p>
                     {provider.description ?? (
                       <FormattedMessage
@@ -293,7 +293,7 @@ export class LoginForm extends Component<Props, State> {
                     )}
                   </p>
                 </EuiTitle>
-                {provider.hint ? <p className="lgnCard__hint">{provider.hint}</p> : null}
+                {provider.hint ? <p className="secLoginCard__hint">{provider.hint}</p> : null}
               </EuiFlexItem>
               {this.isLoadingState(LoadingStateType.Selector, provider.name) ? (
                 <EuiFlexItem grow={false}>
@@ -325,7 +325,6 @@ export class LoginForm extends Component<Props, State> {
           <EuiText size="xs" className="eui-textCenter">
             <EuiLink
               data-test-subj="loginBackToLoginLink"
-              style={{ fontWeight: 'bold' }}
               onClick={() => this.onPageModeChange(this.state.previousMode)}
             >
               <FormattedMessage

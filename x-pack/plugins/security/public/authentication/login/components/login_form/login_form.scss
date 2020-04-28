@@ -1,4 +1,4 @@
-.lgnCard {
+.secLoginCard {
   display: block;
   box-shadow: none;
   padding: $euiSize;
@@ -6,7 +6,7 @@
   width: 100%;
 
   &:hover {
-    .lgnCard__title {
+    .secLoginCard__title {
       text-decoration: underline;
     }
   }
@@ -15,9 +15,9 @@
     pointer-events: none;
   }
 
-  &:not(.lgnCard-isLoading):disabled {
-    .lgnCard__title,
-    .lgnCard__hint {
+  &:not(.secLoginCard-isLoading):disabled {
+    .secLoginCard__title,
+    .secLoginCard__hint {
       color: $euiColorMediumShade;
     }
   }
@@ -27,32 +27,29 @@
     border-radius: $euiBorderRadius;
     @include euiFocusRing;
 
-    .lgnCard__title {
+    .secLoginCard__title {
       text-decoration: underline;
     }
 
     // Make the focus ring clean and without borders
-    + .lgnCard {
+    + .secLoginCard {
       border-color: transparent;
     }
   }
 
-  + .lgnCard {
+  + .secLoginCard {
     border-top: $euiBorderThin;
   }
 }
 
-.lgnCard__hint {
+.secLoginCard__hint {
   @include euiFontSizeXS;
   color: $euiColorDarkShade;
   margin-top: $euiSizeXS;
 }
 
-.lgnAssistanceMessage {
-  margin-top: -($euiSizeXXL + $euiSizeS); // This tightens up the layout if message is present
-  padding: 0 $euiSize;
-}
-
-.lgnPanel {
+.secLoginAssistanceMessage {
+  // This tightens up the layout if message is present
+  margin-top: -($euiSizeXXL + $euiSizeS);
   padding: 0 $euiSize;
 }

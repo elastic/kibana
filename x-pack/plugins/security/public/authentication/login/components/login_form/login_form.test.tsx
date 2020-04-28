@@ -275,10 +275,10 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.lgnCard').map(card => {
-          const hint = card.find('.lgnCard__hint');
+        wrapper.find('.secLoginCard').map(card => {
+          const hint = card.find('.secLoginCard__hint');
           return {
-            title: card.find('p.lgnCard__title').text(),
+            title: card.find('p.secLoginCard__title').text(),
             hint: hint.exists() ? hint.text() : '',
             icon: card.find(EuiIcon).props().type,
           };
@@ -316,10 +316,10 @@ describe('LoginForm', () => {
       expectPageMode(wrapper, PageMode.Selector);
 
       expect(
-        wrapper.find('.lgnCard').map(card => {
-          const hint = card.find('.lgnCard__hint');
+        wrapper.find('.secLoginCard').map(card => {
+          const hint = card.find('.secLoginCard__hint');
           return {
-            title: card.find('p.lgnCard__title').text(),
+            title: card.find('p.secLoginCard__title').text(),
             hint: hint.exists() ? hint.text() : '',
             icon: card.find(EuiIcon).props().type,
           };
