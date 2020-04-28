@@ -289,7 +289,6 @@ export {
 import {
   // aggs
   aggTypeFilters,
-  aggGroupNamesMap,
   CidrMask,
   intervalOptions, // only used in Discover
   isDateHistogramBucketAggConfig,
@@ -322,6 +321,7 @@ export { ParsedInterval } from '../common';
 
 export {
   // aggs
+  AggGroupLabels,
   AggGroupName,
   AggGroupNames,
   AggParam,
@@ -376,7 +376,6 @@ export {
 // Search namespace
 export const search = {
   aggs: {
-    aggGroupNamesMap,
     aggTypeFilters,
     CidrMask,
     intervalOptions,
