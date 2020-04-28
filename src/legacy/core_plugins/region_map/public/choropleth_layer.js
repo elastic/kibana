@@ -23,7 +23,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import * as topojson from 'topojson-client';
-import { toastNotifications } from 'ui/notify';
+import { getNotifications } from './kibana_services';
 import { colorUtil, KibanaMapLayer } from '../../../../plugins/maps_legacy/public';
 import { truncatedColorMaps } from '../../../../plugins/charts/public';
 
@@ -181,7 +181,7 @@ CORS configuration of the server permits requests from the Kibana application on
           );
         }
 
-        toastNotifications.addDanger({
+        getNotifications().toasts.addDanger({
           title: i18n.translate(
             'regionMap.choroplethLayer.downloadingVectorDataErrorMessageTitle',
             {

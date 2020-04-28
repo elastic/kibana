@@ -22,6 +22,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
+  NotificationsSetup,
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
@@ -43,7 +44,6 @@ interface RegionMapVisualizationDependencies {
   regionmapsConfig: RegionMapsConfig;
   serviceSettings: IServiceSettings;
   BaseMapsVisualization: any;
-  notifications: CoreStart['notifications'] | undefined;
 }
 
 /** @internal */
@@ -51,6 +51,7 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  notifications: NotificationsSetup;
 }
 
 /** @internal */
