@@ -17,7 +17,7 @@ import {
   DEFAULT_TIMELINE_WIDTH,
 } from '../../components/timeline/body/constants';
 import { getColumnWidthFromType } from '../../components/timeline/body/column_headers/helpers';
-import { Direction } from '../../graphql/types';
+import { Direction, TimelineType } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
 import {
@@ -98,6 +98,7 @@ const timelineByIdMock: TimelineById = {
     width: DEFAULT_TIMELINE_WIDTH,
     isSaving: false,
     version: null,
+    timelineType: TimelineType.default,
   },
 };
 
@@ -1130,6 +1131,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1222,6 +1224,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1420,6 +1423,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1512,6 +1516,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1699,6 +1704,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1775,6 +1781,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);
@@ -1875,6 +1882,7 @@ describe('Timeline', () => {
           width: DEFAULT_TIMELINE_WIDTH,
           isSaving: false,
           version: null,
+          timelineType: TimelineType.default,
         },
       };
       expect(update).toEqual(expected);

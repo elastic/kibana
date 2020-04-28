@@ -13,6 +13,7 @@ import {
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
+  TimelineType,
 } from '../graphql/types';
 import { networkModel, State } from '../store';
 
@@ -217,6 +218,7 @@ export const mockGlobalState: State = {
         width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
+        timelineType: TimelineType.default,
       },
     },
   },

@@ -5,7 +5,7 @@
  */
 
 import { TimelineModel } from './model';
-import { Direction } from '../../graphql/types';
+import { Direction, TimelineType } from '../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 
 import { Filter, esFilters } from '../../../../../../src/plugins/data/public';
@@ -149,6 +149,7 @@ describe('Epic Timeline', () => {
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
         savedQueryId: 'my endgame timeline query',
+        timelineType: TimelineType.default,
       };
 
       expect(

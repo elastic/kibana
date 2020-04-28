@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, omit } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';

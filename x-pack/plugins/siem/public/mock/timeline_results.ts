@@ -5,7 +5,13 @@
  */
 
 import { OpenTimelineResult } from '../components/open_timeline/types';
-import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
+import {
+  GetAllTimeline,
+  SortFieldTimeline,
+  TimelineResult,
+  Direction,
+  TimelineType,
+} from '../graphql/types';
 import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
 import { CreateTimelineProps } from '../pages/detection_engine/components/signals/types';
 import { TimelineModel } from '../store/timeline/model';
@@ -2143,6 +2149,7 @@ export const mockTimelineModel: TimelineModel = {
   title: 'Test rule',
   version: '1',
   width: 1100,
+  timelineType: TimelineType.default,
 };
 
 export const mockTimelineResult: TimelineResult = {
@@ -2237,6 +2244,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     title: '',
     version: null,
     width: 1100,
+    timelineType: TimelineType.default,
   },
   to: 1541444605937,
   ruleNote: '# this is some markdown documentation',

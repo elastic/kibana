@@ -6,14 +6,20 @@
 
 import { of, Observable, from } from 'rxjs';
 import { get } from 'lodash/fp';
-import { filter, withLatestFrom, mergeMap, startWith, takeUntil } from 'rxjs/operators';
+import {
+  filter,
+  withLatestFrom,
+  mergeMap,
+  //  startWith,
+  takeUntil,
+} from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import {
   getDraftTimeline as getDraftTimelineAction,
   showCallOutUnauthorizedMsg,
   endTimelineSaving,
-  startTimelineSaving,
+  // startTimelineSaving,
 } from './actions';
 import { getDraftTimeline } from '../../containers/timeline/api';
 import { ActionTimeline, TimelineById } from './types';

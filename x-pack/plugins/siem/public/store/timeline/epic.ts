@@ -19,7 +19,7 @@ import { from, Observable, empty, merge } from 'rxjs';
 import {
   filter,
   map,
-  startWith,
+  // startWith,
   withLatestFrom,
   debounceTime,
   mergeMap,
@@ -58,7 +58,7 @@ import {
   updateAutoSaveMsg,
   setFilters,
   setSavedQueryId,
-  startTimelineSaving,
+  // startTimelineSaving,
   endTimelineSaving,
   createTimeline,
   addTimeline,
