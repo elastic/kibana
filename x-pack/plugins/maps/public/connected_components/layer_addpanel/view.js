@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { SourceSelect } from './source_select/source_select';
 import { FlyoutFooter } from './flyout_footer';
-import { SourceEditor } from './source_editor';
 import { ImportEditor } from './import_editor';
-import { EuiFlexGroup, EuiTitle, EuiFlyoutHeader } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPanel, EuiTitle, EuiFlyoutHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class AddLayerPanel extends Component {
   state = {
     layerWizard: null,
-    layer: null,
+    layerDescriptor: null, // TODO get this from redux store instead of storing locally
+    isIndexingSource: false,
     importView: false,
     layerImportAddReady: false,
   };
@@ -35,13 +36,9 @@ export class AddLayerPanel extends Component {
   }
 
   _getPanelDescription() {
-    const { layerWizard, importView, layerImportAddReady } = this.state;
+    const { importView, layerImportAddReady } = this.state;
     let panelDescription;
-    if (!layerWizard) {
-      panelDescription = i18n.translate('xpack.maps.addLayerPanel.selectSource', {
-        defaultMessage: 'Select source',
-      });
-    } else if (layerImportAddReady || !importView) {
+    if (layerImportAddReady || !importView) {
       panelDescription = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
         defaultMessage: 'Add layer',
       });
@@ -53,29 +50,21 @@ export class AddLayerPanel extends Component {
     return panelDescription;
   }
 
-  _viewLayer = async (source, options = {}) => {
+  _previewLayer = async (layerDescriptor, isIndexingSource) => {
     if (!this._isMounted) {
       return;
     }
-    if (!source) {
-      this.setState({ layer: null });
+    if (!layerDescriptor) {
+      this.setState({
+        layerDescriptor: null,
+        isIndexingSource: false,
+      });
       this.props.removeTransientLayer();
       return;
     }
 
-    const styleDescriptor =
-      this.state.layer && this.state.layer.getCurrentStyle()
-        ? this.state.layer.getCurrentStyle().getDescriptor()
-        : null;
-    const layerInitProps = {
-      ...options,
-      style: styleDescriptor,
-    };
-    const newLayer = source.createDefaultLayer(layerInitProps, this.props.mapColors);
-    if (!this._isMounted) {
-      return;
-    }
-    this.setState({ layer: newLayer }, () => this.props.viewLayer(this.state.layer));
+    this.setState({ layerDescriptor, isIndexingSource });
+    this.props.previewLayer(layerDescriptor);
   };
 
   _clearLayerData = ({ keepSourceType = false }) => {
@@ -84,7 +73,8 @@ export class AddLayerPanel extends Component {
     }
 
     this.setState({
-      layer: null,
+      layerDescriptor: null,
+      isIndexingSource: false,
       ...(!keepSourceType ? { layerWizard: null, importView: false } : {}),
     });
     this.props.removeTransientLayer();
@@ -95,72 +85,75 @@ export class AddLayerPanel extends Component {
   };
 
   _layerAddHandler = () => {
-    const {
-      isIndexingTriggered,
-      setIndexingTriggered,
-      selectLayerAndAdd,
-      resetIndexing,
-    } = this.props;
-    const layerSource = this.state.layer.getSource();
-    const boolIndexLayer = layerSource.shouldBeIndexed();
-    this.setState({ layer: null });
-    if (boolIndexLayer && !isIndexingTriggered) {
-      setIndexingTriggered();
+    if (this.state.isIndexingSource && !this.props.isIndexingTriggered) {
+      this.props.setIndexingTriggered();
     } else {
-      selectLayerAndAdd();
+      this.props.selectLayerAndAdd();
       if (this.state.importView) {
         this.setState({
           layerImportAddReady: false,
         });
-        resetIndexing();
+        this.props.resetIndexing();
       }
     }
   };
 
-  _renderAddLayerPanel() {
-    const { layerWizard, importView } = this.state;
-    if (!layerWizard) {
+  _renderPanelBody() {
+    if (!this.state.layerWizard) {
       return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
     }
-    if (importView) {
+
+    const backButton = this.props.isIndexingTriggered ? null : (
+      <Fragment>
+        <EuiButtonEmpty size="xs" flush="left" onClick={this._clearLayerData} iconType="arrowLeft">
+          <FormattedMessage
+            id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
+            defaultMessage="Change layer"
+          />
+        </EuiButtonEmpty>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+
+    if (this.state.importView) {
       return (
-        <ImportEditor
-          clearSource={this._clearLayerData}
-          viewLayer={this._viewLayer}
-          onRemove={() => this._clearLayerData({ keepSourceType: true })}
-        />
+        <Fragment>
+          {backButton}
+          <ImportEditor
+            clearSource={this._clearLayerData}
+            previewLayer={this._previewLayer}
+            mapColors={this.props.mapColors}
+            onRemove={() => this._clearLayerData({ keepSourceType: true })}
+          />
+        </Fragment>
       );
     }
+
     return (
-      <SourceEditor
-        clearSource={this._clearLayerData}
-        layerWizard={layerWizard}
-        previewLayer={this._viewLayer}
-      />
+      <Fragment>
+        {backButton}
+        <EuiPanel>
+          {this.state.layerWizard.renderWizard({
+            previewLayer: this._previewLayer,
+            mapColors: this.props.mapColors,
+          })}
+        </EuiPanel>
+      </Fragment>
     );
   }
 
-  _renderFooter(buttonDescription) {
-    const { importView, layer } = this.state;
-    const { isIndexingReady, isIndexingSuccess } = this.props;
+  render() {
+    if (!this.props.flyoutVisible) {
+      return null;
+    }
 
-    const buttonEnabled = importView ? isIndexingReady || isIndexingSuccess : !!layer;
-
-    return (
-      <FlyoutFooter
-        showNextButton={!!this.state.layerWizard}
-        disableNextButton={!buttonEnabled}
-        onClick={this._layerAddHandler}
-        nextButtonText={buttonDescription}
-      />
-    );
-  }
-
-  _renderFlyout() {
     const panelDescription = this._getPanelDescription();
+    const isNextBtnEnabled = this.state.importView
+      ? this.props.isIndexingReady || this.props.isIndexingSuccess
+      : !!this.state.layerDescriptor;
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <Fragment>
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiTitle size="s">
             <h2>{panelDescription}</h2>
@@ -168,14 +161,16 @@ export class AddLayerPanel extends Component {
         </EuiFlyoutHeader>
 
         <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
-          <div className="mapLayerPanel__bodyOverflow">{this._renderAddLayerPanel()}</div>
+          <div className="mapLayerPanel__bodyOverflow">{this._renderPanelBody()}</div>
         </div>
-        {this._renderFooter(panelDescription)}
-      </EuiFlexGroup>
-    );
-  }
 
-  render() {
-    return this.props.flyoutVisible ? this._renderFlyout() : null;
+        <FlyoutFooter
+          showNextButton={!!this.state.layerWizard}
+          disableNextButton={!isNextBtnEnabled}
+          onClick={this._layerAddHandler}
+          nextButtonText={panelDescription}
+        />
+      </Fragment>
+    );
   }
 }
