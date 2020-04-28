@@ -106,6 +106,7 @@ export function createBundlesRoute({
       routePath: `/${buildHash}/bundles/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
+      replacePublicPath: false,
       isDist,
     }),
     buildRouteForBundles({
