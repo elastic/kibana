@@ -60,6 +60,7 @@ import {
   initAngularBootstrap,
 } from '../../../plugins/kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
   DashboardContainerFactory,
@@ -221,6 +222,7 @@ export class DashboardPlugin
       euiIconType: 'dashboardApp',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
+      category: DEFAULT_APP_CATEGORIES.analyze,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();

@@ -42,6 +42,7 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
@@ -195,12 +196,7 @@ export class DiscoverPlugin
       order: -1004,
       euiIconType: 'discoverApp',
       defaultPath: '#/',
-      category: {
-        label: i18n.translate('core.ui.analyzeNavList.label', {
-          defaultMessage: 'Analyze',
-        }),
-        order: 1000,
-      },
+      category: DEFAULT_APP_CATEGORIES.analyze,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');

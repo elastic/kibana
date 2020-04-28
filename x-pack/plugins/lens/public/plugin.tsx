@@ -33,6 +33,7 @@ import {
   stopReportManager,
   trackUiEvent,
 } from './lens_ui_telemetry';
+import { AppNavLinkStatus } from '../../../../src/core/public';
 
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { LENS_EMBEDDABLE_TYPE, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
@@ -100,7 +101,7 @@ export class LensPlugin {
 
     core.application.register({
       id: 'lens',
-      navLinkStatus: 3, // TODO should be fetched by enum
+      navLinkStatus: AppNavLinkStatus.hidden,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startDependencies] = await core.getStartServices();

@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { App, AppUpdater, CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
-import { AppNavLinkStatus } from '../../../core/public';
+import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import './index.scss';
 
@@ -109,12 +109,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       updater$: this.appStateUpdater,
       euiIconType: 'devToolsApp',
       order: 9001,
-      category: {
-        label: i18n.translate('core.ui.managementNavList.label', {
-          defaultMessage: 'Management',
-        }),
-        euiIconType: 'managementApp',
-      },
+      category: DEFAULT_APP_CATEGORIES.management,
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {
           throw new Error('not started yet');

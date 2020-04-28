@@ -41,6 +41,7 @@ import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { DefaultEditorController } from '../../vis_default_editor/public';
 import { DashboardStart } from '../../dashboard/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -100,12 +101,7 @@ export class VisualizePlugin
       order: -1002,
       euiIconType: 'visualizeApp',
       defaultPath: '#/',
-      category: {
-        label: i18n.translate('core.ui.analyzeNavList.label', {
-          defaultMessage: 'Analyze',
-        }),
-        order: 1000,
-      },
+      category: DEFAULT_APP_CATEGORIES.analyze,
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

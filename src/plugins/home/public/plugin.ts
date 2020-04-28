@@ -40,6 +40,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
+import { AppNavLinkStatus } from '../../../core/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -68,7 +69,7 @@ export class HomePublicPlugin
     core.application.register({
       id: 'home',
       title: 'Home',
-      navLinkStatus: 3, // TODO should be fetched by enum
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiStats.bind(usageCollection, 'Kibana_home')
