@@ -10,16 +10,17 @@ import { EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
+  className?: string;
   title: React.ReactNode;
 }
 
 export const AuthenticationStatePage: React.FC<Props> = props => (
-  <div className="secAuthenticationStatePage">
+  <div className={`secAuthenticationStatePage ${props.className || ''}`}>
     <header className="secAuthenticationStatePage__header">
       <div className="secAuthenticationStatePage__content eui-textCenter">
         <EuiSpacer size="xxl" />
         <span className="secAuthenticationStatePage__logo">
-          <EuiIcon type="logoKibana" size="xxl" />
+          <EuiIcon type="logoElastic" size="xxl" />
         </span>
         <EuiTitle size="l" className="secAuthenticationStatePage__title">
           <h1>{props.title}</h1>
