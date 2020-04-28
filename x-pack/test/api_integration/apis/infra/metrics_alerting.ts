@@ -39,6 +39,7 @@ export default function({ getService }: FtrProviderContext) {
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
@@ -53,6 +54,21 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
+      });
+      it('should work with a filterQuery in KQL format', async () => {
+        const searchBody = getElasticsearchMetricQuery(
+          getSearchParams('avg'),
+          undefined,
+          '"agent.hostname":"foo"'
+        );
+        const result = await client.search({
+          index,
+          body: searchBody,
+        });
+        expect(result.error).to.not.be.ok();
+        expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
     describe('querying with a groupBy parameter', () => {
@@ -65,6 +81,7 @@ export default function({ getService }: FtrProviderContext) {
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
@@ -79,6 +96,7 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
   });
