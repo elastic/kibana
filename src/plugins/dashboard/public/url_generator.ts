@@ -27,7 +27,7 @@ import {
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
-import { DashboardInitialSavedFiltersHandling } from './types';
+import { DashboardSavedFiltersHandling } from './types';
 import { DashboardConstants } from './dashboard_constants';
 
 export const STATE_STORAGE_KEY = '_a';
@@ -78,7 +78,7 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    *
    * Url generator uses `merge` handling as default
    */
-  savedFiltersHandling?: DashboardInitialSavedFiltersHandling;
+  savedFiltersHandling?: DashboardSavedFiltersHandling;
 }>;
 
 export const createDirectAccessDashboardLinkGenerator = (

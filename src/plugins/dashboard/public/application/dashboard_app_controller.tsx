@@ -59,7 +59,7 @@ import {
   SavedObjectEmbeddableInput,
   ContainerOutput,
 } from '../../../embeddable/public';
-import { DashboardInitialSavedFiltersHandling, NavAction, SavedDashboardPanel } from '../types';
+import { DashboardSavedFiltersHandling, NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -141,7 +141,7 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const savedFiltersHandling: DashboardInitialSavedFiltersHandling =
+    const savedFiltersHandling: DashboardSavedFiltersHandling =
       $routeParams[DashboardConstants.SAVED_FILTERS_HANDLING_PARAM];
     if (savedFiltersHandling) {
       removeQueryParam(history, DashboardConstants.SAVED_FILTERS_HANDLING_PARAM);

@@ -139,4 +139,4 @@ export interface StagedFilter {
  * * override (default) - if there is state in the url, url is source of truth and filters from url take precedence over filters in saved object
  * * merge - filters from url are merge together with filters from saved object
  */
-export type DashboardInitialSavedFiltersHandling = 'merge' | 'override';
+export type DashboardSavedFiltersHandling = 'merge' | 'override';

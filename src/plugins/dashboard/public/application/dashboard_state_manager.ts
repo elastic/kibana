@@ -36,7 +36,7 @@ import {
   DashboardAppStateDefaults,
   DashboardAppStateInUrl,
   DashboardAppStateTransitions,
-  DashboardInitialSavedFiltersHandling,
+  DashboardSavedFiltersHandling,
   SavedDashboardPanel,
 } from '../types';
 import {
@@ -110,7 +110,7 @@ export class DashboardStateManager {
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
     usageCollection?: UsageCollectionSetup;
-    savedFiltersHandling?: DashboardInitialSavedFiltersHandling;
+    savedFiltersHandling?: DashboardSavedFiltersHandling;
   }) {
     this.history = history;
     this.kibanaVersion = kibanaVersion;
