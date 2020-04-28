@@ -54,6 +54,7 @@ const createSuperSelectOptions = <T extends {}>(
   return options.map(option => ({
     value: option.key,
     inputDisplay: <span>{option.label}</span>,
+    'data-test-subj': `dropdown-mapping-${option.key}`,
   }));
 };
 
@@ -120,7 +121,8 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
       <FieldRowWrapper data-test-subj="case-configure-field-mapping-row-wrapper">
         {(mapping ?? defaultMapping).map(item => (
           <FieldMappingRow
-            key={item.source}
+            key={`${item.source}`}
+            id={`${item.source}`}
             disabled={disabled}
             siemField={item.source}
             thirdPartyOptions={getThirdPartyOptions(item.source, selectedConnector.fields)}

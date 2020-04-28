@@ -23,6 +23,7 @@ import {
 import { AllThirdPartyFields } from '../../../../lib/connectors/types';
 
 export interface RowProps {
+  id: string;
   disabled: boolean;
   siemField: CaseField;
   thirdPartyOptions: Array<EuiSuperSelectOption<AllThirdPartyFields>>;
@@ -34,6 +35,7 @@ export interface RowProps {
 }
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({
+  id,
   disabled,
   siemField,
   thirdPartyOptions,
@@ -62,7 +64,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
           onChange={onChangeThirdParty.bind(null, siemField)}
-          data-test-subj={'case-configure-third-party-select'}
+          data-test-subj={`case-configure-third-party-select-${id}`}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -71,7 +73,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={actionTypeOptions}
           valueOfSelected={selectedActionType}
           onChange={onChangeActionType.bind(null, siemField)}
-          data-test-subj={'case-configure-action-type-select'}
+          data-test-subj={`case-configure-action-type-select-${id}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
