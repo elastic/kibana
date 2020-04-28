@@ -45,6 +45,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
             getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
             notifications={core.notifications}
             overlays={core.overlays}
+            application={core.application}
             inspector={plugins.inspector}
             SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           />
