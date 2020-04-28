@@ -22,14 +22,31 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const find = getService('find');
 
   return new (class AppsMenu {
+    /**
+     * Close the collapsible nav
+     * TODO #64541 can replace with a data-test-subj
+     */
+    public async closeCollapsibleNav() {
+      const CLOSE_BUTTON = '[data-test-subj=collapsibleNav] > button';
+      if (await find.existsByCssSelector(CLOSE_BUTTON)) {
+        (await find.byCssSelector(CLOSE_BUTTON)).click();
+      }
+    }
+
+    public async openCollapsibleNav() {
+      if (!(await testSubjects.exists('collapsibleNav'))) {
+        await testSubjects.click('toggleNavButton');
+      }
+    }
+
     /**
      * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
-      await testSubjects.click('toggleNavButton');
-
+      await this.openCollapsibleNav();
       const appMenu = await testSubjects.find('collapsibleNav');
       const $ = await appMenu.parseDomContent();
       const links = $.findTestSubjects('collapsibleNavAppLink')
@@ -42,7 +59,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
           };
         });
 
-      await testSubjects.click('toggleNavButton');
+      await this.closeCollapsibleNav();
 
       return links;
     }
@@ -70,11 +87,11 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     public async clickLink(name: string) {
       try {
         log.debug(`click "${name}" app link`);
-        await testSubjects.click('toggleNavButton');
-
+        await this.openCollapsibleNav();
         const nav = await testSubjects.find('collapsibleNav');
         const link = await nav.findByPartialLinkText(name);
         await link.click();
+        await this.closeCollapsibleNav();
       } finally {
         // Intentionally empty
       }

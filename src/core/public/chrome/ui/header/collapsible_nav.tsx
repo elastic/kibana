@@ -169,9 +169,11 @@ export function CollapsibleNav({
         {orderedCategories.map((categoryName, i) => {
           const category = categoryDictionary[categoryName]!;
           const links = allCategorizedLinks[categoryName].map(
-            ({ label, href, onClick }: NavLink) => ({
+            ({ label, href, isActive, isDisabled, onClick }: NavLink) => ({
               label,
               href,
+              isActive,
+              isDisabled,
               'data-test-subj': 'collapsibleNavAppLink',
               onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                 onIsOpenUpdate(false);
@@ -205,18 +207,21 @@ export function CollapsibleNav({
         })}
 
         {/* Things with no category (largely for custom plugins) */}
-        {unknowns.map((linkWithoutCategory, i) => (
+        {unknowns.map(({ label, href, icon, isActive, isDisabled, onClick }, i) => (
           <EuiCollapsibleNavGroup key={i}>
             <EuiListGroup flush>
               <EuiListGroupItem
                 color="text"
                 size="s"
-                label={linkWithoutCategory.label}
-                href={linkWithoutCategory.href}
-                icon={linkWithoutCategory.icon}
+                label={label}
+                href={href}
+                icon={icon}
+                isActive={isActive}
+                isDisabled={isDisabled}
+                data-test-subj="collapsibleNavAppLink"
                 onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                   onIsOpenUpdate(false);
-                  linkWithoutCategory.onClick(e);
+                  onClick(e);
                 }}
               />
             </EuiListGroup>

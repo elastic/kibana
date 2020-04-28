@@ -65,14 +65,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       });
       link = await appsMenu.getLink('App Status');
       expect(link).to.eql(undefined);
-
-      await setAppStatus({
-        navLinkStatus: AppNavLinkStatus.visible,
-        tooltip: 'Some tooltip',
-      });
-      link = await appsMenu.getLink('Some tooltip'); // the tooltip replaces the name in the selector we use.
-      expect(link).not.to.eql(undefined);
-      expect(link!.disabled).to.eql(false);
     });
 
     it('shows an error when navigating to an inaccessible app', async () => {
