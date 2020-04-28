@@ -68,7 +68,7 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
 export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables);
 
-  const template = Handlebars.compile(streamTemplate, { noEscape: true });
+  const template = Handlebars.compile(streamTemplate);
   const stream = template(vars);
 
   const yamlFromStream = safeLoad(stream, {});
