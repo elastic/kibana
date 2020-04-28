@@ -34,7 +34,7 @@ import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { setFormatService } from './services';
+import { setFormatService, setQueryService } from './services';
 
 /** @private */
 interface TileMapVisualizationDependencies {
@@ -83,5 +83,6 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
 
   public start(core: CoreStart, { data }: TileMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
+    setQueryService(data.query);
   }
 }

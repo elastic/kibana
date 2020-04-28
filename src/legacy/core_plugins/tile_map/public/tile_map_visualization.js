@@ -19,8 +19,7 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { npStart } from 'ui/new_platform';
-import { getFormatService } from './services';
+import { getFormatService, getQueryService } from './services';
 import {
   scaleBounds,
   geoContains,
@@ -215,7 +214,7 @@ export const createTileMapVisualization = dependencies => {
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
 
-      const { filterManager } = npStart.plugins.data.query;
+      const { filterManager } = getQueryService();
       filterManager.addFilters([filter]);
 
       this.vis.updateState();

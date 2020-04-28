@@ -23,3 +23,7 @@ import { DataPublicPluginStart } from '../../../../plugins/data/public';
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
