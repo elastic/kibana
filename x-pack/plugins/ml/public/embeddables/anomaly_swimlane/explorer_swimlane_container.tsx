@@ -132,6 +132,15 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             };
           });
 
+          let appliedFilters: any;
+          try {
+            appliedFilters = processFilters(filters, query);
+          } catch (e) {
+            // handle query syntax errors
+            setError(e);
+            return of(undefined);
+          }
+
           return from(explorerService.loadOverallData(explorerJobs, swimlaneContainerWidth)).pipe(
             switchMap(overallSwimlaneData => {
               const { earliest, latest } = overallSwimlaneData;
@@ -145,7 +154,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
                     viewBy!,
                     limit!,
                     swimlaneContainerWidth,
-                    processFilters(filters, query)
+                    appliedFilters
                   )
                 ).pipe(
                   map(viewBySwimlaneData => {
@@ -167,7 +176,10 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         })
       )
       .subscribe(data => {
-        setSwimlaneData(data);
+        if (data !== undefined) {
+          setError(null);
+          setSwimlaneData(data);
+        }
       });
 
     return () => {
