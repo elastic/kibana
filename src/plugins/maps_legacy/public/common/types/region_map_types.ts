@@ -17,26 +17,20 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { CoreStart, Plugin } from 'kibana/public';
+import { VectorLayer, FileLayerField } from '../../index';
+import { WMSOptions } from './external_basemap_types';
 
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  $injector: any;
-  serviceSettings: any;
-}
-
-export class LegacyDependenciesPlugin
-  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
-  public async setup() {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-
-    return {
-      $injector,
-    } as LegacyDependenciesPluginSetup;
-  }
-
-  public start(core: CoreStart) {
-    // nothing to do here yet
-  }
+export interface RegionMapVisParams {
+  readonly addTooltip: true;
+  readonly legendPosition: 'bottomright';
+  colorSchema: string;
+  emsHotLink?: string | null;
+  mapCenter: [number, number];
+  mapZoom: number;
+  outlineWeight: number | '';
+  isDisplayWarning: boolean;
+  showAllShapes: boolean;
+  selectedLayer?: VectorLayer;
+  selectedJoinField?: FileLayerField;
+  wms: WMSOptions;
 }
