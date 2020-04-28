@@ -155,13 +155,16 @@ export const signalRulesAlertType = ({
             await ruleStatusService.error(errorMessage);
           }
 
+          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
           const anomalyResults = await findMlSignals(
             machineLearningJobId,
             anomalyThreshold,
             from,
             to,
-            services.callCluster
+            scopedMlCallCluster
           );
+          // TODO What happens if the ML checks fail?
+
           const anomalyCount = anomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
