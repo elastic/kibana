@@ -50,6 +50,7 @@ export interface LegacyAPI {
 export interface SecurityPluginSetup {
   authc: Authentication;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  license: SecurityLicense;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -64,7 +65,6 @@ export interface SecurityPluginSetup {
   __legacyCompat: {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
-    license: SecurityLicense;
   };
 }
 
@@ -175,6 +175,8 @@ export class Plugin {
         mode: authz.mode,
       },
 
+      license,
+
       registerSpacesService: service => {
         if (this.wasSpacesServiceAccessed()) {
           throw new Error('Spaces service has been accessed before registration.');
@@ -187,8 +189,6 @@ export class Plugin {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
-
-        license,
       },
     });
   }
