@@ -7,16 +7,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButtonGroup, EuiSteps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useEnrollmentApiKey } from '../enrollment_api_keys';
 import {
   ShellEnrollmentInstructions,
   ManualInstructions,
 } from '../../../../../components/enrollment_instructions';
-import { useCore, useGetAgents } from '../../../../../hooks';
+import { useCore, useGetAgents, useGetOneEnrollmentAPIKey } from '../../../../../hooks';
 import { Loading } from '../../../components';
 
 interface Props {
-  selectedAPIKeyId: string | null;
+  selectedAPIKeyId: string | undefined;
 }
 function useNewEnrolledAgents() {
   // New enrolled agents
@@ -44,7 +43,7 @@ export const EnrollmentInstructions: React.FunctionComponent<Props> = ({ selecte
   const core = useCore();
   const [installType, setInstallType] = useState<'quickInstall' | 'manual'>('quickInstall');
 
-  const apiKey = useEnrollmentApiKey(selectedAPIKeyId);
+  const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
   const newAgents = useNewEnrolledAgents();
   if (!apiKey.data) {
