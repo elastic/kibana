@@ -95,7 +95,7 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    requestContext: RequestHandlerContext,
+    savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
@@ -107,7 +107,7 @@ export class InfraSources {
     );
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await requestContext.core.savedObjects.client.create(
+      await savedObjectsClient.create(
         infraSourceConfigurationSavedObjectType,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
