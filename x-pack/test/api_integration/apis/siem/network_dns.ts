@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { networkDnsQuery } from '../../../../legacy/plugins/siem/public/containers/network_dns/index.gql_query';
+import { networkDnsQuery } from '../../../../plugins/siem/public/containers/network_dns/index.gql_query';
 import {
   Direction,
   GetNetworkDnsQuery,
   NetworkDnsFields,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {

@@ -10,17 +10,14 @@ import {
   ActionTypeExecutorOptions,
   ActionTypeExecutorResult,
 } from '../types';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.slack';
 
-const services: Services = {
-  callCluster: async (path: string, opts: unknown) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 
