@@ -43,6 +43,8 @@ import { Filter } from '../../../../../../src/plugins/data/common/es_query/filte
 import { esKuery, Query } from '../../../../../../src/plugins/data/public';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
+const RESIZE_IGNORED_DIFF_PX = 20;
+const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
@@ -98,15 +100,13 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         skipWhile(v => !v),
         distinctUntilChanged((prev, curr) => {
           // emit only if the width has been changed significantly
-          const allowedDiff = 20;
-          const diff = Math.abs(curr - prev);
-          return diff < allowedDiff;
+          return Math.abs(curr - prev) < RESIZE_IGNORED_DIFF_PX;
         })
       ),
       refresh.pipe(startWith(null)),
     ])
       .pipe(
-        debounceTime(500),
+        debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         switchMap(([jobs, input, swimlaneContainerWidth]) => {
           const {
             viewBy,
@@ -198,7 +198,7 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
         title={
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.errorMessage"
-            defaultMessage="Unable to load the swimlane data"
+            defaultMessage="Unable to load the ML swimlane data"
           />
         }
         color="danger"

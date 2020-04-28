@@ -29,7 +29,6 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
   let jobCount;
 
   if (icon === true && removeId) {
-    // TODO check iconOnClick prop required by EuiBadge
     // @ts-ignore
     props = {
       ...props,

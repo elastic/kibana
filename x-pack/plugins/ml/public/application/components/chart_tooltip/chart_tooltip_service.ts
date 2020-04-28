@@ -26,7 +26,7 @@ interface TooltipPosition {
 
 export interface ChartTooltipState {
   isTooltipVisible: boolean;
-  offset: ToolTipOffset;
+  offset: TooltipOffset;
   targetPosition: ClientRect;
   tooltipData: TooltipData;
   tooltipHeaderFormatter?: TooltipValueFormatter;
@@ -34,7 +34,7 @@ export interface ChartTooltipState {
   target: HTMLElement | null;
 }
 
-interface ToolTipOffset {
+interface TooltipOffset {
   x: number;
   y: number;
 }
@@ -58,7 +58,7 @@ export class ChartTooltipService {
   public show(
     tooltipData: TooltipData,
     target?: HTMLElement | null,
-    offset: ToolTipOffset = { x: 0, y: 0 }
+    offset: TooltipOffset = { x: 0, y: 0 }
   ) {
     if (typeof target !== 'undefined' && target !== null) {
       this.chartTooltip$.next({
