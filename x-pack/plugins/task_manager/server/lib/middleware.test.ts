@@ -28,9 +28,9 @@ const getMockConcreteTaskInstance = () => {
     scheduledAt: Date;
     startedAt: Date | null;
     retryAt: Date | null;
-    state: any;
+    state: unknown;
     taskType: string;
-    params: any;
+    params: unknown;
     ownerId: string | null;
   } = {
     id: 'hy8o99o83',
@@ -47,7 +47,7 @@ const getMockConcreteTaskInstance = () => {
     params: { abc: 'def' },
     ownerId: null,
   };
-  return concrete;
+  return (concrete as unknown) as ConcreteTaskInstance;
 };
 const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
   taskInstance: runTask,
@@ -95,7 +95,7 @@ describe('addMiddlewareToChain', () => {
 
     await middlewareChain
       .beforeSave({ taskInstance: getMockTaskInstance() })
-      .then((saveOpts: any) => {
+      .then((saveOpts: unknown) => {
         expect(saveOpts).toMatchInlineSnapshot(`
           Object {
             "taskInstance": Object {
