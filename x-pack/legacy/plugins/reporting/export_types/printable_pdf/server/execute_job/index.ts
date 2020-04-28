@@ -26,14 +26,12 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   parentLogger: Logger
 ) {
   const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
 
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
-    const browserDriverFactory = await reporting.getBrowserDriverFactory();
-    const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
+    const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
