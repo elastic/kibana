@@ -214,6 +214,10 @@ export function CollapsibleNav({
                 label={linkWithoutCategory.label}
                 href={linkWithoutCategory.href}
                 icon={linkWithoutCategory.icon}
+                onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                  onIsOpenUpdate(false);
+                  linkWithoutCategory.onClick(e);
+                }}
               />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
