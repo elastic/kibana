@@ -8,6 +8,7 @@
 /optimize
 /plugins
 /test/fixtures/scenarios
+/x-pack/build
 node_modules
 target
 
