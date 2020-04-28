@@ -26,12 +26,12 @@ export const readListIndexRoute = (router: IRouter): void => {
 
       try {
         const lists = getListClient(context);
-        const listsIndexExists = await lists.getListIndexExists();
+        const listIndexExists = await lists.getListIndexExists();
         const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (listsIndexExists || listItemIndexExists) {
+        if (listIndexExists || listItemIndexExists) {
           const [validated, errors] = validate(
-            { lists_index: listsIndexExists, lists_items_index: listItemIndexExists },
+            { list_index: listIndexExists, lists_item_index: listItemIndexExists },
             listItemIndexExistSchema
           );
           if (errors != null) {
@@ -39,12 +39,12 @@ export const readListIndexRoute = (router: IRouter): void => {
           } else {
             return response.ok({ body: validated ?? {} });
           }
-        } else if (!listsIndexExists && listItemIndexExists) {
+        } else if (!listIndexExists && listItemIndexExists) {
           return siemResponse.error({
             body: `index ${lists.getListIndex()} does not exist`,
             statusCode: 404,
           });
-        } else if (!listItemIndexExists && listsIndexExists) {
+        } else if (!listItemIndexExists && listIndexExists) {
           return siemResponse.error({
             body: `index ${lists.getListItemIndex()} does not exist`,
             statusCode: 404,

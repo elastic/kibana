@@ -15,9 +15,9 @@ import {
 } from '../siem_server_deps';
 import {
   ImportListItemSchema,
-  acknowledgeSchema,
   importListItemQuerySchema,
   importListItemSchema,
+  listSchema,
 } from '../../common/schemas';
 
 import { getListClient } from '.';
@@ -59,11 +59,12 @@ export const importListItemRoute = (router: IRouter): void => {
             type: list.type,
           });
 
-          return response.accepted({
-            body: {
-              acknowledged: true,
-            },
-          });
+          const [validated, errors] = validate(list, listSchema);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         } else if (type != null) {
           const { filename } = request.body.file.hapi;
           // TODO: Should we prevent the same file from being uploaded multiple times?
@@ -80,7 +81,7 @@ export const importListItemRoute = (router: IRouter): void => {
             stream: request.body.file,
             type: list.type,
           });
-          const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
+          const [validated, errors] = validate(list, listSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });
           } else {

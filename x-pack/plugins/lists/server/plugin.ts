@@ -33,16 +33,17 @@ export class ListPlugin {
       .pipe(first())
       .toPromise();
 
-    if (config.enabled) {
-      this.spaces = plugins.spaces?.spacesService;
-      this.config = config;
-      this.elasticsearch = core.elasticsearch;
-      this.security = plugins.security;
+    this.logger.error(
+      'You have activated the lists values feature flag which is NOT currently supported for Elastic Security! You should turn this feature flag off immediately by un-setting "xpack.lists.enabled: true" in kibana.yml and restarting Kibana'
+    );
+    this.spaces = plugins.spaces?.spacesService;
+    this.config = config;
+    this.elasticsearch = core.elasticsearch;
+    this.security = plugins.security;
 
-      core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
-      const router = core.http.createRouter();
-      initRoutes(router);
-    }
+    core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
+    const router = core.http.createRouter();
+    initRoutes(router);
   }
 
   public start(): void {

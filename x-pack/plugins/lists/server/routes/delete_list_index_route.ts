@@ -42,16 +42,16 @@ export const deleteListIndexRoute = (router: IRouter): void => {
 
       try {
         const lists = getListClient(context);
-        const listsIndexExists = await lists.getListIndexExists();
+        const listIndexExists = await lists.getListIndexExists();
         const listItemIndexExists = await lists.getListItemIndexExists();
 
-        if (!listsIndexExists && !listItemIndexExists) {
+        if (!listIndexExists && !listItemIndexExists) {
           return siemResponse.error({
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" does not exist`,
             statusCode: 404,
           });
         } else {
-          if (listsIndexExists) {
+          if (listIndexExists) {
             await lists.deleteListIndex();
           }
           if (listItemIndexExists) {

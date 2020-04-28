@@ -7,7 +7,7 @@
 import { TypeOf, schema } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
   listIndex: schema.string({ defaultValue: '.lists' }),
   listItemIndex: schema.string({ defaultValue: '.items' }),
 });

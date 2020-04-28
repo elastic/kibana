@@ -7,8 +7,8 @@
 import * as t from 'io-ts';
 
 export const listItemIndexExistSchema = t.type({
-  lists_index: t.boolean,
-  lists_items_index: t.boolean,
+  list_index: t.boolean,
+  list_item_index: t.boolean,
 });
 
 export type ListItemIndexExistSchema = t.TypeOf<typeof listItemIndexExistSchema>;
