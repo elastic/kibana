@@ -595,3 +595,103 @@ export type NewPolicyData = NewDatasource & {
     }
   ];
 };
+
+/**
+ * the possible status for actions, configurations and overall Policy Response
+ */
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
+/**
+ * The details of a given action
+ */
+interface HostPolicyResponseActionDetails {
+  status: HostPolicyResponseActionStatus;
+  message: string;
+}
+
+/**
+ * A known list of possible Endpoint actions
+ */
+interface HostPolicyResponseActions {
+  download_model: HostPolicyResponseActionDetails;
+  ingest_events_config: HostPolicyResponseActionDetails;
+  workflow: HostPolicyResponseActionDetails;
+  configure_elasticsearch_connection: HostPolicyResponseActionDetails;
+  configure_kernel: HostPolicyResponseActionDetails;
+  configure_logging: HostPolicyResponseActionDetails;
+  configure_malware: HostPolicyResponseActionDetails;
+  connect_kernel: HostPolicyResponseActionDetails;
+  detect_file_open_events: HostPolicyResponseActionDetails;
+  detect_file_write_events: HostPolicyResponseActionDetails;
+  detect_image_load_events: HostPolicyResponseActionDetails;
+  detect_process_events: HostPolicyResponseActionDetails;
+  download_global_artifacts: HostPolicyResponseActionDetails;
+  load_config: HostPolicyResponseActionDetails;
+  load_malware_model: HostPolicyResponseActionDetails;
+  read_elasticsearch_config: HostPolicyResponseActionDetails;
+  read_events_config: HostPolicyResponseActionDetails;
+  read_kernel_config: HostPolicyResponseActionDetails;
+  read_logging_config: HostPolicyResponseActionDetails;
+  read_malware_config: HostPolicyResponseActionDetails;
+  // The list of possible Actions will change rapidly, so the below entry will allow
+  // them without us defining them here statically
+  [key: string]: HostPolicyResponseActionDetails;
+}
+
+interface HostPolicyResponseConfigurationStatus {
+  status: HostPolicyResponseActionStatus;
+  concerned_actions: Array<keyof HostPolicyResponseActions>;
+}
+
+/**
+ * Information about the applying of a policy to a given host
+ */
+export interface HostPolicyResponse {
+  '@timestamp': string;
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
+  ecs: {
+    version: string;
+  };
+  event: {
+    created: string;
+    kind: string;
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
+  endpoint: {
+    artifacts: {};
+    policy: {
+      applied: {
+        version: string;
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        response: {
+          configurations: {
+            malware: HostPolicyResponseConfigurationStatus;
+            events: HostPolicyResponseConfigurationStatus;
+            logging: HostPolicyResponseConfigurationStatus;
+            streaming: HostPolicyResponseConfigurationStatus;
+          };
+          actions: Partial<HostPolicyResponseActions>;
+        };
+      };
+    };
+  };
+}
+
+/**
+ * REST API response for retrieving a host's Policy Response status
+ */
+export interface GetHostPolicyResponse {
+  policy_response: HostPolicyResponse;
+}

@@ -77,7 +77,7 @@ export class AlertTypeRegistry {
   }
 }
 
-function normalizedActionVariables(actionVariables: any) {
+function normalizedActionVariables(actionVariables: AlertType['actionVariables']) {
   return {
     context: actionVariables?.context ?? [],
     state: actionVariables?.state ?? [],

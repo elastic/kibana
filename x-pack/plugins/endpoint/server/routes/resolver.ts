@@ -6,15 +6,19 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { validateTree } from '../../common/schema/tree';
-import { handleEvents, validateEvents } from './resolver/events';
-import { handleChildren, validateChildren } from './resolver/children';
-import { handleAncestry, validateAncestry } from './resolver/ancestry';
+import {
+  validateTree,
+  validateEvents,
+  validateChildren,
+  validateAncestry,
+} from '../../common/schema/resolver';
+import { handleEvents } from './resolver/events';
+import { handleChildren } from './resolver/children';
+import { handleAncestry } from './resolver/ancestry';
 import { handleTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
-  const indexPatternService = endpointAppContext.indexPatternRetriever;
 
   router.get(
     {
@@ -22,7 +26,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateEvents,
       options: { authRequired: true },
     },
-    handleEvents(log, indexPatternService)
+    handleEvents(log, endpointAppContext)
   );
 
   router.get(
@@ -31,7 +35,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateChildren,
       options: { authRequired: true },
     },
-    handleChildren(log, indexPatternService)
+    handleChildren(log, endpointAppContext)
   );
 
   router.get(
@@ -40,7 +44,7 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateAncestry,
       options: { authRequired: true },
     },
-    handleAncestry(log, indexPatternService)
+    handleAncestry(log, endpointAppContext)
   );
 
   router.get(
@@ -49,6 +53,6 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(log, indexPatternService)
+    handleTree(log, endpointAppContext)
   );
 }

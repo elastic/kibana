@@ -6,14 +6,14 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateTree } from '../../../common/schema/tree';
+import { validateTree } from '../../../common/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { Tree } from './utils/tree';
-import { IndexPatternRetriever } from '../../index_pattern';
+import { EndpointAppContext } from '../../types';
 
 export function handleTree(
   log: Logger,
-  indexRetriever: IndexPatternRetriever
+  endpointAppContext: EndpointAppContext
 ): RequestHandler<TypeOf<typeof validateTree.params>, TypeOf<typeof validateTree.query>> {
   return async (context, req, res) => {
     const {
@@ -30,6 +30,7 @@ export function handleTree(
     } = req;
     try {
       const client = context.core.elasticsearch.dataClient;
+      const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);

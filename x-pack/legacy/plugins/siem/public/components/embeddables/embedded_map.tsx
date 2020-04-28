@@ -208,6 +208,7 @@ export const EmbeddedMapComponent = ({
             notifications={services.notifications}
             overlays={services.overlays}
             inspector={services.inspector}
+            application={services.application}
             SavedObjectFinder={getSavedObjectFinder(services.savedObjects, services.uiSettings)}
           />
         ) : !isLoading && isIndexError ? (
