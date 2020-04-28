@@ -101,6 +101,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |---|---|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
+|services.getScopedCallCluster|This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who created the alert when security is enabled. This must only be called with instances of CallCluster provided by core.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
