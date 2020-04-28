@@ -143,7 +143,9 @@ export class Plugin
   private async registerLogsAlertType(pluginsSetup: ClientPluginsSetup) {
     const { getAlertType } = await import('./components/alerting/logs/log_threshold_alert_type');
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    if (!pluginsSetup.triggers_actions_ui.alertTypeRegistry.has(getAlertType().id)) {
+      pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    }
   }
 
   private async registerMetricsAlertType(pluginsSetup: ClientPluginsSetup) {
@@ -151,6 +153,8 @@ export class Plugin
       './components/alerting/metrics/metric_threshold_alert_type'
     );
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    if (!pluginsSetup.triggers_actions_ui.alertTypeRegistry.has(getAlertType().id)) {
+      pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    }
   }
 }
