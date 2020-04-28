@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointAppConstants } from '../../../../common/types';
+
 import { LifecycleQuery } from './lifecycle';
 import { fakeEventIndexPattern } from './children.test';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', () => {
-    expect(
-      new LifecycleQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id').build('5')
-    ).toStrictEqual({
+    expect(new LifecycleQuery(legacyEventIndexPattern, 'awesome-id').build('5')).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -34,7 +33,7 @@ describe('lifecycle query', () => {
         size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
-      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      index: legacyEventIndexPattern,
     });
   });
 

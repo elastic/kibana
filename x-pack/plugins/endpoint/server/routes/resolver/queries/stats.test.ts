@@ -3,15 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointAppConstants } from '../../../../common/types';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { StatsQuery } from './stats';
 import { fakeEventIndexPattern } from './children.test';
 
 describe('stats query', () => {
   it('generates the correct legacy queries', () => {
-    expect(
-      new StatsQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id').build('5')
-    ).toStrictEqual({
+    expect(new StatsQuery(legacyEventIndexPattern, 'awesome-id').build('5')).toStrictEqual({
       body: {
         size: 0,
         query: {
@@ -103,7 +101,7 @@ describe('stats query', () => {
           },
         },
       },
-      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      index: legacyEventIndexPattern,
     });
   });
 

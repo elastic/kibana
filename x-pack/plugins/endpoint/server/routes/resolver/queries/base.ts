@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import { EndpointAppConstants, ResolverEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 import {
   paginate,
   paginatedResults,
@@ -14,6 +14,7 @@ import {
   PaginatedResults,
 } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 export abstract class ResolverQuery {
   constructor(
@@ -33,7 +34,7 @@ export abstract class ResolverQuery {
 
   build(...ids: string[]) {
     if (this.endpointID) {
-      return this.legacyQuery(this.endpointID, ids, EndpointAppConstants.LEGACY_EVENT_INDEX_NAME);
+      return this.legacyQuery(this.endpointID, ids, legacyEventIndexPattern);
     }
     return this.query(ids, this.indexPattern);
   }

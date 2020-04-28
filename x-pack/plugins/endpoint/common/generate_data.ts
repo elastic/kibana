@@ -9,9 +9,9 @@ import seedrandom from 'seedrandom';
 import {
   AlertEvent,
   EndpointEvent,
-  HostFields,
+  Host,
   HostMetadata,
-  OSFields,
+  HostOS,
   PolicyData,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
@@ -29,7 +29,7 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -56,11 +56,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -102,7 +102,7 @@ interface HostInfo {
     version: string;
     id: string;
   };
-  host: HostFields;
+  host: Host;
   endpoint: {
     policy: {
       id: string;
