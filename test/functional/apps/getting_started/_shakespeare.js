@@ -59,9 +59,9 @@ export default function({ getService, getPageObjects }) {
 
     it('should create shakespeare index pattern', async function() {
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.createIndexPattern('shakes', null);
+      await PageObjects.settings.createIndexPattern('shakespeare', null);
       const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('shakes*');
+      expect(patternName).to.be('shakespeare');
     });
 
     // https://www.elastic.co/guide/en/kibana/current/tutorial-visualizing.html
@@ -74,7 +74,7 @@ export default function({ getService, getPageObjects }) {
       log.debug('create shakespeare vertical bar chart');
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch('shakes*');
+      await PageObjects.visualize.clickNewSearch('shakespeare');
       await PageObjects.visChart.waitForVisualization();
 
       const expectedChartValues = [111396];
