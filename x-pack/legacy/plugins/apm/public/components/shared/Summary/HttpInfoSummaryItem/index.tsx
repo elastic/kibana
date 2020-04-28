@@ -11,9 +11,9 @@ import styled from 'styled-components';
 import { units, px, truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 
-const HttpInfoBadge = styled(EuiBadge)`
+const HttpInfoBadge = (styled(EuiBadge)`
   margin-right: ${px(units.quarter)};
-`;
+` as unknown) as typeof EuiBadge;
 
 const Url = styled('span')`
   display: inline-block;

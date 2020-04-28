@@ -170,7 +170,7 @@ function DefaultEditorAggGroup({
                     agg={agg}
                     aggIndex={index}
                     aggIsTooLow={calcAggIsTooLow(agg, index, group, schemas)}
-                    dragHandleProps={provided.dragHandleProps}
+                    dragHandleProps={provided.dragHandleProps || null}
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}

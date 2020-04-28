@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -36,11 +35,11 @@ import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
 import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const { notifications, services } = useKibana();
-  const history = useHistory();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -53,7 +52,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
 
-  // Handle showing udpate statuses
+  // Handle showing update statuses
   useEffect(() => {
     if (policyUpdateStatus) {
       if (policyUpdateStatus.success) {
@@ -80,15 +79,9 @@ export const PolicyDetails = React.memo(() => {
         });
       }
     }
-  }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
+  }, [notifications.toasts, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick: React.MouseEventHandler = useCallback(
-    ev => {
-      ev.preventDefault();
-      history.push(`/policy`);
-    },
-    [history]
-  );
+  const handleBackToListOnClick = useNavigateByRouterEventHandler('/policy');
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);

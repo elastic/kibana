@@ -6,21 +6,27 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { handleRelatedEvents, validateRelatedEvents } from './resolver/related_events';
-import { handleChildren, validateChildren } from './resolver/children';
-import { handleLifecycle, validateLifecycle } from './resolver/lifecycle';
+import {
+  validateTree,
+  validateEvents,
+  validateChildren,
+  validateAncestry,
+} from '../../common/schema/resolver';
+import { handleEvents } from './resolver/events';
+import { handleChildren } from './resolver/children';
+import { handleAncestry } from './resolver/ancestry';
+import { handleTree } from './resolver/tree';
 
 export function registerResolverRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   const log = endpointAppContext.logFactory.get('resolver');
-  const indexPatternService = endpointAppContext.indexPatternRetriever;
 
   router.get(
     {
-      path: '/api/endpoint/resolver/{id}/related',
-      validate: validateRelatedEvents,
+      path: '/api/endpoint/resolver/{id}/events',
+      validate: validateEvents,
       options: { authRequired: true },
     },
-    handleRelatedEvents(log, indexPatternService)
+    handleEvents(log, endpointAppContext)
   );
 
   router.get(
@@ -29,15 +35,24 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
       validate: validateChildren,
       options: { authRequired: true },
     },
-    handleChildren(log, indexPatternService)
+    handleChildren(log, endpointAppContext)
+  );
+
+  router.get(
+    {
+      path: '/api/endpoint/resolver/{id}/ancestry',
+      validate: validateAncestry,
+      options: { authRequired: true },
+    },
+    handleAncestry(log, endpointAppContext)
   );
 
   router.get(
     {
       path: '/api/endpoint/resolver/{id}',
-      validate: validateLifecycle,
+      validate: validateTree,
       options: { authRequired: true },
     },
-    handleLifecycle(log, indexPatternService)
+    handleTree(log, endpointAppContext)
   );
 }

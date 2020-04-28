@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -13,10 +13,13 @@ import {
   EuiFlexItem,
   EuiDescriptionList,
   EuiButton,
+  EuiPopover,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiButtonEmpty,
   EuiIconTip,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +29,7 @@ import { Agent } from '../../../../types';
 import { AgentHealth } from '../../components/agent_health';
 import { useCapabilities, useGetOneAgentConfig } from '../../../../hooks';
 import { Loading } from '../../../../components';
-import { ConnectedLink } from '../../components';
+import { ConnectedLink, AgentReassignConfigFlyout } from '../../components';
 import { AgentUnenrollProvider } from '../../components/agent_unenroll_provider';
 
 const Item: React.FunctionComponent<{ label: string }> = ({ label, children }) => {
@@ -56,10 +59,19 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
   const hasWriteCapabilites = useCapabilities().write;
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
+  // Actions menu
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+  const handleCloseMenu = useCallback(() => setIsActionsPopoverOpen(false), [
+    setIsActionsPopoverOpen,
+  ]);
+  const handleToggleMenu = useCallback(() => setIsActionsPopoverOpen(!isActionsPopoverOpen), [
+    isActionsPopoverOpen,
+  ]);
+  const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(false);
 
   // Fetch AgentConfig information
   const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
-    agent.config_id as string
+    agent.config_id
   );
 
   const items = [
@@ -111,6 +123,9 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
 
   return (
     <>
+      {isReassignFlyoutOpen && (
+        <AgentReassignConfigFlyout agent={agent} onClose={() => setIsReassignFlyoutOpen(false)} />
+      )}
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="l">
@@ -123,21 +138,55 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AgentUnenrollProvider>
-            {unenrollAgentsPrompt => (
-              <EuiButton
-                disabled={!hasWriteCapabilites || !agent.active}
-                onClick={() => {
-                  unenrollAgentsPrompt([agent.id], 1, refreshAgent);
-                }}
-              >
+          <EuiPopover
+            anchorPosition="downRight"
+            panelPaddingSize="none"
+            button={
+              <EuiButton onClick={handleToggleMenu}>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentDetails.unenrollButtonText"
-                  defaultMessage="Unenroll"
+                  id="xpack.ingestManager.agentDetails.actionsButton"
+                  defaultMessage="Actions"
                 />
               </EuiButton>
-            )}
-          </AgentUnenrollProvider>
+            }
+            isOpen={isActionsPopoverOpen}
+            closePopover={handleCloseMenu}
+          >
+            <EuiContextMenuPanel
+              items={[
+                <EuiContextMenuItem
+                  icon="pencil"
+                  onClick={() => {
+                    handleCloseMenu();
+                    setIsReassignFlyoutOpen(true);
+                  }}
+                  key="reassignConfig"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentList.reassignActionText"
+                    defaultMessage="Assign new agent config"
+                  />
+                </EuiContextMenuItem>,
+
+                <AgentUnenrollProvider>
+                  {unenrollAgentsPrompt => (
+                    <EuiContextMenuItem
+                      icon="cross"
+                      disabled={!hasWriteCapabilites || !agent.active}
+                      onClick={() => {
+                        unenrollAgentsPrompt([agent.id], 1, refreshAgent);
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestManager.agentList.unenrollOneButton"
+                        defaultMessage="Unenroll"
+                      />
+                    </EuiContextMenuItem>
+                  )}
+                </AgentUnenrollProvider>,
+              ]}
+            />
+          </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={'xl'} />

@@ -49,7 +49,7 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const { signalsIndex } = siemClient;
+        const signalsIndex = siemClient.getSignalsIndex();
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const signalsIndexExists = await getIndexExists(
             clusterClient.callAsCurrentUser,

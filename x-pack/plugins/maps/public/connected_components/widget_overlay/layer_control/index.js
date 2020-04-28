@@ -22,7 +22,7 @@ function mapStateToProps(state = {}) {
     isReadOnly: getIsReadOnly(state),
     isLayerTOCOpen: getIsLayerTOCOpen(state),
     layerList: getLayerList(state),
-    isAddButtonActive: getFlyoutDisplay(state) === FLYOUT_STATE.NONE,
+    isFlyoutOpen: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
   };
 }
 
