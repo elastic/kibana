@@ -11,13 +11,11 @@ import {
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { drilldownsPluginMock } from '../../../../../../drilldowns/public/mocks';
 import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { uiActionsPluginMock } from '../../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContextMapping } from '../../../../../../../../src/plugins/ui_actions/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
 
 const overlays = coreMock.createStart().overlays;
 const drilldowns = drilldownsPluginMock.createStartContract();
-const uiActions = uiActionsPluginMock.createStartContract();
 
 const actionParams: OpenFlyoutAddDrilldownParams = {
   drilldowns: () => drilldowns,
@@ -63,7 +61,6 @@ describe('isCompatible', () => {
         supportedTriggers: (isValueClickTriggerSupported ? ['VALUE_CLICK_TRIGGER'] : []) as Array<
           keyof TriggerContextMapping
         >,
-        uiActions,
       }
     );
 
@@ -119,7 +116,7 @@ describe('execute', () => {
 
   test('should open flyout', async () => {
     const spy = jest.spyOn(overlays, 'openFlyout');
-    const embeddable = enhanceEmbeddable(new MockEmbeddable({ id: '' }, { uiActions }));
+    const embeddable = enhanceEmbeddable(new MockEmbeddable({ id: '' }, {}));
 
     await drilldownAction.execute({
       embeddable,

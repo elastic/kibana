@@ -27,7 +27,6 @@ import {
   getHttp,
   getTimeFilter,
   getCapabilities,
-  getUiActions,
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
@@ -60,7 +59,6 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
         indexPatterns,
         editUrl,
         editable,
-        uiActions: getUiActions(),
         deps,
       },
       input,

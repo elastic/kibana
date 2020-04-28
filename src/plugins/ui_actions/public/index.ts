@@ -29,7 +29,6 @@ export { UiActionsServiceParams, UiActionsService } from './service';
 export {
   Action,
   ActionDefinition as UiActionsActionDefinition,
-  ActionInternal as UiActionsActionInternal,
   createAction,
   IncompatibleActionError,
 } from './actions';

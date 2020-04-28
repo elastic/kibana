@@ -64,9 +64,7 @@ describe('isCompatible', () => {
       id: '',
       viewMode: isEdit ? ViewMode.EDIT : ViewMode.VIEW,
     };
-    const embeddable = new MockEmbeddable(input, {
-      uiActions,
-    });
+    const embeddable = new MockEmbeddable(input, {});
     const context = {
       embeddable: (isEmbeddableEnhanced
         ? enhanceEmbeddable(embeddable, uiActions)
@@ -138,7 +136,7 @@ describe('execute', () => {
   test('should open flyout', async () => {
     const spy = jest.spyOn(overlays, 'openFlyout');
     await drilldownAction.execute({
-      embeddable: enhanceEmbeddable(new MockEmbeddable({ id: '' }, { uiActions })),
+      embeddable: enhanceEmbeddable(new MockEmbeddable({ id: '' }, {})),
     });
     expect(spy).toBeCalled();
   });

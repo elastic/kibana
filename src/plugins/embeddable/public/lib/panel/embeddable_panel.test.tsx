@@ -159,6 +159,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         getAllEmbeddableFactories={start.getEmbeddableFactories}
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
+        application={{} as any}
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
@@ -198,6 +199,7 @@ const renderInEditModeAndOpenContextMenu = async (
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -221,10 +223,10 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
     execute: async () => {},
     order: 10,
     getHref: () => {
-      return undefined;
+      return Promise.resolve(undefined);
     },
   };
-  const getActions = () => Promise.resolve([action]) as any;
+  const getActions = () => Promise.resolve([action]);
 
   const { component: component1 } = await renderInEditModeAndOpenContextMenu(
     {
@@ -257,10 +259,10 @@ test('HelloWorldContainer hides disabled badges', async () => {
     execute: async () => {},
     order: 10,
     getHref: () => {
-      return undefined;
+      return Promise.resolve(undefined);
     },
   };
-  const getActions = () => Promise.resolve([action]) as any;
+  const getActions = () => Promise.resolve([action]);
 
   const { component: component1 } = await renderInEditModeAndOpenContextMenu(
     {
@@ -304,6 +306,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -366,6 +369,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -418,6 +422,7 @@ test('Check when hide header option is false', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
@@ -455,6 +460,7 @@ test('Check when hide header option is true', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}

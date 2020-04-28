@@ -23,9 +23,8 @@ import {
   TriggerToActionsRegistry,
   TriggerId,
   TriggerContextMapping,
-  ActionType,
 } from '../types';
-import { ActionInternal, Action, ActionByType, ActionDefinition, ActionContext } from '../actions';
+import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
@@ -134,11 +133,17 @@ export class UiActionsService {
     );
   };
 
-  public readonly addTriggerAction = <TType extends TriggerId, AType extends ActionType>(
+  /**
+   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
+   * trigger, but it also registers the action, if it has not been registered, yet.
+   *
+   * `addTriggerAction` also infers better typing of the `action` argument.
+   */
+  public readonly addTriggerAction = <TType extends TriggerId>(
     triggerId: TType,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: ActionByType<AType> & Action<TriggerContextMapping[TType]>
+    action: Action<TriggerContextMapping[TType]>
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);

@@ -22,6 +22,8 @@ import {
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
+  HostPolicyResponse,
+  HostInfo,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -90,7 +92,7 @@ export type SubstateMiddlewareFactory = <Substate>(
 
 export interface HostState {
   /** list of host **/
-  hosts: HostMetadata[];
+  hosts: HostInfo[];
   /** number of items per page */
   pageSize: number;
   /** which page to show */
@@ -107,6 +109,8 @@ export interface HostState {
   detailsLoading: boolean;
   /** api error from retrieving host details */
   detailsError?: ServerApiError;
+  /** Holds the Policy Response for the Host currently being displayed in the details */
+  policyResponse?: HostPolicyResponse;
   /** current location info */
   location?: Immutable<EndpointAppLocation>;
 }

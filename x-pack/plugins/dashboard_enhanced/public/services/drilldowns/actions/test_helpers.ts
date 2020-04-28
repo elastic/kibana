@@ -11,10 +11,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsStart,
 } from '../../../../../advanced_ui_actions/public';
-import {
-  TriggerContextMapping,
-  UiActionsStart,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsEnhancedPluginMock } from '../../../../../advanced_ui_actions/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
@@ -22,9 +19,9 @@ export class MockEmbeddable extends Embeddable {
   private readonly triggers: Array<keyof TriggerContextMapping> = [];
   constructor(
     initialInput: EmbeddableInput,
-    params: { uiActions?: UiActionsStart; supportedTriggers?: Array<keyof TriggerContextMapping> }
+    params: { supportedTriggers?: Array<keyof TriggerContextMapping> }
   ) {
-    super(initialInput, {}, undefined, params);
+    super(initialInput, {}, undefined);
     this.triggers = params.supportedTriggers ?? [];
   }
   public render(node: HTMLElement) {}

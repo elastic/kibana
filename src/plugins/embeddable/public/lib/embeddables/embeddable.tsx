@@ -16,20 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { Adapters, ViewMode } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { TriggerContextMapping } from '../ui_actions';
-import { UiActionsStart } from '../../../../../plugins/ui_actions/public';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
-}
-
-export interface EmbeddableParams {
-  uiActions?: UiActionsStart;
 }
 
 export abstract class Embeddable<
@@ -58,12 +54,7 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  constructor(
-    input: TEmbeddableInput,
-    output: TEmbeddableOutput,
-    parent?: IContainer,
-    public readonly params: EmbeddableParams = {}
-  ) {
+  constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
     this.id = input.id;
     this.output = {
       title: getPanelTitle(input, output),
