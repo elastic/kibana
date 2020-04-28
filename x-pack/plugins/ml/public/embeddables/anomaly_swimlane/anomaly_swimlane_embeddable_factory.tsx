@@ -29,7 +29,7 @@ import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import { ExplorerService } from '../../application/services/explorer.service';
+import { ExplorerService } from '../../application/services/explorer_service';
 import { mlResultsService } from '../../application/services/results_service';
 
 export class AnomalySwimlaneEmbeddableFactory

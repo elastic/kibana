@@ -18,7 +18,7 @@ import { MlStartDependencies } from '../../plugin';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
-import { ExplorerService } from '../../application/services/explorer.service';
+import { ExplorerService } from '../../application/services/explorer_service';
 import {
   Filter,
   Query,
