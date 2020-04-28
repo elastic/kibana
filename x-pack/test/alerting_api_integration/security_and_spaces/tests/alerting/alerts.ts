@@ -165,6 +165,100 @@ instanceStateValue: true
           }
         });
 
+        it('should schedule task, run alert and schedule preconfigured actions when appropriate', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            indexRecordActionId: 'preconfigured.test.index-record',
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+
+              // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+              await taskManagerUtils.waitForAllTasksIdle(testStart);
+
+              const alertId = response.body.id;
+              await alertUtils.disable(alertId);
+              await taskManagerUtils.waitForEmpty(testStart);
+
+              // Ensure only 1 alert executed with proper params
+              const alertSearchResult = await esTestIndexTool.search(
+                'alert:test.always-firing',
+                reference
+              );
+              expect(alertSearchResult.hits.total.value).to.eql(1);
+              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+                source: 'alert:test.always-firing',
+                reference,
+                state: {},
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                },
+                alertInfo: {
+                  alertId,
+                  spaceId: space.id,
+                  namespace: space.id,
+                  name: 'abc',
+                  tags: ['tag-A', 'tag-B'],
+                  createdBy: user.fullName,
+                  updatedBy: user.fullName,
+                },
+              });
+
+              // Ensure only 1 action executed with proper params
+              const actionSearchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(actionSearchResult.hits.total.value).to.eql(1);
+              expect(actionSearchResult.hits.hits[0]._source).to.eql({
+                config: {
+                  unencrypted: 'ignored-but-required',
+                },
+                secrets: {
+                  encrypted: 'this-is-also-ignored-and-also-required',
+                },
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
+                },
+                reference,
+                source: 'action:test.index-record',
+              });
+
+              await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should pass updated alert params to executor', async () => {
           const testStart = new Date();
           // create an alert
@@ -375,9 +469,14 @@ instanceStateValue: true
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -403,6 +502,7 @@ instanceStateValue: true
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -483,9 +583,14 @@ instanceStateValue: true
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -511,6 +616,7 @@ instanceStateValue: true
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,

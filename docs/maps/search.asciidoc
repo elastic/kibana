@@ -4,7 +4,7 @@
 
 **Elastic Maps** embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
-Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] to the right of layer name in the legend.
+Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 

@@ -21,7 +21,6 @@ import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ToStringArray } from '../../graphql/types';
-import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DragEffects } from '../drag_and_drop/draggable_wrapper';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
@@ -35,7 +34,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { MESSAGE_FIELD_NAME } from '../timeline/body/renderers/constants';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
 import { OnUpdateColumns } from '../timeline/events';
-import { WithHoverActions } from '../with_hover_actions';
 import { getIconFromType, getExampleText, getColumnsWithTimestamp } from './helpers';
 import * as i18n from './translations';
 import { EventFieldsData } from './types';
@@ -172,29 +170,18 @@ export const getColumns = ({
               component="span"
               key={`event-details-value-flex-item-${contextId}-${eventId}-${data.field}-${i}-${value}`}
             >
-              <WithHoverActions
-                hoverContent={
-                  <HoverActionsContainer data-test-subj="hover-actions-container">
-                    <EuiToolTip content={i18n.COPY_TO_CLIPBOARD}>
-                      <WithCopyToClipboard text={value} titleSummary={i18n.VALUE.toLowerCase()} />
-                    </EuiToolTip>
-                  </HoverActionsContainer>
-                }
-                render={() =>
-                  data.field === MESSAGE_FIELD_NAME ? (
-                    <OverflowField value={value} />
-                  ) : (
-                    <FormattedFieldValue
-                      contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
-                      eventId={eventId}
-                      fieldFormat={data.format}
-                      fieldName={data.field}
-                      fieldType={data.type}
-                      value={value}
-                    />
-                  )
-                }
-              />
+              {data.field === MESSAGE_FIELD_NAME ? (
+                <OverflowField value={value} />
+              ) : (
+                <FormattedFieldValue
+                  contextId={`event-details-value-formatted-field-value-${contextId}-${eventId}-${data.field}-${i}-${value}`}
+                  eventId={eventId}
+                  fieldFormat={data.format}
+                  fieldName={data.field}
+                  fieldType={data.type}
+                  value={value}
+                />
+              )}
             </EuiFlexItem>
           ))}
       </EuiFlexGroup>

@@ -54,12 +54,13 @@ LinkBack.displayName = 'LinkBack';
 
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-`;
+` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 Badge.displayName = 'Badge';
 
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
+  dataTestSubj?: string;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -91,7 +92,11 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
       <FlexItem>
         {backOptions && (
           <LinkBack>
-            <LinkIcon href={backOptions.href} iconType="arrowLeft">
+            <LinkIcon
+              dataTestSubj={backOptions.dataTestSubj}
+              href={backOptions.href}
+              iconType="arrowLeft"
+            >
               {backOptions.text}
             </LinkIcon>
           </LinkBack>

@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -29,18 +28,18 @@ import {
   isLoading,
   apiError,
 } from '../../store/policy_details/selectors';
-import { WindowsEventing } from './policy_forms/eventing/windows';
-import { PageView, PageViewHeaderTitle } from '../../components/page_view';
+import { PageView, PageViewHeaderTitle } from '../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
+import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const { notifications, services } = useKibana();
-  const history = useHistory();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -82,13 +81,7 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useCallback(
-    ev => {
-      ev.preventDefault();
-      history.push(`/policy`);
-    },
-    [history]
-  );
+  const handleBackToListOnClick = useNavigateByRouterEventHandler('/policy');
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -161,7 +154,6 @@ export const PolicyDetails = React.memo(() => {
           fill={true}
           iconType="save"
           data-test-subj="policyDetailsSaveButton"
-          // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
         >
@@ -206,7 +198,11 @@ export const PolicyDetails = React.memo(() => {
           </h4>
         </EuiText>
         <EuiSpacer size="xs" />
-        <WindowsEventing />
+        <WindowsEvents />
+        <EuiSpacer size="l" />
+        <MacEvents />
+        <EuiSpacer size="l" />
+        <LinuxEvents />
       </PageView>
     </>
   );

@@ -9,7 +9,7 @@ import { filter } from 'rxjs/operators';
 import { performance } from 'perf_hooks';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import {
   SavedObjectsSerializer,
   IScopedClusterClient,
@@ -43,6 +43,7 @@ import {
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
+  ElasticJs,
 } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { TaskPool } from './task_pool';
@@ -129,7 +130,7 @@ export class TaskManager {
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
-      callCluster: opts.callAsInternalUser,
+      callCluster: (opts.callAsInternalUser as unknown) as ElasticJs,
       index: opts.config.index,
       maxAttempts: opts.config.max_attempts,
       definitions: this.definitions,
@@ -156,8 +157,8 @@ export class TaskManager {
     this.events$.next(event);
   };
 
-  private attemptToRun(task: Option<string> = none) {
-    this.claimRequests$.next(task);
+  private attemptToRun(task: string) {
+    this.claimRequests$.next(some(task));
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
@@ -273,16 +274,14 @@ export class TaskManager {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: any
+    options?: object
   ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
-    const result = await this.store.schedule(modifiedTask);
-    this.attemptToRun();
-    return result;
+    return await this.store.schedule(modifiedTask);
   }
 
   /**
@@ -298,7 +297,7 @@ export class TaskManager {
         .then(resolve)
         .catch(reject);
 
-      this.attemptToRun(some(taskId));
+      this.attemptToRun(taskId);
     });
   }
 
@@ -310,7 +309,7 @@ export class TaskManager {
    */
   public async ensureScheduled(
     taskInstance: TaskInstanceWithId,
-    options?: any
+    options?: object
   ): Promise<TaskInstanceWithId> {
     try {
       return await this.schedule(taskInstance, options);

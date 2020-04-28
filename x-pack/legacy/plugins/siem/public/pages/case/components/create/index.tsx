@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,8 +15,16 @@ import {
 import styled, { css } from 'styled-components';
 import { Redirect } from 'react-router-dom';
 
+import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../../../../plugins/case/common/api';
-import { Field, Form, getUseField, useForm, UseField } from '../../../../shared_imports';
+import {
+  Field,
+  Form,
+  getUseField,
+  useForm,
+  UseField,
+  FormDataProvider,
+} from '../../../../shared_imports';
 import { usePostCase } from '../../../../containers/case/use_post_case';
 import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../../components/timeline/insert_timeline_popover';
@@ -24,6 +32,7 @@ import { useInsertTimeline } from '../../../../components/timeline/insert_timeli
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
 import { MarkdownEditorForm } from '../../../../components/markdown_editor/form';
+import { useGetTags } from '../../../../containers/case/use_get_tags';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -59,6 +68,21 @@ export const Create = React.memo(() => {
     options: { stripEmptyFields: false },
     schema,
   });
+  const { tags: tagOptions } = useGetTags();
+  const [options, setOptions] = useState(
+    tagOptions.map(label => ({
+      label,
+    }))
+  );
+  useEffect(
+    () =>
+      setOptions(
+        tagOptions.map(label => ({
+          label,
+        }))
+      ),
+    [tagOptions]
+  );
   const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
     form,
     'description'
@@ -73,7 +97,7 @@ export const Create = React.memo(() => {
 
   const handleSetIsCancel = useCallback(() => {
     setIsCancel(true);
-  }, [isCancel]);
+  }, []);
 
   if (caseData != null && caseData.id) {
     return <Redirect to={`/${SiemPageName.case}/${caseData.id}`} />;
@@ -85,7 +109,7 @@ export const Create = React.memo(() => {
 
   return (
     <EuiPanel>
-      {isLoading && <MySpinner size="xl" />}
+      {isLoading && <MySpinner data-test-subj="create-case-loading-spinner" size="xl" />}
       <Form form={form}>
         <CommonUseField
           path="title"
@@ -107,7 +131,9 @@ export const Create = React.memo(() => {
               euiFieldProps: {
                 fullWidth: true,
                 placeholder: '',
-                isDisabled: isLoading,
+                disabled: isLoading,
+                options,
+                noSuggestions: false,
               },
             }}
           />
@@ -131,6 +157,25 @@ export const Create = React.memo(() => {
             }}
           />
         </ContainerBig>
+        <FormDataProvider pathsToWatch="tags">
+          {({ tags: anotherTags }) => {
+            const current: string[] = options.map(opt => opt.label);
+            const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+              if (!acc.includes(item)) {
+                return [...acc, item];
+              }
+              return acc;
+            }, current);
+            if (!isEqual(current, newOptions)) {
+              setOptions(
+                newOptions.map((label: string) => ({
+                  label,
+                }))
+              );
+            }
+            return null;
+          }}
+        </FormDataProvider>
       </Form>
       <Container>
         <EuiFlexGroup
@@ -151,6 +196,7 @@ export const Create = React.memo(() => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="create-case-submit"
               fill
               iconType="plusInCircle"
               isDisabled={isLoading}

@@ -10,6 +10,13 @@ import { RouteInitialization } from '../types';
 import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
+  jobIdSchema,
+  getRecordsSchema,
+  getBucketsSchema,
+  getOverallBucketsSchema,
+  getCategoriesSchema,
+  forecastAnomalyDetector,
+  getBucketParamsSchema,
 } from './schemas/anomaly_detectors_schema';
 
 /**
@@ -50,15 +57,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetAnomalyDetectorsById
    * @apiDescription Returns the anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -108,15 +113,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetAnomalyDetectorsStatsById
    * @apiDescription Returns anomaly detection job statistics.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_stats',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -135,19 +138,20 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {put} /api/ml/anomaly_detectors/:jobId Instantiate an anomaly detection job
+   * @api {put} /api/ml/anomaly_detectors/:jobId Create an anomaly detection job
    * @apiName CreateAnomalyDetectors
    * @apiDescription Creates an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) anomalyDetectionJobSchema
+   *
+   * @apiSuccess {Object} job the configuration of the job that has been created.
    */
   router.put(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
         body: schema.object(anomalyDetectionJobSchema),
       },
     },
@@ -174,16 +178,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName UpdateAnomalyDetectors
    * @apiDescription Updates certain properties of an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) anomalyDetectionUpdateJobSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_update',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({ ...anomalyDetectionUpdateJobSchema }),
+        params: jobIdSchema,
+        body: anomalyDetectionUpdateJobSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -209,15 +212,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName OpenAnomalyDetectorsJob
    * @apiDescription Opens an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_open',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -242,15 +243,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName CloseAnomalyDetectorsJob
    * @apiDescription Closes an anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -279,15 +278,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName DeleteAnomalyDetectorsJob
    * @apiDescription Deletes specified anomaly detection job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
    */
   router.delete(
     {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
+        params: jobIdSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -315,8 +312,6 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @api {post} /api/ml/anomaly_detectors/_validate/detector Validate detector
    * @apiName ValidateAnomalyDetector
    * @apiDescription Validates specified detector.
-   *
-   * @apiParam {String} jobId Job ID.
    */
   router.post(
     {
@@ -346,16 +341,15 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName ForecastAnomalyDetector
    * @apiDescription Creates a forecast for the specified anomaly detection job, predicting the future behavior of a time series by using its historical behavior.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) forecastAnomalyDetector
    */
   router.post(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/_forecast',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({ duration: schema.any() }),
+        params: jobIdSchema,
+        body: forecastAnomalyDetector,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -382,7 +376,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetRecords
    * @apiDescription Retrieves anomaly records for a job.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) getRecordsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} records
@@ -391,23 +386,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/records',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({
-          desc: schema.maybe(schema.boolean()),
-          end: schema.maybe(schema.string()),
-          exclude_interim: schema.maybe(schema.boolean()),
-          page: schema.maybe(
-            schema.object({
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-            })
-          ),
-          record_score: schema.maybe(schema.number()),
-          sort: schema.maybe(schema.string()),
-          start: schema.maybe(schema.string()),
-        }),
+        params: jobIdSchema,
+        body: getRecordsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -432,8 +412,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetBuckets
    * @apiDescription The get buckets API presents a chronological view of the records, grouped by bucket.
    *
-   * @apiParam {String} jobId Job ID.
-   * @apiParam {String} timestamp.
+   * @apiSchema (params) getBucketParamsSchema
+   * @apiSchema (body) getBucketsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} buckets
@@ -442,25 +422,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/buckets/{timestamp?}',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-          timestamp: schema.maybe(schema.string()),
-        }),
-        body: schema.object({
-          anomaly_score: schema.maybe(schema.number()),
-          desc: schema.maybe(schema.boolean()),
-          end: schema.maybe(schema.string()),
-          exclude_interim: schema.maybe(schema.boolean()),
-          expand: schema.maybe(schema.boolean()),
-          page: schema.maybe(
-            schema.object({
-              from: schema.maybe(schema.number()),
-              size: schema.maybe(schema.number()),
-            })
-          ),
-          sort: schema.maybe(schema.string()),
-          start: schema.maybe(schema.string()),
-        }),
+        params: getBucketParamsSchema,
+        body: getBucketsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -486,7 +449,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetOverallBuckets
    * @apiDescription Retrieves overall bucket results that summarize the bucket results of multiple anomaly detection jobs.
    *
-   * @apiParam {String} jobId Job ID.
+   * @apiSchema (params) jobIdSchema
+   * @apiSchema (body) getOverallBucketsSchema
    *
    * @apiSuccess {Number} count
    * @apiSuccess {Object[]} overall_buckets
@@ -495,15 +459,8 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/overall_buckets',
       validate: {
-        params: schema.object({
-          jobId: schema.string(),
-        }),
-        body: schema.object({
-          topN: schema.number(),
-          bucketSpan: schema.string(),
-          start: schema.number(),
-          end: schema.number(),
-        }),
+        params: jobIdSchema,
+        body: getOverallBucketsSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -531,17 +488,13 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
    * @apiName GetCategories
    * @apiDescription Returns the categories results for the specified job ID and category ID.
    *
-   * @apiParam {String} jobId Job ID.
-   * @apiParam {String} categoryId Category ID.
+   * @apiSchema (params) getCategoriesSchema
    */
   router.get(
     {
       path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
       validate: {
-        params: schema.object({
-          categoryId: schema.string(),
-          jobId: schema.string(),
-        }),
+        params: getCategoriesSchema,
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -31,10 +31,6 @@ describe('context app', function() {
       fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     });
 
-    afterEach(() => {
-      searchSourceStub._restore();
-    });
-
     it('should use the `fetch` method of the SearchSource', function() {
       return fetchAnchor('INDEX_PATTERN_ID', 'id', [
         { '@timestamp': 'desc' },

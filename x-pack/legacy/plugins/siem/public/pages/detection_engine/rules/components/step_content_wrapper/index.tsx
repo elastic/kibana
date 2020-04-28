@@ -16,3 +16,5 @@ StyledDiv.defaultProps = {
 };
 
 export const StepContentWrapper = React.memo(StyledDiv);
+
+StepContentWrapper.displayName = 'StepContentWrapper';

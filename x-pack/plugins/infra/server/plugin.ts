@@ -26,7 +26,7 @@ import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
-import { InfraStaticSourceConfiguration } from './lib/sources/types';
+import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
 import { registerAlertTypes } from './lib/alerting';
 
 export const config = {
@@ -147,7 +147,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting);
+    registerAlertTypes(plugins.alerting, this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

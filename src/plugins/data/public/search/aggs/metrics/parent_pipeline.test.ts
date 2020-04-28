@@ -25,14 +25,15 @@ import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
-import { GetInternalStartServicesFn } from '../../../types';
+import { GetInternalStartServicesFn, InternalStartServices } from '../../../types';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 
 describe('parent pipeline aggs', function() {
-  const getInternalStartServices: GetInternalStartServicesFn = () => ({
-    fieldFormats: fieldFormatsServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
-  });
+  const getInternalStartServices: GetInternalStartServicesFn = () =>
+    (({
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      notifications: notificationServiceMock.createStartContract(),
+    } as unknown) as InternalStartServices);
 
   const typesRegistry = mockAggTypesRegistry();
 
@@ -110,7 +111,7 @@ describe('parent pipeline aggs', function() {
               schema: 'metric',
             },
           ],
-          { typesRegistry }
+          { typesRegistry, fieldFormats: getInternalStartServices().fieldFormats }
         );
 
         // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

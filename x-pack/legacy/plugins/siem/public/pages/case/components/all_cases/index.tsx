@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -129,13 +129,25 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
     id: '',
   });
   const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
-
-  const refreshCases = useCallback(() => {
-    refetchCases(filterOptions, queryParams);
-    fetchCasesStatus();
-    setSelectedCases([]);
-    setDeleteBulk([]);
-  }, [filterOptions, queryParams]);
+  const filterRefetch = useRef<() => void>();
+  const setFilterRefetch = useCallback(
+    (refetchFilter: () => void) => {
+      filterRefetch.current = refetchFilter;
+    },
+    [filterRefetch.current]
+  );
+  const refreshCases = useCallback(
+    (dataRefresh = true) => {
+      if (dataRefresh) refetchCases();
+      fetchCasesStatus();
+      setSelectedCases([]);
+      setDeleteBulk([]);
+      if (filterRefetch.current != null) {
+        filterRefetch.current();
+      }
+    },
+    [filterOptions, queryParams, filterRefetch.current]
+  );
 
   useEffect(() => {
     if (isDeleted) {
@@ -247,6 +259,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         };
       }
       setQueryParams(newQueryParams);
+      refreshCases(false);
     },
     [queryParams]
   );
@@ -259,6 +272,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         setQueryParams({ sortField: SortFieldCase.createdAt });
       }
       setFilters(newFilterOptions);
+      refreshCases(false);
     },
     [filterOptions, queryParams]
   );
@@ -299,6 +313,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={true}>
           <EuiFlexItem grow={false}>
             <OpenClosedStats
+              dataTestSubj="openStatsHeader"
               caseCount={countOpenCases}
               caseStatus={'open'}
               isLoading={isCasesStatusLoading}
@@ -306,6 +321,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
           </EuiFlexItem>
           <FlexItemDivider grow={false}>
             <OpenClosedStats
+              dataTestSubj="closedStatsHeader"
               caseCount={countClosedCases}
               caseStatus={'closed'}
               isLoading={isCasesStatusLoading}
@@ -327,6 +343,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
               fill
               href={getCreateCaseUrl(urlSearch)}
               iconType="plusInCircle"
+              data-test-subj="createNewCaseBtn"
             >
               {i18n.CREATE_TITLE}
             </EuiButton>
@@ -347,6 +364,7 @@ export const AllCases = React.memo<AllCasesProps>(({ userCanCrud }) => {
             tags: filterOptions.tags,
             status: filterOptions.status,
           }}
+          setFilterRefetch={setFilterRefetch}
         />
         {isCasesLoading && isDataEmpty ? (
           <Div>
