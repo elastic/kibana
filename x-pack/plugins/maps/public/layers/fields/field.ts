@@ -76,7 +76,7 @@ export class AbstractField implements IField {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     return null;
   }
 }
