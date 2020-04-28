@@ -273,7 +273,7 @@ describe('The metric threshold alert type', () => {
       const instanceID = 'test-*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason.split('; ');
+      const reasons = action.reason.split('\n');
       expect(reasons.length).toBe(2);
       expect(reasons[0]).toContain('test.metric.1');
       expect(reasons[1]).toContain('test.metric.2');
