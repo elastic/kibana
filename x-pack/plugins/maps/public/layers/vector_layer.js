@@ -464,7 +464,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const dynamicStyleFields = dynamicStyleProps.map(dynamicStyleProp => {
-      return dynamicStyleProp.getField().getName();
+      return `${dynamicStyleProp.getField().getName()}${dynamicStyleProp.getNumberOfCategories()}`;
     });
 
     const nextMeta = {

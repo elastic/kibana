@@ -23,6 +23,7 @@ export interface IDynamicStyleProperty extends IStyleProperty {
   getFieldOrigin(): FIELD_ORIGIN | undefined;
   getRangeFieldMeta(): RangeFieldMeta;
   getCategoryFieldMeta(): CategoryFieldMeta;
+  getNumberOfCategories(): number;
   isFieldMetaEnabled(): boolean;
   isOrdinal(): boolean;
   supportsFieldMeta(): boolean;

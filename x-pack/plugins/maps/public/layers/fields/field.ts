@@ -19,7 +19,7 @@ export interface IField {
   getOrigin(): FIELD_ORIGIN;
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
-  getCategoricalFieldMetaRequest(): Promise<unknown>;
+  getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
 }
 
 export class AbstractField implements IField {

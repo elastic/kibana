@@ -260,33 +260,40 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
     });
-    if (canSkipFetch) {
-      return;
-    }
-
-    let isSyncClustered;
-    try {
-      syncContext.startLoading(dataRequestId, requestToken, searchFilters);
-      const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
-      const resp = await searchSource.fetch();
-      const maxResultWindow = await this._documentSource.getMaxResultWindow();
-      isSyncClustered = resp.hits.total > maxResultWindow;
-      syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        syncContext.onLoadError(dataRequestId, requestToken, error.message);
-      }
-      return;
-    }
 
     let activeSource;
     let activeStyle;
-    if (isSyncClustered) {
-      activeSource = this._clusterSource;
-      activeStyle = this._clusterStyle;
+    if (canSkipFetch) {
+      // Even when source fetch is skipped, need to call super._syncData to sync StyleMeta and formatters
+      if (this._isClustered) {
+        activeSource = this._clusterSource;
+        activeStyle = this._clusterStyle;
+      } else {
+        activeSource = this._documentSource;
+        activeStyle = this._documentStyle;
+      }
     } else {
-      activeSource = this._documentSource;
-      activeStyle = this._documentStyle;
+      let isSyncClustered;
+      try {
+        syncContext.startLoading(dataRequestId, requestToken, searchFilters);
+        const searchSource = await this._documentSource.makeSearchSource(searchFilters, 0);
+        const resp = await searchSource.fetch();
+        const maxResultWindow = await this._documentSource.getMaxResultWindow();
+        isSyncClustered = resp.hits.total > maxResultWindow;
+        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, searchFilters);
+      } catch (error) {
+        if (!(error instanceof DataRequestAbortError)) {
+          syncContext.onLoadError(dataRequestId, requestToken, error.message);
+        }
+        return;
+      }
+      if (isSyncClustered) {
+        activeSource = this._clusterSource;
+        activeStyle = this._clusterStyle;
+      } else {
+        activeSource = this._documentSource;
+        activeStyle = this._documentStyle;
+      }
     }
 
     super._syncData(syncContext, activeSource, activeStyle);

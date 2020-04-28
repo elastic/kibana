@@ -174,8 +174,6 @@ export const COLOR_MAP_TYPE = {
   ORDINAL: 'ORDINAL',
 };
 
-export const COLOR_PALETTE_MAX_SIZE = 10;
-
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];
 

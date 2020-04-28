@@ -9,7 +9,6 @@ import tinycolor from 'tinycolor2';
 import chroma from 'chroma-js';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { ColorGradient } from './components/color_gradient';
-import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { vislibColorMaps } from '../../../../../../src/plugins/charts/public';
 
 const GRADIENT_INTERVALS = 8;
@@ -120,7 +119,15 @@ export function getLinearGradient(colorStrings) {
 const COLOR_PALETTES_CONFIGS = [
   {
     id: 'palette_0',
-    colors: DEFAULT_FILL_COLORS.slice(0, COLOR_PALETTE_MAX_SIZE),
+    colors: euiPaletteColorBlind(),
+  },
+  {
+    id: 'palette_20',
+    colors: euiPaletteColorBlind(2),
+  },
+  {
+    id: 'palette_30',
+    colors: euiPaletteColorBlind(3),
   },
 ];
 
@@ -133,7 +140,7 @@ export const COLOR_PALETTES = COLOR_PALETTES_CONFIGS.map(palette => {
   const paletteDisplay = palette.colors.map(color => {
     const style = {
       backgroundColor: color,
-      width: '10%',
+      width: `${100 / palette.colors.length}%`,
       position: 'relative',
       height: '100%',
       display: 'inline-block',
