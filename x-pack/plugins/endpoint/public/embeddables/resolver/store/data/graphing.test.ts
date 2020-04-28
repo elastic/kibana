@@ -8,7 +8,7 @@ import { Store, createStore } from 'redux';
 import { DataAction } from './action';
 import { dataReducer } from './reducer';
 import { DataState } from '../../types';
-import { LegacyEndpointEvent } from '../../../../../common/types';
+import { LegacyEndpointEvent, ResolverEvent } from '../../../../../common/types';
 import { graphableProcesses, processNodePositionsAndEdgeLineSegments } from './selectors';
 import { mockProcessEvent } from '../../models/process_event_test_helpers';
 
@@ -113,13 +113,7 @@ describe('resolver graph layout', () => {
   });
   describe('when rendering no nodes', () => {
     beforeEach(() => {
-      const payload = {
-        data: {
-          result: {
-            search_results: [],
-          },
-        },
-      };
+      const payload: ResolverEvent[] = [];
       const action: DataAction = { type: 'serverReturnedResolverData', payload };
       store.dispatch(action);
     });
@@ -133,13 +127,7 @@ describe('resolver graph layout', () => {
   });
   describe('when rendering one node', () => {
     beforeEach(() => {
-      const payload = {
-        data: {
-          result: {
-            search_results: [processA],
-          },
-        },
-      };
+      const payload = [processA];
       const action: DataAction = { type: 'serverReturnedResolverData', payload };
       store.dispatch(action);
     });
@@ -153,13 +141,7 @@ describe('resolver graph layout', () => {
   });
   describe('when rendering two nodes, one being the parent of the other', () => {
     beforeEach(() => {
-      const payload = {
-        data: {
-          result: {
-            search_results: [processA, processB],
-          },
-        },
-      };
+      const payload = [processA, processB];
       const action: DataAction = { type: 'serverReturnedResolverData', payload };
       store.dispatch(action);
     });
@@ -173,23 +155,17 @@ describe('resolver graph layout', () => {
   });
   describe('when rendering two forks, and one fork has an extra long tine', () => {
     beforeEach(() => {
-      const payload = {
-        data: {
-          result: {
-            search_results: [
-              processA,
-              processB,
-              processC,
-              processD,
-              processE,
-              processF,
-              processG,
-              processH,
-              processI,
-            ],
-          },
-        },
-      };
+      const payload = [
+        processA,
+        processB,
+        processC,
+        processD,
+        processE,
+        processF,
+        processG,
+        processH,
+        processI,
+      ];
       const action: DataAction = { type: 'serverReturnedResolverData', payload };
       store.dispatch(action);
     });

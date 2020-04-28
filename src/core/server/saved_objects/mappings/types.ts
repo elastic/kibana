@@ -131,6 +131,7 @@ export interface IndexMappingMeta {
  */
 export interface SavedObjectsCoreFieldMapping {
   type: string;
+  null_value?: number | boolean | string;
   index?: boolean;
   enabled?: boolean;
   fields?: {
