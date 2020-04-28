@@ -30,7 +30,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('ecommerce', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -47,7 +47,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -65,7 +65,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
     describe('flights', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -78,7 +78,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -97,7 +97,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
     // Skipped because EMS vectors are not accessible in CI
     describe('web logs', () => {
       before(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -111,7 +111,7 @@ export default function({ getPageObjects, getService, updateBaselines }) {
 
       after(async () => {
         await PageObjects.maps.existFullScreen();
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
           useActualUrl: true,
         });
         await PageObjects.header.waitUntilLoadingHasFinished();

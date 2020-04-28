@@ -26,9 +26,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
 
-  describe('Dashboard Panel', () => {
+  // TODO skipped because legacy maps vis are not ready yet
+  describe.skip('Dashboard Panel', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData', {
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
       await PageObjects.home.addSampleDataSet('flights');
