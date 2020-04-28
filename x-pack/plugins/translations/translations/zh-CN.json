@@ -12655,7 +12655,6 @@
     "xpack.security.loginPage.esUnavailableTitle": "无法连接到 Elasticsearch 集群",
     "xpack.security.loginPage.loginProviderDescription": "使用 {providerType}/{providerName} 登录",
     "xpack.security.loginPage.loginSelectorErrorMessage": "无法执行登录。",
-    "xpack.security.loginPage.loginSelectorOR": "或",
     "xpack.security.loginPage.noLoginMethodsAvailableMessage": "请联系您的管理员。",
     "xpack.security.loginPage.noLoginMethodsAvailableTitle": "登录已禁用。",
     "xpack.security.loginPage.requiresSecureConnectionMessage": "请联系您的管理员。",
