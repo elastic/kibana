@@ -33,19 +33,31 @@ export class AbortError extends Error {
  * Returns a `Promise` corresponding with when the given `AbortSignal` is aborted. Useful for
  * situations when you might need to `Promise.race` multiple `AbortSignal`s, or an `AbortSignal`
  * with any other expected errors (or completions).
+ *
  * @param signal The `AbortSignal` to generate the `Promise` from
  * @param shouldReject If `false`, the promise will be resolved, otherwise it will be rejected
  */
-export function toPromise(signal: AbortSignal, shouldReject = false) {
-  return new Promise((resolve, reject) => {
+export function toPromise(signal: AbortSignal, shouldReject?: false): Promise<undefined | Event>;
+export function toPromise(signal: AbortSignal, shouldReject?: true): Promise<never>;
+export function toPromise(signal: AbortSignal, shouldReject: boolean = false) {
+  const promise = new Promise((resolve, reject) => {
     const action = shouldReject ? reject : resolve;
     if (signal.aborted) action();
     signal.addEventListener('abort', action);
   });
+
+  /**
+   * Below is to make sure we don't have unhandled promise rejections. Otherwise
+   * Jest tests fail.
+   */
+  promise.catch(() => {});
+
+  return promise;
 }
 
 /**
  * Returns an `AbortSignal` that will be aborted when the first of the given signals aborts.
+ *
  * @param signals
  */
 export function getCombinedSignal(signals: AbortSignal[]) {

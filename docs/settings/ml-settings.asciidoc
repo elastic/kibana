@@ -19,10 +19,4 @@ instance. If `xpack.ml.enabled` is set to `true` in `elasticsearch.yml`, however
 you can still use the {ml} APIs. To disable {ml} entirely, see the
 {ref}/ml-settings.html[{es} {ml} settings].
 
-[[data-visualizer-settings]]
-==== {data-viz} settings
-
-`xpack.ml.file_data_visualizer.max_file_size`::
-Sets the file size limit when importing data in the {data-viz}. The default
-value is `100MB`. The highest supported value for this setting is `1GB`.
 
