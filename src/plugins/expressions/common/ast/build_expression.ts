@@ -25,7 +25,7 @@ import { parse } from './parse';
 export interface ExpressionAstExpressionBuilder {
   /**
    * Adds a new function to the end of the expression chain.
-   * Functions must be created using `createExpressionFunction()`.
+   * Functions must be created using `buildExpressionFunction()`.
    *
    * @param fnBuilder A `ExpressionAstFunctionBuilder` instance.
    * @return `this`

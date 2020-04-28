@@ -21,6 +21,14 @@ import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
 import { ExecutionContext } from '../execution/types';
+import {
+  ExpressionFunctionClog,
+  ExpressionFunctionFont,
+  ExpressionFunctionKibanaContext,
+  ExpressionFunctionKibana,
+  ExpressionFunctionVarSet,
+  ExpressionFunctionVar,
+} from './specs';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -29,7 +37,7 @@ import { ExecutionContext } from '../execution/types';
 export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
-  Arguments,
+  Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
 > {
@@ -94,3 +102,39 @@ export interface ExpressionFunctionDefinition<
  * Type to capture every possible expression function definition.
  */
 export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<any, any, any, any>;
+
+/**
+ * Anybody registering an expression function should add a property to this
+ * interface so that modules importing `ExpressionFunctionDefinitions` can
+ * have the interfaces of all expression functions available to them.
+ *
+ * @example
+ *  declare module '../../plugins/expressions/public' {
+ *    interface ExpressionFunctionDefinitions {
+ *      myExprFunctionName: MyExpressionFunctionDefinition;
+ *    }
+ *  }
+ *
+ *  declare module '../../plugins/expressions/server' {
+ *    interface ExpressionFunctionDefinitions {
+ *      myExprFunctionName: MyExpressionFunctionDefinition;
+ *    }
+ *  }
+ *
+ * @public
+ */
+export interface ExpressionFunctionDefinitions {
+  // Common functions exported from the Expressions plugin
+  clog: ExpressionFunctionClog;
+  font: ExpressionFunctionFont;
+  kibana_context: ExpressionFunctionKibanaContext;
+  kibana: ExpressionFunctionKibana;
+  var_set: ExpressionFunctionVarSet;
+  var: ExpressionFunctionVar;
+
+  // Other functions will be added via `declare module`
+
+  // Fallback for if a function cannot be found in the mapping,
+  // or someone forgets to `declare module`.
+  [key: string]: AnyExpressionFunctionDefinition;
+}
