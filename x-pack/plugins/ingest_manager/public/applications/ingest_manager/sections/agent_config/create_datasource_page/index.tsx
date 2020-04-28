@@ -85,6 +85,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
     if (updatedPackageInfo) {
       setPackageInfo(updatedPackageInfo);
+      setFormState('VALID');
     } else {
       setFormState('INVALID');
       setPackageInfo(undefined);
@@ -238,7 +239,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       children:
         agentConfig && packageInfo ? (
           <StepConfigureDatasource
-            agentConfig={agentConfig}
             packageInfo={packageInfo}
             datasource={datasource}
             updateDatasource={updateDatasource}
