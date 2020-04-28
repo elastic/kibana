@@ -60,7 +60,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. For more information about machine learning in the Elastic stack please see {whatIsMachineLearning}. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. We recommend using {transforms} to create feature indices for analytics jobs."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
@@ -96,7 +96,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.feedbackSectionText"
-            defaultMessage="If you have input or suggestions regarding your experience with Machine Learning please feel free to submit {feedbackLink}."
+            defaultMessage="If you have input or suggestions regarding your experience please submit {feedbackLink}."
             values={{
               feedbackLink: (
                 <EuiLink href={feedbackLink} target="blank">
