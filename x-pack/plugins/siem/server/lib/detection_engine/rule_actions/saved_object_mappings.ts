@@ -31,9 +31,8 @@ export const ruleActionsSavedObjectMappings = {
           type: 'keyword',
         },
         params: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dynamic: true as any,
-          properties: {},
+          type: 'object',
+          enabled: false,
         },
       },
     },
