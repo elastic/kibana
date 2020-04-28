@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { indexBy } from 'lodash';
 import {
   EuiPageBody,
@@ -59,17 +59,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
-  
-  // const alertActions = alert.actions;
-  // const myCount = data.reduce((obj, v) => {
-  //   obj[v.actionTypeId] = (obj[v.actionTypeId] || 0) + 1;
-  //   return obj;
-  // }, {})
-  // console.log(myCount, 'myCount');
-  // const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
-  // console.log(uniqueActions, 'unique');
-  // const [firstAction, secondAction, thirdAction, ...otherActions] = uniqueActions;
-  const [firstAction, secondAction, thirdAction, ...otherActions] = alert.actions;
+
+  const alertActions = alert.actions;
+  const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
+  console.log(uniqueActions, 'uniqueActions');
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
 
@@ -110,64 +103,43 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentBody>
             <EuiFlexGroup wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="m">
-                  <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle"
+                      defaultMessage="Type"
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>
+                {uniqueActions && uniqueActions.length ? (
+                  <Fragment>
                     <EuiText size="s">
                       <p>
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle"
-                          defaultMessage="Type"
+                          id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
+                          defaultMessage="Actions"
                         />
                       </p>
                     </EuiText>
                     <EuiSpacer size="xs" />
-                    <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
-                  </EuiFlexItem>
-                  {firstAction && (
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
-                            defaultMessage="Actions"
-                          />
-                        </p>
-                      </EuiText>
-                      <EuiSpacer size="xs" />
-                      <EuiFlexGroup gutterSize="s">
+                    <EuiFlexGroup wrap gutterSize="s">
+                      {uniqueActions.map(action => (
                         <EuiFlexItem grow={false}>
                           <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                            {actionTypesByTypeId[firstAction.actionTypeId].name ??
-                              firstAction.actionTypeId}
+                            {actionTypesByTypeId[action].name ??
+                              action}
                           </EuiBadge>
                         </EuiFlexItem>
-                        {secondAction && (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                              {actionTypesByTypeId[secondAction.actionTypeId].name ??
-                                secondAction.actionTypeId}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        )}
-                        {thirdAction && (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                              {actionTypesByTypeId[thirdAction.actionTypeId].name ??
-                                thirdAction.actionTypeId}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        )}
-                        {otherActions.length ? (
-                          <EuiFlexItem grow={false} data-test-subj="actionCountLabel">
-                            <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                      ))}
+                    </EuiFlexGroup>
+                  </Fragment>
+                ) : null}
               </EuiFlexItem>
-              <EuiFlexItem grow={true}>
+              <EuiFlexItem grow={false}>
                 <EuiSpacer />
                 <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
                   <EuiFlexItem grow={false}>
@@ -222,19 +194,21 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
-              <EuiSpacer size="m" />
               <EuiFlexItem>
                 {alert.enabled ? (
                   <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
                 ) : (
-                    <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
-                      <p>
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                          defaultMessage="This alert is disabled and cannot be displayed. Toggle Enable ↑ to activate it."
-                        />
-                      </p>
-                    </EuiCallOut>
+                    <Fragment>
+                      <EuiSpacer />
+                      <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                        <p>
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
+                            defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
+                          />
+                        </p>
+                      </EuiCallOut>
+                    </Fragment>
                   )}
               </EuiFlexItem>
             </EuiFlexGroup>

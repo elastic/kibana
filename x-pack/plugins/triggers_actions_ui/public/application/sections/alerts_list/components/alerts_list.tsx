@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiFieldText,
   EuiFlexGroup,
@@ -204,6 +205,10 @@ export const AlertsList: React.FunctionComponent = () => {
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
         { defaultMessage: 'Actions' }
+      ),
+      render: countryCode => (
+        // const country = store.getCountry(countryCode);
+        <EuiBadge>{countryCode.length}</EuiBadge>
       ),
       sortable: false,
       'data-test-subj': 'alertsTableCell-actionsText',
@@ -480,10 +485,18 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
   return alerts.filter(alert => ids.includes(alert.id));
 }
 
+// const alertActions = alert.actions ? alert.actions : null;
+// const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
+// const [firstAction, ...otherActions] = uniqueActions;
+
+
+
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
+  const actionsText = (<span>hello</span>);
   return alerts.map(alert => ({
     ...alert,
-    actionsText: alert.actions.length,
+    actionsText: alert.actions,
+    // actionsText: actionsText,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId] ?.name ?? alert.alertTypeId,
   }));
