@@ -19,7 +19,7 @@ export interface Props {
 
 export const PipelineProcessorEditorItem: FunctionComponent<Props> = ({ processor, onClick }) => {
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{processor.type}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty size="s" onClick={() => onClick('edit')}>

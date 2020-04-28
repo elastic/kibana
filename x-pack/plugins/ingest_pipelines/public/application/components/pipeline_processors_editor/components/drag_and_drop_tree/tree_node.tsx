@@ -20,19 +20,28 @@ interface Props {
   component: (args: TreeNodeComponentArgs) => React.ReactNode;
   selector: ProcessorSelector;
   processor: ProcessorInternal;
+  isDroppable: boolean;
   index: number;
+  currentDragSelector?: string;
 }
 
 const ON_FAILURE = 'onFailure';
 
-export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index, component }) => {
+export const TreeNode: FunctionComponent<Props> = ({
+  processor,
+  selector,
+  index,
+  component,
+  isDroppable,
+  currentDragSelector,
+}) => {
   const id = selector.join('.');
   return (
-    <EuiDraggable spacing="m" draggableId={id} key={id} index={index} customDragHandle={true}>
+    <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle={true}>
       {provided => (
-        <EuiPanel paddingSize="m">
-          <EuiFlexGroup direction="column" alignItems="flexStart">
-            <EuiFlexGroup alignItems="center">
+        <EuiPanel paddingSize="s">
+          <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <div {...provided.dragHandleProps}>
                   <EuiIcon type="grab" />
@@ -40,13 +49,13 @@ export const TreeNode: FunctionComponent<Props> = ({ processor, selector, index,
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
             </EuiFlexGroup>
-            {processor.onFailure && (
-              <PrivateDragAndDropTree
-                selector={selector.concat([ON_FAILURE])}
-                processors={processor.onFailure}
-                nodeComponent={component}
-              />
-            )}
+            <PrivateDragAndDropTree
+              currentDragSelector={currentDragSelector}
+              isDroppable={isDroppable}
+              selector={selector.concat([ON_FAILURE])}
+              processors={processor.onFailure ?? []}
+              nodeComponent={component}
+            />
           </EuiFlexGroup>
         </EuiPanel>
       )}

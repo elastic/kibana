@@ -48,18 +48,21 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   const [processorsEditorState, setProcessorsEditorState] = useState<OnUpdateHandlerArg>();
 
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
-    const override: any = {};
-    if (isValid) {
-      if (processorsEditorState) {
-        if (
-          processorsEditorState.isValid === undefined &&
-          (await processorsEditorState.validate())
-        ) {
-          override.processors = processorsEditorState.getData();
-        }
-      }
-      onSave({ formData, ...override } as Pipeline);
+    let override: any = {};
+
+    if (!isValid) {
+      return;
     }
+
+    if (processorsEditorState) {
+      if (processorsEditorState.isValid === undefined && (await processorsEditorState.validate())) {
+        override = processorsEditorState.getData();
+      } else {
+        return;
+      }
+    }
+
+    onSave({ ...formData, ...override } as Pipeline);
   };
 
   const handleTestPipelineClick = () => {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
-import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
+import React, { FunctionComponent, useState } from 'react';
+import { EuiDragDropContext, EuiDroppable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from '../../types';
 
@@ -24,6 +24,8 @@ export interface Props {
 
 export interface PrivateProps extends Omit<Props, 'onDragEnd'> {
   selector: ProcessorSelector;
+  isDroppable: boolean;
+  currentDragSelector?: string;
 }
 
 export const ROOT_PATH_ID = 'ROOT_PATH_ID';
@@ -32,16 +34,28 @@ export const PrivateDragAndDropTree: FunctionComponent<PrivateProps> = ({
   processors,
   selector,
   nodeComponent,
+  isDroppable,
+  currentDragSelector,
 }) => {
-  const id = selector.join('.') || ROOT_PATH_ID;
-  return (
-    <EuiDroppable droppableId={id} spacing="m">
+  const serializedSelector = selector.join('.');
+  const isRoot = !serializedSelector;
+  const id = isRoot ? ROOT_PATH_ID : serializedSelector;
+  const droppable = (
+    <EuiDroppable
+      // type={serializedSelector}
+      isDropDisabled={!isDroppable}
+      droppableId={id}
+      spacing="l"
+    >
       {processors.map((processor, idx) => {
+        const nodeSelector = selector.concat(String(idx));
         return (
           <TreeNode
+            currentDragSelector={currentDragSelector}
+            isDroppable={!isDroppable ? false : currentDragSelector !== nodeSelector.join('.')}
             key={idx}
             processor={processor}
-            selector={selector.concat(String(idx))}
+            selector={nodeSelector}
             index={idx}
             component={nodeComponent}
           />
@@ -49,6 +63,19 @@ export const PrivateDragAndDropTree: FunctionComponent<PrivateProps> = ({
       })}
     </EuiDroppable>
   );
+
+  if (isRoot || !processors.length) {
+    return droppable;
+  } else {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <div style={{ width: '30px' }} />
+        </EuiFlexItem>
+        <EuiFlexItem>{droppable}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 };
 
 export const DragAndDropTree: FunctionComponent<Props> = ({
@@ -56,9 +83,15 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
   onDragEnd,
   nodeComponent,
 }) => {
+  const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
+
   return (
     <EuiDragDropContext
+      onBeforeCapture={({ draggableId: selector }) => {
+        setCurrentDragSelector(selector);
+      }}
       onDragEnd={({ source, destination }) => {
+        setCurrentDragSelector(undefined);
         if (source && destination) {
           onDragEnd({
             source: {
@@ -74,7 +107,13 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
         }
       }}
     >
-      <PrivateDragAndDropTree selector={[]} processors={processors} nodeComponent={nodeComponent} />
+      <PrivateDragAndDropTree
+        selector={[]}
+        isDroppable={true}
+        currentDragSelector={currentDragSelector}
+        processors={processors}
+        nodeComponent={nodeComponent}
+      />
     </EuiDragDropContext>
   );
 };
