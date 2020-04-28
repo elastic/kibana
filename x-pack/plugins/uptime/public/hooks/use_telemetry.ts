@@ -7,7 +7,7 @@
 import { useEffect } from 'react';
 import { useGetUrlParams } from './use_url_params';
 import { apiService } from '../state/api/utils';
-import { API_URLS } from '../../common';
+import { API_URLS } from '../../common/constants';
 
 export enum UptimePage {
   Overview = 'Overview',

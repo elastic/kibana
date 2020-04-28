@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { Check } from '../../../../common';
+import { Check } from '../../../../common/runtime_types';
 
 /**
  * Builds URLs to the designated features by extracting values from the provided

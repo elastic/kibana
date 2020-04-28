@@ -9,7 +9,7 @@ import {
   getMonitorStatusActionSuccess,
   getMonitorStatusActionFail,
 } from '../actions';
-import { Ping } from '../../../common';
+import { Ping } from '../../../common/runtime_types';
 import { QueryParams } from '../actions/types';
 
 export interface MonitorStatusState {

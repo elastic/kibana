@@ -10,7 +10,7 @@ import {
   HistogramResult,
   PingsResponse,
   GetPingsParams,
-} from '../../../common';
+} from '../../../common/runtime_types';
 
 export const getPingHistogram = createAction<GetPingHistogramParams>('GET_PING_HISTOGRAM');
 export const getPingHistogramSuccess = createAction<HistogramResult>('GET_PING_HISTOGRAM_SUCCESS');

@@ -7,7 +7,7 @@
 import React, { useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { FetchMonitorStatesQueryArgs } from '../../../../common';
+import { FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 

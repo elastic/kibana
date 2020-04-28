@@ -9,7 +9,7 @@ import {
   DynamicSettings,
   DynamicSettingsSaveResponse,
   DynamicSettingsSaveType,
-} from '../../../common';
+} from '../../../common/runtime_types';
 import { apiService } from './utils';
 
 const apiPath = '/api/uptime/dynamic_settings';

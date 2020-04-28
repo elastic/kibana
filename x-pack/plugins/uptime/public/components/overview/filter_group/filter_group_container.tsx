@@ -11,7 +11,7 @@ import { parseFiltersMap } from './parse_filter_map';
 import { AppState } from '../../../state';
 import { fetchOverviewFilters, GetOverviewFiltersPayload } from '../../../state/actions';
 import { FilterGroupComponent } from './index';
-import { OverviewFilters } from '../../../../common';
+import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { UptimeRefreshContext } from '../../../contexts';
 
 interface OwnProps {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_URLS } from '../../../common';
-import { StatesIndexStatus, StatesIndexStatusType } from '../../../common';
+import { API_URLS } from '../../../common/constants';
+import { StatesIndexStatus, StatesIndexStatusType } from '../../../common/runtime_types';
 import { apiService } from './utils';
 
 export const fetchIndexStatus = async (): Promise<StatesIndexStatus> => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OverviewFilters } from '../../../common';
+import { OverviewFilters } from '../../../common/runtime_types';
 import {
   FETCH_OVERVIEW_FILTERS,
   FETCH_OVERVIEW_FILTERS_FAIL,

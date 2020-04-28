@@ -10,7 +10,8 @@ import styled from 'styled-components';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeThemeContext } from '../../../contexts';
-import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE, MonitorLocation } from '../../../../common';
+import { MonitorLocation } from '../../../../common/runtime_types';
+import { SHORT_TIMESPAN_LOCALE, SHORT_TS_LOCALE } from '../../../../common/constants';
 
 const TimeStampSpan = styled.span`
   display: inline-block;

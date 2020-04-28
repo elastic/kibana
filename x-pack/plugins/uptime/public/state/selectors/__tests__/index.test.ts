@@ -6,7 +6,7 @@
 
 import { getBasePath, isIntegrationsPopupOpen } from '../index';
 import { AppState } from '../../../state';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('state selectors', () => {
   const state: AppState = {

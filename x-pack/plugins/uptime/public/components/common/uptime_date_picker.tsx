@@ -7,7 +7,7 @@
 import React, { useContext } from 'react';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { useUrlParams } from '../../hooks';
-import { CLIENT_DEFAULTS } from '../../../common';
+import { CLIENT_DEFAULTS } from '../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../contexts';
 
 // TODO: when EUI exports types for this, this should be replaced

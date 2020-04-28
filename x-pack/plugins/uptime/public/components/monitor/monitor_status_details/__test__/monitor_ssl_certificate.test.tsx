@@ -9,7 +9,7 @@ import moment from 'moment';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiBadge } from '@elastic/eui';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
-import { Tls } from '../../../../../common';
+import { Tls } from '../../../../../common/runtime_types';
 import { MonitorSSLCertificate } from '../monitor_status_bar';
 
 describe('MonitorStatusBar component', () => {

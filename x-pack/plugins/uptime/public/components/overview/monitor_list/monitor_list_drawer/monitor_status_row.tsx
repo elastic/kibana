@@ -8,7 +8,7 @@ import React, { useContext } from 'react';
 import { EuiHealth, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { UptimeThemeContext } from '../../../../contexts';
-import { UNNAMED_LOCATION, STATUS } from '../../../../../common';
+import { UNNAMED_LOCATION, STATUS } from '../../../../../common/constants';
 
 interface MonitorStatusRowProps {
   /**

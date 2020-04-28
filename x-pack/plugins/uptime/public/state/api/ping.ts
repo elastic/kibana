@@ -11,9 +11,9 @@ import {
   GetPingsParams,
   GetPingHistogramParams,
   HistogramResult,
-} from '../../../common';
+} from '../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchPings: APIFn<GetPingsParams, PingsResponse> = async ({
   dateRange: { from, to },

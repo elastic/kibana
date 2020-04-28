@@ -17,8 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { CertStateThresholds } from '../../../common';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common';
+import { CertStateThresholds } from '../../../common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { SettingsFormProps } from '../../pages/settings';
 
 interface ChangedValues {

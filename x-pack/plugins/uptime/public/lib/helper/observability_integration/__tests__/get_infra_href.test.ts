@@ -5,7 +5,7 @@
  */
 
 import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from '../get_infra_href';
-import { MonitorSummary } from '../../../../../common';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('getInfraHref', () => {
   let summary: MonitorSummary;

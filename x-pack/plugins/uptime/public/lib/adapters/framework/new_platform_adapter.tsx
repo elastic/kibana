@@ -17,7 +17,7 @@ import {
   PLUGIN,
   DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
-} from '../../../../common';
+} from '../../../../common/constants';
 import { UMFrameworkAdapter } from '../../lib';
 import { ClientPluginsStart, ClientPluginsSetup } from '../../../apps/plugin';
 

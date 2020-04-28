@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../common';
+import { DynamicSettings } from '../../../../common/runtime_types';
 
 export type APICaller = (
   endpoint: string,

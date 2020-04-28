@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import React, { useContext, useCallback } from 'react';
 import { selectPingList } from '../../../state/selectors';
 import { getPings } from '../../../state/actions';
-import { GetPingsParams } from '../../../../common';
+import { GetPingsParams } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { PingListComponent } from './index';
 

@@ -17,7 +17,8 @@ import {
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from './translations';
 import { StatusByLocations } from './status_by_location';
-import { MonitorLocations, Ping } from '../../../../../common';
+import { Ping } from '../../../../../common/runtime_types';
+import { MonitorLocations } from '../../../../../common/runtime_types';
 
 interface MonitorStatusBarProps {
   monitorId: string;

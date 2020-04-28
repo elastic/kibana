@@ -5,9 +5,9 @@
  */
 
 import { GetOverviewFiltersPayload } from '../actions';
-import { OverviewFiltersType } from '../../../common';
+import { OverviewFiltersType } from '../../../common/runtime_types';
 import { apiService } from './utils';
-import { API_URLS } from '../../../common';
+import { API_URLS } from '../../../common/constants';
 
 export const fetchOverviewFilters = async ({
   dateRangeStart,

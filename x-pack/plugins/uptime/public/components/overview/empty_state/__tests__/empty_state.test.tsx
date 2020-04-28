@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EmptyStateComponent } from '../empty_state';
-import { StatesIndexStatus } from '../../../../../common';
+import { StatesIndexStatus } from '../../../../../common/runtime_types';
 import { HttpFetchError, IHttpFetchError } from 'src/core/public';
 import { mountWithRouter, shallowWithRouter } from '../../../../lib';
 

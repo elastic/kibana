@@ -9,7 +9,7 @@ import {
   getLoggingKubernetesHref,
   getLoggingIpHref,
 } from '../get_logging_href';
-import { MonitorSummary } from '../../../../../common';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 
 describe('getLoggingHref', () => {
   let summary: MonitorSummary;

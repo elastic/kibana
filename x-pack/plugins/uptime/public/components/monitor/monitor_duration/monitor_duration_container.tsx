@@ -22,7 +22,7 @@ import { UptimeRefreshContext } from '../../../contexts';
 import { getMLJobId } from '../../../state/api/ml_anomaly';
 import { JobStat } from '../../../../../ml/common/types/data_recognizer';
 import { MonitorDurationComponent } from './monitor_duration';
-import { MonitorIdParam } from '../../../../common';
+import { MonitorIdParam } from '../../../../common/types';
 
 export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const {

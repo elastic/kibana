@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MonitorLocation } from '../../../../../common';
+import { MonitorLocation } from '../../../../../common/runtime_types';
 
 interface StatusByLocationsProps {
   locations: MonitorLocation[];

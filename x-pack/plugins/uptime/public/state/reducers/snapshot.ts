@@ -5,7 +5,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { Snapshot } from '../../../common';
+import { Snapshot } from '../../../common/runtime_types';
 import {
   getSnapshotCountAction,
   getSnapshotCountActionSuccess,

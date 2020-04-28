@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PingListComponent, toggleDetails } from '../ping_list';
-import { Ping, PingsResponse } from '../../../../../common';
+import { Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { ExpandedRowMap } from '../../../overview/monitor_list/types';
 
 describe('PingList component', () => {

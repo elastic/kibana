@@ -12,7 +12,7 @@ import {
   setDynamicSettingsSuccess,
   setDynamicSettingsFail,
 } from '../actions/dynamic_settings';
-import { DynamicSettings } from '../../../common';
+import { DynamicSettings } from '../../../common/runtime_types';
 
 export interface DynamicSettingsState {
   settings?: DynamicSettings;

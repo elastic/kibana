@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from '../monitor_page_link';
 import { useGetUrlParams } from '../../../../hooks';
 import { stringifyUrlParams } from '../../../../lib/helper/stringify_url_params';
-import { MonitorError } from '../../../../../common';
+import { MonitorError } from '../../../../../common/runtime_types';
 
 interface MostRecentErrorProps {
   /**

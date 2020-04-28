@@ -21,7 +21,7 @@ import {
   KibanaReactNotifications,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { MLFlyoutView } from './ml_flyout';
-import { ML_JOB_ID } from '../../../../common';
+import { ML_JOB_ID } from '../../../../common/constants';
 import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';

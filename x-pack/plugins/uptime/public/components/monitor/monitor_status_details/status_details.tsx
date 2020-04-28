@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { LocationMap } from '../location_map';
 import { UptimeRefreshContext } from '../../../contexts';
-import { MonitorLocations } from '../../../../common';
+import { MonitorLocations } from '../../../../common/runtime_types';
 import { MonitorStatusBar } from './monitor_status_bar';
 
 interface MonitorStatusDetailsProps {

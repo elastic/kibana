@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_URLS } from '../../../common';
+import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 import {
   FetchMonitorStatesQueryArgs,
   MonitorSummaryResult,
   MonitorSummaryResultType,
-} from '../../../common';
+} from '../../../common/runtime_types';
 
 export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs

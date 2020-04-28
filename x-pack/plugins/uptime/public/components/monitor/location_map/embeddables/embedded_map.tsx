@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import styled from 'styled-components';
 import { MapEmbeddable, MapEmbeddableInput } from '../../../../../../../legacy/plugins/maps/public';
 import * as i18n from './translations';
-import { Location } from '../../../../../common';
+import { Location } from '../../../../../common/runtime_types';
 import { getLayerList } from './map_config';
 import { UptimeThemeContext, UptimeStartupPluginsContext } from '../../../../contexts';
 import {

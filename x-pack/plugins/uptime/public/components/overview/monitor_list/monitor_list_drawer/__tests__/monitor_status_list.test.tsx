@@ -8,7 +8,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import moment from 'moment';
 import { MonitorStatusList } from '../monitor_status_list';
-import { Check } from '../../../../../../common';
+import { Check } from '../../../../../../common/runtime_types';
 
 describe('MonitorStatusList component', () => {
   let checks: Check[];

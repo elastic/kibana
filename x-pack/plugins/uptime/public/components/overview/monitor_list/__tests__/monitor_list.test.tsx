@@ -5,7 +5,11 @@
  */
 
 import React from 'react';
-import { MonitorSummaryResult, CursorDirection, SortOrder } from '../../../../../common';
+import {
+  MonitorSummaryResult,
+  CursorDirection,
+  SortOrder,
+} from '../../../../../common/runtime_types';
 import { MonitorListComponent } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CONTEXT_DEFAULTS } from '../../../common';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { fetchPage } from './search';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorSummary, SortOrder, CursorDirection } from '../../../common';

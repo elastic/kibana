@@ -6,7 +6,7 @@
 
 import { isWithinCurrentDate } from './is_within_current_date';
 import { getLabelFormat } from './get_label_format';
-import { CHART_FORMAT_LIMITS } from '../../../../common';
+import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
 /**
  * Generates an appropriate date formatting string intended for the y-axis

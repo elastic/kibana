@@ -13,7 +13,7 @@ import moment from 'moment';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
-import { HistogramResult } from '../../../../common';
+import { HistogramResult } from '../../../../common/runtime_types';
 import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 

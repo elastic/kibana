@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Snapshot } from '../../../../common';
+import { Snapshot } from '../../../../common/runtime_types';
 import { SnapshotComponent } from '../snapshot/snapshot';
 
 describe('Snapshot component', () => {

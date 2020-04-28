@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MonitorSummary } from '../../../../../../common';
+import { MonitorSummary } from '../../../../../../common/runtime_types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IntegrationGroup } from '../actions_popover/integration_group';
 

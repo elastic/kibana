@@ -12,7 +12,7 @@ import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
-import { MonitorDetails, MonitorSummary } from '../../../../../common';
+import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 
 interface ContainerProps {
   summary: MonitorSummary;

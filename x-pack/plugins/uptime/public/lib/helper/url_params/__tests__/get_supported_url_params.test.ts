@@ -6,7 +6,7 @@
 
 import DateMath from '@elastic/datemath';
 import { getSupportedUrlParams } from '../get_supported_url_params';
-import { CLIENT_DEFAULTS } from '../../../../../common';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 
 describe('getSupportedUrlParams', () => {
   let dateMathSpy: any;

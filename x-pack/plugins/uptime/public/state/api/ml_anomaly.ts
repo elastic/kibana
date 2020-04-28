@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { apiService } from './utils';
 import { AnomalyRecords, AnomalyRecordsParams } from '../actions';
-import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common';
+import { API_URLS, ML_JOB_ID, ML_MODULE_ID } from '../../../common/constants';
 import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 import {
   CreateMLJobSuccess,
