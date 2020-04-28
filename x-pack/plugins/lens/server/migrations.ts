@@ -76,20 +76,20 @@ function addTimeFieldToEsaggs(doc: SavedObjectUnsanitizedDoc) {
               if (node.function !== 'esaggs') {
                 return node;
               }
-              const timeFields: string[] = [];
+              const timeField: string[] = [];
               JSON.parse(node.arguments.aggConfigs[0] as string).forEach(
                 (agg: { type: string; params: { field: string } }) => {
                   if (agg.type !== 'date_histogram') {
                     return;
                   }
-                  timeFields.push(agg.params.field);
+                  timeField.push(agg.params.field);
                 }
               );
               return {
                 ...node,
                 arguments: {
                   ...node.arguments,
-                  timeFields,
+                  timeField,
                 },
               };
             }),

@@ -259,7 +259,7 @@ describe('Lens migrations', () => {
 
     it('should remove the lens_auto_date expression', () => {
       const result = migrations['7.8.0'](example, context);
-      expect(result.attributes.expression).toContain(`timeFields=\"products.created_on\"`);
+      expect(result.attributes.expression).toContain(`timeField=\"products.created_on\"`);
     });
   });
 });

@@ -74,7 +74,7 @@ export interface Arguments {
   partialRows: boolean;
   includeFormatHints: boolean;
   aggConfigs: string;
-  timeFields?: string[];
+  timeField?: string[];
 }
 
 const handleCourierRequest = async ({
@@ -266,7 +266,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       default: '""',
       help: '',
     },
-    timeFields: {
+    timeField: {
       types: ['string'],
       help: '',
       multi: true,
@@ -294,7 +294,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       timeRange: get(input, 'timeRange', undefined),
       query: get(input, 'query', undefined),
       filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
+      timeFields: args.timeField,
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
