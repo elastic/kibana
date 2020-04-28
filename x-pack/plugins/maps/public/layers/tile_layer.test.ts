@@ -23,9 +23,6 @@ class MockTileSource extends AbstractTMSSource implements ITMSSource {
     super(descriptor, {});
     this._descriptor = descriptor;
   }
-  createDefaultLayer(): ILayer {
-    throw new Error('not implemented');
-  }
 
   async getDisplayName(): Promise<string> {
     return this._descriptor.urlTemplate;
