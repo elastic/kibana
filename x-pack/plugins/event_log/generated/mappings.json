@@ -41,6 +41,10 @@
                 },
                 "end": {
                     "type": "date"
+                },
+                "outcome": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
                 }
             }
         },
