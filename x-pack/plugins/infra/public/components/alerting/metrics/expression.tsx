@@ -148,7 +148,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
-      setAlertParams('groupBy', group || undefined);
+      setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
   );
@@ -212,7 +212,7 @@ export const Expressions: React.FC<Props> = props => {
           setAlertParams('filterQuery', filter);
         }
 
-        setAlertParams('groupBy', md.currentOptions.groupBy || '');
+        setAlertParams('groupBy', md.currentOptions.groupBy);
       }
       setAlertParams('sourceId', source?.id);
     } else {
