@@ -59,7 +59,7 @@ import {
   SavedObjectEmbeddableInput,
   ContainerOutput,
 } from '../../../embeddable/public';
-import { NavAction, SavedDashboardPanel } from '../types';
+import { DashboardInitialSavedFiltersHandling, NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { DashboardSaveModal } from './top_nav/save_modal';
@@ -141,6 +141,12 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
+    const savedFiltersHandling: DashboardInitialSavedFiltersHandling =
+      $routeParams[DashboardConstants.SAVED_FILTERS_HANDLING_PARAM];
+    if (savedFiltersHandling) {
+      removeQueryParam(history, DashboardConstants.SAVED_FILTERS_HANDLING_PARAM);
+    }
+
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
@@ -148,6 +154,7 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+      savedFiltersHandling,
     });
 
     // sync initial app filters from state to filterManager

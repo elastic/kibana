@@ -25,6 +25,7 @@ export const DashboardConstants = {
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
+  SAVED_FILTERS_HANDLING_PARAM: 'savedFiltersHandling',
 };
 
 export function createDashboardEditUrl(id: string) {

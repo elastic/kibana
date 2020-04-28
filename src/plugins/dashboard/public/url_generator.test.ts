@@ -36,7 +36,9 @@ describe('dashboard url generator', () => {
       Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
     );
     const url = await generator.createUrl!({});
-    expect(url).toMatchInlineSnapshot(`"xyz/app/kibana#/dashboard?_a=()&_g=()"`);
+    expect(url).toMatchInlineSnapshot(
+      `"xyz/app/kibana#/dashboard?_a=()&_g=()&savedFiltersHandling=merge"`
+    );
   });
 
   test('creates a link with global time range set up', async () => {
@@ -47,7 +49,7 @@ describe('dashboard url generator', () => {
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/kibana#/dashboard?_a=()&_g=(time:(from:now-15m,mode:relative,to:now))&savedFiltersHandling=merge"`
     );
   });
 
@@ -83,7 +85,7 @@ describe('dashboard url generator', () => {
       query: { query: 'bye', language: 'kuery' },
     });
     expect(url).toMatchInlineSnapshot(
-      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))"`
+      `"xyz/app/kibana#/dashboard/123?_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),query:(language:kuery,query:bye))&_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:hi))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&savedFiltersHandling=merge"`
     );
   });
 
@@ -117,5 +119,21 @@ describe('dashboard url generator', () => {
       useHash: false,
     });
     expect(url.indexOf('relative')).toBeGreaterThan(1);
+  });
+
+  test('by default saved filters are merged', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({});
+    expect(url).toEqual(expect.stringContaining('savedFiltersHandling=merge'));
+  });
+
+  test('can disable merging filters', async () => {
+    const generator = createDirectAccessDashboardLinkGenerator(() =>
+      Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
+    );
+    const url = await generator.createUrl!({ savedFiltersHandling: 'override' });
+    expect(url).not.toEqual(expect.stringContaining('savedFiltersHandling'));
   });
 });

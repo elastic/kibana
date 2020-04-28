@@ -36,6 +36,7 @@ import {
   DashboardAppStateDefaults,
   DashboardAppStateInUrl,
   DashboardAppStateTransitions,
+  DashboardInitialSavedFiltersHandling,
   SavedDashboardPanel,
 } from '../types';
 import {
@@ -101,6 +102,7 @@ export class DashboardStateManager {
     kbnUrlStateStorage,
     history,
     usageCollection,
+    savedFiltersHandling,
   }: {
     savedDashboard: SavedObjectDashboard;
     hideWriteControls: boolean;
@@ -108,6 +110,7 @@ export class DashboardStateManager {
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
     usageCollection?: UsageCollectionSetup;
+    savedFiltersHandling?: DashboardInitialSavedFiltersHandling;
   }) {
     this.history = history;
     this.kibanaVersion = kibanaVersion;
@@ -123,13 +126,20 @@ export class DashboardStateManager {
     );
 
     this.kbnUrlStateStorage = kbnUrlStateStorage;
+    const initialStateFromUrl = this.kbnUrlStateStorage.get<DashboardAppState>(
+      this.STATE_STORAGE_KEY
+    );
 
     // setup initial state by merging defaults with state from url
     // also run migration, as state in url could be of older version
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
-        ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+        ...initialStateFromUrl,
+        filters:
+          savedFiltersHandling === 'merge'
+            ? [...this.stateDefaults.filters, ...(initialStateFromUrl?.filters ?? [])] // merge filters from url with filters from saved object
+            : initialStateFromUrl?.filters ?? this.stateDefaults.filters, // filters from url take precedence over saved filters
       },
       kibanaVersion,
       usageCollection

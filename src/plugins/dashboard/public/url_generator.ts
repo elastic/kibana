@@ -27,6 +27,8 @@ import {
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
+import { DashboardInitialSavedFiltersHandling } from './types';
+import { DashboardConstants } from './dashboard_constants';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -64,6 +66,19 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * whether to hash the data in the url to avoid url length issues.
    */
   useHash?: boolean;
+
+  /**
+   * When dashboard is loaded filters could come from 2 places:
+   * 1. From url
+   * 2. From dashboard's saved object
+   *
+   * Filters could be handled in 2 different ways:
+   * * override - if there is state in the url, url is source of truth and filters from url take precedence over filters in saved object
+   * * merge - filters from url are merged together with filters from saved object
+   *
+   * Url generator uses `merge` handling as default
+   */
+  savedFiltersHandling?: DashboardInitialSavedFiltersHandling;
 }>;
 
 export const createDirectAccessDashboardLinkGenerator = (
@@ -85,7 +100,7 @@ export const createDirectAccessDashboardLinkGenerator = (
       return stateObj;
     };
 
-    const appStateUrl = setStateToKbnUrl(
+    let resultUrl = setStateToKbnUrl(
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
@@ -95,7 +110,7 @@ export const createDirectAccessDashboardLinkGenerator = (
       `${appBasePath}#/${hash}`
     );
 
-    return setStateToKbnUrl<QueryState>(
+    resultUrl = setStateToKbnUrl<QueryState>(
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
@@ -103,7 +118,13 @@ export const createDirectAccessDashboardLinkGenerator = (
         refreshInterval: state.refreshInterval,
       }),
       { useHash },
-      appStateUrl
+      resultUrl
     );
+
+    if (!state.savedFiltersHandling || state.savedFiltersHandling === 'merge') {
+      resultUrl = `${resultUrl}&${DashboardConstants.SAVED_FILTERS_HANDLING_PARAM}=merge`;
+    }
+
+    return resultUrl;
   },
 });

@@ -129,3 +129,14 @@ export interface StagedFilter {
   operator: string;
   index: string;
 }
+
+/**
+ * When dashboard is loaded filters could come from 2 places:
+ * 1. From url
+ * 2. From dashboard's saved object
+ *
+ * Filters could be handled in 2 different ways:
+ * * override (default) - if there is state in the url, url is source of truth and filters from url take precedence over filters in saved object
+ * * merge - filters from url are merge together with filters from saved object
+ */
+export type DashboardInitialSavedFiltersHandling = 'merge' | 'override';
