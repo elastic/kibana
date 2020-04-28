@@ -26,4 +26,7 @@ interface ServerReturnedRelatedEventData {
   };
 }
 
-export type DataAction = ServerReturnedResolverData | ServerFailedToReturnResolverData | ServerReturnedRelatedEventData;
+export type DataAction =
+  | ServerReturnedResolverData
+  | ServerFailedToReturnResolverData
+  | ServerReturnedRelatedEventData;
