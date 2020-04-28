@@ -20,6 +20,7 @@ import {
   MetricsExplorerOptionsMetric,
   MetricsExplorerChartType,
 } from '../hooks/use_metrics_explorer_options';
+import { getMetricId } from './helpers/get_metric_id';
 
 interface Props {
   metric: MetricsExplorerOptionsMetric;
@@ -41,7 +42,7 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
     (metric.color && colorTransformer(metric.color)) ||
     colorTransformer(MetricsExplorerColor.color0);
 
-  const yAccessor = `metric_${id}`;
+  const yAccessor = getMetricId(metric, id);
   const chartId = `series-${series.id}-${yAccessor}`;
 
   const seriesAreaStyle: RecursivePartial<AreaSeriesStyle> = {

@@ -12,6 +12,8 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'min',
   'cardinality',
   'rate',
+  'p95',
+  'p99',
   'count',
 ] as const;
 
