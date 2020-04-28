@@ -186,7 +186,7 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
         layerId: 'first',
-        changeType: 'unchanged',
+        changeType: 'extended',
         label: 'Datasource title',
       },
       keptLayerIds: [],

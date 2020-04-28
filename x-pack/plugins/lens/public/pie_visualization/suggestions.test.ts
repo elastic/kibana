@@ -5,7 +5,7 @@
  */
 
 import { DataType } from '../types';
-import { pieSuggestions, treemapSuggestions } from './suggestions';
+import { pieSuggestions } from './suggestions';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -261,133 +261,24 @@ describe('suggestions', () => {
   });
 
   describe('treemap', () => {
-    it('should reject multiple layer suggestions', () => {
-      expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [],
-            changeType: 'initial',
-          },
-          state: undefined,
-          keptLayerIds: ['first', 'second'],
-        })
-      ).toHaveLength(0);
-    });
-
-    it('should reject when layer is different', () => {
-      expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [],
-            changeType: 'initial',
-          },
-          state: undefined,
-          keptLayerIds: ['second'],
-        })
-      ).toHaveLength(0);
-    });
-
     it('should reject when currently active and unchanged data', () => {
       expect(
-        treemapSuggestions({
+        pieSuggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
             columns: [],
             changeType: 'unchanged',
           },
-          state: { shape: 'pie', layers: [{ layerId: 'first', slices: [], metric: 'a' }] },
+          state: { shape: 'treemap', layers: [{ layerId: 'first', slices: [], metric: 'a' }] },
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
     });
 
-    it('should reject when table is reordered', () => {
+    it('should reject when there are too many buckets being added', () => {
       expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [],
-            changeType: 'reorder',
-          },
-          state: undefined,
-          keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
-    });
-
-    it('should reject any date operations', () => {
-      expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [
-              {
-                columnId: 'b',
-                operation: { label: 'Days', dataType: 'date' as DataType, isBucketed: true },
-              },
-              {
-                columnId: 'c',
-                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
-              },
-            ],
-            changeType: 'initial',
-          },
-          state: undefined,
-          keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
-    });
-
-    it('should reject when there are no buckets', () => {
-      expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [
-              {
-                columnId: 'c',
-                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
-              },
-            ],
-            changeType: 'initial',
-          },
-          state: undefined,
-          keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
-    });
-
-    it('should reject when there are no metrics', () => {
-      expect(
-        treemapSuggestions({
-          table: {
-            layerId: 'first',
-            isMultiRow: true,
-            columns: [
-              {
-                columnId: 'c',
-                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: true },
-              },
-            ],
-            changeType: 'initial',
-          },
-          state: undefined,
-          keptLayerIds: ['first'],
-        })
-      ).toHaveLength(0);
-    });
-
-    it('should reject when there are too many buckets', () => {
-      expect(
-        treemapSuggestions({
+        pieSuggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -413,9 +304,12 @@ describe('suggestions', () => {
                 operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
               },
             ],
-            changeType: 'initial',
+            changeType: 'extended',
           },
-          state: undefined,
+          state: {
+            shape: 'treemap',
+            layers: [{ layerId: 'first', slices: ['a', 'b'], metric: 'e' }],
+          },
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -423,7 +317,7 @@ describe('suggestions', () => {
 
     it('should reject when there are too many metrics', () => {
       expect(
-        treemapSuggestions({
+        pieSuggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -451,35 +345,13 @@ describe('suggestions', () => {
             ],
             changeType: 'initial',
           },
-          state: undefined,
+          state: {
+            shape: 'treemap',
+            layers: [{ layerId: 'first', slices: ['a', 'b'], metric: 'e' }],
+          },
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
-    });
-
-    it('should suggest simple treemap', () => {
-      const suggestions = treemapSuggestions({
-        table: {
-          layerId: 'first',
-          isMultiRow: true,
-          columns: [
-            {
-              columnId: 'a',
-              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
-            },
-            {
-              columnId: 'e',
-              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
-            },
-          ],
-          changeType: 'initial',
-        },
-        state: undefined,
-        keptLayerIds: ['first'],
-      });
-
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].state.shape).toEqual('treemap');
     });
   });
 });
