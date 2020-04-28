@@ -21,7 +21,7 @@ type Errors = string[] | null;
 type ValidationEntry = Record<string, Errors>;
 
 export interface DatasourceConfigValidationResults {
-  config?: ValidationEntry;
+  vars?: ValidationEntry;
 }
 
 export type DatasourceInputValidationResults = DatasourceConfigValidationResults & {
@@ -77,12 +77,12 @@ export const validateDatasource = (
 
   // Validate each datasource input with either its own config fields or streams
   datasource.inputs.forEach(input => {
-    if (!input.config && !input.streams) {
+    if (!input.vars && !input.streams) {
       return;
     }
 
     const inputValidationResults: DatasourceInputValidationResults = {
-      config: undefined,
+      vars: undefined,
       streams: {},
     };
 
@@ -95,27 +95,27 @@ export const validateDatasource = (
     );
 
     // Validate input-level config fields
-    const inputConfigs = Object.entries(input.config || {});
+    const inputConfigs = Object.entries(input.vars || {});
     if (inputConfigs.length) {
-      inputValidationResults.config = inputConfigs.reduce((results, [name, configEntry]) => {
+      inputValidationResults.vars = inputConfigs.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
           ? validateDatasourceConfig(configEntry, inputVarsByName[name])
           : null;
         return results;
       }, {} as ValidationEntry);
     } else {
-      delete inputValidationResults.config;
+      delete inputValidationResults.vars;
     }
 
     // Validate each input stream with config fields
     if (input.streams.length) {
       input.streams.forEach(stream => {
-        if (!stream.config) {
+        if (!stream.vars) {
           return;
         }
 
         const streamValidationResults: DatasourceConfigValidationResults = {
-          config: undefined,
+          vars: undefined,
         };
 
         const streamVarsByName = (
@@ -130,7 +130,7 @@ export const validateDatasource = (
         }, {} as Record<string, RegistryVarsEntry>);
 
         // Validate stream-level config fields
-        streamValidationResults.config = Object.entries(stream.config).reduce(
+        streamValidationResults.vars = Object.entries(stream.vars).reduce(
           (results, [name, configEntry]) => {
             results[name] =
               input.enabled && stream.enabled
@@ -147,7 +147,7 @@ export const validateDatasource = (
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.config || inputValidationResults.streams) {
+    if (inputValidationResults.vars || inputValidationResults.streams) {
       validationResults.inputs![input.type] = inputValidationResults;
     }
   });
