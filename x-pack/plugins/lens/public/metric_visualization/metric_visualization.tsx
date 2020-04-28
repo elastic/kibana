@@ -53,6 +53,10 @@ export const metricVisualization: Visualization<State, PersistableState> = {
     },
   ],
 
+  getVisualizationTypeId() {
+    return 'lnsMetric';
+  },
+
   clearLayer(state) {
     return {
       ...state,

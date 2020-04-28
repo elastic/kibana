@@ -28,6 +28,7 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
         label: 'TEST',
       },
     ],
+    getVisualizationTypeId: jest.fn(_state => 'empty'),
     getDescription: jest.fn(_state => ({ label: '' })),
     switchVisualizationType: jest.fn((_, x) => x),
     getPersistableState: jest.fn(_state => _state),
