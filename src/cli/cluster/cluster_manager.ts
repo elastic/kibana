@@ -258,7 +258,7 @@ export class ClusterManager {
     );
 
     const ignorePaths = [
-      /[\\\/](\..*|node_modules|bower_components|public|__[a-z0-9_]+__|coverage)[\\\/]/,
+      /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
       /\.test\.(js|ts)$/,
       ...pluginInternalDirsIgnore,
       fromRoot('src/legacy/server/sass/__tmp__'),
