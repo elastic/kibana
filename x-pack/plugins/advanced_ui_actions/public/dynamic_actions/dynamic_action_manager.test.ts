@@ -6,10 +6,8 @@
 
 import { DynamicActionManager } from './dynamic_action_manager';
 import { ActionStorage, MemoryActionStorage } from './dynamic_action_storage';
-import {
-  UiActionsService,
-  UiActionsActionInternal as ActionInternal,
-} from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsService } from '../../../../../src/plugins/ui_actions/public';
+import { ActionInternal } from '../../../../../src/plugins/ui_actions/public/actions';
 import { of } from '../../../../../src/plugins/kibana_utils';
 import { UiActionsServiceEnhancements } from '../services';
 import { ActionFactoryDefinition } from './action_factory_definition';
