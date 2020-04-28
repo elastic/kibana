@@ -22,11 +22,15 @@ describe('lifecycle query', () => {
                 term: { 'agent.id': 'awesome-id' },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.category': 'process' },
               },
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: legacyEventIndexPattern,
@@ -40,16 +44,10 @@ describe('lifecycle query', () => {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': ['baz'] },
-                    },
-                    {
-                      terms: { 'process.entity_id': ['baz'] },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': ['baz'] },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 term: { 'event.category': 'process' },
@@ -57,6 +55,7 @@ describe('lifecycle query', () => {
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index: fakeEventIndexPattern,
