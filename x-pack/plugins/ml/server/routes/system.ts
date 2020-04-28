@@ -54,6 +54,9 @@ export function systemRoutes(
       validate: {
         body: schema.maybe(schema.any()),
       },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {

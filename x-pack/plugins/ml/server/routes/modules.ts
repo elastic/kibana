@@ -98,7 +98,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         }),
       },
       options: {
-        tags: ['access:ml:'],
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
