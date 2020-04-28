@@ -22,7 +22,7 @@ export function InstallationButton(props: InstallationButtonProps) {
   const installPackage = useInstallPackage();
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const installationStatus = getPackageInstallStatus(name);
+  const { status: installationStatus } = getPackageInstallStatus(name);
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const isRemoving = installationStatus === InstallStatus.uninstalling;

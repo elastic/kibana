@@ -29,11 +29,11 @@ const Text = styled.span`
 type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
-  const { iconType, name, title, version, latestVersion } = props;
+  const { iconType, name, title, version, installedVersion, latestVersion } = props;
   const hasWriteCapabilites = useCapabilities().write;
   const { toListView } = useLinks();
   const ADD_DATASOURCE_URI = useLink(`${EPM_PATH}/${name}-${version}/add-datasource`);
-  const updateAvailable = latestVersion > version ? true : false;
+  const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
   return (
     <Fragment>
       <FullWidthNavRow>

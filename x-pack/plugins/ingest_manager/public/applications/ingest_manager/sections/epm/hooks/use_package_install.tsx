@@ -20,21 +20,27 @@ interface PackagesInstall {
 
 interface PackageInstallItem {
   status: InstallStatus;
+  version: string | null;
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
   fromUpdate?: boolean;
 };
+type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const { toDetailView } = useLinks();
   const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
+    ({ name, status, version }: SetPackageInstallStatusProps) => {
+      const packageProps: PackageInstallItem = {
+        status,
+        version,
+      };
       setPackage((prev: PackagesInstall) => ({
         ...prev,
-        [name]: { status },
+        [name]: packageProps,
       }));
     },
     []
@@ -42,12 +48,12 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
 
   const installPackage = useCallback(
     async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
-      setPackageInstallStatus({ name, status: InstallStatus.installing });
+      setPackageInstallStatus({ name, status: InstallStatus.installing, version });
       const pkgkey = `${name}-${version}`;
 
       const res = await sendInstallPackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
@@ -65,7 +71,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         if (fromUpdate) {
           const settingsUrl = toDetailView({
             name,
@@ -96,20 +102,20 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const getPackageInstallStatus = useCallback(
-    (pkg: string): InstallStatus => {
-      return packages[pkg].status;
+    (pkg: string): PackageInstallItem => {
+      return packages[pkg];
     },
     [packages]
   );
 
   const uninstallPackage = useCallback(
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
-      setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
+      setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
       const pkgkey = `${name}-${version}`;
 
       const res = await sendRemovePackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({
           title: toMountPoint(
             <FormattedMessage
@@ -127,7 +133,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
 
         notifications.toasts.addSuccess({
           title: toMountPoint(
