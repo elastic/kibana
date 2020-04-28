@@ -28,7 +28,7 @@ export default function({ getService, getPageObjects }) {
   const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
-    defaultIndex: 'long-window-logstash-**',
+    defaultIndex: 'long-window-logstash-*',
     'dateFormat:tz': 'Europe/Berlin',
   };
 
@@ -54,7 +54,7 @@ export default function({ getService, getPageObjects }) {
 
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('long-window-logstash-**');
+      await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
       // NOTE: For some reason without setting this relative time, the abs times will not fetch data.
       await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
     });
