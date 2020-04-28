@@ -167,6 +167,21 @@ export default function({ getService, getPageObjects }) {
         expect(await filterBar.getFilterCount()).to.be(0);
         await pieChart.expectPieSliceCount(5);
       });
+
+      it('&savedFiltersHandling=merge merges incoming filters from url with saved filters', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await filterBar.removeFilter('bytes');
+        await filterBar.addFilter('extension', 'is', 'jpg');
+        const currentUrl = await browser.getCurrentUrl();
+        const newUrl = `${currentUrl}&savedFiltersHandling=merge`;
+        await browser.get(newUrl);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.equal(2);
+        await pieChart.expectPieSliceCount(1);
+      });
     });
 
     describe('saved search filtering', function() {
