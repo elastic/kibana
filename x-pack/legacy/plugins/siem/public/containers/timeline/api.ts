@@ -47,7 +47,6 @@ const postTimeline = async ({ timeline }: RequestPostTimeline): Promise<Timeline
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
     body: JSON.stringify({ timeline }),
-    // signal,
   });
 
   return decodeTimelineResponse(response);
@@ -61,7 +60,6 @@ const patchTimeline = async ({
   const response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
     method: 'PATCH',
     body: JSON.stringify({ timeline, timelineId, version }),
-    // signal,
   });
 
   return decodeTimelineResponse(response);

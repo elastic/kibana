@@ -29,13 +29,7 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
-// import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
-import {
-  // PersistTimelineMutation,
-  TimelineInput,
-  ResponseTimeline,
-  TimelineResult,
-} from '../../graphql/types';
+import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
 import { addError } from '../app/actions';
 import { NotesById } from '../app/model';
@@ -75,7 +69,6 @@ import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_p
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-// import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';

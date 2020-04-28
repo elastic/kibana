@@ -9,6 +9,7 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 import { Refetch } from '../../store/inputs/model';
+import { TimelineTypes } from '../../../../../../plugins/siem/common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -36,10 +37,6 @@ export interface TimelineActionsOverflowColumns {
   } | null>;
 }
 
-enum TimelineTypes {
-  default = 'default',
-  template = 'template',
-}
 /** The results of the query run by the OpenTimeline component */
 export interface OpenTimelineResult {
   created?: number | null;

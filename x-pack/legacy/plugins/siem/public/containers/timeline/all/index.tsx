@@ -88,7 +88,14 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   });
 
   const fetchAllTimeline = useCallback(
-    async ({ onlyUserFavorite, pageInfo, search, sort }: AllTimelinesVariables) => {
+    async ({
+      onlyUserFavorite,
+      pageInfo,
+      search,
+      sort,
+      timelines,
+      totalCount,
+    }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -98,6 +105,8 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             setAllTimelines({
               ...allTimelines,
               loading: true,
+              timelines: timelines ?? allTimelines.timelines,
+              totalCount: totalCount ?? allTimelines.totalCount,
             });
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
@@ -143,7 +152,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         } catch (error) {
           if (!didCancel) {
             errorToToaster({
-              title: 'Add error title',
+              title: 'Fetch all timelines failure',
               error: error.body && error.body.message ? new Error(error.body.message) : error,
               dispatchToaster,
             });

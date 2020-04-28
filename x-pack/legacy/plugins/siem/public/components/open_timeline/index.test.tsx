@@ -37,7 +37,7 @@ describe('StatefulOpenTimeline', () => {
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline(
         '',
-        getOr([], 'getAllTimeline.timeline', mockOpenTimelineQueryResults[0].result.data)
+        mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
       ),
       loading: false,
       totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
