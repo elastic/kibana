@@ -225,21 +225,59 @@ export function geoShapeToGeometry(value, accumulator) {
   accumulator.push(geoJson);
 }
 
-function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
-  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
+function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
+  // geo_bounding_box does not support ranges outside of -180 and 180
+  // Split into two bounding boxes when ranges are outside those values
+  const boundingBoxes = [];
+  if (maxLon - minLon >= 360) {
+    boundingBoxes.push({
+      top_left: [-180, maxLat],
+      bottom_right: [180, minLat],
+    });
+  } else if (maxLon > 180) {
+    boundingBoxes.push({
+      top_left: [minLon, maxLat],
+      bottom_right: [180, minLat],
+    });
+    const overflow = maxLon - 180;
+    boundingBoxes.push({
+      top_left: [-180, maxLat],
+      bottom_right: [-180 + overflow, minLat],
+    });
+  } else if (minLon < -180) {
+    boundingBoxes.push({
+      top_left: [-180, maxLat],
+      bottom_right: [maxLon, minLat],
+    });
+    const overflow = Math.abs(minLon) - 180;
+    boundingBoxes.push({
+      top_left: [180 - overflow, maxLat],
+      bottom_right: [180, minLat],
+    });
+  } else {
+    boundingBoxes.push({
+      top_left: [minLon, maxLat],
+      bottom_right: [maxLon, minLat],
+    });
+  }
 
-  const TOP_LEFT_INDEX = 0;
-  const BOTTOM_RIGHT_INDEX = 2;
-  const verticies = geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
-  return {
-    geo_bounding_box: {
-      [geoFieldName]: {
-        top_left: verticies[TOP_LEFT_INDEX],
-        bottom_right: verticies[BOTTOM_RIGHT_INDEX],
+  const boundingBoxFilters = boundingBoxes.map(boundingBox => {
+    return {
+      geo_bounding_box: {
+        [geoFieldName]: boundingBox,
       },
-    },
-    ...filterProps,
-  };
+    };
+  });
+
+  return boundingBoxFilters.length === 1
+    ? boundingBoxFilters[0]
+    : {
+        query: {
+          bool: {
+            should: boundingBoxFilters,
+          },
+        },
+      };
 }
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
@@ -251,8 +289,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   // 2) geo_shape benefits of pre-indexed shapes and
   // compatability across multi-indices with geo_point and geo_shape do not apply to this use case.
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    // geo_bounding_box can not use longitudes outside -180,180 yet
-    return createGeoBoundBoxFilter(convertMapExtentToPolygon(mapExtent), geoFieldName);
+    return createGeoBoundBoxFilter(mapExtent, geoFieldName);
   }
 
   return {
@@ -393,45 +430,6 @@ function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
     type: GEO_JSON_TYPE.POLYGON,
     coordinates: [[topLeft, bottomLeft, bottomRight, topRight, topLeft]],
   };
-}
-
-/*
- * Convert map bounds to polygon
- */
-export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
-  const lonDelta = maxLon - minLon;
-  if (lonDelta >= 360) {
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon: 180,
-      minLat,
-      minLon: -180,
-    });
-  }
-
-  if (maxLon > 180) {
-    // bounds cross dateline east to west
-    const overlapWestOfDateLine = maxLon - 180;
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon: -180 + overlapWestOfDateLine,
-      minLat,
-      minLon,
-    });
-  }
-
-  if (minLon < -180) {
-    // bounds cross dateline west to east
-    const overlapEastOfDateLine = Math.abs(minLon) - 180;
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon,
-      minLat,
-      minLon: 180 - overlapEastOfDateLine,
-    });
-  }
-
-  return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }
 
 export function clampToLatBounds(lat) {
