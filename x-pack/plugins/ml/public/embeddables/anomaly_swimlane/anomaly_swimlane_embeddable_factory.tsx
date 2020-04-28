@@ -96,10 +96,11 @@ export class AnomalySwimlaneEmbeddableFactory
               const modalSession = overlays.openModal(
                 toMountPoint(
                   <AnomalySwimlaneInitializer
+                    defaultTitle={title}
                     influencers={influencers}
-                    onCreate={({ viewBy, swimlaneType, limit }) => {
+                    onCreate={({ panelTitle, viewBy, swimlaneType, limit }) => {
                       modalSession.close();
-                      resolve({ jobIds, title, swimlaneType, viewBy, limit });
+                      resolve({ jobIds, title: panelTitle, swimlaneType, viewBy, limit });
                     }}
                     onCancel={() => {
                       modalSession.close();

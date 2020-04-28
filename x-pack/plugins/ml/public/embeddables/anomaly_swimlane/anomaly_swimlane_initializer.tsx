@@ -16,14 +16,21 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelect,
+  EuiFieldText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 export interface AnomalySwimlaneInitializerProps {
+  defaultTitle: string;
   influencers: string[];
-  onCreate: (swimlaneProps: { swimlaneType: string; viewBy?: string; limit?: number }) => void;
+  onCreate: (swimlaneProps: {
+    panelTitle: string;
+    swimlaneType: string;
+    viewBy?: string;
+    limit?: number;
+  }) => void;
   onCancel: () => void;
 }
 
@@ -33,10 +40,12 @@ const limitOptions = [5, 10, 25, 50].map(limit => ({
 }));
 
 export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = ({
+  defaultTitle,
   influencers,
   onCreate,
   onCancel,
 }) => {
+  const [panelTitle, setPanelTitle] = useState(defaultTitle);
   const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(SWIMLANE_TYPE.OVERALL);
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState();
   const [limit, setLimit] = useState(5);
@@ -63,9 +72,12 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
     };
   });
 
+  const isPanelTitleValid = panelTitle.length > 0;
+
   const isFormValid =
-    swimlaneType === SWIMLANE_TYPE.OVERALL ||
-    (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName);
+    isPanelTitleValid &&
+    (swimlaneType === SWIMLANE_TYPE.OVERALL ||
+      (swimlaneType === SWIMLANE_TYPE.VIEW_BY && !!viewBySwimlaneFieldName));
 
   return (
     <div>
@@ -80,6 +92,24 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
       <EuiModalBody>
         <EuiForm>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
+                defaultMessage="Panel title"
+              />
+            }
+            isInvalid={!isPanelTitleValid}
+          >
+            <EuiFieldText
+              id="panelTitle"
+              name="panelTitle"
+              value={panelTitle}
+              onChange={e => setPanelTitle(e.target.value)}
+              isInvalid={!isPanelTitleValid}
+            />
+          </EuiFormRow>
+
           <EuiFormRow
             label={
               <FormattedMessage
@@ -140,7 +170,12 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
         <EuiButton
           isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, { swimlaneType, viewBy: viewBySwimlaneFieldName, limit })}
+          onClick={onCreate.bind(null, {
+            panelTitle,
+            swimlaneType,
+            viewBy: viewBySwimlaneFieldName,
+            limit,
+          })}
           fill
         >
           Create
