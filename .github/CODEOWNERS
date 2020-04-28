@@ -223,6 +223,7 @@
 /x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
 /x-pack/test/api_integration/apis/siem @elastic/siem @elastic/endpoint-app-team
 /x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
+/x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
 /x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
