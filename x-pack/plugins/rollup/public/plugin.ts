@@ -21,7 +21,6 @@ import { CRUD_APP_BASE_PATH } from './crud_app/constants';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 // @ts-ignore
 import { setEsBaseAndXPackBase, setHttp } from './crud_app/services/index';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
@@ -33,10 +32,6 @@ export interface RollupPluginSetupDependencies {
   indexManagement?: IndexManagementPluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
   usageCollection?: UsageCollectionSetup;
-}
-
-export interface RollupPluginStartDependencies {
-  data: DataPublicPluginStart;
 }
 
 export class RollupPlugin implements Plugin {
@@ -104,7 +99,7 @@ export class RollupPlugin implements Plugin {
     }
   }
 
-  start(core: CoreStart, plugins: RollupPluginStartDependencies) {
+  start(core: CoreStart) {
     setHttp(core.http);
     setNotifications(core.notifications);
     setEsBaseAndXPackBase(core.docLinks.ELASTIC_WEBSITE_URL, core.docLinks.DOC_LINK_VERSION);
