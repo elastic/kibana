@@ -73,8 +73,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
         );
     },
     /**
-     * Finds a table and returns the data in a nested array with row 0 is the headers if they exist.
-     * It uses euiTableCellContent to avoid poluting the array data with the euiTableRowCell__mobileHeader data.
+     * Finds a nodes and returns the data in a nested array of nodes.
      * @param dataTestSubj
      * @param element
      * @returns Promise<string[][]>
@@ -89,8 +88,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
       return $;
     },
     /**
-     * Finds a table and returns the data in a nested array with row 0 is the headers if they exist.
-     * It uses euiTableCellContent to avoid poluting the array data with the euiTableRowCell__mobileHeader data.
+     * Gets a array of not parsed styles and returns the Array of parsed styles.
      * @returns Promise<string[][]>
      * @param style
      */
