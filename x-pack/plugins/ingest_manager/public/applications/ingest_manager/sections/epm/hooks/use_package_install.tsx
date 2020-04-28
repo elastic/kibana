@@ -46,9 +46,18 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     []
   );
 
+  const getPackageInstallStatus = useCallback(
+    (pkg: string): PackageInstallItem => {
+      return packages[pkg];
+    },
+    [packages]
+  );
+
   const installPackage = useCallback(
     async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
-      setPackageInstallStatus({ name, status: InstallStatus.installing, version });
+      const currStatus = getPackageInstallStatus(name);
+      const newStatus = { ...currStatus, name, status: InstallStatus.installing };
+      setPackageInstallStatus(newStatus);
       const pkgkey = `${name}-${version}`;
 
       const res = await sendInstallPackage(pkgkey);
@@ -98,14 +107,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
-  );
-
-  const getPackageInstallStatus = useCallback(
-    (pkg: string): PackageInstallItem => {
-      return packages[pkg];
-    },
-    [packages]
+    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, toDetailView]
   );
 
   const uninstallPackage = useCallback(
@@ -133,7 +135,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version: null });
 
         notifications.toasts.addSuccess({
           title: toMountPoint(

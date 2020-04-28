@@ -55,12 +55,13 @@ export const SettingsPanel = (
   const packageHasDatasources = !!datasourcesData?.total;
   const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
   const isViewingOldPackage = version < latestVersion;
-
   // hide install/remove options if the user has version of the package is installed
   // and this package is out of date or if they do have a version installed but it's not this one
   const hideInstallOptions =
     (installationStatus === InstallStatus.notInstalled && isViewingOldPackage) ||
     (installationStatus === InstallStatus.installed && installedVersion !== version);
+
+  const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
   return (
     <EuiText>
       <EuiTitle>
@@ -72,7 +73,7 @@ export const SettingsPanel = (
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {installationStatus === InstallStatus.installed && (
+      {installedVersion !== null && (
         <div>
           <EuiTitle>
             <h4>
@@ -129,7 +130,7 @@ export const SettingsPanel = (
           )}
         </div>
       )}
-      {!hideInstallOptions && (
+      {!hideInstallOptions && !isUpdating && (
         <div>
           <EuiSpacer size="s" />
           {installationStatus === InstallStatus.notInstalled ||
