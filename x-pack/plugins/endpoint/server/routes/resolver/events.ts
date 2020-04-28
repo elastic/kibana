@@ -4,29 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateChildren } from '../../../common/schema/resolver';
+import { RequestHandler, Logger } from 'kibana/server';
+import { validateEvents } from '../../../common/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
 
-export function handleChildren(
+export function handleEvents(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateChildren.params>, TypeOf<typeof validateChildren.query>> {
+): RequestHandler<TypeOf<typeof validateEvents.params>, TypeOf<typeof validateEvents.query>> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { children, generations, afterChild, legacyEndpointID: endpointID },
+      query: { events, afterEvent, legacyEndpointID: endpointID },
     } = req;
     try {
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
+      const client = context.core.elasticsearch.dataClient;
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const client = context.core.elasticsearch.dataClient;
-
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.children(children, generations, afterChild);
+      const tree = await fetcher.events(events, afterEvent);
 
       return res.ok({
         body: tree.render(),
