@@ -33,6 +33,8 @@ import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { setFormatService } from './services';
 
 /** @private */
 interface TileMapVisualizationDependencies {
@@ -47,6 +49,11 @@ export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+}
+
+/** @internal */
+export interface TileMapPluginStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 /** @internal */
@@ -74,7 +81,7 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: TileMapPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
   }
 }

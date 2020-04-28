@@ -17,23 +17,9 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { createGetterSetter } from '../../../../plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
 
-import { TileMapPluginSetupDependencies, TileMapPluginStartDependencies } from './plugin';
-import { plugin } from '.';
-
-const setupPlugins: Readonly<TileMapPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-  mapsLegacy: npSetup.plugins.mapsLegacy,
-};
-
-const startPlugins: Readonly<TileMapPluginStartDependencies> = {
-  data: npStart.plugins.data,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, startPlugins);
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('vislib data.fieldFormats');

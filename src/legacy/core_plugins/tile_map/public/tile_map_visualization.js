@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { npStart } from 'ui/new_platform';
-import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
+import { getFormatService } from './services';
 import {
   scaleBounds,
   geoContains,
@@ -183,7 +183,9 @@ export const createTileMapVisualization = dependencies => {
       const newParams = this._getMapsParams();
       const metricDimension = this._params.dimensions.metric;
       const metricLabel = metricDimension ? metricDimension.label : '';
-      const metricFormat = getFormat(metricDimension && metricDimension.format);
+      const metricFormat = getFormatService().deserialize(
+        metricDimension && metricDimension.format
+      );
 
       return {
         label: metricLabel,
