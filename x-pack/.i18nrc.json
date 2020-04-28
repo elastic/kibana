@@ -17,7 +17,7 @@
     "xpack.endpoint": "plugins/endpoint",
     "xpack.features": "plugins/features",
     "xpack.fileUpload": "plugins/file_upload",
-    "xpack.graph": ["legacy/plugins/graph", "plugins/graph"],
+    "xpack.graph": ["plugins/graph"],
     "xpack.grokDebugger": "plugins/grokdebugger",
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
