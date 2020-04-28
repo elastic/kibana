@@ -32,8 +32,7 @@ import {
   SelectOption,
   SwitchOption,
 } from '../../../../../plugins/charts/public';
-import { WmsOptions } from '../../../tile_map/public/components/wms_options';
-import { RegionMapVisParams } from '../types';
+import { RegionMapVisParams, WmsOptions } from '../../../../../plugins/maps_legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,

@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export * from './legacy_dependencies_plugin';
+/**
+ * Use * syntax so that these exports do not break when internal
+ * types are stripped.
+ */
+export * from './external_basemap_types';
+export * from './map_types';
+export * from './region_map_types';

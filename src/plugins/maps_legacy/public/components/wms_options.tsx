@@ -21,12 +21,12 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TmsLayer } from '../../../../../plugins/maps_legacy/public';
-import { Vis } from '../../../../../plugins/visualizations/public';
-import { RegionMapVisParams } from '../../../region_map/public/types';
-import { SelectOption, SwitchOption } from '../../../../../plugins/charts/public';
+import { TmsLayer } from '../index';
+import { Vis } from '../../../visualizations/public';
+import { RegionMapVisParams } from '../common/types/region_map_types';
+import { SelectOption, SwitchOption } from '../../../charts/public';
 import { WmsInternalOptions } from './wms_internal_options';
-import { WMSOptions, TileMapVisParams } from '../types';
+import { WMSOptions, TileMapVisParams } from '../common/types/external_basemap_types';
 
 interface Props {
   stateParams: TileMapVisParams | RegionMapVisParams;
@@ -59,7 +59,7 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="tileMap.wmsOptions.baseLayerSettingsTitle"
+            id="maps_legacy.wmsOptions.baseLayerSettingsTitle"
             defaultMessage="Base layer settings"
           />
         </h2>
@@ -67,10 +67,10 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
       <EuiSpacer size="s" />
 
       <SwitchOption
-        label={i18n.translate('tileMap.wmsOptions.wmsMapServerLabel', {
+        label={i18n.translate('maps_legacy.wmsOptions.wmsMapServerLabel', {
           defaultMessage: 'WMS map server',
         })}
-        tooltip={i18n.translate('tileMap.wmsOptions.useWMSCompliantMapTileServerTip', {
+        tooltip={i18n.translate('maps_legacy.wmsOptions.useWMSCompliantMapTileServerTip', {
           defaultMessage: 'Use WMS compliant map tile server. For advanced users only.',
         })}
         paramName="enabled"
@@ -83,7 +83,7 @@ function WmsOptions({ stateParams, setValue, vis }: Props) {
           <EuiSpacer size="s" />
           <SelectOption
             id="wmsOptionsSelectTmsLayer"
-            label={i18n.translate('tileMap.wmsOptions.layersLabel', {
+            label={i18n.translate('maps_legacy.wmsOptions.layersLabel', {
               defaultMessage: 'Layers',
             })}
             options={tmsLayerOptions}
