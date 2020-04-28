@@ -73,12 +73,15 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
     validate: {
-      params: schema.object({
-        criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-        groupBy: schema.maybe(schema.string()),
-        filterQuery: schema.maybe(schema.string()),
-        sourceId: schema.string(),
-      }),
+      params: schema.object(
+        {
+          criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
+          groupBy: schema.maybe(schema.string()),
+          filterQuery: schema.maybe(schema.string()),
+          sourceId: schema.string(),
+        },
+        { unknowns: 'allow' }
+      ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],

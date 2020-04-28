@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +49,7 @@ import { InventoryMetricConditions } from '../../../../server/lib/alerting/inven
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -62,6 +64,7 @@ interface Props {
     nodeType: InventoryItemType;
     groupBy?: string;
     filterQuery?: string;
+    filterQueryText?: string;
     sourceId?: string;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
@@ -120,11 +123,15 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, alertParams.criteria]
   );
 
-  const onFilterQuerySubmit = useCallback(
+  const onFilterChange = useCallback(
     (filter: any) => {
-      setAlertParams('filterQuery', filter);
+      setAlertParams('filterQueryText', filter || '');
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+      );
     },
-    [setAlertParams]
+    [derivedIndexPattern, setAlertParams]
   );
 
   const emptyError = useMemo(() => {
@@ -166,6 +173,11 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams]
   );
 
+  const handleFieldSearchChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    [onFilterChange]
+  );
+
   useEffect(() => {
     const md = alertsContext.metadata;
     if (!alertParams.nodeType) {
@@ -191,14 +203,18 @@ export const Expressions: React.FC<Props> = props => {
 
     if (!alertParams.filterQuery) {
       if (md && md.filter) {
-        setAlertParams('filterQuery', md.filter);
+        setAlertParams('filterQueryText', md.filter);
+        setAlertParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
+        );
       }
     }
 
     if (!alertParams.sourceId) {
       setAlertParams('sourceId', source?.id);
     }
-  }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [alertsContext.metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -261,26 +277,32 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiSpacer size={'m'} />
 
-      {alertsContext.metadata && (
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
-              defaultMessage: 'Filter (optional)',
-            })}
-            helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
-              defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
-            })}
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
+          defaultMessage: 'Filter (optional)',
+        })}
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+        })}
+        fullWidth
+        compressed
+      >
+        {(alertsContext.metadata && (
+          <MetricsExplorerKueryBar
+            derivedIndexPattern={derivedIndexPattern}
+            onSubmit={onFilterChange}
+            onChange={onFilterChange}
+            value={alertParams.filterQueryText}
+          />
+        )) || (
+          <EuiFieldSearch
+            onChange={handleFieldSearchChange}
+            value={alertParams.filterQueryText}
             fullWidth
-            compressed
-          >
-            <MetricsExplorerKueryBar
-              derivedIndexPattern={derivedIndexPattern}
-              onSubmit={onFilterQuerySubmit}
-              value={alertParams.filterQuery}
-            />
-          </EuiFormRow>
-        </>
-      )}
+          />
+        )}
+      </EuiFormRow>
+
       <EuiSpacer size={'m'} />
     </>
   );

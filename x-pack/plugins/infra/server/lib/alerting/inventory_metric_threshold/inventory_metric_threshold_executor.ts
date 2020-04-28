@@ -5,6 +5,7 @@
  */
 import { mapValues, last, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import {
   InfraDatabaseSearchResponse,
   CallWithRequestParams,
@@ -99,7 +100,14 @@ const evaluateCondtion = async (
     services,
     nodeType,
     metric,
-    { to: Date.now(), from: Date.now(), interval: condition.timeUnit },
+    {
+      to: Date.now(),
+      from: moment()
+        .subtract(condition.timeSize, condition.timeUnit)
+        .toDate()
+        .getTime(),
+      interval: condition.timeUnit,
+    },
     sourceConfiguration,
     filterQuery
   );

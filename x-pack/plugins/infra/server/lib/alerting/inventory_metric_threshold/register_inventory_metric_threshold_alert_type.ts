@@ -22,6 +22,7 @@ const condition = schema.object({
     schema.literal('>='),
     schema.literal('<='),
     schema.literal('between'),
+    schema.literal('outside'),
   ]),
   timeUnit: schema.string(),
   timeSize: schema.number(),
@@ -32,12 +33,15 @@ export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   name: 'Inventory',
   validate: {
-    params: schema.object({
-      criteria: schema.arrayOf(condition),
-      nodeType: schema.string(),
-      filterQuery: schema.maybe(schema.string()),
-      sourceId: schema.string(),
-    }),
+    params: schema.object(
+      {
+        criteria: schema.arrayOf(condition),
+        nodeType: schema.string(),
+        filterQuery: schema.maybe(schema.string()),
+        sourceId: schema.string(),
+      },
+      { unknowns: 'allow' }
+    ),
   },
   defaultActionGroupId: FIRED_ACTIONS.id,
   actionGroups: [FIRED_ACTIONS],
