@@ -329,19 +329,19 @@ describe('createExtentFilter', () => {
       });
     });
 
-    it('should clamp longitudes to -180 to 180', () => {
+    it('should clamp longitudes to -180 to 180 and latitudes to -90 to 90', () => {
       const mapExtent = {
-        maxLat: 39,
+        maxLat: 120,
         maxLon: 200,
-        minLat: 35,
+        minLat: -100,
         minLon: -190,
       };
       const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
       expect(filter).toEqual({
         geo_bounding_box: {
           location: {
-            bottom_right: [180, 35],
-            top_left: [-180, 39],
+            bottom_right: [180, -90],
+            top_left: [-180, 90],
           },
         },
       });

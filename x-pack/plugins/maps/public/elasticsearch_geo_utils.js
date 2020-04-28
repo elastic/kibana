@@ -226,38 +226,41 @@ export function geoShapeToGeometry(value, accumulator) {
 }
 
 function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
+  const top = maxLat > 90 ? 90 : maxLat;
+  const bottom = minLat < -90 ? -90 : minLat;
+
   // geo_bounding_box does not support ranges outside of -180 and 180
   // Split into two bounding boxes when ranges are outside those values
   const boundingBoxes = [];
   if (maxLon - minLon >= 360) {
     boundingBoxes.push({
-      top_left: [-180, maxLat],
-      bottom_right: [180, minLat],
+      top_left: [-180, top],
+      bottom_right: [180, bottom],
     });
   } else if (maxLon > 180) {
     boundingBoxes.push({
-      top_left: [minLon, maxLat],
-      bottom_right: [180, minLat],
+      top_left: [minLon, top],
+      bottom_right: [180, bottom],
     });
     const overflow = maxLon - 180;
     boundingBoxes.push({
-      top_left: [-180, maxLat],
-      bottom_right: [-180 + overflow, minLat],
+      top_left: [-180, top],
+      bottom_right: [-180 + overflow, bottom],
     });
   } else if (minLon < -180) {
     boundingBoxes.push({
-      top_left: [-180, maxLat],
-      bottom_right: [maxLon, minLat],
+      top_left: [-180, top],
+      bottom_right: [maxLon, bottom],
     });
     const overflow = Math.abs(minLon) - 180;
     boundingBoxes.push({
-      top_left: [180 - overflow, maxLat],
-      bottom_right: [180, minLat],
+      top_left: [180 - overflow, top],
+      bottom_right: [180, bottom],
     });
   } else {
     boundingBoxes.push({
-      top_left: [minLon, maxLat],
-      bottom_right: [maxLon, minLat],
+      top_left: [minLon, top],
+      bottom_right: [maxLon, bottom],
     });
   }
 
