@@ -54,9 +54,9 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
 
 DropAndTargetDataProviders.displayName = 'DropAndTargetDataProviders';
 
-const NumberProviderAndBadge = styled(EuiBadge)`
+const NumberProviderAndBadge = (styled(EuiBadge)`
   margin: 0px 5px;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 NumberProviderAndBadge.displayName = 'NumberProviderAndBadge';
 
