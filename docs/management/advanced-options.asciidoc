@@ -142,7 +142,14 @@ This setting does not have an effect when loading a saved search.
 Highlighting slows requests when
 working on big documents.
 
+[float]
+[[kibana-ml-settings]]
+==== Machine learning
 
+[horizontal]
+`ml:fileDataVisualizerMaxFileSize`:: Sets the file size limit when importing
+data in the {data-viz}. The default value is `100MB`. The highest supported
+value for this setting is `1GB`.
 
 
 [float]

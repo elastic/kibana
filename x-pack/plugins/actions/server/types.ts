@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectAttributes,
-  KibanaRequest,
-} from '../../../../src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from '../../../../src/core/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -21,8 +23,9 @@ export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
-  callCluster(path: string, opts: unknown): Promise<unknown>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
 
 declare module 'src/core/server' {

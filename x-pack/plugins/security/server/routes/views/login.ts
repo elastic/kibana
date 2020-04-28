@@ -55,15 +55,16 @@ export function defineLoginRoutes({
       const { allowLogin, layout = 'form' } = license.getFeatures();
       const { sortedProviders, selector } = config.authc;
 
-      let showLoginForm = false;
       const providers = [];
-      for (const { type, name, options } of sortedProviders) {
-        if (options.showInSelector) {
-          if (type === 'basic' || type === 'token') {
-            showLoginForm = true;
-          } else if (selector.enabled) {
-            providers.push({ type, name, description: options.description });
-          }
+      for (const { type, name } of sortedProviders) {
+        // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
+        // be sure that config is present for every provider in `config.authc.sortedProviders`.
+        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+
+        // Include provider into the list if either selector is enabled or provider uses login form.
+        const usesLoginForm = type === 'basic' || type === 'token';
+        if (showInSelector && (usesLoginForm || selector.enabled)) {
+          providers.push({ type, name, usesLoginForm, description, hint, icon });
         }
       }
 
@@ -71,7 +72,7 @@ export function defineLoginRoutes({
         allowLogin,
         layout,
         requiresSecureConnection: config.secureCookies,
-        showLoginForm,
+        loginHelp: config.loginHelp,
         selector: { enabled: selector.enabled, providers },
       };
 
