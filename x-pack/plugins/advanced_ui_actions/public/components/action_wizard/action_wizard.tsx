@@ -29,7 +29,7 @@ export interface ActionWizardProps {
 
   /**
    * Currently selected action factory
-   * undefined - is allowed and means that non is selected
+   * undefined - is allowed and means that none is selected
    */
   currentActionFactory?: ActionFactory;
 
