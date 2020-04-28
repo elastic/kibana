@@ -11,7 +11,6 @@ import { useMlKibana } from '../../contexts/kibana';
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
-const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
