@@ -37,7 +37,7 @@ export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
+export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface SearchAggsSetup {

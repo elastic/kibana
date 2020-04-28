@@ -27,12 +27,6 @@ export interface OptionedValueProp {
   isCompatible: (agg: IAggConfig) => boolean;
 }
 
-export interface OptionedParamEditorProps<T = OptionedValueProp> {
-  aggParam: {
-    options: T[];
-  };
-}
-
 export class OptionedParamType extends BaseParamType {
   options: OptionedValueProp[];
 

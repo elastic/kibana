@@ -337,7 +337,6 @@ export {
   IFieldParamType,
   IMetricAggType,
   METRIC_TYPES,
-  OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
   OptionedValueProp,
   // search
