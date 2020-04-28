@@ -5,18 +5,35 @@
  */
 import { sendRequest, useRequest } from './use_request';
 import { datasourceRouteService } from '../../services';
-import { CreateDatasourceRequest, CreateDatasourceResponse } from '../../types';
+import {
+  CreateDatasourceRequest,
+  CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
+} from '../../types';
 import {
   DeleteDatasourcesRequest,
   DeleteDatasourcesResponse,
   GetDatasourcesRequest,
   GetDatasourcesResponse,
+  GetOneDatasourceResponse,
 } from '../../../../../common/types/rest_spec';
 
 export const sendCreateDatasource = (body: CreateDatasourceRequest['body']) => {
   return sendRequest<CreateDatasourceResponse>({
     path: datasourceRouteService.getCreatePath(),
     method: 'post',
+    body: JSON.stringify(body),
+  });
+};
+
+export const sendUpdateDatasource = (
+  datasourceId: string,
+  body: UpdateDatasourceRequest['body']
+) => {
+  return sendRequest<UpdateDatasourceResponse>({
+    path: datasourceRouteService.getUpdatePath(datasourceId),
+    method: 'put',
     body: JSON.stringify(body),
   });
 };
@@ -36,3 +53,10 @@ export function useGetDatasources(query: GetDatasourcesRequest['query']) {
     query,
   });
 }
+
+export const sendGetOneDatasource = (datasourceId: string) => {
+  return sendRequest<GetOneDatasourceResponse>({
+    path: datasourceRouteService.getInfoPath(datasourceId),
+    method: 'get',
+  });
+};
