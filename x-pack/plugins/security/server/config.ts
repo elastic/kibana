@@ -6,6 +6,7 @@
 
 import crypto from 'crypto';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { Logger } from '../../../../src/core/server';
 
 export type ConfigType = ReturnType<typeof createConfig>;
@@ -21,7 +22,7 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
   );
 
 type ProvidersCommonConfigType = Record<
-  'enabled' | 'showInSelector' | 'order' | 'description',
+  'enabled' | 'showInSelector' | 'order' | 'description' | 'hint' | 'icon',
   Type<any>
 >;
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
@@ -30,6 +31,8 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     showInSelector: schema.boolean({ defaultValue: true }),
     order: schema.number({ min: 0 }),
     description: schema.maybe(schema.string()),
+    hint: schema.maybe(schema.string()),
+    icon: schema.maybe(schema.string()),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     ...overrides,
   };
@@ -54,11 +57,12 @@ type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
 const providersConfigSchema = schema.object(
   {
     basic: getUniqueProviderSchema('basic', {
-      description: schema.maybe(
-        schema.any({
-          validate: () => '`basic` provider does not support custom description.',
-        })
-      ),
+      description: schema.string({
+        defaultValue: i18n.translate('xpack.security.loginWithElasticsearchLabel', {
+          defaultMessage: 'Log in with Elasticsearch',
+        }),
+      }),
+      icon: schema.string({ defaultValue: 'logoElastic' }),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {
@@ -69,11 +73,12 @@ const providersConfigSchema = schema.object(
       }),
     }),
     token: getUniqueProviderSchema('token', {
-      description: schema.maybe(
-        schema.any({
-          validate: () => '`token` provider does not support custom description.',
-        })
-      ),
+      description: schema.string({
+        defaultValue: i18n.translate('xpack.security.loginWithElasticsearchLabel', {
+          defaultMessage: 'Log in with Elasticsearch',
+        }),
+      }),
+      icon: schema.string({ defaultValue: 'logoElastic' }),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {
@@ -132,6 +137,7 @@ const providersConfigSchema = schema.object(
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   loginAssistanceMessage: schema.string({ defaultValue: '' }),
+  loginHelp: schema.maybe(schema.string()),
   cookieName: schema.string({ defaultValue: 'sid' }),
   encryptionKey: schema.conditional(
     schema.contextRef('dist'),
@@ -154,6 +160,8 @@ export const ConfigSchema = schema.object({
             showInSelector: true,
             order: 0,
             description: undefined,
+            hint: undefined,
+            icon: undefined,
             accessAgreement: undefined,
           },
         },
