@@ -252,7 +252,11 @@ describe('field_manager', () => {
     act(() => {
       getDisplayForm()
         .find(EuiColorPicker)
-        .prop('onChange')!('#aaa');
+        .prop('onChange')!('#aaa', {
+        rgba: [170, 170, 170, 1],
+        hex: '#aaa',
+        isValid: true,
+      });
     });
     fieldEditor.update();
     getDisplayForm()

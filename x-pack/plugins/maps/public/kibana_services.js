@@ -5,8 +5,6 @@
  */
 import { esFilters, search } from '../../../../src/plugins/data/public';
 
-export { SearchSource } from '../../../../src/plugins/data/public';
-
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
 
@@ -137,3 +135,7 @@ export const getNavigation = () => navigation;
 let coreI18n;
 export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
 export const getCoreI18n = () => coreI18n;
+
+let dataSearchService;
+export const setSearchService = searchService => (dataSearchService = searchService);
+export const getSearchService = () => dataSearchService;

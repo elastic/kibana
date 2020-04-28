@@ -10,7 +10,7 @@ import { ManagementAppMountParams } from '../../../../../../src/plugins/manageme
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
 const homeBreadcrumbText = i18n.translate('xpack.ingestPipelines.breadcrumb.pipelinesLabel', {
-  defaultMessage: 'Ingest Pipelines',
+  defaultMessage: 'Ingest Node Pipelines',
 });
 
 export class BreadcrumbService {

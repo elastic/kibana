@@ -10,7 +10,9 @@ import {
   registerGetRoutes,
   registerCreateRoute,
   registerUpdateRoute,
+  registerPrivilegesRoute,
   registerDeleteRoute,
+  registerSimulateRoute,
 } from './api';
 
 export class ApiRoutes {
@@ -18,6 +20,8 @@ export class ApiRoutes {
     registerGetRoutes(dependencies);
     registerCreateRoute(dependencies);
     registerUpdateRoute(dependencies);
+    registerPrivilegesRoute(dependencies);
     registerDeleteRoute(dependencies);
+    registerSimulateRoute(dependencies);
   }
 }

@@ -284,5 +284,47 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Simulate', () => {
+      it('should successfully simulate a pipeline', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/simulate`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            pipeline: {
+              description: 'test simulate pipeline description',
+              processors: [
+                {
+                  set: {
+                    field: 'field2',
+                    value: '_value',
+                  },
+                },
+              ],
+            },
+            documents: [
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'bar',
+                },
+              },
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'rab',
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        // The simulate ES response is quite long and includes timestamps
+        // so for now, we just confirm the docs array is returned with the correct length
+        expect(body.docs?.length).to.eql(2);
+      });
+    });
   });
 }

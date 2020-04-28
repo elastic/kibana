@@ -17,8 +17,6 @@ export {
 export {
   FormSchema,
   FIELD_TYPES,
-  VALIDATION_TYPES,
-  FieldConfig,
   FormConfig,
   useForm,
   Form,
@@ -35,7 +33,6 @@ export {
 export {
   fieldFormatters,
   fieldValidators,
-  serializers,
 } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
 
 export {
@@ -50,6 +47,15 @@ export {
   isJSON,
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
-export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';
+
+export {
+  SectionLoading,
+  WithPrivileges,
+  AuthorizationProvider,
+  SectionError,
+  Error,
+  useAuthorizationContext,
+  NotAuthorizedSection,
+} from '../../../../src/plugins/es_ui_shared/public';
 
 export const useKibana = () => _useKibana<AppServices>();
