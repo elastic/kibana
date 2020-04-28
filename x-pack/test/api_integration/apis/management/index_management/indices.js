@@ -199,7 +199,7 @@ export default function({ getService }) {
           'isRollupIndex', // data enricher
         ];
         expectedKeys.map(key => {
-          expect(Object.keys(body[0]).contain(key));
+          expect(Object.keys(body[0])).to.contain(key);
         });
         expect(Object.keys(body[0]).length).to.equal(expectedKeys.length);
       });
