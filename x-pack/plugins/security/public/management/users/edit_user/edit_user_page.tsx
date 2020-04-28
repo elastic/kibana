@@ -35,6 +35,7 @@ import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
 import { RoleComboBox } from '../../role_combo_box';
+import { isUserDeprecated, getExtendedUserDeprecationNotice } from '../user_utils';
 import { UserAPIClient } from '..';
 
 interface Props {
@@ -241,7 +242,7 @@ export class EditUserPage extends Component<Props, State> {
     return (
       <Fragment>
         <EuiHorizontalRule />
-        {user.username === 'kibana' ? (
+        {user.username === 'kibana' || user.username === 'kibana_system' ? (
           <Fragment>
             <EuiCallOut
               title={i18n.translate(
@@ -424,15 +425,31 @@ export class EditUserPage extends Component<Props, State> {
           </EuiPageContentHeader>
           <EuiPageContentBody>
             {reserved && (
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
-                    defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
+              <Fragment>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
+                      defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
                     may be changed."
-                  />
-                </p>
-              </EuiText>
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </Fragment>
+            )}
+
+            {isUserDeprecated(this.state.user) && (
+              <Fragment>
+                <EuiCallOut
+                  data-test-subj="deprecatedUserWarning"
+                  title={getExtendedUserDeprecationNotice(this.state.user)}
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                />
+                <EuiSpacer size="s" />
+              </Fragment>
             )}
 
             {showDeleteConfirmation ? (

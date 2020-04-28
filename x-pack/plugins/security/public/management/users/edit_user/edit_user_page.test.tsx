@@ -32,6 +32,14 @@ const createUser = (username: string, roles = ['idk', 'something']) => {
     };
   }
 
+  if (username === 'deprecated_user') {
+    user.metadata = {
+      _reserved: true,
+      _deprecated: true,
+      _deprecated_reason: 'beacuse I said so.',
+    };
+  }
+
   return user;
 };
 
@@ -160,6 +168,28 @@ describe('EditUserPage', () => {
 
     expect(findTestSubject(wrapper, 'hasDeprecatedRolesAssignedHelpText')).toHaveLength(0);
     expectSaveButton(wrapper);
+  });
+
+  it('warns when viewing a depreciated user', async () => {
+    const user = createUser('deprecated_user');
+    const { apiClient, rolesAPIClient } = buildClients(user);
+    const securitySetup = buildSecuritySetup();
+
+    const wrapper = mountWithIntl(
+      <EditUserPage
+        username={user.username}
+        userAPIClient={apiClient}
+        rolesAPIClient={rolesAPIClient}
+        authc={securitySetup.authc}
+        notifications={coreMock.createStart().notifications}
+      />
+    );
+
+    await waitForRender(wrapper);
+    expect(apiClient.getUser).toBeCalledTimes(1);
+    expect(securitySetup.authc.getCurrentUser).toBeCalledTimes(1);
+
+    expect(findTestSubject(wrapper, 'deprecatedUserWarning')).toHaveLength(1);
   });
 
   it('warns when user is assigned a deprecated role', async () => {
