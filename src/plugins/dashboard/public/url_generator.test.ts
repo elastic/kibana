@@ -22,6 +22,7 @@ import { hashedItemStore } from '../../kibana_utils/public';
 // eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
 import { esFilters } from '../../data/public';
+import { DashboardConstants } from './dashboard_constants';
 
 const APP_BASE_PATH: string = 'xyz/app/kibana';
 
@@ -126,7 +127,9 @@ describe('dashboard url generator', () => {
       Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
     );
     const url = await generator.createUrl!({});
-    expect(url).toEqual(expect.stringContaining('savedFiltersHandling=merge'));
+    expect(url).toEqual(
+      expect.stringContaining(`${DashboardConstants.SAVED_FILTERS_HANDLING_PARAM}=merge`)
+    );
   });
 
   test('can disable merging filters', async () => {
@@ -134,6 +137,8 @@ describe('dashboard url generator', () => {
       Promise.resolve({ appBasePath: APP_BASE_PATH, useHashedUrl: false })
     );
     const url = await generator.createUrl!({ savedFiltersHandling: 'override' });
-    expect(url).not.toEqual(expect.stringContaining('savedFiltersHandling'));
+    expect(url).not.toEqual(
+      expect.stringContaining(DashboardConstants.SAVED_FILTERS_HANDLING_PARAM)
+    );
   });
 });
