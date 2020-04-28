@@ -51,8 +51,6 @@ export const detailsIdFromParams = () => {
   return '';
 };
 
-export const isOnHostPage = () => isOnPage('/hosts');
-
 export const getCurrentAppLocation = () => currentLocation;
 
 export const getFromAppLocation = () => fromLocation;

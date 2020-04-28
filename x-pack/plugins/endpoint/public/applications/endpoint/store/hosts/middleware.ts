@@ -5,20 +5,17 @@
  */
 
 import { HostResultList } from '../../../../../common/types';
-import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
+import { hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
 import { HostPolicyResponse } from '../../../../../common/types';
+import { isOnHostPage } from '../../lib/location/hosts';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
     next(action);
     const state = getState();
-    if (
-      action.type === 'userChangedUrl' &&
-      isOnHostPage(state) &&
-      hasSelectedHost(state) !== true
-    ) {
+    if (action.type === 'userChangedUrl' && isOnHostPage() && hasSelectedHost(state) !== true) {
       const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
       try {
         const response = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
