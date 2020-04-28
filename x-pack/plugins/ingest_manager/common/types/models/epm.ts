@@ -97,6 +97,7 @@ export interface RegistryStream {
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template?: string;
 }
 
 export type RequirementVersion = string;
