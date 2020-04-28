@@ -21,6 +21,7 @@ import { inputsModel, inputsActions } from '../../../store/inputs';
 import { useApolloClient } from '../../../utils/apollo_context';
 
 import { allTimelinesQuery } from './index.gql_query';
+import * as i18n from '../../../pages/timelines/translations';
 
 export interface AllTimelinesArgs {
   fetchAllTimeline: ({ onlyUserFavorite, pageInfo, search, sort }: AllTimelinesVariables) => void;
@@ -154,7 +155,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         } catch (error) {
           if (!didCancel) {
             errorToToaster({
-              title: 'Fetch all timelines failure',
+              title: i18n.ERROR_FETCHING_TIMELINES_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
               dispatchToaster,
             });
