@@ -228,7 +228,7 @@ async function _assignPackageStreamToStream(
   stream: DatasourceInputStream
 ) {
   if (!stream.enabled) {
-    return { ...stream, pkg_stream: undefined };
+    return { ...stream, agent_stream: undefined };
   }
   const dataset = getDataset(stream.dataset);
   const assetsData = await getAssetsDataForPackageKey(pkgInfo, _isAgentStream, dataset);
@@ -239,11 +239,12 @@ async function _assignPackageStreamToStream(
   }
 
   const yaml = createStream(
-    // Populate template variables from input config and stream config
-    Object.assign({}, input.config, stream.config),
+    // Populate template variables from input vars and stream vars
+    Object.assign({}, input.vars, stream.vars),
     pkgStream.buffer.toString()
   );
-  stream.pkg_stream = yaml;
+  stream.agent_stream = yaml;
+
   return { ...stream };
 }
 

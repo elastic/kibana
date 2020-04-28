@@ -16,9 +16,19 @@ import * as selectors from '../../store/hosts/selectors';
 import { useHostSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
-import { HostMetadata, Immutable } from '../../../../../common/types';
+import { HostInfo, HostStatus, Immutable } from '../../../../../common/types';
 import { PageView } from '../components/page_view';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
+
+const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
+  {
+    [key in HostStatus]: string;
+  }
+>({
+  [HostStatus.ERROR]: 'danger',
+  [HostStatus.ONLINE]: 'success',
+  [HostStatus.OFFLINE]: 'subdued',
+});
 
 const HostLink = memo<{
   name: string;
@@ -73,17 +83,37 @@ export const HostList = () => {
     [history, queryParams]
   );
 
-  const columns: Array<EuiBasicTableColumn<Immutable<HostMetadata>>> = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     return [
       {
-        field: '',
+        field: 'metadata.host',
         name: i18n.translate('xpack.endpoint.host.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
+        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
           const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
           return (
             <HostLink name={hostname} href={'?' + newQueryParams.search} route={newQueryParams} />
+          );
+        },
+      },
+      {
+        field: 'host_status',
+        name: i18n.translate('xpack.endpoint.host.list.hostStatus', {
+          defaultMessage: 'Host Status',
+        }),
+        render: (hostStatus: HostInfo['host_status']) => {
+          return (
+            <EuiHealth
+              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+              data-test-subj="rowHostStatus"
+            >
+              <FormattedMessage
+                id="xpack.endpoint.host.list.hostStatusValue"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                values={{ hostStatus }}
+              />
+            </EuiHealth>
           );
         },
       },
@@ -117,26 +147,23 @@ export const HostList = () => {
         },
       },
       {
-        field: 'host.os.name',
+        field: 'metadata.host.os.name',
         name: i18n.translate('xpack.endpoint.host.list.os', {
           defaultMessage: 'Operating System',
         }),
       },
       {
-        field: 'host.ip',
+        field: 'metadata.host.ip',
         name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
         truncateText: true,
       },
       {
-        field: '',
-        name: i18n.translate('xpack.endpoint.host.list.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        field: 'metadata.agent.version',
+        name: i18n.translate('xpack.endpoint.host.list.endpointVersion', {
+          defaultMessage: 'Version',
         }),
-        render: () => {
-          return 'version';
-        },
       },
       {
         field: '',
@@ -158,7 +185,7 @@ export const HostList = () => {
       headerLeft={i18n.translate('xpack.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
     >
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiText color="subdued" size="xs">
+      <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
         <FormattedMessage
           id="xpack.endpoint.host.list.totalCount"
           defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
