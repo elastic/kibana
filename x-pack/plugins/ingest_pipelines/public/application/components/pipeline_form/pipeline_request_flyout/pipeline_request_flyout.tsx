@@ -40,7 +40,7 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   uuid.current++;
 
   return (
-    <EuiFlyout maxWidth={550} onClose={closeFlyout}>
+    <EuiFlyout maxWidth={550} onClose={closeFlyout} data-test-subj="requestFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>

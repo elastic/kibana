@@ -114,8 +114,8 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         <EuiTitle size="l">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
-                <h1 data-test-subj="pageTitle">
+              <EuiTitle size="l" data-test-subj="pageTitle">
+                <h1>
                   <FormattedMessage
                     id="xpack.ingestPipelines.edit.pageTitle"
                     defaultMessage="Edit pipeline '{name}'"
