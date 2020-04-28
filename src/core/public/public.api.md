@@ -53,6 +53,7 @@ export interface AppBase {
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
+    id: string;
     label: string;
     order?: number;
 }
@@ -339,6 +340,7 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -437,21 +439,25 @@ export class CoreSystem {
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
     kibana: {
+        id: string;
         label: string;
         euiIconType: string;
         order: number;
     };
     observability: {
+        id: string;
         label: string;
         euiIconType: string;
         order: number;
     };
     security: {
+        id: string;
         label: string;
         order: number;
         euiIconType: string;
     };
     management: {
+        id: string;
         label: string;
         order: number;
     };
@@ -860,6 +866,11 @@ export interface LegacyNavLink {
 
 // @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+// Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type NavType = 'modern' | 'legacy';
 
 // @public (undocumented)
 export interface NotificationsSetup {
