@@ -9,7 +9,8 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { API_URLS, GetPingsParamsType } from '../../../common';
+import { API_URLS } from '../../../common/constants';
+import { GetPingsParamsType } from '../../../common/runtime_types';
 
 export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',

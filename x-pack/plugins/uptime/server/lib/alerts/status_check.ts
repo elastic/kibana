@@ -12,11 +12,11 @@ import { AlertExecutorOptions } from '../../../../alerting/server';
 import { UptimeAlertTypeFactory } from './types';
 import { GetMonitorStatusResult } from '../requests';
 import {
-  ACTION_GROUP_DEFINITIONS,
   StatusCheckExecutorParamsType,
   StatusCheckAlertStateType,
   StatusCheckAlertState,
-} from '../../../common';
+} from '../../../common/runtime_types';
+import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants';
 import { savedObjectsAdapter } from '../saved_objects';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;

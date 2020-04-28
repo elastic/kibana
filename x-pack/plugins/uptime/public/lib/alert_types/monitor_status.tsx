@@ -10,7 +10,7 @@ import DateMath from '@elastic/datemath';
 import { isRight } from 'fp-ts/lib/Either';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { StatusCheckExecutorParamsType } from '../../../common';
+import { StatusCheckExecutorParamsType } from '../../../common/runtime_types';
 import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_containers';
 
 export const validate = (alertParams: any) => {

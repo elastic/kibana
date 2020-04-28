@@ -6,7 +6,7 @@
 import { LegacyCoreStart, AppMountParameters } from 'src/core/public';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { UMFrontendLibs } from '../lib/lib';
-import { PLUGIN } from '../../common';
+import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';

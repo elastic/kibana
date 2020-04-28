@@ -5,7 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { UNNAMED_LOCATION, MonitorLocations, MonitorLocation } from '../../../common';
+import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
+import { UNNAMED_LOCATION } from '../../../common/constants';
 
 /**
  * Fetch data for the monitor page title.

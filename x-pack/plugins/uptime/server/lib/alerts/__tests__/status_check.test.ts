@@ -16,7 +16,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 /**

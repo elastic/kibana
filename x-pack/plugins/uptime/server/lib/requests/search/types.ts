@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CursorDirection, SortOrder } from '../../../../common';
+import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 
 export interface CursorPagination {
   cursorKey?: any;

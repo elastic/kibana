@@ -5,7 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../common';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 /**

@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Cert, GetCertsParams } from '../../../common';
+import { Cert, GetCertsParams } from '../../../common/runtime_types';
 
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   callES,

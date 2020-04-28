@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorDetails, MonitorError } from '../../../common';
+import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;

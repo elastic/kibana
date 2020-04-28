@@ -6,7 +6,7 @@
 
 import { QueryContext } from '../query_context';
 import { CursorPagination } from '../types';
-import { CursorDirection, SortOrder } from '../../../../../common';
+import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 
 describe(QueryContext, () => {
   // 10 minute range

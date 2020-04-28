@@ -16,7 +16,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from 'kibana/server';
-import { DynamicSettings } from '../../common';
+import { DynamicSettings } from '../../common/runtime_types';
 import { UMServerLibs } from '../lib/lib';
 
 /**

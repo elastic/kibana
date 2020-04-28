@@ -7,7 +7,8 @@
 import { flatten } from 'lodash';
 import { CursorPagination } from './types';
 import { QueryContext } from './query_context';
-import { CursorDirection, MonitorSummary, SortOrder, QUERY } from '../../../../common';
+import { QUERY } from '../../../../common/constants';
+import { CursorDirection, MonitorSummary, SortOrder } from '../../../../common/runtime_types';
 import { enrichMonitorGroups } from './enrich_monitor_groups';
 import { MonitorGroupIterator } from './monitor_group_iterator';
 

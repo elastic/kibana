@@ -14,11 +14,11 @@ import {
   Cert,
   OverviewFilters,
   MonitorDetails,
-  MonitorDurationResult,
   MonitorLocations,
   Snapshot,
   StatesIndexStatus,
-} from '../../../common';
+} from '../../../common/runtime_types';
+import { MonitorDurationResult } from '../../../common/types';
 import {
   GetFilterBarParams,
   GetLatestMonitorParams,

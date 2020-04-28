@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { OverviewFilters } from '../../../common';
+import { OverviewFilters } from '../../../common/runtime_types';
 import { generateFilterAggs } from './generate_filter_aggs';
 
 export interface GetFilterBarParams {
