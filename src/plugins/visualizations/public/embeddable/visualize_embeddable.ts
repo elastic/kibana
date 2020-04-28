@@ -40,7 +40,6 @@ import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/e
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
-import { VisualizationsStartDeps } from '../plugin';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
@@ -51,7 +50,6 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
-  uiActions?: VisualizationsStartDeps['uiActions'];
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -91,7 +89,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, uiActions, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: IContainer
   ) {
@@ -104,8 +102,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         editable,
         visTypeName: vis.type.name,
       },
-      parent,
-      { uiActions }
+      parent
     );
     this.deps = deps;
     this.timefilter = timefilter;
