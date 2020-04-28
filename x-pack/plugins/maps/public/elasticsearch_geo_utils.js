@@ -415,7 +415,7 @@ export function getBoundingBoxGeometry(geometry) {
   return formatEnvelopeAsPolygon(extent);
 }
 
-function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
+export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
   const left = minLon;
