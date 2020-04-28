@@ -8,8 +8,12 @@ import Handlebars from 'handlebars';
 import { safeLoad } from 'js-yaml';
 import { DatasourceConfigRecord } from '../../../../common';
 
+function isValidKey(key: string) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
+
 function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) {
-  if (Object.keys(yamlVariables).length === 0) {
+  if (Object.keys(yamlVariables).length === 0 || !yaml) {
     return yaml;
   }
 
@@ -33,12 +37,15 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
     const keyParts = key.split('.');
     const lastKeyPart = keyParts.pop();
 
-    if (!lastKeyPart) {
+    if (!lastKeyPart || !isValidKey(lastKeyPart)) {
       throw new Error('Invalid key');
     }
 
     let varPart = acc;
     for (const keyPart of keyParts) {
+      if (!isValidKey(keyPart)) {
+        throw new Error('Invalid key');
+      }
       if (!varPart[keyPart]) {
         varPart[keyPart] = {};
       }
@@ -46,7 +53,7 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
     }
 
     if (recordEntry.type && recordEntry.type === 'yaml') {
-      const yamlKeyPlaceholder = `{{${key}}}`;
+      const yamlKeyPlaceholder = `##${key}##`;
       varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
     } else {

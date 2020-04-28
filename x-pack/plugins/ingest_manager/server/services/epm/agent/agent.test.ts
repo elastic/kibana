@@ -35,6 +35,7 @@ describe('createStream', () => {
     const streamTemplate = `
     input: redis/metrics
     metricsets: ["key"]
+    test: null
     {{#if key.patterns}}
     key.patterns: {{key.patterns}}
     {{/if}}
@@ -53,6 +54,7 @@ describe('createStream', () => {
     expect(output).toEqual({
       input: 'redis/metrics',
       metricsets: ['key'],
+      test: null,
       'key.patterns': [
         {
           limit: 20,
