@@ -21,7 +21,6 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
     if (typeof value === 'object') {
       yaml[key] = replaceVariablesInYaml(yamlVariables, value);
     }
-
     if (typeof value === 'string' && value in yamlVariables) {
       yaml[key] = yamlVariables[value];
     }
@@ -54,7 +53,7 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
 
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = yamlKeyPlaceholder;
+      varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
     } else {
       varPart[lastKeyPart] = recordEntry.value;
@@ -68,9 +67,8 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
 export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
   const { vars, yamlValues } = buildTemplateVariables(variables);
 
-  const template = Handlebars.compile(streamTemplate);
+  const template = Handlebars.compile(streamTemplate, { noEscape: true });
   const stream = template(vars);
-
   const yamlFromStream = safeLoad(stream, {});
 
   return replaceVariablesInYaml(yamlValues, yamlFromStream);
