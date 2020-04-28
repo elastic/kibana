@@ -202,7 +202,6 @@ export const EmbeddedMapComponent = ({
             getEmbeddableFactory={services.embeddable.getEmbeddableFactory}
             getAllEmbeddableFactories={services.embeddable.getEmbeddableFactories}
             notifications={services.notifications}
-            application={services.application}
             overlays={services.overlays}
             inspector={services.inspector}
             application={services.application}
