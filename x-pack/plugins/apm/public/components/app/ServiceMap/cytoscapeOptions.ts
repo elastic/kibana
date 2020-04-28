@@ -12,6 +12,55 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { defaultIcon, iconForNode } from './icons';
 
+enum severity {
+  critical = 'critical',
+  major = 'major',
+  minor = 'minor',
+  warning = 'warning'
+}
+
+const getBorderColor = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+  if (el.hasClass('primary') || el.selected()) {
+    return theme.euiColorPrimary;
+  } else if (nodeSeverity === severity.warning) {
+    return theme.euiColorVis0;
+  } else if (
+    nodeSeverity === severity.minor ||
+    nodeSeverity === severity.major
+  ) {
+    return theme.euiColorVis5;
+  } else if (nodeSeverity === severity.critical) {
+    return theme.euiColorVis9;
+  } else {
+    return theme.euiColorMediumShade;
+  }
+};
+
+const getBorderStyle: cytoscape.Css.MapperFunction<
+  cytoscape.NodeSingular,
+  cytoscape.Css.LineStyle
+> = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+  if (nodeSeverity === severity.critical) {
+    return 'double';
+  } else {
+    return 'solid';
+  }
+};
+
+const getBorderWidth = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+
+  if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
+    return 4;
+  } else if (nodeSeverity === severity.critical) {
+    return 12;
+  } else {
+    return 2;
+  }
+};
+
 // IE 11 does not properly load some SVGs or draw certain shapes. This causes
 // a runtime error and the map fails work at all. We would prefer to do some
 // kind of feature detection rather than browser detection, but some of these
@@ -55,11 +104,9 @@ const style: cytoscape.Stylesheet[] = [
         isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
         isService(el) ? '60%' : '40%',
-      'border-color': (el: cytoscape.NodeSingular) =>
-        el.hasClass('primary') || el.selected()
-          ? theme.euiColorPrimary
-          : theme.euiColorMediumShade,
-      'border-width': 2,
+      'border-color': getBorderColor,
+      'border-style': getBorderStyle,
+      'border-width': getBorderWidth,
       color: (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected()
           ? theme.euiColorPrimaryText
@@ -149,7 +196,7 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'node.hover',
     style: {
-      'border-width': 2
+      'border-width': getBorderWidth
     }
   },
   {
