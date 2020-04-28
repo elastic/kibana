@@ -237,7 +237,7 @@ export class WorkpadLoader extends React.PureComponent {
             <p>{strings.getEmptyPromptGettingStartedDescription()}</p>
             <p>
               {strings.getEmptyPromptNewUserDescription()}{' '}
-              <EuiLink href="kibana#/home/tutorial_directory/sampleData">
+              <EuiLink href="home#/tutorial_directory/sampleData">
                 {strings.getSampleDataLinkLabel()}
               </EuiLink>
               .

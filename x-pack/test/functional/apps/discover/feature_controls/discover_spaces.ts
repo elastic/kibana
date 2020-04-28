@@ -107,6 +107,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
+          useActualUrl: true,
         });
         await PageObjects.spaceSelector.expectHomePage('custom_space');
       });

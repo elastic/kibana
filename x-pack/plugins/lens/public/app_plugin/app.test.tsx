@@ -233,7 +233,7 @@ describe('Lens App', () => {
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/visualize#/' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
   });

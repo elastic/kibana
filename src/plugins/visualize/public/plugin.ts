@@ -23,6 +23,7 @@ import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -33,11 +34,7 @@ import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart } from '../../share/public';
-import {
-  KibanaLegacySetup,
-  AngularRenderedAppUpdater,
-  KibanaLegacyStart,
-} from '../../kibana_legacy/public';
+import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
@@ -63,7 +60,7 @@ export interface VisualizePluginSetupDependencies {
 export class VisualizePlugin
   implements
     Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
-  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}

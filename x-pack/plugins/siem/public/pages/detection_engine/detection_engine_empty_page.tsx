@@ -14,7 +14,7 @@ export const DetectionEngineEmptyPage = React.memo(() => (
   <EmptyPage
     actionPrimaryIcon="gear"
     actionPrimaryLabel={i18n.EMPTY_ACTION_PRIMARY}
-    actionPrimaryUrl={`${useKibana().services.http.basePath.get()}/app/kibana#/home/tutorial_directory/siem`}
+    actionPrimaryUrl={`${useKibana().services.http.basePath.get()}/app/home#/tutorial_directory/siem`}
     actionSecondaryIcon="popout"
     actionSecondaryLabel={i18n.EMPTY_ACTION_SECONDARY}
     actionSecondaryTarget="_blank"

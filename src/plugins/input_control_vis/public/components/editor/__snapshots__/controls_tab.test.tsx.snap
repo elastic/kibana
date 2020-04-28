@@ -24,10 +24,8 @@ exports[`renders ControlsTab 1`] = `
       Object {
         "core": Object {
           "getStartServices": [MockFunction],
-          "injectedMetadata": Object {
-            "getInjectedVar": [MockFunction],
-          },
         },
+        "getSettings": [MockFunction],
         "data": Object {
           "query": Object {
             "filterManager": Object {
@@ -85,10 +83,8 @@ exports[`renders ControlsTab 1`] = `
       Object {
         "core": Object {
           "getStartServices": [MockFunction],
-          "injectedMetadata": Object {
-            "getInjectedVar": [MockFunction],
-          },
         },
+        "getSettings": [MockFunction],
         "data": Object {
           "query": Object {
             "filterManager": Object {

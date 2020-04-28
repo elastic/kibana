@@ -30,6 +30,7 @@ import {
   PluginInitializerContext,
   Plugin,
   SavedObjectsClientContract,
+  AppUpdater,
 } from 'src/core/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
@@ -54,7 +55,6 @@ import {
 } from '../../../plugins/kibana_react/public';
 import { createKbnUrlTracker, Storage } from '../../../plugins/kibana_utils/public';
 import {
-  AngularRenderedAppUpdater,
   KibanaLegacySetup,
   KibanaLegacyStart,
   initAngularBootstrap,
@@ -132,7 +132,7 @@ export class DashboardPlugin
   implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
 
@@ -220,6 +220,7 @@ export class DashboardPlugin
       order: -1001,
       euiIconType: 'dashboardApp',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
+      updater$: this.appStateUpdater,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         appMounted();

@@ -24,6 +24,7 @@ import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -35,7 +36,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup, AngularRenderedAppUpdater } from 'src/plugins/kibana_legacy/public';
+import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
@@ -119,7 +120,7 @@ export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;

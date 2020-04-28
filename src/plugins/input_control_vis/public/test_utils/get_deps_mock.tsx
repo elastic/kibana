@@ -52,19 +52,13 @@ export const getDepsMock = ({
           },
         },
       ]),
-      injectedMetadata: {
-        getInjectedVar: jest.fn().mockImplementation(key => {
-          switch (key) {
-            case 'autocompleteTimeout':
-              return 1000;
-            case 'autocompleteTerminateAfter':
-              return 100000;
-            default:
-              return '';
-          }
-        }),
-      },
     },
+    getSettings: jest.fn().mockImplementation(() => {
+      return Promise.resolve({
+        autocompleteTimeout: 1000,
+        autocompleteTerminateAfter: 100000,
+      });
+    }),
     data: {
       search: {
         searchSource: {

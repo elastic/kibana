@@ -28,7 +28,7 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProvider
 
   class NewsfeedPage {
     async resetPage() {
-      await PageObjects.common.navigateToUrl('home');
+      await PageObjects.common.navigateToUrl('home', '', { useActualUrl: true });
     }
 
     async closeNewsfeedPanel() {

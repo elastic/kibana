@@ -56,7 +56,7 @@ export default function spaceSelectorFunctonalTests({
 
     describe('Spaces Data', () => {
       const spaceId = 'another-space';
-      const sampleDataHash = '/home/tutorial_directory/sampleData';
+      const sampleDataHash = '/tutorial_directory/sampleData';
 
       const expectDashboardRenders = async (dashName: string) => {
         await listingTable.searchForItemWithName(dashName);
