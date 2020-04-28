@@ -74,7 +74,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
                       {i18n.translate(
                         'kibana-react.exitFullScreenButton.exitFullScreenModeButtonTitle',
                         {
-                          defaultMessage: 'Elastic Kibana',
+                          defaultMessage: 'Elastic',
                         }
                       )}
                     </p>

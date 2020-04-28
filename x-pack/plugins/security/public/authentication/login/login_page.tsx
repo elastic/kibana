@@ -39,7 +39,7 @@ const infoMessageMap = new Map([
   [
     'LOGGED_OUT',
     i18n.translate('xpack.security.login.loggedOutDescription', {
-      defaultMessage: 'You have logged out of Kibana.',
+      defaultMessage: 'You have logged out of Elastic.',
     }),
   ],
 ]);
@@ -93,18 +93,10 @@ export class LoginPage extends Component<Props, State> {
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
-                  defaultMessage="Welcome to Elastic Kibana"
+                  defaultMessage="Welcome to Elastic"
                 />
               </h1>
             </EuiTitle>
-            <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.loginPage.welcomeDescription"
-                  defaultMessage="Your window into the Elastic Stack"
-                />
-              </p>
-            </EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
