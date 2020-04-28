@@ -70,7 +70,6 @@ export const LICENSE_WHITELIST = [
   'WTFPL OR ISC',
   'WTFPL',
   'Nuclide software',
-  'GraphQL Language Service',
 ];
 
 // The following list only applies to licenses that
@@ -79,19 +78,6 @@ export const DEV_ONLY_LICENSE_WHITELIST = ['MPL-2.0'];
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
-  // The following packages doesn't have a LICENSE file in their distribution,
-  // but are all forks from another project which, at the time of the fork, was
-  // licensed with a custom Facebook license [1]. Later these projects have all
-  // coverted to MIT (both the forks and the upstream projects). For details
-  // see [2].
-  //
-  // 1: https://github.com/graphql/graphql-language-service/blob/a80c0a5035c0bbd57e5c1fd7e2b64d65013a6f66/LICENSE
-  // 2: https://github.com/apollographql/apollo-tooling/issues/1553#issuecomment-571303621
-  '@apollographql/graphql-language-service-interface@2.0.2': ['GraphQL Language Service'],
-  '@apollographql/graphql-language-service-parser@2.0.2': ['GraphQL Language Service'],
-  '@apollographql/graphql-language-service-types@2.0.2': ['GraphQL Language Service'],
-  '@apollographql/graphql-language-service-utils@2.0.2': ['GraphQL Language Service'],
-
   'cycle@1.0.3': ['CC0-1.0'], // conversion to a public-domain like license
   'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
