@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccessAgreementPage renders as expected when state is available 1`] = `
+<ReactMarkdown
+  astPlugins={Array []}
+  escapeHtml={true}
+  plugins={Array []}
+  rawSourcePos={false}
+  renderers={Object {}}
+  skipHtml={false}
+  sourcePos={false}
+  transformLinkUri={[Function]}
+>
+  <div
+    key="root-1-1"
+  >
+    <p
+      key="paragraph-1-1"
+    >
+      This is 
+      <a
+        href="../link"
+        key="link-1-9"
+      >
+        link
+      </a>
+    </p>
+  </div>
+</ReactMarkdown>
+`;
