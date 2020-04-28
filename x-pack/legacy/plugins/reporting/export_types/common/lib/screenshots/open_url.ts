@@ -9,26 +9,21 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import { LevelLogger } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
 import { ConditionalHeaders } from '../../../../types';
-import { PAGELOAD_SELECTOR } from '../../constants';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   url: string,
+  pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: LevelLogger,
-  page?: number
+  logger: LevelLogger
 ): Promise<void> => {
-  // If we're moving to another page in the app, we'll want to wait for the app to tell us
-  // it's loaded the next page.
-  const selector = page && page > 1 ? `[data-shared-page="${page}"]` : PAGELOAD_SELECTOR;
-
   try {
     await browser.open(
       url,
       {
         conditionalHeaders,
-        waitForSelector: selector,
+        waitForSelector: pageLoadSelector,
         timeout: captureConfig.timeouts.openUrl,
       },
       logger

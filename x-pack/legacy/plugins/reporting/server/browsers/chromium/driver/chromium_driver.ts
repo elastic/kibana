@@ -45,16 +45,14 @@ export class HeadlessChromiumDriver {
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
 
-  private hasCdpListener: boolean;
-  private hasPupListener: boolean;
+  private listenersAttached: boolean;
 
   constructor(page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.page = page;
     this.inspect = inspect;
     this.networkPolicy = networkPolicy;
 
-    this.hasCdpListener = false;
-    this.hasPupListener = false;
+    this.listenersAttached = false;
   }
 
   private allowRequest(url: string) {
@@ -82,6 +80,7 @@ export class HeadlessChromiumDriver {
     logger: LevelLogger
   ): Promise<void> {
     logger.info(`opening url ${url}`);
+
     // @ts-ignore
     const client = this.page._client;
 
@@ -89,12 +88,12 @@ export class HeadlessChromiumDriver {
 
     await this.page.setRequestInterception(true);
 
-    // We have to reach into the Chrome Devtools Protocol to apply headers as using
-    // puppeteer's API will cause map tile requests to hang indefinitely:
-    //    https://github.com/puppeteer/puppeteer/issues/5003
-    // Docs on this client/protocol can be found here:
-    //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
-    if (!this.hasCdpListener) {
+    if (!this.listenersAttached) {
+      // We have to reach into the Chrome Devtools Protocol to apply headers as using
+      // puppeteer's API will cause map tile requests to hang indefinitely:
+      //    https://github.com/puppeteer/puppeteer/issues/5003
+      // Docs on this client/protocol can be found here:
+      //    https://chromedevtools.github.io/devtools-protocol/tot/Fetch
       client.on('Fetch.requestPaused', async (interceptedRequest: InterceptedRequest) => {
         const {
           requestId,
@@ -164,13 +163,9 @@ export class HeadlessChromiumDriver {
         interceptedCount = interceptedCount + (isData ? 0 : 1);
       });
 
-      this.hasCdpListener = true;
-    }
-
-    // Even though 3xx redirects go through our request
-    // handler, we should probably inspect responses just to
-    // avoid being bamboozled by some malicious request
-    if (!this.hasPupListener) {
+      // Even though 3xx redirects go through our request
+      // handler, we should probably inspect responses just to
+      // avoid being bamboozled by some malicious request
       this.page.on('response', (interceptedResponse: Response) => {
         const interceptedUrl = interceptedResponse.url();
         const allowed = !interceptedUrl.startsWith('file://');
@@ -188,7 +183,7 @@ export class HeadlessChromiumDriver {
         }
       });
 
-      this.hasPupListener = true;
+      this.listenersAttached = true;
     }
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
