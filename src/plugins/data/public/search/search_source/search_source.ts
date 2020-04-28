@@ -140,7 +140,7 @@ export class SearchSource {
     return { ...this.fields };
   }
 
-  getSessionId(): string | undefined {
+  private getSessionId(): string | undefined {
     const parent = this.getParent();
     return this.sessionId || parent?.getSessionId();
   }
