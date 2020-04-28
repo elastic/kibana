@@ -403,43 +403,4 @@ describe('savedObjectsClient/errorTypes', () => {
       });
     });
   });
-
-  describe('EsAutoCreateIndex error', () => {
-    describe('createEsAutoCreateIndexError', () => {
-      it('does not take an error argument', () => {
-        const error = new Error();
-        // @ts-ignore
-        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError(error)).not.toBe(error);
-      });
-
-      it('returns a new Error', () => {
-        expect(SavedObjectsErrorHelpers.createEsAutoCreateIndexError()).toBeInstanceOf(Error);
-      });
-
-      it('makes errors identifiable as EsAutoCreateIndex errors', () => {
-        expect(
-          SavedObjectsErrorHelpers.isEsAutoCreateIndexError(
-            SavedObjectsErrorHelpers.createEsAutoCreateIndexError()
-          )
-        ).toBe(true);
-      });
-
-      it('returns a boom error', () => {
-        const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-        expect(error).toHaveProperty('isBoom', true);
-      });
-
-      describe('error.output', () => {
-        it('uses "Automatic index creation failed" message', () => {
-          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-          expect(error.output.payload).toHaveProperty('message', 'Automatic index creation failed');
-        });
-
-        it('sets statusCode to 503', () => {
-          const error = SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-          expect(error.output).toHaveProperty('statusCode', 503);
-        });
-      });
-    });
-  });
 });
