@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { URL } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ONE_HOUR = 60 * 60 * 1000;
@@ -28,8 +29,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         search: `time=${timestamp}&filter=trace.id:${traceId}`,
         state: undefined,
       };
-      const expectedSearchString = `logFilter=(expression:'trace.id:${traceId}',kind:kuery)&logPosition=(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)&sourceId=default`;
-      const expectedRedirectPath = '/logs/stream?';
 
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'infraLogs',
@@ -41,9 +40,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await retry.tryForTime(5000, async () => {
         const currentUrl = await browser.getCurrentUrl();
-        const decodedUrl = decodeURIComponent(currentUrl);
-        expect(decodedUrl).to.contain(expectedRedirectPath);
-        expect(decodedUrl).to.contain(expectedSearchString);
+        const parsedUrl = new URL(currentUrl);
+
+        expect(parsedUrl.pathname).to.be('/app/logs/stream');
+        expect(parsedUrl.searchParams.get('logFilter')).to.be(
+          `(expression:'trace.id:${traceId}',kind:kuery)`
+        );
+        expect(parsedUrl.searchParams.get('logPosition')).to.be(
+          `(end:'${endDate}',position:(tiebreaker:0,time:${timestamp}),start:'${startDate}',streamLive:!f)`
+        );
+        expect(parsedUrl.searchParams.get('sourceId')).to.be('default');
       });
     });
   });
