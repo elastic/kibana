@@ -176,33 +176,35 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     <EuiResizeObserver onResize={onResize}>
       {resizeRef => (
         <div
-          style={{ width: '100%' }}
+          style={{ width: '100%', height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
           data-test-subj={`mlMaxAnomalyScoreEmbeddable_${id}`}
           ref={el => {
             resizeRef(el);
           }}
         >
-          <EuiSpacer size="m" />
+          <div style={{ width: '100%' }}>
+            <EuiSpacer size="m" />
 
-          {chartWidth > 0 && swimlaneData && swimlaneType ? (
-            <MlTooltipComponent>
-              {tooltipService => (
-                <ExplorerSwimlane
-                  chartWidth={chartWidth}
-                  timeBuckets={timeBuckets}
-                  swimlaneData={swimlaneData}
-                  swimlaneType={swimlaneType}
-                  tooltipService={tooltipService}
-                />
-              )}
-            </MlTooltipComponent>
-          ) : (
-            <EuiFlexGroup justifyContent="spaceAround">
-              <EuiFlexItem grow={false}>
-                <EuiLoadingChart size="xl" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            {chartWidth > 0 && swimlaneData && swimlaneType ? (
+              <MlTooltipComponent>
+                {tooltipService => (
+                  <ExplorerSwimlane
+                    chartWidth={chartWidth}
+                    timeBuckets={timeBuckets}
+                    swimlaneData={swimlaneData}
+                    swimlaneType={swimlaneType}
+                    tooltipService={tooltipService}
+                  />
+                )}
+              </MlTooltipComponent>
+            ) : (
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingChart size="xl" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </div>
         </div>
       )}
     </EuiResizeObserver>
