@@ -352,7 +352,7 @@ describe('createExtentFilter', () => {
     });
   });
 
-  it('should clamp longitudes to -180 to 180', () => {
+  it('should not clamp longitudes to -180 to 180 for geo_shape queries', () => {
     const mapExtent = {
       maxLat: 39,
       maxLon: 209,
@@ -367,11 +367,11 @@ describe('createExtentFilter', () => {
           shape: {
             coordinates: [
               [
-                [-180, 39],
-                [-180, 35],
-                [180, 35],
-                [180, 39],
-                [-180, 39],
+                [-191, 39],
+                [-191, 35],
+                [209, 35],
+                [209, 39],
+                [-191, 39],
               ],
             ],
             type: 'Polygon',
