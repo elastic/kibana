@@ -588,3 +588,9 @@ export function processCreatedBy(customSettings) {
     delete customSettings.created_by;
   }
 }
+
+export function splitIndexPatternNames(indexPatternName) {
+  return indexPatternName.includes(',')
+    ? indexPatternName.split(',').map(i => i.trim())
+    : [indexPatternName];
+}
