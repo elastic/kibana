@@ -20,6 +20,11 @@
     "build": {
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
       "oss": false
+    },
+    "clean": {
+      "extraPatterns": [
+        "plugins/*/target"
+      ]
     }
   },
   "resolutions": {

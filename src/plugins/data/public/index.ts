@@ -204,11 +204,13 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
 
 /*
