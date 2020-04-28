@@ -52,4 +52,6 @@ function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
   );
 }
 
-export { SettingsOptions };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { SettingsOptions as default };
