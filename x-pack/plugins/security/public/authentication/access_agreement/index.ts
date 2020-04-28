@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SessionInfo {
-  now: number;
-  idleTimeoutExpiration: number | null;
-  lifespanExpiration: number | null;
-  provider: string;
-}
+export { accessAgreementApp } from './access_agreement_app';
