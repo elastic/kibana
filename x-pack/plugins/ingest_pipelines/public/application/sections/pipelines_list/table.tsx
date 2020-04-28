@@ -96,7 +96,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
           }),
           sortable: true,
           render: (name: string, pipeline) => (
-            <EuiLink onClick={() => onViewPipelineClick(pipeline)}>{name}</EuiLink>
+            <EuiLink
+              data-test-subj="pipelineDetailsLink"
+              onClick={() => onViewPipelineClick(pipeline)}
+            >
+              {name}
+            </EuiLink>
           ),
         },
         {

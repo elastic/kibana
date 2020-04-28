@@ -103,9 +103,10 @@ export const PipelineDetails: FunctionComponent<Props> = ({
       aria-labelledby="pipelineDetailsFlyoutTitle"
       size="m"
       maxWidth={550}
+      data-test-subj="pipelineDetails"
     >
       <EuiFlyoutHeader>
-        <EuiTitle id="pipelineDetailsFlyoutTitle">
+        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
           <h2>{pipeline.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
