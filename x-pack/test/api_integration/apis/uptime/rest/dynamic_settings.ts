@@ -7,11 +7,8 @@
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  DYNAMIC_SETTINGS_DEFAULTS,
-  DynamicSettingsType,
-} from '../../../../../plugins/uptime/common';
-
+import { DynamicSettingsType } from '../../../../../plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../plugins/uptime/common/constants';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

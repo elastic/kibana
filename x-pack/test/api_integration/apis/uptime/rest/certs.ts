@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS, CertType } from '../../../../../plugins/uptime/common';
+import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { CertType } from '../../../../../plugins/uptime/common/runtime_types';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
