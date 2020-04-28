@@ -25,7 +25,7 @@ import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaMap } from '../../../../../plugins/maps_legacy/public/map/kibana_map';
+import { KibanaMap } from '../../../maps_legacy/public/map/kibana_map';
 
 describe('geohash_layer', function() {
   let domNode;

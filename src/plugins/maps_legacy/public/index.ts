@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, PluginInitializerContext } from 'kibana/public';
 import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
@@ -41,8 +41,15 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
-export function plugin() {
-  return new MapsLegacyPlugin();
+export interface MapsLegacyConfigType {
+  emsTileLayerId: string;
+  includeElasticMapsService: boolean;
+  proxyElasticMapsServiceInMaps: boolean;
+  tilemap: any;
+}
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MapsLegacyPlugin(initializerContext);
 }
 
 /** @public */

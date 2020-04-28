@@ -22,8 +22,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import $ from 'jquery';
 import { EventEmitter } from 'events';
-import { colorUtil } from '../../../../../plugins/maps_legacy/public';
-import { truncatedColorMaps } from '../../../../../plugins/charts/public';
+import { colorUtil } from '../../../maps_legacy/public';
+import { truncatedColorMaps } from '../../../charts/public';
 
 export class ScaledCirclesMarkers extends EventEmitter {
   constructor(

@@ -27,10 +27,10 @@ import { ORIGIN } from '../common/constants/origin';
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export class ServiceSettings {
-  constructor() {
+  constructor(mapConfig, tilemapsConfig) {
     const getInjectedVar = getInjectedVarFunc();
-    this.mapConfig = getInjectedVar('mapConfig');
-    this.tilemapsConfig = getInjectedVar('tilemapsConfig');
+    this.mapConfig = mapConfig;
+    this.tilemapsConfig = tilemapsConfig;
     const kbnVersion = getInjectedVar('version');
 
     this._showZoomMessage = true;

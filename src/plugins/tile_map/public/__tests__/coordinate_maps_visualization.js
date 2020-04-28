@@ -26,34 +26,34 @@ import blues from './blues.png';
 import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_CATALOGUE from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
+import EMS_FILES from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
+import EMS_TILES from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
+import EMS_STYLE_DARK_MAP from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+import { ExprVis } from '../../../visualizations/public/expressions/vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import { BaseVisType } from '../../../visualizations/public/vis_types/base_vis_type';
 import {
   getPrecision,
   getZoomPrecision,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps_legacy/public/map/precision';
+} from '../../../maps_legacy/public/map/precision';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { ServiceSettings } from '../../../maps_legacy/public/map/service_settings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
-import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
+import { setInjectedVarFunc } from '../../../maps_legacy/public/kibana_services';
+import { getBaseMapsVis } from '../../../maps_legacy/public';
 
 function mockRawData() {
   const stack = [dummyESResponse];

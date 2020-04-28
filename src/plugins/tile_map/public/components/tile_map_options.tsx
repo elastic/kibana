@@ -22,13 +22,8 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import {
-  BasicOptions,
-  RangeOption,
-  SelectOption,
-  SwitchOption,
-} from '../../../../../plugins/charts/public';
-import { WmsOptions, TileMapVisParams, MapTypes } from '../../../../../plugins/maps_legacy/public';
+import { BasicOptions, RangeOption, SelectOption, SwitchOption } from '../../../charts/public';
+import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps_legacy/public';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 

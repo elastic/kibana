@@ -20,7 +20,7 @@
 import L from 'leaflet';
 import { min, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaMapLayer, MapTypes } from '../../../../plugins/maps_legacy/public';
+import { KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { TileMapPlugin as Plugin } from './plugin';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('vislib data.fieldFormats');
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');

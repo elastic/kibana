@@ -27,6 +27,7 @@ import {
   setInjectedVars,
   setUISettings,
   setKibanaMapFactory,
+  setMapsLegacyConfig,
 } from './services';
 
 import { createVegaFn } from './vega_fn';
@@ -76,6 +77,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     });
     setUISettings(core.uiSettings);
     setKibanaMapFactory(getKibanaMapFactoryProvider(core));
+    setMapsLegacyConfig(mapsLegacy.config);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,

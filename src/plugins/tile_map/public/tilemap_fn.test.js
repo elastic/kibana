@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
 jest.mock('ui/new_platform');
@@ -37,7 +37,7 @@ jest.mock('../../../../plugins/maps_legacy/public', () => ({
   }),
 }));
 
-import { convertToGeoJson } from '../../../../plugins/maps_legacy/public';
+import { convertToGeoJson } from '../../maps_legacy/public';
 
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());

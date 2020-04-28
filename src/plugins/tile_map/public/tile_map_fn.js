@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { convertToGeoJson } from '../../../../plugins/maps_legacy/public';
+import { convertToGeoJson } from '../../maps_legacy/public';
 import { i18n } from '@kbn/i18n';
 
 export const createTileMapFn = () => ({

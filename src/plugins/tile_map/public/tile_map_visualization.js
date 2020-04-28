@@ -20,11 +20,7 @@
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
 import { getFormatService, getQueryService } from './services';
-import {
-  scaleBounds,
-  geoContains,
-  mapTooltipProvider,
-} from '../../../../plugins/maps_legacy/public';
+import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
 export const createTileMapVisualization = dependencies => {
