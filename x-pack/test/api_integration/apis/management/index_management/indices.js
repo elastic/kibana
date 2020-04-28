@@ -201,6 +201,7 @@ export default function({ getService }) {
         expectedKeys.map(key => {
           expect(Object.keys(body[0]).contain(key));
         });
+        expect(Object.keys(body[0]).length).to.equal(expectedKeys.length);
       });
     });
 
