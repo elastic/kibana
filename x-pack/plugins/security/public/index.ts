@@ -15,7 +15,6 @@ import {
 } from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };
-export { SessionInfo } from './types';
 export { AuthenticatedUser } from '../common/model';
 export { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
 
