@@ -6,6 +6,7 @@
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
@@ -24,8 +25,8 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { throttle, isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
@@ -38,6 +39,8 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { MlTooltipComponent } from '../../application/components/chart_tooltip';
+import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
+import { esKuery, Query } from '../../../../../../src/plugins/data/public';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -55,11 +58,12 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   services,
   refresh,
 }) => {
-  const [{ uiSettings, notifications }, , { explorerService, mlAnomalyDetectorService }] = services;
+  const [{ uiSettings }, , { explorerService, mlAnomalyDetectorService }] = services;
 
   const [swimlaneData, setSwimlaneData] = useState<OverallSwimlaneData>();
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [swimlaneType, setSwimlaneType] = useState<string>();
+  const [error, setError] = useState();
 
   const chartWidth$ = useMemo(() => new Subject<number>(), []);
 
@@ -104,7 +108,14 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
       .pipe(
         debounceTime(500),
         switchMap(([jobs, input, swimlaneContainerWidth]) => {
-          const { viewBy, swimlaneType: swimlaneTypeInput, limit, timeRange } = input;
+          const {
+            viewBy,
+            swimlaneType: swimlaneTypeInput,
+            limit,
+            timeRange,
+            filters,
+            query,
+          } = input;
 
           explorerService.setTimeRange(timeRange);
 
@@ -133,7 +144,8 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
                     explorerJobs,
                     viewBy!,
                     limit!,
-                    swimlaneContainerWidth
+                    swimlaneContainerWidth,
+                    processFilters(filters, query)
                   )
                 ).pipe(
                   map(viewBySwimlaneData => {
@@ -149,12 +161,8 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             })
           );
         }),
-        catchError(error => {
-          notifications.toasts.addError(new Error(error), {
-            title: i18n.translate('xpack.ml.swimlaneEmbeddable.errorMessage', {
-              defaultMessage: 'Unable to load the swimlane data',
-            }),
-          });
+        catchError(e => {
+          setError(e.body);
           return of(undefined);
         })
       )
@@ -171,6 +179,24 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     const labelWidth = 200;
     setChartWidth(e.width - labelWidth);
   }, RESIZE_THROTTLE_TIME_MS);
+
+  if (error) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.ml.swimlaneEmbeddable.errorMessage"
+            defaultMessage="Unable to load the swimlane data"
+          />
+        }
+        color="danger"
+        iconType="alert"
+        style={{ width: '100%' }}
+      >
+        <p>{error.message}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <EuiResizeObserver onResize={onResize}>
@@ -210,3 +236,42 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
     </EuiResizeObserver>
   );
 };
+
+export function processFilters(filters: Filter[], query: Query) {
+  const inputQuery =
+    query.language === 'kuery'
+      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
+      : query.query;
+
+  const must = [inputQuery];
+  const mustNot = [];
+  for (const filter of filters) {
+    if (filter.meta.disabled) continue;
+
+    const {
+      meta: { negate, type, key: fieldName },
+    } = filter;
+
+    let filterQuery = filter.query;
+
+    if (filterQuery === undefined && type === 'exists') {
+      filterQuery = {
+        exists: {
+          field: fieldName,
+        },
+      };
+    }
+
+    if (negate) {
+      mustNot.push(filterQuery);
+    } else {
+      must.push(filterQuery);
+    }
+  }
+  return {
+    bool: {
+      must,
+      must_not: mustNot,
+    },
+  };
+}
