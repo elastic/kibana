@@ -39,6 +39,7 @@ export class DrilldownService {
       ExecutionContext extends object = object
     >({
       id: factoryId,
+      order,
       CollectConfig,
       createConfig,
       isConfigValid,
@@ -53,6 +54,7 @@ export class DrilldownService {
         ExecutionContext
       > = {
         id: factoryId,
+        order,
         CollectConfig,
         createConfig,
         isConfigValid,

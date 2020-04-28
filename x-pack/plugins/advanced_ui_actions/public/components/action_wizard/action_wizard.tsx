@@ -175,7 +175,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   return (
     <EuiFlexGroup gutterSize="m" wrap={true}>
       {[...actionFactories]
-        .sort((f1, f2) => f1.order - f2.order)
+        .sort((f1, f2) => f2.order - f1.order)
         .map(actionFactory => (
           <EuiFlexItem grow={false} key={actionFactory.id}>
             <EuiKeyPadMenuItem
