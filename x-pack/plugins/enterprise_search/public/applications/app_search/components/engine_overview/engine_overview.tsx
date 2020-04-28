@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
+import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 import EnginesIcon from '../../assets/engine.svg';
@@ -96,6 +97,7 @@ export const EngineOverview: ReactFC<> = () => {
   return (
     <EuiPage restrictWidth className="engine-overview">
       <SetBreadcrumbs isRoot />
+      <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EuiPageBody>
         <EngineOverviewHeader />
