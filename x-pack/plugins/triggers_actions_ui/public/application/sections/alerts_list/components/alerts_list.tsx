@@ -24,7 +24,7 @@ import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
-import { AlertAdd, AlertEdit } from '../../alert_form';
+import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { AlertQuickEditButtonsWithApi as AlertQuickEditButtons } from '../../common/components/alert_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';
@@ -85,8 +85,6 @@ export const AlertsList: React.FunctionComponent = () => {
     data: [],
     totalItemCount: 0,
   });
-  const [editedAlertItem, setEditedAlertItem] = useState<AlertTableItem | undefined>(undefined);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [alertsToDelete, setAlertsToDelete] = useState<string[]>([]);
 
   useEffect(() => {
@@ -160,11 +158,6 @@ export const AlertsList: React.FunctionComponent = () => {
       });
       setAlertsState({ ...alertsState, isLoading: false });
     }
-  }
-
-  async function editItem(alertTableItem: AlertTableItem) {
-    setEditedAlertItem(alertTableItem);
-    setEditFlyoutVisibility(true);
   }
 
   const alertsTableColumns = [
@@ -432,14 +425,6 @@ export const AlertsList: React.FunctionComponent = () => {
           addFlyoutVisible={alertFlyoutVisible}
           setAddFlyoutVisibility={setAlertFlyoutVisibility}
         />
-        {editFlyoutVisible && editedAlertItem ? (
-          <AlertEdit
-            key={editedAlertItem.id}
-            initialAlert={editedAlertItem}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
-          />
-        ) : null}
       </AlertsContextProvider>
     </section>
   );
