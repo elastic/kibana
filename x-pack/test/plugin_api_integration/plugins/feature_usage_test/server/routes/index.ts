@@ -5,14 +5,16 @@
  */
 
 import { IRouter, StartServicesAccessor } from 'src/core/server';
-import { LicensingPluginStart } from '../types';
-import { registerInfoRoute } from './info';
-import { registerFeatureUsageRoute } from './feature_usage';
+import { FeatureUsageTestStartDependencies, FeatureUsageTestPluginStart } from '../plugin';
+
+import { registerFeatureHitRoute } from './hit';
 
 export function registerRoutes(
   router: IRouter,
-  getStartServices: StartServicesAccessor<{}, LicensingPluginStart>
+  getStartServices: StartServicesAccessor<
+    FeatureUsageTestStartDependencies,
+    FeatureUsageTestPluginStart
+  >
 ) {
-  registerInfoRoute(router);
-  registerFeatureUsageRoute(router, getStartServices);
+  registerFeatureHitRoute(router, getStartServices);
 }
