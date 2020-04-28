@@ -34,6 +34,9 @@ export const FilterPopover = ({
   onFilterFieldChange,
   selectedItems,
   title,
+  btnContent,
+  forceOpen,
+  setForceOpen,
 }: FilterPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
@@ -52,28 +55,33 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       button={
-        <UptimeFilterButton
-          isDisabled={disabled}
-          isSelected={tempSelectedItems.length > 0}
-          numFilters={items.length}
-          numActiveFilters={tempSelectedItems.length}
-          onClick={() => {
-            setIsOpen(!isOpen);
-            onFilterFieldChange(fieldName, tempSelectedItems);
-          }}
-          title={title}
-        />
+        btnContent ?? (
+          <UptimeFilterButton
+            isDisabled={disabled}
+            isSelected={tempSelectedItems.length > 0}
+            numFilters={items.length}
+            numActiveFilters={tempSelectedItems.length}
+            onClick={() => {
+              setIsOpen(!isOpen);
+              onFilterFieldChange(fieldName, tempSelectedItems);
+            }}
+            title={title}
+          />
+        )
       }
       closePopover={() => {
         setIsOpen(false);
         onFilterFieldChange(fieldName, tempSelectedItems);
+        if (setForceOpen) {
+          setForceOpen(false);
+        }
       }}
       data-test-subj={`filter-popover_${id}`}
       id={id}
-      isOpen={isOpen}
+      isOpen={isOpen || forceOpen}
       ownFocus={true}
       withTitle
-      zIndex={1000}
+      zIndex={10000}
     >
       <EuiPopoverTitle>
         <EuiFieldSearch
