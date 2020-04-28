@@ -7,7 +7,7 @@
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-import { EndpointAppConstants } from '../types';
+import { AlertConstants } from '../alert_constants';
 
 /**
  * Used to validate GET requests against the index of the alerting APIs.
@@ -18,7 +18,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.number({
         min: 1,
         max: 100,
-        defaultValue: EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
+        defaultValue: AlertConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
       })
     ),
     page_index: schema.maybe(
