@@ -18,6 +18,7 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-es-unavailable',
@@ -37,6 +38,7 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-xpack-unavailable',
@@ -60,6 +62,7 @@ describe('license features', function() {
       expect(subscriptionHandler.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "allowAccessAgreement": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -78,6 +81,7 @@ describe('license features', function() {
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "allowAccessAgreement": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -94,7 +98,7 @@ describe('license features', function() {
     }
   });
 
-  it('should show login page and other security elements, allow RBAC but forbid role mappings, DLS, and sub-feature privileges if license is basic.', () => {
+  it('should show login page and other security elements, allow RBAC but forbid paid features if license is basic.', () => {
     const mockRawLicense = licensingMock.createLicense({
       features: { security: { isEnabled: true, isAvailable: true } },
     });
@@ -109,6 +113,7 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
@@ -131,6 +136,7 @@ describe('license features', function() {
       allowLogin: false,
       showLinks: false,
       showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
@@ -138,7 +144,7 @@ describe('license features', function() {
     });
   });
 
-  it('should allow role mappings and sub-feature privileges, but not DLS/FLS if license = gold', () => {
+  it('should allow role mappings, access agreement and sub-feature privileges, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licensingMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -152,6 +158,7 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: true,
+      allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
@@ -159,7 +166,7 @@ describe('license features', function() {
     });
   });
 
-  it('should allow to login, allow RBAC, role mappings, sub-feature privileges, and DLS if license >= platinum', () => {
+  it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
     const mockRawLicense = licensingMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -173,6 +180,7 @@ describe('license features', function() {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: true,
+      allowAccessAgreement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
       allowRbac: true,

@@ -6,6 +6,11 @@
 
 import { actionsClientMock } from './actions_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
+import { Services } from './types';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../src/core/server/mocks';
 
 export { actionsClientMock };
 
@@ -27,7 +32,19 @@ const createStartMock = () => {
   return mock;
 };
 
+const createServicesMock = () => {
+  const mock: jest.Mocked<Services & {
+    savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  }> = {
+    callCluster: elasticsearchServiceMock.createScopedClusterClient().callAsCurrentUser,
+    getScopedCallCluster: jest.fn(),
+    savedObjectsClient: savedObjectsClientMock.create(),
+  };
+  return mock;
+};
+
 export const actionsMock = {
+  createServices: createServicesMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
 };
