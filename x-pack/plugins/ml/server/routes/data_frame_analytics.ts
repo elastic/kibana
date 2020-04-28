@@ -33,6 +33,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -61,6 +64,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -88,6 +94,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     {
       path: '/api/ml/data_frame/analytics/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -117,6 +126,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}/_stats',
       validate: {
         params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -155,6 +167,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         params: analyticsIdSchema,
         body: dataAnalyticsJobConfigSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -190,6 +205,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         body: dataAnalyticsEvaluateSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -224,6 +242,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         body: dataAnalyticsExplainSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -256,6 +277,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}',
       validate: {
         params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -291,6 +315,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -323,6 +350,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       validate: {
         params: analyticsIdSchema,
         query: stopsDataFrameAnalyticsJobQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canStartStopDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -363,6 +393,9 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
       path: '/api/ml/data_frame/analytics/{analyticsId}/messages',
       validate: {
         params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

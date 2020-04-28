@@ -71,6 +71,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
           accepts: ['text/*', 'application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:ml:canFindFileStructure'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
@@ -105,6 +106,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:ml:canFindFileStructure'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
