@@ -118,16 +118,6 @@ export default function(kibana) {
         },
       ],
 
-      savedObjectsManagement: {
-        url: {
-          defaultSearchField: 'url',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return `/goto/${encodeURIComponent(obj.id)}`;
-          },
-        },
-      },
-
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');
         const tilemap = mapConfig.tilemap;
