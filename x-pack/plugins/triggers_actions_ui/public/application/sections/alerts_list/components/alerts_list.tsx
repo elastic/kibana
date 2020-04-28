@@ -377,10 +377,10 @@ export const AlertsList: React.FunctionComponent = () => {
         selection={
           canDelete
             ? {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                },
-              }
+              onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+              },
+            }
             : undefined
         }
         onChange={({ page: changedPage }: { page: Pagination }) => {
@@ -390,9 +390,8 @@ export const AlertsList: React.FunctionComponent = () => {
     </Fragment>
   );
 
-  
+
   const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
-  console.log('andrea', loadedItems);
 
   const isFilterApplied = !(
     isEmpty(searchText) &&
@@ -444,8 +443,8 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
-      )}
+            <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+          )}
       <AlertsContextProvider
         value={{
           reloadAlerts: loadAlertsData,
@@ -486,6 +485,6 @@ function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIn
     ...alert,
     actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
+    alertType: alertTypesIndex[alert.alertTypeId] ?.name ?? alert.alertTypeId,
   }));
 }

@@ -7,7 +7,7 @@
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth, EuiSpacer } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference, chunk } from 'lodash';
@@ -161,6 +161,7 @@ export function AlertInstances({
 
   return (
     <Fragment>
+      <EuiSpacer size="xl" />
       <input
         type="hidden"
         data-test-subj="alertInstancesDurationEpoch"
