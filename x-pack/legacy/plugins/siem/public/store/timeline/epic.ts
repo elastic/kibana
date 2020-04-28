@@ -29,17 +29,11 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
-// import { persistTimelineMutation } from '../../containers/timeline/persist.gql_query';
-import {
-  // PersistTimelineMutation,
-  TimelineInput,
-  ResponseTimeline,
-  TimelineResult,
-} from '../../graphql/types';
+import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
 import { addError } from '../app/actions';
 import { NotesById } from '../app/model';
-import { TimeRange, GlobalQuery } from '../inputs/model';
+import { inputsModel } from '../inputs';
 
 import {
   applyKqlFilterQuery,
@@ -76,18 +70,16 @@ import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_p
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-// import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
-import { inputsModel } from '../inputs';
 import { epicDraftTimeline } from './epic_draft_timeline';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
-  timelineTimeRangeSelector: (state: State) => TimeRange;
-  selectAllTimelineQuery: () => (state: State, id: string) => GlobalQuery;
+  timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
+  selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   apolloClient$: Observable<AppApolloClient>;
 }
@@ -189,11 +181,34 @@ export const createTimelineEpic = <State>(): Epic<
         const version = myEpicTimelineId.getTimelineVersion();
 
         if (timelineNoteActionsType.includes(action.type)) {
-          return epicPersistNote(apolloClient, action, timeline, notes, action$, timeline$, notes$);
+          return epicPersistNote(
+            apolloClient,
+            action,
+            timeline,
+            notes,
+            action$,
+            timeline$,
+            notes$,
+            allTimelineQuery$
+          );
         } else if (timelinePinnedEventActionsType.includes(action.type)) {
-          return epicPersistPinnedEvent(apolloClient, action, timeline, action$, timeline$);
+          return epicPersistPinnedEvent(
+            apolloClient,
+            action,
+            timeline,
+            action$,
+            timeline$,
+            allTimelineQuery$
+          );
         } else if (timelineFavoriteActionsType.includes(action.type)) {
-          return epicPersistTimelineFavorite(apolloClient, action, timeline, action$, timeline$);
+          return epicPersistTimelineFavorite(
+            apolloClient,
+            action,
+            timeline,
+            action$,
+            timeline$,
+            allTimelineQuery$
+          );
         } else if (action.type === getDraftTimeline.type) {
           return epicDraftTimeline(action, timeline, action$, timeline$, false);
         } else if (action.type === createTimeline.type) {
@@ -283,7 +298,7 @@ const timelineInput: TimelineInput = {
 
 export const convertTimelineAsInput = (
   timeline: TimelineModel,
-  timelineTimeRange: TimeRange
+  timelineTimeRange: inputsModel.TimeRange
 ): TimelineInput =>
   Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
     if (has(key, timeline)) {

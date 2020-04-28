@@ -230,23 +230,21 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const deleteTimelines: DeleteTimelines = useCallback(
-      (timelineIds: string[], variables?: AllTimelinesVariables) => {
+      async (timelineIds: string[], variables?: AllTimelinesVariables) => {
         if (timelineIds.includes(timeline.savedObjectId || '')) {
           createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
         }
-        apolloClient.mutate<DeleteTimelineMutation.Mutation, DeleteTimelineMutation.Variables>({
+        await apolloClient.mutate<
+          DeleteTimelineMutation.Mutation,
+          DeleteTimelineMutation.Variables
+        >({
           mutation: deleteTimelineMutation,
           fetchPolicy: 'no-cache',
           variables: { id: timelineIds },
-          refetchQueries: [
-            {
-              query: allTimelinesQuery,
-              variables,
-            },
-          ],
         });
+        refetch();
       },
-      [apolloClient, createNewTimeline, timeline]
+      [apolloClient, createNewTimeline, refetch, timeline]
     );
 
     useEffect(() => {
