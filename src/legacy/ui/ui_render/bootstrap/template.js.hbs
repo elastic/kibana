@@ -36,7 +36,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       dom.href = url;
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
-      document.head.appendChild(dom);
+      {{!-- Inject stylesheets into the top of the <head> so that all styles bundled in KP plugins will override --}}
+      if (document.head.firstChild) {
+        document.head.insertBefore(dom, document.head.firstChild);
+      } else {
+        document.head.appendChild(dom);
+      }
     }
 
     function loadScript(url, cb) {
