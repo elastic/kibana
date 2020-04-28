@@ -12,7 +12,6 @@ import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, useGetAllTimeline } from '../../containers/timeline/all';
-import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
@@ -148,9 +147,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             sortOrder: sortDirection as Direction,
           },
           onlyUserFavorite: onlyFavorites,
+          timelines,
+          totalCount,
         });
       },
-      [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]
+      [search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites, timelines, totalCount]
     );
 
     /** Invoked when the user clicks the action to delete the selected timelines */
@@ -166,6 +167,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           sortOrder: sortDirection as Direction,
         },
         onlyUserFavorite: onlyFavorites,
+        timelines,
+        totalCount,
       });
 
       // NOTE: we clear the selection state below, but if the server fails to
@@ -173,7 +176,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       resetSelectionState();
 
       // TODO: the query must re-execute to show the results of the deletion
-    }, [selectedItems, search, pageIndex, pageSize, sortField, sortDirection, onlyFavorites]);
+    }, [
+      selectedItems,
+      search,
+      pageIndex,
+      pageSize,
+      sortField,
+      sortDirection,
+      onlyFavorites,
+      timelines,
+      totalCount,
+    ]);
 
     /** Invoked when the user selects (or de-selects) timelines */
     const onSelectionChange: OnSelectionChange = useCallback(

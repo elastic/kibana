@@ -9,7 +9,7 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 import { Refetch } from '../../store/inputs/model';
-import { TimelineTypes } from '../../../../../../plugins/siem/common/types/timeline';
+import { TimelineType } from '../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -49,7 +49,7 @@ export interface OpenTimelineResult {
   savedObjectId?: string | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypes.template | TimelineTypes.default;
+  type?: TimelineType.template | TimelineType.default;
   updated?: number | null;
   updatedBy?: string | null;
 }
