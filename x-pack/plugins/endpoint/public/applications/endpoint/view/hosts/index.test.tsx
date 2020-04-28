@@ -14,7 +14,7 @@ import {
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
-import { HostInfo, HostPolicyResponseActionStatus } from '../../../../../common/types';
+import { HostInfo, HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 describe('when on the hosts page', () => {
@@ -48,21 +48,50 @@ describe('when on the hosts page', () => {
     describe('when list data loads', () => {
       beforeEach(() => {
         reactTestingLibrary.act(() => {
+          const hostListData = mockHostResultList({ total: 3 });
+          [HostStatus.ERROR, HostStatus.ONLINE, HostStatus.OFFLINE].forEach((status, index) => {
+            hostListData.hosts[index] = {
+              metadata: hostListData.hosts[index].metadata,
+              host_status: status,
+            };
+          });
           const action: AppAction = {
             type: 'serverReturnedHostList',
-            payload: mockHostResultList(),
+            payload: hostListData,
           };
           store.dispatch(action);
         });
       });
 
-      it('should render the host summary row in the table', async () => {
+      it('should display rows in the table', async () => {
         const renderResult = render();
         const rows = await renderResult.findAllByRole('row');
-        expect(rows).toHaveLength(2);
+        expect(rows).toHaveLength(4);
+      });
+      it('should show total', async () => {
+        const renderResult = render();
+        const total = await renderResult.findByTestId('hostListTableTotal');
+        expect(total.textContent).toEqual('3 Hosts');
+      });
+      it('should display correct status', async () => {
+        const renderResult = render();
+        const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
+
+        expect(hostStatuses[0].textContent).toEqual('Error');
+        expect(hostStatuses[0].querySelector('[data-euiicon-type][color="danger"]')).not.toBeNull();
+
+        expect(hostStatuses[1].textContent).toEqual('Online');
+        expect(
+          hostStatuses[1].querySelector('[data-euiicon-type][color="success"]')
+        ).not.toBeNull();
+
+        expect(hostStatuses[2].textContent).toEqual('Offline');
+        expect(
+          hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
+        ).not.toBeNull();
       });
 
-      describe('when the user clicks the hostname in the table', () => {
+      describe('when the user clicks the first hostname in the table', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
           const hostDetailsApiResponse = mockHostDetailsApiResult();
@@ -76,9 +105,9 @@ describe('when on the hosts page', () => {
           });
 
           renderResult = render();
-          const detailsLink = await renderResult.findByTestId('hostnameCellLink');
-          if (detailsLink) {
-            reactTestingLibrary.fireEvent.click(detailsLink);
+          const hostNameLinks = await renderResult.findAllByTestId('hostnameCellLink');
+          if (hostNameLinks.length) {
+            reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
           }
         });
 

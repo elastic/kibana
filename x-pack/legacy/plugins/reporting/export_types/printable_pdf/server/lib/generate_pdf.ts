@@ -7,12 +7,11 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { CaptureConfig } from '../../../../server/types';
-import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
+import { ConditionalHeaders } from '../../../../types';
 import { createLayout } from '../../../common/layouts';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
@@ -27,11 +26,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export function generatePdfObservableFactory(
-  captureConfig: CaptureConfig,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-) {
-  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
+export async function generatePdfObservableFactory(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const getScreenshots = await reporting.getScreenshotsObservable();
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -43,7 +41,7 @@ export function generatePdfObservableFactory(
     logo?: string
   ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
-    const screenshots$ = screenshotsObservable({
+    const screenshots$ = getScreenshots({
       logger,
       urls,
       conditionalHeaders,
