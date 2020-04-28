@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
 
+import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 interface IEngineTableProps {
@@ -27,17 +28,24 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex = 0, onPaginate },
 }) => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+  const engineLinkProps = {
+    href: `${enterpriseSearchUrl}/as/engines/${name}`,
+    target: '_blank',
+    onClick: () =>
+      sendTelemetry({
+        http,
+        product: 'app_search',
+        action: 'clicked',
+        metric: 'engine_table_link',
+      }),
+  };
 
   const columns = [
     {
       field: 'name',
       name: 'Name',
-      render: name => (
-        <EuiLink href={`${enterpriseSearchUrl}/as/engines/${name}`} target="_blank">
-          {name}
-        </EuiLink>
-      ),
+      render: name => <EuiLink {...engineLinkProps}>{name}</EuiLink>,
       width: '30%',
       truncateText: true,
       mobileOptions: {
@@ -78,11 +86,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       field: 'name',
       name: 'Actions',
       dataType: 'string',
-      render: name => (
-        <EuiLink href={`${enterpriseSearchUrl}/as/engines/${name}`} target="_blank" color="primary">
-          Manage
-        </EuiLink>
-      ),
+      render: name => <EuiLink {...engineLinkProps}>Manage</EuiLink>,
       align: 'right',
       width: '100px',
     },
