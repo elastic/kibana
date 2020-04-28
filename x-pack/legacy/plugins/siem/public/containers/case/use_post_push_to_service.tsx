@@ -14,7 +14,7 @@ import { errorToToaster, useStateToaster, displaySuccessToast } from '../../comp
 
 import { getCase, pushToService, pushCase } from './api';
 import * as i18n from './translations';
-import { Case, CaseExternalService, CaseUserActions } from './types';
+import { Case } from './types';
 import { CaseServices } from './use_get_case_user_actions';
 
 interface PushToServiceState {

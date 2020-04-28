@@ -10,7 +10,7 @@ import {
   useGetCaseUserActions,
   UseGetCaseUserActions,
 } from './use_get_case_user_actions';
-import { basicCaseId, caseUserActions, elasticUser } from './mock';
+import { basicCase, caseUserActions, elasticUser } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -25,7 +25,7 @@ describe('useGetCaseUserActions', () => {
   it('init', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCaseId)
+        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
       );
       await waitForNextUpdate();
       expect(result.current).toEqual({
@@ -40,23 +40,23 @@ describe('useGetCaseUserActions', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCaseId)
+        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
       );
       await waitForNextUpdate();
 
-      result.current.fetchCaseUserActions(basicCaseId);
+      result.current.fetchCaseUserActions(basicCase.id);
       await waitForNextUpdate();
-      expect(spyOnPostCase).toBeCalledWith(basicCaseId, abortCtrl.signal);
+      expect(spyOnPostCase).toBeCalledWith(basicCase.id, abortCtrl.signal);
     });
   });
 
   it('retuns proper state on getCaseUserActions', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCaseId)
+        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCaseId);
+      result.current.fetchCaseUserActions(basicCase.id);
       await waitForNextUpdate();
       expect(result.current).toEqual({
         ...initialData,
@@ -73,10 +73,10 @@ describe('useGetCaseUserActions', () => {
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCaseId)
+        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCaseId);
+      result.current.fetchCaseUserActions(basicCase.id);
 
       expect(result.current.isLoading).toBe(true);
     });
@@ -90,10 +90,10 @@ describe('useGetCaseUserActions', () => {
 
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
-        useGetCaseUserActions(basicCaseId)
+        useGetCaseUserActions(basicCase.id, basicCase.connectorId)
       );
       await waitForNextUpdate();
-      result.current.fetchCaseUserActions(basicCaseId);
+      result.current.fetchCaseUserActions(basicCase.id);
 
       expect(result.current).toEqual({
         ...initialData,
