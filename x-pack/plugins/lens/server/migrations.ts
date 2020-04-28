@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep, flow } from 'lodash';
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'src/core/server';
 
 interface XYLayerPre77 {
@@ -19,16 +19,40 @@ function removeLensAutoDate(doc: SavedObjectUnsanitizedDoc) {
   const expression: string = doc.attributes?.expression;
   const ast = fromExpression(expression);
 
-  // TODO: Magic AST manipulation
-  // esaggs aggConfigs={lens_auto_date aggConfigs='[{}, {}]'}
-  // ->
-  // esaggs aggConfigs='[{}, {}]'
+  const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    if (topNode.function !== 'lens_merge_tables') {
+      return topNode;
+    }
+    return {
+      ...topNode,
+      arguments: {
+        ...topNode.arguments,
+        tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          return {
+            type: 'expression',
+            chain: middleNode.chain.map(node => {
+              if (node.function === 'esaggs') {
+                return {
+                  ...node,
+                  arguments: {
+                    ...node.arguments,
+                    aggConfigs: (node.arguments.aggConfigs[0] as Ast).chain[0].arguments.aggConfigs,
+                  },
+                };
+              }
+              return node;
+            }),
+          };
+        }),
+      },
+    };
+  });
 
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      expression: toExpression(ast),
+      expression: toExpression({ ...ast, chain: newChain }),
     },
   };
 }
@@ -37,16 +61,49 @@ function addTimeFieldToEsaggs(doc: SavedObjectUnsanitizedDoc) {
   const expression: string = doc.attributes?.expression;
   const ast = fromExpression(expression);
 
-  // TODO: Magiv AST manipulation
-  // esaggs aggConfigs='[{id, type: 'date_histogram', params: { field: 'timestamp' }}, ... ]'
-  // ->
-  // esaggs timeField='timestamp' timeField='another_date_field' aggConfigs='[the same as before]'
+  const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+    if (topNode.function !== 'lens_merge_tables') {
+      return topNode;
+    }
+    return {
+      ...topNode,
+      arguments: {
+        ...topNode.arguments,
+        tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+          return {
+            type: 'expression',
+            chain: middleNode.chain.map(node => {
+              if (node.function !== 'esaggs') {
+                return node;
+              }
+              const timeFields: string[] = [];
+              JSON.parse(node.arguments.aggConfigs[0] as string).forEach(
+                (agg: { type: string; params: { field: string } }) => {
+                  if (agg.type !== 'date_histogram') {
+                    return;
+                  }
+                  timeFields.push(agg.params.field);
+                }
+              );
+              return {
+                ...node,
+                arguments: {
+                  ...node.arguments,
+                  timeFields,
+                },
+              };
+            }),
+          };
+        }),
+      },
+    };
+  });
 
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      expression: toExpression(ast),
+      expression: toExpression({ ...ast, chain: newChain }),
     },
   };
 }
