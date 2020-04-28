@@ -299,7 +299,7 @@ app.controller(
 
     function addFilters(newFilters) {
       newFilters.forEach(filter => {
-        filter.$state = esFilters.FilterStateStore.APP_STATE;
+        filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
       });
       $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
     }
