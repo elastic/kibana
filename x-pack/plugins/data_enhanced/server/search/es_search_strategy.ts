@@ -20,7 +20,7 @@ import {
 } from '../../../../../src/plugins/data/server';
 import { IEnhancedEsSearchRequest } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
-import { BackgroundSearchService } from '../background_search/bg_search_service';
+import { BackgroundSearchService } from '../background_search';
 import { SecurityPluginSetup } from '../../../security/server';
 
 export interface AsyncSearchResponse<T> {

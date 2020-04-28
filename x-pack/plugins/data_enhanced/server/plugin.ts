@@ -14,7 +14,7 @@ import {
 import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';
 import { enhancedEsSearchStrategyProvider } from './search';
-import { BackgroundSearchService } from './background_search/bg_search_service';
+import { BackgroundSearchService } from './background_search';
 import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {

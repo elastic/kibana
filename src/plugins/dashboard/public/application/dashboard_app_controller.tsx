@@ -112,7 +112,7 @@ export class DashboardAppController {
     share,
     dashboardCapabilities,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
@@ -308,6 +308,7 @@ export class DashboardAppController {
     };
 
     const updateState = () => {
+      searchService.searchSource.startSession();
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {

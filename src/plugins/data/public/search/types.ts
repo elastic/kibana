@@ -87,6 +87,9 @@ export interface ISearchStart {
       searchSourceJson: string,
       references: SavedObjectReference[]
     ) => Promise<ISearchSource>;
+    getSessionId: () => string;
+    startSession: () => void;
+    clearSession: () => void;
   };
   __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
 }
