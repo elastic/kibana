@@ -92,7 +92,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -102,7 +102,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can save existing Visualization', async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

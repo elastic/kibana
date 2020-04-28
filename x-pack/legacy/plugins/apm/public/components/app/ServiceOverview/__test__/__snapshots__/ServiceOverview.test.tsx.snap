@@ -76,7 +76,7 @@ NodeList [
                 </p>
                 <p>
                   You may also have old data that needs to be migrated.
-
+                   
                   <a
                     class="euiLink euiLink--primary"
                     href="/basepath/app/kibana#/management/elasticsearch/upgrade_assistant"

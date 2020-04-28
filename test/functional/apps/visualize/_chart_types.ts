@@ -43,8 +43,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         'Gauge',
         'Goal',
         'Heat Map',
-        '',
-        '',
         'Horizontal Bar',
         'Line',
         'Markdown',

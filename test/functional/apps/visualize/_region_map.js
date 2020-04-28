@@ -20,7 +20,8 @@
 import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
-  describe('vector map', function() {
+  // TODO skipped because legacy maps vis are not ready yet
+  describe.skip('vector map', function() {
     const inspector = getService('inspector');
     const log = getService('log');
     const find = getService('find');

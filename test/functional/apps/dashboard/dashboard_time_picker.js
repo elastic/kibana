@@ -75,7 +75,7 @@ export default function({ getService, getPageObjects }) {
       const currentUrl = await browser.getCurrentUrl();
       const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
       const urlQuery =
-        `/dashboard?` +
+        `/create?` +
         `_g=(refreshInterval:(pause:!t,value:2000),` +
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
         `_a=(description:'',filters:!()` +

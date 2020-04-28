@@ -47,7 +47,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can view existing Visualization`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-exist`,
           {
             basePath: '/s/custom_space',
@@ -87,7 +87,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new visualization redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', VisualizeConstants.CREATE_PATH, {
+        await PageObjects.common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -97,7 +97,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`edit visualization for object which doesn't exist redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
           {
             basePath: '/s/custom_space',
@@ -110,7 +110,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`edit visualization for object which exists redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-exist`,
           {
             basePath: '/s/custom_space',

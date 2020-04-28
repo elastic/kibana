@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboards',
           DashboardConstants.LANDING_PAGE_PATH,
           {
             ensureCurrentUrl: false,
@@ -114,10 +114,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'dashboards',
+          createDashboardEditUrl('i-exist'),
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -296,10 +300,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'dashboards',
+          createDashboardEditUrl('i-exist'),
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('embeddablePanelHeading-APie', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -409,10 +417,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Dashboard`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'dashboards',
+          createDashboardEditUrl('i-exist'),
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('embeddablePanelHeading-APie', { timeout: 10000 });
       });
 
@@ -525,10 +537,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', createDashboardEditUrl('i-exist'), {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl(
+          'dashboards',
+          createDashboardEditUrl('i-exist'),
+          {
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
         await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
       });
     });
