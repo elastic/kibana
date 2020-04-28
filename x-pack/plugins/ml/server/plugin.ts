@@ -123,7 +123,6 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         ],
       },
     });
-    // console.log(userMlCapabilitiesKeys.map(k => `access:${k}`));
     registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
