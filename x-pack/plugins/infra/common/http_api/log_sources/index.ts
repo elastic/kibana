@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './input_fields';
-export { SourceConfigurationSettings } from './source_configuration_settings';
-export { ViewSourceConfigurationButton } from './view_source_configuration_button';
+export * from './get_log_source_configuration';
+export * from './get_log_source_status';
+export * from './log_source_configuration';
+export * from './patch_log_source_configuration';
