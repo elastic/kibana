@@ -35,6 +35,8 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
+  timelines: OpenTimelineResult[];
+  totalCount: number;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -104,9 +106,9 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (apolloClient != null) {
             setAllTimelines({
               ...allTimelines,
-              loading: true,
               timelines: timelines ?? allTimelines.timelines,
               totalCount: totalCount ?? allTimelines.totalCount,
+              loading: true,
             });
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
