@@ -57446,7 +57446,7 @@ async function getChangesForProjects(projects, kbn, log) {
   log.verbose('getting changed files');
   const {
     stdout
-  } = await execa__WEBPACK_IMPORTED_MODULE_3___default()('git', ['ls-files', '-dmt', '--', ...Array.from(projects.values()).filter(p => kbn.isPartOfRepo(p)).map(p => p.path)], {
+  } = await execa__WEBPACK_IMPORTED_MODULE_3___default()('git', ['ls-files', '-dmto', '--exclude-standard', '--', ...Array.from(projects.values()).filter(p => kbn.isPartOfRepo(p)).map(p => p.path)], {
     cwd: kbn.getAbsolute()
   });
   const output = stdout.trim();
@@ -57473,10 +57473,13 @@ async function getChangesForProjects(projects, kbn, log) {
           unassignedChanges.set(path, 'deleted');
           break;
 
+        case '?':
+          unassignedChanges.set(path, 'untracked');
+          break;
+
         case 'H':
         case 'S':
         case 'K':
-        case '?':
         default:
           log.warning(`unexpected modification status "${tag}" for ${path}, please report this!`);
           unassignedChanges.set(path, 'invalid');
