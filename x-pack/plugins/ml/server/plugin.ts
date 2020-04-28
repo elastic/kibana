@@ -47,6 +47,7 @@ import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 import { userMlCapabilities, adminMlCapabilities } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
+import { registerKibanaSettings } from './lib/register_settings';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -121,6 +122,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         ],
       },
     });
+
+    registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
