@@ -30,7 +30,6 @@ import {
   useCaseConfigureResponse,
   useConnectorsResponse,
   kibanaMockImplementationArgs,
-  mapping,
 } from './__mock__';
 
 jest.mock('../../../../lib/kibana');
@@ -140,13 +139,13 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[0].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '123',
+        connectorId: 'servicenow-1',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
       }));
@@ -166,7 +165,7 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(Connectors).prop('connectors')).toEqual(connectors);
       expect(wrapper.find(Connectors).prop('disabled')).toBe(false);
       expect(wrapper.find(Connectors).prop('isLoading')).toBe(false);
-      expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('123');
+      expect(wrapper.find(Connectors).prop('selectedConnector')).toBe('servicenow-1');
 
       // ClosureOptions
       expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(false);
@@ -175,6 +174,7 @@ describe('ConfigureCases', () => {
       // Mapping
       expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
       expect(wrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(false);
+      expect(wrapper.find(Mapping).prop('connectorActionTypeId')).toBe('.servicenow');
       expect(wrapper.find(Mapping).prop('mapping')).toEqual(
         connectors[0].config.casesConfiguration.mapping
       );
@@ -182,64 +182,12 @@ describe('ConfigureCases', () => {
       // Flyouts
       expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(false);
       expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
-        {
+        expect.objectContaining({
           id: '.servicenow',
-          name: 'ServiceNow',
-          enabled: true,
-          logo: 'test-file-stub',
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'platinum',
-          fields: {
-            short_description: {
-              label: 'Short Description',
-              validSourceFields: ['title', 'description'],
-              defaultSourceField: 'title',
-              defaultActionType: 'overwrite',
-            },
-            description: {
-              label: 'Description',
-              validSourceFields: ['title', 'description'],
-              defaultSourceField: 'description',
-              defaultActionType: 'overwrite',
-            },
-            comments: {
-              label: 'Comments',
-              validSourceFields: ['comments'],
-              defaultSourceField: 'comments',
-              defaultActionType: 'append',
-            },
-          },
-        },
-        {
+        }),
+        expect.objectContaining({
           id: '.jira',
-          name: 'Jira',
-          logo: 'test-file-stub',
-          enabled: true,
-          enabledInConfig: true,
-          enabledInLicense: true,
-          minimumLicenseRequired: 'platinum',
-          fields: {
-            summary: {
-              label: 'Summary',
-              validSourceFields: ['title', 'description'],
-              defaultSourceField: 'title',
-              defaultActionType: 'overwrite',
-            },
-            description: {
-              label: 'Description',
-              validSourceFields: ['title', 'description'],
-              defaultSourceField: 'description',
-              defaultActionType: 'overwrite',
-            },
-            comments: {
-              label: 'Comments',
-              validSourceFields: ['comments'],
-              defaultSourceField: 'comments',
-              defaultActionType: 'append',
-            },
-          },
-        },
+        }),
       ]);
 
       expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(false);
@@ -263,8 +211,6 @@ describe('ConfigureCases', () => {
     });
 
     // TODO: When mapping is enabled the test.todo should be implemented.
-    test.todo('the mapping is changed successfully when changing the third party');
-    test.todo('the mapping is changed successfully when changing the action type');
     test.todo('it disables the update connector button when loading the configuration');
 
     test('it disables correctly when the user cannot crud', () => {
@@ -314,13 +260,13 @@ describe('ConfigureCases', () => {
     test('it disables the buttons of action bar when loading connectors', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
       }));
@@ -375,13 +321,13 @@ describe('ConfigureCases', () => {
     test('it disables the buttons of action bar when saving configuration', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
         persistLoading: true,
@@ -409,13 +355,13 @@ describe('ConfigureCases', () => {
     test('it shows the loading spinner when saving configuration', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
         persistLoading: true,
@@ -449,13 +395,13 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
         persistCaseConfigure,
@@ -477,7 +423,7 @@ describe('ConfigureCases', () => {
 
       expect(persistCaseConfigure).toHaveBeenCalled();
       expect(persistCaseConfigure).toHaveBeenCalledWith({
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'My Connector 2',
         closureType: 'close-by-user',
       });
@@ -491,16 +437,17 @@ describe('ConfigureCases', () => {
           .prop('href')
       ).toBe(`#/link-to/case${searchURL}`);
     });
+
     test('it disables the buttons of action bar when loading configuration', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-user',
         },
         loading: true,
@@ -530,13 +477,13 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '456',
+          connectorId: 'servicenow-2',
           closureType: 'close-by-user',
         },
       }));
@@ -570,20 +517,20 @@ describe('ConfigureCases', () => {
     test('it tracks the changes successfully', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'unchanged',
         currentConfiguration: {
           connectorName: 'unchanged',
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-pushing',
         },
       }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
       wrapper.find('input[id="close-by-pushing"]').simulate('change');
       wrapper.update();
@@ -598,23 +545,25 @@ describe('ConfigureCases', () => {
           .text()
       ).toBe('2 unsaved changes');
     });
+
     test('it tracks the changes successfully when name changes', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
-        mapping,
+        mapping: connectors[1].config.casesConfiguration.mapping,
         closureType: 'close-by-user',
-        connectorId: '456',
+        connectorId: 'servicenow-2',
         connectorName: 'nameChange',
         currentConfiguration: {
-          connectorId: '123',
+          connectorId: 'servicenow-1',
           closureType: 'close-by-pushing',
           connectorName: 'before',
         },
       }));
+
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
       wrapper.find('input[id="close-by-pushing"]').simulate('change');
       wrapper.update();
@@ -635,7 +584,7 @@ describe('ConfigureCases', () => {
       // change settings
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
       wrapper.find('input[id="close-by-pushing"]').simulate('change');
       wrapper.update();
@@ -643,7 +592,7 @@ describe('ConfigureCases', () => {
       // revert back to initial settings
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-123"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-1"]').simulate('click');
       wrapper.update();
       wrapper.find('input[id="close-by-user"]').simulate('change');
       wrapper.update();
@@ -657,17 +606,17 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-user',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-pushing',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       // Change closure type
@@ -712,17 +661,17 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-user',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-pushing',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
 
@@ -764,22 +713,22 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[0].config.casesConfiguration.mapping,
           closureType: 'close-by-user',
-          connectorId: '123',
-          currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+          connectorId: 'servicenow-1',
+          currentConfiguration: { connectorId: 'servicenow-1', closureType: 'close-by-user' },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-user',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '123', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-1', closureType: 'close-by-user' },
         }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
       wrapper.update();
-      wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
       wrapper.update();
 
       expect(
@@ -797,17 +746,17 @@ describe('ConfigureCases', () => {
       useCaseConfigureMock
         .mockImplementationOnce(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-user',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }))
         .mockImplementation(() => ({
           ...useCaseConfigureResponse,
-          mapping,
+          mapping: connectors[1].config.casesConfiguration.mapping,
           closureType: 'close-by-pushing',
-          connectorId: '456',
-          currentConfiguration: { connectorId: '456', closureType: 'close-by-user' },
+          connectorId: 'servicenow-2',
+          currentConfiguration: { connectorId: 'servicenow-2', closureType: 'close-by-user' },
         }));
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper.find('input[id="close-by-pushing"]').simulate('change');
@@ -828,5 +777,30 @@ describe('ConfigureCases', () => {
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
     });
+
+    test('it sets the mapping correctly when changing connector types', () => {
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        mapping: connectors[2].config.casesConfiguration.mapping,
+        closureType: 'close-by-user',
+        connectorId: 'jira-1',
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: 'servicenow-1',
+          closureType: 'close-by-user',
+        },
+        persistLoading: false,
+      }));
+
+      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+      expect(
+        wrapper.find('button[data-test-subj="case-configure-third-party-select-title"]').text()
+      ).toBe('Summary');
+    });
+
+    // TODO: When mapping is enabled the test.todo should be implemented.
+    test.todo('the mapping is changed successfully when changing the third party');
+    test.todo('the mapping is changed successfully when changing the action type');
   });
 });

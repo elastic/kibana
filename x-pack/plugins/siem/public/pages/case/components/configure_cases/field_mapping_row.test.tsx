@@ -49,6 +49,7 @@ describe('FieldMappingRow', () => {
   const onChangeThirdParty = jest.fn();
 
   const props: RowProps = {
+    id: 'title',
     disabled: false,
     siemField: 'title',
     thirdPartyOptions,
@@ -66,14 +67,14 @@ describe('FieldMappingRow', () => {
   test('it renders', () => {
     expect(
       wrapper
-        .find('[data-test-subj="case-configure-third-party-select"]')
+        .find('[data-test-subj="case-configure-third-party-select-title"]')
         .first()
         .exists()
     ).toBe(true);
 
     expect(
       wrapper
-        .find('[data-test-subj="case-configure-action-type-select"]')
+        .find('[data-test-subj="case-configure-action-type-select-title"]')
         .first()
         .exists()
     ).toBe(true);
