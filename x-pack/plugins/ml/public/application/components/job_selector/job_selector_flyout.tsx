@@ -50,6 +50,7 @@ export interface JobSelectorFlyoutProps {
   singleSelection: boolean;
   timeseriesOnly: boolean;
   maps: JobSelectionMaps;
+  withTimeRangeSelector?: boolean;
 }
 
 export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
@@ -62,6 +63,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   onSelectionConfirmed,
   onFlyoutClose,
   maps,
+  withTimeRangeSelector = true,
 }) => {
   const {
     services: { notifications },
@@ -228,16 +230,18 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
                   </EuiButtonEmpty>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
-                    defaultMessage: 'Apply timerange',
-                  })}
-                  checked={applyTimeRange}
-                  onChange={toggleTimerangeSwitch}
-                  data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
-                />
-              </EuiFlexItem>
+              {withTimeRangeSelector && (
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
+                      defaultMessage: 'Apply timerange',
+                    })}
+                    checked={applyTimeRange}
+                    onChange={toggleTimerangeSwitch}
+                    data-test-subj="mlFlyoutJobSelectorSwitchApplyTimeRange"
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

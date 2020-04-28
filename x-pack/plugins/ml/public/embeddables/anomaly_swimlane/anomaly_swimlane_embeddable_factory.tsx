@@ -65,6 +65,7 @@ export class AnomalySwimlaneEmbeddableFactory
       const flyoutSession = overlays.openFlyout(
         toMountPoint(
           <JobSelectorFlyout
+            withTimeRangeSelector={false}
             dateFormatTz={dateFormatTz}
             singleSelection={false}
             timeseriesOnly={true}
