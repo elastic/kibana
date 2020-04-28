@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import Util from 'util';
+import Fs from 'fs';
 import { resolve } from 'path';
-import { open, fstat, createReadStream, close } from 'fs';
 
 import Hapi from 'hapi';
 import LruCache from 'lru-cache';
 
 import Boom from 'boom';
-import { fromNode as fcb } from 'bluebird';
 
 // @ts-ignore
 import { getFileHash } from './file_hash';
@@ -34,6 +34,10 @@ import { replacePlaceholder } from '../public_path_placeholder';
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
+
+const asyncOpen = Util.promisify(Fs.open);
+const asyncClose = Util.promisify(Fs.close);
+const asyncFstat = Util.promisify(Fs.fstat);
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -89,12 +93,12 @@ export async function createDynamicAssetResponse({
     // we use and manage a file descriptor mostly because
     // that's what Inert does, and since we are accessing
     // the file 2 or 3 times per request it seems logical
-    fd = await fcb(cb => open(path, 'r', cb));
+    fd = await asyncOpen(path, 'r');
 
-    const stat = await fcb(cb => fstat(fd!, cb));
+    const stat = await asyncFstat(fd);
     const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
 
-    const read = createReadStream(null as any, {
+    const read = Fs.createReadStream(null as any, {
       fd,
       start: 0,
       autoClose: true,
@@ -120,7 +124,7 @@ export async function createDynamicAssetResponse({
   } catch (error) {
     if (fd) {
       try {
-        await fcb(cb => close(fd!, cb));
+        await asyncClose(fd);
       } catch (_) {
         // ignore errors from close, we already have one to report
         // and it's very likely they are the same
