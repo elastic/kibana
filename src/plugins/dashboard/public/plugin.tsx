@@ -276,7 +276,7 @@ export class DashboardPlugin
       DashboardConstants.DASHBOARD_ID,
       DashboardConstants.DASHBOARDS_ID,
       path => {
-        const [, id, tail] = /dashboard\/(.*?)($|\?)(.*)/.exec(path) || [];
+        const [, id, tail] = /dashboard\/?(.*?)($|\?.*)/.exec(path) || [];
         if (!id && !tail) {
           // unrecognized sub url
           return '#/list';

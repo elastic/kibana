@@ -104,7 +104,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
-      const urlSubstring = 'dashboards#/view/';
+      const urlSubstring = '#/view/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');
       const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
@@ -405,7 +405,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
         { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
-        { name: 'Visualization TileMap', description: 'TileMap' },
+        // TODO skipped because legacy maps vis are not ready yet
+        // { name: 'Visualization TileMap', description: 'TileMap' },
         { name: 'Visualization MetricChart', description: 'MetricChart' },
       ];
     }
