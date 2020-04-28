@@ -325,7 +325,7 @@ export interface ESTotal {
  */
 export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
-interface LegacyEndpointEvent {
+export interface LegacyEndpointEvent {
   '@timestamp': number;
   endgame: {
     pid?: number;
@@ -352,7 +352,7 @@ interface LegacyEndpointEvent {
   user?: object;
 }
 
-interface EndpointEvent {
+export interface EndpointEvent {
   '@timestamp': number;
   agent: {
     id: string;
