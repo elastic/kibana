@@ -69,7 +69,7 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
-    async getRawPdfReportData(url: string) {
+    async getRawPdfReportData(url: string): Promise<Buffer> {
       const data: Buffer[] = []; // List of Buffer objects
       log.debug(`getRawPdfReportData for ${url}`);
 

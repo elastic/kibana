@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-import fs from 'fs';
 import { promisify } from 'bluebird';
+import fs from 'fs';
+import path from 'path';
 import { comparePngs } from '../../../../../../../test/functional/services/lib/compare_pngs';
 
 const mkdirAsync = promisify<void, fs.PathLike, { recursive: boolean }>(fs.mkdir);

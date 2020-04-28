@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { promisify } from 'util';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 import { checkIfPngsMatch } from './lib/compare_pngs';
 
 const writeFileAsync = promisify(fs.writeFile);
