@@ -9,7 +9,7 @@ Constructs a new instance of the `FieldList` class
 <b>Signature:</b>
 
 ```typescript
-constructor({ fieldFormats, toastNotifications };: Deps, indexPattern;: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean;)
+constructor({ fieldFormats, toastNotifications }: Deps, indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
 ```
 
 ## Parameters
