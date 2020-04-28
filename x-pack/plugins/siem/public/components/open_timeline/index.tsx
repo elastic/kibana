@@ -12,7 +12,6 @@ import { Dispatch } from 'redux';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { AllTimelinesVariables, useGetAllTimeline } from '../../containers/timeline/all';
-import { allTimelinesQuery } from '../../containers/timeline/all/index.gql_query';
 import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../graphql/types';
 import { State, timelineSelectors } from '../../store';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
@@ -161,8 +160,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     /** Invoked when the user clicks the action to delete the selected timelines */
-    const onDeleteSelected: OnDeleteSelected = useCallback(() => {
-      deleteTimelines(getSelectedTimelineIds(selectedItems));
+    const onDeleteSelected: OnDeleteSelected = useCallback(async () => {
+      await deleteTimelines(getSelectedTimelineIds(selectedItems));
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:

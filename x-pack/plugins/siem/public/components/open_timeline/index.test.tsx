@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { getOr } from 'lodash/fp';
 
 import { wait } from '../../lib/helpers';
 import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_providers';

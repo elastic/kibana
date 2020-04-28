@@ -62,7 +62,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       [filterBy]
     );
 
-    const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
+    const { fetchAllTimeline, timelines, totalCount, loading } = useGetAllTimeline();
 
     useEffect(() => {
       fetchAllTimeline({
@@ -76,8 +76,10 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           sortOrder: Direction.desc,
         },
         onlyUserFavorite: filterBy === 'favorites',
+        timelines,
+        totalCount,
       });
-    }, [filterBy]);
+    }, [filterBy, timelines, totalCount]);
 
     return (
       <>
