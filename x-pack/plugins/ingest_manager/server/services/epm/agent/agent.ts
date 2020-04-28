@@ -54,7 +54,7 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
 
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
+      varPart[lastKeyPart] = yamlKeyPlaceholder;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
     } else {
       varPart[lastKeyPart] = recordEntry.value;
