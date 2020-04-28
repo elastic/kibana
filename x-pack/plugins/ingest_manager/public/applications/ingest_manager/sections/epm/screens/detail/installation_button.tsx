@@ -89,9 +89,6 @@ export function InstallationButton(props: InstallationButtonProps) {
       <FormattedMessage
         id="xpack.ingestManager.integrations.updatePackage.updatePackageButtonLabel"
         defaultMessage="Update to latest version"
-        values={{
-          title,
-        }}
       />
     </EuiButton>
   );
