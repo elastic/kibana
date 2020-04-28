@@ -113,18 +113,13 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
         <EuiText size="s">
           <ListGroup aria-labelledby={intervalTitleId} className="canvasControlSettings__list">
             <RefreshItem
-              duration={5000}
-              label={getSecondsText(5)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={30000}
-              label={getSecondsText(30)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
               duration={60000}
               label={getMinutesText(1)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={300000}
+              label={getMinutesText(5)}
               descriptionId={intervalTitleId}
             />
             <RefreshItem
@@ -135,6 +130,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <RefreshItem
               duration={3600000}
               label={getHoursText(1)}
+              descriptionId={intervalTitleId}
+            />
+            <RefreshItem
+              duration={43200000}
+              label={getHoursText(12)}
               descriptionId={intervalTitleId}
             />
             <RefreshItem
