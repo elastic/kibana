@@ -6,34 +6,48 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateChildren } from '../../../common/schema/resolver';
+import { validateTree } from '../../../common/schema/resolver';
 import { Fetcher } from './utils/fetch';
+import { Tree } from './utils/tree';
 import { EndpointAppContext } from '../../types';
 
-export function handleChildren(
+export function handleTree(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateChildren.params>, TypeOf<typeof validateChildren.query>> {
+): RequestHandler<TypeOf<typeof validateTree.params>, TypeOf<typeof validateTree.query>> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { children, generations, afterChild, legacyEndpointID: endpointID },
+      query: {
+        children,
+        generations,
+        ancestors,
+        events,
+        afterEvent,
+        afterChild,
+        legacyEndpointID: endpointID,
+      },
     } = req;
     try {
+      const client = context.core.elasticsearch.dataClient;
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
-      const client = context.core.elasticsearch.dataClient;
-
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.children(children, generations, afterChild);
+      const tree = await Tree.merge(
+        fetcher.children(children, generations, afterChild),
+        fetcher.ancestors(ancestors + 1),
+        fetcher.events(events, afterEvent)
+      );
+
+      const enrichedTree = await fetcher.stats(tree);
 
       return res.ok({
-        body: tree.render(),
+        body: enrichedTree.render(),
       });
     } catch (err) {
       log.warn(err);
-      return res.internalError({ body: err });
+      return res.internalError({ body: 'Error retrieving tree.' });
     }
   };
 }

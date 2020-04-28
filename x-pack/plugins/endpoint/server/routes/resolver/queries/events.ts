@@ -6,10 +6,11 @@
 import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-export class RelatedEventsQuery extends ResolverQuery {
+export class EventsQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
+    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_pid');
     return {
-      body: this.paginateBy('endgame.serial_event_id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
@@ -18,6 +19,9 @@ export class RelatedEventsQuery extends ResolverQuery {
               },
               {
                 term: { 'agent.id': endpointID },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 bool: {
@@ -35,22 +39,17 @@ export class RelatedEventsQuery extends ResolverQuery {
   }
 
   protected query(entityIDs: string[], index: string): JsonObject {
+    const paginator = this.paginateBy('event.id', 'process.entity_id');
     return {
-      body: this.paginateBy('event.id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': entityIDs },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 bool: {
