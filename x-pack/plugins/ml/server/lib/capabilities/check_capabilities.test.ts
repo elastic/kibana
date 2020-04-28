@@ -36,7 +36,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(22);
+      expect(count).toBe(23);
       done();
     });
   });
@@ -52,6 +52,7 @@ describe('check_capabilities', () => {
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canAccessML).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -87,6 +88,7 @@ describe('check_capabilities', () => {
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canAccessML).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -122,6 +124,7 @@ describe('check_capabilities', () => {
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canAccessML).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -157,6 +160,7 @@ describe('check_capabilities', () => {
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(true);
       expect(mlFeatureEnabledInSpace).toBe(true);
+      expect(capabilities.canAccessML).toBe(true);
       expect(capabilities.canGetJobs).toBe(true);
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -192,6 +196,7 @@ describe('check_capabilities', () => {
       const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
       expect(upgradeInProgress).toBe(false);
       expect(mlFeatureEnabledInSpace).toBe(false);
+      expect(capabilities.canAccessML).toBe(false);
       expect(capabilities.canGetJobs).toBe(false);
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -228,6 +233,7 @@ describe('check_capabilities', () => {
     const { capabilities, upgradeInProgress, mlFeatureEnabledInSpace } = await getCapabilities();
     expect(upgradeInProgress).toBe(false);
     expect(mlFeatureEnabledInSpace).toBe(false);
+    expect(capabilities.canAccessML).toBe(false);
     expect(capabilities.canGetJobs).toBe(false);
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
