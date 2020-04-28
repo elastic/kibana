@@ -6,6 +6,14 @@
 import { schema } from '@kbn/config-schema';
 export { Datasource, NewDatasource } from '../../../common';
 
+const ConfigRecordSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    type: schema.maybe(schema.string()),
+    value: schema.maybe(schema.any()),
+  })
+);
+
 const DatasourceBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
@@ -25,6 +33,7 @@ const DatasourceBaseSchema = {
       type: schema.string(),
       enabled: schema.boolean(),
       processors: schema.maybe(schema.arrayOf(schema.string())),
+      vars: schema.maybe(ConfigRecordSchema),
       config: schema.maybe(
         schema.recordOf(
           schema.string(),
@@ -40,6 +49,7 @@ const DatasourceBaseSchema = {
           enabled: schema.boolean(),
           dataset: schema.string(),
           processors: schema.maybe(schema.arrayOf(schema.string())),
+          vars: schema.maybe(ConfigRecordSchema),
           config: schema.maybe(
             schema.recordOf(
               schema.string(),
