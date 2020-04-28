@@ -6,7 +6,7 @@
 
 import dateMath from '@elastic/datemath';
 
-import { AlertServices } from '../../../../../alerting/server';
+import { APICaller } from '../../../../../../../src/core/server';
 
 import { getAnomalies } from '../../machine_learning';
 
@@ -15,7 +15,7 @@ export const findMlSignals = async (
   anomalyThreshold: number,
   from: string,
   to: string,
-  callCluster: AlertServices['callCluster']
+  callCluster: APICaller
 ) => {
   const params = {
     jobIds: [jobId],
