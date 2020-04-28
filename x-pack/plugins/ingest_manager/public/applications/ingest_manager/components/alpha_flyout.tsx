@@ -71,7 +71,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.warning"
+              id="xpack.ingestManager.alphaMessaging.warningText"
               defaultMessage=" {note}: you should not store important data with Ingest Manager
               since you will have limited visibility to it in a future release. This version uses an
               indexing strategy that will be deprecated in the next release and there is no migration
