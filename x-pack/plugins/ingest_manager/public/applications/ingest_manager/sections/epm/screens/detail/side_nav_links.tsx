@@ -37,7 +37,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               : p.theme.eui.euiFontWeightRegular};
         `;
         // don't display Data Sources tab if the package is not installed
-        if (packageInstallStatus !== InstallStatus.installed && panel === 'data-sources')
+        if (packageInstallStatus.status !== InstallStatus.installed && panel === 'data-sources')
           return null;
 
         return (
