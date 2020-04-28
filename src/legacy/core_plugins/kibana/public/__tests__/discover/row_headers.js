@@ -16,40 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import angular from 'angular';
 import _ from 'lodash';
-import $ from 'jquery';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import 'angular-mocks';
-import 'angular-sanitize';
-import 'angular-route';
+import ngMock from 'ng_mock';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
+import $ from 'jquery';
+import { pluginInstance } from './legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import { coreMock } from '../../../../../../../core/public/mocks';
-import { initializeInnerAngularModule } from '../../../../get_inner_angular';
-import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
-import { dataPluginMock } from '../../../../../../data/public/mocks';
-import { initAngularBootstrap } from '../../../../../../kibana_legacy/public';
-
-jest.mock('../../../../kibana_services', () => ({
-  getServices: () => ({
-    uiSettings: {
-      get: jest.fn(),
-    },
-    filterManager: {
-      getGlobalFilters: () => [],
-      getAppFilters: () => [],
-    },
-  }),
-  getDocViewsRegistry: () => ({
-    getDocViewsSorted: () => [],
-  }),
-}));
-
-describe.skip('Doc Table', function() {
+describe('Doc Table', function() {
   let $parentScope;
   let $scope;
 
@@ -58,19 +35,11 @@ describe.skip('Doc Table', function() {
 
   let fakeRowVals;
   let stubFieldFormatConverter;
-
-  beforeEach(() => {
-    initAngularBootstrap();
-    initializeInnerAngularModule(
-      'app/discover',
-      coreMock.createStart(),
-      navigationPluginMock.createStartContract(),
-      dataPluginMock.createStartContract()
-    );
-
-    angular.mock.module('app/discover');
-
-    angular.mock.inject(function($rootScope, Private) {
+  beforeEach(() => pluginInstance.initializeServices());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
+  beforeEach(
+    ngMock.inject(function($rootScope, Private) {
       $parentScope = $rootScope;
       $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       mapping = $parentScope.indexPattern.fields;
@@ -83,7 +52,7 @@ describe.skip('Doc Table', function() {
           if (val) {
             return val;
           }
-          const fieldName = _.get(options, 'field.name', '');
+          const fieldName = _.get(options, 'field.name', null);
 
           return fakeRowVals[fieldName] || '';
         };
@@ -91,12 +60,12 @@ describe.skip('Doc Table', function() {
         $root.indexPattern.fields.getByName(field).format.convert = convertFn;
         $root.indexPattern.fields.getByName(field).format.getConverterFor = () => convertFn;
       };
-    });
-  });
+    })
+  );
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   const init = function($elem, props) {
-    angular.mock.inject(function($compile) {
+    ngMock.inject(function($compile) {
       _.assign($parentScope, props);
       $compile($elem)($parentScope);
       $elem.scope().$digest();
@@ -230,7 +199,7 @@ describe.skip('Doc Table', function() {
       row = getFakeRow(0, mapping);
 
       init($elem, {
-        row,
+        row: row,
         columns: [],
         sorting: [],
         filtering: sinon.spy(),
@@ -248,7 +217,7 @@ describe.skip('Doc Table', function() {
     });
 
     /** this no longer works with the new plugin approach
-      it('should render even when the row source contains a field with the same name as a meta field', function () {
+     it('should render even when the row source contains a field with the same name as a meta field', function () {
       setTimeout(() => {
         //this should be overridden by later changes
       }, 100);
@@ -263,7 +232,7 @@ describe.skip('Doc Table', function() {
     let $before;
 
     beforeEach(
-      angular.mock.inject(function($rootScope, $compile, Private) {
+      ngMock.inject(function($rootScope, $compile, Private) {
         $root = $rootScope;
         $root.row = getFakeRow(0, mapping);
         $root.columns = ['_source'];
