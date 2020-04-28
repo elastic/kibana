@@ -133,6 +133,12 @@ export class UiActionsService {
     );
   };
 
+  /**
+   * `addTriggerAction` is similar to `attachAction` as it attaches action to a
+   * trigger, but it also registers the action, if it has not been registered, yet.
+   *
+   * `addTriggerAction` also infers better typing of the `action` argument.
+   */
   public readonly addTriggerAction = <TType extends TriggerId>(
     triggerId: TType,
     // The action can accept partial or no context, but if it needs context not provided
