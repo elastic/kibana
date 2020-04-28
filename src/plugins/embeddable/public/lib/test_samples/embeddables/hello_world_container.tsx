@@ -49,6 +49,7 @@ interface HelloWorldContainerOptions {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
@@ -81,6 +82,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           getAllEmbeddableFactories={this.options.getAllEmbeddableFactories}
           getEmbeddableFactory={this.options.getEmbeddableFactory}
           overlays={this.options.overlays}
+          application={this.options.application}
           notifications={this.options.notifications}
           inspector={this.options.inspector}
           SavedObjectFinder={this.options.SavedObjectFinder}
