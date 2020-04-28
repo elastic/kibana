@@ -69,10 +69,6 @@ export const DESCRIPTION = i18n.translate('xpack.siem.case.caseView.description'
   defaultMessage: 'Description',
 });
 
-export const SELECT_CONNECTOR = i18n.translate('xpack.siem.case.caseView.selectConnector', {
-  defaultMessage: 'Select a 3rd party connector',
-});
-
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.siem.case.createCase.descriptionFieldRequiredError',
   {
@@ -201,13 +197,9 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
 );
 
 export const CONNECTORS = i18n.translate('xpack.siem.case.caseView.connectors', {
-  defaultMessage: 'Third-party incident management system',
+  defaultMessage: 'External incident management system',
 });
 
 export const EDIT_CONNECTOR = i18n.translate('xpack.siem.case.caseView.editConnector', {
-  defaultMessage: 'Change third-party incident management system',
-});
-
-export const NO_CONNECTOR = i18n.translate('xpack.siem.case.caseView.noConnector', {
-  defaultMessage: 'No connector selected',
+  defaultMessage: 'Change external incident management system',
 });

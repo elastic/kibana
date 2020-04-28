@@ -22,6 +22,7 @@ import { Connector } from '../../../../../../../../plugins/case/common/api/cases
 
 export interface UserActionTreeProps {
   data: Case;
+  caseConnectorName: string;
   caseUserActions: CaseUserActions[];
   connectors: Connector[];
   fetchUserActions: () => void;
@@ -44,6 +45,7 @@ const NEW_ID = 'newComment';
 export const UserActionTree = React.memo(
   ({
     data: caseData,
+    caseConnectorName,
     caseUserActions,
     connectors,
     fetchUserActions,
@@ -233,10 +235,10 @@ export const UserActionTree = React.memo(
               index,
               connectors,
             });
-
             return (
               <UserActionItem
                 key={action.actionId}
+                caseConnectorName={caseConnectorName}
                 createdAt={action.actionAt}
                 data-test-subj={`${action.actionField[0]}-${action.action}-action`}
                 disabled={!userCanCrud}

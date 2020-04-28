@@ -8,7 +8,7 @@ import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
-import { Case } from '../../../../containers/case/types';
+import { Case, CaseExternalService, CaseUserActions } from '../../../../containers/case/types';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
 import { getConfigureCasesUrl } from '../../../../components/link_to';
@@ -18,13 +18,15 @@ import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
+import { parseString } from '../../../../containers/case/utils';
 
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
   caseConnectorId: string;
+  caseConnectorName: string;
+  caseUserActions: CaseUserActions[];
   connectors: Connector[];
-  isNew: boolean;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -36,10 +38,11 @@ export interface ReturnUsePushToService {
 
 export const usePushToService = ({
   caseConnectorId,
+  caseConnectorName,
   caseId,
   caseStatus,
   connectors,
-  isNew,
+  caseUserActions,
   updateCase,
   userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
@@ -49,20 +52,41 @@ export const usePushToService = ({
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const connectorName = useMemo(() => {
-    return connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
-  }, [caseConnectorId]);
+  const externalServiceHistory = useMemo<CaseExternalService[]>(
+    () =>
+      caseUserActions.reduce((acc, cua) => {
+        const possibleExternalService = parseString(`${cua.newValue}`);
+        return cua.action === 'push-to-service' &&
+          possibleExternalService != null &&
+          possibleExternalService.connectorId === caseConnectorId
+          ? [...acc, possibleExternalService]
+          : acc;
+      }, [] as CaseExternalService[]),
+    [caseUserActions]
+  );
+
+  const externalServiceHasHistory = useMemo(() => externalServiceHistory.length === 0, [
+    externalServiceHistory.length,
+  ]);
 
   const handlePushToService = useCallback(() => {
     if (caseConnectorId != null && caseConnectorId !== 'none') {
       postPushToService({
         caseId,
+        externalServiceHistory,
         connectorId: caseConnectorId,
-        connectorName,
+        connectorName: caseConnectorName,
         updateCase,
       });
     }
-  }, [caseId, caseConnectorId, connectorName, postPushToService, updateCase]);
+  }, [
+    caseId,
+    externalServiceHistory,
+    caseConnectorId,
+    caseConnectorName,
+    postPushToService,
+    updateCase,
+  ]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
@@ -96,7 +120,7 @@ export const usePushToService = ({
           title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
           description: (
             <FormattedMessage
-              defaultMessage="To open and update cases in external systems, you must select a third-party incident management system for this case."
+              defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
               id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
             />
           ),
@@ -124,7 +148,6 @@ export const usePushToService = ({
   }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
 
   const pushToServiceButton = useMemo(() => {
-    const currentConnectorName = connectors.find(c => c.id === caseConnectorId)?.name ?? 'none';
     return (
       <EuiButton
         data-test-subj="push-to-external-service"
@@ -134,16 +157,19 @@ export const usePushToService = ({
         disabled={isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud}
         isLoading={isLoading}
       >
-        {isNew ? i18n.PUSH_THIRD(currentConnectorName) : i18n.UPDATE_THIRD(currentConnectorName)}
+        {externalServiceHasHistory
+          ? i18n.PUSH_THIRD(caseConnectorName)
+          : i18n.UPDATE_THIRD(caseConnectorName)}
       </EuiButton>
     );
   }, [
     caseConnectorId,
+    caseConnectorName,
     connectors,
     errorsMsg,
     handlePushToService,
     isLoading,
-    isNew,
+    externalServiceHasHistory,
     loadingLicense,
     userCanCrud,
   ]);

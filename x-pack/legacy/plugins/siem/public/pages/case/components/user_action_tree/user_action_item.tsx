@@ -20,6 +20,7 @@ import { UserActionTitle } from './user_action_title';
 import * as i18n from './translations';
 
 interface UserActionItemProps {
+  caseConnectorName?: string;
   createdAt: string;
   'data-test-subj'?: string;
   disabled: boolean;
@@ -112,6 +113,7 @@ const PushedInfoContainer = styled.div`
 `;
 
 export const UserActionItem = ({
+  caseConnectorName,
   createdAt,
   disabled,
   'data-test-subj': dataTestSubj,
@@ -178,14 +180,14 @@ export const UserActionItem = ({
       <PushedContainer data-test-subj="show-top-footer">
         <PushedInfoContainer>
           <EuiText size="xs" color="subdued">
-            {i18n.ALREADY_PUSHED_TO_SERVICE}
+            {i18n.ALREADY_PUSHED_TO_SERVICE(`${caseConnectorName}`)}
           </EuiText>
         </PushedInfoContainer>
         <EuiHorizontalRule />
         {showBottomFooter && (
           <PushedInfoContainer data-test-subj="show-bottom-footer">
             <EuiText size="xs" color="subdued">
-              {i18n.REQUIRED_UPDATE_TO_SERVICE}
+              {i18n.REQUIRED_UPDATE_TO_SERVICE(`${caseConnectorName}`)}
             </EuiText>
           </PushedInfoContainer>
         )}

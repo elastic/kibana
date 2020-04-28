@@ -7,9 +7,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TagList } from './';
+import { EditConnector } from './';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../../../mock';
+import { connectorsMock } from '../../../../containers/case/configure/mock';
 import { wait } from '../../../../lib/helpers';
 import { useForm } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks';
 import { act } from 'react-dom/test-utils';
@@ -19,28 +20,29 @@ jest.mock(
 );
 const onSubmit = jest.fn();
 const defaultProps = {
+  connectors: connectorsMock,
   disabled: false,
   isLoading: false,
   onSubmit,
-  tags: [],
+  selectedConnector: 'none',
 };
 
-describe('TagList ', () => {
-  const sampleTags = ['coke', 'pepsi'];
-  const formHookMock = getFormMock({ tags: sampleTags });
+describe('EditConnector ', () => {
+  const sampleConnector = '123';
+  const formHookMock = getFormMock({ connector: sampleConnector });
   beforeEach(() => {
     jest.resetAllMocks();
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
   });
-  it('Renders no tags, and then edit', () => {
+  it('Renders no connector, and then edit', () => {
     const wrapper = mount(
       <TestProviders>
-        <TagList {...defaultProps} />
+        <EditConnector {...defaultProps} />
       </TestProviders>
     );
     expect(
       wrapper
-        .find(`[data-test-subj="no-tags"]`)
+        .find(`[data-test-subj="no-connector"]`)
         .last()
         .exists()
     ).toBeTruthy();
@@ -50,13 +52,13 @@ describe('TagList ', () => {
       .simulate('click');
     expect(
       wrapper
-        .find(`[data-test-subj="no-tags"]`)
+        .find(`[data-test-subj="no-connector"]`)
         .last()
         .exists()
     ).toBeFalsy();
     expect(
       wrapper
-        .find(`[data-test-subj="edit-tags"]`)
+        .find(`[data-test-subj="edit-connector"]`)
         .last()
         .exists()
     ).toBeTruthy();
@@ -64,7 +66,7 @@ describe('TagList ', () => {
   it('Edit tag on submit', async () => {
     const wrapper = mount(
       <TestProviders>
-        <TagList {...defaultProps} />
+        <EditConnector {...defaultProps} />
       </TestProviders>
     );
     wrapper
@@ -73,21 +75,21 @@ describe('TagList ', () => {
       .simulate('click');
     await act(async () => {
       wrapper
-        .find(`[data-test-subj="edit-tags-submit"]`)
+        .find(`[data-test-subj="edit-connector-submit"]`)
         .last()
         .simulate('click');
       await wait();
-      expect(onSubmit).toBeCalledWith(sampleTags);
+      expect(onSubmit).toBeCalledWith(sampleConnector);
     });
   });
   it('Cancels on cancel', async () => {
     const props = {
       ...defaultProps,
-      tags: ['pepsi'],
+      connector: ['pepsi'],
     };
     const wrapper = mount(
       <TestProviders>
-        <TagList {...props} />
+        <EditConnector {...props} />
       </TestProviders>
     );
     expect(
@@ -108,7 +110,7 @@ describe('TagList ', () => {
           .exists()
       ).toBeFalsy();
       wrapper
-        .find(`[data-test-subj="edit-tags-cancel"]`)
+        .find(`[data-test-subj="edit-connector-cancel"]`)
         .last()
         .simulate('click');
       await wait();
@@ -125,7 +127,7 @@ describe('TagList ', () => {
     const props = { ...defaultProps, disabled: true };
     const wrapper = mount(
       <TestProviders>
-        <TagList {...props} />
+        <EditConnector {...props} />
       </TestProviders>
     );
     expect(

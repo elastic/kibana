@@ -5,30 +5,40 @@
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCaseUserActions } from './api';
 import * as i18n from './translations';
-import { CaseUserActions, ElasticUser } from './types';
+import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
+import { parseString } from './utils';
 
 interface CaseUserActionsState {
+  caseServices: CaseService[];
   caseUserActions: CaseUserActions[];
+  isError: boolean;
+  isLoading: boolean;
+  participants: ElasticUser[];
+}
+
+interface CaseService {
+  connectorId: string;
   firstIndexPushToService: number;
   hasDataToPush: boolean;
-  participants: ElasticUser[];
-  isLoading: boolean;
-  isError: boolean;
   lastIndexPushToService: number;
 }
 
-export const initialData: CaseUserActionsState = {
-  caseUserActions: [],
+const initialCaseServiceData = {
+  connectorId: 'none',
   firstIndexPushToService: -1,
-  lastIndexPushToService: -1,
   hasDataToPush: false,
-  isLoading: true,
+  lastIndexPushToService: -1,
+};
+export const initialData: CaseUserActionsState = {
+  caseServices: [],
+  caseUserActions: [],
   isError: false,
+  isLoading: true,
   participants: [],
 };
 
@@ -37,25 +47,99 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 }
 
 const getPushedInfo = (
-  caseUserActions: CaseUserActions[]
-): { firstIndexPushToService: number; lastIndexPushToService: number; hasDataToPush: boolean } => {
-  const firstIndexPushToService = caseUserActions.findIndex(
+  caseUserActions: CaseUserActions[],
+  caseConnectorId: string
+): {
+  caseUserActions: CaseUserActions[];
+  firstIndexPushToService: number;
+  hasDataToPush: boolean;
+  lastIndexPushToService: number;
+} => {
+  const externalServicesUserActions = caseUserActions.filter(
     cua => cua.action === 'push-to-service'
   );
-  const lastIndexPushToService = caseUserActions
+  const externalServiceHistory = caseUserActions.reduce(
+    (acc, cua) => {
+      if (cua.action !== 'push-to-service') {
+        return acc;
+      }
+      const possibleExternalService = parseString(`${cua.newValue}`);
+      if (possibleExternalService === null) {
+        return {
+          ...acc,
+          externalServiceUserActions: [...acc.externalServiceUserActions, cua],
+        };
+      }
+      return {
+        ...acc,
+        externalServiceUserActions: [...acc.externalServiceUserActions, cua],
+        externalServices: {
+          ...acc.externalServices,
+          [possibleExternalService.connectorId]: possibleExternalService,
+        },
+      };
+    },
+    {
+      externalServices: {},
+      externalServiceUserActions: [],
+    }
+  );
+
+  const availableExternalServices = caseUserActions.filter(cua => cua.action === 'push-to-service');
+
+  const caseActionsFiltered = caseUserActions;
+  //   .filter(cua => {
+  //   if (cua.action !== 'push-to-service') {
+  //     return true;
+  //   }
+  //   return parseString(`${cua.newValue}`).connectorId === caseConnectorId;
+  // });
+  console.log('filter case actions', {
+    caseUserActions,
+    caseActionsFiltered,
+  });
+  const firstIndexPushToService = caseActionsFiltered.findIndex(
+    (cua, i) =>
+      cua.action === 'push-to-service' &&
+      parseString(`${caseActionsFiltered[i].newValue}`).connectorId === caseConnectorId
+  );
+  const lastIndexPushToService = caseActionsFiltered
     .map(cua => cua.action)
     .lastIndexOf('push-to-service');
+  //
+  // const isFirstIndexValid =
+  //   firstIndexPushToService > -1 &&
+  //   caseActionsFiltered[firstIndexPushToService].newValue !== null &&
+  //   parseString(`${caseActionsFiltered[firstIndexPushToService].newValue}`).connectorId ===
+  //     caseConnectorId;
+  // if (
+  //   firstIndexPushToService > -1 &&
+  //   caseActionsFiltered[firstIndexPushToService].newValue !== null &&
+  //   parseString(`${caseActionsFiltered[firstIndexPushToService].newValue}`).connectorId ===
+  //     caseConnectorId
+  // ) {
+  // }
+  //
+  // const isLastIndexValid =
+  //   lastIndexPushToService > -1 &&
+  //   caseActionsFiltered[lastIndexPushToService].newValue !== null &&
+  //   parseString(`${caseActionsFiltered[lastIndexPushToService].newValue}`).connectorId ===
+  //     caseConnectorId;
 
   const hasDataToPush =
-    lastIndexPushToService === -1 || lastIndexPushToService < caseUserActions.length - 1;
+    lastIndexPushToService === -1 || lastIndexPushToService < caseActionsFiltered.length - 1;
   return {
+    caseUserActions,
     firstIndexPushToService,
     lastIndexPushToService,
     hasDataToPush,
   };
 };
 
-export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => {
+export const useGetCaseUserActions = (
+  caseId: string,
+  caseConnectorId: string
+): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
@@ -82,9 +166,10 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
               : [];
 
             const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
+            console.log('caseUserActions!!!!!!!', caseUserActions);
+            console.log('getPushedInfo!!!!!!!', getPushedInfo(caseUserActions, caseConnectorId));
             setCaseUserActionsState({
-              caseUserActions,
-              ...getPushedInfo(caseUserActions),
+              ...getPushedInfo(caseUserActions, caseConnectorId),
               isLoading: false,
               isError: false,
               participants,
@@ -115,7 +200,7 @@ export const useGetCaseUserActions = (caseId: string): UseGetCaseUserActions => 
         abortCtrl.abort();
       };
     },
-    [caseUserActionsState]
+    [caseUserActionsState, caseConnectorId]
   );
 
   useEffect(() => {

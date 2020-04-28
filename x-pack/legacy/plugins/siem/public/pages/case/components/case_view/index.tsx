@@ -78,7 +78,7 @@ export const CaseComponent = React.memo<CaseProps>(
       isLoading: isLoadingUserActions,
       lastIndexPushToService,
       participants,
-    } = useGetCaseUserActions(caseId);
+    } = useGetCaseUserActions(caseId, caseData.connectorId);
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
@@ -161,12 +161,17 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const caseConnectorName = useMemo(
+      () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
+      [connectors, caseData.connectorId]
+    );
     const { pushButton, pushCallouts } = usePushToService({
       caseConnectorId: caseData.connectorId,
+      caseConnectorName,
+      caseUserActions,
       caseId: caseData.id,
       caseStatus: caseData.status,
       connectors,
-      isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
       updateCase: handleUpdateCase,
       userCanCrud,
     });
@@ -268,6 +273,7 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
+                      caseConnectorName={caseConnectorName}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}

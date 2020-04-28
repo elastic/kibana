@@ -37,7 +37,7 @@ export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
 export const REMOVED_THIRD_PARTY = i18n.translate(
   'xpack.siem.case.caseView.actionLabel.removedThirdParty',
   {
-    defaultMessage: 'removed third-party incident management system',
+    defaultMessage: 'removed external incident management system',
   }
 );
 

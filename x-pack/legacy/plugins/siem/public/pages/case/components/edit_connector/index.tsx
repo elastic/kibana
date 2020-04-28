@@ -23,10 +23,10 @@ import { ConnectorSelector } from '../connector_selector/form';
 import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
 
 interface EditConnectorProps {
+  connectors: Connector[];
   disabled?: boolean;
   isLoading: boolean;
   onSubmit: (a: string[]) => void;
-  connectors: Connector[];
   selectedConnector: string;
 }
 
@@ -41,10 +41,10 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 
 export const EditConnector = React.memo(
   ({
+    connectors,
     disabled = false,
     isLoading,
     onSubmit,
-    connectors,
     selectedConnector,
   }: EditConnectorProps) => {
     const { form } = useForm({
