@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function({ loadTestFile }) {
-  describe('reporting app', function() {
-    this.tags('ciGroup6');
-    loadTestFile(require.resolve('./reporting'));
-  });
-}
+/**
+ * Legacy events are stored in indices with endgame-* prefix
+ */
+export const legacyEventIndexPattern = 'endgame-*';
