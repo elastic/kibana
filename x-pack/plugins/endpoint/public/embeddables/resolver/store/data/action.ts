@@ -23,8 +23,8 @@ interface ServerReturnedResolverData {
 interface ServerReturnedRelatedEventData {
   readonly type: 'serverReturnedRelatedEventData';
   readonly payload: {
-    //TODO: add type information when /related API is finalized
-    readonly data: object
+    // TODO: add type information when /related API is finalized
+    readonly data: object;
   };
 }
 

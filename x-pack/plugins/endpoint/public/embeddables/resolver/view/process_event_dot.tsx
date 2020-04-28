@@ -17,7 +17,13 @@ import {
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
-import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
+import {
+  Vector2,
+  Matrix3,
+  AdjacentProcessMap,
+  ResolverProcessType,
+  waitingForRelatedEventData,
+} from '../types';
 import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
@@ -115,7 +121,7 @@ const NodeSubMenu = styled(
     }: { menuTitle: string; className?: string } & (
       | {
           menuAction?: undefined;
-          optionsWithActions: ResolverSubmenuOptionList;
+          optionsWithActions: ResolverSubmenuOptionList | typeof waitingForRelatedEventData;
         }
       | { menuAction: () => unknown; optionsWithActions?: undefined }
     )) => {
@@ -165,7 +171,10 @@ const NodeSubMenu = styled(
           >
             {menuTitle}
           </EuiButton>
-          {menuIsOpen && <OptionList subMenuOptions={optionsWithActions} />}
+          {menuIsOpen &&
+            (optionsWithActions === waitingForRelatedEventData ? null : (
+              <OptionList subMenuOptions={optionsWithActions} />
+            ))}
         </div>
       );
     }
