@@ -5,8 +5,12 @@
  */
 import { Logger } from 'src/core/server';
 import { Setup } from '../helpers/setup_request';
+import { IndexPrivileges } from '../helpers/es_client';
 
-export async function getIndicesPrivileges(setup: Setup, logger: Logger) {
+export async function getIndicesPrivileges(
+  setup: Setup,
+  logger: Logger
+): Promise<IndexPrivileges> {
   const { client, indices } = setup;
   try {
     const response = await client.hasPrivileges({
@@ -22,8 +26,9 @@ export async function getIndicesPrivileges(setup: Setup, logger: Logger) {
         }
       ]
     });
-    return response.index;
+    return response;
   } catch (err) {
     logger.warn(`Failed to fetch indices privileges. Error: ${err.message}`);
+    return { has_all_requested: true, index: {} };
   }
 }

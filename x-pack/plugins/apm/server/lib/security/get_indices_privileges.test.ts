@@ -16,7 +16,10 @@ describe('getIndicesPrivileges', () => {
       spanIndices: 'apm-*'
     }
   };
-  it('logs the error when fetching privileges', async () => {
+  const logger = ({
+    warn: jest.fn()
+  } as unknown) as Logger;
+  it('has privileges when an error happens while fetching ', async () => {
     const setup = ({
       indices,
       client: {
@@ -27,30 +30,95 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    const logger = ({
-      warn: jest.fn()
-    } as unknown) as Logger;
     const privileges = await getIndicesPrivileges(setup, logger);
-    expect(privileges).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      'Failed to fetch indices privileges. Error: no handler found for uri [/_security/user/_has_privileges]'
-    );
+    expect(privileges).toEqual({
+      has_all_requested: true,
+      index: {}
+    });
   });
-  it('returns indices privileges', async () => {
+  it("has privileges to read from 'apm-*'", async () => {
     const setup = ({
       indices,
       client: {
         hasPrivileges: () => {
-          return Promise.resolve({ index: { apm: { read: true } } });
+          return Promise.resolve({
+            has_all_requested: true,
+            index: { 'apm-*': { read: true } }
+          });
         }
       }
     } as unknown) as Setup;
-    const logger = ({
-      warn: jest.fn()
-    } as unknown) as Logger;
     const privileges = await getIndicesPrivileges(setup, logger);
 
-    expect(privileges).toEqual({ apm: { read: true } });
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(privileges).toEqual({
+      has_all_requested: true,
+      index: {
+        'apm-*': {
+          read: true
+        }
+      }
+    });
+  });
+
+  it("doesn't have privileges to read from 'apm-*'", async () => {
+    const setup = ({
+      indices,
+      client: {
+        hasPrivileges: () => {
+          return Promise.resolve({
+            has_all_requested: false,
+            index: { 'apm-*': { read: false } }
+          });
+        }
+      }
+    } as unknown) as Setup;
+
+    const privileges = await getIndicesPrivileges(setup, logger);
+
+    expect(privileges).toEqual({
+      has_all_requested: false,
+      index: {
+        'apm-*': {
+          read: false
+        }
+      }
+    });
+  });
+  it("doesn't have privileges on multiple indices", async () => {
+    const setup = ({
+      indices: {
+        apm_oss: {
+          errorIndices: 'apm-error-*',
+          metricsIndices: 'apm-metrics-*',
+          transactionIndices: 'apm-trasanction-*',
+          spanIndices: 'apm-span-*'
+        }
+      },
+      client: {
+        hasPrivileges: () => {
+          return Promise.resolve({
+            has_all_requested: false,
+            index: {
+              'apm-error-*': { read: false },
+              'apm-trasanction-*': { read: false },
+              'apm-metrics-*': { read: true },
+              'apm-span-*': { read: true }
+            }
+          });
+        }
+      }
+    } as unknown) as Setup;
+
+    const privileges = await getIndicesPrivileges(setup, logger);
+
+    expect(privileges).toEqual({
+      has_all_requested: false,
+      index: {
+        'apm-error-*': { read: false },
+        'apm-trasanction-*': { read: false },
+        'apm-metrics-*': { read: true },
+        'apm-span-*': { read: true }
+      }
+    });
   });
 });

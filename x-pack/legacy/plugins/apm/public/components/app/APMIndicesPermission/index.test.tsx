@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import { APMIndicesPermission } from './';
 
@@ -34,7 +34,10 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-*': { read: false }
+        has_all_requested: false,
+        index: {
+          'apm-*': { read: false }
+        }
       }
     });
     const component = render(
@@ -48,39 +51,13 @@ describe('APMIndicesPermission', () => {
       'apm-*'
     ]);
   });
-  it('shows escape hatch button when at least one indice has read privileges', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
-      status: hooks.FETCH_STATUS.SUCCESS,
-      data: {
-        'apm-7.5.1-error-*': { read: false },
-        'apm-7.5.1-metric-*': { read: false },
-        'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
-      }
-    });
-    const component = render(
-      <MockApmPluginContextWrapper>
-        <APMIndicesPermission />
-      </MockApmPluginContextWrapper>
-    );
-    expectTextsInDocument(component, [
-      'Missing permissions to access APM',
-      'apm-7.5.1-error-*',
-      'apm-7.5.1-metric-*',
-      'apm-7.5.1-transaction-*',
-      'Dismiss'
-    ]);
-    expectTextsNotInDocument(component, ['apm-7.5.1-span-*']);
-  });
 
   it('shows children component when indices have read privileges', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-*': { read: true },
-        'apm-7.5.1-metric-*': { read: true },
-        'apm-7.5.1-transaction-*': { read: true },
-        'apm-7.5.1-span-*': { read: true }
+        has_all_requested: true,
+        index: {}
       }
     });
     const component = render(
@@ -90,13 +67,7 @@ describe('APMIndicesPermission', () => {
         </APMIndicesPermission>
       </MockApmPluginContextWrapper>
     );
-    expectTextsNotInDocument(component, [
-      'Missing permissions to access APM',
-      'apm-7.5.1-error-*',
-      'apm-7.5.1-metric-*',
-      'apm-7.5.1-transaction-*',
-      'apm-7.5.1-span-*'
-    ]);
+    expectTextsNotInDocument(component, ['Missing permissions to access APM']);
     expectTextsInDocument(component, ['My amazing component']);
   });
 
@@ -104,10 +75,13 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-*': { read: false },
-        'apm-7.5.1-metric-*': { read: false },
-        'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
+        has_all_requested: false,
+        index: {
+          'apm-error-*': { read: false },
+          'apm-trasanction-*': { read: false },
+          'apm-metrics-*': { read: true },
+          'apm-span-*': { read: true }
+        }
       }
     });
     const component = render(
@@ -117,13 +91,19 @@ describe('APMIndicesPermission', () => {
         </APMIndicesPermission>
       </MockApmPluginContextWrapper>
     );
-    expectTextsInDocument(component, ['Dismiss']);
-    fireEvent.click(component.getByText('Dismiss'));
+    expectTextsInDocument(component, [
+      'Dismiss',
+      'apm-error-*',
+      'apm-trasanction-*'
+    ]);
+    act(() => {
+      fireEvent.click(component.getByText('Dismiss'));
+    });
     expectTextsInDocument(component, ['My amazing component']);
   });
 
-  it('shows children component when security api is disabled', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue('');
+  it("shows children component when api doesn't return value", () => {
+    spyOn(hooks, 'useFetcher').and.returnValue({});
     const component = render(
       <MockApmPluginContextWrapper>
         <APMIndicesPermission>
