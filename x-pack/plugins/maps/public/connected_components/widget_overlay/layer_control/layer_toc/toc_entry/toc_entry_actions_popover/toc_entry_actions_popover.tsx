@@ -66,21 +66,21 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }));
   };
 
-  _cloneLayer = () => {
+  _cloneLayer() {
     this.props.cloneLayer(this.props.layer.getId());
-  };
+  }
 
-  _fitToBounds = () => {
+  _fitToBounds() {
     this.props.fitToBounds(this.props.layer.getId());
-  };
+  }
 
-  _removeLayer = () => {
+  _removeLayer() {
     this.props.fitToBounds(this.props.layer.getId());
-  };
+  }
 
-  _toggleVisible = () => {
+  _toggleVisible() {
     this.props.toggleVisible(this.props.layer.getId());
-  };
+  }
 
   _renderPopoverToggleButton() {
     const { icon, tooltipContent, footnotes } = this.props.layer.getIconAndTooltipContent(
