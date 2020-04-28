@@ -6,14 +6,14 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import { APMIndicesPermission } from '../';
+import { APMIndicesPermission } from './';
 
-import * as hooks from '../../../../hooks/useFetcher';
+import * as hooks from '../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
-} from '../../../../utils/testHelpers';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+} from '../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('APMIndicesPermission', () => {
   it('returns empty component when api status is loading', () => {
@@ -119,6 +119,25 @@ describe('APMIndicesPermission', () => {
     );
     expectTextsInDocument(component, ['Dismiss']);
     fireEvent.click(component.getByText('Dismiss'));
+    expectTextsInDocument(component, ['My amazing component']);
+  });
+
+  it('shows children component when security api is disabled', () => {
+    spyOn(hooks, 'useFetcher').and.returnValue('');
+    const component = render(
+      <MockApmPluginContextWrapper>
+        <APMIndicesPermission>
+          <p>My amazing component</p>
+        </APMIndicesPermission>
+      </MockApmPluginContextWrapper>
+    );
+    expectTextsNotInDocument(component, [
+      'Missing permissions to access APM',
+      'apm-7.5.1-error-*',
+      'apm-7.5.1-metric-*',
+      'apm-7.5.1-transaction-*',
+      'apm-7.5.1-span-*'
+    ]);
     expectTextsInDocument(component, ['My amazing component']);
   });
 });

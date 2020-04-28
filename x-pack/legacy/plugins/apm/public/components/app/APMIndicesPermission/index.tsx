@@ -40,19 +40,21 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return null;
   }
 
-  const indicesWithoutPermission = Object.keys(indicesPrivileges).filter(
-    index => !indicesPrivileges[index].read
-  );
-
-  // Show permission warning when a user has at least one index without Read privilege,
-  // and he has not manually dismissed the warning
-  if (!isEmpty(indicesWithoutPermission) && !isPermissionWarningDismissed) {
-    return (
-      <PermissionWarning
-        indicesWithoutPermission={indicesWithoutPermission}
-        onEscapeHatchClick={() => setIsPermissionWarningDismissed(true)}
-      />
+  if (!isEmpty(indicesPrivileges)) {
+    const indicesWithoutPermission = Object.keys(indicesPrivileges).filter(
+      index => !indicesPrivileges[index].read
     );
+
+    // Show permission warning when a user has at least one index without Read privilege,
+    // and he has not manually dismissed the warning
+    if (!isEmpty(indicesWithoutPermission) && !isPermissionWarningDismissed) {
+      return (
+        <PermissionWarning
+          indicesWithoutPermission={indicesWithoutPermission}
+          onEscapeHatchClick={() => setIsPermissionWarningDismissed(true)}
+        />
+      );
+    }
   }
 
   return <>{children}</>;
