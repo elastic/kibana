@@ -48,6 +48,7 @@ export interface State {
   advancedEditorMessages: FormMessage[];
   advancedEditorRawString: string;
   form: {
+    computeFeatureInfluence: string;
     createIndexPattern: boolean;
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
@@ -63,6 +64,7 @@ export interface State {
     excludesTableItems: FieldSelectionItem[];
     excludesOptions: EuiComboBoxOptionOption[]; // TODO: remove once we switch to table
     featureBagFraction: undefined | number;
+    featureInfluenceThreshold: undefined | number;
     fieldOptionsFetchFail: boolean;
     gamma: undefined | number;
     jobId: DataFrameAnalyticsId;
@@ -76,12 +78,15 @@ export interface State {
     loadingFieldOptions: boolean;
     maxDistinctValuesError: string | undefined;
     maxTrees: undefined | number;
+    method: undefined | string;
     modelMemoryLimit: string | undefined;
     modelMemoryLimitUnitValid: boolean;
     modelMemoryLimitValidationResult: any;
+    nNeighbors: undefined | number;
     numTopFeatureImportanceValues: number | undefined;
     numTopFeatureImportanceValuesValid: boolean;
     numTopClasses: number;
+    outlierFraction: undefined | number;
     predictionFieldName: string;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
@@ -92,6 +97,7 @@ export interface State {
     sourceIndexNameValid: boolean;
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
+    standardizationEnabled: undefined | string;
     trainingPercent: number;
   };
   disabled: boolean;
@@ -115,7 +121,8 @@ export const getInitialState = (): State => ({
   advancedEditorMessages: [],
   advancedEditorRawString: '',
   form: {
-    createIndexPattern: false,
+    computeFeatureInfluence: 'true',
+    createIndexPattern: true,
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
@@ -128,6 +135,7 @@ export const getInitialState = (): State => ({
     eta: undefined,
     excludes: [],
     featureBagFraction: undefined,
+    featureInfluenceThreshold: undefined,
     fieldOptionsFetchFail: false,
     gamma: undefined,
     excludesTableItems: [],
@@ -143,12 +151,15 @@ export const getInitialState = (): State => ({
     loadingFieldOptions: false,
     maxDistinctValuesError: undefined,
     maxTrees: undefined,
+    method: undefined,
     modelMemoryLimit: undefined,
     modelMemoryLimitUnitValid: true,
     modelMemoryLimitValidationResult: null,
+    nNeighbors: undefined,
     numTopFeatureImportanceValues: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
     numTopFeatureImportanceValuesValid: true,
     numTopClasses: 2,
+    outlierFraction: undefined,
     predictionFieldName: '', // TODO: change to constant
     previousJobType: null,
     previousSourceIndex: undefined,
@@ -159,6 +170,7 @@ export const getInitialState = (): State => ({
     sourceIndexNameValid: false,
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
+    standardizationEnabled: 'true',
     trainingPercent: 80,
   },
   jobConfig: {},

@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 
 export interface ListItems {
@@ -21,18 +22,15 @@ export const ConfigurationStepDetails: FC<{ state: State }> = ({ state }) => {
   const { form } = state;
   const { dependentVariable, excludes, jobType, trainingPercent } = form;
 
+  const isJobTypeWithDepVar =
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+
   const detailsFirstCol: ListItems[] = [
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.jobType', {
         defaultMessage: 'Source index',
       }),
       description: currentIndexPattern.title || '',
-    },
-    {
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.trainingPercent', {
-        defaultMessage: 'Training percent',
-      }),
-      description: `${trainingPercent}`,
     },
   ];
 
@@ -43,13 +41,22 @@ export const ConfigurationStepDetails: FC<{ state: State }> = ({ state }) => {
       }),
       description: jobType || '',
     },
-    {
+  ];
+
+  if (isJobTypeWithDepVar) {
+    detailsFirstCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.trainingPercent', {
+        defaultMessage: 'Training percent',
+      }),
+      description: `${trainingPercent}`,
+    });
+    detailsSecondCol.push({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.dependentVariable', {
         defaultMessage: 'Dependent variable',
       }),
       description: dependentVariable,
-    },
-  ];
+    });
+  }
 
   const detailsThirdCol = [
     {
@@ -62,13 +69,13 @@ export const ConfigurationStepDetails: FC<{ state: State }> = ({ state }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsFirstCol} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsSecondCol} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsThirdCol} />
       </EuiFlexItem>
     </EuiFlexGroup>

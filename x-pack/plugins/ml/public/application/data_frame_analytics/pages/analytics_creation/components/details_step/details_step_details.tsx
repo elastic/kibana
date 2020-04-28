@@ -47,13 +47,13 @@ export const DetailsStepDetails: FC<{ state: State }> = ({ state }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsFirstCol} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsSecondCol} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed listItems={detailsThirdCol} />
       </EuiFlexItem>
     </EuiFlexGroup>

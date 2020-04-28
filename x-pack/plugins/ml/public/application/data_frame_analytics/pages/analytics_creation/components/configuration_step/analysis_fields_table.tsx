@@ -77,9 +77,10 @@ export const AnalysisFieldsTable: FC<{
       : undefined;
 
   const selection = {
-    selectable: (fieldData: FieldSelectionItem) => fieldData.is_included === true,
+    selectable: (fieldData: FieldSelectionItem) =>
+      fieldData.is_included === true && fieldData.is_required === false,
     selectableMessage: (selectable: boolean, item: FieldSelectionItem) =>
-      !selectable ? `${item.name} is already excluded from analysis` : '',
+      !selectable ? `${item.name} is already excluded from analysis or is a required field` : '',
     onSelectionChange: (currentSelection: FieldSelectionItem[]) => {
       setFormState({ excludes: currentSelection.map(item => item.name) });
     },

@@ -44,7 +44,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
     <Fragment>
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFormRow
               helpText={i18n.translate(
                 'xpack.ml.dataframe.analytics.create.startCheckboxHelpText',
