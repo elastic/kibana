@@ -26,13 +26,13 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> =
   requestRefresh,
   loadAlertState,
 }) => {
-  const { http, toastNotifications } = useAppDependencies();
+  const { toastNotifications } = useAppDependencies();
 
   const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
 
   useEffect(() => {
     getAlertState(alert.id, loadAlertState, setAlertState, toastNotifications);
-  }, [alert, http, loadAlertState, toastNotifications]);
+  }, [alert, loadAlertState, toastNotifications]);
 
   return alertState ? (
     <AlertInstances requestRefresh={requestRefresh} alert={alert} alertState={alertState} />
