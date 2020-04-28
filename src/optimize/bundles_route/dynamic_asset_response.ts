@@ -31,6 +31,11 @@ import { getFileHash } from './file_hash';
 // @ts-ignore
 import { replacePlaceholder } from '../public_path_placeholder';
 
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
 /**
  *  Create a Hapi response for the requested path. This is designed
  *  to replicate a subset of the features provided by Hapi's Inert
@@ -102,7 +107,7 @@ export async function createDynamicAssetResponse({
       .type(request.server.mime.path(path).type);
 
     if (isDist) {
-      response.header('cache-control', 'max-age=31536000');
+      response.header('cache-control', `max-age=${365 * DAY}`);
     } else {
       response.etag(`${hash}-${publicPath}`);
       response.header('cache-control', 'must-revalidate');
