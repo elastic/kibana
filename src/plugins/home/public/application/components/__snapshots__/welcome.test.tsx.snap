@@ -28,25 +28,12 @@ exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to Elastic Kibana"
+              defaultMessage="Welcome to Elastic"
               id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
         </EuiTitle>
-        <EuiText
-          className="homWelcome__subtitle"
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Your window into the Elastic Stack"
-              id="home.welcomeDescription"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
         <EuiSpacer
           size="m"
         />
@@ -102,25 +89,12 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to Elastic Kibana"
+              defaultMessage="Welcome to Elastic"
               id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
         </EuiTitle>
-        <EuiText
-          className="homWelcome__subtitle"
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Your window into the Elastic Stack"
-              id="home.welcomeDescription"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
         <EuiSpacer
           size="m"
         />
@@ -214,25 +188,12 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to Elastic Kibana"
+              defaultMessage="Welcome to Elastic"
               id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
         </EuiTitle>
-        <EuiText
-          className="homWelcome__subtitle"
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Your window into the Elastic Stack"
-              id="home.welcomeDescription"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
         <EuiSpacer
           size="m"
         />
@@ -326,25 +287,12 @@ exports[`should render a Welcome screen with the telemetry disclaimer when optIn
         >
           <h1>
             <FormattedMessage
-              defaultMessage="Welcome to Elastic Kibana"
+              defaultMessage="Welcome to Elastic"
               id="home.welcomeTitle"
               values={Object {}}
             />
           </h1>
         </EuiTitle>
-        <EuiText
-          className="homWelcome__subtitle"
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Your window into the Elastic Stack"
-              id="home.welcomeDescription"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
         <EuiSpacer
           size="m"
         />

@@ -62,7 +62,7 @@ exports[`is rendered 1`] = `
                     <p
                       className="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
                     >
-                      Elastic Kibana
+                      Elastic
                     </p>
                   </EuiTitle>
                   <EuiText

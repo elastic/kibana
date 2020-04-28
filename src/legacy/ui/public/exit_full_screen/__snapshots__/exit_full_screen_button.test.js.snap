@@ -32,7 +32,7 @@ exports[`is rendered 1`] = `
             <p
               class="euiTitle euiTitle--xxxsmall dshExitFullScreenButton__title"
             >
-              Elastic Kibana
+              Elastic
             </p>
             <div
               class="euiText euiText--extraSmall dshExitFullScreenButton__text"
