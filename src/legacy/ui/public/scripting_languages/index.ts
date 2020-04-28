@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import { IHttpService } from 'angular';
 import { i18n } from '@kbn/i18n';
-
-import chrome from '../chrome';
+import { HttpStart } from 'src/core/public';
 import { toastNotifications } from '../notify';
 
 export function getSupportedScriptingLanguages(): string[] {
@@ -31,18 +29,12 @@ export function getDeprecatedScriptingLanguages(): string[] {
   return [];
 }
 
-export function GetEnabledScriptingLanguagesProvider($http: IHttpService) {
-  return () => {
-    return $http
-      .get(chrome.addBasePath('/api/kibana/scripts/languages'))
-      .then((res: any) => res.data)
-      .catch(() => {
-        toastNotifications.addDanger(
-          i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {
-            defaultMessage: 'Error getting available scripting languages from Elasticsearch',
-          })
-        );
-        return [];
-      });
-  };
-}
+export const getEnabledScriptingLanguages = (http: HttpStart) =>
+  http.get('/api/kibana/scripts/languages').catch(() => {
+    toastNotifications.addDanger(
+      i18n.translate('common.ui.scriptingLanguages.errorFetchingToastDescription', {
+        defaultMessage: 'Error getting available scripting languages from Elasticsearch',
+      })
+    );
+    return [];
+  });
