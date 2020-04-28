@@ -45,6 +45,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     shouldLoginIfPrompted: boolean;
     shouldAcceptAlert: boolean;
     useActualUrl: boolean;
+    insertTimestamp: boolean;
   }
 
   class CommonPage {
@@ -52,11 +53,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Navigates the browser window to provided URL
      * @param url URL
      * @param shouldAcceptAlert pass 'true' if browser alert should be accepted
+     * @param insertTimestamp pass 'false' to skip inserting timestamp in URL
      */
-    private static async navigateToUrlAndHandleAlert(url: string, shouldAcceptAlert: boolean) {
+    private static async navigateToUrlAndHandleAlert(
+      url: string,
+      shouldAcceptAlert: boolean,
+      insertTimestamp: boolean
+    ) {
       log.debug('Navigate to: ' + url);
       try {
-        await browser.get(url);
+        await browser.get(url, insertTimestamp);
       } catch (navigationError) {
         log.debug('Error navigating to url');
         const alert = await browser.getAlert();
@@ -96,8 +102,9 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     /**
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
+     * @param insertTimestamp pass 'false' to skip inserting timestamp in URL
      */
-    private async loginIfPrompted(appUrl: string) {
+    private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
       await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
@@ -119,7 +126,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
           6 * defaultFindTimeout
         );
-        await browser.get(appUrl);
+        await browser.get(appUrl, insertTimestamp);
         currentUrl = await browser.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }
@@ -133,19 +140,20 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted,
         shouldAcceptAlert,
         useActualUrl,
+        insertTimestamp,
       } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {
         if (useActualUrl) {
           log.debug(`navigateToActualUrl ${appUrl}`);
-          await browser.get(appUrl);
+          await browser.get(appUrl, insertTimestamp);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert, insertTimestamp);
         }
 
         const currentUrl = shouldLoginIfPrompted
-          ? await this.loginIfPrompted(appUrl)
+          ? await this.loginIfPrompted(appUrl, insertTimestamp)
           : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
@@ -169,6 +177,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted = true,
         shouldAcceptAlert = true,
         useActualUrl = false,
+        insertTimestamp = true,
       } = {}
     ) {
       const appConfig = {
@@ -182,6 +191,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted,
         shouldAcceptAlert,
         useActualUrl,
+        insertTimestamp,
       });
     }
 
@@ -202,6 +212,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted = true,
         shouldAcceptAlert = true,
         useActualUrl = true,
+        insertTimestamp = true,
       } = {}
     ) {
       const appConfig = {
@@ -216,6 +227,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         shouldLoginIfPrompted,
         shouldAcceptAlert,
         useActualUrl,
+        insertTimestamp,
       });
     }
 
@@ -252,8 +264,15 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, shouldAcceptAlert = true, hash = '' } = {}
+      {
+        basePath = '',
+        shouldLoginIfPrompted = true,
+        shouldAcceptAlert = true,
+        hash = '',
+        insertTimestamp = true,
+      } = {}
     ) {
+      log.debug(`++++++++++++ insertTimestamp = ${insertTimestamp}`);
       let appUrl: string;
       if (config.has(['apps', appName])) {
         // Legacy applications
@@ -274,12 +293,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert);
+          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert, insertTimestamp);
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();
           let currentUrl = shouldLoginIfPrompted
-            ? await this.loginIfPrompted(appUrl)
+            ? await this.loginIfPrompted(appUrl, insertTimestamp)
             : await browser.getCurrentUrl();
 
           if (currentUrl.includes('app/kibana')) {

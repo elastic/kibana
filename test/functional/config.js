@@ -82,7 +82,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dashboards',
       },
+      // deprecated settings, use management
       settings: {
+        pathname: '/app/kibana',
+        hash: '/management',
+      },
+      management: {
         pathname: '/app/kibana',
         hash: '/management',
       },

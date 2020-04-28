@@ -319,8 +319,10 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async createIndexPattern(
       indexPatternName: string,
       timefield = '@timestamp',
-      isStandardIndexPattern = true
+      isStandardIndexPattern = true,
+      expectWildcard = true
     ) {
+      log.debug(`createIndexPattern expectWildcard = ${expectWildcard}`);
       await retry.try(async () => {
         await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -332,7 +334,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField({ indexPatternName });
+          await this.setIndexPatternField({ indexPatternName, expectWildcard });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -374,7 +376,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
-      log.debug(`setIndexPatternField(${indexPatternName})`);
+      log.debug(`setIndexPatternField(${indexPatternName}) with expectWilcard = ${expectWildcard}`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName, { charByChar: true });

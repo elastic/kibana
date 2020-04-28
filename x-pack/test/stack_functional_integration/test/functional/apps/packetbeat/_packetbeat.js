@@ -22,8 +22,9 @@ export default function({ getService, getPageObjects }) {
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
-        await PageObjects.common.navigateToApp('discover');
-      } else if (!url.includes('discover')) {
+        await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
+      }
+      if (!url.includes('discover')) {
         await appsMenu.clickLink('Discover');
       }
       await PageObjects.discover.selectIndexPattern('packetbeat-*');
