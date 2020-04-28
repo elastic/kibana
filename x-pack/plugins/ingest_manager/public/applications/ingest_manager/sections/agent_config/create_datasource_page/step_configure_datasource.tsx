@@ -42,8 +42,6 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   validationResults,
   submitAttempted,
 }) => {
-  // Form show/hide states
-
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update datasource's package and config info

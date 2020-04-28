@@ -28,7 +28,7 @@ import {
 } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
-import { CreateDatasourceFrom } from './types';
+import { CreateDatasourceFrom, DatasourceFormState } from './types';
 import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectConfig } from './step_select_config';
@@ -152,9 +152,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
 
   // Save datasource
-  const [formState, setFormState] = useState<
-    'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED'
-  >('INVALID');
+  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
   const saveDatasource = async () => {
     setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
