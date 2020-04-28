@@ -7,7 +7,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
-import { TemplateFormTestBed } from './helpers/pipeline_form.helpers';
+import { PipelineFormTestBed } from './helpers/pipeline_form.helpers';
 
 const { setup } = pageHelpers.pipelinesCreate;
 
@@ -25,7 +25,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 describe('<PipelinesCreate />', () => {
-  let testBed: TemplateFormTestBed;
+  let testBed: PipelineFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 

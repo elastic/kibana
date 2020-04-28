@@ -6,7 +6,7 @@
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { nextTick } from './index';
 
-export type TemplateFormTestBed = TestBed<PipelineFormTestSubjects> &
+export type PipelineFormTestBed = TestBed<PipelineFormTestSubjects> &
   UnwrapPromise<ReturnType<typeof formSetup>>;
 
 export const formSetup = async (initTestBed: SetupFunc<PipelineFormTestSubjects>) => {
