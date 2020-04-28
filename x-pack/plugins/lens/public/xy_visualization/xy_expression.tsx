@@ -37,6 +37,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getExecuteTriggerActions } from './services';
+import { parseInterval } from '../../../../../src/plugins/data/common';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -219,10 +220,11 @@ export function XYChart({
   function calculateMinInterval() {
     // add minInterval only for single row value as it cannot be determined from dataset
     if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
+        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
+
       const { fromDate, toDate } = data.dateRange;
       const duration = moment(toDate).diff(moment(fromDate));
-
-      // simplified version of plugins/data/public/search/aggs/buckets/lib/time_buckets/calc_auto_interval.ts
       const targetMs = duration / histogramBarTarget;
       return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
     }

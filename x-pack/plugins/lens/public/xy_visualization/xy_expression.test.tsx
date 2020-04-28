@@ -40,7 +40,7 @@ const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatata
       id: 'c',
       name: 'c',
       formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: '10s' } },
+      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
     },
     { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
   ],
