@@ -55,6 +55,11 @@ jest.mock('../../../kibana_services', () => ({
         }
       },
     },
+    fieldFormats: {
+      getDefaultInstance: () => ({
+        convert: (value: unknown) => String(value),
+      }),
+    },
   }),
 }));
 
