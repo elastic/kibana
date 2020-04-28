@@ -5,6 +5,7 @@
  */
 
 import { ConfigType } from '../../config';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { RouteDefinitionParams } from '..';
 
 /**
@@ -13,18 +14,28 @@ import { RouteDefinitionParams } from '..';
 export function defineAccessAgreementRoutes({
   authc,
   httpResources,
+  license,
   config,
   router,
   logger,
 }: RouteDefinitionParams) {
+  // If license doesn't allow access agreement we shouldn't handle request.
+  const canHandleRequest = () => license.getFeatures().allowAccessAgreement;
+
   httpResources.register(
     { path: '/security/access_agreement', validate: false },
-    async (context, request, response) => response.renderCoreApp()
+    createLicensedRouteHandler(async (context, request, response) =>
+      canHandleRequest() ? response.renderCoreApp() : response.notFound()
+    )
   );
 
   router.get(
     { path: '/internal/security/access_agreement/state', validate: false },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
+      if (!canHandleRequest()) {
+        return response.notFound();
+      }
+
       // It's not guaranteed that we'll have session for the authenticated user (e.g. when user is
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
@@ -42,6 +53,6 @@ export function defineAccessAgreementRoutes({
         logger.error(err);
         return response.internalError();
       }
-    }
+    })
   );
 }

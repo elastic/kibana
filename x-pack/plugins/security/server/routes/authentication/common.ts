@@ -18,7 +18,13 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes that are common to various authentication mechanisms.
  */
-export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDefinitionParams) {
+export function defineCommonRoutes({
+  router,
+  authc,
+  basePath,
+  license,
+  logger,
+}: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/logout', '/api/security/v1/logout']) {
     router.get(
@@ -138,7 +144,13 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
 
   router.post(
     { path: '/internal/security/access_agreement/acknowledge', validate: false },
-    async (context, request, response) => {
+    createLicensedRouteHandler(async (context, request, response) => {
+      // If license doesn't allow access agreement we shouldn't handle request.
+      if (!license.getFeatures().allowAccessAgreement) {
+        logger.warn(`Attempted to acknowledge access agreement when license doesn allow it.`);
+        return response.notFound();
+      }
+
       try {
         await authc.acknowledgeAccessAgreement(request);
       } catch (err) {
@@ -147,6 +159,6 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
       }
 
       return response.noContent();
-    }
+    })
   );
 }

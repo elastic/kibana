@@ -12,6 +12,7 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
+import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import {
   Authentication,
   AuthenticationResult,
@@ -28,11 +29,13 @@ import { routeDefinitionParamsMock } from '../index.mock';
 describe('Common authentication routes', () => {
   let router: jest.Mocked<IRouter>;
   let authc: jest.Mocked<Authentication>;
+  let license: jest.Mocked<SecurityLicense>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     authc = routeParamsMock.authc;
+    license = routeParamsMock.license;
 
     mockContext = ({
       licensing: {
@@ -442,6 +445,10 @@ describe('Common authentication routes', () => {
         ([{ path }]) => path === '/internal/security/access_agreement/acknowledge'
       )!;
 
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
+      } as SecurityLicenseFeatures);
+
       routeConfig = acsRouteConfig;
       routeHandler = acsRouteHandler;
     });
@@ -449,6 +456,19 @@ describe('Common authentication routes', () => {
     it('correctly defines route.', () => {
       expect(routeConfig.options).toBeUndefined();
       expect(routeConfig.validate).toBe(false);
+    });
+
+    it('returns 404 if current license doesnt allow access agreement acknowledgement.', async () => {
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      const request = httpServerMock.createKibanaRequest();
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 404,
+        payload: 'Not Found',
+        options: {},
+      });
     });
 
     it('returns 500 if acknowledge throws unhandled exception.', async () => {

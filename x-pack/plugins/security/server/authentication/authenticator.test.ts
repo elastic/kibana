@@ -20,8 +20,10 @@ import {
   elasticsearchServiceMock,
   sessionStorageMock,
 } from '../../../../../src/core/server/mocks';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityAuditLoggerMock } from '../audit/index.mock';
+import { SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigSchema, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
@@ -44,6 +46,7 @@ function getMockOptions({
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
+    license: licenseMock.create(),
     loggers: loggingServiceMock.create(),
     config: createConfig(
       ConfigSchema.validate({ session, authc: { selector, providers, http } }),
@@ -1121,6 +1124,9 @@ describe('Authenticator', () => {
           },
         });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+        mockOptions.license.getFeatures.mockReturnValue({
+          allowAccessAgreement: true,
+        } as SecurityLicenseFeatures);
 
         mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
           AuthenticationResult.succeeded(mockUser)
@@ -1215,6 +1221,18 @@ describe('Authenticator', () => {
         authenticator = new Authenticator(mockOptions);
 
         const request = httpServerMock.createKibanaRequest();
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+        mockOptions.license.getFeatures.mockReturnValue({
+          allowAccessAgreement: false,
+        } as SecurityLicenseFeatures);
+
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser)
         );
@@ -1416,6 +1434,9 @@ describe('Authenticator', () => {
       };
       mockSessionStorage.get.mockResolvedValue(mockSessionValue);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      mockOptions.license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
+      } as SecurityLicenseFeatures);
 
       authenticator = new Authenticator(mockOptions);
     });
@@ -1439,6 +1460,20 @@ describe('Authenticator', () => {
         authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Cannot acknowledge access agreement for unauthenticated user."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('fails if license doesn allow access agreement acknowledgement', async () => {
+      mockOptions.license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      await expect(
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Current license does not allow access agreement acknowledgement."`
       );
 
       expect(mockSessionStorage.set).not.toHaveBeenCalled();

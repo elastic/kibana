@@ -14,6 +14,7 @@ import {
   HttpServiceSetup,
   IClusterClient,
 } from '../../../../../src/core/server';
+import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { AuthenticationProvider, SessionInfo } from '../../common/types';
 import { SecurityAuditLogger } from '../audit';
@@ -96,6 +97,7 @@ export interface AuthenticatorOptions {
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'session' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
+  license: SecurityLicense;
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
@@ -490,6 +492,10 @@ export class Authenticator {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
 
+    if (!this.options.license.getFeatures().allowAccessAgreement) {
+      throw new Error('Current license does not allow access agreement acknowledgement.');
+    }
+
     sessionStorage.set({ ...existingSession, accessAgreementAcknowledged: true });
 
     this.options.auditLogger.accessAgreementAcknowledged(
@@ -682,7 +688,8 @@ export class Authenticator {
     //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
     //     session yet (based on the flag we store in the session)
     //  3. Request is authenticated by the provider that has `accessAgreement` configured
-    //  4. And it's not a request to the Access Agreement UI itself
+    //  4. Current license allows access agreement
+    //  5. And it's not a request to the Access Agreement UI itself
     return (
       canRedirectRequest(request) &&
       session != null &&
@@ -690,6 +697,7 @@ export class Authenticator {
       (this.options.config.authc.providers as Record<string, any>)[session.provider.type]?.[
         session.provider.name
       ]?.accessAgreement &&
+      this.options.license.getFeatures().allowAccessAgreement &&
       request.url.pathname !== ACCESS_AGREEMENT_ROUTE
     );
   }

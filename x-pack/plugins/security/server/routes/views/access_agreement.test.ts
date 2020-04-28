@@ -11,16 +11,14 @@ import {
   IRouter,
   HttpResources,
   HttpResourcesRequestHandler,
+  RequestHandlerContext,
 } from '../../../../../../src/core/server';
+import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { AuthenticationProvider } from '../../../common/types';
 import { ConfigType } from '../../config';
 import { defineAccessAgreementRoutes } from './access_agreement';
 
-import {
-  coreMock,
-  httpResourcesMock,
-  httpServerMock,
-} from '../../../../../../src/core/server/mocks';
+import { httpResourcesMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { Authentication } from '../../authentication';
 
@@ -29,12 +27,25 @@ describe('Access agreement view routes', () => {
   let router: jest.Mocked<IRouter>;
   let config: ConfigType;
   let authc: jest.Mocked<Authentication>;
+  let license: jest.Mocked<SecurityLicense>;
+  let mockContext: RequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
     httpResources = routeParamsMock.httpResources;
     authc = routeParamsMock.authc;
     config = routeParamsMock.config;
+    license = routeParamsMock.license;
+
+    license.getFeatures.mockReturnValue({
+      allowAccessAgreement: true,
+    } as SecurityLicenseFeatures);
+
+    mockContext = ({
+      licensing: {
+        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
+      },
+    } as unknown) as RequestHandlerContext;
 
     defineAccessAgreementRoutes(routeParamsMock);
   });
@@ -56,12 +67,25 @@ describe('Access agreement view routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
-    it('renders view.', async () => {
+    it('does not render view if current license does not allow access agreement.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      const contextMock = coreMock.createRequestHandlerContext();
       const responseFactory = httpResourcesMock.createResponseFactory();
 
-      await routeHandler({ core: contextMock } as any, request, responseFactory);
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      await routeHandler(mockContext, request, responseFactory);
+
+      expect(responseFactory.renderCoreApp).not.toHaveBeenCalledWith();
+      expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders view.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const responseFactory = httpResourcesMock.createResponseFactory();
+
+      await routeHandler(mockContext, request, responseFactory);
 
       expect(responseFactory.renderCoreApp).toHaveBeenCalledWith();
     });
@@ -84,15 +108,26 @@ describe('Access agreement view routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
+    it('returns `Not Found` if current license does not allow access agreement.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 404,
+        payload: 'Not Found',
+        options: {},
+      });
+    });
+
     it('returns empty `accessAgreement` if session info is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      const contextMock = coreMock.createRequestHandlerContext();
 
       authc.getSessionInfo.mockResolvedValue(null);
 
-      await expect(
-        routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
-      ).resolves.toEqual({
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
         options: { body: { accessAgreement: '' } },
         payload: { accessAgreement: '' },
         status: 200,
@@ -101,7 +136,6 @@ describe('Access agreement view routes', () => {
 
     it('returns non-empty `accessAgreement` only if it is configured.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      const contextMock = coreMock.createRequestHandlerContext();
 
       config.authc = routeDefinitionParamsMock.create({
         authc: {
@@ -132,9 +166,7 @@ describe('Access agreement view routes', () => {
           provider: sessionProvider,
         });
 
-        await expect(
-          routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
-        ).resolves.toEqual({
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
           options: { body: { accessAgreement: expectedAccessAgreement } },
           payload: { accessAgreement: expectedAccessAgreement },
           status: 200,

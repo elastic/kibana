@@ -90,6 +90,7 @@ export async function setupAuthentication({
     clusterClient,
     basePath: http.basePath,
     config: { session: config.session, authc: config.authc },
+    license,
     loggers,
     sessionStorageFactory: await http.createCookieSessionStorageFactory({
       encryptionKey: config.encryptionKey,
