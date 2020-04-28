@@ -35,6 +35,31 @@ type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
  */
 export type AlertAPIOrdering = 'asc' | 'desc';
 
+export interface ResolverNodeStats {
+  totalEvents: number;
+  totalAlerts: number;
+}
+
+export interface ResolverNodePagination {
+  nextChild?: string | null;
+  nextEvent?: string | null;
+  nextAncestor?: string | null;
+  nextAlert?: string | null;
+}
+
+/**
+ * A node that contains pointers to other nodes, arrrays of resolver events, and any metadata associated with resolver specific data
+ */
+export interface ResolverNode {
+  id: string;
+  children: ResolverNode[];
+  events: ResolverEvent[];
+  lifecycle: ResolverEvent[];
+  ancestors?: ResolverNode[];
+  pagination: ResolverNodePagination;
+  stats?: ResolverNodeStats;
+}
+
 /**
  * Returned by 'api/endpoint/alerts'
  */
