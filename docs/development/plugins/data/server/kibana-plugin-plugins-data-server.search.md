@@ -9,7 +9,6 @@
 ```typescript
 search: {
     aggs: {
-        dateHistogramInterval: typeof dateHistogramInterval;
         InvalidEsCalendarIntervalError: typeof InvalidEsCalendarIntervalError;
         InvalidEsIntervalFormatError: typeof InvalidEsIntervalFormatError;
         isValidEsInterval: typeof isValidEsInterval;
