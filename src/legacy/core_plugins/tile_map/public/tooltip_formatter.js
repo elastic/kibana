@@ -17,27 +17,29 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { CoreStart, Plugin } from 'kibana/public';
-// TODO: Determine why visualizations don't populate without this
-import 'angular-sanitize';
+import { i18n } from '@kbn/i18n';
 
-/** @internal */
-export interface LegacyDependenciesPluginSetup {
-  $injector: any;
-}
-
-export class LegacyDependenciesPlugin
-  implements Plugin<Promise<LegacyDependenciesPluginSetup>, void> {
-  public async setup() {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-
-    return {
-      $injector,
-    } as LegacyDependenciesPluginSetup;
+export function tooltipFormatter(metricTitle, metricFormat, feature) {
+  if (!feature) {
+    return '';
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
-  }
+  return [
+    {
+      label: metricTitle,
+      value: metricFormat(feature.properties.value),
+    },
+    {
+      label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
+        defaultMessage: 'Latitude',
+      }),
+      value: feature.geometry.coordinates[1],
+    },
+    {
+      label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', {
+        defaultMessage: 'Longitude',
+      }),
+      value: feature.geometry.coordinates[0],
+    },
+  ];
 }

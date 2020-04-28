@@ -25,28 +25,28 @@ import {
 } from '../../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
-
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
-
 // @ts-ignore
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import {
+  getBaseMapsVis,
+  IServiceSettings,
+  MapsLegacyPluginSetup,
+} from '../../../../plugins/maps_legacy/public';
 
 /** @private */
-interface RegionMapVisualizationDependencies extends LegacyDependenciesPluginSetup {
+interface RegionMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   regionmapsConfig: RegionMapsConfig;
   serviceSettings: IServiceSettings;
-  notificationService: any;
+  BaseMapsVisualization: any;
 }
 
 /** @internal */
 export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  __LEGACY: LegacyDependenciesPlugin;
   mapsLegacy: MapsLegacyPluginSetup;
 }
 
@@ -66,14 +66,13 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy, __LEGACY }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
   ) {
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
-      notificationService: core.notifications.toasts,
-      ...(await __LEGACY.setup()),
+      BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
     };
 
     expressions.registerFunction(createRegionMapFn);
