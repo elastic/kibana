@@ -4,17 +4,86 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { StepDefineFormContext } from '../step_define';
+import {
+  PivotAggDict,
+  PivotAggsConfigDict,
+  PivotGroupByDict,
+  PivotGroupByConfigDict,
+  PivotSupportedGroupByAggs,
+  PIVOT_SUPPORTED_AGGS,
+} from '../../../../common';
+
 import { SwitchModal } from '../switch_modal';
 
-export const AdvancedPivotEditorSwitch: FC = () => {
-  const { actions, state } = useContext(StepDefineFormContext);
+import { StepDefineFormHook } from '../step_define';
+
+export const AdvancedPivotEditorSwitch: FC<StepDefineFormHook> = ({
+  advancedPivotEditor: {
+    actions: {
+      convertToJson,
+      setAdvancedEditorConfigLastApplied,
+      setAdvancedEditorSwitchModalVisible,
+      setAdvancedPivotEditorApplyButtonEnabled,
+      toggleAdvancedEditor,
+    },
+    state: {
+      advancedEditorConfig,
+      advancedEditorConfigLastApplied,
+      isAdvancedEditorSwitchModalVisible,
+      isAdvancedPivotEditorEnabled,
+      isAdvancedPivotEditorApplyButtonEnabled,
+    },
+  },
+  pivotConfig: {
+    actions: { setAggList, setGroupByList },
+  },
+}) => {
+  const applyChangesHandler = () => {
+    const pivot = JSON.parse(convertToJson(advancedEditorConfig));
+
+    const newGroupByList: PivotGroupByConfigDict = {};
+    if (pivot !== undefined && pivot.group_by !== undefined) {
+      Object.entries(pivot.group_by).forEach(d => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotGroupByDict;
+        const aggConfigKeys = Object.keys(aggConfig);
+        const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
+        newGroupByList[aggName] = {
+          ...aggConfig[agg],
+          agg,
+          aggName,
+          dropDownName: '',
+        };
+      });
+    }
+    setGroupByList(newGroupByList);
+
+    const newAggList: PivotAggsConfigDict = {};
+    if (pivot !== undefined && pivot.aggregations !== undefined) {
+      Object.entries(pivot.aggregations).forEach(d => {
+        const aggName = d[0];
+        const aggConfig = d[1] as PivotAggDict;
+        const aggConfigKeys = Object.keys(aggConfig);
+        const agg = aggConfigKeys[0] as PIVOT_SUPPORTED_AGGS;
+        newAggList[aggName] = {
+          ...aggConfig[agg],
+          agg,
+          aggName,
+          dropDownName: '',
+        };
+      });
+    }
+    setAggList(newAggList);
+
+    setAdvancedEditorConfigLastApplied(advancedEditorConfig);
+    setAdvancedPivotEditorApplyButtonEnabled(false);
+  };
 
   return (
     <EuiFormRow>
@@ -24,38 +93,38 @@ export const AdvancedPivotEditorSwitch: FC = () => {
             label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorSwitchLabel', {
               defaultMessage: 'Advanced pivot editor',
             })}
-            checked={state.isAdvancedPivotEditorEnabled}
+            checked={isAdvancedPivotEditorEnabled}
             onChange={() => {
               if (
-                state.isAdvancedPivotEditorEnabled &&
-                (state.isAdvancedPivotEditorApplyButtonEnabled ||
-                  state.advancedEditorConfig !== state.advancedEditorConfigLastApplied)
+                isAdvancedPivotEditorEnabled &&
+                (isAdvancedPivotEditorApplyButtonEnabled ||
+                  advancedEditorConfig !== advancedEditorConfigLastApplied)
               ) {
-                actions.setAdvancedEditorSwitchModalVisible(true);
+                setAdvancedEditorSwitchModalVisible(true);
                 return;
               }
 
-              actions.toggleAdvancedEditor();
+              toggleAdvancedEditor();
             }}
             data-test-subj="transformAdvancedPivotEditorSwitch"
           />
-          {state.isAdvancedEditorSwitchModalVisible && (
+          {isAdvancedEditorSwitchModalVisible && (
             <SwitchModal
-              onCancel={() => actions.setAdvancedEditorSwitchModalVisible(false)}
+              onCancel={() => setAdvancedEditorSwitchModalVisible(false)}
               onConfirm={() => {
-                actions.setAdvancedEditorSwitchModalVisible(false);
-                actions.toggleAdvancedEditor();
+                setAdvancedEditorSwitchModalVisible(false);
+                toggleAdvancedEditor();
               }}
               type={'pivot'}
             />
           )}
         </EuiFlexItem>
-        {state.isAdvancedPivotEditorEnabled && (
+        {isAdvancedPivotEditorEnabled && (
           <EuiButton
             size="s"
             fill
-            onClick={actions.applyAdvancedPivotEditorChanges}
-            disabled={!state.isAdvancedPivotEditorApplyButtonEnabled}
+            onClick={applyChangesHandler}
+            disabled={!isAdvancedPivotEditorApplyButtonEnabled}
           >
             {i18n.translate('xpack.transform.stepDefineForm.advancedEditorApplyButtonText', {
               defaultMessage: 'Apply changes',

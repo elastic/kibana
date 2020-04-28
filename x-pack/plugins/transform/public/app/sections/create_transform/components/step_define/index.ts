@@ -5,10 +5,12 @@
  */
 
 export {
+  defaultSearch,
   applyTransformConfigToDefineState,
   getDefaultStepDefineState,
   StepDefineExposedState,
   QUERY_LANGUAGE_KUERY,
 } from './common';
-export { StepDefineForm, StepDefineFormContext } from './step_define_form';
+export { StepDefineFormHook } from './hooks/use_step_define_form';
+export { StepDefineForm } from './step_define_form';
 export { StepDefineSummary } from './step_define_summary';

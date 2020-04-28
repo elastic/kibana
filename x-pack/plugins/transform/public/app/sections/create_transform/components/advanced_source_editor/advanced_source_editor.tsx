@@ -4,18 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { FC } from 'react';
 
-import { EuiCodeEditor, EuiFormRow, EuiPanel } from '@elastic/eui';
+import { EuiCodeEditor, EuiFormRow, EuiLink, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { StepDefineFormContext } from '../step_define';
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
-export const AdvancedSourceEditor: FC<{ advancedSourceEditorHelpText: JSX.Element }> = ({
-  advancedSourceEditorHelpText,
+import { StepDefineFormHook } from '../step_define';
+
+export const AdvancedSourceEditor: FC<StepDefineFormHook> = ({
+  searchBar: {
+    actions: { setSearchString },
+  },
+  advancedSourceEditor: {
+    actions: { setAdvancedEditorSourceConfig, setAdvancedSourceEditorApplyButtonEnabled },
+    state: { advancedEditorSourceConfig, advancedEditorSourceConfigLastApplied },
+  },
 }) => {
-  const { actions, state } = useContext(StepDefineFormContext);
+  const { esQueryDsl } = useDocumentationLinks();
+
+  const advancedEditorHelpTextLinkText = i18n.translate(
+    'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
+    {
+      defaultMessage: 'Learn more about available options.',
+    }
+  );
+
+  const advancedSourceEditorHelpText = (
+    <>
+      {i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorHelpText', {
+        defaultMessage:
+          'The advanced editor allows you to edit the source query clause of the transform.',
+      })}{' '}
+      <EuiLink href={esQueryDsl} target="_blank">
+        {advancedEditorHelpTextLinkText}
+      </EuiLink>
+    </>
+  );
 
   return (
     <>
@@ -29,14 +56,14 @@ export const AdvancedSourceEditor: FC<{ advancedSourceEditorHelpText: JSX.Elemen
           <EuiCodeEditor
             mode="json"
             width="100%"
-            value={state.advancedEditorSourceConfig}
+            value={advancedEditorSourceConfig}
             onChange={(d: string) => {
-              actions.setSearchString(undefined);
-              actions.setAdvancedEditorSourceConfig(d);
+              setSearchString(undefined);
+              setAdvancedEditorSourceConfig(d);
 
               // Disable the "Apply"-Button if the config hasn't changed.
-              if (state.advancedEditorSourceConfigLastApplied === d) {
-                actions.setAdvancedSourceEditorApplyButtonEnabled(false);
+              if (advancedEditorSourceConfigLastApplied === d) {
+                setAdvancedSourceEditorApplyButtonEnabled(false);
                 return;
               }
 
@@ -44,9 +71,9 @@ export const AdvancedSourceEditor: FC<{ advancedSourceEditorHelpText: JSX.Elemen
               // If parsing fails, the "Apply"-Button will be disabled
               try {
                 JSON.parse(d);
-                actions.setAdvancedSourceEditorApplyButtonEnabled(true);
+                setAdvancedSourceEditorApplyButtonEnabled(true);
               } catch (e) {
-                actions.setAdvancedSourceEditorApplyButtonEnabled(false);
+                setAdvancedSourceEditorApplyButtonEnabled(false);
               }
             }}
             setOptions={{

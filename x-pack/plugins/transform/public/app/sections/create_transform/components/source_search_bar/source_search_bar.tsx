@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiCode, EuiFormRow, EuiInputPopover } from '@elastic/eui';
 
@@ -14,13 +14,17 @@ import { QueryStringInput } from '../../../../../../../../../src/plugins/data/pu
 
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineFormContext, QUERY_LANGUAGE_KUERY } from '../step_define';
+import { StepDefineFormHook, QUERY_LANGUAGE_KUERY } from '../step_define';
 
 interface SourceSearchBarProps {
   indexPattern: SearchItems['indexPattern'];
+  searchBar: StepDefineFormHook['searchBar'];
 }
-export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern }) => {
-  const { actions, state } = useContext(StepDefineFormContext);
+export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, searchBar }) => {
+  const {
+    actions: { searchChangeHandler, searchSubmitHandler, setErrorMessage },
+    state: { errorMessage, searchInput },
+  } = searchBar;
 
   return (
     <EuiFormRow
@@ -33,16 +37,16 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern }) => {
     >
       <EuiInputPopover
         style={{ maxWidth: '100%' }}
-        closePopover={() => actions.setErrorMessage(undefined)}
+        closePopover={() => setErrorMessage(undefined)}
         input={
           <QueryStringInput
             bubbleSubmitEvent={true}
-            query={state.searchInput}
+            query={searchInput}
             indexPatterns={[indexPattern]}
-            onChange={actions.searchChangeHandler}
-            onSubmit={actions.searchSubmitHandler}
+            onChange={searchChangeHandler}
+            onSubmit={searchSubmitHandler}
             placeholder={
-              state.searchInput.language === QUERY_LANGUAGE_KUERY
+              searchInput.language === QUERY_LANGUAGE_KUERY
                 ? i18n.translate('xpack.transform.stepDefineForm.queryPlaceholderKql', {
                     defaultMessage: 'e.g. {example}',
                     values: { example: 'method : "GET" or status : "404"' },
@@ -57,17 +61,14 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern }) => {
             languageSwitcherPopoverAnchorPosition="rightDown"
           />
         }
-        isOpen={
-          state.errorMessage?.query === state.searchInput.query &&
-          state.errorMessage?.message !== ''
-        }
+        isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}
       >
         <EuiCode>
           {i18n.translate('xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar', {
             defaultMessage: 'Invalid query',
           })}
           {': '}
-          {state.errorMessage?.message.split('\n')[0]}
+          {errorMessage?.message.split('\n')[0]}
         </EuiCode>
       </EuiInputPopover>
     </EuiFormRow>

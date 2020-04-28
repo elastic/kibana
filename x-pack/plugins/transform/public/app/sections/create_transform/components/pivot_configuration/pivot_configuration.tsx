@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, FC } from 'react';
+import { isEqual } from 'lodash';
+import React, { memo, FC } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 
@@ -13,58 +14,74 @@ import { i18n } from '@kbn/i18n';
 import { AggListForm } from '../aggregation_list';
 import { DropDown } from '../aggregation_dropdown';
 import { GroupByListForm } from '../group_by_list';
-import { StepDefineFormContext } from '../step_define';
+import { StepDefineFormHook } from '../step_define';
 
-export const PivotConfiguration: FC = () => {
-  const { actions, state } = useContext(StepDefineFormContext);
+export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
+  ({
+    actions: {
+      addAggregation,
+      addGroupBy,
+      deleteAggregation,
+      deleteGroupBy,
+      updateAggregation,
+      updateGroupBy,
+    },
+    state: { aggList, aggOptions, aggOptionsData, groupByList, groupByOptions, groupByOptionsData },
+  }) => {
+    return (
+      <>
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
+            defaultMessage: 'Group by',
+          })}
+        >
+          <>
+            <GroupByListForm
+              list={groupByList}
+              options={groupByOptionsData}
+              onChange={updateGroupBy}
+              deleteHandler={deleteGroupBy}
+            />
+            <DropDown
+              changeHandler={addGroupBy}
+              options={groupByOptions}
+              placeholder={i18n.translate('xpack.transform.stepDefineForm.groupByPlaceholder', {
+                defaultMessage: 'Add a group by field ...',
+              })}
+              testSubj="transformGroupBySelection"
+            />
+          </>
+        </EuiFormRow>
 
-  return (
-    <>
-      <EuiFormRow
-        label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
-          defaultMessage: 'Group by',
-        })}
-      >
-        <>
-          <GroupByListForm
-            list={state.groupByList}
-            options={state.groupByOptionsData}
-            onChange={actions.updateGroupBy}
-            deleteHandler={actions.deleteGroupBy}
-          />
-          <DropDown
-            changeHandler={actions.addGroupBy}
-            options={state.groupByOptions}
-            placeholder={i18n.translate('xpack.transform.stepDefineForm.groupByPlaceholder', {
-              defaultMessage: 'Add a group by field ...',
-            })}
-            testSubj="transformGroupBySelection"
-          />
-        </>
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
-          defaultMessage: 'Aggregations',
-        })}
-      >
-        <>
-          <AggListForm
-            list={state.aggList}
-            options={state.aggOptionsData}
-            onChange={actions.updateAggregation}
-            deleteHandler={actions.deleteAggregation}
-          />
-          <DropDown
-            changeHandler={actions.addAggregation}
-            options={state.aggOptions}
-            placeholder={i18n.translate('xpack.transform.stepDefineForm.aggregationsPlaceholder', {
-              defaultMessage: 'Add an aggregation ...',
-            })}
-            testSubj="transformAggregationSelection"
-          />
-        </>
-      </EuiFormRow>
-    </>
-  );
-};
+        <EuiFormRow
+          label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
+            defaultMessage: 'Aggregations',
+          })}
+        >
+          <>
+            <AggListForm
+              list={aggList}
+              options={aggOptionsData}
+              onChange={updateAggregation}
+              deleteHandler={deleteAggregation}
+            />
+            <DropDown
+              changeHandler={addAggregation}
+              options={aggOptions}
+              placeholder={i18n.translate(
+                'xpack.transform.stepDefineForm.aggregationsPlaceholder',
+                {
+                  defaultMessage: 'Add an aggregation ...',
+                }
+              )}
+              testSubj="transformAggregationSelection"
+            />
+          </>
+        </EuiFormRow>
+      </>
+    );
+  },
+  (prevProps, nextProps) => {
+    return isEqual(prevProps.state, nextProps.state);
+  }
+);
