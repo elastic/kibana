@@ -9,7 +9,7 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
-import { RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';

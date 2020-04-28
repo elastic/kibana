@@ -99,14 +99,6 @@ describe('The metric threshold alert type', () => {
       expect(action.thresholdOf.condition0).toStrictEqual([0.75]);
       expect(action.metricOf.condition0).toBe('test.metric.1');
     });
-    test('fetches the index pattern dynamically', async () => {
-      await execute(Comparator.LT, [17], 'alternate');
-      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-      await execute(Comparator.LT, [1.5], 'alternate');
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-    });
   });
 
   describe('querying with a groupBy parameter', () => {
