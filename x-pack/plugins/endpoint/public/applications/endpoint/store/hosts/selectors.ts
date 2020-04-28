@@ -5,7 +5,7 @@
  */
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
-import { Immutable } from '../../../../../common/types';
+import { Immutable, HostPolicyResponseActions } from '../../../../../common/types';
 import { HostState, HostIndexUIQueryParams } from '../../types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
@@ -74,7 +74,7 @@ const detailsPolicyResponse = () => {
               concerned_actions: ['download_model'],
             },
             eventing: {
-              status: 'failed',
+              status: 'failure',
               concerned_actions: ['ingest_events_config'],
             },
           },
@@ -99,9 +99,12 @@ export const policyResponseConfigurations = createSelector(detailsPolicyResponse
   return response.configurations;
 });
 
-export const policyResponseActions = createSelector(detailsPolicyResponse, response => {
-  return response.actions;
-});
+export const policyResponseActions: HostPolicyResponseActions = createSelector(
+  detailsPolicyResponse,
+  response => {
+    return response.actions;
+  }
+);
 
 export const isOnHostPage = (state: Immutable<HostState>) =>
   state.location ? state.location.pathname === '/hosts' : false;

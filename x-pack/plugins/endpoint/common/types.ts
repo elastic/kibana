@@ -621,7 +621,7 @@ interface HostPolicyResponseActionDetails {
 /**
  * A known list of possible Endpoint actions
  */
-interface HostPolicyResponseActions {
+export interface HostPolicyResponseActions {
   download_model: HostPolicyResponseActionDetails;
   ingest_events_config: HostPolicyResponseActionDetails;
   workflow: HostPolicyResponseActionDetails;
