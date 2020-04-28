@@ -88,6 +88,7 @@ export function createBundlesRoute({
       routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
+      replacePublicPath: false,
       isDist,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
@@ -96,6 +97,7 @@ export function createBundlesRoute({
         routePath: `/${buildHash}/bundles/plugin/${id}/`,
         bundlesPath: path,
         fileHashCache,
+        replacePublicPath: false,
         isDist,
       })
     ),
@@ -135,12 +137,14 @@ function buildRouteForBundles({
   routePath,
   bundlesPath,
   fileHashCache,
+  replacePublicPath = true,
   isDist,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: LruCache<unknown, unknown>;
+  replacePublicPath?: boolean;
   isDist: boolean;
 }) {
   return {
@@ -163,6 +167,7 @@ function buildRouteForBundles({
               bundlesPath,
               fileHashCache,
               publicPath,
+              replacePublicPath,
               isDist,
             });
           },

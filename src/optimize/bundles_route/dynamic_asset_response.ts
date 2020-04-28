@@ -31,8 +31,7 @@ import { getFileHash } from './file_hash';
 // @ts-ignore
 import { replacePlaceholder } from '../public_path_placeholder';
 
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
+const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
@@ -67,6 +66,7 @@ export async function createDynamicAssetResponse({
   bundlesPath,
   publicPath,
   fileHashCache,
+  replacePublicPath,
   isDist,
 }: {
   request: Hapi.Request;
@@ -74,6 +74,7 @@ export async function createDynamicAssetResponse({
   bundlesPath: string;
   publicPath: string;
   fileHashCache: LruCache<unknown, unknown>;
+  replacePublicPath: boolean;
   isDist: boolean;
 }) {
   let fd: number | undefined;
@@ -90,18 +91,20 @@ export async function createDynamicAssetResponse({
     // the file 2 or 3 times per request it seems logical
     fd = await fcb(cb => open(path, 'r', cb));
 
+    const stat = await fcb(cb => fstat(fd!, cb));
+    const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
+
     const read = createReadStream(null as any, {
       fd,
       start: 0,
       autoClose: true,
     });
-
-    const stat = await fcb(cb => fstat(fd!, cb));
-    const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
     fd = undefined; // read stream is now responsible for fd
 
+    const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
+
     const response = h
-      .response(replacePlaceholder(read, publicPath))
+      .response(content)
       .takeover()
       .code(200)
       .type(request.server.mime.path(path).type);
@@ -118,7 +121,7 @@ export async function createDynamicAssetResponse({
     if (fd) {
       try {
         await fcb(cb => close(fd!, cb));
-      } catch (err) {
+      } catch (_) {
         // ignore errors from close, we already have one to report
         // and it's very likely they are the same
       }
