@@ -116,14 +116,14 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
 
     _tmsConfigured() {
       const { wms } = this._getMapsParams();
-      const hasTmsBaseLayer = !!wms.selectedTmsLayer;
+      const hasTmsBaseLayer = wms && !!wms.selectedTmsLayer;
 
       return hasTmsBaseLayer;
     }
 
     _wmsConfigured() {
       const { wms } = this._getMapsParams();
-      const hasWmsBaseLayer = !!wms.enabled;
+      const hasWmsBaseLayer = wms && !!wms.enabled;
 
       return hasWmsBaseLayer;
     }

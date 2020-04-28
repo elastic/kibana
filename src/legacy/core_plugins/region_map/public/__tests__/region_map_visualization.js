@@ -136,7 +136,9 @@ describe('RegionMapsVisualizationTests', function() {
         notifications: {
           toasts: {},
         },
-        uiSettings: {},
+        uiSettings: {
+          get: () => {},
+        },
         injectedMetadata: {
           getInjectedVar: () => {},
         },
