@@ -12,6 +12,7 @@ import { AlphaFlyout } from './alpha_flyout';
 const Message = styled(EuiText).attrs(props => ({
   color: 'subdued',
   textAlign: 'center',
+  size: 's',
 }))`
   padding: ${props => props.theme.eui.paddingSizes.m};
 `;
@@ -23,23 +24,21 @@ export const AlphaMessaging: React.FC<{}> = () => {
     <>
       <Message>
         <p>
-          <small>
-            <strong>
-              <FormattedMessage
-                id="xpack.ingestManager.alphaMessageTitle"
-                defaultMessage="Alpha release"
-              />
-            </strong>
-            {' – '}
+          <strong>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessageDescription"
-              defaultMessage="Ingest Manager is under active development and is not
+              id="xpack.ingestManager.alphaMessageTitle"
+              defaultMessage="Alpha release"
+            />
+          </strong>
+          {' – '}
+          <FormattedMessage
+            id="xpack.ingestManager.alphaMessageDescription"
+            defaultMessage="Ingest Manager is under active development and is not
           intended for production purposes."
-            />{' '}
-            <EuiLink color="subdued" onClick={() => setIsAlphaFlyoutOpen(true)}>
-              View more details.
-            </EuiLink>
-          </small>
+          />{' '}
+          <EuiLink color="subdued" onClick={() => setIsAlphaFlyoutOpen(true)}>
+            View more details.
+          </EuiLink>
         </p>
       </Message>
       {isAlphaFlyoutOpen && <AlphaFlyout onClose={() => setIsAlphaFlyoutOpen(false)} />}
