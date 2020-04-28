@@ -222,6 +222,7 @@ export default function({ getService }: FtrProviderContext) {
         kibana: {
           saved_objects: [
             {
+              rel: 'primary',
               namespace: 'default',
               type: 'event_log_test',
               id,

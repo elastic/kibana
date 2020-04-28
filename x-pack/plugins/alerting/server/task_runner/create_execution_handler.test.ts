@@ -95,6 +95,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
+                "rel": "primary",
                 "type": "alert",
               },
               Object {

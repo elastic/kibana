@@ -24,6 +24,11 @@ exports.EcsKibanaExtensionsMappings = {
     saved_objects: {
       type: 'nested',
       properties: {
+        // relation; currently only supports "primary" or not set
+        rel: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
         // relevant kibana space
         namespace: {
           type: 'keyword',
@@ -58,6 +63,7 @@ exports.EcsEventLogProperties = [
   'user.name',
   'kibana.server_uuid',
   'kibana.alerting.instance_id',
+  'kibana.saved_objects.rel',
   'kibana.saved_objects.namespace',
   'kibana.saved_objects.id',
   'kibana.saved_objects.name',

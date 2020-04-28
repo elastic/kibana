@@ -238,6 +238,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -321,6 +328,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -388,6 +402,13 @@ describe('queryEventsBySavedObject', () => {
                   query: {
                     bool: {
                       must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
                         {
                           term: {
                             'kibana.saved_objects.type': {

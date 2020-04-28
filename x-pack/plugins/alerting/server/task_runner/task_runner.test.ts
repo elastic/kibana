@@ -172,6 +172,7 @@ describe('Task Runner', () => {
             Object {
               "id": "1",
               "namespace": undefined,
+              "rel": "primary",
               "type": "alert",
             },
           ],
@@ -234,6 +235,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -254,6 +256,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -274,6 +277,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
                 Object {
@@ -351,6 +355,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -371,6 +376,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -568,6 +574,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
