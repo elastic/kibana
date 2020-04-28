@@ -37,7 +37,10 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       try {
         const { type, sourceId } = request.params;
 
-        const source = await libs.sources.getSourceConfiguration(requestContext, sourceId);
+        const source = await libs.sources.getSourceConfiguration(
+          requestContext.core.savedObjects.client,
+          sourceId
+        );
         if (!source) {
           return response.notFound();
         }

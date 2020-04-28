@@ -217,6 +217,9 @@ module.exports = {
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
                   '!(x-pack/)?test/**/*',
+                  // next folder contains legacy browser tests which can't be migrated to jest
+                  // which import np files
+                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -562,7 +565,7 @@ module.exports = {
      */
     {
       // front end typescript and javascript files only
-      files: ['x-pack/legacy/plugins/siem/public/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/siem/public/**/*.{js,ts,tsx}'],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
@@ -611,7 +614,7 @@ module.exports = {
     // {
     //   // will introduced after the other warns are fixed
     //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/legacy/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
+    //   files: ['x-pack/plugins/siem/public/**/!(*.test).{js,ts,tsx}'],
     //   plugins: ['react-perf'],
     //   rules: {
     //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
@@ -736,6 +739,19 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
+      },
+    },
+
+    /**
+     * Alerting Services overrides
+     */
+    {
+      // typescript only for front and back end
+      files: [
+        'x-pack/{,legacy/}plugins/{alerting,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'error',
       },
     },
 
