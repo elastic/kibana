@@ -29,7 +29,7 @@ it('handles undefined plugin exports', () => {
 
   expect(() => {
     read('foo');
-  }).toThrowError(`Definition of plugin "foo" should be a function.`);
+  }).toThrowError(`Definition of plugin "foo" not found and may have failed to load.`);
 });
 
 it('handles plugin exports with a "plugin" export that is not a function', () => {

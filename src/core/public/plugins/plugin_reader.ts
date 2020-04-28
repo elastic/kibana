@@ -42,7 +42,9 @@ export function read(name: string) {
   const coreWindow = (window as unknown) as CoreWindow;
   const exportId = `plugin/${name}`;
   const pluginExport = coreWindow.__kbnBundles__[exportId];
-  if (typeof pluginExport?.plugin !== 'function') {
+  if (!pluginExport) {
+    throw new Error(`Definition of plugin "${name}" not found and may have failed to load.`);
+  } else if (typeof pluginExport.plugin !== 'function') {
     throw new Error(`Definition of plugin "${name}" should be a function.`);
   } else {
     return pluginExport.plugin;
