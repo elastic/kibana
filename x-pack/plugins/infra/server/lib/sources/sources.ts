@@ -123,11 +123,11 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
-    await requestContext.core.savedObjects.client.delete(
-      infraSourceConfigurationSavedObjectType,
-      sourceId
-    );
+  public async deleteSourceConfiguration(
+    savedObjectsClient: SavedObjectsClientContract,
+    sourceId: string
+  ) {
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectType, sourceId);
   }
 
   public async updateSourceConfiguration(
