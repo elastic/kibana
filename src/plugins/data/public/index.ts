@@ -322,7 +322,7 @@ export { ParsedInterval } from '../common';
 
 export {
   // aggs
-  IAggGroupNames,
+  AggGroupName,
   AggGroupNames,
   AggParam,
   AggParamOption,
