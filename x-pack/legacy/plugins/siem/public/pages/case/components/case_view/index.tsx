@@ -73,10 +73,9 @@ export const CaseComponent = React.memo<CaseProps>(
     const {
       caseUserActions,
       fetchCaseUserActions,
-      firstIndexPushToService,
+      caseServices,
       hasDataToPush,
       isLoading: isLoadingUserActions,
-      lastIndexPushToService,
       participants,
     } = useGetCaseUserActions(caseId, caseData.connectorId);
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
@@ -168,7 +167,7 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       caseConnectorId: caseData.connectorId,
       caseConnectorName,
-      caseUserActions,
+      caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,
       connectors,
@@ -278,10 +277,9 @@ export const CaseComponent = React.memo<CaseProps>(
                       connectors={connectors}
                       data={caseData}
                       fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                      firstIndexPushToService={firstIndexPushToService}
+                      caseServices={caseServices}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
-                      lastIndexPushToService={lastIndexPushToService}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}

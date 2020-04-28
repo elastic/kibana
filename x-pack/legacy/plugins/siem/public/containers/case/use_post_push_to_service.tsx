@@ -15,6 +15,7 @@ import { errorToToaster, useStateToaster, displaySuccessToast } from '../../comp
 import { getCase, pushToService, pushCase } from './api';
 import * as i18n from './translations';
 import { Case, CaseExternalService, CaseUserActions } from './types';
+import { CaseServices } from './use_get_case_user_actions';
 
 interface PushToServiceState {
   serviceData: ServiceConnectorCaseResponse | null;
@@ -65,12 +66,18 @@ interface PushToServiceRequest {
   caseId: string;
   connectorId: string;
   connectorName: string;
-  externalServiceHistory: CaseExternalService[];
+  caseServices: CaseServices;
   updateCase: (newCase: Case) => void;
 }
 
 export interface UsePostPushToService extends PushToServiceState {
-  postPushToService: ({ caseId, connectorId, updateCase }: PushToServiceRequest) => void;
+  postPushToService: ({
+    caseId,
+    caseServices,
+    connectorId,
+    connectorName,
+    updateCase,
+  }: PushToServiceRequest) => void;
 }
 
 export const usePostPushToService = (): UsePostPushToService => {
@@ -85,7 +92,7 @@ export const usePostPushToService = (): UsePostPushToService => {
   const postPushToService = useCallback(
     async ({
       caseId,
-      externalServiceHistory,
+      caseServices,
       connectorId,
       connectorName,
       updateCase,
@@ -95,15 +102,9 @@ export const usePostPushToService = (): UsePostPushToService => {
       try {
         dispatch({ type: 'FETCH_INIT' });
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
-        console.log('casePushData', casePushData);
-        console.log('connectorId', connectorId);
-        console.log(
-          'formatServiceRequestData',
-          formatServiceRequestData(casePushData, connectorId, externalServiceHistory)
-        );
         const responseService = await pushToService(
           connectorId,
-          formatServiceRequestData(casePushData, connectorId, externalServiceHistory),
+          formatServiceRequestData(casePushData, connectorId, caseServices),
           abortCtrl.signal
         );
         const responseCase = await pushCase(
@@ -147,7 +148,7 @@ export const usePostPushToService = (): UsePostPushToService => {
 export const formatServiceRequestData = (
   myCase: Case,
   connectorId: string,
-  externalServiceHistory: CaseExternalService[]
+  caseServices: CaseServices
 ): ServiceConnectorCaseParams => {
   const {
     id: caseId,
@@ -164,13 +165,13 @@ export const formatServiceRequestData = (
   if (
     externalService != null &&
     externalService.connectorId !== connectorId &&
-    externalServiceHistory.length > 0
+    caseServices[connectorId]
   ) {
-    actualExternalService = externalServiceHistory.slice(-1)[0];
+    actualExternalService = caseServices[connectorId];
   } else if (
     externalService != null &&
     externalService.connectorId !== connectorId &&
-    externalServiceHistory.length === 0
+    !caseServices[connectorId]
   ) {
     actualExternalService = null;
   }

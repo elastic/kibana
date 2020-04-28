@@ -19,17 +19,18 @@ import { getLabelTitle } from './helpers';
 import { UserActionItem } from './user_action_item';
 import { UserActionMarkdown } from './user_action_markdown';
 import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
+import { CaseServices } from '../../../../containers/case/use_get_case_user_actions';
+import { parseString } from '../../../../containers/case/utils';
 
 export interface UserActionTreeProps {
   data: Case;
   caseConnectorName: string;
+  caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
   connectors: Connector[];
   fetchUserActions: () => void;
-  firstIndexPushToService: number;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
-  lastIndexPushToService: number;
   onUpdateField: (updateKey: keyof Case, updateValue: string | string[]) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -46,13 +47,12 @@ export const UserActionTree = React.memo(
   ({
     data: caseData,
     caseConnectorName,
+    caseServices,
     caseUserActions,
     connectors,
     fetchUserActions,
-    firstIndexPushToService,
     isLoadingDescription,
     isLoadingUserActions,
-    lastIndexPushToService,
     onUpdateField,
     updateCase,
     userCanCrud,
@@ -228,17 +228,29 @@ export const UserActionTree = React.memo(
           }
           if (action.actionField.length === 1) {
             const myField = action.actionField[0];
+            const parsedValue = parseString(`${action.newValue}`);
+            const { firstPush, parsedConnectorId, parsedConnectorName } =
+              parsedValue != null
+                ? {
+                    firstPush: caseServices[parsedValue.connector_id].firstPushIndex === index,
+                    parsedConnectorId: parsedValue.connector_id,
+                    parsedConnectorName: parsedValue.connector_name,
+                  }
+                : {
+                    firstPush: false,
+                    parsedConnectorId: 'none',
+                    parsedConnectorName: 'none',
+                  };
             const labelTitle: string | JSX.Element = getLabelTitle({
               action,
               field: myField,
-              firstIndexPushToService,
-              index,
+              firstPush,
               connectors,
             });
             return (
               <UserActionItem
                 key={action.actionId}
-                caseConnectorName={caseConnectorName}
+                caseConnectorName={parsedConnectorName}
                 createdAt={action.actionAt}
                 data-test-subj={`${action.actionField[0]}-${action.action}-action`}
                 disabled={!userCanCrud}
@@ -252,11 +264,12 @@ export const UserActionTree = React.memo(
                 fullName={action.actionBy.fullName ?? action.actionBy.username ?? ''}
                 outlineComment={handleOutlineComment}
                 showTopFooter={
-                  action.action === 'push-to-service' && index === lastIndexPushToService
+                  action.action === 'push-to-service' &&
+                  index === caseServices[parsedConnectorId].lastPushIndex
                 }
                 showBottomFooter={
                   action.action === 'push-to-service' &&
-                  index === lastIndexPushToService &&
+                  index === caseServices[parsedConnectorId].lastPushIndex &&
                   index < caseUserActions.length - 1
                 }
                 username={action.actionBy.username ?? ''}

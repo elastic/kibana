@@ -8,7 +8,7 @@ import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
-import { Case, CaseExternalService, CaseUserActions } from '../../../../containers/case/types';
+import { Case } from '../../../../containers/case/types';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
 import { getConfigureCasesUrl } from '../../../../components/link_to';
@@ -18,14 +18,14 @@ import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
 import { Connector } from '../../../../../../../../plugins/case/common/api/cases';
-import { parseString } from '../../../../containers/case/utils';
+import { CaseServices } from '../../../../containers/case/use_get_case_user_actions';
 
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
   caseConnectorId: string;
   caseConnectorName: string;
-  caseUserActions: CaseUserActions[];
+  caseServices: CaseServices;
   connectors: Connector[];
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
@@ -40,9 +40,9 @@ export const usePushToService = ({
   caseConnectorId,
   caseConnectorName,
   caseId,
+  caseServices,
   caseStatus,
   connectors,
-  caseUserActions,
   updateCase,
   userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
@@ -52,41 +52,17 @@ export const usePushToService = ({
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const externalServiceHistory = useMemo<CaseExternalService[]>(
-    () =>
-      caseUserActions.reduce((acc, cua) => {
-        const possibleExternalService = parseString(`${cua.newValue}`);
-        return cua.action === 'push-to-service' &&
-          possibleExternalService != null &&
-          possibleExternalService.connectorId === caseConnectorId
-          ? [...acc, possibleExternalService]
-          : acc;
-      }, [] as CaseExternalService[]),
-    [caseUserActions]
-  );
-
-  const externalServiceHasHistory = useMemo(() => externalServiceHistory.length === 0, [
-    externalServiceHistory.length,
-  ]);
-
   const handlePushToService = useCallback(() => {
     if (caseConnectorId != null && caseConnectorId !== 'none') {
       postPushToService({
         caseId,
-        externalServiceHistory,
+        caseServices,
         connectorId: caseConnectorId,
         connectorName: caseConnectorName,
         updateCase,
       });
     }
-  }, [
-    caseId,
-    externalServiceHistory,
-    caseConnectorId,
-    caseConnectorName,
-    postPushToService,
-    updateCase,
-  ]);
+  }, [caseId, caseServices, caseConnectorId, caseConnectorName, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
@@ -157,9 +133,9 @@ export const usePushToService = ({
         disabled={isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud}
         isLoading={isLoading}
       >
-        {externalServiceHasHistory
-          ? i18n.PUSH_THIRD(caseConnectorName)
-          : i18n.UPDATE_THIRD(caseConnectorName)}
+        {caseServices[caseConnectorId]
+          ? i18n.UPDATE_THIRD(caseConnectorName)
+          : i18n.PUSH_THIRD(caseConnectorName)}
       </EuiButton>
     );
   }, [
@@ -169,7 +145,6 @@ export const usePushToService = ({
     errorsMsg,
     handlePushToService,
     isLoading,
-    externalServiceHasHistory,
     loadingLicense,
     userCanCrud,
   ]);
