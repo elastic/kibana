@@ -26,5 +26,5 @@ const isLeftClickEvent: THandleEvent = event => event.button === 0;
 
 const isTargetBlank: THandleEvent = event => {
   const target = event.target.getAttribute('target');
-  return target && target !== '_self';
+  return !!target && target !== '_self';
 };
