@@ -87,15 +87,16 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   defaultMessage="Ingest Manager"
                 />
                 <AlphaBadge
+                  iconType="beaker"
                   label={i18n.translate('xpack.IngestManager.alphaBadge.labelText', {
-                    defaultMessage: 'Alpha',
+                    defaultMessage: 'Experimental',
                   })}
                   title={i18n.translate('xpack.IngestManager.alphaBadge.titleText', {
-                    defaultMessage: 'Alpha release',
+                    defaultMessage: 'Experimental',
                   })}
-                  tooltipContent={i18n.translate('xpack.IngestManager.alphaBadge.titleText', {
+                  tooltipContent={i18n.translate('xpack.IngestManager.alphaBadge.tooltipText', {
                     defaultMessage:
-                      'Ingest Manager is under active development and is not intended for production purposes.',
+                      'This plugin might change or be removed in a future release and is not subject to the support SLA',
                   })}
                 />
               </h1>

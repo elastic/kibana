@@ -27,7 +27,7 @@ export const AlphaMessaging: React.FC<{}> = () => {
           <strong>
             <FormattedMessage
               id="xpack.ingestManager.alphaMessageTitle"
-              defaultMessage="Alpha release"
+              defaultMessage="Experimental"
             />
           </strong>
           {' – '}
