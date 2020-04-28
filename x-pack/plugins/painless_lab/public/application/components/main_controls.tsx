@@ -122,7 +122,7 @@ export function MainControls({
                 closePopover={() => setIsHelpOpen(false)}
                 panelPaddingSize="none"
                 withTitle
-                anchorPosition="upRight"
+                anchorPosition="upLeft"
               >
                 <EuiContextMenuPanel items={items} />
               </EuiPopover>
