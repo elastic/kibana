@@ -34,13 +34,7 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   search: jest.fn(),
   searchSource: searchSourceMock,
   __LEGACY: {
-    AggConfig: jest.fn() as any,
-    AggType: jest.fn(),
     aggTypeFieldFilters: new AggTypeFieldFilters(),
-    FieldParamType: jest.fn(),
-    MetricAggType: jest.fn(),
-    parentPipelineAggHelper: jest.fn() as any,
-    siblingPipelineAggHelper: jest.fn() as any,
     esClient: {
       search: jest.fn(),
       msearch: jest.fn(),

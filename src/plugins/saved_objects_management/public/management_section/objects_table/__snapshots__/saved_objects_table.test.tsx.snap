@@ -260,10 +260,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   search={
     Object {
       "__LEGACY": Object {
-        "AggConfig": [MockFunction],
-        "AggType": [MockFunction],
-        "FieldParamType": [MockFunction],
-        "MetricAggType": [MockFunction],
         "aggTypeFieldFilters": AggTypeFieldFilters {
           "filters": Set {},
         },
@@ -271,8 +267,6 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
           "msearch": [MockFunction],
           "search": [MockFunction],
         },
-        "parentPipelineAggHelper": [MockFunction],
-        "siblingPipelineAggHelper": [MockFunction],
       },
       "aggs": Object {
         "calculateAutoTimeExpression": [Function],

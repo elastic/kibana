@@ -19,20 +19,14 @@
 
 import { IndexPattern } from '../../index_patterns';
 import {
-  AggConfig,
   AggConfigSerialized,
   AggConfigs,
   AggParamsTerms,
-  AggType,
   aggTypeFieldFilters,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
-  FieldParamType,
   getCalculateAutoTimeExpression,
-  MetricAggType,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -53,13 +47,7 @@ export interface SearchAggsSetup {
 
 /** @internal */
 export interface SearchAggsStartLegacy {
-  AggConfig: typeof AggConfig;
-  AggType: typeof AggType;
   aggTypeFieldFilters: typeof aggTypeFieldFilters;
-  FieldParamType: typeof FieldParamType;
-  MetricAggType: typeof MetricAggType;
-  parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
 /** @internal */
