@@ -128,7 +128,7 @@ export function createKbnUrlTracker({
   let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
-    navLinkUpdater$.next(() => ({ defaultPath: baseUrl + hash }));
+    navLinkUpdater$.next(() => ({ defaultPath: hash }));
   }
 
   function getActiveSubUrl(url: string) {

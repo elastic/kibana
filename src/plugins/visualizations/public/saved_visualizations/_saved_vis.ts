@@ -155,7 +155,7 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
       });
       this.showInRecentlyAccessed = true;
       this.getFullPath = () => {
-        return `/app/visualize#/edit/${this.id}`;
+        return `/app/visualize/#/edit/${this.id}`;
       };
     }
   }
