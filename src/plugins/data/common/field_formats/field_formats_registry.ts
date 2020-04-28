@@ -110,7 +110,7 @@ export class FieldFormatsRegistry {
    */
   getDefaultType = (
     fieldType: KBN_FIELD_TYPES,
-    esTypes: ES_FIELD_TYPES[]
+    esTypes?: ES_FIELD_TYPES[]
   ): FieldFormatInstanceType | undefined => {
     const config = this.getDefaultConfig(fieldType, esTypes);
 
