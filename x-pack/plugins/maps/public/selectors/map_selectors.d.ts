@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction } from 'redux';
 import { MapCenter } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
 import { IVectorLayer } from '../layers/vector_layer';
+import { ILayer } from '../layers/layer';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 
@@ -23,3 +23,6 @@ export function getMapSettings(state: MapStoreState): MapSettings;
 export function hasMapSettingsChanges(state: MapStoreState): boolean;
 
 export function getSpatialFiltersLayer(state: MapStoreState): IVectorLayer;
+
+export function getLayerList(state: MapStoreState): ILayer[];
+export function getFittableLayers(state: MapStoreState): ILayer[];

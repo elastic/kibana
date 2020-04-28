@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
+import { FitToData } from './fit_to_data';
 
 export class ToolbarOverlay extends React.Component {
   _renderToolsControl() {
@@ -37,6 +38,10 @@ export class ToolbarOverlay extends React.Component {
         </EuiFlexItem>
 
         {this._renderToolsControl()}
+
+        <EuiFlexItem>
+          <FitToData />
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
