@@ -147,8 +147,10 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       // If license doesn't allow access agreement we shouldn't handle request.
       if (!license.getFeatures().allowAccessAgreement) {
-        logger.warn(`Attempted to acknowledge access agreement when license doesn allow it.`);
-        return response.notFound();
+        logger.warn(`Attempted to acknowledge access agreement when license doesn't allow it.`);
+        return response.forbidden({
+          body: { message: `Current license doesn't support access agreement.` },
+        });
       }
 
       try {

@@ -78,7 +78,7 @@ describe('Access agreement view routes', () => {
       await routeHandler(mockContext, request, responseFactory);
 
       expect(responseFactory.renderCoreApp).not.toHaveBeenCalledWith();
-      expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
+      expect(responseFactory.forbidden).toHaveBeenCalledTimes(1);
     });
 
     it('renders view.', async () => {
@@ -108,7 +108,7 @@ describe('Access agreement view routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
-    it('returns `Not Found` if current license does not allow access agreement.', async () => {
+    it('returns `403` if current license does not allow access agreement.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       license.getFeatures.mockReturnValue({
@@ -116,9 +116,9 @@ describe('Access agreement view routes', () => {
       } as SecurityLicenseFeatures);
 
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 404,
-        payload: 'Not Found',
-        options: {},
+        status: 403,
+        payload: { message: `Current license doesn't support access agreement.` },
+        options: { body: { message: `Current license doesn't support access agreement.` } },
       });
     });
 

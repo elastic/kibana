@@ -458,16 +458,16 @@ describe('Common authentication routes', () => {
       expect(routeConfig.validate).toBe(false);
     });
 
-    it('returns 404 if current license doesnt allow access agreement acknowledgement.', async () => {
+    it(`returns 403 if current license doesn't allow access agreement acknowledgement.`, async () => {
       license.getFeatures.mockReturnValue({
         allowAccessAgreement: false,
       } as SecurityLicenseFeatures);
 
       const request = httpServerMock.createKibanaRequest();
       await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
-        status: 404,
-        payload: 'Not Found',
-        options: {},
+        status: 403,
+        payload: { message: `Current license doesn't support access agreement.` },
+        options: { body: { message: `Current license doesn't support access agreement.` } },
       });
     });
 

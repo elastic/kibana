@@ -25,7 +25,11 @@ export function defineAccessAgreementRoutes({
   httpResources.register(
     { path: '/security/access_agreement', validate: false },
     createLicensedRouteHandler(async (context, request, response) =>
-      canHandleRequest() ? response.renderCoreApp() : response.notFound()
+      canHandleRequest()
+        ? response.renderCoreApp()
+        : response.forbidden({
+            body: { message: `Current license doesn't support access agreement.` },
+          })
     )
   );
 
@@ -33,7 +37,9 @@ export function defineAccessAgreementRoutes({
     { path: '/internal/security/access_agreement/state', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       if (!canHandleRequest()) {
-        return response.notFound();
+        return response.forbidden({
+          body: { message: `Current license doesn't support access agreement.` },
+        });
       }
 
       // It's not guaranteed that we'll have session for the authenticated user (e.g. when user is
