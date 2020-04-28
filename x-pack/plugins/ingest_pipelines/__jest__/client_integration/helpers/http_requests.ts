@@ -21,6 +21,17 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setLoadPipelineResponse = (response?: {}, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? error.body : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/:name`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
   const setDeletePipelineResponse = (response?: object) => {
     server.respondWith('DELETE', API_BASE_PATH, [
       200,
@@ -42,6 +53,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   return {
     setLoadPipelinesResponse,
+    setLoadPipelineResponse,
     setDeletePipelineResponse,
     setCreatePipelineResponse,
   };
