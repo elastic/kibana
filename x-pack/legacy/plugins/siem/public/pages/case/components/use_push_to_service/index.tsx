@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import { Case } from '../../../../containers/case/types';
@@ -27,11 +27,6 @@ export interface UsePushToService {
   userCanCrud: boolean;
 }
 
-interface Connector {
-  connectorId: string;
-  connectorName: string;
-}
-
 export interface ReturnUsePushToService {
   pushButton: JSX.Element;
   pushCallouts: JSX.Element | null;
@@ -45,40 +40,30 @@ export const usePushToService = ({
   userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
   const urlSearch = useGetUrlSearch(navTabs.case);
-  const [connector, setConnector] = useState<Connector | null>(null);
 
   const { isLoading, postPushToService } = usePostPushToService();
 
-  const handleSetConnector = useCallback((connectorId: string, connectorName?: string) => {
-    setConnector({ connectorId, connectorName: connectorName ?? '' });
-  }, []);
-
-  const { loading: loadingCaseConfigure } = useCaseConfigure({
-    setConnector: handleSetConnector,
-  });
+  const { connectorId, connectorName, loading: loadingCaseConfigure } = useCaseConfigure();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
   const handlePushToService = useCallback(() => {
-    if (connector != null) {
+    if (connectorId != null) {
       postPushToService({
         caseId,
-        ...connector,
+        connectorId,
+        connectorName,
         updateCase,
       });
     }
-  }, [caseId, connector, postPushToService, updateCase]);
+  }, [caseId, connectorId, connectorName, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
-    if (
-      (connector == null || (connector != null && connector.connectorId === 'none')) &&
-      !loadingCaseConfigure &&
-      !loadingLicense
-    ) {
+    if (connectorId === 'none' && !loadingCaseConfigure && !loadingLicense) {
       errors = [
         ...errors,
         {
@@ -117,7 +102,7 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
-  }, [actionLicense, caseStatus, connector, loadingCaseConfigure, loadingLicense, urlSearch]);
+  }, [actionLicense, caseStatus, connectorId, loadingCaseConfigure, loadingLicense, urlSearch]);
 
   const pushToServiceButton = useMemo(
     () => (
