@@ -29,9 +29,21 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setCreatePipelineResponse = (response?: object, error?: any) => {
+    const status = error ? error.status || 400 : 200;
+    const body = error ? JSON.stringify(error.body) : JSON.stringify(response);
+
+    server.respondWith('POST', API_BASE_PATH, [
+      status,
+      { 'Content-Type': 'application/json' },
+      body,
+    ]);
+  };
+
   return {
     setLoadPipelinesResponse,
     setDeletePipelineResponse,
+    setCreatePipelineResponse,
   };
 };
 

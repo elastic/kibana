@@ -66,8 +66,8 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
         <EuiTitle size="l">
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
-                <h1 data-test-subj="pageTitle">
+              <EuiTitle size="l" data-test-subj="pageTitle">
+                <h1>
                   <FormattedMessage
                     id="xpack.ingestPipelines.create.pageTitle"
                     defaultMessage="Create pipeline"
@@ -83,6 +83,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
                 href={services.documentation.getPutPipelineApiUrl()}
                 target="_blank"
                 iconType="help"
+                data-test-subj="documentationLink"
               >
                 <FormattedMessage
                   id="xpack.ingestPipelines.create.docsButtonLabel"
