@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
-  EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -50,7 +49,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
       return;
     }
 
-    history.push(BASE_PATH);
+    history.push(BASE_PATH + `?pipeline=${pipeline.name}`);
   };
 
   const onCancel = () => {
@@ -93,8 +92,6 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
-
-        <EuiSpacer size="l" />
 
         <PipelineForm
           defaultValue={sourcePipeline}

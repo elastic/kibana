@@ -8,6 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Location } from 'history';
+import { parse } from 'query-string';
 
 import {
   EuiPageBody,
@@ -28,14 +30,28 @@ import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
-import { PipelineDetails } from './details';
+import { PipelineDetailsFlyout } from './details_flyout';
+import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
 
-export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
+const getPipelineNameFromLocation = (location: Location) => {
+  const { pipeline } = parse(location.search.substring(1));
+  return pipeline;
+};
+
+export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
+  history,
+  location,
+}) => {
   const { services } = useKibana();
+  const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
   const [selectedPipeline, setSelectedPipeline] = useState<Pipeline | undefined>(undefined);
+  const [showFlyout, setShowFlyout] = useState<boolean>(false);
+
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
+
+  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
 
   // Track component loaded
   useEffect(() => {
@@ -43,17 +59,28 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     services.breadcrumbs.setBreadcrumbs('home');
   }, [services.metric, services.breadcrumbs]);
 
-  const { data, isLoading, error, sendRequest } = services.api.useLoadPipelines();
+  useEffect(() => {
+    if (pipelineNameFromLocation && data?.length) {
+      const pipeline = data.find(p => p.name === pipelineNameFromLocation);
+      setSelectedPipeline(pipeline);
+      setShowFlyout(true);
+    }
+  }, [pipelineNameFromLocation, data]);
+
+  const goToEditPipeline = (name: string) => {
+    history.push(`${BASE_PATH}/edit/${encodeURIComponent(name)}`);
+  };
+
+  const goToClonePipeline = (name: string) => {
+    history.push(`${BASE_PATH}/create/${encodeURIComponent(name)}`);
+  };
+
+  const goHome = () => {
+    setShowFlyout(false);
+    history.push(BASE_PATH);
+  };
 
   let content: React.ReactNode;
-
-  const editPipeline = (name: string) => {
-    history.push(encodeURI(`${BASE_PATH}/edit/${encodeURIComponent(name)}`));
-  };
-
-  const clonePipeline = (name: string) => {
-    history.push(encodeURI(`${BASE_PATH}/create/${encodeURIComponent(name)}`));
-  };
 
   if (isLoading) {
     content = (
@@ -68,16 +95,46 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
     content = (
       <PipelineTable
         onReloadClick={sendRequest}
-        onEditPipelineClick={editPipeline}
+        onEditPipelineClick={goToEditPipeline}
         onDeletePipelineClick={setPipelinesToDelete}
-        onClonePipelineClick={clonePipeline}
-        onViewPipelineClick={setSelectedPipeline}
+        onClonePipelineClick={goToClonePipeline}
         pipelines={data}
       />
     );
   } else {
     content = <EmptyList />;
   }
+
+  const renderFlyout = (): React.ReactNode => {
+    if (!showFlyout) {
+      return;
+    }
+    if (selectedPipeline) {
+      return (
+        <PipelineDetailsFlyout
+          pipeline={selectedPipeline}
+          onClose={() => {
+            setSelectedPipeline(undefined);
+            goHome();
+          }}
+          onEditClick={goToEditPipeline}
+          onCloneClick={goToClonePipeline}
+          onDeleteClick={setPipelinesToDelete}
+        />
+      );
+    } else {
+      // Somehow we triggered show pipeline details, but do not have a pipeline.
+      // We assume not found.
+      return (
+        <PipelineNotFoundFlyout
+          onClose={() => {
+            goHome();
+          }}
+          pipelineName={pipelineNameFromLocation}
+        />
+      );
+    }
+  };
 
   return (
     <>
@@ -89,7 +146,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
                 <h1 data-test-subj="appTitle">
                   <FormattedMessage
                     id="xpack.ingestPipelines.list.listTitle"
-                    defaultMessage="Ingest Pipelines"
+                    defaultMessage="Ingest Node Pipelines"
                   />
                 </h1>
               </EuiFlexItem>
@@ -102,7 +159,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
-                    defaultMessage="Ingest Pipelines docs"
+                    defaultMessage="Ingest Node Pipelines docs"
                   />
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -133,15 +190,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
           )}
         </EuiPageContent>
       </EuiPageBody>
-      {selectedPipeline && (
-        <PipelineDetails
-          pipeline={selectedPipeline}
-          onClose={() => setSelectedPipeline(undefined)}
-          onEditClick={editPipeline}
-          onCloneClick={clonePipeline}
-          onDeleteClick={setPipelinesToDelete}
-        />
-      )}
+      {renderFlyout()}
       {pipelinesToDelete?.length > 0 ? (
         <PipelineDeleteModal
           callback={deleteResponse => {

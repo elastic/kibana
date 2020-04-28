@@ -11,3 +11,4 @@ export const UIM_PIPELINE_CREATE = 'pipeline_create';
 export const UIM_PIPELINE_UPDATE = 'pipeline_update';
 export const UIM_PIPELINE_DELETE = 'pipeline_delete';
 export const UIM_PIPELINE_DELETE_MANY = 'pipeline_delete_many';
+export const UIM_PIPELINE_SIMULATE = 'pipeline_simulate';

@@ -7,29 +7,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../../../shared_imports';
+import { parseJson, stringifyJson } from '../../lib';
 
 const { emptyField, isJsonField } = fieldValidators;
 const { toInt } = fieldFormatters;
-
-const stringifyJson = (json: { [key: string]: unknown }): string =>
-  Array.isArray(json) ? JSON.stringify(json, null, 2) : '[\n\n]';
-
-const parseJson = (jsonString: string): object[] => {
-  let parsedJSON: any;
-
-  try {
-    parsedJSON = JSON.parse(jsonString);
-
-    if (!Array.isArray(parsedJSON)) {
-      // Convert object to array
-      parsedJSON = [parsedJSON];
-    }
-  } catch {
-    parsedJSON = [];
-  }
-
-  return parsedJSON;
-};
 
 export const pipelineFormSchema: FormSchema = {
   name: {

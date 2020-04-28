@@ -48,12 +48,13 @@ export const setup = async (): Promise<ListTestBed> => {
   };
 
   const clickPipelineAt = async (index: number) => {
-    const { component, table } = testBed;
+    const { component, table, router } = testBed;
     const { rows } = table.getMetaData('pipelinesTable');
     const pipelineLink = findTestSubject(rows[index].reactWrapper, 'pipelineDetailsLink');
 
     await act(async () => {
-      pipelineLink.simulate('click');
+      const { href } = pipelineLink.props();
+      router.navigateTo(href!);
       await nextTick();
       component.update();
     });

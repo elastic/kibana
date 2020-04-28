@@ -18,10 +18,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      await log.debug('Checking for section heading to say Ingest Pipelines.');
+      await log.debug('Checking for section heading to say Ingest Node Pipelines.');
 
       const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
-      expect(headingText).to.be('Ingest Pipelines');
+      expect(headingText).to.be('Ingest Node Pipelines');
     });
   });
 };

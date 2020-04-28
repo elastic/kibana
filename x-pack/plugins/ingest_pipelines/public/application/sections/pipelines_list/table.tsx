@@ -17,7 +17,6 @@ export interface Props {
   onEditPipelineClick: (pipelineName: string) => void;
   onClonePipelineClick: (pipelineName: string) => void;
   onDeletePipelineClick: (pipelineName: string[]) => void;
-  onViewPipelineClick: (pipeline: Pipeline) => void;
 }
 
 export const PipelineTable: FunctionComponent<Props> = ({
@@ -26,7 +25,6 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onEditPipelineClick,
   onClonePipelineClick,
   onDeletePipelineClick,
-  onViewPipelineClick,
 }) => {
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
@@ -95,11 +93,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
             defaultMessage: 'Name',
           }),
           sortable: true,
-          render: (name: string, pipeline) => (
-            <EuiLink
-              data-test-subj="pipelineDetailsLink"
-              onClick={() => onViewPipelineClick(pipeline)}
-            >
+          render: (name: string) => (
+            <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
               {name}
             </EuiLink>
           ),

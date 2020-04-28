@@ -26,6 +26,8 @@ export const AppWithoutRouter = () => (
     <Route exact path={`${BASE_PATH}/create/:sourceName`} component={PipelinesClone} />
     <Route exact path={`${BASE_PATH}/create`} component={PipelinesCreate} />
     <Route exact path={`${BASE_PATH}/edit/:name`} component={PipelinesEdit} />
+    {/* Catch all */}
+    <Route component={PipelinesList} />
   </Switch>
 );
 
