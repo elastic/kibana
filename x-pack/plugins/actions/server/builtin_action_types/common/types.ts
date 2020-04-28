@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// This will have to remain `any` until we can extend connectors with generics
+// and circular dependencies eliminated.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { TypeOf } from '@kbn/config-schema';
 
 import {
@@ -15,8 +19,6 @@ import {
   CommentSchema,
   ExecutorActionParamsSchema,
 } from './schema';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExecutorType } from '../../types';
 
 export interface AnyParams {
   [index: string]: string | number | object | null | undefined;
@@ -33,8 +35,6 @@ export type MapRecord = TypeOf<typeof MapRecordSchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
 
 export interface ApiParams extends ExecutorActionParams {
-  // This will have to remain `any` until we can extend connectors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   externalCase: Record<string, any>;
 }
 
@@ -44,17 +44,13 @@ export interface ConnectorConfiguration {
 }
 
 export interface ExternalServiceCredential {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   secrets: Record<string, any>;
 }
 
 export interface ConnectorValidation {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+  config: (configurationUtilities: any, configObject: any) => void;
+  secrets: (configurationUtilities: any, secrets: any) => void;
 }
 
 export interface ExternalServiceCaseResponse {
@@ -71,12 +67,10 @@ export interface ExternalServiceCommentResponse {
 }
 
 export interface ExternalServiceParams {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [index: string]: any;
 }
 
 export interface ExternalService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getIncident: (id: string) => Promise<any>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceCaseResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceCaseResponse>;
@@ -85,7 +79,6 @@ export interface ExternalService {
 
 export interface ConnectorApiHandlerArgs {
   externalService: ExternalService;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mapping: Map<string, any>;
   params: ApiParams;
 }
@@ -108,13 +101,12 @@ export interface CreateConnectorBasicArgs {
 export interface CreateConnectorArgs extends CreateConnectorBasicArgs {
   config: ConnectorConfiguration;
   validate: ConnectorValidation;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validationSchema: { config: any; secrets: any };
 }
 
 export interface CreateActionTypeArgs {
-  configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType;
+  configurationUtilities: any;
+  executor?: any;
 }
 
 export interface PipedField {
