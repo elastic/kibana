@@ -19,6 +19,8 @@ import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
+// import { ListClient } from '../../lists/server/services/lists/client';
+import { ListPluginSetup /* , getListItemByValues */ } from '../../lists/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -52,6 +54,7 @@ export interface SetupPlugins {
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   ml?: MlSetup;
+  lists?: ListPluginSetup;
 }
 
 export interface StartPlugins {
@@ -189,11 +192,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerting != null) {
+    if (plugins.alerting != null && plugins.ml != null && plugins.lists != null) {
+      // const clusterClient = core.elasticsearch.dataClient;
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
+        lists: plugins.lists, // need to pass this down here.
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,

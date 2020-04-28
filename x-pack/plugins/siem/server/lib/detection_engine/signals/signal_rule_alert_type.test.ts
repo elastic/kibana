@@ -110,6 +110,7 @@ describe('rules_notification_alert_type', () => {
       logger,
       version,
       ml: mlMock,
+      lists: undefined,
     });
   });
 
@@ -199,6 +200,7 @@ describe('rules_notification_alert_type', () => {
           logger,
           version,
           ml: undefined,
+          lists: undefined,
         });
         await alert.executor(payload);
         expect(logger.error).toHaveBeenCalled();

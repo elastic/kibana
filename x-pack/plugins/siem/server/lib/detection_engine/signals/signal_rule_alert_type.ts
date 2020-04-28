@@ -33,14 +33,22 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 
+/* eslint-disable complexity*/
+// const allowIps = ['127.0.0.1']; // collection of ip's in our system
+// const blockIps = [['1.1.1.1']];
 export const signalRulesAlertType = ({
   logger,
   version,
   ml,
-}: {
+  lists,
+}: // getListItemByValues,
+{
   logger: Logger;
   version: string;
   ml: SetupPlugins['ml'];
+  lists: SetupPlugins['lists'];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // getListItemByValues: any;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
@@ -51,7 +59,7 @@ export const signalRulesAlertType = ({
       params: signalParamsSchema(),
     },
     producer: 'siem',
-    async executor({ previousStartedAt, alertId, services, params }) {
+    async executor({ previousStartedAt, alertId, services, params, spaceId }) {
       const {
         anomalyThreshold,
         from,
@@ -67,6 +75,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
+        // allowListId,
         exceptions_list,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
@@ -87,6 +96,7 @@ export const signalRulesAlertType = ({
         'alert',
         alertId
       );
+      // const list = await services. // maybe add lists here?
       const {
         actions,
         name,
@@ -123,7 +133,6 @@ export const signalRulesAlertType = ({
         hasError = true;
         await ruleStatusService.error(gapMessage, { gap: gapString });
       }
-
       try {
         if (isMlRule(type)) {
           if (ml == null) {
@@ -199,6 +208,10 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
+          // if (lists == null) {
+          //   throw new Error('lists plugin unavailable during rule execution');
+          // }
+
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -222,7 +235,13 @@ export const signalRulesAlertType = ({
 
           logger.debug(buildRuleMessage('[+] Initial search call'));
           const start = performance.now();
+          // const dataClient = {
+          //   callAsCurrentUser: services.callCluster,
+          //   callAsInternalUser: services.callCluster,
+          // };
           const noReIndexResult = await services.callCluster('search', noReIndex);
+          // grab the result set and run it through the
+
           const end = performance.now();
 
           const signalCount = noReIndexResult.hits.total.value;
@@ -232,10 +251,31 @@ export const signalRulesAlertType = ({
                 `Found ${signalCount} signals from the indexes of "[${inputIndex.join(', ')}]"`
               )
             );
+            const value = noReIndexResult.hits.hits
+              .map((item: { _source: { source?: { ip?: string } } }) => item._source.source?.ip)
+              .filter((item: string) => item != null);
+            let listSignals;
+            if (lists != null) {
+              listSignals = await lists
+                .getListClient(services.callCluster, spaceId)
+                .getListItemByValues({
+                  listId: 'ci-badguys.txt',
+                  type: 'ip',
+                  value: [...new Set<string>(value)],
+                });
+            }
+            // const listSignals = await getListItemByValues({
+            //   dataClient,
+            //   listId: 'ci-badguys.txt',
+            //   listItemIndex: '.items-default', // get this when lists plugin is available....... >:(
+            //   type: 'ip',
+            //   value: [...new Set(value)],
+            // });
+            // console.log({ listSignals });
           }
 
           result = await searchAfterAndBulkCreate({
-            someResult: noReIndexResult,
+            someResult: noReIndexResult, // possibleSignals
             ruleParams: params,
             services,
             logger,

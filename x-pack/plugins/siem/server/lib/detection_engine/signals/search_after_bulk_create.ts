@@ -16,6 +16,7 @@ interface SearchAfterAndBulkCreateParams {
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
   services: AlertServices;
+  // listClient: ListServices; // for now....
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -48,6 +49,7 @@ export const searchAfterAndBulkCreate = async ({
   someResult,
   ruleParams,
   services,
+  // listClient,
   logger,
   id,
   inputIndexPattern,
