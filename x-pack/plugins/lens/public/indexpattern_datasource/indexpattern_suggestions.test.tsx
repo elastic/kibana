@@ -184,6 +184,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id2: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id3: expect.objectContaining({
                       operationType: 'count',
@@ -388,6 +389,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id2: expect.objectContaining({
                       operationType: 'count',
@@ -779,7 +781,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
-      it('appends a terms column on string field', () => {
+      it('appends a terms column with default size on string field', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'dest',
@@ -800,6 +802,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'dest',
+                      params: expect.objectContaining({ size: 3 }),
                     }),
                   },
                 }),
