@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
-import { isEmpty, indexBy } from 'lodash';
+import { isEmpty } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
@@ -482,10 +482,6 @@ export const AlertsList: React.FunctionComponent = () => {
 function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
   return alerts.filter(alert => ids.includes(alert.id));
 }
-
-// const alertActions = alert.actions ? alert.actions : null;
-// const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
-// const [firstAction, ...otherActions] = uniqueActions;
 
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
   return alerts.map(alert => ({
