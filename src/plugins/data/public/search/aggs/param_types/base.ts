@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ExpressionAstFunction } from 'src/plugins/expressions/public';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 import { FetchOptions } from '../../fetch';
@@ -37,6 +38,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
+  toExpressionAst?: (value: any) => ExpressionAstFunction | undefined;
   options: any[];
   valueType?: any;
 
@@ -77,6 +79,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.write = config.write || defaultWrite;
     this.serialize = config.serialize;
     this.deserialize = config.deserialize;
+    this.toExpressionAst = config.toExpressionAst;
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
       config.modifyAggConfigOnSearchRequestStart || function() {};

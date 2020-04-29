@@ -12,8 +12,11 @@ import {
   PluginInitializerContext,
   SavedObjectsServiceStart,
 } from 'kibana/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { EncryptedSavedObjectsPluginStart } from '../../encrypted_saved_objects/server';
+import { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import {
@@ -26,26 +29,35 @@ import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
 } from './constants';
-
+import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
 import {
   registerEPMRoutes,
   registerDatasourceRoutes,
+  registerDataStreamRoutes,
   registerAgentConfigRoutes,
   registerSetupRoutes,
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
+  registerOutputRoutes,
+  registerSettingsRoutes,
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
-import { appContextService, ESIndexPatternSavedObjectService } from './services';
-import { ESIndexPatternService, AgentService } from './services';
+import {
+  appContextService,
+  licenseService,
+  ESIndexPatternSavedObjectService,
+  ESIndexPatternService,
+  AgentService,
+} from './services';
 import { getAgentStatusById } from './services/agents';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -85,6 +97,7 @@ export class IngestManagerPlugin
       IngestManagerSetupDeps,
       IngestManagerStartDeps
     > {
+  private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
 
@@ -93,9 +106,13 @@ export class IngestManagerPlugin
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
     }
+
+    registerSavedObjects(core.savedObjects);
+    registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
     // TODO: Flesh out privileges
@@ -135,6 +152,9 @@ export class IngestManagerPlugin
     // Register routes
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerOutputRoutes(router);
+    registerSettingsRoutes(router);
+    registerDataStreamRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
@@ -165,6 +185,7 @@ export class IngestManagerPlugin
       config$: this.config$,
       savedObjects: core.savedObjects,
     });
+    licenseService.start(this.licensing$);
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
       agentService: {
@@ -175,5 +196,6 @@ export class IngestManagerPlugin
 
   public async stop() {
     appContextService.stop();
+    licenseService.stop();
   }
 }
