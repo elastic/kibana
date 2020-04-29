@@ -4,18 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo } from 'react';
-import { EuiAccordion } from '@elastic/eui';
-import { EuiNotificationBadge } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import styled from 'styled-components';
+import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
 import {
   HostPolicyResponseActions,
   HostPolicyResponseActionStatus,
+  HostPolicyResponseConfiguration,
+  Immutable,
+  ImmutableArray,
 } from '../../../../../../common/types';
-import { useHostSelector } from '../hooks';
-import {
-  policyResponseConfigurations,
-  policyResponseActions,
-} from '../../../store/hosts/selectors';
+
+const HostPolicyResponse = styled.div`
+margin: {props => props.theme.eui.ruleMargins.marginXLarge};
+`;
 
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   {
@@ -26,56 +27,80 @@ export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   [HostPolicyResponseActionStatus.success]: 'success',
   [HostPolicyResponseActionStatus.warning]: 'subdued',
 });
-const ResponseActions = memo(({ actions }: { actions: Array<keyof HostPolicyResponseActions> }) => {
-  const actionStatus: HostPolicyResponseActions = useHostSelector(policyResponseActions);
-  return (
-    <div>
-      {actions.map(action => {
-        const statuses = actionStatus[action];
-        return (
-          <EuiAccordion
-            id={action}
-            key={action}
-            buttonContent={action}
-            extraAction={
-              <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}>
-                <p>{statuses.status}</p>
-              </EuiHealth>
-            }
-          >
-            <div>
-              <p>{statuses.message}</p>
-            </div>
-          </EuiAccordion>
-        );
-      })}
-    </div>
-  );
-});
+const ResponseActions = memo(
+  ({
+    actions,
+    actionStatus,
+  }: {
+    actions: ImmutableArray<string>;
+    actionStatus: Partial<HostPolicyResponseActions>;
+  }) => {
+    return (
+      <HostPolicyResponse>
+        {actions.map(action => {
+          const statuses = actionStatus[action];
+          if (statuses === undefined) {
+            return undefined;
+          }
+          return (
+            <EuiAccordion
+              id={action}
+              key={action}
+              buttonContent={action}
+              extraAction={
+                <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}>
+                  <p>{statuses.status}</p>
+                </EuiHealth>
+              }
+            >
+              <div>
+                <p>{statuses.message}</p>
+              </div>
+            </EuiAccordion>
+          );
+        })}
+      </HostPolicyResponse>
+    );
+  }
+);
 
-export const PolicyResponse = memo(() => {
-  const responseConfig = useHostSelector(policyResponseConfigurations);
-  return (
-    <div>
-      {Object.entries(responseConfig).map(([key, val]) => {
-        return (
-          <EuiAccordion
-            id={key}
-            buttonContent={key}
-            key={key}
-            extraAction={
-              val.status === 'failure' && (
-                <>
-                  <span>Failed Processes</span>
-                  <EuiNotificationBadge color="accent">2</EuiNotificationBadge>
-                </>
-              )
-            }
-          >
-            <ResponseActions actions={val.concerned_actions} />
-          </EuiAccordion>
-        );
-      })}
-    </div>
-  );
-});
+/**
+ * this is for the policy response shown in the host details after a user modifies a policy
+ */
+export const PolicyResponse = memo(
+  ({
+    responseConfig,
+    responseActionStatus,
+  }: {
+    responseConfig: Immutable<HostPolicyResponseConfiguration>;
+    responseActionStatus: Partial<HostPolicyResponseActions>;
+  }) => {
+    return (
+      <div>
+        {Object.entries(responseConfig).map(([key, val]) => {
+          return (
+            <EuiAccordion
+              id={key}
+              className="hostPolicyResponseActionAccordion"
+              buttonContent={key}
+              key={key}
+              extraAction={
+                val.status === 'failure' && (
+                  <>
+                    <span>Failed Processes</span>
+                    <EuiNotificationBadge color="accent">2</EuiNotificationBadge>
+                  </>
+                )
+              }
+            >
+              <ResponseActions
+                actions={val.concerned_actions}
+                actionStatus={responseActionStatus}
+              />
+            </EuiAccordion>
+          );
+        })}
+      </div>
+    );
+  }
+);

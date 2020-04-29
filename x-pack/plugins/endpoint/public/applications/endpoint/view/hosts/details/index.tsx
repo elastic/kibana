@@ -25,6 +25,8 @@ import {
   detailsError,
   showView,
   detailsLoading,
+  policyResponseConfigurations,
+  policyResponseActions,
 } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
@@ -101,6 +103,8 @@ const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
+  const responseConfig = useHostSelector(policyResponseConfigurations);
+  const responseActionStatus = useHostSelector(policyResponseActions);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -136,7 +140,12 @@ const PolicyResponseFlyoutPanel = memo<{
         </EuiTitle>
       </FlyoutSubHeader>
       <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        <PolicyResponse />
+        {responseConfig !== undefined && responseActionStatus !== undefined && (
+          <PolicyResponse
+            responseConfig={responseConfig}
+            responseActionStatus={responseActionStatus}
+          />
+        )}
       </EuiFlyoutBody>
     </>
   );

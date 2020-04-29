@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostResultList } from '../../../../../common/types';
+import { HostResultList, HostPolicyResponseActionStatus } from '../../../../../common/types';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
@@ -77,7 +77,31 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
               endpoint: {
                 policy: {
                   applied: {
-                    status: 'success',
+                    version: '1.0.0',
+                    status: HostPolicyResponseActionStatus.success,
+                    id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
+                    response: {
+                      configurations: {
+                        malware: {
+                          status: 'success',
+                          concerned_actions: ['download_model'],
+                        },
+                        eventing: {
+                          status: 'failure',
+                          concerned_actions: ['ingest_events_config'],
+                        },
+                      },
+                      actions: {
+                        download_model: {
+                          status: 'success',
+                          message: 'model downloaded',
+                        },
+                        ingest_events_config: {
+                          status: 'failure',
+                          message: 'no action taken',
+                        },
+                      },
+                    },
                   },
                 },
               },
