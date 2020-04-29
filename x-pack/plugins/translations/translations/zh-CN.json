@@ -12970,7 +12970,6 @@
     "xpack.security.management.users.editUser.cancelButtonLabel": "取消",
     "xpack.security.management.users.editUser.changePasswordButtonLabel": "更改密码",
     "xpack.security.management.users.editUser.changePasswordExtraStepTitle": "需要额外的步骤",
-    "xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle": "更改 Kibana 用户的密码后，必须更新 {kibana} 文件并重新启动 Kibana。",
     "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription": "用户名一经创建，将无法更改。",
     "xpack.security.management.users.editUser.confirmPasswordFormRowLabel": "确认密码",
     "xpack.security.management.users.editUser.createUserButtonLabel": "创建用户",

@@ -12966,7 +12966,6 @@
     "xpack.security.management.users.editUser.cancelButtonLabel": "キャンセル",
     "xpack.security.management.users.editUser.changePasswordButtonLabel": "パスワードを変更",
     "xpack.security.management.users.editUser.changePasswordExtraStepTitle": "追加ステップが必要です",
-    "xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle": "Kibana ユーザーのパスワードを変更後、{kibana} ファイルを更新し Kibana を再起動する必要があります。",
     "xpack.security.management.users.editUser.changingUserNameAfterCreationDescription": "ユーザー名は作成後変更できません。",
     "xpack.security.management.users.editUser.confirmPasswordFormRowLabel": "パスワードの確認",
     "xpack.security.management.users.editUser.createUserButtonLabel": "ユーザーを作成",
