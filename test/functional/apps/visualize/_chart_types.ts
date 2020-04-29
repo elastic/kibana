@@ -35,6 +35,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the correct chart types', async function() {
+      expect(false).to.be(true);
+
       let expectedChartTypes = [
         'Area',
         'Controls',

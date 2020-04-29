@@ -47,6 +47,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the default request', async () => {
+      expect(false).to.be(true);
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       // on IE11, the dialog that says 'Your browser does not meet the security requirements for Kibana.'
       // blocks the close help button for several seconds so just retry until we can click it.
