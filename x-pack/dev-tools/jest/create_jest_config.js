@@ -38,7 +38,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       'legacy/plugins/**/*.{js,jsx,ts,tsx}',
       'legacy/server/**/*.{js,jsx,ts,tsx}',
       'plugins/**/*.{js,jsx,ts,tsx}',
-      '!**/{__test__,__snapshots__,__examples__,integration_tests}/**',
+      '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
       '!**/*.test.{js,ts,tsx}',
       '!**/flot-charts/**',
       '!**/test/**',

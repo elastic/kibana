@@ -40,7 +40,7 @@ export default {
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',
-    '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks}/**/*',
+    '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
     '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
