@@ -18,9 +18,6 @@ import { txtChangeButton } from './i18n';
 import './action_wizard.scss';
 import { ActionFactory } from '../../dynamic_actions';
 
-type ActionBaseConfig = object;
-type ActionFactoryBaseContext = object;
-
 export interface ActionWizardProps {
   /**
    * List of available action factories
@@ -42,17 +39,17 @@ export interface ActionWizardProps {
   /**
    * current config for currently selected action factory
    */
-  config?: ActionBaseConfig;
+  config?: object;
 
   /**
    * config changed
    */
-  onConfigChange: (config: ActionBaseConfig) => void;
+  onConfigChange: (config: object) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
    */
-  context: ActionFactoryBaseContext;
+  context: object;
 }
 
 export const ActionWizard: React.FC<ActionWizardProps> = ({
@@ -98,9 +95,9 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 
 interface SelectedActionFactoryProps {
   actionFactory: ActionFactory;
-  config: ActionBaseConfig;
-  context: ActionFactoryBaseContext;
-  onConfigChange: (config: ActionBaseConfig) => void;
+  config: object;
+  context: object;
+  onConfigChange: (config: object) => void;
   showDeselect: boolean;
   onDeselect: () => void;
 }
@@ -155,7 +152,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
 
 interface ActionFactorySelectorProps {
   actionFactories: ActionFactory[];
-  context: ActionFactoryBaseContext;
+  context: object;
   onActionFactorySelected: (actionFactory: ActionFactory) => void;
 }
 
