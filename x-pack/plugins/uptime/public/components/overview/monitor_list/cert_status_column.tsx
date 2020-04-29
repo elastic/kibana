@@ -9,11 +9,8 @@ import moment from 'moment';
 import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { Cert } from '../../../../common/runtime_types';
-import { CERT_STATUS, useCertStatus } from '../../../../../../legacy/plugins/uptime/public/hooks';
-import {
-  EXPIRED,
-  EXPIRES_SOON,
-} from '../../../../../../legacy/plugins/uptime/public/components/certificates/translations';
+import { CERT_STATUS, useCertStatus } from '../../../hooks';
+import { EXPIRED, EXPIRES_SOON } from '../../certificates/translations';
 
 interface Props {
   cert: Cert;

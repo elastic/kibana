@@ -25,8 +25,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   sortBy,
   direction,
 }) => {
-  const searchWrapper = `*${search}*`;
-  const sort = SortFields[sortBy];
+  const sort = SortFields[sortBy as keyof SortFields];
 
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
@@ -97,7 +96,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     params.body.query.bool.should = [
       {
         multi_match: {
-          query: searchWrapper,
+          query: search,
           type: 'phrase_prefix',
           fields: [
             'monitor.id.text',
@@ -128,7 +127,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     const monitors = hit.inner_hits.monitors.hits.hits.map((monitor: any) => ({
       name: monitor._source?.monitor.name,
       id: monitor._source?.monitor.id,
-      url: monitor._source?.url.full,
+      url: monitor._source?.url?.full,
     }));
 
     return {

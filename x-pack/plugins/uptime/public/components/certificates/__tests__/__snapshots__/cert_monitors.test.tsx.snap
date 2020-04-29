@@ -3,45 +3,57 @@
 exports[`CertMonitors renders expected elements for valid props 1`] = `
 <span>
   <span>
-    <button
-      class="euiLink euiLink--primary"
-      type="button"
+    <span
+      class="euiToolTipAnchor"
     >
-      <a
-        data-test-subj="monitor-page-link-bad-ssl-dashboard"
-        href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
+      <button
+        class="euiLink euiLink--primary"
+        type="button"
       >
-        bad-ssl-dashboard
-      </a>
-    </button>
+        <a
+          data-test-subj="monitor-page-link-bad-ssl-dashboard"
+          href="/monitor/YmFkLXNzbC1kYXNoYm9hcmQ="
+        >
+          bad-ssl-dashboard
+        </a>
+      </button>
+    </span>
   </span>
   <span>
     , 
-    <button
-      class="euiLink euiLink--primary"
-      type="button"
+    <span
+      class="euiToolTipAnchor"
     >
-      <a
-        data-test-subj="monitor-page-link-elastic-co"
-        href="/monitor/ZWxhc3RpYy1jbw=="
+      <button
+        class="euiLink euiLink--primary"
+        type="button"
       >
-        elastic
-      </a>
-    </button>
+        <a
+          data-test-subj="monitor-page-link-elastic-co"
+          href="/monitor/ZWxhc3RpYy1jbw=="
+        >
+          elastic
+        </a>
+      </button>
+    </span>
   </span>
   <span>
     , 
-    <button
-      class="euiLink euiLink--primary"
-      type="button"
+    <span
+      class="euiToolTipAnchor"
     >
-      <a
-        data-test-subj="monitor-page-link-extended-validation"
-        href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
+      <button
+        class="euiLink euiLink--primary"
+        type="button"
       >
-        extended-validation
-      </a>
-    </button>
+        <a
+          data-test-subj="monitor-page-link-extended-validation"
+          href="/monitor/ZXh0ZW5kZWQtdmFsaWRhdGlvbg=="
+        >
+          extended-validation
+        </a>
+      </button>
+    </span>
   </span>
 </span>
 `;

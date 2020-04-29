@@ -5,9 +5,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../lib/lib';
-import { UMRestApiRouteFactory } from '.';
-import { API_URLS } from '../../common/constants';
+import { API_URLS } from '../../../common/constants';
+import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteFactory } from '../types';
 
 const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 25;

@@ -40,6 +40,9 @@ describe('getCerts', () => {
             name: 'Real World Test',
             id: 'real-world-test',
           },
+          url: {
+            full: 'https://fullurl.com',
+          },
         },
         fields: {
           'tls.server.hash.sha256': [
@@ -111,6 +114,7 @@ describe('getCerts', () => {
               Object {
                 "id": "real-world-test",
                 "name": "Real World Test",
+                "url": undefined,
               },
             ],
             "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
@@ -150,6 +154,7 @@ describe('getCerts', () => {
                     "includes": Array [
                       "monitor.id",
                       "monitor.name",
+                      "url.full",
                     ],
                   },
                   "collapse": Object {
@@ -184,31 +189,16 @@ describe('getCerts', () => {
                   "minimum_should_match": 1,
                   "should": Array [
                     Object {
-                      "wildcard": Object {
-                        "tls.server.issuer": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "tls.server.x509.issuer.common_name": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "monitor.id": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "monitor.name": Object {
-                          "value": "*my_common_name*",
-                        },
+                      "multi_match": Object {
+                        "fields": Array [
+                          "monitor.id.text",
+                          "monitor.name.text",
+                          "url.full.text",
+                          "tls.server.x509.subject.common_name.text",
+                          "tls.server.x509.issuer.common_name.text",
+                        ],
+                        "query": "my_common_name",
+                        "type": "phrase_prefix",
                       },
                     },
                   ],
@@ -217,7 +207,7 @@ describe('getCerts', () => {
               "size": 30,
               "sort": Array [
                 Object {
-                  "tls.certificate_not_valid_after": Object {
+                  "undefined": Object {
                     "order": "desc",
                   },
                 },

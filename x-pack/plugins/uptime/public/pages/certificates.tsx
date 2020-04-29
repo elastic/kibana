@@ -15,24 +15,17 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
-import { useUptimeTelemetry, UptimePage } from '../../../../legacy/plugins/uptime/public/hooks';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { useTrackPageview } from '../../../observability/public';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import {
-  CertificateList,
-  CertSort,
-  CertificateSearch,
-} from '../../../../legacy/plugins/uptime/public/components/certificates';
 import { OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../common/constants';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
-import {
-  certificatesSelector,
-  getCertificatesAction,
-} from '../../../../legacy/plugins/uptime/public/state/certificates/certificates';
 import { UptimeRefreshContext } from '../contexts';
 import * as labels from './translations';
+import { UptimePage, useUptimeTelemetry } from '../hooks';
+import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
+import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
