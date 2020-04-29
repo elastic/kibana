@@ -18,7 +18,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
    * @param {string} styles
    * @returns {Object}
    */
-  const parseStyle = styles =>
+  const parseStyle = (styles: any) =>
     styles
       .split(';')
       .filter(style => style.split(':')[0] && style.split(':')[1])
@@ -98,16 +98,19 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
     /**
      * Gets a array of not parsed styles and returns the Array of parsed styles.
      * @returns Promise<string[][]>
-     * @param style
+     * @param dataTestSubj
+     * @param element
      */
-    async parseStyles(style: any[]) {
+    async parseStyles(dataTestSubj: string, element: string) {
+      const tableData = await this.getEndpointAlertResolverTableData(dataTestSubj, element);
       const $ = [];
-      for (let i = 1; i < style.length; i++) {
-        const eachStyle = parseStyle(style[i]);
+      for (let i = 1; i < tableData.length; i++) {
+        const eachStyle = parseStyle(tableData[i]);
         $.push(eachStyle);
       }
       return $;
     },
+
     async waitForTableToHaveData(dataTestSubj: string) {
       await retry.waitForWithTimeout('table to have data', 2000, async () => {
         const tableData = await this.getEndpointAlertResolverTableData(dataTestSubj, 'tr');
