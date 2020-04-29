@@ -33,8 +33,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
 
-  const loadingScreenShown = () => testSubjects.existOrFail('kbnLoadingMessage');
-
   const getAppWrapperHeight = async () => {
     const wrapper = await find.byClassName('app-wrapper');
     return (await wrapper.getSize()).height;
@@ -139,13 +137,11 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
     it('can navigate from NP apps to legacy apps', async () => {
       await appsMenu.clickLink('Stack Management');
-      await loadingScreenShown();
       await testSubjects.existOrFail('managementNav');
     });
 
     it('can navigate from legacy apps to NP apps', async () => {
       await appsMenu.clickLink('Foo');
-      await loadingScreenShown();
       await testSubjects.existOrFail('fooAppHome');
     });
   });

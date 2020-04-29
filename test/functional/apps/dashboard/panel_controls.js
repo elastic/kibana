@@ -227,6 +227,9 @@ export default function({ getService, getPageObjects }) {
 
       describe('visualization object edit menu', () => {
         it('opens a visualization when edit link is clicked', async () => {
+          if (await PageObjects.dashboard.getIsInViewMode()) {
+            await PageObjects.dashboard.switchToEditMode();
+          }
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
