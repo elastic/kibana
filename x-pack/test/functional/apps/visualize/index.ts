@@ -15,5 +15,6 @@ export default function visualize({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./hybrid_visualization'));
     loadTestFile(require.resolve('./precalculated_histogram'));
     loadTestFile(require.resolve('./preserve_url'));
+    loadTestFile(require.resolve('./reporting'));
   });
 }

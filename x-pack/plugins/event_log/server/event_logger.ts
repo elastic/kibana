@@ -168,7 +168,7 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 }
 
 // whew, the thing that actually writes the event log document!
-async function indexLogEventDoc(esContext: EsContext, doc: any) {
+async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
   esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
   await esContext.waitTillReady();
   await esContext.esAdapter.indexDocument(doc);
@@ -176,6 +176,6 @@ async function indexLogEventDoc(esContext: EsContext, doc: any) {
 }
 
 // TODO: write log entry to a bounded queue buffer
-function writeLogEventDocOnError(esContext: EsContext, doc: any) {
+function writeLogEventDocOnError(esContext: EsContext, doc: unknown) {
   esContext.logger.warn(`unable to write event doc: ${JSON.stringify(doc)}`);
 }

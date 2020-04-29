@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
 import {
   CreateAnalyticsFormProps,
   DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
@@ -214,7 +215,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     },
     results_field: {
       optional: true,
-      defaultValue: 'ml',
+      defaultValue: DEFAULT_RESULTS_FIELD,
     },
   },
   model_memory_limit: {

@@ -11,7 +11,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'remoteClusters']);
 
   describe('Home page', function() {
-    this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('remoteClusters');
     });

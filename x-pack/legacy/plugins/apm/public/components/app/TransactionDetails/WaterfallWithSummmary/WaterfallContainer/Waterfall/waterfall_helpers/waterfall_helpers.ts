@@ -237,7 +237,7 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
   });
 
 /**
- * Changes the parent_id of items based on the child_ids property.
+ * Changes the parent_id of items based on the child.id property.
  * Solves the problem of Inferred spans that are created as child of trace spans
  * when it actually should be its parent.
  * @param waterfallItems
@@ -245,10 +245,10 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
 const reparentSpans = (waterfallItems: IWaterfallItem[]) => {
   return waterfallItems.map(waterfallItem => {
     if (waterfallItem.docType === 'span') {
-      const { child_ids: childIds } = waterfallItem.doc;
-      if (childIds) {
-        childIds.forEach(childId => {
-          const item = waterfallItems.find(_item => _item.id === childId);
+      const childId = waterfallItem.doc.child?.id;
+      if (childId) {
+        childId.forEach(id => {
+          const item = waterfallItems.find(_item => _item.id === id);
           if (item) {
             item.parentId = waterfallItem.id;
           }

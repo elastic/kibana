@@ -22,7 +22,7 @@ export async function updateAgentsForConfigId(
   let page = 1;
   while (hasMore) {
     const { agents } = await listAgents(soClient, {
-      kuery: `agents.config_id:"${configId}"`,
+      kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}"`,
       page: page++,
       perPage: 1000,
       showInactive: true,
@@ -46,7 +46,7 @@ export async function unenrollForConfigId(soClient: SavedObjectsClientContract, 
   let page = 1;
   while (hasMore) {
     const { agents } = await listAgents(soClient, {
-      kuery: `agents.config_id:"${configId}"`,
+      kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:"${configId}"`,
       page: page++,
       perPage: 1000,
       showInactive: true,

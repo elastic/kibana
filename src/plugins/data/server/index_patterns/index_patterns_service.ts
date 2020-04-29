@@ -20,10 +20,12 @@
 import { CoreSetup, Plugin } from 'kibana/server';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
 
 export class IndexPatternsService implements Plugin<void> {
   public setup(core: CoreSetup) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     registerRoutes(core.http);
   }

@@ -13,8 +13,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
 
-import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
-import { ILayer } from '../layer';
+import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 
@@ -37,7 +36,6 @@ export type PreIndexedShape = {
 export type FieldFormatter = (value: string | number | null | undefined | boolean) => string;
 
 export interface ISource {
-  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
@@ -59,7 +57,6 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  shouldBeIndexed(): boolean;
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
@@ -97,10 +94,6 @@ export class AbstractSource implements ISource {
 
   getInspectorAdapters(): Adapters | undefined {
     return this._inspectorAdapters;
-  }
-
-  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer {
-    throw new Error(`Source#createDefaultLayer not implemented`);
   }
 
   async getDisplayName(): Promise<string> {
@@ -152,10 +145,6 @@ export class AbstractSource implements ISource {
   }
 
   isJoinable(): boolean {
-    return false;
-  }
-
-  shouldBeIndexed(): boolean {
     return false;
   }
 

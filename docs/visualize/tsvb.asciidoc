@@ -44,18 +44,6 @@ Table:: Display data from multiple time series by defining the field group to sh
 image:images/tsvb-table.png["Table visualization"]
 
 [float]
-[[tsvb-aggregation]]
-=== Supported aggregations
-
-TSVB supports the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-
-[float]
 [[create-tsvb-visualization]]
 === Create TSVB visualizations
 

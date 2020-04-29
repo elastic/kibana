@@ -7,15 +7,8 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// vis_type_vislib UI styles
-@import 'src/legacy/core_plugins/vis_type_vislib/public/index';
-
 // Discover styles
 @import 'discover/index';
-
-// Visualization styles are imported here for running karma Browser tests
-// should be somehow included through the "visualizations" plugin initialization
-@import '../../../../plugins/visualizations/public/index';
 
 // Has to come after visualize because of some
 // bad cascading in the Editor layout

@@ -11,5 +11,9 @@ export function getDefaultMapSettings(): MapSettings {
   return {
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
+    showSpatialFilters: true,
+    spatialFiltersAlpa: 0.3,
+    spatialFiltersFillColor: '#DA8B45',
+    spatialFiltersLineColor: '#DA8B45',
   };
 }

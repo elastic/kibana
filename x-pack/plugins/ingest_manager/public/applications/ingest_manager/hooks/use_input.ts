@@ -20,5 +20,27 @@ export function useInput(defaultValue = '') {
     clear: () => {
       setValue('');
     },
+    setValue,
+  };
+}
+
+export function useComboInput(defaultValue = []) {
+  const [value, setValue] = React.useState<string[]>(defaultValue);
+
+  return {
+    props: {
+      selectedOptions: value.map((val: string) => ({ label: val })),
+      onCreateOption: (newVal: any) => {
+        setValue([...value, newVal]);
+      },
+      onChange: (newVals: any[]) => {
+        setValue(newVals.map(val => val.label));
+      },
+    },
+    value,
+    clear: () => {
+      setValue([]);
+    },
+    setValue,
   };
 }

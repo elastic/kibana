@@ -8,6 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 import { sendDeleteAgentConfigs, useCore, sendRequest } from '../../../hooks';
 
 interface Props {
@@ -122,7 +123,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
       path: `/api/ingest_manager/fleet/agents`,
       method: 'get',
       query: {
-        kuery: `agents.config_id : (${agentConfigsToCheck.join(' or ')})`,
+        kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : (${agentConfigsToCheck.join(' or ')})`,
       },
     });
     setAgentsCount(data?.total || 0);

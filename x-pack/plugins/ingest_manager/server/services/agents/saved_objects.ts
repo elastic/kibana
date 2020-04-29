@@ -38,5 +38,6 @@ export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes
   return {
     id: so.id,
     ...so.attributes,
+    data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
   };
 }

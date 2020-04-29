@@ -9,11 +9,11 @@
  */
 import apm from 'elastic-apm-node';
 import { Subject, Observable } from 'rxjs';
-import { omit, difference } from 'lodash';
+import { omit, difference, defaults } from 'lodash';
 
+import { SearchResponse, UpdateDocumentByQueryResponse } from 'elasticsearch';
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
@@ -29,6 +29,7 @@ import {
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
+  SerializedConcreteTaskInstance,
 } from './task';
 
 import { TaskClaim, asTaskClaimEvent } from './task_events';
@@ -71,7 +72,7 @@ export interface SearchOpts {
   query?: object;
   size?: number;
   seq_no_primary_term?: boolean;
-  search_after?: any[];
+  search_after?: unknown[];
 }
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
@@ -166,7 +167,7 @@ export class TaskStore {
       );
     }
 
-    const savedObject = await this.savedObjectsRepository.create(
+    const savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
       'task',
       taskInstanceToAttributes(taskInstance),
       { id: taskInstance.id, refresh: false }
@@ -314,17 +315,21 @@ export class TaskStore {
    * @returns {Promise<TaskDoc>}
    */
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {
-    const updatedSavedObject = await this.savedObjectsRepository.update(
-      'task',
-      doc.id,
-      taskInstanceToAttributes(doc),
-      {
-        refresh: false,
-        version: doc.version,
-      }
-    );
+    const attributes = taskInstanceToAttributes(doc);
+    const updatedSavedObject = await this.savedObjectsRepository.update<
+      SerializedConcreteTaskInstance
+    >('task', doc.id, attributes, {
+      refresh: false,
+      version: doc.version,
+    });
 
-    return savedObjectToConcreteTaskInstance(updatedSavedObject);
+    return savedObjectToConcreteTaskInstance(
+      // The SavedObjects update api forces a Partial on the `attributes` on the response,
+      // but actually returns the whole object that is passed to it, so as we know we're
+      // passing in the whole object, this is safe to do.
+      // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
+      { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
+    );
   }
 
   /**
@@ -377,12 +382,12 @@ export class TaskStore {
       },
     });
 
-    const rawDocs = result.hits.hits;
+    const rawDocs = (result as SearchResponse<unknown>).hits.hits;
 
     return {
       docs: (rawDocs as SavedObjectsRawDoc[])
         .map(doc => this.serializer.rawToSavedObject(doc))
-        .map(doc => omit(doc, 'namespace') as SavedObject)
+        .map(doc => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map(savedObjectToConcreteTaskInstance),
     };
   }
@@ -404,7 +409,7 @@ export class TaskStore {
       },
     });
 
-    const { total, updated, version_conflicts } = result;
+    const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;
     return {
       total,
       updated,
@@ -413,7 +418,7 @@ export class TaskStore {
   }
 }
 
-function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
+function taskInstanceToAttributes(doc: TaskInstance): SerializedConcreteTaskInstance {
   return {
     ...omit(doc, 'id', 'version'),
     params: JSON.stringify(doc.params || {}),
@@ -428,8 +433,7 @@ function taskInstanceToAttributes(doc: TaskInstance): SavedObjectAttributes {
 }
 
 export function savedObjectToConcreteTaskInstance(
-  // TODO: define saved object type
-  savedObject: Omit<SavedObject<any>, 'references'>
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
   return {
     ...savedObject.attributes,
@@ -437,8 +441,8 @@ export function savedObjectToConcreteTaskInstance(
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),
     runAt: new Date(savedObject.attributes.runAt),
-    startedAt: savedObject.attributes.startedAt && new Date(savedObject.attributes.startedAt),
-    retryAt: savedObject.attributes.retryAt && new Date(savedObject.attributes.retryAt),
+    startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
+    retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
   };

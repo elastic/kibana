@@ -16,7 +16,7 @@ import {
 } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import { ConfigPanelWrapper } from './config_panel_wrapper';
+import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';

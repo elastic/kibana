@@ -120,7 +120,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   }
 
   private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<any, any, any>,
+    RequestHandler<unknown, unknown, unknown>,
     'eventLog'
   > => {
     return async (context, request) => {

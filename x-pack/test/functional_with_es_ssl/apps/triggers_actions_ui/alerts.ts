@@ -68,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await nameInput.click();
 
       await testSubjects.click('.slack-ActionTypeSelectOption');
-      await testSubjects.click('createActionConnectorButton');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test');

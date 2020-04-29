@@ -25,6 +25,7 @@ import { DllCompiler } from '../../src/optimize/dynamic_dll_plugin';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
+const buildHash = String(Number.MAX_SAFE_INTEGER);
 
 module.exports = function(grunt) {
   function pickBrowser() {
@@ -53,29 +54,34 @@ module.exports = function(grunt) {
   function getKarmaFiles(shardNum) {
     return [
       'http://localhost:5610/test_bundle/built_css.css',
+      // Sets global variables normally set by the bootstrap.js script
+      'http://localhost:5610/test_bundle/karma/globals.js',
 
       ...UiSharedDeps.jsDepFilenames.map(
-        chunkFilename => `http://localhost:5610/bundles/kbn-ui-shared-deps/${chunkFilename}`
+        chunkFilename =>
+          `http://localhost:5610/${buildHash}/bundles/kbn-ui-shared-deps/${chunkFilename}`
       ),
-      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
+      `http://localhost:5610/${buildHash}/bundles/kbn-ui-shared-deps/${UiSharedDeps.jsFilename}`,
 
-      'http://localhost:5610/built_assets/dlls/vendors_runtime.bundle.dll.js',
+      `http://localhost:5610/${buildHash}/built_assets/dlls/vendors_runtime.bundle.dll.js`,
       ...DllCompiler.getRawDllConfig().chunks.map(
-        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.bundle.dll.js`
+        chunk =>
+          `http://localhost:5610/${buildHash}/built_assets/dlls/vendors${chunk}.bundle.dll.js`
       ),
 
       shardNum === undefined
-        ? `http://localhost:5610/bundles/tests.bundle.js`
-        : `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
+        ? `http://localhost:5610/${buildHash}/bundles/tests.bundle.js`
+        : `http://localhost:5610/${buildHash}/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${shardNum}`,
 
-      `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+      `http://localhost:5610/${buildHash}/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
       // this causes tilemap tests to fail, probably because the eui styles haven't been
       // included in the karma harness a long some time, if ever
       // `http://localhost:5610/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
       ...DllCompiler.getRawDllConfig().chunks.map(
-        chunk => `http://localhost:5610/built_assets/dlls/vendors${chunk}.style.dll.css`
+        chunk =>
+          `http://localhost:5610/${buildHash}/built_assets/dlls/vendors${chunk}.style.dll.css`
       ),
-      'http://localhost:5610/bundles/tests.style.css',
+      `http://localhost:5610/${buildHash}/bundles/tests.style.css`,
     ];
   }
 
@@ -125,9 +131,9 @@ module.exports = function(grunt) {
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/',
-        '/built_assets/dlls/': 'http://localhost:5610/built_assets/dlls/',
         '/test_bundle/': 'http://localhost:5610/test_bundle/',
+        [`/${buildHash}/bundles/`]: `http://localhost:5610/${buildHash}/bundles/`,
+        [`/${buildHash}/built_assets/dlls/`]: `http://localhost:5610/${buildHash}/built_assets/dlls/`,
       },
 
       client: {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { getAgentStatusById } from './status';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { AgentSOAttributes } from '../../../common/types/models';

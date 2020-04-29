@@ -139,6 +139,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
@@ -159,7 +160,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);

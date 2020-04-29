@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EMSFileSource, emsBoundariesLayerWizardConfig } from './ems_file_source';
+export { emsBoundariesLayerWizardConfig } from './ems_boundaries_layer_wizard';
+export { EMSFileSource } from './ems_file_source';
