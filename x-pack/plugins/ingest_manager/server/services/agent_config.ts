@@ -301,28 +301,49 @@ class AgentConfigService {
     if (!config) {
       return null;
     }
+    const defaultOutput = await outputService.get(
+      soClient,
+      await outputService.getDefaultOutputId(soClient)
+    );
 
     const agentConfig: FullAgentConfig = {
       id: config.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[
-          await outputService.get(soClient, await outputService.getDefaultOutputId(soClient)),
-        ].reduce((outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
-          outputs[name] = {
-            type,
-            hosts,
-            ca_sha256,
-            api_key,
-            ...outputConfig,
-          };
-          return outputs;
-        }, {} as FullAgentConfig['outputs']),
+        ...[defaultOutput].reduce(
+          (outputs, { config: outputConfig, name, type, hosts, ca_sha256, api_key }) => {
+            outputs[name] = {
+              type,
+              hosts,
+              ca_sha256,
+              api_key,
+              ...outputConfig,
+            };
+            return outputs;
+          },
+          {} as FullAgentConfig['outputs']
+        ),
       },
       datasources: (config.datasources as Datasource[])
         .filter(datasource => datasource.enabled)
         .map(ds => storedDatasourceToAgentDatasource(ds)),
       revision: config.revision,
+      ...(config.monitoring_enabled && config.monitoring_enabled.length > 0
+        ? {
+            settings: {
+              monitoring: {
+                use_output: defaultOutput.name,
+                enabled: true,
+                logs: config.monitoring_enabled.indexOf('logs') >= 0,
+                metrics: config.monitoring_enabled.indexOf('metrics') >= 0,
+              },
+            },
+          }
+        : {
+            settings: {
+              monitoring: { enabled: false, logs: false, metrics: false },
+            },
+          }),
     };
 
     return agentConfig;
