@@ -123,9 +123,16 @@ function dedupFields(fields: Fields): Fields {
        *  - name: a.b
        *  In this scenario found could be `object` or `nested` and field will be group
        */
-      if (found.type === 'group' || found.type === 'object' || found.type === 'nested') {
+      if (
+        // only merge if found is a group and field is object, nested, or group.
+        // Or if found is object, or nested, and field is a group.
+        // This is to avoid merging two objects, or nested, or object with a nested.
+        (found.type === 'group' &&
+          (field.type === 'object' || field.type === 'nested' || field.type === 'group')) ||
+        ((found.type === 'object' || found.type === 'nested') && field.type === 'group')
+      ) {
         if (field.type === 'group' || field.type === 'object' || field.type === 'nested') {
-          // the new field has properties let's dedup and concat them with the already existing found variable in
+          // if the new field has properties let's dedup and concat them with the already existing found variable in
           // the array
           if (field.fields) {
             // if the found type was object or nested it won't have a fields array so let's initialize it
@@ -150,6 +157,7 @@ function dedupFields(fields: Fields): Fields {
           // we need to merge in other properties (like `dynamic`) that might exist
           Object.assign(found, importantFieldProps);
         }
+        // if `field.type` wasn't group object or nested, then there's a conflict in types, so lets ignore it
       } else {
         // only `group`, `object`, and `nested` fields can be merged in this way
         // XXX: don't abort on error for now

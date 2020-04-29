@@ -297,4 +297,79 @@ describe('processFields', () => {
     ];
     expect(processFields(nested)).toEqual(nestedExpanded);
   });
+
+  test('ignores redefinitions of an object field', () => {
+    const object = [
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: false,
+      },
+    ];
+
+    const objectExpected = [
+      {
+        name: 'a',
+        type: 'object',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(object)).toEqual(objectExpected);
+  });
+
+  test('ignores redefinitions of a nested field', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: false,
+      },
+    ];
+
+    const nestedExpected = [
+      {
+        name: 'a',
+        type: 'nested',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpected);
+  });
+
+  test('ignores redefinitions of a nested and object field', () => {
+    const nested = [
+      {
+        name: 'a',
+        type: 'nested',
+        dynamic: true,
+      },
+      {
+        name: 'a',
+        type: 'object',
+        dynamic: false,
+      },
+    ];
+
+    const nestedExpected = [
+      {
+        name: 'a',
+        type: 'nested',
+        // should preserve the field that was parsed first which had dynamic: true
+        dynamic: true,
+      },
+    ];
+    expect(processFields(nested)).toEqual(nestedExpected);
+  });
 });
