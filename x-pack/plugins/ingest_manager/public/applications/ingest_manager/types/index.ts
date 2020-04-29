@@ -27,8 +27,8 @@ export {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,

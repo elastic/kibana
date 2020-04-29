@@ -14,7 +14,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
   AgentConfig,
   DefaultPackages,
@@ -25,7 +25,7 @@ import {
   GetOneAgentConfigResponse,
   CreateAgentConfigResponse,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigResponse,
   GetFullAgentConfigResponse,
 } from '../../../common';
 
@@ -178,13 +178,13 @@ export const updateAgentConfigHandler: RequestHandler<
 export const deleteAgentConfigsHandler: RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof DeleteAgentConfigsRequestSchema.body>
+  TypeOf<typeof DeleteAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const body: DeleteAgentConfigsResponse = await agentConfigService.delete(
+    const body: DeleteAgentConfigResponse = await agentConfigService.delete(
       soClient,
-      request.body.agentConfigIds
+      request.body.agentConfigId
     );
     return response.ok({
       body,

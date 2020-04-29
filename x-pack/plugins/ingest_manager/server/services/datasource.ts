@@ -145,6 +145,7 @@ class DatasourceService {
   public async delete(
     soClient: SavedObjectsClientContract,
     ids: string[],
+    unassignFromAgentConfigs: boolean = true,
     options?: { user?: AuthenticatedUser }
   ): Promise<DeleteDatasourcesResponse> {
     const result: DeleteDatasourcesResponse = [];
@@ -155,14 +156,16 @@ class DatasourceService {
         if (!oldDatasource) {
           throw new Error('Datasource not found');
         }
-        await agentConfigService.unassignDatasources(
-          soClient,
-          oldDatasource.config_id,
-          [oldDatasource.id],
-          {
-            user: options?.user,
-          }
-        );
+        if (unassignFromAgentConfigs) {
+          await agentConfigService.unassignDatasources(
+            soClient,
+            oldDatasource.config_id,
+            [oldDatasource.id],
+            {
+              user: options?.user,
+            }
+          );
+        }
         await soClient.delete(SAVED_OBJECT_TYPE, id);
         result.push({
           id,
