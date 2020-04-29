@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(body.now).to.be.a('number');
         expect(body.idleTimeoutExpiration).to.be.a('number');
         expect(body.lifespanExpiration).to.be(null);
-        expect(body.provider).to.be('basic');
+        expect(body.provider).to.eql({ type: 'basic', name: 'basic' });
       });
 
       it('should not extend the session', async () => {

@@ -25,7 +25,7 @@ import {
 } from '../../../../../../../../plugins/kibana_utils/public';
 
 interface IEditIndexPatternState {
-  tab: string; // TODO: type those 3 tabs with enum, when edit_index_pattern.js migrated to ts
+  tab: string;
 }
 
 /**
@@ -38,7 +38,6 @@ export function createEditIndexPatternPageStateContainer({
   defaultTab: string;
   useHashedUrl: boolean;
 }) {
-  // until angular is used as shell - use hash history
   const history = createHashHistory();
   // query param to store app state at
   const stateStorageKey = '_a';
@@ -78,12 +77,10 @@ export function createEditIndexPatternPageStateContainer({
   // makes sure initial url is the same as initial state (this is not really required)
   kbnUrlStateStorage.set(stateStorageKey, stateContainer.getState(), { replace: true });
 
-  // expose api needed for Controller
   return {
     startSyncingState: start,
     stopSyncingState: stop,
     setCurrentTab: (newTab: string) => stateContainer.transitions.setTab(newTab),
     getCurrentTab: () => stateContainer.selectors.tab(),
-    state$: stateContainer.state$,
   };
 }

@@ -7,8 +7,13 @@
 import { Legacy } from 'kibana';
 import { Root } from 'joi';
 import mappings from './mappings.json';
+import {
+  LegacyPluginApi,
+  LegacyPluginSpec,
+  ArrayOrItem,
+} from '../../../../../src/legacy/plugin_discovery/types';
 
-export function alerting(kibana: any) {
+export function alerting(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   return new kibana.Plugin({
     id: 'alerting',
     configPrefix: 'xpack.alerting',
@@ -31,5 +36,5 @@ export function alerting(kibana: any) {
     uiExports: {
       mappings,
     },
-  });
+  } as Legacy.PluginSpecOptions);
 }

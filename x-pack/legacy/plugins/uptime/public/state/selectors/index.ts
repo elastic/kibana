@@ -24,9 +24,7 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
 
 export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
-export const selectDynamicSettings = (state: AppState) => {
-  return state.dynamicSettings;
-};
+export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
   return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };

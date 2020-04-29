@@ -72,14 +72,10 @@ describe('Security Plugin', () => {
                   "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
-                  "getSessionInfo": [Function],
                   "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
                   "invalidateAPIKeyAsInternalUser": [Function],
                   "isAuthenticated": [Function],
-                  "isProviderTypeEnabled": [Function],
-                  "login": [Function],
-                  "logout": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {
