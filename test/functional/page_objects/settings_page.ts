@@ -395,8 +395,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await field.type(indexPatternName, { charByChar: true });
         const tempName = await field.getAttribute('value');
         if (tempName.length > indexPatternName.length) {
-          await field.type(browser.keys.RIGHT, { charByChar: true });
-          await field.type(browser.keys.BACK_SPACE, { charByChar: true });
+          await field.type(browser.keys.DELETE, { charByChar: true });
         }
       }
       const currentName = await field.getAttribute('value');
