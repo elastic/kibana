@@ -5,10 +5,7 @@
  */
 
 import { isRight } from 'fp-ts/lib/Either';
-import {
-  UptimeCommonState,
-  UptimeCommonStateType,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
   state: Record<string, any>,

@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 import { getCertSummary } from '../tls';
-import { Cert } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { Cert } from '../../../../common/runtime_types';
 
 describe('tls alert', () => {
   describe('getCertSummary', () => {

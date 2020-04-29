@@ -10,11 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { UptimeAlertTypeFactory } from './types';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
-import {
-  ACTION_GROUP_DEFINITIONS,
-  DYNAMIC_SETTINGS_DEFAULTS,
-} from '../../../../../legacy/plugins/uptime/common/constants';
-import { Cert } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { ACTION_GROUP_DEFINITIONS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { Cert } from '../../../common/runtime_types';
 import { commonStateTranslations } from './translations';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
