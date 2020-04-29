@@ -77,14 +77,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         case 'group-nested':
           fieldProps = generateMappings(field.fields!);
           fieldProps.type = 'nested';
-          attemptAddDynamicAndEnabled(fieldProps, field);
-
-          if (field.hasOwnProperty('include_in_parent')) {
-            fieldProps.include_in_parent = field.include_in_parent;
-          }
-          if (field.hasOwnProperty('include_in_root')) {
-            fieldProps.include_in_root = field.include_in_root;
-          }
+          attemptAddNestedProps(fieldProps, field);
           break;
         case 'integer':
           fieldProps.type = 'long';
@@ -110,6 +103,10 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         case 'object':
           fieldProps.type = 'object';
           attemptAddDynamicAndEnabled(fieldProps, field);
+          break;
+        case 'nested':
+          fieldProps.type = 'nested';
+          attemptAddNestedProps(fieldProps, field);
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
@@ -142,6 +139,17 @@ function attemptAddDynamicAndEnabled(props: Properties, field: Field) {
   }
   if (field.hasOwnProperty('dynamic')) {
     props.dynamic = field.dynamic;
+  }
+}
+
+function attemptAddNestedProps(props: Properties, field: Field) {
+  attemptAddDynamicAndEnabled(props, field);
+
+  if (field.hasOwnProperty('include_in_parent')) {
+    props.include_in_parent = field.include_in_parent;
+  }
+  if (field.hasOwnProperty('include_in_root')) {
+    props.include_in_root = field.include_in_root;
   }
 }
 

@@ -367,3 +367,31 @@ test('tests processing nested field with property, nested field first', () => {
   const mappings = generateMappings(processedFields);
   expect(mappings).toEqual(expectedMapping);
 });
+
+test('tests processing nested leaf field with properties', () => {
+  const nestedYaml = `
+  - name: a
+    type: object
+    dynamic: false
+  - name: a.b
+    type: nested
+    enabled: false
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        dynamic: false,
+        properties: {
+          b: {
+            enabled: false,
+            type: 'nested',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
+});
