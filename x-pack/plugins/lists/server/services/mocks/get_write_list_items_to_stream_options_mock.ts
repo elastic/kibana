@@ -15,10 +15,10 @@ import {
 
 import { LIST_ID, LIST_ITEM_INDEX } from './lists_services_mock_constants';
 import { getSearchListItemMock } from './get_search_list_item_mock';
-import { getCallAsCurrentUserMock } from './get_data_client_mock';
+import { getCallClusterMock } from './get_call_cluster_mock';
 
 export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStreamOptions => ({
-  callAsCurrentUser: getCallAsCurrentUserMock(getSearchListItemMock()),
+  callCluster: getCallClusterMock(getSearchListItemMock()),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   stream: new Stream.PassThrough(),
@@ -26,7 +26,7 @@ export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStream
 });
 
 export const getWriteNextResponseOptions = (): WriteNextResponseOptions => ({
-  callAsCurrentUser: getCallAsCurrentUserMock(getSearchListItemMock()),
+  callCluster: getCallClusterMock(getSearchListItemMock()),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   searchAfter: [],
@@ -35,7 +35,7 @@ export const getWriteNextResponseOptions = (): WriteNextResponseOptions => ({
 });
 
 export const getResponseOptionsMock = (): GetResponseOptions => ({
-  callAsCurrentUser: getCallAsCurrentUserMock(),
+  callCluster: getCallClusterMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   searchAfter: [],

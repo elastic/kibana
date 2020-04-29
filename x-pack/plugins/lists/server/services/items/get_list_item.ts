@@ -12,16 +12,16 @@ import { deriveTypeFromItem, transformElasticToListItem } from '../utils';
 
 interface GetListItemOptions {
   id: Id;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
 export const getListItem = async ({
   id,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
 }: GetListItemOptions): Promise<ListItemSchema | null> => {
-  const listItemES: SearchResponse<SearchEsListItemSchema> = await callAsCurrentUser('search', {
+  const listItemES: SearchResponse<SearchEsListItemSchema> = await callCluster('search', {
     body: {
       query: {
         term: {

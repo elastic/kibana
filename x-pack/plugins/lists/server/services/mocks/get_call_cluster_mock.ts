@@ -20,6 +20,6 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
   result: '',
 });
 
-export const getCallAsCurrentUserMock = (
-  callAsCurrentUserData: unknown = getEmptyCreateDocumentResponseMock()
-): APICaller => jest.fn().mockResolvedValue(callAsCurrentUserData);
+export const getCallClusterMock = (
+  callCluster: unknown = getEmptyCreateDocumentResponseMock()
+): APICaller => jest.fn().mockResolvedValue(callCluster);

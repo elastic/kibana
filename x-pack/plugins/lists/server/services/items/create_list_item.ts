@@ -22,7 +22,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -35,7 +35,7 @@ export const createListItem = async ({
   listId,
   type,
   value,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   user,
   meta,
@@ -58,7 +58,7 @@ export const createListItem = async ({
     ...transformListItemToElasticQuery({ type, value }),
   };
 
-  const response: CreateDocumentResponse = await callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await callCluster('index', {
     body,
     id,
     index: listItemIndex,

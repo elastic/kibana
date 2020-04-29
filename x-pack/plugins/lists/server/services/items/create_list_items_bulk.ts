@@ -19,7 +19,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -31,7 +31,7 @@ export const createListItemsBulk = async ({
   listId,
   type,
   value,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   user,
   meta,
@@ -63,7 +63,7 @@ export const createListItemsBulk = async ({
     []
   );
 
-  await callAsCurrentUser('bulk', {
+  await callCluster('bulk', {
     body,
     index: listItemIndex,
   });

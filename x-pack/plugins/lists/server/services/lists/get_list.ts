@@ -11,16 +11,16 @@ import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
 
 interface GetListOptions {
   id: Id;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listIndex: string;
 }
 
 export const getList = async ({
   id,
-  callAsCurrentUser,
+  callCluster,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  const result: SearchResponse<SearchEsListSchema> = await callAsCurrentUser('search', {
+  const result: SearchResponse<SearchEsListSchema> = await callCluster('search', {
     body: {
       query: {
         term: {

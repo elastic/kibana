@@ -10,7 +10,7 @@ import {
   TYPE,
   VALUE,
   VALUE_2,
-  getCallAsCurrentUserMock,
+  getCallClusterMock,
   getSearchListItemMock,
 } from '../mocks';
 
@@ -28,9 +28,9 @@ describe('get_list_item_by_values', () => {
   test('Returns a an empty array if the ES query is also empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
-    const callAsCurrentUser = getCallAsCurrentUserMock(data);
+    const callCluster = getCallClusterMock(data);
     const listItem = await getListItemByValues({
-      callAsCurrentUser,
+      callCluster,
       listId: LIST_ID,
       listItemIndex: LIST_ITEM_INDEX,
       type: TYPE,
@@ -42,9 +42,9 @@ describe('get_list_item_by_values', () => {
 
   test('Returns transformed list item if the data exists within ES', async () => {
     const data = getSearchListItemMock();
-    const callAsCurrentUser = getCallAsCurrentUserMock(data);
+    const callCluster = getCallClusterMock(data);
     const listItem = await getListItemByValues({
-      callAsCurrentUser,
+      callCluster,
       listId: LIST_ID,
       listItemIndex: LIST_ITEM_INDEX,
       type: TYPE,

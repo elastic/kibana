@@ -17,7 +17,7 @@ import { createListItemsBulk } from './create_list_items_bulk';
 export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -27,7 +27,7 @@ export interface ImportListItemsToStreamOptions {
 export const importListItemsToStream = ({
   listId,
   stream,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   type,
   user,
@@ -38,7 +38,7 @@ export const importListItemsToStream = ({
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
         buffer: lines,
-        callAsCurrentUser,
+        callCluster,
         listId,
         listItemIndex,
         meta,
@@ -55,7 +55,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   buffer: string[];
   type: Type;
@@ -70,7 +70,7 @@ export interface LinesResult {
 
 export const writeBufferToItems = async ({
   listId,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   buffer,
   type,
@@ -78,7 +78,7 @@ export const writeBufferToItems = async ({
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemByValues({
-    callAsCurrentUser,
+    callCluster,
     listId,
     listItemIndex,
     type,
@@ -90,7 +90,7 @@ export const writeBufferToItems = async ({
   const linesProcessed = duplicatesRemoved.length;
   const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
-    callAsCurrentUser,
+    callCluster,
     listId,
     listItemIndex,
     meta,

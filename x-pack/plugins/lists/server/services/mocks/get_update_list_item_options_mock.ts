@@ -5,7 +5,7 @@
  */
 import { UpdateListItemOptions } from '../items';
 
-import { getCallAsCurrentUserMock } from './get_data_client_mock';
+import { getCallClusterMock } from './get_call_cluster_mock';
 import {
   DATE_NOW,
   LIST_ITEM_ID,
@@ -16,7 +16,7 @@ import {
 } from './lists_services_mock_constants';
 
 export const getUpdateListItemOptionsMock = (): UpdateListItemOptions => ({
-  callAsCurrentUser: getCallAsCurrentUserMock(),
+  callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
   id: LIST_ITEM_ID,
   listItemIndex: LIST_ITEM_INDEX,

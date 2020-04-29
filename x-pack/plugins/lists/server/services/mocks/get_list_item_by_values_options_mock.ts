@@ -6,11 +6,11 @@
 
 import { GetListItemByValuesOptions } from '../items';
 
-import { getCallAsCurrentUserMock } from './get_data_client_mock';
+import { getCallClusterMock } from './get_call_cluster_mock';
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2 } from './lists_services_mock_constants';
 
 export const getListItemByValuesOptionsMocks = (): GetListItemByValuesOptions => ({
-  callAsCurrentUser: getCallAsCurrentUserMock(),
+  callCluster: getCallClusterMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   type: TYPE,

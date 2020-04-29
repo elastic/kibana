@@ -72,7 +72,7 @@ export class ListPlugin {
         return {
           getListClient: (): ListClient =>
             new ListClient({
-              callAsCurrentUser,
+              callCluster: callAsCurrentUser,
               config,
               request,
               security,

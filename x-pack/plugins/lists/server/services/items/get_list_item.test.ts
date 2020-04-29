@@ -7,7 +7,7 @@
 import {
   LIST_ID,
   LIST_INDEX,
-  getCallAsCurrentUserMock,
+  getCallClusterMock,
   getListItemResponseMock,
   getSearchListItemMock,
 } from '../mocks';
@@ -25,8 +25,8 @@ describe('get_list_item', () => {
 
   test('it returns a list item as expected if the list item is found', async () => {
     const data = getSearchListItemMock();
-    const callAsCurrentUser = getCallAsCurrentUserMock(data);
-    const list = await getListItem({ callAsCurrentUser, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const callCluster = getCallClusterMock(data);
+    const list = await getListItem({ callCluster, id: LIST_ID, listItemIndex: LIST_INDEX });
     const expected = getListItemResponseMock();
     expect(list).toEqual(expected);
   });
@@ -34,8 +34,8 @@ describe('get_list_item', () => {
   test('it returns null if the search is empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];
-    const callAsCurrentUser = getCallAsCurrentUserMock(data);
-    const list = await getListItem({ callAsCurrentUser, id: LIST_ID, listItemIndex: LIST_INDEX });
+    const callCluster = getCallClusterMock(data);
+    const list = await getListItem({ callCluster, id: LIST_ID, listItemIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });
 });

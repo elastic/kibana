@@ -12,7 +12,7 @@ import { getListItemByValues } from '.';
 
 export interface GetListItemByValueOptions {
   listId: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   type: Type;
   value: string;
@@ -20,13 +20,13 @@ export interface GetListItemByValueOptions {
 
 export const getListItemByValue = async ({
   listId,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   type,
   value,
 }: GetListItemByValueOptions): Promise<ListItemArraySchema> =>
   getListItemByValues({
-    callAsCurrentUser,
+    callCluster,
     listId,
     listItemIndex,
     type,

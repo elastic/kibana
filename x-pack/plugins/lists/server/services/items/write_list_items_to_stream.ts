@@ -20,7 +20,7 @@ export const SIZE = 100;
 
 export interface ExportListItemsToStreamOptions {
   listId: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -28,7 +28,7 @@ export interface ExportListItemsToStreamOptions {
 
 export const exportListItemsToStream = ({
   listId,
-  callAsCurrentUser,
+  callCluster,
   stream,
   listItemIndex,
   stringToAppend,
@@ -37,7 +37,7 @@ export const exportListItemsToStream = ({
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       searchAfter: undefined,
@@ -46,7 +46,7 @@ export const exportListItemsToStream = ({
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
-        callAsCurrentUser,
+        callCluster,
         listId,
         listItemIndex,
         searchAfter,
@@ -60,7 +60,7 @@ export const exportListItemsToStream = ({
 
 export interface WriteNextResponseOptions {
   listId: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -69,14 +69,14 @@ export interface WriteNextResponseOptions {
 
 export const writeNextResponse = async ({
   listId,
-  callAsCurrentUser,
+  callCluster,
   stream,
   listItemIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
-    callAsCurrentUser,
+    callCluster,
     listId,
     listItemIndex,
     searchAfter,
@@ -100,7 +100,7 @@ export const getSearchAfterFromResponse = <T>({
     : undefined;
 
 export interface GetResponseOptions {
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listId: string;
   searchAfter: undefined | string[];
   listItemIndex: string;
@@ -108,13 +108,13 @@ export interface GetResponseOptions {
 }
 
 export const getResponse = async ({
-  callAsCurrentUser,
+  callCluster,
   searchAfter,
   listId,
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
-  return callAsCurrentUser('search', {
+  return callCluster('search', {
     body: {
       query: {
         term: {

@@ -15,7 +15,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
@@ -23,11 +23,11 @@ export const deleteListItemByValue = async ({
   listId,
   value,
   type,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
 }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
-    callAsCurrentUser,
+    callCluster,
     listId,
     listItemIndex,
     type,
@@ -39,7 +39,7 @@ export const deleteListItemByValue = async ({
     type,
     value: values,
   });
-  await callAsCurrentUser('deleteByQuery', {
+  await callCluster('deleteByQuery', {
     body: {
       query: {
         bool: {

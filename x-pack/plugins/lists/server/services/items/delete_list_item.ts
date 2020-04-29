@@ -12,20 +12,20 @@ import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
 export const deleteListItem = async ({
   id,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
 }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-  const listItem = await getListItem({ callAsCurrentUser, id, listItemIndex });
+  const listItem = await getListItem({ callCluster, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
-    await callAsCurrentUser('delete', {
+    await callCluster('delete', {
       id,
       index: listItemIndex,
     });

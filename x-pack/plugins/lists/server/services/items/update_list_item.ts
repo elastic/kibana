@@ -20,7 +20,7 @@ import { getListItem } from './get_list_item';
 export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -30,14 +30,14 @@ export interface UpdateListItemOptions {
 export const updateListItem = async ({
   id,
   value,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   user,
   meta,
   dateNow,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const listItem = await getListItem({ callAsCurrentUser, id, listItemIndex });
+  const listItem = await getListItem({ callCluster, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
@@ -48,7 +48,7 @@ export const updateListItem = async ({
       ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
-    const response: CreateDocumentResponse = await callAsCurrentUser('update', {
+    const response: CreateDocumentResponse = await callCluster('update', {
       body: {
         doc,
       },

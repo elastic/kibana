@@ -7,7 +7,7 @@
 import {
   LIST_ID,
   LIST_ITEM_INDEX,
-  getCallAsCurrentUserMock,
+  getCallClusterMock,
   getExportListItemsToStreamOptionsMock,
   getResponseOptionsMock,
   getSearchListItemMock,
@@ -37,7 +37,7 @@ describe('write_list_items_to_stream', () => {
       const options = getExportListItemsToStreamOptionsMock();
       const firstResponse = getSearchListItemMock();
       firstResponse.hits.hits = [];
-      options.callAsCurrentUser = getCallAsCurrentUserMock(firstResponse);
+      options.callCluster = getCallClusterMock(firstResponse);
       exportListItemsToStream(options);
 
       let chunks: string[] = [];
@@ -71,7 +71,7 @@ describe('write_list_items_to_stream', () => {
       const firstResponse = getSearchListItemMock();
       const secondResponse = getSearchListItemMock();
       firstResponse.hits.hits = [...firstResponse.hits.hits, ...secondResponse.hits.hits];
-      options.callAsCurrentUser = getCallAsCurrentUserMock(firstResponse);
+      options.callCluster = getCallClusterMock(firstResponse);
       exportListItemsToStream(options);
 
       let chunks: string[] = [];
@@ -94,7 +94,7 @@ describe('write_list_items_to_stream', () => {
       const secondResponse = getSearchListItemMock();
       secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
 
-      options.callAsCurrentUser = jest
+      options.callCluster = jest
         .fn()
         .mockResolvedValueOnce(firstResponse)
         .mockResolvedValueOnce(secondResponse);
@@ -124,7 +124,7 @@ describe('write_list_items_to_stream', () => {
       const listItem = getSearchListItemMock();
       listItem.hits.hits[0].sort = ['sort-value-1'];
       const options = getWriteNextResponseOptions();
-      options.callAsCurrentUser = getCallAsCurrentUserMock(listItem);
+      options.callCluster = getCallClusterMock(listItem);
       const searchAfter = await writeNextResponse(options);
       expect(searchAfter).toEqual(['sort-value-1']);
     });
@@ -133,7 +133,7 @@ describe('write_list_items_to_stream', () => {
       const listItem = getSearchListItemMock();
       listItem.hits.hits = [];
       const options = getWriteNextResponseOptions();
-      options.callAsCurrentUser = getCallAsCurrentUserMock(listItem);
+      options.callCluster = getCallClusterMock(listItem);
       const searchAfter = await writeNextResponse(options);
       expect(searchAfter).toEqual(undefined);
     });
@@ -186,7 +186,7 @@ describe('write_list_items_to_stream', () => {
         index: LIST_ITEM_INDEX,
         size: 100,
       };
-      expect(options.callAsCurrentUser).toBeCalledWith('search', expected);
+      expect(options.callCluster).toBeCalledWith('search', expected);
     });
 
     test('It returns a simple response with expected values and size changed', async () => {
@@ -204,7 +204,7 @@ describe('write_list_items_to_stream', () => {
         index: LIST_ITEM_INDEX,
         size: 33,
       };
-      expect(options.callAsCurrentUser).toBeCalledWith('search', expected);
+      expect(options.callCluster).toBeCalledWith('search', expected);
     });
   });
 

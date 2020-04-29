@@ -12,22 +12,22 @@ import { getList } from './get_list';
 
 export interface DeleteListOptions {
   id: Id;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listIndex: string;
   listItemIndex: string;
 }
 
 export const deleteList = async ({
   id,
-  callAsCurrentUser,
+  callCluster,
   listIndex,
   listItemIndex,
 }: DeleteListOptions): Promise<ListSchema | null> => {
-  const list = await getList({ callAsCurrentUser, id, listIndex });
+  const list = await getList({ callCluster, id, listIndex });
   if (list == null) {
     return null;
   } else {
-    await callAsCurrentUser('deleteByQuery', {
+    await callCluster('deleteByQuery', {
       body: {
         query: {
           term: {
@@ -38,7 +38,7 @@ export const deleteList = async ({
       index: listItemIndex,
     });
 
-    await callAsCurrentUser('delete', {
+    await callCluster('delete', {
       id,
       index: listIndex,
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './get_data_client_mock';
+export * from './get_call_cluster_mock';
 export * from './get_delete_list_options_mock';
 export * from './get_create_list_options_mock';
 export * from './get_list_response_mock';

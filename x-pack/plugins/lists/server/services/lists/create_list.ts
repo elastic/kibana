@@ -23,7 +23,7 @@ export interface CreateListOptions {
   type: Type;
   name: Name;
   description: Description;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -36,7 +36,7 @@ export const createList = async ({
   name,
   type,
   description,
-  callAsCurrentUser,
+  callCluster,
   listIndex,
   user,
   meta,
@@ -55,7 +55,7 @@ export const createList = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const response: CreateDocumentResponse = await callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await callCluster('index', {
     body,
     id,
     index: listIndex,

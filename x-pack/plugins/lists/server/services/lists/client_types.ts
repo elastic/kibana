@@ -22,7 +22,7 @@ import {
 import { ConfigType } from '../../config';
 
 export interface ConstructorOptions {
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   config: ConfigType;
   request: KibanaRequest;
   spaceId: string;

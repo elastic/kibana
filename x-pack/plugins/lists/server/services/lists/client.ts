@@ -65,13 +65,13 @@ export class ListClient {
   private readonly spaceId: string;
   private readonly user: string;
   private readonly config: ConfigType;
-  private readonly callAsCurrentUser: APICaller;
+  private readonly callCluster: APICaller;
 
-  constructor({ spaceId, user, config, callAsCurrentUser }: ConstructorOptions) {
+  constructor({ spaceId, user, config, callCluster }: ConstructorOptions) {
     this.spaceId = spaceId;
     this.user = user;
     this.config = config;
-    this.callAsCurrentUser = callAsCurrentUser;
+    this.callCluster = callCluster;
   }
 
   public getListIndex = (): string => {
@@ -91,9 +91,9 @@ export class ListClient {
   };
 
   public getList = async ({ id }: GetListOptions): Promise<ListSchema | null> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return getList({ callAsCurrentUser, id, listIndex });
+    return getList({ callCluster, id, listIndex });
   };
 
   public createList = async ({
@@ -103,9 +103,9 @@ export class ListClient {
     type,
     meta,
   }: CreateListOptions): Promise<ListSchema> => {
-    const { callAsCurrentUser, user } = this;
+    const { callCluster, user } = this;
     const listIndex = this.getListIndex();
-    return createList({ callAsCurrentUser, description, id, listIndex, meta, name, type, user });
+    return createList({ callCluster, description, id, listIndex, meta, name, type, user });
   };
 
   public createListIfItDoesNotExist = async ({
@@ -124,51 +124,51 @@ export class ListClient {
   };
 
   public getListIndexExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return getIndexExists(callAsCurrentUser, listIndex);
+    return getIndexExists(callCluster, listIndex);
   };
 
   public getListItemIndexExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return getIndexExists(callAsCurrentUser, listItemIndex);
+    return getIndexExists(callCluster, listItemIndex);
   };
 
   public createListBootStrapIndex = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return createBootstrapIndex(callAsCurrentUser, listIndex);
+    return createBootstrapIndex(callCluster, listIndex);
   };
 
   public createListItemBootStrapIndex = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return createBootstrapIndex(callAsCurrentUser, listItemIndex);
+    return createBootstrapIndex(callCluster, listItemIndex);
   };
 
   public getListPolicyExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return getPolicyExists(callAsCurrentUser, listIndex);
+    return getPolicyExists(callCluster, listIndex);
   };
 
   public getListItemPolicyExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listsItemIndex = this.getListItemIndex();
-    return getPolicyExists(callAsCurrentUser, listsItemIndex);
+    return getPolicyExists(callCluster, listsItemIndex);
   };
 
   public getListTemplateExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return getTemplateExists(callAsCurrentUser, listIndex);
+    return getTemplateExists(callCluster, listIndex);
   };
 
   public getListItemTemplateExists = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return getTemplateExists(callAsCurrentUser, listItemIndex);
+    return getTemplateExists(callCluster, listItemIndex);
   };
 
   public getListTemplate = (): Record<string, unknown> => {
@@ -182,71 +182,71 @@ export class ListClient {
   };
 
   public setListTemplate = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const template = this.getListTemplate();
     const listIndex = this.getListIndex();
-    return setTemplate(callAsCurrentUser, listIndex, template);
+    return setTemplate(callCluster, listIndex, template);
   };
 
   public setListItemTemplate = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const template = this.getListItemTemplate();
     const listItemIndex = this.getListItemIndex();
-    return setTemplate(callAsCurrentUser, listItemIndex, template);
+    return setTemplate(callCluster, listItemIndex, template);
   };
 
   public setListPolicy = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return setPolicy(callAsCurrentUser, listIndex, listPolicy);
+    return setPolicy(callCluster, listIndex, listPolicy);
   };
 
   public setListItemPolicy = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return setPolicy(callAsCurrentUser, listItemIndex, listsItemsPolicy);
+    return setPolicy(callCluster, listItemIndex, listsItemsPolicy);
   };
 
   public deleteListIndex = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return deleteAllIndex(callAsCurrentUser, `${listIndex}-*`);
+    return deleteAllIndex(callCluster, `${listIndex}-*`);
   };
 
   public deleteListItemIndex = async (): Promise<boolean> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteAllIndex(callAsCurrentUser, `${listItemIndex}-*`);
+    return deleteAllIndex(callCluster, `${listItemIndex}-*`);
   };
 
   public deleteListPolicy = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return deletePolicy(callAsCurrentUser, listIndex);
+    return deletePolicy(callCluster, listIndex);
   };
 
   public deleteListItemPolicy = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return deletePolicy(callAsCurrentUser, listItemIndex);
+    return deletePolicy(callCluster, listItemIndex);
   };
 
   public deleteListTemplate = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
-    return deleteTemplate(callAsCurrentUser, listIndex);
+    return deleteTemplate(callCluster, listIndex);
   };
 
   public deleteListItemTemplate = async (): Promise<unknown> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteTemplate(callAsCurrentUser, listItemIndex);
+    return deleteTemplate(callCluster, listItemIndex);
   };
 
   public deleteListItem = async ({ id }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
-    return deleteListItem({ callAsCurrentUser, id, listItemIndex });
+    return deleteListItem({ callCluster, id, listItemIndex });
   };
 
   public deleteListItemByValue = async ({
@@ -254,10 +254,10 @@ export class ListClient {
     value,
     type,
   }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     return deleteListItemByValue({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       type,
@@ -266,11 +266,11 @@ export class ListClient {
   };
 
   public deleteList = async ({ id }: DeleteListOptions): Promise<ListSchema | null> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listIndex = this.getListIndex();
     const listItemIndex = this.getListItemIndex();
     return deleteList({
-      callAsCurrentUser,
+      callCluster,
       id,
       listIndex,
       listItemIndex,
@@ -282,10 +282,10 @@ export class ListClient {
     listId,
     stream,
   }: ExportListItemsToStreamOptions): void => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     exportListItemsToStream({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       stream,
@@ -299,10 +299,10 @@ export class ListClient {
     stream,
     meta,
   }: ImportListItemsToStreamOptions): Promise<void> => {
-    const { callAsCurrentUser, user } = this;
+    const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return importListItemsToStream({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       meta,
@@ -317,10 +317,10 @@ export class ListClient {
     value,
     type,
   }: GetListItemByValueOptions): Promise<ListItemArraySchema> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValue({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       type,
@@ -335,10 +335,10 @@ export class ListClient {
     type,
     meta,
   }: CreateListItemOptions): Promise<ListItemSchema> => {
-    const { callAsCurrentUser, user } = this;
+    const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return createListItem({
-      callAsCurrentUser,
+      callCluster,
       id,
       listId,
       listItemIndex,
@@ -354,10 +354,10 @@ export class ListClient {
     value,
     meta,
   }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
-    const { callAsCurrentUser, user } = this;
+    const { callCluster, user } = this;
     const listItemIndex = this.getListItemIndex();
     return updateListItem({
-      callAsCurrentUser,
+      callCluster,
       id,
       listItemIndex,
       meta,
@@ -372,10 +372,10 @@ export class ListClient {
     description,
     meta,
   }: UpdateListOptions): Promise<ListSchema | null> => {
-    const { callAsCurrentUser, user } = this;
+    const { callCluster, user } = this;
     const listIndex = this.getListIndex();
     return updateList({
-      callAsCurrentUser,
+      callCluster,
       description,
       id,
       listIndex,
@@ -386,10 +386,10 @@ export class ListClient {
   };
 
   public getListItem = async ({ id }: GetListItemOptions): Promise<ListItemSchema | null> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItem({
-      callAsCurrentUser,
+      callCluster,
       id,
       listItemIndex,
     });
@@ -400,10 +400,10 @@ export class ListClient {
     listId,
     value,
   }: GetListItemsByValueOptions): Promise<ListItemArraySchema> => {
-    const { callAsCurrentUser } = this;
+    const { callCluster } = this;
     const listItemIndex = this.getListItemIndex();
     return getListItemByValues({
-      callAsCurrentUser,
+      callCluster,
       listId,
       listItemIndex,
       type,

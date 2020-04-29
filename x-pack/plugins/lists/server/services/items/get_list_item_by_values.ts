@@ -12,7 +12,7 @@ import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../util
 
 export interface GetListItemByValuesOptions {
   listId: string;
-  callAsCurrentUser: APICaller;
+  callCluster: APICaller;
   listItemIndex: string;
   type: Type;
   value: string[];
@@ -20,12 +20,12 @@ export interface GetListItemByValuesOptions {
 
 export const getListItemByValues = async ({
   listId,
-  callAsCurrentUser,
+  callCluster,
   listItemIndex,
   type,
   value,
 }: GetListItemByValuesOptions): Promise<ListItemArraySchema> => {
-  const response: SearchResponse<SearchEsListItemSchema> = await callAsCurrentUser('search', {
+  const response: SearchResponse<SearchEsListItemSchema> = await callCluster('search', {
     body: {
       query: {
         bool: {
