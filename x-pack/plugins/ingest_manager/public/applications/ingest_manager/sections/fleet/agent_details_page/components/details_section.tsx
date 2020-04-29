@@ -71,7 +71,7 @@ export const AgentDetailSection: React.FunctionComponent<Props> = ({ agent }) =>
 
   // Fetch AgentConfig information
   const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
-    agent.config_id as string
+    agent.config_id
   );
 
   const items = [
