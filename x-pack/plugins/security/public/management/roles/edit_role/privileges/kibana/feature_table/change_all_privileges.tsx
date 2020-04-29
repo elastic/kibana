@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_change_all_privileges.scss';
+import './change_all_privileges.scss';
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiLink, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';

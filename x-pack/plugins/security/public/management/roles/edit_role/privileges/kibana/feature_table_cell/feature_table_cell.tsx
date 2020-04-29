@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_feature_table_cell.scss';
+import './feature_table_cell.scss';
 
 import React from 'react';
 import { EuiText, EuiIconTip, EuiIcon, IconType } from '@elastic/eui';

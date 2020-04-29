@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_collapsible_panel.scss';
+import './collapsible_panel.scss';
 
 import {
   EuiFlexGroup,

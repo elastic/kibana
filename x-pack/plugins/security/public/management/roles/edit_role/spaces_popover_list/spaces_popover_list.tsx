@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_spaces_popover_list.scss';
+import './spaces_popover_list.scss';
 
 import {
   EuiButtonEmpty,
