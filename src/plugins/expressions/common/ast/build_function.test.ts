@@ -240,6 +240,18 @@ describe('buildExpressionFunction()', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
       expect(fn.getArgument('test')).toBe(undefined);
     });
+
+    test('returned array can be updated to add/remove multiargs', () => {
+      const fn = buildExpressionFunction('hello', { world: [0, 1] });
+      const arg = fn.getArgument('world');
+      arg!.push(2);
+      expect(fn.getArgument('world')).toEqual([0, 1, 2]);
+      fn.replaceArgument(
+        'world',
+        arg!.filter(a => a !== 1)
+      );
+      expect(fn.getArgument('world')).toEqual([0, 2]);
+    });
   });
 
   describe('#toAst', () => {
