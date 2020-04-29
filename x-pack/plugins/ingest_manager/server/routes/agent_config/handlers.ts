@@ -22,6 +22,7 @@ import {
 } from '../../types';
 import {
   GetAgentConfigsResponse,
+  GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
   CreateAgentConfigResponse,
   UpdateAgentConfigResponse,
@@ -46,7 +47,7 @@ export const getAgentConfigsHandler: RequestHandler<
 
     await bluebird.map(
       items,
-      agentConfig =>
+      (agentConfig: GetAgentConfigsResponseItem) =>
         listAgents(soClient, {
           showInactive: true,
           perPage: 0,

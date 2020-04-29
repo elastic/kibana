@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, NewDatasource, FullAgentConfigDatasource } from '../types';
+import { Datasource, FullAgentConfigDatasource } from '../types';
 import { DEFAULT_OUTPUT } from '../constants';
 
 export const storedDatasourceToAgentDatasource = (
-  datasource: Datasource | NewDatasource
+  datasource: Datasource
 ): FullAgentConfigDatasource => {
-  const { name, namespace, enabled, package: pkg, inputs } = datasource;
+  const { id, name, namespace, enabled, package: pkg, inputs } = datasource;
 
   const fullDatasource: FullAgentConfigDatasource = {
-    id: 'id' in datasource ? datasource.id : name,
+    id: id || name,
     name,
     namespace,
     enabled,
