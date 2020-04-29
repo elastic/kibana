@@ -112,11 +112,17 @@ describe('buildExpression()', () => {
     `);
   });
 
-  describe('#addFunction', () => {
-    test('adds new function to the AST', () => {
+  describe('functions', () => {
+    test('returns an array of buildExpressionFunctions', () => {
+      const exp = buildExpression(ast);
+      expect(exp.functions).toHaveLength(1);
+      expect(exp.functions.map(f => f.name)).toEqual(['foo']);
+    });
+
+    test('functions.push() adds new function to the AST', () => {
       const exp = buildExpression(ast);
       const fn = buildExpressionFunction('test', { abc: [123] });
-      exp.addFunction(fn);
+      exp.functions.push(fn);
       expect(exp.toAst()).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -159,6 +165,31 @@ describe('buildExpression()', () => {
           "type": "expression",
         }
       `);
+    });
+
+    test('functions can be reordered', () => {
+      const exp = buildExpression(ast);
+      const fn = buildExpressionFunction('test', { abc: [123] });
+      exp.functions.push(fn);
+      expect(exp.functions.map(f => f.name)).toEqual(['foo', 'test']);
+      const testFn = exp.functions[1];
+      exp.functions[1] = exp.functions[0];
+      exp.functions[0] = testFn;
+      expect(exp.functions.map(f => f.name)).toEqual(['test', 'foo']);
+      const barFn = buildExpressionFunction('bar', {});
+      const fooFn = exp.functions[1];
+      exp.functions[1] = barFn;
+      exp.functions[2] = fooFn;
+      expect(exp.functions.map(f => f.name)).toEqual(['test', 'bar', 'foo']);
+    });
+
+    test('functions can be removed', () => {
+      const exp = buildExpression(ast);
+      const fn = buildExpressionFunction('test', { abc: [123] });
+      exp.functions.push(fn);
+      expect(exp.functions.map(f => f.name)).toEqual(['foo', 'test']);
+      exp.functions.shift();
+      expect(exp.functions.map(f => f.name)).toEqual(['test']);
     });
   });
 
