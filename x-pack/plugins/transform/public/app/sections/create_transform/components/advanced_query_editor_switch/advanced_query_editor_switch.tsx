@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,15 +18,12 @@ import { StepDefineFormHook } from '../step_define';
 export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
   advancedSourceEditor: {
     actions: {
-      applyAdvancedSourceEditorChanges,
       setAdvancedSourceEditorSwitchModalVisible,
       setSourceConfigUpdated,
       toggleAdvancedSourceEditor,
     },
     state: {
-      advancedEditorSourceConfig,
       isAdvancedSourceEditorEnabled,
-      isAdvancedSourceEditorApplyButtonEnabled,
       isAdvancedSourceEditorSwitchModalVisible,
       sourceConfigUpdated,
     },
@@ -35,12 +32,6 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
     actions: { setSearchQuery },
   },
 }) => {
-  const applyChangesHandler = () => {
-    const sourceConfig = JSON.parse(advancedEditorSourceConfig);
-    setSearchQuery(sourceConfig);
-    applyAdvancedSourceEditorChanges();
-  };
-
   // If switching to KQL after updating via editor - reset search
   const toggleEditorHandler = (reset = false) => {
     if (reset === true) {
@@ -51,51 +42,35 @@ export const AdvancedQueryEditorSwitch: FC<StepDefineFormHook> = ({
   };
 
   return (
-    <EuiFormRow>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
-              {
-                defaultMessage: 'Advanced query editor',
-              }
-            )}
-            checked={isAdvancedSourceEditorEnabled}
-            onChange={() => {
-              if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
-                setAdvancedSourceEditorSwitchModalVisible(true);
-                return;
-              }
-
-              toggleEditorHandler();
-            }}
-            data-test-subj="transformAdvancedQueryEditorSwitch"
-          />
-          {isAdvancedSourceEditorSwitchModalVisible && (
-            <SwitchModal
-              onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
-              onConfirm={() => {
-                setAdvancedSourceEditorSwitchModalVisible(false);
-                toggleEditorHandler(true);
-              }}
-              type={'source'}
-            />
-          )}
-        </EuiFlexItem>
-        {isAdvancedSourceEditorEnabled && (
-          <EuiButton
-            size="s"
-            fill
-            onClick={applyChangesHandler}
-            disabled={!isAdvancedSourceEditorApplyButtonEnabled}
-          >
-            {i18n.translate('xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText', {
-              defaultMessage: 'Apply changes',
-            })}
-          </EuiButton>
+    <>
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.transform.stepDefineForm.advancedEditorSourceConfigSwitchLabel',
+          {
+            defaultMessage: 'Edit JSON query',
+          }
         )}
-      </EuiFlexGroup>
-    </EuiFormRow>
+        checked={isAdvancedSourceEditorEnabled}
+        onChange={() => {
+          if (isAdvancedSourceEditorEnabled && sourceConfigUpdated) {
+            setAdvancedSourceEditorSwitchModalVisible(true);
+            return;
+          }
+
+          toggleEditorHandler();
+        }}
+        data-test-subj="transformAdvancedQueryEditorSwitch"
+      />
+      {isAdvancedSourceEditorSwitchModalVisible && (
+        <SwitchModal
+          onCancel={() => setAdvancedSourceEditorSwitchModalVisible(false)}
+          onConfirm={() => {
+            setAdvancedSourceEditorSwitchModalVisible(false);
+            toggleEditorHandler(true);
+          }}
+          type={'source'}
+        />
+      )}
+    </>
   );
 };

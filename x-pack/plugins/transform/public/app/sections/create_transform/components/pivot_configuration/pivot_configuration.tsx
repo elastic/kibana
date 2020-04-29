@@ -31,6 +31,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
     return (
       <>
         <EuiFormRow
+          fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.groupByLabel', {
             defaultMessage: 'Group by',
           })}
@@ -43,6 +44,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
               deleteHandler={deleteGroupBy}
             />
             <DropDown
+              fullWidth
               changeHandler={addGroupBy}
               options={groupByOptions}
               placeholder={i18n.translate('xpack.transform.stepDefineForm.groupByPlaceholder', {
@@ -54,6 +56,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
         </EuiFormRow>
 
         <EuiFormRow
+          fullWidth
           label={i18n.translate('xpack.transform.stepDefineForm.aggregationsLabel', {
             defaultMessage: 'Aggregations',
           })}
@@ -66,6 +69,7 @@ export const PivotConfiguration: FC<StepDefineFormHook['pivotConfig']> = memo(
               deleteHandler={deleteAggregation}
             />
             <DropDown
+              fullWidth
               changeHandler={addAggregation}
               options={aggOptions}
               placeholder={i18n.translate(
