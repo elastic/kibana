@@ -82,7 +82,8 @@ const getPushedInfo = (
           },
         };
   }, {});
-  const hasDataToPush = caseServices[caseConnectorId].hasDataToPush;
+  const hasDataToPush =
+    caseServices[caseConnectorId] != null ? caseServices[caseConnectorId].hasDataToPush : true;
   return {
     hasDataToPush,
     caseServices,
