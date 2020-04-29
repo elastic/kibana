@@ -106,7 +106,13 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
+        const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+        const hasActionsDisabled = actions.some(
+          action =>
+            !index[action.actionTypeId].enabled &&
+            !checkActionFormActionTypeEnabled(index[action.actionTypeId], preconfiguredConnectors)
+              .isEnabled
+        );
         if (setHasActionsDisabled) {
           setHasActionsDisabled(hasActionsDisabled);
         }
