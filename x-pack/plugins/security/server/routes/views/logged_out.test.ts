@@ -39,7 +39,7 @@ describe('LoggedOut view routes', () => {
 
   it('redirects user to the root page if they have a session already.', async () => {
     authc.getSessionInfo.mockResolvedValue({
-      provider: 'basic',
+      provider: { type: 'basic', name: 'basic' },
       now: 0,
       idleTimeoutExpiration: null,
       lifespanExpiration: null,

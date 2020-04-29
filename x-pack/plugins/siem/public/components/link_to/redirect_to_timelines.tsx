@@ -11,14 +11,24 @@ import { SiemPageName } from '../../pages/home/types';
 
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
+import { TimelineTypes } from '../../../common/types/timelines';
 
 export type TimelineComponentProps = RouteComponentProps<{
+  tabName: 'default' | 'template';
   search: string;
 }>;
 
-export const RedirectToTimelinesPage = ({ location: { search } }: TimelineComponentProps) => (
-  <RedirectWrapper to={`/${SiemPageName.timelines}/default${search}`} />
+export const RedirectToTimelinesPage = ({
+  match: {
+    params: { tabName },
+  },
+  location: { search },
+}: TimelineComponentProps) => (
+  <RedirectWrapper to={`/${SiemPageName.timelines}/${tabName}${search}`} />
 );
 
 export const getTimelinesUrl = (search?: string) =>
   `#/link-to/${SiemPageName.timelines}/default${appendSearch(search)}`;
+
+export const getTemplateTimelinesUrl = (search?: string) =>
+  `#/link-to/${SiemPageName.timelines}/template${appendSearch(search)}`;

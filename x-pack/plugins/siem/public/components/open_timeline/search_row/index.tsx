@@ -35,7 +35,7 @@ SearchRowFlexGroup.displayName = 'SearchRowFlexGroup';
 type Props = Pick<
   OpenTimelineProps,
   'onlyFavorites' | 'onQueryChange' | 'onToggleOnlyFavorites' | 'query' | 'totalSearchResultsCount'
->;
+> & { tabs?: JSX.Element };
 
 const searchBox = {
   placeholder: i18n.SEARCH_PLACEHOLDER,
@@ -46,7 +46,14 @@ const searchBox = {
  * Renders the row containing the search input and Only Favorites filter
  */
 export const SearchRow = React.memo<Props>(
-  ({ onlyFavorites, onQueryChange, onToggleOnlyFavorites, query, totalSearchResultsCount }) => {
+  ({
+    onlyFavorites,
+    onQueryChange,
+    onToggleOnlyFavorites,
+    query,
+    totalSearchResultsCount,
+    tabs,
+  }) => {
     return (
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
@@ -55,15 +62,17 @@ export const SearchRow = React.memo<Props>(
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
-              <EuiFilterButton
-                data-test-subj="only-favorites-toggle"
-                hasActiveFilters={onlyFavorites}
-                onClick={onToggleOnlyFavorites}
-              >
-                {i18n.ONLY_FAVORITES}
-              </EuiFilterButton>
-              {TimetypeAction}
+            <EuiFilterGroup fullWidth={true}>
+              <>
+                <EuiFilterButton
+                  data-test-subj="only-favorites-toggle"
+                  hasActiveFilters={onlyFavorites}
+                  onClick={onToggleOnlyFavorites}
+                >
+                  {i18n.ONLY_FAVORITES}
+                </EuiFilterButton>
+                {tabs}
+              </>
             </EuiFilterGroup>
           </EuiFlexItem>
         </SearchRowFlexGroup>

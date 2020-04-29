@@ -17,12 +17,14 @@ import {
   EuiFilterButton,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { ListProps } from 'react-virtualized';
 import styled from 'styled-components';
 
-import { AllTimelinesQuery } from '../../../containers/timeline/all';
+import { useGetAllTimeline } from '../../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
+import { TimelineType } from '../../../../common/types/timeline';
+
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
@@ -98,6 +100,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const [searchTimelineValue, setSearchTimelineValue] = useState('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
+  const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
+
   const onSearchTimeline = useCallback(val => {
     setSearchTimelineValue(val);
   }, []);
@@ -216,62 +220,66 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [searchRef, onlyFavorites, handleOnToggleOnlyFavorites]
   );
 
+  useEffect(() => {
+    fetchAllTimeline({
+      pageInfo: {
+        pageIndex: 1,
+        pageSize,
+      },
+      search: searchTimelineValue,
+      sort: {
+        sortField: SortFieldTimeline.updated,
+        sortOrder: Direction.desc,
+      },
+      onlyUserFavorite: onlyFavorites,
+      timelineTypes: TimelineType.default,
+      timelines,
+      totalCount: timelineCount,
+    });
+  }, [onlyFavorites, pageSize, searchTimelineValue, timelines, timelineCount]);
+
   return (
-    <>
-      <AllTimelinesQuery
-        pageInfo={{
-          pageIndex: 1,
-          pageSize,
+    <EuiSelectableContainer isLoading={loading}>
+      <EuiSelectable
+        height={POPOVER_HEIGHT}
+        isLoading={loading && timelines.length === 0}
+        listProps={{
+          rowHeight: TIMELINE_ITEM_HEIGHT,
+          showIcons: false,
+          virtualizedProps: ({
+            onScroll: handleOnScroll.bind(
+              null,
+              timelines.filter(t => !hideUntitled || t.title !== '').length,
+              timelineCount
+            ),
+          } as unknown) as ListProps,
         }}
-        search={searchTimelineValue}
-        sort={{ sortField: SortFieldTimeline.updated, sortOrder: Direction.desc }}
-        onlyUserFavorite={onlyFavorites}
+        renderOption={renderTimelineOption}
+        onChange={handleTimelineChange}
+        searchable
+        searchProps={{
+          'data-test-subj': 'timeline-super-select-search-box',
+          isLoading: loading,
+          placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
+          onSearch: onSearchTimeline,
+          incremental: false,
+          inputRef: (ref: HTMLElement) => {
+            setSearchRef(ref);
+          },
+        }}
+        singleSelection={true}
+        options={getSelectableOptions({ timelines, onlyFavorites, searchTimelineValue })}
         timelineTypes="default"
       >
-        {({ timelines, loading, totalCount }) => (
-          <EuiSelectableContainer isLoading={loading}>
-            <EuiSelectable
-              height={POPOVER_HEIGHT}
-              isLoading={loading && timelines.length === 0}
-              listProps={{
-                rowHeight: TIMELINE_ITEM_HEIGHT,
-                showIcons: false,
-                virtualizedProps: ({
-                  onScroll: handleOnScroll.bind(
-                    null,
-                    timelines.filter(t => !hideUntitled || t.title !== '').length,
-                    totalCount
-                  ),
-                } as unknown) as ListProps,
-              }}
-              renderOption={renderTimelineOption}
-              onChange={handleTimelineChange}
-              searchable
-              searchProps={{
-                'data-test-subj': 'timeline-super-select-search-box',
-                isLoading: loading,
-                placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
-                onSearch: onSearchTimeline,
-                incremental: false,
-                inputRef: (ref: HTMLElement) => {
-                  setSearchRef(ref);
-                },
-              }}
-              singleSelection={true}
-              options={getSelectableOptions({ timelines, onlyFavorites, searchTimelineValue })}
-            >
-              {(list, search) => (
-                <>
-                  {search}
-                  {favoritePortal}
-                  {list}
-                </>
-              )}
-            </EuiSelectable>
-          </EuiSelectableContainer>
+        {(list, search) => (
+          <>
+            {search}
+            {favoritePortal}
+            {list}
+          </>
         )}
-      </AllTimelinesQuery>
-    </>
+      </EuiSelectable>
+    </EuiSelectableContainer>
   );
 };
 

@@ -7,19 +7,9 @@
 import uuid from 'uuid';
 import { has } from 'lodash/fp';
 import { createBulkErrorObject, BulkError } from '../../../detection_engine/routes/utils';
-import { PinnedEvent } from '../../../pinned_event/saved_object';
-import { Note } from '../../../note/saved_object';
-
-import { Timeline } from '../../saved_object';
-import { SavedTimeline } from '../../types';
-import { FrameworkRequest } from '../../../framework';
-import { SavedNote } from '../../../note/types';
+import { SavedTimeline } from '../../../../../common/types/timeline';
 import { NoteResult } from '../../../../graphql/types';
 import { HapiReadableStream } from '../../../detection_engine/rules/types';
-
-const pinnedEventLib = new PinnedEvent();
-const timelineLib = new Timeline();
-const noteLib = new Note();
 
 export interface ImportTimelinesSchema {
   success: boolean;
@@ -84,100 +74,6 @@ export const getTupleDuplicateErrorsAndUniqueTimeline = (
   return [Array.from(errors.values()), Array.from(timelinesAcc.values())];
 };
 
-export const saveTimelines = async (
-  frameworkRequest: FrameworkRequest,
-  timeline: SavedTimeline,
-  timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null
-) => {
-  const newTimelineRes = await timelineLib.persistTimeline(
-    frameworkRequest,
-    timelineSavedObjectId ?? null,
-    timelineVersion ?? null,
-    timeline
-  );
-
-  return {
-    newTimelineSavedObjectId: newTimelineRes?.timeline?.savedObjectId ?? null,
-    newTimelineVersion: newTimelineRes?.timeline?.version ?? null,
-  };
-};
-
-export const savePinnedEvents = (
-  frameworkRequest: FrameworkRequest,
-  timelineSavedObjectId: string,
-  pinnedEventIds?: string[] | null
-) => {
-  return (
-    pinnedEventIds?.map(eventId => {
-      return pinnedEventLib.persistPinnedEventOnTimeline(
-        frameworkRequest,
-        null, // pinnedEventSavedObjectId
-        eventId,
-        timelineSavedObjectId
-      );
-    }) ?? []
-  );
-};
-
-export const saveNotes = (
-  frameworkRequest: FrameworkRequest,
-  timelineSavedObjectId: string,
-  timelineVersion?: string | null,
-  existingNoteIds?: string[],
-  newNotes?: NoteResult[]
-) => {
-  return Promise.all(
-    newNotes?.map(note => {
-      const newNote: SavedNote = {
-        eventId: note.eventId,
-        note: note.note,
-        timelineId: timelineSavedObjectId,
-      };
-
-      return noteLib.persistNote(
-        frameworkRequest,
-        existingNoteIds?.find(nId => nId === note.noteId) ?? null,
-        timelineVersion ?? null,
-        newNote
-      );
-    }) ?? []
-  );
-};
-
-export const createTimelines = async (
-  frameworkRequest: FrameworkRequest,
-  timeline: SavedTimeline,
-  timelineSavedObjectId?: string | null,
-  timelineVersion?: string | null,
-  pinnedEventIds?: string[] | null,
-  notes?: NoteResult[],
-  existingNoteIds?: string[]
-) => {
-  const { newTimelineSavedObjectId, newTimelineVersion } = await saveTimelines(
-    frameworkRequest,
-    timeline,
-    timelineSavedObjectId,
-    timelineVersion
-  );
-  await Promise.all([
-    savePinnedEvents(
-      frameworkRequest,
-      timelineSavedObjectId ?? newTimelineSavedObjectId,
-      pinnedEventIds
-    ),
-    saveNotes(
-      frameworkRequest,
-      timelineSavedObjectId ?? newTimelineSavedObjectId,
-      newTimelineVersion,
-      existingNoteIds,
-      notes
-    ),
-  ]);
-
-  return newTimelineSavedObjectId;
-};
-
 export const isImportRegular = (
   importTimelineResponse: ImportTimelineResponse
 ): importTimelineResponse is ImportRegular => {
@@ -189,3 +85,15 @@ export const isBulkError = (
 ): importRuleResponse is BulkError => {
   return has('error', importRuleResponse);
 };
+
+export const timelineSavedObjectOmittedFields = [
+  'globalNotes',
+  'eventNotes',
+  'pinnedEventIds',
+  'version',
+  'savedObjectId',
+  'created',
+  'createdBy',
+  'updated',
+  'updatedBy',
+];

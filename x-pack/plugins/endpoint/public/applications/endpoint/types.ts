@@ -17,7 +17,6 @@ import {
   AlertData,
   AlertResultList,
   Immutable,
-  ImmutableArray,
   AlertDetails,
   MalwareFields,
   UIPolicyConfig,
@@ -312,7 +311,7 @@ export type AlertListData = AlertResultList;
 
 export interface AlertListState {
   /** Array of alert items. */
-  readonly alerts: ImmutableArray<AlertData>;
+  readonly alerts: Immutable<AlertData[]>;
 
   /** The total number of alerts on the page. */
   readonly total: number;

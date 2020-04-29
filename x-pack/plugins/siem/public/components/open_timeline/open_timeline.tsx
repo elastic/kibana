@@ -13,7 +13,7 @@ import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { ImportDataModal } from '../import_data_modal';
 import * as i18n from './translations';
-import { importTimelines } from '../../containers/timeline/all/api';
+import { importTimelines } from '../../containers/timeline/api';
 
 import {
   UtilityBarGroup,
@@ -114,7 +114,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         refetch();
       }
     }, [setImportDataModalToggle, refetch]);
-    const tabs =
 
     return (
       <>
@@ -143,7 +142,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         />
 
         <EuiPanel className={OPEN_TIMELINE_CLASS_NAME}>
-          {renderTabs(true)}
+          {tabs}
           <SearchRow
             data-test-subj="search-row"
             onlyFavorites={onlyFavorites}

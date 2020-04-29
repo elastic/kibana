@@ -9,6 +9,7 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 import { Refetch } from '../../store/inputs/model';
+import { TimelineType } from '../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -47,6 +48,8 @@ export interface OpenTimelineResult {
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   savedObjectId?: string | null;
   title?: string | null;
+  templateTimelineId?: string | null;
+  type?: TimelineType.template | TimelineType.default;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -159,7 +162,7 @@ export interface OpenTimelineProps {
   /** the requested field to sort on */
   sortField: string;
   /** timeline / template timeline */
-  tabs: () => React.element;
+  tabs: JSX.Element;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */
@@ -187,3 +190,8 @@ export type DispatchUpdateTimeline = ({
   to,
   ruleNote,
 }: UpdateTimeline) => () => void;
+
+export enum TimelineTabsStyle {
+  tab = 'tab',
+  filter = 'filter',
+}

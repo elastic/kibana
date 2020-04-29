@@ -12,7 +12,6 @@ import { OpenTimelineProps, ActionTimelineToShow } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';
-import { useTimelineTabs } from '../useTimelineTabs';
 
 export const HeaderContainer = styled.div`
   width: 100%;
@@ -43,6 +42,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
+    tabs,
     title,
     totalSearchResultsCount,
   }) => {
@@ -53,7 +53,6 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
           : ['duplicate'];
       return actions.filter(action => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
-    const { timelineTypes, renderTabs } = useTimelineTabs();
 
     return (
       <>
@@ -66,13 +65,13 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               title={title}
             />
             <>
-              {renderTabs(false)}
               <SearchRow
                 data-test-subj="search-row"
                 onlyFavorites={onlyFavorites}
                 onQueryChange={onQueryChange}
                 onToggleOnlyFavorites={onToggleOnlyFavorites}
                 query={query}
+                tabs={tabs}
                 totalSearchResultsCount={totalSearchResultsCount}
               />
             </>

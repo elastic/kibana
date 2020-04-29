@@ -125,6 +125,11 @@ export const timelineSchema = gql`
     script: String
   }
 
+  enum TimelineType {
+    default
+    template
+  }
+
   input TimelineInput {
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
@@ -134,6 +139,9 @@ export const timelineSchema = gql`
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
     title: String
+    templateTimelineId: String
+    templateTimelineVersion: Int
+    timelineType: TimelineType
     dateRange: DateRangePickerInput
     savedQueryId: String
     sort: SortTimelineInput
@@ -237,6 +245,9 @@ export const timelineSchema = gql`
     savedObjectId: String!
     sort: SortTimelineResult
     title: String
+    templateTimelineId: String
+    templateTimelineVersion: Int
+    timelineType: TimelineType
     updated: Float
     updatedBy: String
     version: String!
