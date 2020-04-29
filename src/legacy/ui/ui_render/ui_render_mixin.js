@@ -145,8 +145,9 @@ export function uiRenderMixin(kbnServer, server, config) {
           // load these plugins first, they are "shared" and other bundles access their
           // public/index exports without considering topographic sorting by plugin deps (for now)
           'kibanaUtils',
-          'esUiShared',
           'kibanaReact',
+          'data',
+          'esUiShared',
           ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
         );
 
