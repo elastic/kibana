@@ -18,7 +18,7 @@ import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
 import * as i18n from './translations';
 
-const ProviderBadgeStyled = styled(EuiBadge)`
+const ProviderBadgeStyled = (styled(EuiBadge)`
   .euiToolTipAnchor {
     &::after {
       font-style: normal;
@@ -44,7 +44,7 @@ const ProviderBadgeStyled = styled(EuiBadge)`
     margin-right: 0;
     margin-left: 4px;
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 ProviderBadgeStyled.displayName = 'ProviderBadgeStyled';
 
