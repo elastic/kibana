@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { Logger, LogMeta } from '../../../logging';
 
 /*
@@ -28,13 +27,13 @@ export type LogFn = (path: string[], message: string) => void;
 
 /** @public */
 export interface SavedObjectsMigrationLogger {
-  debug: (msg: string) => void;
-  info: (msg: string) => void;
+  debug: (msg: string, meta?: LogMeta) => void;
+  info: (msg: string, meta?: LogMeta) => void;
   /**
    * @deprecated Use `warn` instead.
    */
   warning: (msg: string) => void;
-  warn: (msg: string) => void;
+  warn: (msg: string, meta?: LogMeta) => void;
   error: (msg: string, meta: LogMeta) => void;
 }
 
@@ -45,9 +44,9 @@ export class MigrationLogger implements SavedObjectsMigrationLogger {
     this.logger = log;
   }
 
-  public info = (msg: string) => this.logger.info(msg);
-  public debug = (msg: string) => this.logger.debug(msg);
+  public info = (msg: string, meta?: LogMeta) => this.logger.info(msg, meta);
+  public debug = (msg: string, meta?: LogMeta) => this.logger.debug(msg, meta);
   public warning = (msg: string) => this.logger.warn(msg);
-  public warn = (msg: string) => this.logger.warn(msg);
+  public warn = (msg: string, meta?: LogMeta) => this.logger.warn(msg, meta);
   public error = (msg: string, meta: LogMeta) => this.logger.error(msg, meta);
 }
