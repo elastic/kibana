@@ -8,40 +8,46 @@ import { get } from 'lodash';
 import { platformService } from '../services';
 import { getDefaultWorkpad } from './defaults';
 
+let initialState;
+
 export const getInitialState = path => {
-  const state = {
-    app: {}, // Kibana stuff in here
-    assets: {}, // assets end up here
-    transient: {
-      canUserWrite: platformService.getService().coreStart.application.capabilities.canvas.save,
-      zoomScale: 1,
-      elementStats: {
-        total: 0,
-        ready: 0,
-        pending: 0,
-        error: 0,
+  if (!initialState) {
+    initialState = {
+      app: {}, // Kibana stuff in here
+      assets: {}, // assets end up here
+      transient: {
+        canUserWrite: platformService.getService().coreStart.application.capabilities.canvas.save,
+        zoomScale: 1,
+        elementStats: {
+          total: 0,
+          ready: 0,
+          pending: 0,
+          error: 0,
+        },
+        fullscreen: false,
+        selectedToplevelNodes: [],
+        resolvedArgs: {},
+        refresh: {
+          interval: 0,
+        },
+        autoplay: {
+          enabled: false,
+          interval: 10000,
+        },
+        // values in resolvedArgs should live under a unique index so they can be looked up.
+        // The ID of the element is a great example.
+        // In there will live an object with a status (string), value (any), and error (Error) property.
+        // If the state is 'error', the error property will be the error object, the value will not change
+        // See the resolved_args reducer for more information.
       },
-      fullscreen: false,
-      selectedToplevelNodes: [],
-      resolvedArgs: {},
-      refresh: {
-        interval: 0,
+      persistent: {
+        schemaVersion: 2,
+        workpad: getDefaultWorkpad(),
       },
-      autoplay: {
-        enabled: false,
-        interval: 10000,
-      },
-      // values in resolvedArgs should live under a unique index so they can be looked up.
-      // The ID of the element is a great example.
-      // In there will live an object with a status (string), value (any), and error (Error) property.
-      // If the state is 'error', the error property will be the error object, the value will not change
-      // See the resolved_args reducer for more information.
-    },
-    persistent: {
-      schemaVersion: 2,
-      workpad: getDefaultWorkpad(),
-    },
-  };
+    };
+  }
+
+  const state = { ...initialState };
 
   if (!path) {
     return state;
