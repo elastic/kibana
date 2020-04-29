@@ -16,7 +16,7 @@ import { KibanaTilemapSource } from '../layers/sources/kibana_tilemap_source';
 import { TileLayer } from '../layers/tile_layer';
 import { EMSTMSSource } from '../layers/sources/ems_tms_source';
 import { VectorTileLayer } from '../layers/vector_tile_layer';
-import { getInjectedVarFunc } from '../kibana_services';
+import { getIsEmsEnabled } from '../kibana_services';
 import { getKibanaTileMap } from '../meta';
 
 export function getInitialLayers(layerListJSON, initialLayers = []) {
@@ -32,7 +32,7 @@ export function getInitialLayers(layerListJSON, initialLayers = []) {
     return [layerDescriptor, ...initialLayers];
   }
 
-  const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
+  const isEmsEnabled = getIsEmsEnabled();
   if (isEmsEnabled) {
     const layerDescriptor = VectorTileLayer.createDescriptor({
       sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),

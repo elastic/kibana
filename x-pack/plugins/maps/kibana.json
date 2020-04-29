@@ -12,7 +12,8 @@
     "uiActions",
     "navigation",
     "visualizations",
-    "embeddable"
+    "embeddable",
+    "mapsLegacy"
   ],
   "ui": true
 }

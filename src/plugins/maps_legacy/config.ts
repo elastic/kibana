@@ -20,7 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { configSchema as tilemapSchema } from '../tile_map/config';
 
-// TODO: Move this to regionmap plugin on migration
+// TODO: Pull this portion from region_map
 export const regionmapSchema = schema.object({
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   layers: schema.maybe(

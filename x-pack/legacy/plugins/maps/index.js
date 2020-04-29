@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
@@ -38,23 +37,13 @@ export function maps(kibana) {
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
-        const mapConfig = serverConfig.get('map');
 
         return {
           showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           enableVectorTiles: serverConfig.get('xpack.maps.enableVectorTiles'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
-          isEmsEnabled: mapConfig.includeElasticMapsService,
-          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
-          emsTileLayerId: mapConfig.emsTileLayerId,
-          proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
-          emsFileApiUrl: mapConfig.emsFileApiUrl,
-          emsTileApiUrl: mapConfig.emsTileApiUrl,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
-          regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', []),
         };
       },
       styleSheetPaths: `${__dirname}/public/index.scss`,
