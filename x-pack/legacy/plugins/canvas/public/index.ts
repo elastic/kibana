@@ -10,6 +10,7 @@ import {
   CoreStart,
 } from '../../../../../src/core/public';
 import { CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps, CanvasPlugin } from './plugin';
+import { CanvasServices } from './services';
 
 export const plugin: PluginInitializer<
   CanvasSetup,
@@ -22,7 +23,7 @@ export const plugin: PluginInitializer<
 
 export interface WithKibanaProps {
   kibana: {
-    services: CoreStart & CanvasStartDeps;
+    services: CoreStart & CanvasStartDeps & { canvas: CanvasServices };
   };
 }
 

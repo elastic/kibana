@@ -160,7 +160,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);

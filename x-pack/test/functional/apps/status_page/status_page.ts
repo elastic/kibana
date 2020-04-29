@@ -13,7 +13,7 @@ export default function statusPageFunctonalTests({
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
 
   describe('Status Page', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => await esArchiver.unload('empty_kibana'));
 

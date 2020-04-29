@@ -85,7 +85,7 @@ async function serviceNowExecutor(
   const { comments, incidentId, ...restParams } = params;
 
   const mapping = buildMap(configurationMapping);
-  const incident = mapParams(restParams, mapping);
+  const incident = mapParams((restParams as unknown) as Record<string, unknown>, mapping);
   const serviceNow = new ServiceNow({ url: apiUrl, username, password });
 
   const handlerInput = {

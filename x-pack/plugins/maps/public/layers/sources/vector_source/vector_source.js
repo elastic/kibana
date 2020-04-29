@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { VectorLayer } from '../../vector_layer';
 import { TooltipProperty } from '../../tooltips/tooltip_property';
-import { VectorStyle } from '../../styles/vector/vector_style';
 import { AbstractSource } from './../source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
@@ -74,28 +72,8 @@ export class AbstractVectorSource extends AbstractSource {
     return this.createField({ fieldName: name });
   }
 
-  _createDefaultLayerDescriptor(options, mapColors) {
-    return VectorLayer.createDescriptor(
-      {
-        sourceDescriptor: this._descriptor,
-        ...options,
-      },
-      mapColors
-    );
-  }
-
   _getTooltipPropertyNames() {
     return this._tooltipFields.map(field => field.getName());
-  }
-
-  createDefaultLayer(options, mapColors) {
-    const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
-    const style = new VectorStyle(layerDescriptor.style, this);
-    return new VectorLayer({
-      layerDescriptor: layerDescriptor,
-      source: this,
-      style,
-    });
   }
 
   isFilterByMapBounds() {

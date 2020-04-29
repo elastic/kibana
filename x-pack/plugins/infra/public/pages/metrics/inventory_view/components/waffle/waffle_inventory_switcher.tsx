@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiPopover,
-  EuiContextMenu,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiContextMenuPanelDescriptor,
-} from '@elastic/eui';
+import { EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
+import { DropdownButton } from '../dropdown_button';
 
 const getDisplayNameForType = (type: InventoryItemType) => {
   const inventoryModel = findInventoryModel(type);
@@ -120,27 +114,23 @@ export const WaffleInventorySwitcher: React.FC = () => {
     return getDisplayNameForType(nodeType);
   }, [nodeType]);
 
+  const button = (
+    <DropdownButton onClick={openPopover} label="Show">
+      {selectedText}
+    </DropdownButton>
+  );
+
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        id="contextMenu"
-        button={
-          <EuiFilterButton iconType="arrowDown" onClick={openPopover}>
-            <FormattedMessage
-              id="xpack.infra.waffle.inventoryButtonLabel"
-              defaultMessage="View: {selectedText}"
-              values={{ selectedText }}
-            />
-          </EuiFilterButton>
-        }
-        isOpen={isOpen}
-        closePopover={closePopover}
-        panelPaddingSize="none"
-        withTitle
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      id="contextMenu"
+      button={button}
+      isOpen={isOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      withTitle
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
+    </EuiPopover>
   );
 };

@@ -68,9 +68,8 @@ const ParamsSchema = schema.object(
   { validate: validateParams }
 );
 
-function validateParams(paramsObject: any): string | void {
-  const params: ActionParamsType = paramsObject;
-  const { timestamp } = params;
+function validateParams(paramsObject: unknown): string | void {
+  const { timestamp } = paramsObject as ActionParamsType;
   if (timestamp != null) {
     try {
       const date = Date.parse(timestamp);
@@ -218,11 +217,23 @@ async function executor(
 
 const AcknowledgeOrResolve = new Set([EVENT_ACTION_ACKNOWLEDGE, EVENT_ACTION_RESOLVE]);
 
-function getBodyForEventAction(actionId: string, params: ActionParamsType): any {
+function getBodyForEventAction(actionId: string, params: ActionParamsType): unknown {
   const eventAction = params.eventAction || EVENT_ACTION_TRIGGER;
   const dedupKey = params.dedupKey || `action:${actionId}`;
 
-  const data: any = {
+  const data: {
+    event_action: ActionParamsType['eventAction'];
+    dedup_key: string;
+    payload?: {
+      summary: string;
+      source: string;
+      severity: string;
+      timestamp?: string;
+      component?: string;
+      group?: string;
+      class?: string;
+    };
+  } = {
     event_action: eventAction,
     dedup_key: dedupKey,
   };

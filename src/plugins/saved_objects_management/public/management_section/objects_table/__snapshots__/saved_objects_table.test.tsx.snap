@@ -238,6 +238,7 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   indexPatterns={
     Object {
       "clearCache": [MockFunction],
+      "ensureDefaultIndexPattern": [MockFunction],
       "get": [MockFunction],
       "make": [Function],
     }

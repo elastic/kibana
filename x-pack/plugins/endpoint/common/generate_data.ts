@@ -6,7 +6,16 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields, PolicyData } from './types';
+import {
+  AlertEvent,
+  EndpointEvent,
+  Host,
+  HostMetadata,
+  HostOS,
+  PolicyData,
+  HostPolicyResponse,
+  HostPolicyResponseActionStatus,
+} from './types';
 import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
@@ -20,7 +29,7 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -47,11 +56,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -93,7 +102,7 @@ interface HostInfo {
     version: string;
     id: string;
   };
-  host: HostFields;
+  host: Host;
   endpoint: {
     policy: {
       id: string;
@@ -298,7 +307,7 @@ export class EndpointDocGenerator {
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : 'powershell.exe',
+        name: options.processName ? options.processName : randomProcessName(),
       },
     };
   }
@@ -486,6 +495,112 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Generates a Host Policy response message
+   */
+  generatePolicyResponse(): HostPolicyResponse {
+    return {
+      '@timestamp': new Date().toISOString(),
+      elastic: {
+        agent: {
+          id: 'c2a9093e-e289-4c0a-aa44-8c32a414fa7a',
+        },
+      },
+      ecs: {
+        version: '1.0.0',
+      },
+      event: {
+        created: '2015-01-01T12:10:30Z',
+        kind: 'policy_response',
+      },
+      agent: {
+        version: '6.0.0-rc2',
+        id: '8a4f500d',
+      },
+      endpoint: {
+        artifacts: {
+          'global-manifest': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'endpointpe-v4-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'user-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+          'global-whitelist-windows': {
+            version: '1.2.3',
+            sha256: 'abcdef',
+          },
+        },
+        policy: {
+          applied: {
+            version: '1.0.0',
+            id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
+            status: HostPolicyResponseActionStatus.success,
+            response: {
+              configurations: {
+                malware: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['download_model', 'workflow', 'a_custom_future_action'],
+                },
+                events: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['ingest_events_config', 'workflow'],
+                },
+                logging: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: ['configure_elasticsearch_connection'],
+                },
+                streaming: {
+                  status: HostPolicyResponseActionStatus.success,
+                  concerned_actions: [
+                    'detect_file_open_events',
+                    'download_global_artifacts',
+                    'a_custom_future_action',
+                  ],
+                },
+              },
+              actions: {
+                download_model: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'model downloaded',
+                },
+                ingest_events_config: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'no action taken',
+                },
+                workflow: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'the flow worked well',
+                },
+                a_custom_future_action: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'future message',
+                },
+                configure_elasticsearch_connection: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                detect_file_open_events: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+                download_global_artifacts: {
+                  status: HostPolicyResponseActionStatus.success,
+                  message: 'some message',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
   private randomN(n: number): number {
     return Math.floor(this.random() * n);
   }
@@ -529,4 +644,17 @@ export class EndpointDocGenerator {
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
+}
+
+const fakeProcessNames = [
+  'lsass.exe',
+  'notepad.exe',
+  'mimikatz.exe',
+  'powershell.exe',
+  'iexlorer.exe',
+  'explorer.exe',
+];
+/** Return a random fake process name */
+function randomProcessName(): string {
+  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
 }

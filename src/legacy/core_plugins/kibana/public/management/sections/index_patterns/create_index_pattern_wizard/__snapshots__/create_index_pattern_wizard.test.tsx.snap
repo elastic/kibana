@@ -149,6 +149,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
       indexPatternsService={
         Object {
           "clearCache": [MockFunction],
+          "ensureDefaultIndexPattern": [MockFunction],
           "get": [MockFunction],
           "make": [Function],
         }
