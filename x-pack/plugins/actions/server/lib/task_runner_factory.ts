@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiKeyForAlertPermissions, invalidateAPIKey } from '../../../alerting/server';
+import { invalidateAPIKey } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
