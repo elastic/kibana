@@ -182,8 +182,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     </EuiText>
                     <EuiSpacer size="xs" />
                     <EuiFlexGroup wrap gutterSize="s">
-                      {uniqueActions.map(action => (
-                        <EuiFlexItem grow={false}>
+                      {uniqueActions.map((action, index) => (
+                        <EuiFlexItem key={index} grow={false}>
                           <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
                             {actionTypesByTypeId[action].name ?? action}
                           </EuiBadge>
