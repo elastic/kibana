@@ -62,7 +62,7 @@ export default function({
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeField='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
+          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;
@@ -78,7 +78,7 @@ export default function({
         };
         const expression = `
           kibana_context timeRange='${JSON.stringify(timeRange)}'
-          | esaggs index='logstash-*' timeField='relatedContent.article:published_time' timeField='@timestamp' aggConfigs='${JSON.stringify(
+          | esaggs index='logstash-*' timeFields='relatedContent.article:published_time' timeFields='@timestamp' aggConfigs='${JSON.stringify(
             aggConfigs
           )}'
         `;

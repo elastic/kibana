@@ -277,7 +277,7 @@ describe('IndexPattern Data Source', () => {
                 "partialRows": Array [
                   false,
                 ],
-                "timeField": Array [
+                "timeFields": Array [
                   "timestamp",
                 ],
               },
@@ -299,7 +299,7 @@ describe('IndexPattern Data Source', () => {
       `);
     });
 
-    it('should put all time fields used in date_histograms to the esaggs timeField parameter', async () => {
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
       const queryPersistedState: IndexPatternPersistedState = {
         currentIndexPatternId: '1',
         layers: {
@@ -342,10 +342,10 @@ describe('IndexPattern Data Source', () => {
       const state = stateFromPersistedState(queryPersistedState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeField).toEqual(['timestamp', 'another_datefield']);
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
-    it('should not put date fields used outside date_histograms to the esaggs timeField parameter', async () => {
+    it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
       const queryPersistedState: IndexPatternPersistedState = {
         currentIndexPatternId: '1',
         layers: {
@@ -378,8 +378,8 @@ describe('IndexPattern Data Source', () => {
       const state = stateFromPersistedState(queryPersistedState);
 
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
-      expect(ast.chain[0].arguments.timeField).toEqual(['timestamp']);
-      expect(ast.chain[0].arguments.timeField).not.toContain('timefield');
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
+      expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
   });
 

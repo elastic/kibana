@@ -86,7 +86,7 @@ function getExpressionForLayer(
             metricsAtAllLevels: [false],
             partialRows: [false],
             includeFormatHints: [true],
-            timeField: allDateHistogramFields,
+            timeFields: allDateHistogramFields,
             aggConfigs: [JSON.stringify(aggs)],
           },
         },

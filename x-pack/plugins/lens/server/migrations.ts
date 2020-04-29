@@ -92,23 +92,23 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
               chain: middleNode.chain.map(node => {
                 // Skip if there are any timeField arguments already, because that indicates
                 // the fix is already applied
-                if (node.function !== 'esaggs' || node.arguments.timeField) {
+                if (node.function !== 'esaggs' || node.arguments.timeFields) {
                   return node;
                 }
-                const timeField: string[] = [];
+                const timeFields: string[] = [];
                 JSON.parse(node.arguments.aggConfigs[0] as string).forEach(
                   (agg: { type: string; params: { field: string } }) => {
                     if (agg.type !== 'date_histogram') {
                       return;
                     }
-                    timeField.push(agg.params.field);
+                    timeFields.push(agg.params.field);
                   }
                 );
                 return {
                   ...node,
                   arguments: {
                     ...node.arguments,
-                    timeField,
+                    timeFields,
                   },
                 };
               }),
