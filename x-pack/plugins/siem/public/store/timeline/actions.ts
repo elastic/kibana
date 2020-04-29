@@ -12,7 +12,7 @@ import {
   DataProvider,
   QueryOperator,
 } from '../../components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { KueryFilterQuery, SerializedFilterQuery } from '../types';
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../graphql/types';
