@@ -20,8 +20,9 @@
 import d3 from 'd3';
 import d3TagCloud from 'd3-cloud';
 import { EventEmitter } from 'events';
+import { D3ScalingFunction } from '../types';
 
-const ORIENTATIONS = {
+const ORIENTATIONS: any = {
   single: () => 0,
   'right angled': (tag: any) => {
     return hashWithinRange(tag.text, 2) * 90;
@@ -30,7 +31,7 @@ const ORIENTATIONS = {
     return hashWithinRange(tag.text, 12) * 15 - 90; // fan out 12 * 15 degrees over top-right and bottom-right quadrant (=-90 deg offset)
   },
 };
-const D3_SCALING_FUNCTIONS = {
+const D3_SCALING_FUNCTIONS: D3ScalingFunction = {
   linear: () => d3.scale.linear(),
   log: () => d3.scale.log(),
   'square root': () => d3.scale.sqrt(),
@@ -52,7 +53,7 @@ export class TagCloud extends EventEmitter {
   _orientation: any;
   _minFontSize: number;
   _maxFontSize: number;
-  _textScale: string;
+  _textScale: any;
   _optionsAsString: any;
 
   _words: any;
@@ -372,7 +373,7 @@ export class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.font(this._fontFamily);
     tagCloudLayoutGenerator.fontStyle(this._fontStyle);
     tagCloudLayoutGenerator.fontWeight(this._fontWeight);
-    tagCloudLayoutGenerator.fontSize(tag => mapSizeToFontSize(tag.value));
+    tagCloudLayoutGenerator.fontSize((tag: any) => mapSizeToFontSize(tag.value));
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
@@ -394,7 +395,7 @@ export class TagCloud extends EventEmitter {
    * @return {*}
    */
   getDebugInfo() {
-    const debug = {};
+    const debug: any = {};
     debug.positions = this._completedJob
       ? this._completedJob.words.map((tag: any) => {
           return {
