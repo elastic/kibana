@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get } from 'lodash';
+import set from 'set-value';
 import { CursorDirection } from '../../../../common/runtime_types';
 import { QueryContext } from './query_context';
 
@@ -117,7 +118,7 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
   };
 
   if (searchAfter) {
-    set(body, 'aggs.monitors.composite.after', searchAfter);
+    set(body, 'aggs.monitors.composite.after.monitor_id', searchAfter.monitor_id.toString());
   }
 
   return body;
