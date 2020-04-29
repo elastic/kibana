@@ -24,7 +24,6 @@ export {
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
 };
-import { npStart } from '../../../../legacy_singletons';
 
 export const useLogSource = ({
   sourceId,
