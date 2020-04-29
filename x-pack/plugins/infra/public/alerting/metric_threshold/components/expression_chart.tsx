@@ -79,7 +79,7 @@ export const ExpressionChart: React.FC<Props> = ({
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: MetricsExplorerColor.color0,
   };
-  const isDarkMode = false; // TODO: Need to figure out a way to get this value through alerts service or context.
+  const isDarkMode = context.uiSettings?.get('theme:darkMode') || false;
   const dateFormatter = useMemo(() => {
     const firstSeries = data ? first(data.series) : null;
     return firstSeries && firstSeries.rows.length > 0
