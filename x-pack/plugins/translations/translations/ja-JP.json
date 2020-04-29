@@ -10534,7 +10534,7 @@
     "xpack.ml.overview.feedbackSectionTitle": "フィードバック",
     "xpack.ml.overview.gettingStartedSectionCreateJob": "新規ジョブを作成中",
     "xpack.ml.overview.gettingStartedSectionDocs": "ドキュメンテーション",
-    "xpack.ml.overview.gettingStartedSectionText": "機械学習へようこそ。はじめに{docs}や{createJob}をご参照ください。Elastic Stackの機械学習の詳細については、{whatIsMachineLearning}をご覧ください。{transforms}を使用して、分析ジョブの機能インデックスを作成することをお勧めします。",
+    "xpack.ml.overview.gettingStartedSectionText": "機械学習へようこそ。はじめに{docs}や{createJob}をご参照ください。{transforms}を使用して、分析ジョブの機能インデックスを作成することをお勧めします。",
     "xpack.ml.overview.gettingStartedSectionTitle": "はじめて使う",
     "xpack.ml.overview.gettingStartedSectionTransforms": "Elasticsearchの変換",
     "xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning": "こちら",
