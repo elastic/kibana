@@ -31,6 +31,8 @@ import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
 import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 import { registerReindexIndicesRoutes, createReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
+import { telemetrySavedObjectType, reindexOperationSavedObjectType } from './saved_object_types';
+
 import { RouteDependencies } from './types';
 
 interface PluginsSetup {
@@ -65,11 +67,14 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   }
 
   setup(
-    { http, getStartServices, capabilities }: CoreSetup,
+    { http, getStartServices, capabilities, savedObjects }: CoreSetup,
     { usageCollection, cloud, licensing, apm_oss: apmOSS }: PluginsSetup
   ) {
     this.licensing = licensing;
     this.apmOSS = apmOSS;
+
+    savedObjects.registerType(reindexOperationSavedObjectType);
+    savedObjects.registerType(telemetrySavedObjectType);
 
     const router = http.createRouter();
 
@@ -96,8 +101,12 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     registerQueryDefaultFieldRoutes(dependencies);
 
     if (usageCollection) {
-      getStartServices().then(([{ savedObjects, elasticsearch }]) => {
-        registerUpgradeAssistantUsageCollector({ elasticsearch, usageCollection, savedObjects });
+      getStartServices().then(([{ savedObjects: savedObjectsService, elasticsearch }]) => {
+        registerUpgradeAssistantUsageCollector({
+          elasticsearch,
+          usageCollection,
+          savedObjects: savedObjectsService,
+        });
       });
     }
   }
