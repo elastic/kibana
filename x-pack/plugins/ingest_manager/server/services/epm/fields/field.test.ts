@@ -179,4 +179,35 @@ describe('processFields', () => {
       JSON.stringify(mixedFieldsExpanded)
     );
   });
+
+  const objectFieldWithProperty = [
+    {
+      name: 'a',
+      type: 'object',
+      dynamic: true,
+    },
+    {
+      name: 'a.b',
+      type: 'keyword',
+    },
+  ];
+
+  const objectFieldWithPropertyExpanded = [
+    {
+      name: 'a',
+      type: 'group',
+      dynamic: true,
+      fields: [
+        {
+          name: 'b',
+          type: 'keyword',
+        },
+      ],
+    },
+  ];
+  test('correctly handles properties of object type fields', () => {
+    expect(JSON.stringify(processFields(objectFieldWithProperty))).toEqual(
+      JSON.stringify(objectFieldWithPropertyExpanded)
+    );
+  });
 });
