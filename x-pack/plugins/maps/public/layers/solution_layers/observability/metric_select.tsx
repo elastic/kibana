@@ -16,6 +16,18 @@ export enum OBSERVABILITY_METRIC_TYPE {
   UNIQUE_COUNT = 'UNIQUE_COUNT',
 }
 
+export function getMetricOptionsForLayer(layer: OBSERVABILITY_LAYER_TYPE): EuiSelectOption[] {
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
+    return APM_RUM_PERFORMANCE_METRIC_OPTIONS;
+  }
+
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC) {
+    return APM_RUM_TRAFFIC_METRIC_OPTIONS;
+  }
+
+  return [];
+}
+
 const APM_RUM_PERFORMANCE_METRIC_OPTIONS = [
   {
     value: OBSERVABILITY_METRIC_TYPE.TRANSACTION_DURATION,
@@ -57,26 +69,7 @@ export function MetricSelect(props: Props) {
     props.onChange(event.target.value as OBSERVABILITY_METRIC_TYPE);
   }
 
-  if (!props.layer) {
-    return null;
-  }
-
-  let options: EuiSelectOption[] = [];
-  if (props.layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
-    options = APM_RUM_PERFORMANCE_METRIC_OPTIONS;
-  } else if (props.layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC) {
-    options = APM_RUM_TRAFFIC_METRIC_OPTIONS;
-  }
-  const selectedOption = options.find(option => {
-    return option.value === props.value;
-  });
-
-  // Select initial option or clear out invalid metric option when layer changes
-  if (!selectedOption) {
-    if (options.length) {
-      // @ts-ignore
-      props.onChange(options[0].value);
-    }
+  if (!props.layer || !props.value) {
     return null;
   }
 
@@ -87,8 +80,7 @@ export function MetricSelect(props: Props) {
       })}
     >
       <EuiSelect
-        options={options}
-        // @ts-ignore
+        options={getMetricOptionsForLayer(props.layer)}
         value={props.value}
         onChange={onChange}
       />

@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
-import { MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { getMetricOptionsForLayer, MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DisplaySelect, DISPLAY } from './display_select';
 
 interface State {
@@ -24,7 +24,23 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
   };
 
   _onLayerChange = (layer: OBSERVABILITY_LAYER_TYPE) => {
-    this.setState({ layer }, this._previewLayer);
+    const newState = { layer };
+
+    // Select metric when layer change invalidates selected metric.
+    const metricOptions = getMetricOptionsForLayer(layer);
+    const selectedMetricOption = metricOptions.find(option => {
+      return option.value === this.state.metric;
+    });
+    if (!selectedMetricOption) {
+      if (metricOptions.length) {
+        // @ts-ignore
+        newState.metric = metricOptions[0].value;
+      } else {
+        newState.metric = null;
+      }
+    }
+
+    this.setState(newState, this._previewLayer);
   };
 
   _onMetricChange = (metric: OBSERVABILITY_METRIC_TYPE) => {
