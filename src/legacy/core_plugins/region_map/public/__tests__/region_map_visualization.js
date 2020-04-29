@@ -54,6 +54,7 @@ import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_ty
 import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -101,7 +102,7 @@ describe('RegionMapsVisualizationTests', function() {
 
   let getManifestStub;
   beforeEach(
-    ngMock.inject((Private, $injector) => {
+    ngMock.inject(() => {
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
           case 'mapConfig':
@@ -127,17 +128,28 @@ describe('RegionMapsVisualizationTests', function() {
         }
       });
       const serviceSettings = new ServiceSettings();
-      const uiSettings = $injector.get('config');
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
       };
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {
+          get: () => {},
+        },
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
 
       dependencies = {
         serviceSettings,
-        $injector,
         regionmapsConfig,
-        uiSettings,
+        uiSettings: coreSetupMock.uiSettings,
+        BaseMapsVisualization,
       };
 
       regionMapVisType = new BaseVisType(createRegionMapTypeDefinition(dependencies));
