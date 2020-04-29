@@ -39,7 +39,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
 
-export const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
+const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
