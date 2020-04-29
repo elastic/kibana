@@ -35,8 +35,6 @@ const shimStartPlugins: CanvasStartDeps = {
   __LEGACY: {
     // ToDo: Copy directly into canvas
     absoluteToParsedUrl,
-    // ToDo: Copy directly into canvas
-    formatMsg,
     // ToDo: Won't be a part of New Platform. Will need to handle internally
     trackSubUrlForApp: chrome.trackSubUrlForApp,
   },
