@@ -33,7 +33,7 @@ const fnList = [
   'timelion',
   'to',
   // ignore embeddables functions for now
-].filter(fn => !['savedMap', 'savedVisualization', 'savedSearch'].includes(fn));
+].filter(fn => !['savedSearch'].includes(fn));
 
 const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -211,8 +211,8 @@ const getArgsTable = (args: Array<ArgumentType<any>>) => {
       let defaultBlock = '';
 
       if (isValidDataUrl(arg.default)) {
-        defaultBlock = `\n\nExample value for the ${displayName} argument, formatted as a \`base64\` data URL:	
-[source, url]	
+        defaultBlock = `\n\nExample value for the ${displayName} argument, formatted as a \`base64\` data URL:
+[source, url]
 ------------
 ${arg.default}
 ------------`;

@@ -99,12 +99,12 @@ all condition={gt 10} condition={lt 20}`,
 | formatnumber "0.0%"
 | metric "Average uptime"
   metricFont={
-		font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
-			color={
-					if {all {gte 0} {lt 0.8}} then="red" else="green"
-			}
-			align="center" lHeight=48
-	}
+    font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
+      color={
+        if {all {gte 0} {lt 0.8}} then="red" else="green"
+      }
+      align="center" lHeight=48
+  }
 | render`,
       help:
         'This sets the color of the metric text to `"red"` if the context passed into `metric` is greater than or equal to 0 and less than 0.8. Otherwise, the color is set to `"green"`.',
@@ -188,17 +188,19 @@ case if={lte 50} then="green"`,
     usage: {
       expression: `math "random()"
 | progress shape="gauge" label={formatnumber "0%"}
-	font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center"
-	color={
-	switch {case if={lte 0.5} then="green"}
-			{case if={all {gt 0.5} {lte 0.75}} then="orange"}
-			default="red"
-	}}
-	valueColor={
-	switch {case if={lte 0.5} then="green"}
-	{case if={all {gt 0.5} {lte 0.75}} then="orange"}
-	default="red"
-	}
+  font={
+    font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center"
+      color={
+        switch {case if={lte 0.5} then="green"}
+          {case if={all {gt 0.5} {lte 0.75}} then="orange"}
+          default="red"
+      }
+  }
+  valueColor={
+    switch {case if={lte 0.5} then="green"}
+      {case if={all {gt 0.5} {lte 0.75}} then="orange"}
+      default="red"
+  }
 | render`,
       help:
         'This sets the color of the progress indicator and the color of the label to `"green"` if the value is less than or equal to `0.5`, `"orange"` if the value is greater than `0.5` and less than or equal to `0.75`, and `"red"` if `none` of the case conditions are met.',
@@ -206,30 +208,30 @@ case if={lte 50} then="green"`,
   },
   columns: {
     syntax: `columns include="@timestamp, projects, cost"
-  columns exclude="username, country, age"`,
+columns exclude="username, country, age"`,
     usage: {
       expression: `filters
-  | demodata
-  | columns include="price, cost, state, project"
-  | table
-  | render`,
+| demodata
+| columns include="price, cost, state, project"
+| table
+| render`,
       help:
         'This only keeps the `price`, `cost`, `state`, and `project` columns from the `demodata` data source and removes all other columns.',
     },
   },
   compare: {
     syntax: `compare "neq" to="elasticsearch"
-  compare op="lte" to=100`,
+compare op="lte" to=100`,
     usage: {
       expression: `filters
 | demodata
 | mapColumn project
-	fn={getCell project |
-		switch
-			{case if={compare eq to=kibana} then=kibana}
-			{case if={compare eq to=elasticsearch} then=elasticsearch}
-			default="other"
-	}
+  fn={getCell project |
+    switch
+      {case if={compare eq to=kibana} then=kibana}
+      {case if={compare eq to=elasticsearch} then=elasticsearch}
+      default="other"
+  }
 | pointseries size="size(cost)" color="project"
 | pie
 | render`,
@@ -248,14 +250,14 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
   backgroundRepeat="no-repeat"
   backgroundSize="cover"`,
     usage: {
-      expression: `shape "star" fill="#E61D35" maintainAspect=true	
-| render containerStyle={	
-    containerStyle backgroundColor="#F8D546" 	
-      borderRadius="200px" 	
-      border="4px solid #05509F" 	
-      padding="0px"	
-      opacity="0.9" 	
-      overflow="hidden"	
+      expression: `shape "star" fill="#E61D35" maintainAspect=true
+| render containerStyle={
+    containerStyle backgroundColor="#F8D546"
+      borderRadius="200px"
+      border="4px solid #05509F"
+      padding="0px"
+      opacity="0.9"
+      overflow="hidden"
   }`,
     },
   },
@@ -276,11 +278,11 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
     Banana, 5"`,
     usage: {
       expression: `csv "fruit,stock
-    kiwi,10
-    banana,5"
-  | pointseries color=fruit size=stock
-  | pie
-  | render`,
+  kiwi,10
+  banana,5"
+| pointseries color=fruit size=stock
+| pie
+| render`,
       help:
         'This creates a `datatable` with `fruit` and `stock` columns with two rows. This is useful for quickly mocking data.',
     },
@@ -372,7 +374,7 @@ esdocs query="response:404" index="kibana_sample_data_logs"
 esdocs index="kibana_sample_data_flights" count=100
 esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"`,
     usage: {
-      expression: `filters	
+      expression: `filters
 | esdocs index="kibana_sample_data_ecommerce"
   fields="customer_gender, taxful_total_price, order_date"
   sort="order_date, asc"
