@@ -12,7 +12,7 @@ import { EMSTMSSource, sourceTitle } from './ems_tms_source';
 import { VectorTileLayer } from '../../vector_tile_layer';
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
-// @ts-ignre
+// @ts-ignore
 import { isEmsEnabled } from '../../../meta';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
