@@ -208,7 +208,7 @@ export const Page: FC = () => {
             <h2>
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
-                defaultMessage="Use a supplied configuration"
+                defaultMessage="Use preconfigured jobs"
               />
             </h2>
           </EuiTitle>
@@ -244,16 +244,6 @@ export const Page: FC = () => {
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.useWizardDescription"
-              defaultMessage=""
-            />
-          </p>
-        </EuiText>
-
         <EuiSpacer size="m" />
 
         <EuiFlexGrid gutterSize="l" columns={4}>
