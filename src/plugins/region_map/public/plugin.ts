@@ -23,20 +23,16 @@ import {
   PluginInitializerContext,
   IUiSettingsClient,
   NotificationsSetup,
-} from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+} from 'kibana/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 // @ts-ignore
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import {
-  getBaseMapsVis,
-  IServiceSettings,
-  MapsLegacyPluginSetup,
-} from '../../../../plugins/maps_legacy/public';
+import { getBaseMapsVis, IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
 import { setFormatService, setNotifications } from './kibana_services';
-import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
 
 /** @private */

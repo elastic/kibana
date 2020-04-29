@@ -18,7 +18,7 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
+import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createRegionMapFn } from './region_map_fn';
 
 jest.mock('ui/new_platform');

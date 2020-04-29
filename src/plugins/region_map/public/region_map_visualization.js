@@ -20,9 +20,9 @@
 import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
 import { getFormatService, getNotifications } from './kibana_services';
-import { truncatedColorMaps } from '../../../../plugins/charts/public';
+import { truncatedColorMaps } from '../../charts/public';
 import { tooltipFormatter } from './tooltip_formatter';
-import { mapTooltipProvider } from '../../../../plugins/maps_legacy/public';
+import { mapTooltipProvider } from '../../maps_legacy/public';
 
 export function createRegionMapVisualization({
   serviceSettings,

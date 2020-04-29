@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
-import { truncatedColorSchemas } from '../../../../plugins/charts/public';
-import { Schemas } from '../../../../plugins/vis_default_editor/public';
-import { ORIGIN } from '../../../../plugins/maps_legacy/public';
+import { truncatedColorSchemas } from '../../charts/public';
+import { Schemas } from '../../vis_default_editor/public';
+import { ORIGIN } from '../../maps_legacy/public';
 
 export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;

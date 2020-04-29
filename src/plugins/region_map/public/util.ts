@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { RegionMapPlugin as Plugin } from './plugin';
+import { FileLayer, VectorLayer } from '../../maps_legacy/public';
+import { ORIGIN } from '../../maps_legacy/public';
 
-export interface RegionMapsConfigType {
-  includeElasticMapsService: boolean;
-  layers: any[];
-}
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
+  ...layer,
+  layerId: `${prefix}.${layer.name}`,
+  isEMS: ORIGIN.EMS === prefix,
+});

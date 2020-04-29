@@ -24,8 +24,8 @@ import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
 import * as topojson from 'topojson-client';
 import { getNotifications } from './kibana_services';
-import { colorUtil, KibanaMapLayer } from '../../../../plugins/maps_legacy/public';
-import { truncatedColorMaps } from '../../../../plugins/charts/public';
+import { colorUtil, KibanaMapLayer } from '../../maps_legacy/public';
+import { truncatedColorMaps } from '../../charts/public';
 
 const EMPTY_STYLE = {
   weight: 1,
