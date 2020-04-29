@@ -23,10 +23,7 @@ import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
 import { getAlertType as getMetricsAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
 import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
-
 import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
-import { getAlertType as getMetricsAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
-import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
