@@ -84,10 +84,9 @@ export default ({ getService }: FtrProviderContext) => {
         startDatafeed: false,
       },
       expected: {
-        responseCode: 403,
-        error: 'Forbidden',
-        message:
-          '[security_exception] action [cluster:monitor/xpack/ml/info/get] is unauthorized for user [ml_unauthorized]',
+        responseCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
       },
     },
   ];
