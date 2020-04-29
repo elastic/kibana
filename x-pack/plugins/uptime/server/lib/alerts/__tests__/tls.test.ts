@@ -66,7 +66,7 @@ describe('tls alert', () => {
           "agingCommonNameAndDate": "",
           "agingCount": 0,
           "count": 4,
-          "expiringCommonNameAndDate": "Common-One, expires on 2020-07-16T03:15:39.000Z in 900 days.; Common-Two, expires on 2020-07-18T03:15:39.000Z in 901 days.; Common-Three, expires on 2020-07-19T03:15:39.000Z in 902 days.",
+          "expiringCommonNameAndDate": "Common-One, expired on 2020-07-16T03:15:39.000Z 900 days ago; Common-Two, expired on 2020-07-18T03:15:39.000Z 901 days ago; Common-Three, expired on 2020-07-19T03:15:39.000Z 902 days ago",
           "expiringCount": 3,
           "hasAging": null,
           "hasExpired": true,
@@ -122,6 +122,7 @@ describe('tls alert', () => {
 
     it('handles negative diff values appropriately for expiring certs', () => {
       diffSpy
+        // negative days are in the future, positive days are in the past
         .mockReturnValueOnce(-96)
         .mockReturnValueOnce(-94)
         .mockReturnValueOnce(2);
@@ -135,7 +136,7 @@ describe('tls alert', () => {
           "agingCommonNameAndDate": "",
           "agingCount": 0,
           "count": 4,
-          "expiringCommonNameAndDate": "Common-One, expired on 2020-07-16T03:15:39.000Z 96 days ago; Common-Two, expired on 2020-07-18T03:15:39.000Z 94 days ago; Common-Three, expires on 2020-07-19T03:15:39.000Z in 2 days.",
+          "expiringCommonNameAndDate": "Common-One, expires on 2020-07-16T03:15:39.000Z in 96 days.; Common-Two, expires on 2020-07-18T03:15:39.000Z in 94 days.; Common-Three, expired on 2020-07-19T03:15:39.000Z 2 days ago",
           "expiringCount": 3,
           "hasAging": null,
           "hasExpired": true,

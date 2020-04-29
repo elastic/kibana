@@ -15,6 +15,7 @@ import {
   DYNAMIC_SETTINGS_DEFAULTS,
 } from '../../../../../legacy/plugins/uptime/common/constants';
 import { Cert } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { commonStateTranslations } from './translations';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
@@ -49,8 +50,8 @@ const getValidAfter = ({ certificate_not_valid_after: date }: Cert) => {
   if (!date) return 'Error, missing `certificate_not_valid_after` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
-    ? `expires on ${date} in ${relativeDate} days.`
-    : `expired on ${date} ${Math.abs(relativeDate)} days ago`;
+    ? `expired on ${date} ${relativeDate} days ago`
+    : `expires on ${date} in ${Math.abs(relativeDate)} days.`;
 };
 
 const getValidBefore = ({ certificate_not_valid_before: date }: Cert): string => {
@@ -137,7 +138,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
           defaultMessage: 'The number of detected certs that are becoming too old.',
         }),
       },
-
       {
         name: 'agingCommonNameAndDate',
         description: i18n.translate(
@@ -147,6 +147,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
           }
         ),
       },
+      ...commonStateTranslations,
     ],
   },
   async executor(options) {
@@ -186,6 +187,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       const alertInstance = alertInstanceFactory(TLS.id);
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
       alertInstance.replaceState({
+        ...updateState(state, certs.length > 0),
         ...summary,
       });
       alertInstance.scheduleActions(TLS.id);
