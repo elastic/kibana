@@ -45,7 +45,7 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
     page: 1,
     perPage: 1000,
   });
-  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id as string);
+  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id);
 
   if (fullConfigRequest.isLoading && !fullConfigRequest.data) {
     return <Loading />;
