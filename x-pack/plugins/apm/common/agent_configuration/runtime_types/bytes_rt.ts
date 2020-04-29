@@ -10,7 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeType } from './get_range_type';
 
-export function getAmountAndUnitRt({
+export const BYTE_UNITS = ['b', 'kb', 'mb'];
+
+export function getBytesRt({
   min = -Infinity,
   max = Infinity,
   units
@@ -35,7 +37,7 @@ export function getAmountAndUnitRt({
   });
 
   return new t.Type<string, string, unknown>(
-    'amountAndUnitRt',
+    'bytesRt',
     t.string.is,
     (input, context) => {
       return either.chain(t.string.validate(input, context), inputAsString => {

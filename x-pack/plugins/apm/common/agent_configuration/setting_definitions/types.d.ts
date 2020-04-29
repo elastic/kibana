@@ -87,8 +87,8 @@ interface BytesSetting extends BaseSetting {
 
 interface DurationSetting extends BaseSetting {
   type: 'duration';
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
   units?: string[];
 }
 

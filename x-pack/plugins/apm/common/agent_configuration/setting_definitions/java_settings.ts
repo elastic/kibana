@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { RawSettingDefinition } from './types';
-import { getDurationRt } from '../runtime_types/duration_rt';
 
 export const javaSettings: RawSettingDefinition[] = [
   // ENABLE_LOG_CORRELATION
@@ -101,11 +100,7 @@ export const javaSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java'],
-    validation: getDurationRt({ min: '1m' }),
-    validationError: i18n.translate(
-      'xpack.apm.agentConfig.stressMonitorCpuDurationThreshold.errorText',
-      { defaultMessage: "Must be at least '1m'" }
-    )
+    min: '1m'
   },
   {
     key: 'stress_monitor_system_cpu_stress_threshold',
@@ -183,11 +178,8 @@ export const javaSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java'],
-    validation: getDurationRt({ min: '1ms', max: '1s' }),
-    validationError: i18n.translate(
-      'xpack.apm.agentConfig.profilingInferredSpansSamplingInterval.errorText',
-      { defaultMessage: "Must be between '1ms' and '1s'" }
-    )
+    min: '1ms',
+    max: '1s'
   },
   {
     key: 'profiling_inferred_spans_min_duration',

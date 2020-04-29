@@ -93,8 +93,10 @@ function FormRow({
             <EuiFieldNumber
               placeholder={setting.placeholder}
               value={(amount as unknown) as number}
-              min={setting.min}
-              max={setting.max}
+              // Min and max settings are string in the duration type, representing the amount and unit e.g.: '1s'.
+              // becasue of that only uses it when it's defined as number.
+              min={typeof setting.min === 'number' ? setting.min : undefined}
+              max={typeof setting.max === 'number' ? setting.max : undefined}
               onChange={e =>
                 onChange(
                   setting.key,

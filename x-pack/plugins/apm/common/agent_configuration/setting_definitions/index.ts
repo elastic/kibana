@@ -13,10 +13,11 @@ import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { isRumAgentName } from '../../agent_name';
 import { floatRt } from '../runtime_types/float_rt';
-import { getAmountAndUnitRt } from '../runtime_types/amount_and_unit_rt';
 import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
+import { getDurationRt } from '../runtime_types/duration_rt';
+import { getBytesRt } from '../runtime_types/bytes_rt';
 
 function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
   switch (setting.type) {
@@ -53,7 +54,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
       const max = setting.max;
 
       return {
-        validation: getAmountAndUnitRt({ min, max, units }),
+        validation: getBytesRt({ min, max, units }),
         units,
         min,
         ...setting
@@ -62,11 +63,11 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
 
     case 'duration': {
       const units = setting.units ?? ['ms', 's', 'm'];
-      const min = setting.min ?? 0;
+      const min = setting.min ?? '1ms';
       const max = setting.max;
 
       return {
-        validation: getAmountAndUnitRt({ min, max, units }),
+        validation: getDurationRt({ min, max, units }),
         units,
         min,
         ...setting
