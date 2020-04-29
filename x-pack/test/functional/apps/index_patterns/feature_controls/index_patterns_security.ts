@@ -128,9 +128,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.eql(['Management']);
       });
 
-      it(`index pattern listing doesn't show create button`, async () => {
+      it(`index pattern page doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('indexPatternTable');
+        // The test doesn't actually create an index-pattern, so we check for the empty state
+        // instead of the index table
+        await testSubjects.existOrFail('inpEmptyIndexPatternPrompt');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
 
