@@ -37,9 +37,9 @@ export const historyToolTip = 'The chronological history of actions related to t
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 
-const NotesCountBadge = styled(EuiBadge)`
+const NotesCountBadge = (styled(EuiBadge)`
   margin-left: 5px;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
