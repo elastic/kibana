@@ -4,17 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  isOnPage,
-  isOnDetailsPage,
-  wasPreviouslyOnPage,
-  wasPreviouslyOnDetailsPage,
-} from './is_on_page';
+import { isOnMatchPage, wasPreviouslyOnMatchPage } from './is_on_page';
 
-export const isOnPolicyPage = () => isOnPage('/policy');
+export const isOnPolicyPage = () => isOnMatchPage('/policy');
 
-export const isOnPolicyDetailsPage = () => isOnDetailsPage('/policy');
+export const isOnPolicyDetailsPage = () => isOnMatchPage('/policy/:id');
 
-export const wasPreviouslyOnPolicyPage = () => wasPreviouslyOnPage('/policy');
+export const wasPreviouslyOnPolicyPage = () => wasPreviouslyOnMatchPage('/policy');
 
-export const wasPreviouslyOnPolicyDetailsPage = () => wasPreviouslyOnDetailsPage('/policy');
+export const wasPreviouslyOnPolicyDetailsPage = () => wasPreviouslyOnMatchPage('/policy/:id');

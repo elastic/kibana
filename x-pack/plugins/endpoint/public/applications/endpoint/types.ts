@@ -304,6 +304,13 @@ export interface EndpointAppLocation {
   key?: string;
 }
 
+export interface EndpointAppMatch {
+  path: string;
+  url: string;
+  isExact: boolean;
+  params: {};
+}
+
 interface AlertsSearchBarState {
   patterns: IIndexPattern[];
 }

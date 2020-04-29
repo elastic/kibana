@@ -7,6 +7,7 @@ import * as React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
+import { useDispatch } from 'react-redux';
 import { AlertIndex } from './alerts';
 import { HostList } from './hosts';
 import { PolicyList } from './policy';
@@ -16,6 +17,9 @@ import { AppRootProvider } from './app_root_provider';
 import { Setup } from './setup';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { ScopedHistory, CoreStart } from '../../../../../../../src/core/public';
+import { PolicyRoute, PolicyDetailsRoute } from './policy/policy_route';
+import { EndpointAppMatch, AppAction } from '../types';
+import { storeCurrentMatch } from '../lib/location/is_on_page';
 
 interface RouterProps {
   history: ScopedHistory;
@@ -29,6 +33,7 @@ interface RouterProps {
  */
 export const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
   ({ history, store, coreStart, depsStart }) => {
+    // const dispatch: (action: AppAction) => unknown = useDispatch();
     return (
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
         <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
@@ -45,8 +50,24 @@ export const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
           />
           <Route path="/hosts" component={HostList} />
           <Route path="/alerts" component={AlertIndex} />
-          <Route path="/policy" exact component={PolicyList} />
-          <Route path="/policy/:id" exact component={PolicyDetails} />
+          <Route
+            path="/policy"
+            exact
+            render={({ match, location }) => {
+              // dispatch({ type: 'userChangedUrl', payload: location });
+              storeCurrentMatch(match);
+              return <PolicyList />;
+            }}
+          />
+          <Route
+            path="/policy/:id"
+            exact
+            render={({ match, location }) => {
+              // dispatch({ type: 'userChangedUrl', payload: location });
+              storeCurrentMatch(match);
+              return <PolicyDetails />;
+            }}
+          />
           <Route
             render={() => (
               <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />

@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  isOnPage,
-  isOnDetailsPage,
-  wasPreviouslyOnPage,
-  wasPreviouslyOnDetailsPage,
-} from './is_on_page';
+import { isOnPage } from './is_on_page';
 
 export const isOnHostPage = () => isOnPage('/hosts');
