@@ -6,7 +6,7 @@
 
 import { cloneDeep, flow } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'src/core/server';
+import { SavedObjectMigrationFn } from 'src/core/server';
 
 interface XYLayerPre77 {
   layerId: string;
@@ -15,98 +15,121 @@ interface XYLayerPre77 {
   accessors: string[];
 }
 
-function removeLensAutoDate(doc: SavedObjectUnsanitizedDoc) {
+/**
+ * Removes the `lens_auto_date` subexpression from a stored expression
+ * string. For example: aggConfigs={lens_auto_date aggConfigs="JSON string"}
+ */
+const removeLensAutoDate: SavedObjectMigrationFn = (doc, context) => {
   const expression: string = doc.attributes?.expression;
-  const ast = fromExpression(expression);
+  try {
+    const ast = fromExpression(expression);
+    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+      if (topNode.function !== 'lens_merge_tables') {
+        return topNode;
+      }
+      return {
+        ...topNode,
+        arguments: {
+          ...topNode.arguments,
+          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+            return {
+              type: 'expression',
+              chain: middleNode.chain.map(node => {
+                // Check for sub-expression in aggConfigs
+                if (
+                  node.function === 'esaggs' &&
+                  typeof node.arguments.aggConfigs[0] !== 'string'
+                ) {
+                  return {
+                    ...node,
+                    arguments: {
+                      ...node.arguments,
+                      aggConfigs: (node.arguments.aggConfigs[0] as Ast).chain[0].arguments
+                        .aggConfigs,
+                    },
+                  };
+                }
+                return node;
+              }),
+            };
+          }),
+        },
+      };
+    });
 
-  const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
-    if (topNode.function !== 'lens_merge_tables') {
-      return topNode;
-    }
     return {
-      ...topNode,
-      arguments: {
-        ...topNode.arguments,
-        tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
-          return {
-            type: 'expression',
-            chain: middleNode.chain.map(node => {
-              if (node.function === 'esaggs') {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        expression: toExpression({ ...ast, chain: newChain }),
+      },
+    };
+  } catch (e) {
+    context.log.warning(e.message);
+    return { ...doc };
+  }
+};
+
+/**
+ * Adds missing timeField arguments to esaggs in the Lens expression
+ */
+const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
+  const expression: string = doc.attributes?.expression;
+
+  try {
+    const ast = fromExpression(expression);
+    const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
+      if (topNode.function !== 'lens_merge_tables') {
+        return topNode;
+      }
+      return {
+        ...topNode,
+        arguments: {
+          ...topNode.arguments,
+          tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
+            return {
+              type: 'expression',
+              chain: middleNode.chain.map(node => {
+                // Skip if there are any timeField arguments already, because that indicates
+                // the fix is already applied
+                if (node.function !== 'esaggs' || node.arguments.timeField) {
+                  return node;
+                }
+                const timeField: string[] = [];
+                JSON.parse(node.arguments.aggConfigs[0] as string).forEach(
+                  (agg: { type: string; params: { field: string } }) => {
+                    if (agg.type !== 'date_histogram') {
+                      return;
+                    }
+                    timeField.push(agg.params.field);
+                  }
+                );
                 return {
                   ...node,
                   arguments: {
                     ...node.arguments,
-                    aggConfigs: (node.arguments.aggConfigs[0] as Ast).chain[0].arguments.aggConfigs,
+                    timeField,
                   },
                 };
-              }
-              return node;
-            }),
-          };
-        }),
-      },
-    };
-  });
+              }),
+            };
+          }),
+        },
+      };
+    });
 
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      expression: toExpression({ ...ast, chain: newChain }),
-    },
-  };
-}
-
-function addTimeFieldToEsaggs(doc: SavedObjectUnsanitizedDoc) {
-  const expression: string = doc.attributes?.expression;
-  const ast = fromExpression(expression);
-
-  const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
-    if (topNode.function !== 'lens_merge_tables') {
-      return topNode;
-    }
     return {
-      ...topNode,
-      arguments: {
-        ...topNode.arguments,
-        tables: (topNode.arguments.tables as Ast[]).map(middleNode => {
-          return {
-            type: 'expression',
-            chain: middleNode.chain.map(node => {
-              if (node.function !== 'esaggs') {
-                return node;
-              }
-              const timeField: string[] = [];
-              JSON.parse(node.arguments.aggConfigs[0] as string).forEach(
-                (agg: { type: string; params: { field: string } }) => {
-                  if (agg.type !== 'date_histogram') {
-                    return;
-                  }
-                  timeField.push(agg.params.field);
-                }
-              );
-              return {
-                ...node,
-                arguments: {
-                  ...node.arguments,
-                  timeField,
-                },
-              };
-            }),
-          };
-        }),
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        expression: toExpression({ ...ast, chain: newChain }),
       },
     };
-  });
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      expression: toExpression({ ...ast, chain: newChain }),
-    },
-  };
-}
+  } catch (e) {
+    context.log.warning(e.message);
+    return { ...doc };
+  }
+};
 
 export const migrations: Record<string, SavedObjectMigrationFn> = {
   '7.7.0': doc => {
