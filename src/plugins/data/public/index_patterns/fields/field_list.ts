@@ -26,7 +26,7 @@ import { FieldFormatsStart } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
 
-interface Deps {
+interface FieldListDependencies {
   fieldFormats: FieldFormatsStart;
   toastNotifications: ToastsStart;
 }
@@ -56,10 +56,10 @@ export class FieldList extends Array<Field> implements IFieldList {
   private toastNotifications: ToastsStart;
 
   constructor(
-    { fieldFormats, toastNotifications }: Deps,
     indexPattern: IndexPattern,
     specs: FieldSpec[] = [],
-    shortDotsEnable = false
+    shortDotsEnable = false,
+    { fieldFormats, toastNotifications }: FieldListDependencies = {} as FieldListDependencies
   ) {
     super();
     this.indexPattern = indexPattern;
@@ -73,15 +73,10 @@ export class FieldList extends Array<Field> implements IFieldList {
   getByName = (name: Field['name']) => this.byName.get(name);
   getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
   add = (field: FieldSpec) => {
-    const newField = new Field(
-      {
-        fieldFormats: this.fieldFormats,
-        toastNotifications: this.toastNotifications,
-      },
-      this.indexPattern,
-      field,
-      this.shortDotsEnable
-    );
+    const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
+      fieldFormats: this.fieldFormats,
+      toastNotifications: this.toastNotifications,
+    });
     this.push(newField);
     this.setByName(newField);
     this.setByGroup(newField);
@@ -96,15 +91,10 @@ export class FieldList extends Array<Field> implements IFieldList {
   };
 
   update = (field: FieldSpec) => {
-    const newField = new Field(
-      {
-        fieldFormats: this.fieldFormats,
-        toastNotifications: this.toastNotifications,
-      },
-      this.indexPattern,
-      field,
-      this.shortDotsEnable
-    );
+    const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
+      fieldFormats: this.fieldFormats,
+      toastNotifications: this.toastNotifications,
+    });
     const index = this.findIndex(f => f.name === newField.name);
     this.splice(index, 1, newField);
     this.setByName(newField);

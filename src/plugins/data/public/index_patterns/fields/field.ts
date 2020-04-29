@@ -33,7 +33,7 @@ import { FieldFormatsStart } from '../../field_formats';
 
 export type FieldSpec = Record<string, any>;
 
-interface Deps {
+interface FieldDependencies {
   fieldFormats: FieldFormatsStart;
   toastNotifications: ToastsStart;
 }
@@ -61,10 +61,10 @@ export class Field implements IFieldType {
   conflictDescriptions?: Record<string, string[]>;
 
   constructor(
-    { fieldFormats, toastNotifications }: Deps,
     indexPattern: IndexPattern,
     spec: FieldSpec | Field,
-    shortDotsEnable: boolean = false
+    shortDotsEnable: boolean,
+    { fieldFormats, toastNotifications }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;

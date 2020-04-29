@@ -30,7 +30,7 @@ export function getIndexPatternFieldList(
   { fieldFormats, toastNotifications }: DiscoverServices
 ): IndexPatternFieldList {
   if (!indexPattern || !fieldCounts)
-    return new IndexPatternFieldList({ fieldFormats, toastNotifications }, indexPattern, []);
+    return new IndexPatternFieldList(indexPattern, [], false, { fieldFormats, toastNotifications });
 
   const fieldSpecs = indexPattern.fields.slice(0);
   const fieldNamesInDocs = Object.keys(fieldCounts);
@@ -43,5 +43,8 @@ export function getIndexPatternFieldList(
     } as IndexPatternField);
   });
 
-  return new IndexPatternFieldList({ fieldFormats, toastNotifications }, indexPattern, fieldSpecs);
+  return new IndexPatternFieldList(indexPattern, fieldSpecs, false, {
+    fieldFormats,
+    toastNotifications,
+  });
 }

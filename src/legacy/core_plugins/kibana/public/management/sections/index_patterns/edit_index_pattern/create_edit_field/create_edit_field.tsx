@@ -69,14 +69,15 @@ export const CreateEditField = withRouter(
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
         : new IndexPatternField(
-            {
-              fieldFormats: services.fieldFormats,
-              toastNotifications: services.notifications.toasts,
-            },
             indexPattern,
             {
               scripted: true,
               type: 'number',
+            },
+            false,
+            {
+              fieldFormats: services.fieldFormats,
+              toastNotifications: services.notifications.toasts,
             }
           );
 

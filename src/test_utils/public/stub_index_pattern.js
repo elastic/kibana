@@ -67,20 +67,16 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function() {
-    this.fields = new IndexPatternFieldList(
-      {
-        fieldFormats: {
-          getDefaultInstance: () => ({
-            convert: val => String(val),
-          }),
-        },
-        toastNotifications: {
-          addDanger: () => {},
-        },
+    this.fields = new IndexPatternFieldList(this, this.fields || fields, false, {
+      fieldFormats: {
+        getDefaultInstance: () => ({
+          convert: val => String(val),
+        }),
       },
-      this,
-      this.fields || fields
-    );
+      toastNotifications: {
+        addDanger: () => {},
+      },
+    });
   };
 
   this.stubSetFieldFormat = function(fieldName, id, params) {
