@@ -30,7 +30,7 @@ function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
     };
   } else if (metric === OBSERVABILITY_METRIC_TYPE.UNIQUE_COUNT) {
     return {
-      type: AGG_TYPE.AVG,
+      type: AGG_TYPE.UNIQUE_COUNT,
       field: 'transaction.id',
     };
   } else {
