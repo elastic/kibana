@@ -96,7 +96,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   })}
                   tooltipContent={i18n.translate('xpack.IngestManager.alphaBadge.tooltipText', {
                     defaultMessage:
-                      'This plugin might change or be removed in a future release and is not subject to the support SLA',
+                      'This plugin might change or be removed in a future release and is not subject to the support SLA.',
                   })}
                 />
               </h1>
