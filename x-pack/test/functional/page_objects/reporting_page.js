@@ -17,7 +17,6 @@ import http from 'http';
 export function ReportingPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
-  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'security', 'share', 'timePicker']);
@@ -51,7 +50,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     getResponse(url) {
       log.debug(`getResponse for ${url}`);
-      const auth = config.get('servers.elasticsearch.auth');
+      const auth = 'test_user:changeme'; // FIXME not sure why there is no config that can be read for this
       const headers = {
         Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
       };
@@ -71,6 +70,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
             }
           )
           .on('error', e => {
+            log.error(e);
             reject(e);
           });
       });

@@ -201,6 +201,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
             enabled: { type: 'boolean' },
             processors: { type: 'keyword' },
             config: { type: 'flattened' },
+            vars: { type: 'flattened' },
             streams: {
               type: 'nested',
               properties: {
@@ -209,7 +210,8 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
                 dataset: { type: 'keyword' },
                 processors: { type: 'keyword' },
                 config: { type: 'flattened' },
-                pkg_stream: { type: 'flattened' },
+                agent_stream: { type: 'flattened' },
+                vars: { type: 'flattened' },
               },
             },
           },

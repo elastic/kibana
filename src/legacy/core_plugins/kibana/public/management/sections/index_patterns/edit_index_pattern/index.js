@@ -95,7 +95,7 @@ uiModules
 
 // routes for create edit field. Will be removed after migartion all component to react.
 const REACT_FIELD_EDITOR_ID = 'reactFieldEditor';
-const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEditors) => {
+const renderCreateEditField = ($scope, $route, getConfig, fieldFormatEditors) => {
   $scope.$$postDigest(() => {
     const node = document.getElementById(REACT_FIELD_EDITOR_ID);
     if (!node) {
@@ -112,9 +112,10 @@ const renderCreateEditField = ($scope, $route, getConfig, $http, fieldFormatEdit
             fieldFormatEditors={fieldFormatEditors}
             getConfig={getConfig}
             services={{
-              http: $http,
+              getHttpStart: () => npStart.core.http,
               notifications: npStart.core.notifications,
               docTitle: npStart.core.chrome.docTitle,
+              docLinksScriptedFields: npStart.core.docLinks.links.scriptedFields,
             }}
           />
         </I18nContext>
@@ -162,11 +163,11 @@ uiRoutes
       },
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($scope, $route, $http, Private, config) {
+    controller: function FieldEditorPageController($scope, $route, Private, config) {
       const getConfig = (...args) => config.get(...args);
       const fieldFormatEditors = Private(RegistryFieldFormatEditorsProvider);
 
-      renderCreateEditField($scope, $route, getConfig, $http, fieldFormatEditors);
+      renderCreateEditField($scope, $route, getConfig, fieldFormatEditors);
 
       $scope.$on('$destroy', () => {
         destroyCreateEditField();
