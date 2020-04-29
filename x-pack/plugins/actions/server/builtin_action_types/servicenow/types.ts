@@ -7,4 +7,4 @@
 export {
   ConnectorPublicConfigurationType as ServiceNowPublicConfigurationType,
   ConnectorSecretConfigurationType as ServiceNowSecretConfigurationType,
-} from '../common/types';
+} from '../case/types';

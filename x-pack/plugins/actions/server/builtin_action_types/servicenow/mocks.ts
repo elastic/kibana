@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../common/types';
+import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => ({
   getIncident: jest.fn().mockImplementation(() =>

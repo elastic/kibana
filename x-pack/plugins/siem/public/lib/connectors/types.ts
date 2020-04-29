@@ -8,7 +8,7 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { ActionType } from '../../../../triggers_actions_ui/public';
-import { ConnectorPublicConfigurationType } from '../../../../actions/server/builtin_action_types/common/types';
+import { ConnectorPublicConfigurationType } from '../../../../actions/server/builtin_action_types/case/types';
 
 export interface Connector extends ActionType {
   logo: string;

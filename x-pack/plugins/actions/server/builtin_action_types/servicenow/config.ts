@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConnectorConfiguration } from '../common/types';
+import { ConnectorConfiguration } from '../case/types';
 import * as i18n from './translations';
 
 export const config: ConnectorConfiguration = {

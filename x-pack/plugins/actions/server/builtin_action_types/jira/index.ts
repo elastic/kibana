@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createConnector } from '../common/utils';
+import { createConnector } from '../case/utils';
 
 import { api } from './api';
 import { config } from './config';
