@@ -1017,11 +1017,6 @@ export interface IndexPatternAttributes {
 export class IndexPatternFieldList extends Array<Field> implements IFieldList {
     // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
     constructor({ fieldFormats, toastNotifications }: Deps_2, indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
-// Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export class IndexPatternFieldList extends Array<Field> implements IFieldList {
-    constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
     // (undocumented)
     add: (field: Record<string, any>) => void;
     // (undocumented)
