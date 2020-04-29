@@ -312,6 +312,10 @@ export interface SuggestionRequest<T = unknown> {
    * The visualization needs to know which table is being suggested
    */
   keptLayerIds: string[];
+  /**
+   * Different suggestions can be generated for each subtype of the visualization
+   */
+  subVisualizationId?: string;
 }
 
 /**
@@ -388,6 +392,11 @@ export interface Visualization<T = unknown, P = unknown> {
    * but can register multiple subtypes
    */
   visualizationTypes: VisualizationType[];
+  /**
+   * Return the ID of the current visualization. Used to highlight
+   * the active subtype of the visualization.
+   */
+  getVisualizationTypeId: (state: T) => string;
   /**
    * If the visualization has subtypes, update the subtype in state.
    */
