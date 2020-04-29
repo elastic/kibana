@@ -90,6 +90,7 @@ describe('buildExpressionFunction()', () => {
         "replaceArgument",
         "removeArgument",
         "toAst",
+        "toString",
       ]
     `);
   });
@@ -268,6 +269,13 @@ describe('buildExpressionFunction()', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('#toString', () => {
+    test('returns a function String', () => {
+      const fn = buildExpressionFunction('hello', { foo: [true], bar: ['hi'] });
+      expect(fn.toString()).toMatchInlineSnapshot(`"hello foo=true bar=\\"hi\\""`);
     });
   });
 
