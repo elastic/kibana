@@ -21,7 +21,7 @@ export function getBytesRt({
   max?: number;
   units: string[];
 }) {
-  const message = i18n.translate('xpack.apm.agentConfig.amount.errorText', {
+  const message = i18n.translate('xpack.apm.agentConfig.bytes.errorText', {
     defaultMessage: `{rangeType, select,
         between {Must be between {min} and {max} with unit: {units}}
         gt {Must be greater than {min} with unit: {units}}

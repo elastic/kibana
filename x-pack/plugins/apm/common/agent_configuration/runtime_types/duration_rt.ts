@@ -27,7 +27,7 @@ export function getDurationRt({
   const minAmountAndUnit = min && amountAndUnitToObject(min);
   const maxAmountAndUnit = max && amountAndUnitToObject(max);
 
-  const message = i18n.translate('xpack.apm.agentConfig.amount.errorText', {
+  const message = i18n.translate('xpack.apm.agentConfig.duration.errorText', {
     defaultMessage: `{rangeType, select,
       between {Must be between {min} and {max}}
       gt {Must be greater than {min}}
