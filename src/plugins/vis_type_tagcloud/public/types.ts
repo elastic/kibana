@@ -34,3 +34,9 @@ export interface LabelComponentState {
   label: string;
   shouldShowLabel: boolean;
 }
+
+export interface D3ScalingFunction {
+  linear: any;
+  log: any;
+  'square root': any;
+}
