@@ -21,7 +21,7 @@ exports[`FilterPopover component does not show item list when loading 1`] = `
   ownFocus={true}
   panelPaddingSize="m"
   withTitle={true}
-  zIndex={1000}
+  zIndex={10000}
 >
   <EuiPopoverTitle>
     <EuiFieldSearch
@@ -59,7 +59,7 @@ exports[`FilterPopover component renders without errors for valid props 1`] = `
   ownFocus={true}
   panelPaddingSize="m"
   withTitle={true}
-  zIndex={1000}
+  zIndex={10000}
 >
   <EuiPopoverTitle>
     <EuiFieldSearch

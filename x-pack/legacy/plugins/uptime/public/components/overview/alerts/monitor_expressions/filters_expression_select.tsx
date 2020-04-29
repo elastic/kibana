@@ -6,35 +6,47 @@
 
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { EuiExpression, EuiSpacer } from '@elastic/eui';
-import { useGetUrlParams } from '../../../../hooks';
+import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
 import { overviewFiltersSelector } from '../../../../state/selectors';
 import { filterLabels } from '../../filter_group/translations';
+import { useFilterUpdate } from '../../../../hooks/use_filter_update';
 
 interface Props {
+  newFilters: string[];
   setAlertParams: (key: string, value: any) => void;
+  onRemoveFilter: (val: string) => void;
 }
 
-export const FiltersExpressionsSelect: React.FC<Props> = ({ setAlertParams }) => {
-  const { filters } = useGetUrlParams();
+export const FiltersExpressionsSelect: React.FC<Props> = ({
+  newFilters,
+  onRemoveFilter,
+  setAlertParams,
+}) => {
+  const { tags, ports, schemes, locations } = useSelector(overviewFiltersSelector);
 
-  const { tags, ports, schemes } = useSelector(overviewFiltersSelector);
+  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
+    fieldName: string;
+    values: string[];
+  }>({ fieldName: '', values: [] });
 
-  const filterKueries = new Map<string, string[]>(
-    JSON.parse(filters === '' ? '[]' : filters ?? '[]')
-  );
+  const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
 
-  const selectedTags = filterKueries.get('tags');
-  const selectedPorts = filterKueries.get('url.port');
-  const selectedScheme = filterKueries.get('monitor.type');
+  const selectedTags = currentFilters.get('tags');
+  const selectedPorts = currentFilters.get('url.port');
+  const selectedScheme = currentFilters.get('monitor.type');
+  const selectedLocation = currentFilters.get('observer.geo.name');
 
-  const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
+
+  const onFilterFieldChange = (fieldName: string, values: string[]) => {
+    setUpdatedFieldValues({ fieldName, values });
+  };
 
   const monitorFilters = [
     {
+      onFilterFieldChange,
       loading: false,
-      onFilterFieldChange: () => {},
       fieldName: 'url.port',
       id: 'filter_port',
       disabled: ports?.length === 0,
@@ -45,60 +57,91 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({ setAlertParams }) =>
       value: selectedPorts?.join(',') ?? 'any port',
     },
     {
+      onFilterFieldChange,
       loading: false,
-      onFilterFieldChange: () => {},
       fieldName: 'tags',
       id: 'filter_tags',
       disabled: tags?.length === 0,
-      items: tags?.map((p: number) => p.toString()) ?? [],
+      items: tags ?? [],
       selectedItems: getSelectedItems('tags'),
       title: filterLabels.TAGS,
       description: selectedTags ? 'With tag' : 'With',
       value: selectedTags?.join(',') ?? 'any tag',
     },
     {
+      onFilterFieldChange,
       loading: false,
-      onFilterFieldChange: () => {},
       fieldName: 'monitor.type',
       id: 'filter_scheme',
       disabled: schemes?.length === 0,
-      items: schemes?.map((p: number) => p.toString()) ?? [],
+      items: schemes ?? [],
       selectedItems: getSelectedItems('monitor.type'),
       title: filterLabels.SCHEME,
       description: selectedScheme ? 'Of type' : 'Of',
       value: selectedScheme?.join(',') ?? 'any type',
     },
+    {
+      onFilterFieldChange,
+      loading: false,
+      fieldName: 'observer.geo.name',
+      id: 'filter_location',
+      disabled: locations?.length === 0,
+      items: locations ?? [],
+      selectedItems: getSelectedItems('observer.geo.name'),
+      title: filterLabels.SCHEME,
+      description: selectedLocation ? 'From location' : 'From',
+      value: selectedLocation?.join(',') ?? 'any location',
+    },
   ];
 
-  const [isOpen, setIsOpen] = useState<boolean>({
+  const [isOpen, setIsOpen] = useState<any>({
     filter_port: false,
     filter_tags: false,
     filter_scheme: false,
+    filter_location: false,
   });
+
+  const filtersToDisplay = monitorFilters.filter(
+    curr => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
+  );
 
   return (
     <>
-      {monitorFilters.map(({ description, value, ...item }) => (
-        <span key={item.id}>
-          <FilterPopover
-            {...item}
-            btnContent={
-              <EuiExpression
-                aria-label={'ariaLabel'}
-                color={'secondary'}
-                data-test-subj={''}
-                description={description}
-                value={value}
-                onClick={() => setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] })}
-              />
-            }
-            forceOpen={isOpen[item.id]}
-            setForceOpen={() => {
-              setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] });
-            }}
-          />
+      {filtersToDisplay.map(({ description, value, ...item }) => (
+        <EuiFlexGroup key={item.id}>
+          <EuiFlexItem>
+            <FilterPopover
+              {...item}
+              btnContent={
+                <EuiExpression
+                  aria-label={'ariaLabel'}
+                  color={'secondary'}
+                  data-test-subj={''}
+                  description={description}
+                  value={value}
+                  onClick={() => setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] })}
+                />
+              }
+              forceOpen={isOpen[item.id]}
+              setForceOpen={() => {
+                setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] });
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              aria-label="Remove filter"
+              iconType="trash"
+              color="danger"
+              onClick={() => {
+                onRemoveFilter(item.fieldName);
+                onFilterFieldChange(item.fieldName, []);
+              }}
+            />
+          </EuiFlexItem>
+
           <EuiSpacer size="xs" />
-        </span>
+        </EuiFlexGroup>
       ))}
 
       <EuiSpacer size="xs" />

@@ -6,5 +6,4 @@
 
 export { DownNoExpressionSelect } from './down_number_select';
 export { FiltersExpressionsSelect } from './filters_expression_select';
-export { LocationExpressionSelect } from './location_expression_select';
 export { TimeExpressionSelect } from './time_expression_select';

@@ -16,27 +16,26 @@ import { useFilterUpdate } from '../../../hooks/use_filter_update';
 interface PresentationalComponentProps {
   loading: boolean;
   overviewFilters: OverviewFilters;
-  currentFilter: string;
-  onFilterUpdate: (filtersKuery: string) => void;
 }
 
 export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
-  currentFilter,
   overviewFilters,
   loading,
-  onFilterUpdate,
 }) => {
   const { locations, ports, schemes, tags } = overviewFilters;
 
-  const [updatedFieldValues, setUpdatedFieldValues] = useState({ fieldName: '', values: '' });
+  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
+    fieldName: string;
+    values: string[];
+  }>({ fieldName: '', values: [] });
 
-  const filterKueries = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+  const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
 
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
     setUpdatedFieldValues({ fieldName, values });
   };
 
-  const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {

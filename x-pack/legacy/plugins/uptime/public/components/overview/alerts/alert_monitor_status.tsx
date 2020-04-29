@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import { EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
 import {
   DownNoExpressionSelect,
-  LocationExpressionSelect,
   TimeExpressionSelect,
   FiltersExpressionsSelect,
 } from './monitor_expressions';
 
-import { FilterGroup, KueryBar } from '..';
+import { AddFilterButton } from './add_filter_btn';
+import { KueryBar } from '..';
 
 interface AlertMonitorStatusProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -31,7 +31,9 @@ interface AlertMonitorStatusProps {
 }
 
 export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
-  const { filters, locations, setAlertParams } = props;
+  const { filters, setAlertParams } = props;
+
+  const [newFilters, setNewFilters] = useState<string[]>([]);
 
   useEffect(() => {
     setAlertParams('filters', filters);
@@ -56,24 +58,25 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
 
       <EuiSpacer size="xs" />
 
-      <FiltersExpressionsSelect setAlertParams={setAlertParams} />
+      <FiltersExpressionsSelect
+        newFilters={newFilters}
+        onRemoveFilter={removeFiler => {
+          if (newFilters.includes(removeFiler)) {
+            setNewFilters(newFilters.filter(item => item !== removeFiler));
+          }
+        }}
+        setAlertParams={setAlertParams}
+      />
 
       <EuiSpacer size="xs" />
 
-      <LocationExpressionSelect locations={locations} setAlertParams={setAlertParams} />
+      <AddFilterButton
+        newFilters={newFilters}
+        onNewFilter={newFilter => {
+          setNewFilters([...newFilters, newFilter]);
+        }}
+      />
 
-      <EuiSpacer size="m" />
-
-      <EuiAccordion
-        id="accordion1"
-        buttonContent={
-          <EuiText>
-            <h5>Filters:</h5>
-          </EuiText>
-        }
-      >
-        <FilterGroup />
-      </EuiAccordion>
       <EuiSpacer size="m" />
     </>
   );

@@ -13,7 +13,7 @@ import { useUrlParams } from './use_url_params';
  * @param values the list of values to use when filter a field
  */
 
-export const useFilterUpdate = (fieldName: string, values: string[]) => {
+export const useFilterUpdate = (fieldName?: string, values?: string[]) => {
   const [getUrlParams, updateUrl] = useUrlParams();
 
   const { filters: currentFilters } = getUrlParams();
@@ -35,7 +35,7 @@ export const useFilterUpdate = (fieldName: string, values: string[]) => {
   useEffect(() => {
     if (fieldName) {
       // add new term to filter map, toggle it off if already present
-      const updatedFilterMap = new Map<string, string[]>(filterKueries);
+      const updatedFilterMap = new Map<string, string[] | undefined>(filterKueries);
       updatedFilterMap.set(fieldName, values);
       Array.from(updatedFilterMap.keys()).forEach(key => {
         const value = updatedFilterMap.get(key);

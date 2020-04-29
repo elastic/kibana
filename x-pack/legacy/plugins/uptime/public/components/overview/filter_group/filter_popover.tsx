@@ -20,6 +20,9 @@ export interface FilterPopoverProps {
   onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
   title: string;
+  btnContent?: JSX.Element;
+  forceOpen?: boolean;
+  setForceOpen?: (val: boolean) => void;
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>

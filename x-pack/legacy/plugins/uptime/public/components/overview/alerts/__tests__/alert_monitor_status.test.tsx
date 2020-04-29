@@ -7,7 +7,6 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AlertFieldNumber, handleAlertFieldNumberChange } from '../alert_field_number';
-import { selectedLocationsToString } from '../monitor_expressions/location_expression_select';
 
 describe('alert monitor status component', () => {
   describe('handleAlertFieldNumberChange', () => {
@@ -141,36 +140,6 @@ describe('alert monitor status component', () => {
       component.find('input').simulate('change', { target: { value: '0' } });
       expect(mockValueHandler).not.toHaveBeenCalled();
       expect(mockValueHandler.mock.calls).toEqual([]);
-    });
-  });
-
-  describe('selectedLocationsToString', () => {
-    it('generates a formatted string for a valid list of options', () => {
-      const locations = [
-        {
-          checked: 'on',
-          label: 'fairbanks',
-        },
-        {
-          checked: 'on',
-          label: 'harrisburg',
-        },
-        {
-          checked: undefined,
-          label: 'orlando',
-        },
-      ];
-      expect(selectedLocationsToString(locations)).toEqual('fairbanks, harrisburg');
-    });
-
-    it('generates a formatted string for a single item', () => {
-      expect(selectedLocationsToString([{ checked: 'on', label: 'fairbanks' }])).toEqual(
-        'fairbanks'
-      );
-    });
-
-    it('returns an empty string when no valid options are available', () => {
-      expect(selectedLocationsToString([{ checked: 'off', label: 'harrisburg' }])).toEqual('');
     });
   });
 });

@@ -104,7 +104,7 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeModel {
   id: string;
-  name: string;
+  name: string | JSX.Element;
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
