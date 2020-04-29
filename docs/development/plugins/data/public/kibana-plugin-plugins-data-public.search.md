@@ -10,6 +10,7 @@
 search: {
     aggs: {
         CidrMask: typeof CidrMask;
+        dateHistogramInterval: typeof dateHistogramInterval;
         intervalOptions: ({
             display: string;
             val: string;
