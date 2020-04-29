@@ -33,6 +33,9 @@ import { ACTION_VALUE_CLICK } from '../../../../../src/plugins/data/public/actio
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
+
+import { startServices, stopServices, services } from './services';
+
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 let restoreAction: ActionByType<any> | undefined;
@@ -51,8 +54,14 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
+    reduction[key] = provider.getService();
+
+    return reduction;
+  }, {} as Record<string, any>);
+
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
+    <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
       <I18nProvider>
         <Provider store={canvasStore}>
           <App />
@@ -71,6 +80,8 @@ export const initializeCanvas = async (
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries
 ) => {
+  startServices(coreSetup, coreStart, setupPlugins, startPlugins);
+
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
 
@@ -130,6 +141,7 @@ export const initializeCanvas = async (
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
+  stopServices();
   destroyRegistries();
   resetInterpreter();
 

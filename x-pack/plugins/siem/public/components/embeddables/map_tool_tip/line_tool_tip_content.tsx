@@ -17,10 +17,10 @@ import {
 import { FeatureProperty } from '../types';
 import * as i18n from '../translations';
 
-const FlowBadge = styled(EuiBadge)`
+const FlowBadge = (styled(EuiBadge)`
   height: 45px;
   min-width: 85px;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 const EuiFlexGroupStyled = styled(EuiFlexGroup)`
   margin: 0 auto;
