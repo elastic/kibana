@@ -6,7 +6,6 @@
 import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-// consider limiting the response size to a reasonable value in case we have a bunch of lifecycle events
 export class LifecycleQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string): JsonObject {
     return {
@@ -21,11 +20,15 @@ export class LifecycleQuery extends ResolverQuery {
                 term: { 'agent.id': endpointID },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.category': 'process' },
               },
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index,
@@ -39,16 +42,10 @@ export class LifecycleQuery extends ResolverQuery {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': entityIDs },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 term: { 'event.category': 'process' },
@@ -56,6 +53,7 @@ export class LifecycleQuery extends ResolverQuery {
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
       index,
