@@ -9880,7 +9880,6 @@
     "xpack.ml.jobMessages.timeLabel": "时间",
     "xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel": "高级配置",
     "xpack.ml.jobsBreadcrumbs.categorizationLabel": "归类",
-    "xpack.ml.jobsBreadcrumbs.createJobLabel": "创建作业",
     "xpack.ml.jobsBreadcrumbs.jobWizardLabel": "创建作业",
     "xpack.ml.jobsBreadcrumbs.multiMetricLabel": "多指标",
     "xpack.ml.jobsBreadcrumbs.populationLabel": "填充",
