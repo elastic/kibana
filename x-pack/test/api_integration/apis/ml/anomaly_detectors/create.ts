@@ -91,12 +91,11 @@ export default ({ getService }: FtrProviderContext) => {
         model_plot_config: { enabled: true },
       },
       expected: {
-        responseCode: 403,
+        responseCode: 404,
         responseBody: {
-          statusCode: 403,
-          error: 'Forbidden',
-          message:
-            '[security_exception] action [cluster:admin/xpack/ml/job/put] is unauthorized for user [ml_viewer]',
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Not Found',
         },
       },
     },

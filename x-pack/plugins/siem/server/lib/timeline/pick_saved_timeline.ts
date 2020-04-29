@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
-import { SavedTimeline } from './types';
+import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
@@ -24,5 +25,21 @@ export const pickSavedTimeline = (
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
+
+  if (savedTimeline.timelineType === TimelineType.template) {
+    savedTimeline.timelineType = TimelineType.template;
+    if (savedTimeline.templateTimelineId == null) {
+      savedTimeline.templateTimelineId = uuid.v4();
+    }
+
+    if (savedTimeline.templateTimelineVersion == null) {
+      savedTimeline.templateTimelineVersion = 1;
+    }
+  } else {
+    savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
+  }
+
   return savedTimeline;
 };
