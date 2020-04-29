@@ -19,7 +19,15 @@
 
 import React from 'react';
 
-import { EuiForm, EuiFormRow, EuiLink, EuiSelect, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -43,73 +51,74 @@ export const TimeField: React.FC<TimeFieldProps> = ({
 }) => (
   <EuiForm>
     {isVisible ? (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.fieldHeader"
-            defaultMessage="Time Filter field name"
-          />
-        }
-        labelAppend={
-          isLoading ? (
-            <EuiLoadingSpinner size="s" />
+      <>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.timeDescription"
+              defaultMessage="Does your index have time series data? Select the field to use as the main time filter."
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+              defaultMessage="Time field"
+            />
+          }
+          labelAppend={
+            isLoading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              <EuiText size="xs">
+                <EuiLink onClick={fetchTimeFields}>
+                  <FormattedMessage
+                    id="kbn.management.createIndexPattern.stepTime.refreshButton"
+                    defaultMessage="Refresh"
+                  />
+                </EuiLink>
+              </EuiText>
+            )
+          }
+          helpText={
+            <FormattedMessage
+              id="kbn.management.createIndexPattern.stepTime.fieldHelpText"
+              defaultMessage="No time series data? No problem. Select 'I don't want to use a time filter'."
+            />
+          }
+        >
+          {isLoading ? (
+            <EuiSelect
+              name="timeField"
+              data-test-subj="createIndexPatternTimeFieldSelect"
+              options={[
+                {
+                  text: i18n.translate(
+                    'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
+                    {
+                      defaultMessage: 'Loading…',
+                    }
+                  ),
+                  value: '',
+                },
+              ]}
+              disabled={true}
+            />
           ) : (
-            <EuiText size="xs">
-              <EuiLink onClick={fetchTimeFields}>
-                <FormattedMessage
-                  id="kbn.management.createIndexPattern.stepTime.refreshButton"
-                  defaultMessage="Refresh"
-                />
-              </EuiLink>
-            </EuiText>
-          )
-        }
-        helpText={
-          <div>
-            <p>
-              <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.fieldLabel"
-                defaultMessage="The time filter uses this field to filter your data by time."
-              />
-            </p>
-            <p>
-              <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
-                defaultMessage="If you choose not to have a time field, you won't be able to narrow your data by time."
-              />
-            </p>
-          </div>
-        }
-      >
-        {isLoading ? (
-          <EuiSelect
-            name="timeField"
-            data-test-subj="createIndexPatternTimeFieldSelect"
-            options={[
-              {
-                text: i18n.translate(
-                  'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
-                  {
-                    defaultMessage: 'Loading…',
-                  }
-                ),
-                value: '',
-              },
-            ]}
-            disabled={true}
-          />
-        ) : (
-          <EuiSelect
-            name="timeField"
-            data-test-subj="createIndexPatternTimeFieldSelect"
-            options={timeFieldOptions}
-            isLoading={isLoading}
-            disabled={isLoading}
-            value={selectedTimeField}
-            onChange={onTimeFieldChanged}
-          />
-        )}
-      </EuiFormRow>
+            <EuiSelect
+              name="timeField"
+              data-test-subj="createIndexPatternTimeFieldSelect"
+              options={timeFieldOptions}
+              isLoading={isLoading}
+              disabled={isLoading}
+              value={selectedTimeField}
+              onChange={onTimeFieldChanged}
+            />
+          )}
+        </EuiFormRow>
+      </>
     ) : (
       <EuiText>
         <p>

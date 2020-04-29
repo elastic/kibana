@@ -77,7 +77,7 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
             iconType="iInCircle"
             title={i18n.translate('data.indexPatterns.ensureDefaultIndexPattern.bannerLabel', {
               defaultMessage:
-                "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
+                'To visualize and explore data in Kibana, you must create an index pattern to retrieve data from Elasticsearch.',
             })}
           />
         )
