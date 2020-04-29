@@ -17,7 +17,6 @@ import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getDatasetForField } from './get_dataset_for_field';
-import { calculateIntervalFromRows } from './caclculate_interval_from_rows';
 
 export const populateSeriesWithTSVBData = (
   request: KibanaRequest,
@@ -131,14 +130,9 @@ export const populateSeriesWithTSVBData = (
       { timestamp, ...rowAttributes } as MetricsExplorerRow
     );
   });
-
   return {
     ...series,
     rows,
-    intervals: {
-      current: calculateIntervalFromRows(rows),
-      recommended: calculatedInterval,
-    },
     columns: [
       { name: 'timestamp', type: 'date' } as MetricsExplorerColumn,
       ...metricColumns,
