@@ -29,6 +29,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     core: CoreSetup<FixtureStartDeps>,
     { features, actions, alerting }: FixtureSetupDeps
   ) {
+    const clusterClient = core.elasticsearch.adminClient;
     features.registerFeature({
       id: 'alerting',
       name: 'Alerting',
@@ -179,6 +180,22 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         } catch (e) {
           callClusterError = e;
         }
+        // Call scoped cluster
+        const callScopedCluster = services.getScopedCallCluster(clusterClient);
+        let callScopedClusterSuccess = false;
+        let callScopedClusterError;
+        try {
+          await callScopedCluster('index', {
+            index: params.callClusterAuthorizationIndex,
+            refresh: 'wait_for',
+            body: {
+              param1: 'test',
+            },
+          });
+          callScopedClusterSuccess = true;
+        } catch (e) {
+          callScopedClusterError = e;
+        }
         // Saved objects client
         let savedObjectsClientSuccess = false;
         let savedObjectsClientError;
@@ -199,6 +216,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             state: {
               callClusterSuccess,
               callClusterError,
+              callScopedClusterSuccess,
+              callScopedClusterError,
               savedObjectsClientSuccess,
               savedObjectsClientError,
             },
@@ -389,6 +408,22 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         } catch (e) {
           callClusterError = e;
         }
+        // Call scoped cluster
+        const callScopedCluster = services.getScopedCallCluster(clusterClient);
+        let callScopedClusterSuccess = false;
+        let callScopedClusterError;
+        try {
+          await callScopedCluster('index', {
+            index: params.callClusterAuthorizationIndex,
+            refresh: 'wait_for',
+            body: {
+              param1: 'test',
+            },
+          });
+          callScopedClusterSuccess = true;
+        } catch (e) {
+          callScopedClusterError = e;
+        }
         // Saved objects client
         let savedObjectsClientSuccess = false;
         let savedObjectsClientError;
@@ -409,6 +444,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             state: {
               callClusterSuccess,
               callClusterError,
+              callScopedClusterSuccess,
+              callScopedClusterError,
               savedObjectsClientSuccess,
               savedObjectsClientError,
             },
