@@ -58,18 +58,6 @@ export function createLayerDescriptor({
       aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
       rightSourceId: joinId,
     });
-    const styleProperties: {
-      [VECTOR_STYLES.FILL_COLOR]: {
-        type: STYLE_TYPE.DYNAMIC;
-        options: {
-          field: {
-            name: joinKey;
-            origin: FIELD_ORIGIN.JOIN;
-          };
-          color: 'Yellow to Red';
-        };
-      };
-    };
     return VectorLayer.createDescriptor({
       joins: [
         {
@@ -87,7 +75,18 @@ export function createLayerDescriptor({
         id: 'world_countries',
         tooltipProperties: ['name', 'iso2'],
       }),
-      style: VectorStyle.createDescriptor(styleProperties),
+      style: VectorStyle.createDescriptor({
+        [VECTOR_STYLES.FILL_COLOR]: {
+          type: STYLE_TYPE.DYNAMIC,
+          options: {
+            field: {
+              name: joinKey,
+              origin: FIELD_ORIGIN.JOIN,
+            },
+            color: 'Yellow to Red',
+          },
+        },
+      }),
     });
   }
 }

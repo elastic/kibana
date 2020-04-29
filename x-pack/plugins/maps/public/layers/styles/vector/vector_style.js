@@ -47,6 +47,7 @@ export class VectorStyle extends AbstractStyle {
   static type = LAYER_STYLE_TYPE.VECTOR;
 
   static createDescriptor(properties = {}, isTimeAware = true) {
+    console.log(properties);
     return {
       type: VectorStyle.type,
       properties: { ...getDefaultProperties(), ...properties },
