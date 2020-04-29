@@ -139,7 +139,7 @@ export const generalSettings: RawSettingDefinition[] = [
   {
     key: 'span_frames_min_duration',
     type: 'duration',
-    // min: '-1ms',
+    min: '-1ms',
     defaultValue: '5ms',
     label: i18n.translate('xpack.apm.agentConfig.spanFramesMinDuration.label', {
       defaultMessage: 'Span frames minimum duration'
