@@ -14,7 +14,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const config = getService('config');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'security',
+    'spaceSelector',
+    'share',
+    'error',
+  ]);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -270,7 +277,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboard',
           DashboardConstants.LANDING_PAGE_PATH,
           {
             ensureCurrentUrl: false,
@@ -289,7 +296,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`create new dashboard redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
           {
             ensureCurrentUrl: false,
@@ -389,7 +396,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboard',
           DashboardConstants.LANDING_PAGE_PATH,
           {
             ensureCurrentUrl: false,
@@ -406,7 +413,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`create new dashboard redirects to the home page`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
           {
             ensureCurrentUrl: false,
@@ -500,52 +507,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dashboard']);
       });
 
-      it(`landing page redirects to the home page`, async () => {
+      it(`landing page shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'dashboard',
           DashboardConstants.LANDING_PAGE_PATH,
           {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`create new dashboard redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'kibana',
-          DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: 20000 });
-      });
-
-      it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'kibana',
-          createDashboardEditUrl('i-dont-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

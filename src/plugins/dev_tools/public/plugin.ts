@@ -40,18 +40,6 @@ export interface DevToolsSetup {
   register: (devTool: DevTool) => void;
 }
 
-export interface DevToolsStart {
-  /**
-   * Returns all registered dev tools in an ordered array.
-   * This function is only exposed because the dev tools app
-   * actually rendering the tool has to stay in the legacy platform
-   * for now. Once it is moved into this plugin, this function
-   * becomes an implementation detail.
-   * @deprecated
-   */
-  getSortedDevTools: () => readonly DevTool[];
-}
-
 /**
  * Descriptor for a dev tool. A dev tool works similar to an application
  * registered in the core application service.
@@ -92,7 +80,7 @@ export interface DevTool {
   order: number;
 }
 
-export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
+export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   private readonly devTools = new Map<string, DevTool>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 

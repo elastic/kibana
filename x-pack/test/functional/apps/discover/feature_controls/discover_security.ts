@@ -10,9 +10,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const globalNav = getService('globalNav');
-  const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'discover',
     'timePicker',
     'security',
@@ -397,11 +397,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_discover_privileges_user');
       });
 
-      it(`redirects to the home page`, async () => {
+      it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

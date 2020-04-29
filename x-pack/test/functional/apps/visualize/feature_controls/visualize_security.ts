@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'visualize',
     'header',
     'security',
@@ -421,20 +422,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_visualize_privileges_user');
       });
 
-      it(`landing page redirects to home page`, async () => {
+      it(`landing page shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit page redirects to home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
-          ensureCurrentUrl: false,
-          shouldLoginIfPrompted: false,
-        });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

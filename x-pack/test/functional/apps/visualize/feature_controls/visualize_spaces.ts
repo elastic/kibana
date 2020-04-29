@@ -11,7 +11,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -86,39 +86,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Visualize');
       });
 
-      it(`create new visualization redirects to the home page`, async () => {
+      it(`create new visualization shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit visualization for object which doesn't exist redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'visualize',
-          `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit visualization for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'visualize',
-          `${VisualizeConstants.EDIT_PATH}/i-exist`,
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

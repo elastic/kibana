@@ -57,6 +57,7 @@ const services = {
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
   indexPatternCreationType: mockIndexPatternCreationType,
+  prependBasePath: jest.fn(x => x),
 };
 
 describe('CreateIndexPatternWizard', () => {

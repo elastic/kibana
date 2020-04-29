@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
@@ -120,7 +120,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Dashboard');
       });
 
-      it(`create new dashboard redirects to the home page`, async () => {
+      it(`create new dashboard shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -130,33 +130,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-dont-exist'),
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
-      });
-
-      it(`edit dashboard for object which exists redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl(
-          'dashboard',
-          createDashboardEditUrl('i-exist'),
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });
