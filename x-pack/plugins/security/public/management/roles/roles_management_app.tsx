@@ -12,13 +12,7 @@ import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../../common/licensing';
 import { PluginStartDependencies } from '../../plugin';
-import { UserAPIClient } from '../users';
-import { RolesAPIClient } from './roles_api_client';
-import { RolesGridPage } from './roles_grid';
-import { EditRolePage } from './edit_role';
 import { DocumentationLinksService } from './documentation_links';
-import { IndicesAPIClient } from './indices_api_client';
-import { PrivilegesAPIClient } from './privileges_api_client';
 
 interface CreateParams {
   fatalErrors: FatalErrorsSetup;
@@ -34,17 +28,33 @@ export const rolesManagementApp = Object.freeze({
       order: 20,
       title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [
-          { application, docLinks, http, i18n: i18nStart, injectedMetadata, notifications },
-          { data, features },
-        ] = await getStartServices();
-
         const rolesBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
             href: `#${basePath}`,
           },
         ];
+
+        const [
+          [
+            { application, docLinks, http, i18n: i18nStart, injectedMetadata, notifications },
+            { data, features },
+          ],
+          { RolesGridPage },
+          { EditRolePage },
+          { RolesAPIClient },
+          { IndicesAPIClient },
+          { PrivilegesAPIClient },
+          { UserAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./roles_grid'),
+          import('./edit_role'),
+          import('./roles_api_client'),
+          import('./indices_api_client'),
+          import('./privileges_api_client'),
+          import('../users'),
+        ]);
 
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
