@@ -10,8 +10,14 @@ import styled from 'styled-components';
 import { Cert } from '../../../common/runtime_types';
 import { COPY_FINGERPRINT } from './translations';
 
+const EmptyButton = styled(EuiButtonEmpty)`
+  .euiButtonEmpty__content {
+    padding-right: 0px;
+  }
+`;
+
 const Span = styled.span`
-  margin-right: 3px;
+  margin-right: 8px;
 `;
 interface Props {
   cert: Cert;
@@ -21,7 +27,7 @@ export const FingerprintCol: React.FC<Props> = ({ cert }) => {
     return (
       <Span data-test-subj={val}>
         <EuiToolTip content={val}>
-          <EuiButtonEmpty>{text} </EuiButtonEmpty>
+          <EmptyButton>{text} </EmptyButton>
         </EuiToolTip>
         <EuiCopy textToCopy={val ?? ''}>
           {copy => <EuiButtonIcon onClick={copy} iconType="copy" title={COPY_FINGERPRINT} />}

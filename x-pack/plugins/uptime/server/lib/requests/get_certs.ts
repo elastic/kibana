@@ -96,7 +96,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     params.body.query.bool.should = [
       {
         multi_match: {
-          query: search,
+          query: escape(search),
           type: 'phrase_prefix',
           fields: [
             'monitor.id.text',

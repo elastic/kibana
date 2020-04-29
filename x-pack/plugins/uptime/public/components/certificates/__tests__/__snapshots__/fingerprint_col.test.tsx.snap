@@ -2,8 +2,12 @@
 
 exports[`FingerprintCol renders expected elements for valid props 1`] = `
 Array [
-  .c0 {
-  margin-right: 3px;
+  .c1 .euiButtonEmpty__content {
+  padding-right: 0px;
+}
+
+.c0 {
+  margin-right: 8px;
 }
 
 <span
@@ -14,7 +18,7 @@ Array [
       class="euiToolTipAnchor"
     >
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty euiButtonEmpty--primary c1"
         type="button"
       >
         <span
@@ -44,8 +48,12 @@ Array [
       </button>
     </span>
   </span>,
-  .c0 {
-  margin-right: 3px;
+  .c1 .euiButtonEmpty__content {
+  padding-right: 0px;
+}
+
+.c0 {
+  margin-right: 8px;
 }
 
 <span
@@ -56,7 +64,7 @@ Array [
       class="euiToolTipAnchor"
     >
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty euiButtonEmpty--primary c1"
         type="button"
       >
         <span

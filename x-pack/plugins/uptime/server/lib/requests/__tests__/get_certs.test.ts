@@ -174,7 +174,7 @@ describe('getCerts', () => {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls",
+                        "field": "tls.server",
                       },
                     },
                     Object {
