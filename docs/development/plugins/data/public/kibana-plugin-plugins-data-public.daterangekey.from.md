@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-from: number;
+from: number | string;
 ```

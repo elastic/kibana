@@ -271,9 +271,9 @@ export interface DataPublicPluginStart {
 // @public (undocumented)
 export interface DateRangeKey {
     // (undocumented)
-    from: number;
+    from: number | string;
     // (undocumented)
-    to: number;
+    to: number | string;
 }
 
 // @public (undocumented)
@@ -1101,17 +1101,12 @@ export type InputTimeRange = TimeRange | {
     to: Moment;
 };
 
+// Warning: (ae-forgotten-export) The symbol "CidrMaskIpRangeAggKey" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RangeIpRangeAggKey" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IpRangeKey" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IpRangeKey = {
-    type: 'mask';
-    mask: string;
-} | {
-    type: 'range';
-    from: string;
-    to: string;
-};
+export type IpRangeKey = CidrMaskIpRangeAggKey | RangeIpRangeAggKey;
 
 // Warning: (ae-missing-release-tag) "IRequestTypesMap" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

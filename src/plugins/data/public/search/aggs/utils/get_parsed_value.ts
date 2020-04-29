@@ -17,25 +17,10 @@
  * under the License.
  */
 
-export interface CidrMaskIpRangeAggKey {
-  type: 'mask';
-  mask: string;
-}
-
-export interface RangeIpRangeAggKey {
-  type: 'range';
-  from: string;
-  to: string;
-}
-
-export type IpRangeKey = CidrMaskIpRangeAggKey | RangeIpRangeAggKey;
-
-export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
-  if (range.type === 'mask') {
-    return format(range.mask);
+export const getParsedValue = (data: any, key: any) => {
+  try {
+    return data[key] ? JSON.parse(data[key]) : undefined;
+  } catch (e) {
+    throw new Error(`Unable to parse ${key} argument string`);
   }
-  const from = range.from ? format(range.from) : '-Infinity';
-  const to = range.to ? format(range.to) : 'Infinity';
-
-  return `${from} to ${to}`;
 };

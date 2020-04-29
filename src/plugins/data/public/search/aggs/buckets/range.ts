@@ -36,6 +36,15 @@ export interface RangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
+export interface AggParamsRange {
+  field: string;
+  ranges?: Array<{
+    from: number;
+    to: number;
+  }>;
+  json?: string;
+}
+
 export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) =>
   new BucketAggType(
     {

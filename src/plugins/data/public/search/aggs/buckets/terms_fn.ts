@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'terms';
 const fnName = 'aggTerms';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TERMS>;
 // Since the orderAgg param is an agg nested in a subexpression, we need to
 // overwrite the param type to expect a value of type AggExpressionType.
 type Arguments = AggArgs &
@@ -151,13 +151,7 @@ export const aggTerms = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-
-    let json;
-    try {
-      json = args.json ? JSON.parse(args.json) : undefined;
-    } catch (e) {
-      throw new Error('Unable to parse json argument string');
-    }
+    const json = getParsedValue(args, 'json');
 
     // Need to spread this object to work around TS bug:
     // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
@@ -169,7 +163,7 @@ export const aggTerms = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: aggName,
+        type: BUCKET_TYPES.TERMS,
         params: {
           ...rest,
           orderAgg,

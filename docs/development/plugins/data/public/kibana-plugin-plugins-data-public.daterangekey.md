@@ -14,6 +14,6 @@ export interface DateRangeKey
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [from](./kibana-plugin-plugins-data-public.daterangekey.from.md) | <code>number</code> |  |
-|  [to](./kibana-plugin-plugins-data-public.daterangekey.to.md) | <code>number</code> |  |
+|  [from](./kibana-plugin-plugins-data-public.daterangekey.from.md) | <code>number &#124; string</code> |  |
+|  [to](./kibana-plugin-plugins-data-public.daterangekey.to.md) | <code>number &#124; string</code> |  |
 

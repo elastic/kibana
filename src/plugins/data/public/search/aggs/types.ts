@@ -22,6 +22,10 @@ import {
   AggConfig,
   AggConfigSerialized,
   AggConfigs,
+  AggParamsRange,
+  AggParamsIpRange,
+  AggParamsDateRange,
+  AggParamsSignificantTerms,
   AggParamsTerms,
   AggType,
   aggTypeFieldFilters,
@@ -33,6 +37,7 @@ import {
   MetricAggType,
   parentPipelineAggHelper,
   siblingPipelineAggHelper,
+  BUCKET_TYPES,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -92,5 +97,9 @@ export type AggExpressionFunctionArgs<
  * @internal
  */
 export interface AggParamsMapping {
-  terms: AggParamsTerms;
+  [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
+  [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
+  [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.TERMS]: AggParamsTerms;
 }

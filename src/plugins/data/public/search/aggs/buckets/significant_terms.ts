@@ -33,6 +33,14 @@ export interface SignificantTermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
+export interface AggParamsSignificantTerms {
+  field: string;
+  size?: number;
+  exclude?: string;
+  include?: string;
+  json?: string;
+}
+
 export const getSignificantTermsBucketAgg = ({
   getInternalStartServices,
 }: SignificantTermsBucketAggDependencies) =>

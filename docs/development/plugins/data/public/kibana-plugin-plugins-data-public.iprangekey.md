@@ -7,12 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type IpRangeKey = {
-    type: 'mask';
-    mask: string;
-} | {
-    type: 'range';
-    from: string;
-    to: string;
-};
+export declare type IpRangeKey = CidrMaskIpRangeAggKey | RangeIpRangeAggKey;
 ```

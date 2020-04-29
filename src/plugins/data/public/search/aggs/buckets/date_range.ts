@@ -39,6 +39,13 @@ export interface DateRangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
+export interface AggParamsDateRange {
+  field: string;
+  ranges?: DateRangeKey[];
+  time_zone?: string;
+  json?: string;
+}
+
 export const getDateRangeBucketAgg = ({
   uiSettings,
   getInternalStartServices,

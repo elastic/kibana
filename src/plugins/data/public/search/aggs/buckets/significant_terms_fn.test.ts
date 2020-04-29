@@ -18,17 +18,15 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggTerms } from './terms_fn';
+import { aggSignificantTerms } from './significant_terms_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggTerms', () => {
-    const fn = functionWrapper(aggTerms());
+  describe('aggSignificantTerms', () => {
+    const fn = functionWrapper(aggSignificantTerms());
 
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'machine.os.keyword',
-        order: 'asc',
-        orderBy: '1',
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -41,17 +39,10 @@ describe('agg_expression_functions', () => {
               "field": "machine.os.keyword",
               "include": undefined,
               "json": undefined,
-              "missingBucket": false,
-              "missingBucketLabel": "Missing",
-              "order": "asc",
-              "orderAgg": undefined,
-              "orderBy": "1",
-              "otherBucket": false,
-              "otherBucketLabel": "Other",
-              "size": 5,
+              "size": undefined,
             },
             "schema": undefined,
-            "type": "terms",
+            "type": "significant_terms",
           },
         }
       `);
@@ -63,13 +54,7 @@ describe('agg_expression_functions', () => {
         enabled: false,
         schema: 'whatever',
         field: 'machine.os.keyword',
-        order: 'desc',
-        orderBy: '2',
         size: 6,
-        missingBucket: true,
-        missingBucketLabel: 'missing',
-        otherBucket: true,
-        otherBucketLabel: 'other',
         include: 'win',
         exclude: 'ios',
       });
@@ -83,62 +68,10 @@ describe('agg_expression_functions', () => {
             "field": "machine.os.keyword",
             "include": "win",
             "json": undefined,
-            "missingBucket": true,
-            "missingBucketLabel": "missing",
-            "order": "desc",
-            "orderAgg": undefined,
-            "orderBy": "2",
-            "otherBucket": true,
-            "otherBucketLabel": "other",
             "size": 6,
           },
           "schema": "whatever",
-          "type": "terms",
-        }
-      `);
-    });
-
-    test('handles orderAgg as a subexpression', () => {
-      const actual = fn({
-        field: 'machine.os.keyword',
-        order: 'asc',
-        orderBy: '1',
-        orderAgg: fn({ field: 'name', order: 'asc', orderBy: '1' }),
-      });
-
-      expect(actual.value.params).toMatchInlineSnapshot(`
-        Object {
-          "exclude": undefined,
-          "field": "machine.os.keyword",
-          "include": undefined,
-          "json": undefined,
-          "missingBucket": false,
-          "missingBucketLabel": "Missing",
-          "order": "asc",
-          "orderAgg": Object {
-            "enabled": true,
-            "id": undefined,
-            "params": Object {
-              "exclude": undefined,
-              "field": "name",
-              "include": undefined,
-              "json": undefined,
-              "missingBucket": false,
-              "missingBucketLabel": "Missing",
-              "order": "asc",
-              "orderAgg": undefined,
-              "orderBy": "1",
-              "otherBucket": false,
-              "otherBucketLabel": "Other",
-              "size": 5,
-            },
-            "schema": undefined,
-            "type": "terms",
-          },
-          "orderBy": "1",
-          "otherBucket": false,
-          "otherBucketLabel": "Other",
-          "size": 5,
+          "type": "significant_terms",
         }
       `);
     });
@@ -146,8 +79,6 @@ describe('agg_expression_functions', () => {
     test('correctly parses json string argument', () => {
       const actual = fn({
         field: 'machine.os.keyword',
-        order: 'asc',
-        orderBy: '1',
         json: '{ "foo": true }',
       });
 
@@ -155,8 +86,6 @@ describe('agg_expression_functions', () => {
       expect(() => {
         fn({
           field: 'machine.os.keyword',
-          order: 'asc',
-          orderBy: '1',
           json: '/// intentionally malformed json ///',
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);
