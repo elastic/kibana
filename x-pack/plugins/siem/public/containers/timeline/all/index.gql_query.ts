@@ -55,6 +55,9 @@ export const allTimelinesQuery = gql`
         noteIds
         pinnedEventIds
         title
+        timelineType
+        templateTimelineId
+        templateTimelineVersion
         created
         createdBy
         updated

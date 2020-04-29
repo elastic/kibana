@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as runtimeTypes from 'io-ts';
 import { GraphQLResolveInfo } from 'graphql';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,6 +105,3 @@ export type ChildResolverOf<Resolver_, ParentResolver> = ResolverWithParent<
   Resolver_,
   ResultOf<ParentResolver>
 >;
-
-export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
-  runtimeTypes.union([type, runtimeTypes.null]);
