@@ -17,7 +17,12 @@ import { escapeHatch, transformNewComment, wrapError, flattenCaseSavedObject } f
 import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
-export function initPostCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPostCommentApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.post(
     {
       path: CASE_COMMENTS_URL,
@@ -45,7 +50,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
 
-        const [newComment, updatedCase] = await Promise.all([
+        const [newComment, updatedCase, myCaseConfigure] = await Promise.all([
           caseService.postNewComment({
             client,
             attributes: transformNewComment({
@@ -72,8 +77,13 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
             },
             version: myCase.version,
           }),
+          caseConfigureService.find({ client }),
         ]);
 
+        const caseConfigureConnectorId =
+          myCaseConfigure.saved_objects.length > 0
+            ? myCaseConfigure.saved_objects[0].attributes.connector_id
+            : 'none';
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
           client,
           caseId,
@@ -121,6 +131,7 @@ export function initPostCommentApi({ caseService, router, userActionService }: R
                 references: myCase.references,
               },
               comments: comments.saved_objects,
+              caseConfigureConnectorId,
             })
           ),
         });

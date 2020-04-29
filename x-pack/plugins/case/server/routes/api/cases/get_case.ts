@@ -29,32 +29,27 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
         const client = context.core.savedObjects.client;
         const includeComments = JSON.parse(request.query.includeComments);
 
-        let theCase = await caseService.getCase({
-          client,
-          caseId: request.params.case_id,
-        });
-        if (!('connector_id' in theCase.attributes)) {
-          const myCaseConfigure = await caseConfigureService.find({ client });
-          const connectorId =
-            myCaseConfigure.saved_objects.length > 0
-              ? myCaseConfigure.saved_objects[0].attributes.connector_id
-              : 'none';
-
-          await caseService.patchCase({
-            client,
-            caseId: theCase.id,
-            version: theCase.version,
-            updatedAttributes: { connector_id: connectorId },
-          });
-          theCase = await caseService.getCase({
+        const [theCase, myCaseConfigure] = await Promise.all([
+          caseService.getCase({
             client,
             caseId: request.params.case_id,
-          });
-        }
+          }),
+          caseConfigureService.find({ client }),
+        ]);
+
+        const caseConfigureConnectorId =
+          myCaseConfigure.saved_objects.length > 0
+            ? myCaseConfigure.saved_objects[0].attributes.connector_id
+            : 'none';
 
         if (!includeComments) {
           return response.ok({
-            body: CaseResponseRt.encode(flattenCaseSavedObject({ savedObject: theCase })),
+            body: CaseResponseRt.encode(
+              flattenCaseSavedObject({
+                savedObject: theCase,
+                caseConfigureConnectorId,
+              })
+            ),
           });
         }
 
@@ -69,7 +64,12 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
 
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject({ savedObject: theCase, comments: theComments.saved_objects })
+            flattenCaseSavedObject({
+              savedObject: theCase,
+              comments: theComments.saved_objects,
+              totalComment: theComments.total,
+              caseConfigureConnectorId,
+            })
           ),
         });
       } catch (error) {

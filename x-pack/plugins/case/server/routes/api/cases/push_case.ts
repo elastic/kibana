@@ -83,6 +83,14 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
+        const caseConfigureConnectorId =
+          myCaseConfigure.saved_objects.length > 0
+            ? myCaseConfigure.saved_objects[0].attributes.connector_id
+            : 'none';
+        // old case may not have new attribute connector_id, so we default to the configured system
+        const updateConnectorId =
+          myCase.attributes.connector_id == null ? { connector_id: caseConfigureConnectorId } : {};
+
         const [updatedCase, updatedComments] = await Promise.all([
           caseService.patchCase({
             client,
@@ -98,6 +106,7 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
+              ...updateConnectorId,
             },
             version: myCase.version,
           }),

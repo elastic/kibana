@@ -17,7 +17,12 @@ import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
-export function initPatchCommentApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPatchCommentApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -64,7 +69,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const updatedDate = new Date().toISOString();
-        const [updatedComment, updatedCase] = await Promise.all([
+        const [updatedComment, updatedCase, myCaseConfigure] = await Promise.all([
           caseService.patchComment({
             client,
             commentId: query.id,
@@ -84,6 +89,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
             },
             version: myCase.version,
           }),
+          caseConfigureService.find({ client }),
         ]);
 
         const totalCommentsFindByCases = await caseService.getAllCaseComments({
@@ -95,6 +101,10 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
             perPage: 1,
           },
         });
+        const caseConfigureConnectorId =
+          myCaseConfigure.saved_objects.length > 0
+            ? myCaseConfigure.saved_objects[0].attributes.connector_id
+            : 'none';
 
         const [comments] = await Promise.all([
           caseService.getAllCaseComments({
@@ -134,6 +144,7 @@ export function initPatchCommentApi({ caseService, router, userActionService }: 
                 references: myCase.references,
               },
               comments: comments.saved_objects,
+              caseConfigureConnectorId,
             })
           ),
         });

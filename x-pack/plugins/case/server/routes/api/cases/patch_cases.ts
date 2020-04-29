@@ -22,7 +22,12 @@ import { getCaseToUpdate } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 import { CASES_URL } from '../../../../common/constants';
 
-export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPatchCasesApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.patch(
     {
       path: CASES_URL,
@@ -37,10 +42,20 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
           excess(CasesPatchRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const myCases = await caseService.getCases({
-          client,
-          caseIds: query.cases.map(q => q.id),
-        });
+
+        const [myCases, myCaseConfigure] = await Promise.all([
+          caseService.getCases({
+            client,
+            caseIds: query.cases.map(q => q.id),
+          }),
+          caseConfigureService.find({ client }),
+        ]);
+
+        const caseConfigureConnectorId =
+          myCaseConfigure.saved_objects.length > 0
+            ? myCaseConfigure.saved_objects[0].attributes.connector_id
+            : 'none';
+
         let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter(q => {
           const myCase = myCases.saved_objects.find(c => c.id === q.id);
@@ -121,6 +136,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
                   references: myCase.references,
                   version: updatedCase?.version ?? myCase.version,
                 },
+                caseConfigureConnectorId,
               });
             });
 

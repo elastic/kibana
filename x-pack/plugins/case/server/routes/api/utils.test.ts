@@ -215,23 +215,24 @@ describe('Utils', () => {
   describe('transformCases', () => {
     it('transforms correctly', () => {
       const extraCaseData = [
-        { caseId: mockCases[0].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[1].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[2].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
-        { caseId: mockCases[3].id, totalComment: 2, connectorId: '123', caseVersion: '700' },
+        { caseId: mockCases[0].id, totalComments: 2 },
+        { caseId: mockCases[1].id, totalComments: 2 },
+        { caseId: mockCases[2].id, totalComments: 2 },
+        { caseId: mockCases[3].id, totalComments: 2 },
       ];
 
       const res = transformCases(
         { saved_objects: mockCases, total: mockCases.length, per_page: 10, page: 1 },
         2,
         2,
-        extraCaseData
+        extraCaseData,
+        '123'
       );
       expect(res).toEqual({
         page: 1,
         per_page: 10,
         total: mockCases.length,
-        cases: flattenCaseSavedObjects(mockCases, extraCaseData),
+        cases: flattenCaseSavedObjects(mockCases, extraCaseData, '123'),
         count_open_cases: 2,
         count_closed_cases: 2,
       });
@@ -240,11 +241,9 @@ describe('Utils', () => {
 
   describe('flattenCaseSavedObjects', () => {
     it('flattens correctly', () => {
-      const extraCaseData = [
-        { caseId: mockCases[0].id, totalComment: 2, connectorId: '123', caseVersion: 'WzAsMV0=' },
-      ];
+      const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];
 
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, '123');
       expect(res).toEqual([
         {
           id: 'mock-id-1',
@@ -276,11 +275,8 @@ describe('Utils', () => {
     });
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
-      const extraCaseData = [
-        { caseId: 'not-exist', totalComment: 2, connectorId: '123', caseVersion: '700' },
-      ];
-
-      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData);
+      const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];
+      const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, '123');
 
       expect(res).toEqual([
         {
@@ -437,7 +433,6 @@ describe('Utils', () => {
       const extraCaseData = {
         totalComment: 2,
         connectorId: '123',
-        version: '700',
       };
 
       // @ts-ignore this is to update old case saved objects to include connector_id
