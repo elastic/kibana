@@ -258,30 +258,25 @@ class AgentConfigService {
     soClient: SavedObjectsClientContract,
     id: string
   ): Promise<DeleteAgentConfigResponse> {
-    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
-    let config;
+    const config = await this.get(soClient, id, false);
+    if (!config) {
+      throw new Error('Agent configuration not found');
+    }
 
+    const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
     if (id === defaultConfigId) {
       throw new Error('The default agent configuration cannot be deleted');
     }
-    try {
-      config = await this.get(soClient, id, false);
-      if (!config) {
-        throw new Error('Agent configuration not found');
-      }
+
+    if (config.datasources && config.datasources.length) {
       await datasourceService.delete(soClient, config.datasources as string[], false);
-      await soClient.delete(SAVED_OBJECT_TYPE, id);
-      await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
-      return {
-        id,
-        success: true,
-      };
-    } catch (e) {
-      return {
-        id,
-        success: false,
-      };
     }
+    await soClient.delete(SAVED_OBJECT_TYPE, id);
+    await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
+    return {
+      id,
+      success: true,
+    };
   }
 
   public async getFullConfig(
