@@ -39,6 +39,7 @@ import {
   TooltipType,
   ElementClickListener,
   XYChartElementEvent,
+  BrushEndListener,
 } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
@@ -143,13 +144,12 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     }
   }
 
-  public onBrushEnd = (min: number, max: number) => {
-    const range = {
-      from: min,
-      to: max,
-    };
-
-    this.props.timefilterUpdateHandler(range);
+  public onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [from, to] = x;
+    this.props.timefilterUpdateHandler({ from, to });
   };
 
   public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {

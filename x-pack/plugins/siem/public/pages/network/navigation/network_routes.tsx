@@ -22,6 +22,7 @@ import { NetworkRoutesProps, NetworkRouteType } from './types';
 import { TlsQueryTabBody } from './tls_query_tab_body';
 import { Anomaly } from '../../../components/ml/types';
 import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
+import { UpdateDateRange } from '../../../components/charts/common';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
   ({
@@ -46,8 +47,12 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
       },
       [setAbsoluteRangeDatePicker]
     );
-    const updateDateRange = useCallback(
-      (min: number, max: number) => {
+    const updateDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]

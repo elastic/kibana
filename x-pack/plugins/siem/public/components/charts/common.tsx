@@ -15,6 +15,7 @@ import {
   SettingsSpecProps,
   TickFormatter,
   Position,
+  BrushEndListener,
 } from '@elastic/charts';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -27,7 +28,7 @@ export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
 const chartDefaultRendering: Rendering = 'canvas';
 
-export type UpdateDateRange = (min: number, max: number) => void;
+export type UpdateDateRange = BrushEndListener;
 
 export interface ChartData {
   x?: number | string | null;

@@ -13,6 +13,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { GlobalTime } from '../../containers/global_time';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { AlertsTable } from '../../components/alerts_viewer/alerts_table';
+import { UpdateDateRange } from '../../components/charts/common';
 import { FiltersGlobal } from '../../components/filters_global';
 import {
   getDetectionEngineTabUrl,
@@ -77,8 +78,12 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
 
   const [lastSignals] = useSignalInfo({});
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
+  const updateDateRangeCallback = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
