@@ -160,8 +160,13 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const caseConnectorName = useMemo(
+      () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
+      [connectors, caseData.connectorId]
+    );
     const { pushButton, pushCallouts } = usePushToService({
       caseConnectorId: caseData.connectorId,
+      caseConnectorName,
       caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,

@@ -12,7 +12,7 @@ import { getCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { parseString } from './utils';
-import { CaseFullExternalService } from '../../../../../../plugins/case/common/api/cases';
+import { CaseFullExternalService } from '../../../../case/common/api/cases';
 
 interface CaseService extends CaseExternalService {
   firstPushIndex: number;
