@@ -40,6 +40,7 @@ export default {
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks}/**/*',
     '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
@@ -49,7 +50,6 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
     'src/legacy/core_plugins/**/*.{js,jsx,ts,tsx}',
     '!src/legacy/core_plugins/**/{__test__,__snapshots__}/**/*',
-    '!src/plugins/**/__examples__/**',
   ],
   moduleNameMapper: {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
