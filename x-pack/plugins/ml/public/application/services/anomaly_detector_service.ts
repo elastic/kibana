@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Job, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { basePath } from './ml_api_service';
@@ -24,15 +24,19 @@ export class AnomalyDetectorService {
       .http$<{ count: number; jobs: Job[] }>({
         path: `${this.apiBasePath}/${jobId}`,
       })
-      .pipe(
-        map(response => {
-          return response.jobs[0];
-        })
-      );
+      .pipe(map(response => response.jobs[0]));
   }
 
+  /**
+   * Fetches anomaly detection jobs by ids
+   * @param jobIds
+   */
   getJobs$(jobIds: JobId[]): Observable<Job[]> {
-    return forkJoin(jobIds.map(jobId => this.getJobById$(jobId)));
+    return this.httpService
+      .http$<{ count: number; jobs: Job[] }>({
+        path: `${this.apiBasePath}/${jobIds.join(',')}`,
+      })
+      .pipe(map(response => response.jobs));
   }
 
   /**
