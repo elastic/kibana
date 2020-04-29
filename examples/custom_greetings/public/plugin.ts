@@ -72,8 +72,8 @@ export class CustomGreetingsPlugin
     }
     return {
       getCasualGreeter: () => casualGreeterProvider(),
-      getExcitedGreeter: () => casualGreeterProvider(),
-      getFormalGreeter: () => casualGreeterProvider(),
+      getExcitedGreeter: () => excitedGreeterProvider(),
+      getFormalGreeter: () => formalGreeterProvider(),
     };
   }
 }
