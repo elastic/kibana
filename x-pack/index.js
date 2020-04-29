@@ -12,14 +12,9 @@ import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
 import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
-import { indexManagement } from './legacy/plugins/index_management';
 import { spaces } from './legacy/plugins/spaces';
 import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
-import { siem } from './legacy/plugins/siem';
-import { remoteClusters } from './legacy/plugins/remote_clusters';
-import { upgradeAssistant } from './legacy/plugins/upgrade_assistant';
-import { uptime } from './legacy/plugins/uptime';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
@@ -35,12 +30,7 @@ module.exports = function(kibana) {
     apm(kibana),
     maps(kibana),
     canvas(kibana),
-    indexManagement(kibana),
     infra(kibana),
-    siem(kibana),
-    remoteClusters(kibana),
-    upgradeAssistant(kibana),
-    uptime(kibana),
     encryptedSavedObjects(kibana),
     ingestManager(kibana),
   ];

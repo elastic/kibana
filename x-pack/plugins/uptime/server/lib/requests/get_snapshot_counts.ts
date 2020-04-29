@@ -5,8 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
+import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 
 export interface GetSnapshotCountParams {
