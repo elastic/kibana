@@ -168,7 +168,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alert = await alerting.alerts.createAlertWithActions(
           testRunUuid,
           '.index-threshold',
-          params
+          params,
+          [
+            {
+              group: 'threshold met',
+              id: 'my-server-log',
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ]
         );
         // refresh to see alert
         await browser.refresh();
@@ -183,6 +190,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
         const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
         await testSubjects.setValue('alertNameInput', updatedAlertName, {
