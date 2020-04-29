@@ -46,7 +46,6 @@ export interface KibanaMigratorOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
-  kibanaVersion: string;
   logger: Logger;
   savedObjectValidations: PropertyValidators;
 }
@@ -85,7 +84,6 @@ export class KibanaMigrator {
     kibanaConfig,
     savedObjectsConfig,
     savedObjectValidations,
-    kibanaVersion,
     logger,
   }: KibanaMigratorOptions) {
     this.callCluster = callCluster;
@@ -96,7 +94,6 @@ export class KibanaMigrator {
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.documentMigrator = new DocumentMigrator({
-      kibanaVersion,
       typeRegistry,
       validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,

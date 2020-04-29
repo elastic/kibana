@@ -76,7 +76,6 @@ export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanit
 type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
 
 interface DocumentMigratorOptions {
-  kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
   validateDoc: ValidateDoc;
   log: Logger;
@@ -118,12 +117,11 @@ export class DocumentMigrator implements VersionedTransformer {
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, log, validateDoc }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
-      kibanaVersion,
       migrations: this.migrations,
       validateDoc,
     });
@@ -231,11 +229,9 @@ function buildActiveMigrations(
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
-  kibanaVersion,
   migrations,
   validateDoc,
 }: {
-  kibanaVersion: string;
   migrations: ActiveMigrations;
   validateDoc: ValidateDoc;
 }): TransformFn {
@@ -321,9 +317,9 @@ function wrapWithTry(
       return result;
     } catch (error) {
       const failedTransform = `${type}:${version}`;
-      const failedDoc = JSON.stringify(doc);
       log.warn(
-        `Failed to transform document ${doc}. Transform: ${failedTransform}\nDoc: ${failedDoc}`
+        `Failed to apply the migration transform '${failedTransform}' to the document: ${type}:${doc.id}`,
+        { document: doc, error: { message: error.message, name: error.name, stack: error.stack } }
       );
       throw error;
     }

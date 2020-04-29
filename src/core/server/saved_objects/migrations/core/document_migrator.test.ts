@@ -45,7 +45,6 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 describe('DocumentMigrator', () => {
   function testOpts() {
     return {
-      kibanaVersion: '25.2.3',
       typeRegistry: createRegistry(),
       validateDoc: _.noop,
       log: mockLogger,
@@ -54,7 +53,6 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration definitions', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: _.noop as any,
@@ -69,7 +67,6 @@ describe('DocumentMigrator', () => {
 
   it('validates individual migration semvers', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -86,7 +83,6 @@ describe('DocumentMigrator', () => {
 
   it('validates the migration function', () => {
     const invalidDefinition = {
-      kibanaVersion: '3.2.3',
       typeRegistry: createRegistry({
         name: 'foo',
         migrations: {
@@ -283,7 +279,6 @@ describe('DocumentMigrator', () => {
   it('rejects docs that belong to a newer Kibana instance', () => {
     const migrator = new DocumentMigrator({
       ...testOpts(),
-      kibanaVersion: '8.0.1',
     });
     expect(() =>
       migrator.migrate({
@@ -555,7 +550,9 @@ describe('DocumentMigrator', () => {
         name: 'dog',
         migrations: {
           '1.2.3': () => {
-            throw new Error('Dang diggity!');
+            const err = new Error('Dang diggity!');
+            err.stack = 'stack trace...';
+            throw err;
           },
         },
       }),
@@ -571,10 +568,24 @@ describe('DocumentMigrator', () => {
       migrator.migrate(_.cloneDeep(failedDoc));
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
-      expect(error.message).toMatch(/Dang diggity!/);
-      const warning = loggingServiceMock.collect(mockLoggerFactory).warn[0][0];
-      expect(warning).toContain(JSON.stringify(failedDoc));
-      expect(warning).toContain('dog:1.2.3');
+      expect(loggingServiceMock.collect(mockLoggerFactory).warn[0]).toMatchInlineSnapshot(`
+        Array [
+          "Failed to apply the migration transform 'dog:1.2.3' to the document: dog:smelly",
+          Object {
+            "document": Object {
+              "attributes": Object {},
+              "id": "smelly",
+              "migrationVersion": Object {},
+              "type": "dog",
+            },
+            "error": Object {
+              "message": "Dang diggity!",
+              "name": "Error",
+              "stack": "stack trace...",
+            },
+          },
+        ]
+      `);
     }
   });
 

@@ -490,7 +490,6 @@ export class SavedObjectsService
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
-      kibanaVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
       savedObjectValidations: this.validations,
       kibanaConfig,
