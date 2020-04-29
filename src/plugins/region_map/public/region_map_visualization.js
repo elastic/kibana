@@ -74,7 +74,7 @@ export function createRegionMapVisualization({
         results
       );
 
-      const metricFieldFormatter = getFormatService(this._params.metric.format);
+      const metricFieldFormatter = getFormatService().deserialize(this._params.metric.format);
 
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
       if (termColumn && valueColumn) {
@@ -107,7 +107,7 @@ export function createRegionMapVisualization({
         this._params.showAllShapes
       );
 
-      const metricFieldFormatter = getFormatService(this._params.metric.format);
+      const metricFieldFormatter = getFormatService().deserialize(this._params.metric.format);
 
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);

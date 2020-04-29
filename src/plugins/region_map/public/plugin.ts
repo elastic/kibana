@@ -22,7 +22,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
-  NotificationsSetup,
+  NotificationsStart,
 } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
@@ -48,12 +48,12 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
-  notifications: NotificationsSetup;
 }
 
 /** @internal */
 export interface RegionMapPluginStartDependencies {
   data: DataPublicPluginStart;
+  notifications: NotificationsStart;
 }
 
 /** @internal */
@@ -62,8 +62,14 @@ export interface RegionMapsConfig {
   layers: any[];
 }
 
+export interface RegionMapPluginSetup {
+  config: any;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RegionMapPluginStart {}
+
 /** @internal */
-export class RegionMapPlugin implements Plugin<Promise<void>, void> {
+export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPluginStart> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -72,9 +78,8 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy, notifications }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
   ) {
-    setNotifications(notifications);
     const config = this.initializerContext.config.get<RegionMapsConfigType>();
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
@@ -96,5 +101,6 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
 
   public start(core: CoreStart, { data }: RegionMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
+    setNotifications(core.notifications);
   }
 }
