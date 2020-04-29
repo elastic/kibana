@@ -5,10 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  CertResult,
-  GetCertsParams,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CertResult, GetCertsParams } from '../../../common/runtime_types';
 
 enum SortFields {
   'issuer' = 'tls.server.x509.issuer.common_name',

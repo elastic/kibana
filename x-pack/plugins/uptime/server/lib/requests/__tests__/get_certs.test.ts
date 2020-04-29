@@ -5,7 +5,7 @@
  */
 
 import { getCerts } from '../get_certs';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getCerts', () => {
   let mockHits: any;
