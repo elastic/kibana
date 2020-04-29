@@ -37,7 +37,7 @@ export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
