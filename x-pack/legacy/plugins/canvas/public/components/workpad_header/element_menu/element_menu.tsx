@@ -93,8 +93,8 @@ export const ElementMenu: FunctionComponent<Props> = ({
 
   const hideAssetModal = () => setAssetModalVisible(false);
   const showAssetModal = () => setAssetModalVisible(true);
-  const showEmbedPanel = () => setEmbedPanelVisible(false);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
+  const showEmbedPanel = () => setEmbedPanelVisible(true);
   const hideSavedElementsModal = () => setSavedElementsModalVisible(false);
   const showSavedElementsModal = () => setSavedElementsModalVisible(true);
 

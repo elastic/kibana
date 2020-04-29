@@ -26,12 +26,12 @@ interface ConfirmedJob {
 }
 
 export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger): EnqueueJobFn {
-  const logger = parentLogger.clone(['queue-job']);
   const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
-  const queueConfig = config.get('queue');
-  const browserType = captureConfig.browser.type;
-  const maxAttempts = captureConfig.maxAttempts;
+  const queueTimeout = config.get('queue', 'timeout');
+  const browserType = config.get('capture', 'browser', 'type');
+  const maxAttempts = config.get('capture', 'maxAttempts');
+
+  const logger = parentLogger.clone(['queue-job']);
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
@@ -53,7 +53,7 @@ export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger
     const payload = await createJob(jobParams, headers, request);
 
     const options = {
-      timeout: queueConfig.timeout,
+      timeout: queueTimeout,
       created_by: get(user, 'username', false),
       browser_type: browserType,
       max_attempts: maxAttempts,

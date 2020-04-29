@@ -2,7 +2,6 @@
   "include": [
     "typings/**/*",
     "plugins/siem/**/*",
-    "legacy/plugins/siem/**/*",
     "plugins/apm/typings/numeral.d.ts",
     "legacy/plugins/canvas/types/webpack.d.ts",
     "plugins/triggers_actions_ui/**/*"

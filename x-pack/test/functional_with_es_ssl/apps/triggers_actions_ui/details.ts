@@ -17,6 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const alerting = getService('alerting');
   const retry = getService('retry');
+  const find = getService('find');
 
   describe('Alert Details', function() {
     describe('Header', function() {
@@ -145,6 +146,56 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const muteSwitchAfterUnmuting = await testSubjects.find('muteSwitch');
         const isCheckedAfterDisabling = await muteSwitchAfterUnmuting.getAttribute('aria-checked');
         expect(isCheckedAfterDisabling).to.eql('false');
+      });
+    });
+
+    describe('Edit alert button', function() {
+      const testRunUuid = uuid.v4();
+
+      it('should open edit alert flyout', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
+          params
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+
+        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
+        expect(headingText).to.be(updatedAlertName);
       });
     });
 
@@ -453,6 +504,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
 
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
+
         // refresh to see alert
         await browser.refresh();
 
@@ -463,12 +520,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-
-        // await first run to complete so we have an initial state
-        await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
-          expect(Object.keys(alertInstances).length).to.eql(instances.length);
-        });
       });
 
       const PAGE_SIZE = 10;
