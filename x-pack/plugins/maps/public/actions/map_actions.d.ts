@@ -74,3 +74,11 @@ export function updateMapSetting(
   settingKey: string,
   settingValue: string | boolean | number
 ): AnyAction;
+
+export function cloneLayer(layerId: string): AnyAction;
+
+export function fitToLayerExtent(layerId: string): AnyAction;
+
+export function removeLayer(layerId: string): AnyAction;
+
+export function toggleLayerVisible(layerId: string): AnyAction;

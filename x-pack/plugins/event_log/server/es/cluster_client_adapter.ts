@@ -183,14 +183,14 @@ export class ClusterClientAdapter {
                   },
                   start && {
                     range: {
-                      'event.start': {
+                      '@timestamp': {
                         gte: start,
                       },
                     },
                   },
                   end && {
                     range: {
-                      'event.end': {
+                      '@timestamp': {
                         lte: end,
                       },
                     },

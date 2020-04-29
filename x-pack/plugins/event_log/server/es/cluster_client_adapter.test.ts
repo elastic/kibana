@@ -226,7 +226,7 @@ describe('queryEventsBySavedObject', () => {
       body: {
         from: 0,
         size: 10,
-        sort: { 'event.start': { order: 'asc' } },
+        sort: { '@timestamp': { order: 'asc' } },
         query: {
           bool: {
             must: [
@@ -354,7 +354,7 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
@@ -430,14 +430,14 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
               },
               {
                 range: {
-                  'event.end': {
+                  '@timestamp': {
                     lte: end,
                   },
                 },
