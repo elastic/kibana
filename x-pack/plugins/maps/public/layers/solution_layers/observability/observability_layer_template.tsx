@@ -4,33 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent, Fragment } from 'react';
 import {
-  EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiButton,
-  EuiSpacer,
-  EuiTextAlign,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
+import { ObservabilityLayerSelect, OBSERVABILITY_LAYER_TYPE } from './observability_layer_select';
 
 interface State {
-
+  layer?: OBSERVABILITY_LAYER_TYPE;
 }
 
 export class ObservabilityLayerTemplate extends Component<RenderWizardArguments, State> {
 
-  state: {
+  state = {}
 
-  }
+  _onLayerChange = (layer: OBSERVABILITY_LAYER_TYPE) => {
+    this.setState({ layer });
+  };
 
   render() {
     return (
-      <div>
-        content goes here
-      </div>
+      <Fragment>
+        <ObservabilityLayerSelect value={this.state.layer} onChange={this._onLayerChange} />
+      </Fragment>
     );
   }
 }
