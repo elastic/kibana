@@ -178,6 +178,7 @@ function getSuggestionsForLayer({
     keptLayerIds,
   };
 
+  // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     return [
       {
@@ -190,11 +191,11 @@ function getSuggestionsForLayer({
   }
 
   const isSameState = currentState && changeType === 'unchanged';
-
   if (!isSameState) {
     return buildSuggestion(options);
   }
 
+  // Suggestions are either changing the data, or changing the way the data is used
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration

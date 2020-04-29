@@ -196,6 +196,34 @@ describe('xy_suggestions', () => {
     expect(suggestion.title).toEqual('Datasource title');
   });
 
+  test('suggests only stacked bar chart when xy chart is inactive', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+        label: 'Datasource title',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.title).toEqual('Bar chart');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        layers: [
+          expect.objectContaining({
+            seriesType: 'bar_stacked',
+            xAccessor: 'date',
+            accessors: ['price'],
+            splitAccessor: undefined,
+          }),
+        ],
+      })
+    );
+  });
+
   test('hides reduced suggestions if there is a current state', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
