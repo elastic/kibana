@@ -152,6 +152,7 @@ export {
  */
 
 import {
+  dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
   isValidEsInterval,
@@ -178,6 +179,7 @@ export {
 // Search namespace
 export const search = {
   aggs: {
+    dateHistogramInterval,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
     isValidEsInterval,

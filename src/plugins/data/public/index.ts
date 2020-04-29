@@ -307,6 +307,7 @@ import {
 } from './search';
 
 import {
+  dateHistogramInterval,
   InvalidEsCalendarIntervalError,
   InvalidEsIntervalFormatError,
   isValidEsInterval,
@@ -374,6 +375,7 @@ export {
 export const search = {
   aggs: {
     CidrMask,
+    dateHistogramInterval,
     intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
