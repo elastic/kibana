@@ -73,7 +73,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
   onDelete = () => {},
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
-  const [showNamespace, setShowNamespace] = useState<boolean>(false);
+  const [showNamespace, setShowNamespace] = useState<boolean>(!!agentConfig.namespace);
   const fields: Array<{
     name: 'name' | 'description' | 'namespace';
     label: JSX.Element;

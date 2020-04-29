@@ -32,7 +32,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
   const [agentConfig, setAgentConfig] = useState<NewAgentConfig>({
     name: '',
     description: '',
-    namespace: 'default',
+    namespace: '',
     is_default: undefined,
     monitoring_enabled: ['logs', 'metrics'],
   });
