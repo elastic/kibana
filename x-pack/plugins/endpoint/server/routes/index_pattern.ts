@@ -6,7 +6,8 @@
 
 import { IRouter, Logger, RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../types';
-import { IndexPatternGetParamsResult, EndpointAppConstants } from '../../common/types';
+import { IndexPatternGetParamsResult } from '../../common/types';
+import { AlertConstants } from '../../common/alert_constants';
 import { indexPatternGetParamsSchema } from '../../common/schema/index_pattern';
 
 function handleIndexPattern(
@@ -33,7 +34,7 @@ export function registerIndexPatternRoute(router: IRouter, endpointAppContext: E
 
   router.get(
     {
-      path: `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/{datasetPath}`,
+      path: `${AlertConstants.INDEX_PATTERN_ROUTE}/{datasetPath}`,
       validate: { params: indexPatternGetParamsSchema },
       options: { authRequired: true },
     },

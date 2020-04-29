@@ -202,12 +202,16 @@ export class TaskRunner {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
       event.error.message = err.message;
+      event.event = event.event || {};
+      event.event.outcome = 'failure';
       eventLogger.logEvent(event);
       throw err;
     }
 
     eventLogger.stopTiming(event);
     event.message = `alert executed: ${alertLabel}`;
+    event.event = event.event || {};
+    event.event.outcome = 'success';
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
