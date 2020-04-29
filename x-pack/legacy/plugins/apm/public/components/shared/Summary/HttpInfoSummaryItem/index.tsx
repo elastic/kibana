@@ -13,7 +13,7 @@ import { HttpStatusBadge } from '../HttpStatusBadge';
 
 const HttpInfoBadge = (styled(EuiBadge)`
   margin-right: ${px(units.quarter)};
-` as any) as any;
+` as unknown) as typeof EuiBadge;
 
 const Url = styled('span')`
   display: inline-block;
