@@ -16,6 +16,11 @@ import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import {
+  SavedNote,
+  NoteSavedObjectRuntimeType,
+  NoteSavedObject,
+} from '../../../common/types/timeline/note';
+import {
   PageInfoNote,
   ResponseNote,
   ResponseNotes,
@@ -23,178 +28,198 @@ import {
   NoteResult,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
-import { SavedNote, NoteSavedObjectRuntimeType, NoteSavedObject } from './types';
 import { noteSavedObjectType } from './saved_object_mappings';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 import { timelineSavedObjectType } from '../timeline/saved_object_mappings';
 
-export class Note {
-  public async deleteNote(request: FrameworkRequest, noteIds: string[]) {
-    const savedObjectsClient = request.context.core.savedObjects.client;
-
-    await Promise.all(
-      noteIds.map(noteId => savedObjectsClient.delete(noteSavedObjectType, noteId))
-    );
-  }
-
-  public async deleteNoteByTimelineId(request: FrameworkRequest, timelineId: string) {
-    const options: SavedObjectsFindOptions = {
-      type: noteSavedObjectType,
-      search: timelineId,
-      searchFields: ['timelineId'],
-    };
-    const notesToBeDeleted = await this.getAllSavedNote(request, options);
-    const savedObjectsClient = request.context.core.savedObjects.client;
-
-    await Promise.all(
-      notesToBeDeleted.notes.map(note =>
-        savedObjectsClient.delete(noteSavedObjectType, note.noteId)
-      )
-    );
-  }
-
-  public async getNote(request: FrameworkRequest, noteId: string): Promise<NoteSavedObject> {
-    return this.getSavedNote(request, noteId);
-  }
-
-  public async getNotesByEventId(
-    request: FrameworkRequest,
-    eventId: string
-  ): Promise<NoteSavedObject[]> {
-    const options: SavedObjectsFindOptions = {
-      type: noteSavedObjectType,
-      search: eventId,
-      searchFields: ['eventId'],
-    };
-    const notesByEventId = await this.getAllSavedNote(request, options);
-    return notesByEventId.notes;
-  }
-
-  public async getNotesByTimelineId(
-    request: FrameworkRequest,
-    timelineId: string
-  ): Promise<NoteSavedObject[]> {
-    const options: SavedObjectsFindOptions = {
-      type: noteSavedObjectType,
-      search: timelineId,
-      searchFields: ['timelineId'],
-    };
-    const notesByTimelineId = await this.getAllSavedNote(request, options);
-    return notesByTimelineId.notes;
-  }
-
-  public async getAllNotes(
+export interface Note {
+  deleteNote: (request: FrameworkRequest, noteIds: string[]) => Promise<void>;
+  deleteNoteByTimelineId: (request: FrameworkRequest, noteIds: string) => Promise<void>;
+  getNote: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject>;
+  getNotesByEventId: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject[]>;
+  getNotesByTimelineId: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject[]>;
+  getAllNotes: (
     request: FrameworkRequest,
     pageInfo: PageInfoNote | null,
     search: string | null,
     sort: SortNote | null
-  ): Promise<ResponseNotes> {
-    const options: SavedObjectsFindOptions = {
-      type: noteSavedObjectType,
-      perPage: pageInfo != null ? pageInfo.pageSize : undefined,
-      page: pageInfo != null ? pageInfo.pageIndex : undefined,
-      search: search != null ? search : undefined,
-      searchFields: ['note'],
-      sortField: sort != null ? sort.sortField : undefined,
-      sortOrder: sort != null ? sort.sortOrder : undefined,
-    };
-    return this.getAllSavedNote(request, options);
-  }
-
-  public async persistNote(
+  ) => Promise<ResponseNotes>;
+  persistNote: (
     request: FrameworkRequest,
     noteId: string | null,
     version: string | null,
     note: SavedNote
-  ): Promise<ResponseNote> {
-    try {
-      const savedObjectsClient = request.context.core.savedObjects.client;
+  ) => Promise<ResponseNote>;
+  convertSavedObjectToSavedNote: (
+    savedObject: unknown,
+    timelineVersion?: string | undefined | null
+  ) => NoteSavedObject;
+}
 
-      if (noteId == null) {
-        const timelineVersionSavedObject =
-          note.timelineId == null
-            ? await (async () => {
-                const timelineResult = convertSavedObjectToSavedTimeline(
-                  await savedObjectsClient.create(
-                    timelineSavedObjectType,
-                    pickSavedTimeline(null, {}, request.user)
-                  )
-                );
-                note.timelineId = timelineResult.savedObjectId;
-                return timelineResult.version;
-              })()
-            : null;
+export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
 
-        // Create new note
-        return {
-          code: 200,
-          message: 'success',
-          note: convertSavedObjectToSavedNote(
-            await savedObjectsClient.create(
-              noteSavedObjectType,
-              pickSavedNote(noteId, note, request.user)
-            ),
-            timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
-          ),
-        };
-      }
+  await Promise.all(noteIds.map(noteId => savedObjectsClient.delete(noteSavedObjectType, noteId)));
+};
 
-      // Update new note
+export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
+  const options: SavedObjectsFindOptions = {
+    type: noteSavedObjectType,
+    search: timelineId,
+    searchFields: ['timelineId'],
+  };
+  const notesToBeDeleted = await getAllSavedNote(request, options);
+  const savedObjectsClient = request.context.core.savedObjects.client;
 
-      const existingNote = await this.getSavedNote(request, noteId);
+  await Promise.all(
+    notesToBeDeleted.notes.map(note => savedObjectsClient.delete(noteSavedObjectType, note.noteId))
+  );
+};
+
+export const getNote = async (
+  request: FrameworkRequest,
+  noteId: string
+): Promise<NoteSavedObject> => {
+  return getSavedNote(request, noteId);
+};
+
+export const getNotesByEventId = async (
+  request: FrameworkRequest,
+  eventId: string
+): Promise<NoteSavedObject[]> => {
+  const options: SavedObjectsFindOptions = {
+    type: noteSavedObjectType,
+    search: eventId,
+    searchFields: ['eventId'],
+  };
+  const notesByEventId = await getAllSavedNote(request, options);
+  return notesByEventId.notes;
+};
+
+export const getNotesByTimelineId = async (
+  request: FrameworkRequest,
+  timelineId: string
+): Promise<NoteSavedObject[]> => {
+  const options: SavedObjectsFindOptions = {
+    type: noteSavedObjectType,
+    search: timelineId,
+    searchFields: ['timelineId'],
+  };
+  const notesByTimelineId = await getAllSavedNote(request, options);
+  return notesByTimelineId.notes;
+};
+
+export const getAllNotes = async (
+  request: FrameworkRequest,
+  pageInfo: PageInfoNote | null,
+  search: string | null,
+  sort: SortNote | null
+): Promise<ResponseNotes> => {
+  const options: SavedObjectsFindOptions = {
+    type: noteSavedObjectType,
+    perPage: pageInfo != null ? pageInfo.pageSize : undefined,
+    page: pageInfo != null ? pageInfo.pageIndex : undefined,
+    search: search != null ? search : undefined,
+    searchFields: ['note'],
+    sortField: sort != null ? sort.sortField : undefined,
+    sortOrder: sort != null ? sort.sortOrder : undefined,
+  };
+  return getAllSavedNote(request, options);
+};
+
+export const persistNote = async (
+  request: FrameworkRequest,
+  noteId: string | null,
+  version: string | null,
+  note: SavedNote
+): Promise<ResponseNote> => {
+  try {
+    const savedObjectsClient = request.context.core.savedObjects.client;
+
+    if (noteId == null) {
+      const timelineVersionSavedObject =
+        note.timelineId == null
+          ? await (async () => {
+              const timelineResult = convertSavedObjectToSavedTimeline(
+                await savedObjectsClient.create(
+                  timelineSavedObjectType,
+                  pickSavedTimeline(null, {}, request.user)
+                )
+              );
+              note.timelineId = timelineResult.savedObjectId;
+              return timelineResult.version;
+            })()
+          : null;
+
+      // Create new note
       return {
         code: 200,
         message: 'success',
         note: convertSavedObjectToSavedNote(
-          await savedObjectsClient.update(
+          await savedObjectsClient.create(
             noteSavedObjectType,
-            noteId,
-            pickSavedNote(noteId, note, request.user),
-            {
-              version: existingNote.version || undefined,
-            }
-          )
+            pickSavedNote(noteId, note, request.user)
+          ),
+          timelineVersionSavedObject != null ? timelineVersionSavedObject : undefined
         ),
       };
-    } catch (err) {
-      if (getOr(null, 'output.statusCode', err) === 403) {
-        const noteToReturn: NoteResult = {
-          ...note,
-          noteId: uuid.v1(),
-          version: '',
-          timelineId: '',
-          timelineVersion: '',
-        };
-        return {
-          code: 403,
-          message: err.message,
-          note: noteToReturn,
-        };
-      }
-      throw err;
     }
-  }
 
-  private async getSavedNote(request: FrameworkRequest, NoteId: string) {
-    const savedObjectsClient = request.context.core.savedObjects.client;
-    const savedObject = await savedObjectsClient.get(noteSavedObjectType, NoteId);
+    // Update new note
 
-    return convertSavedObjectToSavedNote(savedObject);
-  }
-
-  private async getAllSavedNote(request: FrameworkRequest, options: SavedObjectsFindOptions) {
-    const savedObjectsClient = request.context.core.savedObjects.client;
-    const savedObjects = await savedObjectsClient.find(options);
-
+    const existingNote = await getSavedNote(request, noteId);
     return {
-      totalCount: savedObjects.total,
-      notes: savedObjects.saved_objects.map(savedObject =>
-        convertSavedObjectToSavedNote(savedObject)
+      code: 200,
+      message: 'success',
+      note: convertSavedObjectToSavedNote(
+        await savedObjectsClient.update(
+          noteSavedObjectType,
+          noteId,
+          pickSavedNote(noteId, note, request.user),
+          {
+            version: existingNote.version || undefined,
+          }
+        )
       ),
     };
+  } catch (err) {
+    if (getOr(null, 'output.statusCode', err) === 403) {
+      const noteToReturn: NoteResult = {
+        ...note,
+        noteId: uuid.v1(),
+        version: '',
+        timelineId: '',
+        timelineVersion: '',
+      };
+      return {
+        code: 403,
+        message: err.message,
+        note: noteToReturn,
+      };
+    }
+    throw err;
   }
-}
+};
+
+const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObject = await savedObjectsClient.get(noteSavedObjectType, NoteId);
+
+  return convertSavedObjectToSavedNote(savedObject);
+};
+
+const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjects = await savedObjectsClient.find(options);
+
+  return {
+    totalCount: savedObjects.total,
+    notes: savedObjects.saved_objects.map(savedObject =>
+      convertSavedObjectToSavedNote(savedObject)
+    ),
+  };
+};
 
 export const convertSavedObjectToSavedNote = (
   savedObject: unknown,

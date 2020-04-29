@@ -69,7 +69,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { query } = nextProps;
 
     const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches = SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
+    const searchTermMatches =
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
 
     if (searchTermMatches !== this.state.queryMatches) {
       this.setState(
