@@ -50,4 +50,18 @@ describe('get_user', () => {
     const user = getUser({ request, security });
     expect(user).toEqual('elastic');
   });
+
+  test('it returns "elastic" as the user given undefined as the plugin', () => {
+    const security: SecurityPluginSetup = securityMock.createSetup();
+    security.authc.getCurrentUser = jest.fn().mockReturnValue(undefined);
+    const user = getUser({ request, security: undefined });
+    expect(user).toEqual('elastic');
+  });
+
+  test('it returns "elastic" as the user given null as the plugin', () => {
+    const security: SecurityPluginSetup = securityMock.createSetup();
+    security.authc.getCurrentUser = jest.fn().mockReturnValue(undefined);
+    const user = getUser({ request, security: null });
+    expect(user).toEqual('elastic');
+  });
 });

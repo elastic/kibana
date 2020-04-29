@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { ElasticsearchServiceSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -23,7 +23,6 @@ export class ListPlugin {
   private readonly logger: Logger;
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
-  private elasticsearch: ElasticsearchServiceSetup | undefined | null;
   private security: SecurityPluginSetup | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -40,7 +39,6 @@ export class ListPlugin {
     );
     this.spaces = plugins.spaces?.spacesService;
     this.config = config;
-    this.elasticsearch = core.elasticsearch;
     this.security = plugins.security;
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
@@ -58,7 +56,7 @@ export class ListPlugin {
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, security, elasticsearch } = this;
+      const { spaces, config, security } = this;
       const {
         core: {
           elasticsearch: {
@@ -68,8 +66,6 @@ export class ListPlugin {
       } = context;
       if (config == null) {
         throw new TypeError('Configuration is required for this plugin to operate');
-      } else if (elasticsearch == null) {
-        throw new TypeError('Elastic Search is required for this plugin to operate');
       } else {
         const spaceId = getSpaceId({ request, spaces });
         const user = getUser({ request, security });
