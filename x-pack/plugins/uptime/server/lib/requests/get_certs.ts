@@ -25,7 +25,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   sortBy,
   direction,
 }) => {
-  const sort = SortFields[sortBy as keyof SortFields];
+  const sort = SortFields[sortBy as keyof typeof SortFields];
 
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
