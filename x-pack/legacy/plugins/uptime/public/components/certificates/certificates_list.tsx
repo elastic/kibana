@@ -67,6 +67,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
     {
       name: labels.COMMON_NAME_COL,
       field: 'common_name',
+      sortable: true,
     },
     {
       name: labels.MONITORS_COL,
@@ -76,6 +77,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
     {
       name: labels.ISSUED_BY_COL,
       field: 'issuer',
+      sortable: true,
     },
     {
       name: labels.VALID_UNTIL_COL,

@@ -10,6 +10,12 @@ import {
   GetCertsParams,
 } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 
+enum SortFields {
+  'issuer' = 'tls.server.x509.issuer.common_name',
+  'certificate_not_valid_after' = 'tls.certificate_not_valid_after',
+  'common_name' = 'tls.server.x509.subject.common_name',
+}
+
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
   callES,
   dynamicSettings,
@@ -22,10 +28,8 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   direction,
 }) => {
   const searchWrapper = `*${search}*`;
-  let sort = sortBy;
-  if (sort === 'certificate_not_valid_after') {
-    sort = 'tls.certificate_not_valid_after';
-  }
+  const sort = SortFields[sortBy];
+
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -97,21 +101,13 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
         multi_match: {
           query: searchWrapper,
           type: 'phrase_prefix',
-          fields: ['monitor.id.text', 'monitor.name.text'],
-        },
-      },
-      {
-        wildcard: {
-          'tls.server.x509.subject.common_name.text': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'tls.server.x509.issuer.common_name.text': {
-            value: searchWrapper,
-          },
+          fields: [
+            'monitor.id.text',
+            'monitor.name.text',
+            'monitor.url.full.text',
+            'tls.server.x509.subject.common_name.text',
+            'tls.server.x509.issuer.common_name.text',
+          ],
         },
       },
     ];

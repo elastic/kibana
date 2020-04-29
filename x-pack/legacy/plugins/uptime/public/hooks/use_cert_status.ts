@@ -12,6 +12,7 @@ export enum CERT_STATUS {
   OK = 'OK',
   EXPIRING_SOON = 'EXPIRING_SOON',
   EXPIRED = 'EXPIRED',
+  TOO_OLD = 'TOO_OLD',
 }
 
 export const useCertStatus = (expiryDate?: string) => {
