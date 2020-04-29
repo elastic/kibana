@@ -34,14 +34,14 @@ export const help: FunctionHelp<FunctionFactory<typeof caseFn>> = {
     }),
     if: i18n.translate('xpack.canvas.functions.case.args.ifHelpText', {
       defaultMessage:
-        'This value indicates whether the condition is met, usually using a sub-expression. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
+        'This value indicates whether the condition is met. The {IF_ARG} argument overrides the {WHEN_ARG} argument when both are provided.',
       values: {
         IF_ARG,
         WHEN_ARG,
       },
     }),
     then: i18n.translate('xpack.canvas.functions.case.args.thenHelpText', {
-      defaultMessage: 'The value to return if the condition is met.',
+      defaultMessage: 'The value returned if the condition is met.',
     }),
   },
 };

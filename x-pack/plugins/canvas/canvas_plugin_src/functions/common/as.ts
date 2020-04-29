@@ -26,7 +26,7 @@ export function asFn(): ExpressionFunctionDefinition<'as', Input, Arguments, Dat
         types: ['string'],
         aliases: ['_'],
         help: argHelp.name,
-        default: 'value',
+        default: '"value"',
       },
     },
     fn: (input, args) => {

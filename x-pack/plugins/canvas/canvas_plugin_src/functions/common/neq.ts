@@ -20,6 +20,9 @@ export function neq(): ExpressionFunctionDefinition<'neq', Input, Arguments, boo
     name: 'neq',
     type: 'boolean',
     help,
+    context: {
+      types: ['boolean', 'number', 'string', 'null'],
+    },
     args: {
       value: {
         aliases: ['_'],

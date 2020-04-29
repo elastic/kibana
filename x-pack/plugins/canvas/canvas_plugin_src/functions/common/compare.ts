@@ -37,7 +37,7 @@ export function compare(): ExpressionFunctionDefinition<'compare', Context, Argu
       op: {
         aliases: ['_'],
         types: ['string'],
-        default: 'eq',
+        default: '"eq"',
         help: argHelp.op,
         options: Object.values(Operation),
       },

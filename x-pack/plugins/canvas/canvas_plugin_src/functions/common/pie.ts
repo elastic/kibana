@@ -119,7 +119,7 @@ export function pie(): ExpressionFunctionDefinition<'pie', PointSeries, Argument
       radius: {
         types: ['string', 'number'],
         help: argHelp.radius,
-        default: 'auto',
+        default: '"auto"',
       },
       seriesStyle: {
         multi: true,

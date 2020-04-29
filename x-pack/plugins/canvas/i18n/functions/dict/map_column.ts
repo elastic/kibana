@@ -14,10 +14,10 @@ export const help: FunctionHelp<FunctionFactory<typeof mapColumn>> = {
   help: i18n.translate('xpack.canvas.functions.mapColumnHelpText', {
     defaultMessage:
       'Adds a column calculated as the result of other columns. ' +
-      'Changes are made only when you provide arguments. ' +
-      'See also {mapColumnFn} and {staticColumnFn}.',
+      'Changes are made only when you provide arguments.' +
+      'See also {alterColumnFn} and {staticColumnFn}.',
     values: {
-      mapColumnFn: '`mapColumn`',
+      alterColumnFn: '`alterColumn`',
       staticColumnFn: '`staticColumn`',
     },
   }),

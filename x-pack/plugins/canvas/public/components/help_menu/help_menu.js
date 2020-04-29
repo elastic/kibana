@@ -5,9 +5,10 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { EuiButtonEmpty, EuiPortal } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 import { ComponentStrings } from '../../../i18n';
+import { FunctionReferenceGenerator } from './function_reference_generator';
 
 const { HelpMenu: strings } = ComponentStrings;
 
@@ -23,6 +24,7 @@ export class HelpMenu extends PureComponent {
   };
 
   render() {
+    const isDevelopment = !['production', 'test'].includes(process.env.NODE_ENV);
     return (
       <Fragment>
         <EuiButtonEmpty
@@ -33,7 +35,12 @@ export class HelpMenu extends PureComponent {
         >
           {strings.getKeyboardShortcutsLinkLabel()}
         </EuiButtonEmpty>
-
+        {isDevelopment && (
+          <Fragment>
+            <EuiSpacer size="s" />
+            <FunctionReferenceGenerator />
+          </Fragment>
+        )}
         {this.state.isFlyoutVisible && (
           <EuiPortal>
             <KeyboardShortcutsDoc onClose={this.hideFlyout} />

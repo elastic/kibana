@@ -33,8 +33,8 @@ export const help: FunctionHelp<FunctionFactory<typeof markdown>> = {
         'The {CSS} font properties for the content. For example, {fontFamily} or {fontWeight}.',
       values: {
         CSS,
-        fontFamily: 'font-family',
-        fontWeight: 'font-weight',
+        fontFamily: '"font-family"',
+        fontWeight: '"font-weight"',
       },
     }),
     openLinksInNewTab: i18n.translate('xpack.canvas.functions.markdown.args.openLinkHelpText', {

@@ -49,7 +49,7 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
       mode: {
         types: ['string'],
         help: argHelp.mode,
-        default: 'contain',
+        default: '"contain"',
         options: Object.values(ImageMode),
       },
     },

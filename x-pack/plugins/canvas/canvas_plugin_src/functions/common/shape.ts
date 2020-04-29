@@ -69,7 +69,7 @@ export function shape(): ExpressionFunctionDefinition<'shape', null, Arguments, 
       fill: {
         types: ['string'],
         help: argHelp.fill,
-        default: 'black',
+        default: '"black"',
       },
       maintainAspect: {
         types: ['boolean'],

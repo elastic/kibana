@@ -12,7 +12,7 @@ import { CONTEXT } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof eq>> = {
   help: i18n.translate('xpack.canvas.functions.eqHelpText', {
-    defaultMessage: 'Return whether the {CONTEXT} is equal to the argument.',
+    defaultMessage: 'Returns whether the {CONTEXT} is equal to the argument.',
     values: {
       CONTEXT,
     },

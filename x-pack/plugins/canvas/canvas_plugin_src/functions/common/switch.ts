@@ -25,6 +25,7 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
         aliases: ['_'],
         resolve: false,
         multi: true,
+        required: true,
         help: argHelp.case,
       },
       default: {

@@ -52,12 +52,12 @@ export function progress(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.shape,
         options: Object.values(Shape),
-        default: 'gauge',
+        default: '"gauge"',
       },
       barColor: {
         types: ['string'],
         help: argHelp.barColor,
-        default: `#f0f0f0`,
+        default: `"#f0f0f0"`,
       },
       barWeight: {
         types: ['number'],
@@ -82,7 +82,7 @@ export function progress(): ExpressionFunctionDefinition<
       valueColor: {
         types: ['string'],
         help: argHelp.valueColor,
-        default: `#1785b0`,
+        default: `"#1785b0"`,
       },
       valueWeight: {
         types: ['number'],

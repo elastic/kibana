@@ -26,6 +26,7 @@ export function tail(): ExpressionFunctionDefinition<'tail', Datatable, Argument
         aliases: ['_'],
         types: ['number'],
         help: argHelp.count,
+        default: 1,
       },
     },
     fn: (input, args) => ({

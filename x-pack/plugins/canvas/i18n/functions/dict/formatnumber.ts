@@ -22,8 +22,8 @@ export const help: FunctionHelp<FunctionFactory<typeof formatnumber>> = {
     format: i18n.translate('xpack.canvas.functions.formatnumber.args.formatHelpText', {
       defaultMessage: 'A {NUMERALJS} format string. For example, {example1} or {example2}.',
       values: {
-        example1: `"0.0a"`,
-        example2: `"0%"`,
+        example1: '`"0.0a"`',
+        example2: '`"0%"`',
         NUMERALJS,
       },
     }),

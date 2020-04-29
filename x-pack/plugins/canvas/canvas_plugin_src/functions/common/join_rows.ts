@@ -52,7 +52,7 @@ export function joinRows(): ExpressionFunctionDefinition<'joinRows', Datatable, 
         aliases: ['sep', 'delimiter'],
         types: ['string'],
         help: argHelp.separator,
-        default: ',',
+        default: '","',
       },
     },
     fn: (input, { column, separator, quote, distinct }) => {

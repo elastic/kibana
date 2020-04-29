@@ -13,11 +13,11 @@ import { TYPE_STRING, URL } from '../../constants';
 export const help: FunctionHelp<FunctionFactory<typeof urlparam>> = {
   help: i18n.translate('xpack.canvas.functions.urlparamHelpText', {
     defaultMessage:
-      'Retreives a {URL} parameter to use in an expression. ' +
+      'Retrieves a {URL} parameter to use in an expression. ' +
       'The {urlparamFn} function always returns a {TYPE_STRING}. ' +
-      'For example, you can retrieve the value {value} from the parameter {myVar} from the {URL} {example}).',
+      'For example, you can retrieve the value {value} from the parameter {myVar} from the {URL} {example}.',
     values: {
-      example: 'https://localhost:5601/app/canvas?myVar=20',
+      example: '`https://localhost:5601/app/canvas?myVar=20`',
       myVar: '`myVar`',
       TYPE_STRING,
       URL,
