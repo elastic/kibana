@@ -3999,7 +3999,6 @@
     "xpack.actions.builtin.pagerdutyTitle": "PagerDuty",
     "xpack.actions.builtin.serverLog.errorLoggingErrorMessage": "记录消息时出错",
     "xpack.actions.builtin.serverLogTitle": "服务器日志",
-    "xpack.actions.builtin.servicenowTitle": "ServiceNow",
     "xpack.actions.builtin.slack.errorPostingErrorMessage": "发布 slack 消息时出错",
     "xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage": "发布 slack 消息时出错，在 {retryString} 重试",
     "xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage": "发布 slack 消息时出错，稍后重试",

@@ -6,12 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const API_URL_REQUIRED = i18n.translate(
-  'xpack.actions.builtin.connector.connectorApiNullError',
-  {
-    defaultMessage: 'connector [apiUrl] is required',
-  }
-);
+export const API_URL_REQUIRED = i18n.translate('xpack.actions.builtin.case.connectorApiNullError', {
+  defaultMessage: 'connector [apiUrl] is required',
+});
 
 export const FIELD_INFORMATION = (
   mode: string,
@@ -20,34 +17,34 @@ export const FIELD_INFORMATION = (
 ) => {
   switch (mode) {
     case 'create':
-      return i18n.translate('xpack.actions.builtin.connector.common.informationCreated', {
+      return i18n.translate('xpack.actions.builtin.case.common.informationCreated', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
     case 'update':
-      return i18n.translate('xpack.actions.builtin.connector.common.informationUpdated', {
+      return i18n.translate('xpack.actions.builtin.case.common.informationUpdated', {
         values: { date, user },
         defaultMessage: '(updated at {date} by {user})',
       });
     case 'add':
-      return i18n.translate('xpack.actions.builtin.connector.common.informationAdded', {
+      return i18n.translate('xpack.actions.builtin.case.common.informationAdded', {
         values: { date, user },
         defaultMessage: '(added at {date} by {user})',
       });
     default:
-      return i18n.translate('xpack.actions.builtin.connector.common.informationDefault', {
+      return i18n.translate('xpack.actions.builtin.case.common.informationDefault', {
         values: { date, user },
         defaultMessage: '(created at {date} by {user})',
       });
   }
 };
 
-export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.connector.common.emptyMapping', {
+export const MAPPING_EMPTY = i18n.translate('xpack.actions.builtin.case.common.emptyMapping', {
   defaultMessage: '[casesConfiguration.mapping]: expected non-empty but got empty',
 });
 
 export const WHITE_LISTED_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.connector.common.apiWhitelistError', {
+  i18n.translate('xpack.actions.builtin.case.common.apiWhitelistError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,

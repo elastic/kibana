@@ -6,6 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.actions.builtin.servicenowTitle', {
+export const NAME = i18n.translate('xpack.actions.builtin.case.servicenowTitle', {
   defaultMessage: 'ServiceNow',
 });
