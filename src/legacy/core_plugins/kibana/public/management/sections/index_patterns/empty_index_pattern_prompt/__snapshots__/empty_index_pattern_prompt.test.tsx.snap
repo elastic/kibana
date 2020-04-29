@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyIndexPatternPrompt should render normally 1`] = `
+<EuiPageContent
+  className="inpEmptyIndexPatternPrompt"
+  grow={false}
+  horizontalPosition="center"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    direction="rowReverse"
+    gutterSize="xl"
+    wrap={true}
+  >
+    <EuiFlexItem
+      className="inpEmptyIndexPatternPrompt__illustration"
+      grow={1}
+    >
+      <IndexPatternIllustration />
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="inpEmptyIndexPatternPrompt__text"
+      grow={2}
+    >
+      <EuiText
+        grow={false}
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="You have data in Elasticsearch."
+            id="kbn.management.emptyIndexPatternPrompt.youHaveData"
+            values={Object {}}
+          />
+          <br />
+          <FormattedMessage
+            defaultMessage="Now, create an index pattern."
+            id="kbn.management.emptyIndexPatternPrompt.nowCreate"
+            values={Object {}}
+          />
+        </h2>
+        <p>
+          <FormattedMessage
+            defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
+            id="kbn.management.emptyIndexPatternPrompt.indexPatternExplanation"
+            values={Object {}}
+          />
+        </p>
+        <InjectUICapabilities(CreateButtonComponent)
+          options={Array []}
+        >
+          <FormattedMessage
+            defaultMessage="Create index pattern"
+            id="kbn.management.indexPatternTable.createBtn"
+            values={Object {}}
+          />
+        </InjectUICapabilities(CreateButtonComponent)>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiDescriptionList
+    className="inpEmptyIndexPatternPrompt__footer"
+    type="responsiveColumn"
+  >
+    <EuiDescriptionListTitle
+      style={
+        Object {
+          "width": "auto",
+        }
+      }
+    >
+      <FormattedMessage
+        defaultMessage="Want to learn more?"
+        id="kbn.management.emptyIndexPatternPrompt.learnMore"
+        values={Object {}}
+      />
+    </EuiDescriptionListTitle>
+    <EuiDescriptionListDescription>
+      <EuiLink
+        external={true}
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Read documentation"
+          id="kbn.management.emptyIndexPatternPrompt.documentation"
+          values={Object {}}
+        />
+      </EuiLink>
+    </EuiDescriptionListDescription>
+  </EuiDescriptionList>
+</EuiPageContent>
+`;
