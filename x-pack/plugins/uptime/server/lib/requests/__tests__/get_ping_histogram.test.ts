@@ -5,7 +5,7 @@
  */
 
 import { getPingHistogram } from '../get_ping_histogram';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getPingHistogram', () => {
   const standardMockResponse: any = {

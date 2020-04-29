@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { fetchPage } from './search';
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  SortOrder,
-  CursorDirection,
-  MonitorSummary,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
-
+import { MonitorSummary, SortOrder, CursorDirection } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 
 export interface CursorPagination {

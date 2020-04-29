@@ -11,7 +11,6 @@ import { useMlKibana } from '../../contexts/kibana';
 
 const createJobLink = '#/jobs/new_job/step/index_or_search';
 const feedbackLink = 'https://www.elastic.co/community/';
-const whatIsMachineLearningLink = 'https://www.elastic.co/what-is/elasticsearch-machine-learning';
 
 interface Props {
   createAnomalyDetectionJobDisabled: boolean;
@@ -60,7 +59,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.gettingStartedSectionText"
-            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. For more information about machine learning in the Elastic stack please see {whatIsMachineLearning}. We recommend using {transforms} to create feature indices for analytics jobs."
+            defaultMessage="Welcome to Machine Learning. Get started by reviewing our {docs} or {createJob}. We recommend using {transforms} to create feature indices for analytics jobs."
             values={{
               docs: (
                 <EuiLink href={docsLink} target="blank">
@@ -79,14 +78,6 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
                   />
                 </EuiLink>
               ),
-              whatIsMachineLearning: (
-                <EuiLink href={whatIsMachineLearningLink} target="blank">
-                  <FormattedMessage
-                    id="xpack.ml.overview.gettingStartedSectionWhatIsMachineLearning"
-                    defaultMessage="here"
-                  />
-                </EuiLink>
-              ),
             }}
           />
         </p>
@@ -96,7 +87,7 @@ export const OverviewSideBar: FC<Props> = ({ createAnomalyDetectionJobDisabled }
         <p>
           <FormattedMessage
             id="xpack.ml.overview.feedbackSectionText"
-            defaultMessage="If you have input or suggestions regarding your experience with Machine Learning please feel free to submit {feedbackLink}."
+            defaultMessage="If you have input or suggestions regarding your experience, please submit {feedbackLink}."
             values={{
               feedbackLink: (
                 <EuiLink href={feedbackLink} target="blank">
