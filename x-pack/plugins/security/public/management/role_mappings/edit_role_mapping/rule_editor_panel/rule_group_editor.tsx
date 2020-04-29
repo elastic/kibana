@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './rule_group_editor.scss';
+
 import React, { Component, Fragment } from 'react';
 import {
   EuiPanel,

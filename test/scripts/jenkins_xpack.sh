@@ -39,7 +39,7 @@ else
   # build runtime for canvas
   echo "NODE_ENV=$NODE_ENV"
   node ./legacy/plugins/canvas/scripts/shareable_runtime
-  node --max-old-space-size=6144 scripts/jest --ci --verbose --coverage
+  node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles --coverage
   # rename file in order to be unique one
   test -f ../target/kibana-coverage/jest/coverage-final.json \
     && mv ../target/kibana-coverage/jest/coverage-final.json \
