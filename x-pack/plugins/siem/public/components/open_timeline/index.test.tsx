@@ -15,15 +15,34 @@ import { TestProviderWithoutDragAndDrop, apolloClient } from '../../mock/test_pr
 import { mockOpenTimelineQueryResults } from '../../mock/timeline_results';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines_page';
 
-import { StatefulOpenTimeline } from '.';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-
+import { StatefulOpenTimeline } from '.';
+import { useGetAllTimeline, getAllTimeline } from '../../containers/timeline/all';
 jest.mock('../../lib/kibana');
+jest.mock('../../containers/timeline/all', () => {
+  const originalModule = jest.requireActual('../../containers/timeline/all');
+  return {
+    useGetAllTimeline: jest.fn(),
+    getAllTimeline: originalModule.getAllTimeline,
+  };
+});
 
 describe('StatefulOpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
+  beforeEach(() => {
+    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+      fetchAllTimeline: jest.fn(),
+      timelines: getAllTimeline(
+        '',
+        mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
+      ),
+      loading: false,
+      totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
+      refetch: jest.fn(),
+    });
+  });
 
   test('it has the expected initial state', () => {
     const wrapper = mount(
@@ -459,6 +478,8 @@ describe('StatefulOpenTimeline', () => {
         .find('[data-test-subj="expand-notes"]')
         .first()
         .simulate('click');
+      expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
 
       expect(
         wrapper
@@ -532,7 +553,7 @@ describe('StatefulOpenTimeline', () => {
   test('it renders the expected count of matching timelines when no query has been entered', async () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+        <MockedProvider addTypename={false}>
           <TestProviderWithoutDragAndDrop>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
