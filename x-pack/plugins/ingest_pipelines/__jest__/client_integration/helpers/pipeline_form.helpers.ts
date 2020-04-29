@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
-import { nextTick } from './index';
 
 export type PipelineFormTestBed = TestBed<PipelineFormTestSubjects> &
   UnwrapPromise<ReturnType<typeof formSetup>>;
