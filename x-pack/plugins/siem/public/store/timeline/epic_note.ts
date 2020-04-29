@@ -16,6 +16,7 @@ import { persistTimelineNoteMutation } from '../../containers/timeline/notes/per
 import { PersistTimelineNoteMutation, ResponseNote } from '../../graphql/types';
 import { updateNote, addError } from '../app/actions';
 import { NotesById } from '../app/model';
+import { inputsModel } from '../inputs';
 
 import {
   addNote,
@@ -39,7 +40,8 @@ export const epicPersistNote = (
   notes: NotesById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
-  notes$: Observable<NotesById>
+  notes$: Observable<NotesById>,
+  allTimelineQuery$: Observable<inputsModel.GlobalQuery>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
@@ -61,11 +63,15 @@ export const epicPersistNote = (
       refetchQueries,
     })
   ).pipe(
-    withLatestFrom(timeline$, notes$),
-    mergeMap(([result, recentTimeline, recentNotes]) => {
+    withLatestFrom(timeline$, notes$, allTimelineQuery$),
+    mergeMap(([result, recentTimeline, recentNotes, allTimelineQuery]) => {
       const noteIdRedux = action.payload.noteId;
       const response: ResponseNote = get('data.persistNote', result);
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
+      if (allTimelineQuery.refetch != null) {
+        (allTimelineQuery.refetch as inputsModel.Refetch)();
+      }
 
       return [
         ...callOutMsg,

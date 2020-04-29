@@ -23,3 +23,10 @@ export const ALL_TIMELINES_IMPORT_TIMELINE_TITLE = i18n.translate(
     defaultMessage: 'Import Timeline',
   }
 );
+
+export const ERROR_FETCHING_TIMELINES_TITLE = i18n.translate(
+  'xpack.siem.timelines.allTimelines.errorFetchingTimelinesTitle',
+  {
+    defaultMessage: 'Failed to query all timelines data',
+  }
+);
