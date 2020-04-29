@@ -11,8 +11,8 @@ import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
-    name: 'alerts',
+    require: ['xpack_main', 'elasticsearch'],
+    name: 'alerts-fixture',
     init(server: any) {
       const clusterClient = server.newPlatform.start.core.elasticsearch.legacy.client;
       server.plugins.xpack_main.registerFeature({

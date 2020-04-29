@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
 import { AuthenticationServiceSetup } from '../authentication';
-import { UserAPIClient } from '../management';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -28,9 +27,14 @@ export const accountManagementApp = Object.freeze({
       navLinkStatus: 3,
       appRoute: '/security/account',
       async mount({ element }: AppMountParameters) {
-        const [[coreStart], { renderAccountManagementPage }] = await Promise.all([
+        const [
+          [coreStart],
+          { renderAccountManagementPage },
+          { UserAPIClient },
+        ] = await Promise.all([
           getStartServices(),
           import('./account_management_page'),
+          import('../management'),
         ]);
 
         coreStart.chrome.setBreadcrumbs([{ text: title }]);
