@@ -28,7 +28,7 @@ import { getInitialGroupsMap } from '../../application/components/job_selector/j
 import { HttpService } from '../../application/services/http_service';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
-import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
+import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { ExplorerService } from '../../application/services/explorer_service';
 import { mlResultsService } from '../../application/services/results_service';
 
@@ -74,8 +74,6 @@ export class AnomalySwimlaneEmbeddableFactory
               reject();
             }}
             onSelectionConfirmed={async ({ jobIds, groups }) => {
-              flyoutSession.close();
-
               const title = i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
                 defaultMessage: 'ML anomaly swimlane for {jobIds}',
                 values: { jobIds: jobIds.join(', ') },
@@ -84,15 +82,9 @@ export class AnomalySwimlaneEmbeddableFactory
               const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 
               const influencers = anomalyDetectorService.extractInfluencers(jobs);
-
-              // only one job selected with no influencers, hence no need to
-              // bother the user with swimlane type selection, set to Overall
-              if (jobs.length === 1 && influencers.length === 0) {
-                resolve({ jobIds, title, swimlaneType: SWIMLANE_TYPE.OVERALL });
-                return;
-              }
-
               influencers.push(VIEW_BY_JOB_LABEL);
+
+              await flyoutSession.close();
 
               const modalSession = overlays.openModal(
                 toMountPoint(

@@ -76,6 +76,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   const [jobs, setJobs] = useState<MlJobWithTimeRange[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [ganttBarWidth, setGanttBarWidth] = useState(DEFAULT_GANTT_BAR_WIDTH);
+  const [jobGroupsMaps, setJobGroupsMaps] = useState(maps);
 
   const flyoutEl = useRef<{ flyout: HTMLElement }>(null);
 
@@ -85,11 +86,11 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
     const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
 
     newSelection.forEach(id => {
-      if (maps.groupsMap[id] !== undefined) {
+      if (jobGroupsMaps.groupsMap[id] !== undefined) {
         // Push all jobs from selected groups into the newSelection list
-        allNewSelection.push(...maps.groupsMap[id]);
+        allNewSelection.push(...jobGroupsMaps.groupsMap[id]);
         // if it's a group - push group obj to set in global state
-        groupSelection.push({ groupId: id, jobIds: maps.groupsMap[id] });
+        groupSelection.push({ groupId: id, jobIds: jobGroupsMaps.groupsMap[id] });
       } else {
         allNewSelection.push(id);
       }
@@ -102,7 +103,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
       : undefined;
 
     onSelectionConfirmed({
-      newSelection,
+      newSelection: allNewSelectionUnique,
       jobIds: allNewSelectionUnique,
       groups: groupSelection,
       time,
@@ -155,6 +156,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
       const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
       setJobs(normalizedJobs);
       setGroups(groupsWithTimerange);
+      setJobGroupsMaps({ groupsMap, jobsMap: resp.jobsMap });
 
       if (onJobsFetched) {
         onJobsFetched({ groupsMap, jobsMap: resp.jobsMap });
@@ -207,7 +209,7 @@ export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
             <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
               <NewSelectionIdBadges
                 limit={BADGE_LIMIT}
-                maps={maps}
+                maps={jobGroupsMaps}
                 newSelection={newSelection}
                 onDeleteClick={removeId}
                 onLinkClick={() => setShowAllBadges(!showAllBadges)}

@@ -12,7 +12,7 @@ import { tabColor } from '../../../../../common/util/group_color_utils';
 interface JobSelectorBadgeProps {
   icon?: boolean;
   id: string;
-  isGroup: boolean;
+  isGroup?: boolean;
   numJobs?: number;
   removeId?: Function;
 }
