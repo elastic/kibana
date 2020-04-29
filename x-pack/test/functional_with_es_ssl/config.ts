@@ -78,7 +78,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
           {
             id: 'my-server-log',
             actionTypeId: '.server-log',
-            name: 'Server log #xyz',
+            name: 'Serverlog#xyz',
           },
         ])}`,
       ],
