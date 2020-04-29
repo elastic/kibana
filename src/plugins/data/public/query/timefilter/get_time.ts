@@ -19,7 +19,7 @@
 
 import dateMath from '@elastic/datemath';
 import { IIndexPattern } from '../..';
-import { TimeRange, IFieldType, buildRangeFilter } from '../../../common';
+import { TimeRange, buildRangeFilter } from '../../../common';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
@@ -32,12 +32,33 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
   };
 }
 
-function createTimeRangeFilter(
-  indexPattern: IIndexPattern,
+export function getTime(
+  indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
-  field: IFieldType,
+  options?: { forceNow?: Date; fieldName?: string }
+) {
+  return createTimeRangeFilter(
+    indexPattern,
+    timeRange,
+    options?.fieldName || indexPattern?.timeFieldName,
+    options?.forceNow
+  );
+}
+
+function createTimeRangeFilter(
+  indexPattern: IIndexPattern | undefined,
+  timeRange: TimeRange,
+  fieldName?: string,
   forceNow?: Date
 ) {
+  if (!indexPattern) {
+    return;
+  }
+  const field = indexPattern.fields.find(f => f.name === fieldName || indexPattern.timeFieldName);
+  if (!field) {
+    return;
+  }
+
   const bounds = calculateBounds(timeRange, { forceNow });
   if (!bounds) {
     return;
@@ -51,42 +72,4 @@ function createTimeRangeFilter(
     },
     indexPattern
   );
-}
-
-export function getTimeFilter(
-  indexPattern: IIndexPattern | undefined,
-  timeRange: TimeRange,
-  fieldName: string
-) {
-  if (!indexPattern) {
-    return;
-  }
-
-  const field = indexPattern.fields.find(f => f.name === fieldName);
-  if (!field) {
-    return;
-  }
-
-  return createTimeRangeFilter(indexPattern, timeRange, field);
-}
-
-export function getTime(
-  indexPattern: IIndexPattern | undefined,
-  timeRange: TimeRange,
-  forceNow?: Date
-) {
-  if (!indexPattern) {
-    // in CI, we sometimes seem to fail here.
-    return;
-  }
-
-  const timefield: IFieldType | undefined = indexPattern.fields.find(
-    field => field.name === indexPattern.timeFieldName
-  );
-
-  if (!timefield) {
-    return;
-  }
-
-  return createTimeRangeFilter(indexPattern, timeRange, timefield, forceNow);
 }

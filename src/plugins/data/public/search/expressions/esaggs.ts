@@ -40,7 +40,7 @@ import {
   IIndexPattern,
   isRangeFilter,
 } from '../../../common';
-import { FilterManager, calculateBounds, getTimeFilter } from '../../query';
+import { FilterManager, calculateBounds, getTime } from '../../query';
 import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
@@ -134,7 +134,7 @@ const handleCourierRequest = async ({
   if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
       return allTimeFields
-        .map(fieldName => getTimeFilter(indexPattern, timeRange, fieldName))
+        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
         .filter(isRangeFilter);
     });
   }
