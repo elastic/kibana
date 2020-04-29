@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RUMLayerWizardConfig } from './rum_layer_wizard';
+export { ObservabilityLayerWizardConfig } from './observability_layer_wizard';

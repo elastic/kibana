@@ -14,18 +14,13 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
-
-interface Props {
-  previewLayer?: (layerDescriptor: LayerDescriptor | null) => void;
-  mapColors: string[];
-}
+import { RenderWizardArguments } from '../../layer_wizard_registry';
 
 interface State {
 
 }
 
-export class RUMLayerTemplate extends Component<Props, State> {
+export class ObservabilityLayerTemplate extends Component<RenderWizardArguments, State> {
 
   state: {
 

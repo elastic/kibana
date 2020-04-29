@@ -16,7 +16,7 @@ import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source'
 import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 import { wmsLayerWizardConfig } from './sources/wms_source';
 import { mvtVectorSourceWizardConfig } from './sources/mvt_single_layer_vector_source';
-import { RUMLayerWizardConfig } from './solution_layers/observability';
+import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { getInjectedVarFunc } from '../kibana_services';
 
 let registered = false;
@@ -27,7 +27,7 @@ export function registerLayerWizards() {
 
   // Registration order determines display order
   registerLayerWizard(uploadLayerWizardConfig);
-  registerLayerWizard(RUMLayerWizardConfig);
+  registerLayerWizard(ObservabilityLayerWizardConfig);
   registerLayerWizard(esDocumentsLayerWizardConfig);
   registerLayerWizard(clustersLayerWizardConfig);
   registerLayerWizard(heatmapLayerWizardConfig);
