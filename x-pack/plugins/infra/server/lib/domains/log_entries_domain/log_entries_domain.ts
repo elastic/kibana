@@ -272,7 +272,7 @@ export class InfraLogEntriesDomain {
 
   public async getLogEntryDatasets(
     requestContext: RequestHandlerContext,
-    sourceConfiguration: InfraSourceConfiguration,
+    timestampField: string,
     indexName: string,
     startTime: number,
     endTime: number
@@ -286,7 +286,7 @@ export class InfraLogEntriesDomain {
         'search',
         createLogEntryDatasetsQuery(
           indexName,
-          sourceConfiguration.fields.timestamp,
+          timestampField,
           startTime,
           endTime,
           COMPOSITE_AGGREGATION_BATCH_SIZE,

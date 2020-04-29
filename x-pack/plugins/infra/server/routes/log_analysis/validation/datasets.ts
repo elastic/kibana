@@ -17,7 +17,6 @@ import { createValidationFunction } from '../../../../common/runtime_types';
 export const initValidateLogAnalysisDatasetsRoute = ({
   framework,
   logEntries,
-  sources,
 }: InfraBackendLibs) => {
   framework.registerRoute(
     {
@@ -30,16 +29,14 @@ export const initValidateLogAnalysisDatasetsRoute = ({
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       try {
         const {
-          data: { indices, sourceId, startTime, endTime },
+          data: { indices, timestampField, startTime, endTime },
         } = request.body;
-
-        const { configuration } = await sources.getSourceConfiguration(requestContext, sourceId);
 
         const datasets = await Promise.all(
           indices.map(async indexName => {
             const indexDatasets = await logEntries.getLogEntryDatasets(
               requestContext,
-              configuration,
+              timestampField,
               indexName,
               startTime,
               endTime

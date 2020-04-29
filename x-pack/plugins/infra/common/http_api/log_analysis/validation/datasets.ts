@@ -14,8 +14,8 @@ export const LOG_ANALYSIS_VALIDATE_DATASETS_PATH =
  */
 export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
-    sourceId: rt.string,
     indices: rt.array(rt.string),
+    timestampField: rt.string,
     startTime: rt.number,
     endTime: rt.number,
   }),

@@ -13,8 +13,8 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { npStart } from '../../../../legacy_singletons';
 
 export const callValidateDatasetsAPI = async (
-  sourceId: string,
   indices: string[],
+  timestampField: string,
   startTime: number,
   endTime: number
 ) => {
@@ -25,8 +25,8 @@ export const callValidateDatasetsAPI = async (
         data: {
           endTime,
           indices,
-          sourceId,
           startTime,
+          timestampField,
         },
       })
     ),
