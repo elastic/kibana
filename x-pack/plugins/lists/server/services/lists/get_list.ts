@@ -5,13 +5,13 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 
 interface GetListOptions {
   id: Id;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listIndex: string;
 }
 

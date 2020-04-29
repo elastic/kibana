@@ -6,8 +6,8 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
-import { CallAsCurrentUser } from '../../types';
 import {
   Description,
   IdOrUndefined,
@@ -23,7 +23,7 @@ export interface CreateListOptions {
   type: Type;
   name: Name;
   description: Description;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;

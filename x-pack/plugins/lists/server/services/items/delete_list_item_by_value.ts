@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
-import { CallAsCurrentUser } from '../../types';
 
 import { getListItemByValues } from './get_list_item_by_values';
 
@@ -14,7 +15,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
 }
 

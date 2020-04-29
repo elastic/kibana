@@ -6,8 +6,9 @@
 
 import { Readable } from 'stream';
 
+import { APICaller } from 'kibana/server';
+
 import { MetaOrUndefined, Type } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 
 import { BufferLines } from './buffer_lines';
 import { getListItemByValues } from './get_list_item_by_values';
@@ -16,7 +17,7 @@ import { createListItemsBulk } from './create_list_items_bulk';
 export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -54,7 +55,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   buffer: string[];
   type: Type;

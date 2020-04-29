@@ -5,6 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import {
   Id,
@@ -13,14 +14,13 @@ import {
   UpdateEsListItemSchema,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
-import { CallAsCurrentUser } from '../../types';
 
 import { getListItem } from './get_list_item';
 
 export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;

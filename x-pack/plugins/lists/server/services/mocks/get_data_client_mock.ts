@@ -5,6 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { LIST_INDEX } from './lists_services_mock_constants';
 import { getShardMock } from './get_shard_mock';
@@ -21,6 +22,4 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
 
 export const getCallAsCurrentUserMock = (
   callAsCurrentUserData: unknown = getEmptyCreateDocumentResponseMock()
-): (() => Promise<unknown>) => {
-  return jest.fn().mockResolvedValue(callAsCurrentUserData);
-};
+): APICaller => jest.fn().mockResolvedValue(callAsCurrentUserData);

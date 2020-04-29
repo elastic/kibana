@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { Id, ListItemSchema } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
 }
 

@@ -5,6 +5,7 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import {
   DescriptionOrUndefined,
@@ -14,13 +15,12 @@ import {
   NameOrUndefined,
   UpdateEsListSchema,
 } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 
 import { getList } from '.';
 
 export interface UpdateListOptions {
   id: Id;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listIndex: string;
   user: string;
   name: NameOrUndefined;

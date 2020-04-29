@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { ListItemArraySchema, ListItemSchema, ListSchema } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
@@ -39,7 +41,6 @@ import {
   setTemplate,
 } from '../../siem_server_deps';
 import listsItemsPolicy from '../items/list_item_policy.json';
-import { CallAsCurrentUser } from '../../types';
 
 import listPolicy from './list_policy.json';
 import {
@@ -64,7 +65,7 @@ export class ListClient {
   private readonly spaceId: string;
   private readonly user: string;
   private readonly config: ConfigType;
-  private readonly callAsCurrentUser: CallAsCurrentUser;
+  private readonly callAsCurrentUser: APICaller;
 
   constructor({ spaceId, user, config, callAsCurrentUser }: ConstructorOptions) {
     this.spaceId = spaceId;

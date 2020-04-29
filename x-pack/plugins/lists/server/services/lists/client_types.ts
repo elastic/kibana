@@ -6,7 +6,7 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { KibanaRequest } from 'kibana/server';
+import { APICaller, KibanaRequest } from 'kibana/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
@@ -20,10 +20,9 @@ import {
   Type,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
-import { CallAsCurrentUser } from '../../types';
 
 export interface ConstructorOptions {
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   config: ConfigType;
   request: KibanaRequest;
   spaceId: string;

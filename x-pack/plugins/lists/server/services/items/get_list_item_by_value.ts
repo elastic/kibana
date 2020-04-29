@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { ListItemArraySchema, Type } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 
 import { getListItemByValues } from '.';
 
 export interface GetListItemByValueOptions {
   listId: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   type: Type;
   value: string;

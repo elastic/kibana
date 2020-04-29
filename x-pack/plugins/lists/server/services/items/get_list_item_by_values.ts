@@ -5,14 +5,14 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
 
 export interface GetListItemByValuesOptions {
   listId: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   type: Type;
   value: string[];

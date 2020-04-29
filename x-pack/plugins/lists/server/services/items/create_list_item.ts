@@ -6,6 +6,7 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import {
   IdOrUndefined,
@@ -14,7 +15,6 @@ import {
   MetaOrUndefined,
   Type,
 } from '../../../common/schemas';
-import { CallAsCurrentUser } from '../../types';
 import { transformListItemToElasticQuery } from '../utils';
 
 export interface CreateListItemOptions {
@@ -22,7 +22,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;

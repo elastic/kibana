@@ -5,9 +5,9 @@
  */
 
 import uuid from 'uuid';
+import { APICaller } from 'kibana/server';
 
 import { transformListItemToElasticQuery } from '../utils';
-import { CallAsCurrentUser } from '../../types';
 import {
   CreateEsBulkTypeSchema,
   IndexEsListItemSchema,
@@ -19,7 +19,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  callAsCurrentUser: CallAsCurrentUser;
+  callAsCurrentUser: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
