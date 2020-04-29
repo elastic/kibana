@@ -8,6 +8,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -40,11 +41,11 @@ describe('updateActionRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -97,11 +98,11 @@ describe('updateActionRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -140,11 +141,11 @@ describe('updateActionRoute', () => {
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
+      isPreconfigured: false,
     };
 
-    const actionsClient = {
-      update: jest.fn().mockResolvedValueOnce(updateResult),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockResolvedValueOnce(updateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -174,9 +175,8 @@ describe('updateActionRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    const actionsClient = {
-      update: jest.fn().mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid')),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.update.mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid'));
 
     const [context, req, res] = mockHandlerArguments({ actionsClient }, { params: {}, body: {} }, [
       'ok',
