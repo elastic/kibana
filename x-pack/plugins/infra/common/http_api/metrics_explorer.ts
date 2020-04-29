@@ -90,6 +90,10 @@ export const metricsExplorerSeriesRT = rt.type({
   id: rt.string,
   columns: rt.array(metricsExplorerColumnRT),
   rows: rt.array(metricsExplorerRowRT),
+  intervals: rt.partial({
+    current: rt.number,
+    recommended: rt.number,
+  }),
 });
 
 export const metricsExplorerResponseRT = rt.type({
