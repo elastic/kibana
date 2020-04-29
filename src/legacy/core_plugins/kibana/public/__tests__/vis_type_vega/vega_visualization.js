@@ -100,6 +100,39 @@ describe('VegaVisualizations', () => {
   setSavedObjects(npStart.core.savedObjects);
   setNotifications(npStart.core.notifications);
 
+  const mockMapConfig = {
+    includeElasticMapsService: true,
+    proxyElasticMapsServiceInMaps: false,
+    tilemap: {
+      deprecated: {
+        config: {
+          options: {
+            attribution: '',
+          },
+        },
+      },
+      options: {
+        attribution: '',
+        minZoom: 0,
+        maxZoom: 10,
+      },
+    },
+    regionmap: {
+      includeElasticMapsService: true,
+      layers: [],
+    },
+    manifestServiceUrl: '',
+    emsFileApiUrl: 'https://vector.maps.elastic.co',
+    emsTileApiUrl: 'https://tiles.maps.elastic.co',
+    emsLandingPageUrl: 'https://maps.elastic.co/v7.7',
+    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
+    emsTileLayerId: {
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    },
+  };
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(() => {
@@ -127,7 +160,7 @@ describe('VegaVisualizations', () => {
             return 'not found';
         }
       });
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mockMapConfig, mockMapConfig.tilemap);
       vegaVisualizationDependencies = {
         serviceSettings,
         core: {
