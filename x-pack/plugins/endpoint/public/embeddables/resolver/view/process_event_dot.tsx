@@ -23,7 +23,6 @@ import {
   AdjacentProcessMap,
   ResolverProcessType,
   waitingForRelatedEventData,
-  RelatedEventDataEntryWithStats,
   RelatedEventEntryWithStatsOrWaiting,
 } from '../types';
 import { SymbolIds, NamedColors } from './defs';

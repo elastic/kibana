@@ -146,6 +146,14 @@ export type RelatedEventType =
   | 'Image Load'
   | 'User';
 /**
+ * This symbol is used to tag results with Related event info
+ * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
+ * When this data is inlined with results, there won't be a need for this.
+ */
+export const resultIsEnrichedWithRelatedEventInfo = Symbol(
+  'The result (e.g. a ResolverEvent) is enriched with information and stats about related events'
+);
+/**
  * This symbol indicates that the app is waiting for related event data for the subject
  * of any particular request.
  */
@@ -187,6 +195,7 @@ export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
+  [resultIsEnrichedWithRelatedEventInfo]?: RelatedEventData;
 }
 
 export type Vector2 = readonly [number, number];

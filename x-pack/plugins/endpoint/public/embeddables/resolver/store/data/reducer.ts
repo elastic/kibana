@@ -5,13 +5,19 @@
  */
 
 import { Reducer } from 'redux';
-import { DataState, ResolverAction } from '../../types';
+import {
+  DataState,
+  ResolverAction,
+  resultIsEnrichedWithRelatedEventInfo,
+  RelatedEventDataEntryWithStats,
+} from '../../types';
 
 function initialState(): DataState {
   return {
     results: [],
     isLoading: false,
     hasError: false,
+    [resultIsEnrichedWithRelatedEventInfo]: new WeakMap(),
   };
 }
 
@@ -23,6 +29,28 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       isLoading: false,
       hasError: false,
     };
+  } else if (action.type === 'serverReturnedRelatedEventData') {
+    /**
+     * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
+     * When this data is inlined with results, there won't be a need for this.
+     */
+    const statsMap = state[resultIsEnrichedWithRelatedEventInfo];
+    if (statsMap && typeof statsMap?.set === 'function') {
+      for (const updatedEvent of action.payload.keys()) {
+        const newStatsEntry = action.payload.get(updatedEvent);
+
+        if (newStatsEntry) {
+          // do stats
+          const statsForEntry = { DNS: 32, File: 12 };
+          const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(
+            newStatsEntry,
+            { stats: statsForEntry }
+          );
+          statsMap.set(updatedEvent, newRelatedEventStats);
+        }
+      }
+    }
+    return Object.assign(state, { [resultIsEnrichedWithRelatedEventInfo]: statsMap });
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,

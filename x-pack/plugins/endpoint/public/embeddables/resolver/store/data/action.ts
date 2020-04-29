@@ -5,6 +5,7 @@
  */
 
 import { ResolverEvent } from '../../../../../common/types';
+import { RelatedEventDataEntry } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -20,10 +21,7 @@ interface ServerFailedToReturnResolverData {
  */
 interface ServerReturnedRelatedEventData {
   readonly type: 'serverReturnedRelatedEventData';
-  readonly payload: {
-    // TODO: add type information when /related API is finalized
-    readonly data: object;
-  };
+  readonly payload: Map<ResolverEvent, RelatedEventDataEntry>;
 }
 
 export type DataAction =
