@@ -16,6 +16,7 @@ import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 // @ts-ignore untyped local
 import { FullscreenControl } from './fullscreen_control';
+import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
@@ -26,12 +27,14 @@ export interface Props {
   isWriteable: boolean;
   toggleWriteable: () => void;
   canUserWrite: boolean;
+  commit: (type: string, payload: any) => any;
 }
 
 export const WorkpadHeader: FunctionComponent<Props> = ({
   isWriteable,
   canUserWrite,
   toggleWriteable,
+  commit,
 }) => {
   const keyHandler = (action: string) => {
     if (action === 'EDITING') {
@@ -99,6 +102,9 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
           )}
           <EuiFlexItem grow={false}>
             <ViewMenu />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EditMenu commit={commit} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShareMenu />

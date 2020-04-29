@@ -804,17 +804,6 @@ export const ComponentStrings = {
       }),
   },
   SidebarHeader: {
-    getAlignmentMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.alignmentMenuItemLabel', {
-        defaultMessage: 'Alignment',
-        description:
-          'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
-          'alignment options of the selected elements',
-      }),
-    getBottomAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.bottomAlignMenuItemLabel', {
-        defaultMessage: 'Bottom',
-      }),
     getBringForwardAriaLabel: () =>
       i18n.translate('xpack.canvas.sidebarHeader.bringForwardArialLabel', {
         defaultMessage: 'Move element up one layer',
@@ -823,56 +812,6 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.sidebarHeader.bringToFrontArialLabel', {
         defaultMessage: 'Move element to top layer',
       }),
-    getCenterAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.centerAlignMenuItemLabel', {
-        defaultMessage: 'Center',
-        description: 'This refers to alignment centered horizontally.',
-      }),
-    getContextMenuTitle: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.contextMenuAriaLabel', {
-        defaultMessage: 'Element options',
-      }),
-    getCreateElementModalTitle: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.createElementModalTitle', {
-        defaultMessage: 'Create new element',
-      }),
-    getDistributionMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.distributionMenutItemLabel', {
-        defaultMessage: 'Distribution',
-        description:
-          'This refers to the options to evenly spacing the selected elements horizontall or vertically.',
-      }),
-    getGroupMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.groupMenuItemLabel', {
-        defaultMessage: 'Group',
-        description: 'This refers to grouping multiple selected elements.',
-      }),
-    getHorizontalDistributionMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.horizontalDistributionMenutItemLabel', {
-        defaultMessage: 'Horizontal',
-      }),
-    getLeftAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.leftAlignMenuItemLabel', {
-        defaultMessage: 'Left',
-      }),
-    getMiddleAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.middleAlignMenuItemLabel', {
-        defaultMessage: 'Middle',
-        description: 'This refers to alignment centered vertically.',
-      }),
-    getOrderMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.orderMenuItemLabel', {
-        defaultMessage: 'Order',
-        description: 'Refers to the order of the elements displayed on the page from front to back',
-      }),
-    getRightAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.rightAlignMenuItemLabel', {
-        defaultMessage: 'Right',
-      }),
-    getSaveElementMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.savedElementMenuItemLabel', {
-        defaultMessage: 'Save as new element',
-      }),
     getSendBackwardAriaLabel: () =>
       i18n.translate('xpack.canvas.sidebarHeader.sendBackwardArialLabel', {
         defaultMessage: 'Move element down one layer',
@@ -880,19 +819,6 @@ export const ComponentStrings = {
     getSendToBackAriaLabel: () =>
       i18n.translate('xpack.canvas.sidebarHeader.sendToBackArialLabel', {
         defaultMessage: 'Move element to bottom layer',
-      }),
-    getTopAlignMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.topAlignMenuItemLabel', {
-        defaultMessage: 'Top',
-      }),
-    getUngroupMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.ungroupMenuItemLabel', {
-        defaultMessage: 'Ungroup',
-        description: 'This refers to ungrouping a grouped element',
-      }),
-    getVerticalDistributionMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.sidebarHeader.verticalDistributionMenutItemLabel', {
-        defaultMessage: 'Vertical',
       }),
   },
   TextStylePicker: {
@@ -1103,6 +1029,94 @@ export const ComponentStrings = {
     getFormLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.formLabel', {
         defaultMessage: 'Set a custom interval',
+      }),
+  },
+  WorkpadHeaderEditMenu: {
+    getAlignmentMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.alignmentMenuItemLabel', {
+        defaultMessage: 'Alignment',
+        description:
+          'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
+          'alignment options of the selected elements',
+      }),
+    getBottomAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.bottomAlignMenuItemLabel', {
+        defaultMessage: 'Bottom',
+      }),
+    getCenterAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.centerAlignMenuItemLabel', {
+        defaultMessage: 'Center',
+        description: 'This refers to alignment centered horizontally.',
+      }),
+    getCreateElementModalTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.createElementModalTitle', {
+        defaultMessage: 'Create new element',
+      }),
+    getDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.distributionMenutItemLabel', {
+        defaultMessage: 'Distribution',
+        description:
+          'This refers to the options to evenly spacing the selected elements horizontall or vertically.',
+      }),
+    getEditMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.editMenuButtonLabel', {
+        defaultMessage: 'Edit',
+      }),
+    getEditMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.editMenuLabel', {
+        defaultMessage: 'Edit options',
+      }),
+    getGroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.groupMenuItemLabel', {
+        defaultMessage: 'Group',
+        description: 'This refers to grouping multiple selected elements.',
+      }),
+    getHorizontalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.horizontalDistributionMenutItemLabel', {
+        defaultMessage: 'Horizontal',
+      }),
+    getLeftAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.leftAlignMenuItemLabel', {
+        defaultMessage: 'Left',
+      }),
+    getMiddleAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.middleAlignMenuItemLabel', {
+        defaultMessage: 'Middle',
+        description: 'This refers to alignment centered vertically.',
+      }),
+    getOrderMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.orderMenuItemLabel', {
+        defaultMessage: 'Order',
+        description: 'Refers to the order of the elements displayed on the page from front to back',
+      }),
+    getRedoMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.redoMenuItemLabel', {
+        defaultMessage: 'Redo',
+      }),
+    getRightAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.rightAlignMenuItemLabel', {
+        defaultMessage: 'Right',
+      }),
+    getSaveElementMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.savedElementMenuItemLabel', {
+        defaultMessage: 'Save as new element',
+      }),
+    getTopAlignMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.topAlignMenuItemLabel', {
+        defaultMessage: 'Top',
+      }),
+    getUndoMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.undoMenuItemLabel', {
+        defaultMessage: 'Undo',
+      }),
+    getUngroupMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.ungroupMenuItemLabel', {
+        defaultMessage: 'Ungroup',
+        description: 'This refers to ungrouping a grouped element',
+      }),
+    getVerticalDistributionMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.verticalDistributionMenutItemLabel', {
+        defaultMessage: 'Vertical',
       }),
   },
   WorkpadHeaderElementMenu: {

@@ -75,4 +75,8 @@ export interface ElementPosition {
   parent: string | null;
 }
 
-export type PositionedElement = CanvasElement & { ast: ExpressionAstExpression };
+export type PositionedElement = CanvasElement & {
+  ast: ExpressionAstExpression;
+} & {
+  position: ElementPosition;
+};

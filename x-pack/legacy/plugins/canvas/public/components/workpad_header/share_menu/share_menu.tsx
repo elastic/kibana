@@ -62,7 +62,6 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
-    title: strings.getShareWorkpadMessage(),
     items: [
       {
         name: strings.getShareDownloadJSONTitle(),

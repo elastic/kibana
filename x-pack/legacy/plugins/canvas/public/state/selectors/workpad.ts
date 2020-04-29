@@ -363,7 +363,11 @@ export function getNodesForPage(page: CanvasPage, withAst: boolean): CanvasEleme
 }
 
 // todo unify or DRY up with `getElements`
-export function getNodes(state: State, pageId: string, withAst = true): CanvasElement[] {
+export function getNodes(
+  state: State,
+  pageId: string,
+  withAst = true
+): CanvasElement[] | PositionedElement[] {
   const id = pageId || getSelectedPage(state);
   if (!id) {
     return [];
