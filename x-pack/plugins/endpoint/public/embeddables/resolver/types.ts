@@ -169,14 +169,16 @@ export interface RelatedEventDataEntry {
 export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
   stats: Partial<Record<RelatedEventType, number>>;
 };
+
+export type RelatedEventEntryWithStatsOrWaiting =
+  | RelatedEventDataEntryWithStats
+  | typeof waitingForRelatedEventData;
+
 /**
  * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
  * or a `waitingForRelatedEventData` symbol when referenced unique event.
  */
-export type RelatedEventData = WeakMap<
-  ResolverEvent,
-  RelatedEventDataEntryWithStats | typeof waitingForRelatedEventData
->;
+export type RelatedEventData = WeakMap<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.

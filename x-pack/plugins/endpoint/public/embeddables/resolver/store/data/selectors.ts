@@ -416,7 +416,7 @@ export const relatedEvents = createSelector(graphableProcesses, function getRela
   const eventsRelatedByProcess: RelatedEventData = new WeakMap();
   /* eslint-disable no-shadow */
   return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
-  /* eslint-enable no-shadow */
+    /* eslint-enable no-shadow */
     const tempEntry = {
       related_events: [{ related_event: graphableProcess, related_event_type: tempType }],
       stats: { DNS: 23 },

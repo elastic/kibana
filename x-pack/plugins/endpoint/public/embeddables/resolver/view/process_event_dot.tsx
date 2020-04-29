@@ -23,6 +23,8 @@ import {
   AdjacentProcessMap,
   ResolverProcessType,
   waitingForRelatedEventData,
+  RelatedEventDataEntryWithStats,
+  RelatedEventEntryWithStatsOrWaiting,
 } from '../types';
 import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
@@ -215,6 +217,7 @@ export const ProcessEventDot = styled(
       event,
       projectionMatrix,
       adjacentNodeMap,
+      relatedEvents,
     }: {
       /**
        * A `className` string provided by `styled`
@@ -236,6 +239,11 @@ export const ProcessEventDot = styled(
        * map of what nodes are "adjacent" to this one in "up, down, previous, next" directions
        */
       adjacentNodeMap: AdjacentProcessMap;
+      /**
+       * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
+       * to provide the user some visibility regarding the contents thereof.
+       */
+      relatedEvents: RelatedEventEntryWithStatsOrWaiting;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.

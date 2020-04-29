@@ -60,6 +60,8 @@ export const processAdjacencies = composeSelectors(
   dataSelectors.processAdjacencies
 );
 
+export const relatedEvents = composeSelectors(dataStateSelector, dataSelectors.relatedEvents);
+
 /**
  * Returns the id of the "current" tree node (fake-focused)
  */
