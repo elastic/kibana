@@ -78,9 +78,7 @@ export const security = (kibana: Record<string, any>) =>
       // features are up to date.
       xpackInfo
         .feature(this.id)
-        .registerLicenseCheckResultsGenerator(() =>
-          securityPlugin.__legacyCompat.license.getFeatures()
-        );
+        .registerLicenseCheckResultsGenerator(() => securityPlugin.license.getFeatures());
 
       server.expose({
         getUser: async (request: LegacyRequest) =>

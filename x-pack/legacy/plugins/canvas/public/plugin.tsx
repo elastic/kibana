@@ -44,7 +44,6 @@ export interface CanvasStartDeps {
   uiActions: UiActionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
-    formatMsg: any;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
   };
 }
@@ -64,6 +63,7 @@ export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
+  private startPlugins: CanvasStartDeps | undefined;
 
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
@@ -73,14 +73,26 @@ export class CanvasPlugin
     core.application.register({
       id: 'canvas',
       title: 'Canvas App',
-      async mount(context, params) {
+      mount: async (context, params) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
+        // TODO: We only need this to get the __LEGACY stuff that isn't coming from getStartSevices.
+        // We won't need this as soon as we move over to NP Completely
+        if (!this.startPlugins) {
+          throw new Error('Start Plugins not ready at mount time');
+        }
+
+        const canvasStore = await initializeCanvas(
+          core,
+          coreStart,
+          plugins,
+          this.startPlugins,
+          registries
+        );
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 
@@ -115,6 +127,7 @@ export class CanvasPlugin
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
+    this.startPlugins = plugins;
     this.srcPlugin.start(core, plugins);
     initLoadingIndicator(core.http.addLoadingCountSource);
   }
