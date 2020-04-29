@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get } from 'lodash';
+import set from 'set-value';
 import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
 import { QueryContext } from './query_context';
 
@@ -116,8 +117,8 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
     },
   };
 
-  if (searchAfter) {
-    set(body, 'aggs.monitors.composite.after', searchAfter);
+  if (searchAfter && typeof searchAfter.monitor_id === 'string') {
+    set(body, 'aggs.monitors.composite.after.monitor_id', searchAfter.monitor_id);
   }
 
   return body;
