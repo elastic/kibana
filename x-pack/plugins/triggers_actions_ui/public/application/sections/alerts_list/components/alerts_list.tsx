@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, indexBy } from 'lodash';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
@@ -206,10 +206,9 @@ export const AlertsList: React.FunctionComponent = () => {
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
         { defaultMessage: 'Actions' }
       ),
-      render: countryCode => (
-        // const country = store.getCountry(countryCode);
-        <EuiBadge>{countryCode.length}</EuiBadge>
-      ),
+      render: actions => {
+        return <EuiBadge>{actions.length}</EuiBadge>;
+      },
       sortable: false,
       'data-test-subj': 'alertsTableCell-actionsText',
     },
@@ -382,10 +381,10 @@ export const AlertsList: React.FunctionComponent = () => {
         selection={
           canDelete
             ? {
-              onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-              },
-            }
+                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                },
+              }
             : undefined
         }
         onChange={({ page: changedPage }: { page: Pagination }) => {
@@ -394,7 +393,6 @@ export const AlertsList: React.FunctionComponent = () => {
       />
     </Fragment>
   );
-
 
   const loadedItems = convertAlertsToTableItems(alertsState.data, alertTypesState.data);
 
@@ -448,8 +446,8 @@ export const AlertsList: React.FunctionComponent = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-            <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
-          )}
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      )}
       <AlertsContextProvider
         value={{
           reloadAlerts: loadAlertsData,
@@ -489,15 +487,11 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 // const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
 // const [firstAction, ...otherActions] = uniqueActions;
 
-
-
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
-  const actionsText = (<span>hello</span>);
   return alerts.map(alert => ({
     ...alert,
     actionsText: alert.actions,
-    // actionsText: actionsText,
     tagsText: alert.tags.join(', '),
-    alertType: alertTypesIndex[alert.alertTypeId] ?.name ?? alert.alertTypeId,
+    alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));
 }

@@ -62,7 +62,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
-  console.log(uniqueActions, 'uniqueActions');
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
 
@@ -130,8 +129,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       {uniqueActions.map(action => (
                         <EuiFlexItem grow={false}>
                           <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                            {actionTypesByTypeId[action].name ??
-                              action}
+                            {actionTypesByTypeId[action].name ?? action}
                           </EuiBadge>
                         </EuiFlexItem>
                       ))}
@@ -198,18 +196,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                 {alert.enabled ? (
                   <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
                 ) : (
-                    <Fragment>
-                      <EuiSpacer />
-                      <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
-                        <p>
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                            defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
-                          />
-                        </p>
-                      </EuiCallOut>
-                    </Fragment>
-                  )}
+                  <Fragment>
+                    <EuiSpacer />
+                    <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
+                          defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
+                        />
+                      </p>
+                    </EuiCallOut>
+                  </Fragment>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
