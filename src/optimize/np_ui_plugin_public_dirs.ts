@@ -17,7 +17,14 @@
  * under the License.
  */
 
-export function getNpUiPluginPublicDirs(kbnServer) {
+import KbnServer from '../legacy/server/kbn_server';
+
+export type NpUiPluginPublicDirs = Array<{
+  id: string;
+  path: string;
+}>;
+
+export function getNpUiPluginPublicDirs(kbnServer: KbnServer): NpUiPluginPublicDirs {
   return Array.from(kbnServer.newPlatform.__internals.uiPlugins.internal.entries()).map(
     ([id, { publicTargetDir }]) => ({
       id,
@@ -26,17 +33,17 @@ export function getNpUiPluginPublicDirs(kbnServer) {
   );
 }
 
-export function isNpUiPluginPublicDirs(something) {
+export function isNpUiPluginPublicDirs(x: any): x is NpUiPluginPublicDirs {
   return (
-    Array.isArray(something) &&
-    something.every(
+    Array.isArray(x) &&
+    x.every(
       s => typeof s === 'object' && s && typeof s.id === 'string' && typeof s.path === 'string'
     )
   );
 }
 
-export function assertIsNpUiPluginPublicDirs(something) {
-  if (!isNpUiPluginPublicDirs(something)) {
+export function assertIsNpUiPluginPublicDirs(x: any): asserts x is NpUiPluginPublicDirs {
+  if (!isNpUiPluginPublicDirs(x)) {
     throw new TypeError(
       'npUiPluginPublicDirs must be an array of objects with string `id` and `path` properties'
     );

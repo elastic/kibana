@@ -17,14 +17,20 @@
  * under the License.
  */
 
-import { createReplaceStream } from '../legacy/utils';
+import Stream from 'stream';
+import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
+import { createReplaceStream } from '../legacy/utils';
 
 export const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 
-export function replacePlaceholder(read, replacement) {
+interface ClosableTransform extends Stream.Transform {
+  close(): void;
+}
+
+export function replacePlaceholder(read: Stream.Readable, replacement: string) {
   const replace = createReplaceStream(PUBLIC_PATH_PLACEHOLDER, replacement);
 
   // handle errors on the read stream by proxying them
@@ -37,13 +43,15 @@ export function replacePlaceholder(read, replacement) {
       replace.end();
     });
 
-  replace.close = () => {
-    read.unpipe();
+  const closableReplace: ClosableTransform = Object.assign(replace, {
+    close: () => {
+      read.unpipe();
 
-    if (read.close) {
-      read.close();
-    }
-  };
+      if ('close' in read) {
+        (read as Fs.ReadStream).close();
+      }
+    },
+  });
 
-  return read.pipe(replace);
+  return read.pipe(closableReplace);
 }
