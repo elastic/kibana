@@ -6,20 +6,13 @@
 
 import { of, Observable, from } from 'rxjs';
 import { get } from 'lodash/fp';
-import {
-  filter,
-  withLatestFrom,
-  mergeMap,
-  //  startWith,
-  takeUntil,
-} from 'rxjs/operators';
+import { filter, withLatestFrom, mergeMap, takeUntil } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import {
   getDraftTimeline as getDraftTimelineAction,
   showCallOutUnauthorizedMsg,
   endTimelineSaving,
-  // startTimelineSaving,
 } from './actions';
 import { getDraftTimeline } from '../../containers/timeline/api';
 import { ActionTimeline, TimelineById } from './types';
@@ -40,7 +33,6 @@ export const epicDraftTimeline = (
   clean: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
-  // !!myEpicTimelineId.getTimelineId()
   from(getDraftTimeline({ clean })).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimelines]) => {
@@ -72,7 +64,6 @@ export const epicDraftTimeline = (
         }),
       ];
     }),
-    // startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
       action$.pipe(
         withLatestFrom(timeline$),

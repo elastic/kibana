@@ -2244,7 +2244,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     title: '',
     version: null,
     width: 1100,
-    timelineType: TimelineType.default,
+    timelineType: TimelineType.draft,
   },
   to: 1541444605937,
   ruleNote: '# this is some markdown documentation',

@@ -285,6 +285,7 @@ describe('Epic Timeline', () => {
           sortDirection: 'desc',
         },
         title: 'saved',
+        timelineType: TimelineType.default,
       });
     });
   });

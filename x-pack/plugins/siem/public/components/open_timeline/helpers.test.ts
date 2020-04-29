@@ -298,6 +298,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        timelineType: 'draft',
         title: '',
         version: '1',
         width: 1100,
@@ -392,11 +393,13 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        timelineType: 'draft',
         title: '',
         version: '1',
         width: 1100,
       });
     });
+
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -409,38 +412,80 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         columns: [
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: '@timestamp',
+            placeholder: undefined,
+            type: undefined,
             width: 190,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'message',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'event.category',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'host.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'source.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'destination.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'user.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
         ],
@@ -484,6 +529,7 @@ describe('helpers', () => {
         },
         width: 1100,
         id: 'savedObject-1',
+        timelineType: 'draft',
       });
     });
 
@@ -649,6 +695,7 @@ describe('helpers', () => {
         },
         width: 1100,
         id: 'savedObject-1',
+        timelineType: 'draft',
       });
     });
   });

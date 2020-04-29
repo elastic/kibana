@@ -214,6 +214,7 @@ describe('signals actions', () => {
               columnId: '@timestamp',
               sortDirection: 'desc',
             },
+            timelineType: 'draft',
             title: '',
             version: null,
             width: 1100,
