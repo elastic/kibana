@@ -35,7 +35,7 @@ export interface ExplorerSwimlaneContainerProps {
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
-  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onOutputChange?: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({

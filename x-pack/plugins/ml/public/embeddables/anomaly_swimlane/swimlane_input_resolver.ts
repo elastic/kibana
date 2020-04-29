@@ -30,9 +30,21 @@ import { Query } from '../../../../../../src/plugins/data/common/query';
 import { esKuery } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 
 const RESIZE_IGNORED_DIFF_PX = 20;
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
+
+function getJobsObservable(
+  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
+  anomalyDetectorService: AnomalyDetectorService
+) {
+  return embeddableInput.pipe(
+    pluck('jobIds'),
+    distinctUntilChanged(isEqual),
+    switchMap(jobsIds => anomalyDetectorService.getJobs$(jobsIds))
+  );
+}
 
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
@@ -57,23 +69,9 @@ export function useSwimlaneInputResolver(
     });
   }, []);
 
-  const jobs$ = useMemo(
-    () =>
-      embeddableInput.pipe(
-        pluck('jobIds'),
-        distinctUntilChanged(isEqual),
-        switchMap(jobsIds => anomalyDetectorService.getJobs$(jobsIds))
-      ),
-    []
-  );
-
-  useEffect(() => {
-    chartWidth$.next(chartWidth);
-  }, [chartWidth]);
-
   useEffect(() => {
     const subscription = combineLatest([
-      jobs$,
+      getJobsObservable(embeddableInput, anomalyDetectorService),
       embeddableInput,
       chartWidth$.pipe(
         skipWhile(v => !v),
@@ -165,6 +163,10 @@ export function useSwimlaneInputResolver(
       subscription.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    chartWidth$.next(chartWidth);
+  }, [chartWidth]);
 
   return [swimlaneType, swimlaneData, timeBuckets, error];
 }
