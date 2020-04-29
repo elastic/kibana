@@ -88,6 +88,14 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
       },
     },
     {
+      name: labels.AGE_COL,
+      field: 'certificate_not_valid_before',
+      sortable: true,
+      render: (value: string) => {
+        return moment().diff(moment(value), 'days') + ' days';
+      },
+    },
+    {
       name: labels.FINGERPRINTS_COL,
       field: 'sha256',
       render: (val: string, item: Cert) => <FingerprintCol cert={item} />,

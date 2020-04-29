@@ -13,6 +13,7 @@ import {
 enum SortFields {
   'issuer' = 'tls.server.x509.issuer.common_name',
   'certificate_not_valid_after' = 'tls.certificate_not_valid_after',
+  'certificate_not_valid_before' = 'tls.certificate_not_valid_before',
   'common_name' = 'tls.server.x509.subject.common_name',
 }
 
@@ -75,7 +76,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
         field: 'tls.server.hash.sha256',
         inner_hits: {
           _source: {
-            includes: ['monitor.id', 'monitor.name'],
+            includes: ['monitor.id', 'monitor.name', 'url.full'],
           },
           collapse: {
             field: 'monitor.id',
@@ -104,7 +105,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
           fields: [
             'monitor.id.text',
             'monitor.name.text',
-            'monitor.url.full.text',
+            'url.full.text',
             'tls.server.x509.subject.common_name.text',
             'tls.server.x509.issuer.common_name.text',
           ],
@@ -130,6 +131,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     const monitors = hit.inner_hits.monitors.hits.hits.map((monitor: any) => ({
       name: monitor._source?.monitor.name,
       id: monitor._source?.monitor.id,
+      url: monitor._source?.url.full,
     }));
 
     return {

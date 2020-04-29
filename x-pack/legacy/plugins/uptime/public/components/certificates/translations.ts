@@ -42,6 +42,10 @@ export const VALID_UNTIL_COL = i18n.translate('xpack.uptime.certs.list.validUnti
   defaultMessage: 'Valid until',
 });
 
+export const AGE_COL = i18n.translate('xpack.uptime.certs.list.ageCol', {
+  defaultMessage: 'Age',
+});
+
 export const FINGERPRINTS_COL = i18n.translate('xpack.uptime.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
 });

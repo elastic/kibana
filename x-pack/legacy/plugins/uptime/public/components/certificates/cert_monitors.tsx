@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import { CertMonitor } from '../../../common/runtime_types';
 import { MonitorPageLink } from '../common/monitor_page_link';
 
@@ -18,9 +19,11 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
       {monitors.map((mon: CertMonitor, ind: number) => (
         <span key={mon.id}>
           {ind > 0 && ', '}
-          <MonitorPageLink monitorId={mon.id!} linkParameters={''}>
-            {mon.name || mon.id}
-          </MonitorPageLink>
+          <EuiToolTip content={mon.url}>
+            <MonitorPageLink monitorId={mon.id!} linkParameters={''}>
+              {mon.name || mon.id}
+            </MonitorPageLink>
+          </EuiToolTip>
         </span>
       ))}
     </span>

@@ -25,6 +25,7 @@ export type GetCertsParams = t.TypeOf<typeof GetCertsParamsType>;
 export const CertMonitorType = t.partial({
   name: t.string,
   id: t.string,
+  url: t.string,
 });
 
 export const CertType = t.intersection([
