@@ -5,6 +5,7 @@
  */
 
 import { ComponentType, ReactWrapper } from 'enzyme';
+
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import {
@@ -166,7 +167,7 @@ export const registerTestBed = <T extends string = string>(
         return process();
       };
 
-      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T, count = 1) => {
+      const waitFor: TestBed<T>['waitFor'] = (testSubject: T, count = 1) => {
         return waitForFn(
           () => Promise.resolve(exists(testSubject, count)),
           `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`

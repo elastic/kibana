@@ -164,12 +164,13 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     await waitFor('fieldsListItem', currentCount + 1);
   };
 
-  const startEditField = async (path: string) => {
+  const startEditField = (path: string) => {
     const field = getFieldAt(path);
     find('editFieldButton', field).simulate('click');
+    component.update();
   };
 
-  const updateFieldAndCloseFlyout = async () => {
+  const updateFieldAndCloseFlyout = () => {
     find('mappingsEditorFieldEdit.editFieldUpdateButton').simulate('click');
     component.update();
   };
@@ -183,7 +184,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
       return;
     }
 
-    find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
+    await act(async () => {
+      find('mappingsEditorFieldEdit.toggleAdvancedSetting').simulate('click');
+    });
 
     await waitForFn(
       checkIsVisible,

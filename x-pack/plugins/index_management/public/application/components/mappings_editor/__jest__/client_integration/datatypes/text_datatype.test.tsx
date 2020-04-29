@@ -61,7 +61,7 @@ describe('Mappings editor: text datatype', () => {
 
     // Open the flyout to edit the field
     await act(async () => {
-      await startEditField('myField');
+      startEditField('myField');
     });
 
     await waitFor('mappingsEditorFieldEdit');
@@ -72,7 +72,7 @@ describe('Mappings editor: text datatype', () => {
 
     // Save the field and close the flyout
     await act(async () => {
-      await updateFieldAndCloseFlyout();
+      updateFieldAndCloseFlyout();
     });
 
     await waitForFn(
@@ -133,13 +133,13 @@ describe('Mappings editor: text datatype', () => {
 
     // Start edit and immediately save to have all the default values
     await act(async () => {
-      await startEditField(fieldToEdit);
+      startEditField(fieldToEdit);
     });
     await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     await act(async () => {
-      await updateFieldAndCloseFlyout();
+      updateFieldAndCloseFlyout();
     });
 
     await waitForFn(
@@ -153,7 +153,7 @@ describe('Mappings editor: text datatype', () => {
 
     // Re-open the edit panel
     await act(async () => {
-      await startEditField('myField');
+      startEditField('myField');
     });
     await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
@@ -204,7 +204,7 @@ describe('Mappings editor: text datatype', () => {
 
     await act(async () => {
       // Save & close
-      await updateFieldAndCloseFlyout();
+      updateFieldAndCloseFlyout();
     });
 
     await waitForFn(
@@ -229,7 +229,7 @@ describe('Mappings editor: text datatype', () => {
 
     // Re-open the flyout and make sure the select have the correct updated value
     await act(async () => {
-      await startEditField('myField');
+      startEditField('myField');
     });
     await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
@@ -270,21 +270,25 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+    await act(async () => {
+      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
 
     const {
       find,
       exists,
       waitFor,
       waitForFn,
+      component,
       form: { setInputValue, setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldToEdit = 'myField';
 
     await act(async () => {
-      await startEditField(fieldToEdit);
+      startEditField(fieldToEdit);
     });
+
     await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
@@ -300,7 +304,7 @@ describe('Mappings editor: text datatype', () => {
     expect(searchAnalyzerValue).toBe(defaultMappings.properties.myField.search_analyzer);
     expect(searchQuoteAnalyzerValue).toBe(defaultMappings.properties.myField.search_quote_analyzer);
 
-    const updatedIndexAnalyzer = 'updatedAnalyzer';
+    const updatedIndexAnalyzer = 'newCustomIndexAnalyzer';
     const updatedSearchAnalyzer = 'whitespace';
 
     await act(async () => {
@@ -309,16 +313,25 @@ describe('Mappings editor: text datatype', () => {
 
       // Change the search analyzer to a built-in analyzer
       find('searchAnalyzer-toggleCustomButton').simulate('click');
-      await waitFor('searchAnalyzer');
+      component.update();
+    });
+
+    await waitFor('searchAnalyzer');
+
+    await act(async () => {
       setSelectValue('searchAnalyzer.select', updatedSearchAnalyzer);
 
       // Change the searchQuote to use built-in analyzer
       // By default it means using the "index default"
       find('searchQuoteAnalyzer-toggleCustomButton').simulate('click');
-      await waitFor('searchQuoteAnalyzer');
+      component.update();
+    });
 
+    await waitFor('searchQuoteAnalyzer');
+
+    await act(async () => {
       // Save & close
-      await updateFieldAndCloseFlyout();
+      updateFieldAndCloseFlyout();
     });
 
     await waitForFn(
@@ -341,7 +354,7 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 30000);
 
   test('analyzer parameter: custom analyzer (from index settings)', async () => {
     const indexSettings = {
@@ -394,7 +407,7 @@ describe('Mappings editor: text datatype', () => {
     const fieldToEdit = 'myField';
 
     await act(async () => {
-      await startEditField(fieldToEdit);
+      startEditField(fieldToEdit);
     });
     await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
@@ -421,7 +434,7 @@ describe('Mappings editor: text datatype', () => {
       setSelectValue(find('indexAnalyzer.select').at(1), customAnalyzers[2]);
 
       // Save & close
-      await updateFieldAndCloseFlyout();
+      updateFieldAndCloseFlyout();
     });
 
     await waitForFn(
