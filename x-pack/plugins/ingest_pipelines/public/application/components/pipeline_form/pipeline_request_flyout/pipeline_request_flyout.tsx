@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Pipeline } from '../../../common/types';
+import { Pipeline } from '../../../../../common/types';
 
 interface Props {
   pipeline: Pipeline;
@@ -40,7 +40,7 @@ export const PipelineRequestFlyout: React.FunctionComponent<Props> = ({
   uuid.current++;
 
   return (
-    <EuiFlyout maxWidth={480} onClose={closeFlyout}>
+    <EuiFlyout maxWidth={550} onClose={closeFlyout}>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>

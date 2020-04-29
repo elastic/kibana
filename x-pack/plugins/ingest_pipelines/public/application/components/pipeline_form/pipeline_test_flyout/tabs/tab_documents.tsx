@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiText, EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiButton, EuiHorizontalRule, EuiLink } from '@elastic/eui';
 
 import {
   getUseField,
@@ -17,6 +17,7 @@ import {
   Form,
   useForm,
   FormConfig,
+  useKibana,
 } from '../../../../../shared_imports';
 
 import { documentsSchema } from './schema';
@@ -35,6 +36,8 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   handleExecute,
   isExecuting,
 }) => {
+  const { services } = useKibana();
+
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
 
@@ -69,7 +72,19 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
-            defaultMessage="Provide an array of documents to be ingested by the pipeline."
+            defaultMessage="Provide an array of documents to be ingested by the pipeline. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={services.documentation.getSimulatePipelineApiUrl()} target="_blank">
+                  {i18n.translate(
+                    'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
         </p>
       </EuiText>

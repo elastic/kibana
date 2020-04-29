@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { BASE_PATH } from '../../../../common/constants';
@@ -92,6 +93,8 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
+
+        <EuiSpacer size="l" />
 
         <PipelineForm
           defaultValue={sourcePipeline}
