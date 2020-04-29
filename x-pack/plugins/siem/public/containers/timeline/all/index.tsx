@@ -22,9 +22,16 @@ import { useApolloClient } from '../../../utils/apollo_context';
 
 import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../../pages/timelines/translations';
+import { TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
 
 export interface AllTimelinesArgs {
-  fetchAllTimeline: ({ onlyUserFavorite, pageInfo, search, sort }: AllTimelinesVariables) => void;
+  fetchAllTimeline: ({
+    onlyUserFavorite,
+    pageInfo,
+    search,
+    sort,
+    timelineTypes,
+  }: AllTimelinesVariables) => void;
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
@@ -33,7 +40,7 @@ export interface AllTimelinesArgs {
 
 export interface AllTimelinesVariables {
   onlyUserFavorite: boolean;
-  timelineTypes: 'default' | 'template' | null;
+  timelineTypes: TimelineTypeLiteralWithNull;
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
@@ -92,15 +99,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   });
 
   const fetchAllTimeline = useCallback(
-    async ({
-      onlyUserFavorite,
-      pageInfo,
-      search,
-      sort,
-      timelineTypes,
-      timelines,
-      totalCount,
-    }: AllTimelinesVariables) => {
+    async ({ onlyUserFavorite, pageInfo, search, sort, timelineTypes }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -109,8 +108,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (apolloClient != null) {
             setAllTimelines({
               ...allTimelines,
-              timelines: timelines ?? allTimelines.timelines,
-              totalCount: totalCount ?? allTimelines.totalCount,
               loading: true,
             });
             const variables: GetAllTimeline.Variables = {

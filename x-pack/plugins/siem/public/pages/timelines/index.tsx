@@ -6,13 +6,58 @@
 
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
-
+import { isEmpty } from 'lodash/fp';
 import { Router, Switch, Route, Redirect, useHistory } from 'react-router-dom';
-import { TimelinesPage } from './timelines_page';
+
+import { TimelineType } from '../../../common/types/timeline';
+import { TAB_TIMELINES, TAB_TEMPLATES } from '../../components/open_timeline/translations';
+import { getTimelineTabsUrl } from '../../components/link_to';
+
 import { SiemPageName } from '../home/types';
 
-const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(default|template)`;
-const timelinesDefaultPath = `/${SiemPageName.timelines}/default`;
+import { TimelinesPage } from './timelines_page';
+import { PAGE_TITLE } from './translations';
+const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`;
+const timelinesDefaultPath = `/${SiemPageName.timelines}/${TimelineType.default}`;
+
+const TabNameMappedToI18nKey: Record<TimelineType, string> = {
+  [TimelineType.default]: TAB_TIMELINES,
+  [TimelineType.template]: TAB_TEMPLATES,
+};
+
+export const getBreadcrumbs = (
+  params: TimelineRouteSpyState,
+  search: string[]
+): ChromeBreadcrumb[] => {
+  let breadcrumb = [
+    {
+      text: PAGE_TITLE,
+      href: `${getTimelineTabsUrl(TimelineType.default, !isEmpty(search[1]) ? search[1] : '')}`,
+    },
+  ];
+  if (params.detailName != null) {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: params.detailName,
+        href: `${getTimelineTabsUrl(params.detailName, !isEmpty(search[1]) ? search[1] : '')}`,
+      },
+    ];
+  }
+
+  const tabName = params?.tabName;
+  if (!tabName) return breadcrumb;
+
+  breadcrumb = [
+    ...breadcrumb,
+    {
+      text: TabNameMappedToI18nKey[tabName],
+      href: '',
+    },
+  ];
+  return breadcrumb;
+};
+
 export const Timelines = React.memo(() => {
   const history = useHistory();
   return (

@@ -14,7 +14,7 @@ export { getHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getNetworkUrl, getIPDetailsUrl, RedirectToNetworkPage } from './redirect_to_network';
 export {
   getTimelinesUrl,
-  getTemplateTimelinesUrl,
+  getTimelineTabsUrl,
   RedirectToTimelinesPage,
 } from './redirect_to_timelines';
 export {

@@ -6,75 +6,77 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTabs, EuiTab, EuiSpacer, EuiFilterButton } from '@elastic/eui';
-import * as i18n from './translations';
-import { TimelineTabsStyle } from './types';
-import { getTimelinesUrl, getTemplateTimelinesUrl } from '../link_to/redirect_to_timelines';
+
+import {
+  TimelineTypeLiteralWithNull,
+  TimelineTypeLiteral,
+  TimelineType,
+} from '../../../common/types/timeline';
+
+import { getTimelinesUrl, getTimelineTabsUrl } from '../link_to';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 import { navTabs } from '../../pages/home/home_navigations';
 
-export const useTimelineTabs = (
-  timelineTabsStyle?: TimelineTabsStyle.tab | TimelineTabsStyle.filter
-): {
-  timelineTypes: 'default' | 'template' | null;
+import * as i18n from './translations';
+import { TimelineTabsStyle } from './types';
+
+export const useTimelineTypes = (): {
+  timelineTypes: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element;
 } => {
   const urlSearch = useGetUrlSearch(navTabs.timelines);
   const { tabName } = useParams<{ pageName: string; tabName: string }>();
-  const [timelineTypes, setTimelineTypes] = useState<'default' | 'template' | null>(
-    timelineTabsStyle === TimelineTabsStyle.tab ? 'default' : null
-  );
-  const tabs: Array<{
-    id: 'default' | 'template';
+  const [timelineTypes, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(tabName || null);
+
+  const getTabs: Array<{
+    id: TimelineTypeLiteral;
     name: string;
     disabled: boolean;
     href: string;
-  }> = useMemo(
-    () => [
-      {
-        id: 'default',
-        name:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
-            : i18n.TAB_TIMELINES,
-        href: getTimelinesUrl(urlSearch),
-        disabled: false,
-      },
-      {
-        id: 'template',
-        name:
-          timelineTabsStyle === TimelineTabsStyle.filter
-            ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
-            : i18n.TAB_TEMPLATES,
-        href: getTemplateTimelinesUrl(urlSearch),
-        disabled: false,
-      },
-    ],
-    [timelineTabsStyle]
-  );
+  }> = (timelineTabsStyle: TimelineTabsStyle) => [
+    {
+      id: TimelineType.default,
+      name:
+        timelineTabsStyle === TimelineTabsStyle.filter
+          ? i18n.FILTER_TIMELINES(i18n.TAB_TIMELINES)
+          : i18n.TAB_TIMELINES,
+      href: getTimelineTabsUrl(TimelineType.default, urlSearch),
+      disabled: false,
+    },
+    {
+      id: TimelineType.template,
+      name:
+        timelineTabsStyle === TimelineTabsStyle.filter
+          ? i18n.FILTER_TIMELINES(i18n.TAB_TEMPLATES)
+          : i18n.TAB_TEMPLATES,
+      href: getTimelineTabsUrl(TimelineType.template, urlSearch),
+      disabled: false,
+    },
+  ];
 
   const onFilterClicked = useCallback(
-    tabId => {
+    (timelineTabsStyle, tabId) => {
       if (timelineTabsStyle === TimelineTabsStyle.filter && tabId === timelineTypes) {
         setTimelineTypes(null);
       } else {
         setTimelineTypes(tabId);
       }
     },
-    [setTimelineTypes]
+    [timelineTypes, setTimelineTypes]
   );
 
   const timelineTabs = useMemo(() => {
     return (
       <>
         <EuiTabs>
-          {tabs.map(tab => (
+          {getTabs(TimelineTabsStyle.tab).map(tab => (
             <EuiTab
               isSelected={tab.id === tabName}
               disabled={tab.disabled}
-              key={`timeline-tab-${tab.id}`}
+              key={`timeline-${TimelineTabsStyle.tab}-${tab.id}`}
               href={tab.href}
-              onClick={onFilterClicked.bind(null, tab.id)}
+              onClick={onFilterClicked.bind(null, TimelineTabsStyle.tab, tab.id)}
             >
               {tab.name}
             </EuiTab>
@@ -83,23 +85,23 @@ export const useTimelineTabs = (
         <EuiSpacer size="m" />
       </>
     );
-  }, [tabs, tabName]);
+  }, [getTabs, tabName]);
 
   const timelineFilters = useMemo(() => {
     return (
       <>
-        {tabs.map(tab => (
+        {getTabs(TimelineTabsStyle.tab).map(tab => (
           <EuiFilterButton
             hasActiveFilters={tab.id === timelineTypes}
-            key={`timeline-filter-${tab.id}`}
-            onClick={onFilterClicked.bind(null, tab.id)}
+            key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
+            onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
           >
             {tab.name}
           </EuiFilterButton>
         ))}
       </>
     );
-  }, [tabs, timelineTypes]);
+  }, [getTabs, timelineTypes]);
 
   return {
     timelineTypes,

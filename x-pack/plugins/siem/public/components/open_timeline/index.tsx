@@ -39,9 +39,10 @@ import {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
+  TimelineTabsStyle,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
-import { useTimelineTabs } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -105,7 +106,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { timelineTypes, timelineTabs, timelineFilters } = useTimelineTabs();
+    const { timelineTypes, timelineTabs, timelineFilters } = useTimelineTypes();
     const { fetchAllTimeline, timelines, loading, totalCount, refetch } = useGetAllTimeline();
 
     /** Invoked when the user presses enters to submit the text in the search input */
@@ -240,21 +241,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         search,
         sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
         onlyUserFavorite: onlyFavorites,
-        timelines,
         timelineTypes,
-        totalCount,
       });
-    }, [
-      pageIndex,
-      pageSize,
-      search,
-      sortField,
-      sortDirection,
-      timelines,
-      timelineTypes,
-      totalCount,
-      onlyFavorites,
-    ]);
+    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
 
     return !isModal ? (
       <OpenTimeline

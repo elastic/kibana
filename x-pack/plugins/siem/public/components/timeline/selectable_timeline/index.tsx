@@ -23,7 +23,7 @@ import styled from 'styled-components';
 
 import { useGetAllTimeline } from '../../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../../graphql/types';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
 
 import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
@@ -73,7 +73,7 @@ const TIMELINE_ITEM_HEIGHT = 50;
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
-  timelineTypes?: 'default' | 'template';
+  timelineTypes?: TimelineTypeLiteralWithNull;
   searchTimelineValue: string;
 }
 
@@ -233,10 +233,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       onlyUserFavorite: onlyFavorites,
       timelineTypes: TimelineType.default,
-      timelines,
-      totalCount: timelineCount,
     });
-  }, [onlyFavorites, pageSize, searchTimelineValue, timelines, timelineCount]);
+  }, [onlyFavorites, pageSize, searchTimelineValue]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

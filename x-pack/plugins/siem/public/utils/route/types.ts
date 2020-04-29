@@ -32,6 +32,10 @@ export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
 }
 
+export interface TimelineRouteSpyState extends RouteSpyState {
+  tabName: TimelineType | undefined;
+}
+
 export type RouteSpyAction =
   | {
       type: 'updateSearch';
