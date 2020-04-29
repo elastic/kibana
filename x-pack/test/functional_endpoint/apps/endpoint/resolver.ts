@@ -12,7 +12,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const browser = getService('browser');
 
   describe('Endpoint Alert Resolver', function() {
     this.tags(['ciGroup7']);
@@ -206,7 +205,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       await (await testSubjects.find('zoom-in')).click();
-      await browser.setWindowSize(2400, 1800);
 
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
