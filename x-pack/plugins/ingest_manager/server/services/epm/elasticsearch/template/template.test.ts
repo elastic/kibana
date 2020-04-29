@@ -291,10 +291,12 @@ test('tests processing object field with property, reverse order', () => {
   type: keyword
 - name: a
   type: object
+  dynamic: false
   `;
   const objectFieldWithPropertyReversedMapping = {
     properties: {
       a: {
+        dynamic: false,
         properties: {
           b: {
             ignore_above: 1024,
@@ -307,5 +309,61 @@ test('tests processing object field with property, reverse order', () => {
   const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldWithPropertyReversedMapping));
+  expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+});
+
+test('tests processing nested field with property', () => {
+  const nestedYaml = `
+  - name: a.b
+    type: keyword
+  - name: a
+    type: nested
+    dynamic: false
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        dynamic: false,
+        type: 'nested',
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
+});
+
+test('tests processing nested field with property, nested field first', () => {
+  const nestedYaml = `
+  - name: a
+    type: nested
+    include_in_parent: true
+  - name: a.b
+    type: keyword
+    `;
+  const expectedMapping = {
+    properties: {
+      a: {
+        include_in_parent: true,
+        type: 'nested',
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(nestedYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(mappings).toEqual(expectedMapping);
 });

@@ -28,6 +28,8 @@ export interface Field {
   object_type?: string;
   scaling_factor?: number;
   dynamic?: 'strict' | boolean;
+  include_in_parent?: boolean;
+  include_in_root?: boolean;
 
   // Kibana specific
   analyzed?: boolean;
@@ -145,6 +147,7 @@ function dedupFields(fields: Fields): Fields {
               found.type = 'group';
             }
           }
+          // we need to merge in other properties (like `dynamic`) that might exist
           Object.assign(found, importantFieldProps);
         }
       } else {

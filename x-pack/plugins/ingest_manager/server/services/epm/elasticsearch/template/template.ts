@@ -72,6 +72,19 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       switch (type) {
         case 'group':
           fieldProps = generateMappings(field.fields!);
+          attemptAddDynamicAndEnabled(fieldProps, field);
+          break;
+        case 'group-nested':
+          fieldProps = generateMappings(field.fields!);
+          fieldProps.type = 'nested';
+          attemptAddDynamicAndEnabled(fieldProps, field);
+
+          if (field.hasOwnProperty('include_in_parent')) {
+            fieldProps.include_in_parent = field.include_in_parent;
+          }
+          if (field.hasOwnProperty('include_in_root')) {
+            fieldProps.include_in_root = field.include_in_root;
+          }
           break;
         case 'integer':
           fieldProps.type = 'long';
@@ -96,12 +109,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           break;
         case 'object':
           fieldProps.type = 'object';
-          if (field.hasOwnProperty('enabled')) {
-            fieldProps.enabled = field.enabled;
-          }
-          if (field.hasOwnProperty('dynamic')) {
-            fieldProps.dynamic = field.dynamic;
-          }
+          attemptAddDynamicAndEnabled(fieldProps, field);
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
@@ -126,6 +134,15 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   }
 
   return { properties: props };
+}
+
+function attemptAddDynamicAndEnabled(props: Properties, field: Field) {
+  if (field.hasOwnProperty('enabled')) {
+    props.enabled = field.enabled;
+  }
+  if (field.hasOwnProperty('dynamic')) {
+    props.dynamic = field.dynamic;
+  }
 }
 
 function generateMultiFields(fields: Fields): MultiFields {
