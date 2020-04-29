@@ -72,8 +72,8 @@ export const createConnectorExecutor = ({
   } = execOptions.config as ConnectorPublicConfigurationType;
 
   const params = execOptions.params as ExecutorParams;
-  const { action, actionParams } = params;
-  const { comments, externalId, ...restParams } = actionParams;
+  const { subAction, subActionParams } = params;
+  const { comments, externalId, ...restParams } = subActionParams;
 
   const mapping = buildMap(configurationMapping);
   const externalCase = mapParams(restParams as ExecutorActionParams, mapping);
@@ -89,14 +89,14 @@ export const createConnectorExecutor = ({
     secrets: execOptions.secrets,
   });
 
-  if (!api[action]) {
-    throw new Error('[Action][Connector] Unsupported action type');
+  if (!api[subAction]) {
+    throw new Error('[Action][Connector] Unsupported subAction type');
   }
 
-  const data = await api[action]({
+  const data = await api[subAction]({
     externalService,
     mapping,
-    params: { ...actionParams, externalCase },
+    params: { ...subActionParams, externalCase },
   });
 
   return {

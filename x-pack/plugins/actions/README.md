@@ -64,12 +64,12 @@ Table of Contents
     - [`config`](#config-6)
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
-      - [`actionParams (pushToService)`](#actionparams-pushtoservice)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
-      - [`actionParams (pushToService)`](#actionparams-pushtoservice-1)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
 - [Command Line Utility](#command-line-utility)
 
 ## Terminology
@@ -149,8 +149,8 @@ This is the primary function for an action type. Whenever the action needs to ex
 | actionId                                | The action saved object id that the action type is executing for.                                                                                                                                                                                                                                                                               |
 | config                                  | The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.                                                              |
 | params                                  | Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                  |
-| services.callCluster(path, opts)        | Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but runs in the context of the user who is calling the action when security is enabled.|
-| services.getScopedCallCluster           | This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who is calling the action when security is enabled. This must only be called with instances of CallCluster provided by core.|
+| services.callCluster(path, opts)        | Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but runs in the context of the user who is calling the action when security is enabled.                                                                                                                  |
+| services.getScopedCallCluster           | This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who is calling the action when security is enabled. This must only be called with instances of CallCluster provided by core.                                                                             |
 | services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled). |
 | services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log)                                                                                                                                                                                                                                                                       |
 
@@ -489,12 +489,12 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `params`
 
-| Property     | Description                                                                      | Type   |
-| ------------ | -------------------------------------------------------------------------------- | ------ |
-| action       | The action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
-| actionParams | The parameters of the action                                                     | object |
+| Property        | Description                                                                          | Type   |
+| --------------- | ------------------------------------------------------------------------------------ | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subActionParams | The parameters of the sub action                                                     | object |
 
-#### `actionParams (pushToService)`
+#### `subActionParams (pushToService)`
 
 | Property    | Description                                                                                                                | Type                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
@@ -504,10 +504,9 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`               | object[] _(optional)_ |
 | externalId  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 
-
 ---
 
-## Jira 
+## Jira
 
 ID: `.jira`
 
@@ -529,12 +528,12 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 ### `params`
 
-| Property     | Description                                                                      | Type   |
-| ------------ | -------------------------------------------------------------------------------- | ------ |
-| action       | The action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
-| actionParams | The parameters of the action                                                     | object |
+| Property        | Description                                                                          | Type   |
+| --------------- | ------------------------------------------------------------------------------------ | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subActionParams | The parameters of the sub action                                                     | object |
 
-#### `actionParams (pushToService)`
+#### `subActionParams (pushToService)`
 
 | Property    | Description                                                                                                         | Type                  |
 | ----------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |

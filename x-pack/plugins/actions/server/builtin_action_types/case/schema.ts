@@ -75,6 +75,6 @@ export const ExecutorActionParams = {
 export const ExecutorActionParamsSchema = schema.object(ExecutorActionParams);
 
 export const ExecutorParamsSchema = schema.object({
-  action: ExecutorActionSchema,
-  actionParams: ExecutorActionParamsSchema,
+  subAction: ExecutorActionSchema,
+  subActionParams: ExecutorActionParamsSchema,
 });

@@ -48,8 +48,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
       email: 'elastic@elastic.co',
     },
     params: {
-      action: 'pushToService',
-      actionParams: {
+      subAction: 'pushToService',
+      subActionParams: {
         caseId: '123',
         title: 'a title',
         description: 'a description',
@@ -326,7 +326,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [action]: expected at least one defined value but got [undefined]',
+                  'error validating action params: [subAction]: expected at least one defined value but got [undefined]',
               });
             });
         });
@@ -336,7 +336,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .post(`/api/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
-              params: { action: 'non-supported' },
+              params: { subAction: 'non-supported' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
@@ -344,17 +344,17 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [action]: types that failed validation:\n- [action.0]: expected value to equal [getIncident]\n- [action.1]: expected value to equal [pushToService]\n- [action.2]: expected value to equal [handshake]',
+                  'error validating action params: [subAction]: types that failed validation:\n- [subAction.0]: expected value to equal [getIncident]\n- [subAction.1]: expected value to equal [pushToService]\n- [subAction.2]: expected value to equal [handshake]',
               });
             });
         });
 
-        it('should handle failing with a simulated success without actionParams', async () => {
+        it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
             .post(`/api/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
-              params: { action: 'pushToService' },
+              params: { subAction: 'pushToService' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
@@ -362,7 +362,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.caseId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -372,7 +372,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .post(`/api/action/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
-              params: { action: 'pushToService', actionParams: {} },
+              params: { subAction: 'pushToService', subActionParams: {} },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
@@ -380,7 +380,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.caseId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -392,7 +392,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
+                subActionParams: {
                   caseId: 'success',
                 },
               },
@@ -403,7 +403,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -415,7 +415,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
+                subActionParams: {
                   caseId: 'success',
                   title: 'success',
                 },
@@ -427,7 +427,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.createdAt]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.createdAt]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -439,8 +439,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
-                  ...mockJira.params.actionParams,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -455,7 +455,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -467,8 +467,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
-                  ...mockJira.params.actionParams,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -483,7 +483,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -495,8 +495,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
-                  ...mockJira.params.actionParams,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
                   caseId: 'success',
                   title: 'success',
                   createdAt: 'success',
@@ -511,7 +511,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [actionParams.comments.0.createdAt]: expected value of type [string] but got [undefined]',
+                  'error validating action params: [subActionParams.comments.0.createdAt]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -525,8 +525,8 @@ export default function jiraTest({ getService }: FtrProviderContext) {
             .send({
               params: {
                 ...mockJira.params,
-                actionParams: {
-                  ...mockJira.params.actionParams,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
                   comments: [],
                 },
               },
