@@ -9,6 +9,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
+import { UpdateDateRange } from '../../../components/charts/common';
 import { FiltersGlobal } from '../../../components/filters_global';
 import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
@@ -68,8 +69,12 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
       detailName,
     ]);
     const getFilters = () => [...hostDetailsPageFilters, ...filters];
-    const narrowDateRange = useCallback(
-      (min: number, max: number) => {
+    const narrowDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]

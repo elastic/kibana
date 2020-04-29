@@ -11,6 +11,7 @@ import { useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
+import { UpdateDateRange } from '../../components/charts/common';
 import { EmbeddedMap } from '../../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
@@ -61,8 +62,12 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
       return filters;
     }, [tabName, filters]);
 
-    const narrowDateRange = useCallback(
-      (min: number, max: number) => {
+    const narrowDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]
