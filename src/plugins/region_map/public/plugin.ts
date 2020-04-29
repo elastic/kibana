@@ -75,9 +75,10 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
     { expressions, visualizations, mapsLegacy, notifications }: RegionMapPluginSetupDependencies
   ) {
     setNotifications(notifications);
+    const config = this.initializerContext.config.get<RegionMapsConfigType>();
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
-      regionmapsConfig: core.injectedMetadata.getInjectedVar('regionmap') as RegionMapsConfig,
+      regionmapsConfig: config as RegionMapsConfig,
       serviceSettings: mapsLegacy.serviceSettings,
       BaseMapsVisualization: getBaseMapsVis(core, mapsLegacy.serviceSettings),
     };
@@ -88,7 +89,6 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
       createRegionMapTypeDefinition(visualizationDependencies)
     );
 
-    const config = this.initializerContext.config.get<RegionMapsConfigType>();
     return {
       config,
     };

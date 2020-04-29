@@ -20,7 +20,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
 import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';

@@ -1,5 +1,5 @@
 {
-  "id": "tileMap",
+  "id": "regionMap",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["map", "regionmap"],
