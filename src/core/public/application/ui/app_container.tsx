@@ -26,9 +26,11 @@ import React, {
   MutableRefObject,
 } from 'react';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
+import './app_container.scss';
 
 interface Props {
   /** Path application is mounted on without the global basePath */
@@ -50,6 +52,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   appStatus,
   setIsMounting,
 }: Props) => {
+  const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const unmountRef: MutableRefObject<AppUnmount | null> = useRef<AppUnmount>(null);
@@ -73,6 +76,7 @@ export const AppContainer: FunctionComponent<Props> = ({
     }
 
     const mount = async () => {
+      setShowSpinner(true);
       unmountRef.current =
         (await mounter.mount({
           appBasePath: mounter.appBasePath,
@@ -80,6 +84,7 @@ export const AppContainer: FunctionComponent<Props> = ({
           element: elementRef.current!,
           onAppLeave: handler => setAppLeaveHandler(appId, handler),
         })) || null;
+      setShowSpinner(false);
       setIsMounting(false);
     };
 
@@ -91,6 +96,11 @@ export const AppContainer: FunctionComponent<Props> = ({
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
+      {showSpinner && (
+        <div className="appContainerLoading">
+          <EuiLoadingSpinner size="l" />
+        </div>
+      )}
       <div key={appId} ref={elementRef} />
     </Fragment>
   );
