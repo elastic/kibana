@@ -13,6 +13,7 @@ import { ThemeProvider } from 'styled-components';
 import { wait } from '../../../lib/helpers';
 import { TestProviderWithoutDragAndDrop } from '../../../mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../mock/timeline_results';
+import { useGetAllTimeline, getAllTimeline } from '../../../containers/timeline/all';
 
 import { OpenTimelineModal } from '.';
 
@@ -20,9 +21,28 @@ jest.mock('../../../lib/kibana');
 jest.mock('../../../utils/apollo_context', () => ({
   useApolloClient: () => ({}),
 }));
+jest.mock('../../../containers/timeline/all', () => {
+  const originalModule = jest.requireActual('../../../containers/timeline/all');
+  return {
+    useGetAllTimeline: jest.fn(),
+    getAllTimeline: originalModule.getAllTimeline,
+  };
+});
 
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  beforeEach(() => {
+    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+      fetchAllTimeline: jest.fn(),
+      timelines: getAllTimeline(
+        '',
+        mockOpenTimelineQueryResults[0].result.data?.getAllTimeline?.timeline ?? []
+      ),
+      loading: false,
+      totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
+      refetch: jest.fn(),
+    });
+  });
 
   test('it renders the expected modal', async () => {
     const wrapper = mount(
