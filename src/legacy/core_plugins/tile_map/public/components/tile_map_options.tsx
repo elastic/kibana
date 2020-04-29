@@ -28,9 +28,7 @@ import {
   SelectOption,
   SwitchOption,
 } from '../../../../../plugins/charts/public';
-import { WmsOptions } from './wms_options';
-import { TileMapVisParams } from '../types';
-import { MapTypes } from '../map_types';
+import { WmsOptions, TileMapVisParams, MapTypes } from '../../../../../plugins/maps_legacy/public';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
 

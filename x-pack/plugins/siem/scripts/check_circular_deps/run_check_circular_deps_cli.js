@@ -11,24 +11,23 @@ import madge from 'madge';
 /* eslint-disable-next-line import/no-extraneous-dependencies */
 import { run, createFailError } from '@kbn/dev-utils';
 
-const legacyPluginPath = '../../../../legacy/plugins/siem';
-const pluginPath = '../..';
-
 run(
   async ({ log }) => {
     const result = await madge(
-      [resolve(__dirname, legacyPluginPath, 'public'), resolve(__dirname, pluginPath, 'common')],
+      [resolve(__dirname, '../../public'), resolve(__dirname, '../../common')],
       {
         fileExtensions: ['ts', 'js', 'tsx'],
         excludeRegExp: [
           'test.ts$',
           'test.tsx$',
           'containers/detection_engine/rules/types.ts$',
-          'core/public/chrome/chrome_service.tsx$',
           'src/core/server/types.ts$',
           'src/core/server/saved_objects/types.ts$',
+          'src/core/public/chrome/chrome_service.tsx$',
           'src/core/public/overlays/banners/banners_service.tsx$',
           'src/core/public/saved_objects/saved_objects_client.ts$',
+          'src/plugins/data/public',
+          'src/plugins/ui_actions/public',
         ],
       }
     );

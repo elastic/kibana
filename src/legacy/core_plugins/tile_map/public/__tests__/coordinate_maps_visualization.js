@@ -53,6 +53,7 @@ import {
 import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -114,15 +115,26 @@ describe('CoordinateMapsVisualizationTest', function() {
             return 'not found';
         }
       });
+
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {},
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
       const serviceSettings = new ServiceSettings();
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
       const uiSettings = $injector.get('config');
 
       dependencies = {
-        serviceSettings,
-        uiSettings,
-        $injector,
-        getPrecision,
         getZoomPrecision,
+        getPrecision,
+        BaseMapsVisualization,
+        uiSettings,
+        serviceSettings,
       };
 
       visType = new BaseVisType(createTileMapTypeDefinition(dependencies));
