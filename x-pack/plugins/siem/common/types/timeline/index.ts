@@ -7,14 +7,11 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
+import { SavedObjectsClient } from 'kibana/server';
 
-import { unionWithNullType } from '../framework';
-import { NoteSavedObjectToReturnRuntimeType, NoteSavedObject } from '../note/types';
-import {
-  PinnedEventToReturnSavedObjectRuntimeType,
-  PinnedEventSavedObject,
-} from '../pinned_event/types';
-import { SavedObjectsClient } from '../../../../../../src/core/server';
+import { unionWithNullType } from '../../utility_types';
+import { NoteSavedObject, NoteSavedObjectToReturnRuntimeType } from './note';
+import { PinnedEventToReturnSavedObjectRuntimeType, PinnedEventSavedObject } from './pinned_event';
 
 /*
  *  ColumnHeader Types
@@ -136,6 +133,17 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 /*
  *  Timeline Types
  */
+
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
+}
+
+export const TimelineTypeLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineType.template),
+  runtimeTypes.literal(TimelineType.default),
+]);
+
 export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
@@ -146,6 +154,9 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   kqlMode: unionWithNullType(runtimeTypes.string),
   kqlQuery: unionWithNullType(SavedFilterQueryQueryRuntimeType),
   title: unionWithNullType(runtimeTypes.string),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
+  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
   dateRange: unionWithNullType(SavedDateRangePickerRuntimeType),
   savedQueryId: unionWithNullType(runtimeTypes.string),
   sort: unionWithNullType(SavedSortRuntimeType),
@@ -195,6 +206,25 @@ export interface TimelineSavedObject
 /**
  * All Timeline Saved object type with metadata
  */
+export const TimelineResponseType = runtimeTypes.type({
+  data: runtimeTypes.type({
+    persistTimeline: runtimeTypes.intersection([
+      runtimeTypes.partial({
+        code: unionWithNullType(runtimeTypes.number),
+        message: unionWithNullType(runtimeTypes.string),
+      }),
+      runtimeTypes.type({
+        timeline: TimelineSavedToReturnObjectRuntimeType,
+      }),
+    ]),
+  }),
+});
+
+export interface TimelineResponse extends runtimeTypes.TypeOf<typeof TimelineResponseType> {}
+
+/**
+ * All Timeline Saved object type with metadata
+ */
 
 export const AllTimelineSavedObjectRuntimeType = runtimeTypes.type({
   total: runtimeTypes.number,
@@ -233,6 +263,11 @@ export type ExportedTimelines = TimelineSavedObject &
   ExportedNotes & {
     pinnedEventIds: string[];
   };
+
+export interface ExportTimelineNotFoundError {
+  statusCode: number;
+  message: string;
+}
 
 export interface BulkGetInput {
   type: string;

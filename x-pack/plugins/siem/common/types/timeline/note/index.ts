@@ -8,7 +8,7 @@
 
 import * as runtimeTypes from 'io-ts';
 
-import { unionWithNullType } from '../framework';
+import { unionWithNullType } from '../../../utility_types';
 
 /*
  *  Note Types
@@ -56,11 +56,7 @@ export const NoteSavedObjectToReturnRuntimeType = runtimeTypes.intersection([
     version: runtimeTypes.string,
   }),
   runtimeTypes.partial({
-    timelineVersion: runtimeTypes.union([
-      runtimeTypes.string,
-      runtimeTypes.null,
-      runtimeTypes.undefined,
-    ]),
+    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
