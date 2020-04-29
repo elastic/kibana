@@ -55,6 +55,7 @@ import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_se
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
+import { registerLayerWizards } from '../layers/load_layer_wizards';
 
 interface MapEmbeddableConfig {
   editUrl?: string;
@@ -128,6 +129,8 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+
+    registerLayerWizards();
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
