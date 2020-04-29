@@ -6,29 +6,61 @@
 
 import { createStream } from './agent';
 
-test('Test creating a stream from template', () => {
-  const streamTemplate = `
-input: log
-paths:
-{{#each paths}}
-  - {{this}}
-{{/each}}
-exclude_files: [".gz$"]
-processors:
-  - add_locale: ~
-  `;
-  const vars = {
-    paths: ['/usr/local/var/log/nginx/access.log'],
-  };
+describe('createStream', () => {
+  it('should work', () => {
+    const streamTemplate = `
+    input: log
+    paths:
+    {{#each paths}}
+      - {{this}}
+    {{/each}}
+    exclude_files: [".gz$"]
+    processors:
+      - add_locale: ~
+      `;
+    const vars = {
+      paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+    };
 
-  const output = createStream(vars, streamTemplate);
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'log',
+      paths: ['/usr/local/var/log/nginx/access.log'],
+      exclude_files: ['.gz$'],
+      processors: [{ add_locale: null }],
+    });
+  });
 
-  expect(output).toBe(`
-input: log
-paths:
-  - /usr/local/var/log/nginx/access.log
-exclude_files: [".gz$"]
-processors:
-  - add_locale: ~
-  `);
+  it('should support yaml values', () => {
+    const streamTemplate = `
+    input: redis/metrics
+    metricsets: ["key"]
+    test: null
+    {{#if key.patterns}}
+    key.patterns: {{key.patterns}}
+    {{/if}}
+      `;
+    const vars = {
+      'key.patterns': {
+        type: 'yaml',
+        value: `
+        - limit: 20
+          pattern: '*'
+        `,
+      },
+    };
+
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'redis/metrics',
+      metricsets: ['key'],
+      test: null,
+      'key.patterns': [
+        {
+          limit: 20,
+          pattern: '*',
+        },
+      ],
+    });
+  });
 });

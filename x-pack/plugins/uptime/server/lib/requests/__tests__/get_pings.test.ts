@@ -6,7 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
