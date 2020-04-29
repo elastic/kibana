@@ -5,7 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DynamicSettings } from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
 
 export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
