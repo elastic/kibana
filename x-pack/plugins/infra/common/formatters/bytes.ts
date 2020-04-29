@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { formatNumber } from './number';
-import { InfraWaffleMapDataFormat } from '.';
+import { InfraWaffleMapDataFormat } from './types';
 
 /**
  * The labels are derived from these two Wikipedia articles.

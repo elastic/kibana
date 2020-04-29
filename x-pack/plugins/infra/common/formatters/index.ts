@@ -10,12 +10,7 @@ import { formatNumber } from './number';
 import { formatPercent } from './percent';
 import { InventoryFormatterType } from '../inventory_models/types';
 import { formatHighPercision } from './high_precision';
-
-export enum InfraWaffleMapDataFormat {
-  bytesDecimal = 'bytesDecimal',
-  bitsDecimal = 'bitsDecimal',
-  abbreviatedNumber = 'abbreviatedNumber',
-}
+import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {
   number: formatNumber,
