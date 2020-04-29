@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './server';
+import { SampleTaskManagerFixturePlugin } from './plugin';
+
+export const plugin = () => new SampleTaskManagerFixturePlugin();

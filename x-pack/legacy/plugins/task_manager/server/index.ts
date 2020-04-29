@@ -6,8 +6,6 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import mappings from './mappings.json';
-import { migrations } from './migrations';
 
 import { createLegacyApi, getTaskManagerSetup } from './legacy';
 export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from './legacy';
@@ -20,19 +18,6 @@ import {
   LegacyPluginSpec,
   ArrayOrItem,
 } from '../../../../../src/legacy/plugin_discovery/types';
-
-const savedObjectSchemas = {
-  task: {
-    hidden: true,
-    isNamespaceAgnostic: true,
-    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-    // legacy config is marked as any in core, no choice here
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    indexPattern(config: any) {
-      return config.get('xpack.task_manager.index');
-    },
-  },
-};
 
 export function taskManager(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   return new kibana.Plugin({
@@ -58,7 +43,7 @@ export function taskManager(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSp
       server.expose(
         createLegacyApi(
           getTaskManagerSetup(server)!
-            .registerLegacyAPI({})
+            .registerLegacyAPI()
             .then((taskManagerPlugin: TaskManager) => {
               // we can't tell the Kibana Platform Task Manager plugin to
               // to wait to `start` as that happens before legacy plugins
@@ -76,11 +61,6 @@ export function taskManager(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSp
             })
         )
       );
-    },
-    uiExports: {
-      mappings,
-      migrations,
-      savedObjectSchemas,
     },
   } as Legacy.PluginSpecOptions);
 }
