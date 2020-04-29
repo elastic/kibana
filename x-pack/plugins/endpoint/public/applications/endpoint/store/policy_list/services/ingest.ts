@@ -8,6 +8,7 @@ import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
   GetDatasourcesRequest,
   GetAgentStatusResponse,
+  DATASOURCE_SAVED_OBJECT_TYPE,
 } from '../../../../../../../ingest_manager/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../common/types';
@@ -33,7 +34,7 @@ export const sendGetEndpointSpecificDatasources = (
       ...options.query,
       kuery: `${
         options?.query?.kuery ? options.query.kuery + ' and ' : ''
-      }datasources.package.name: endpoint`,
+      }${DATASOURCE_SAVED_OBJECT_TYPE}.package.name: endpoint`,
     },
   });
 };
