@@ -27,7 +27,8 @@
     opacity: $euiColorDarkShade;
     cursor: default;
 
-    &:hover, &:visited {
+    &:hover,
+    &:visited {
       color: $euiColorPrimary;
     }
   }
@@ -38,12 +39,14 @@ kbn-management-objects {
   form {
     margin-bottom: $euiSize;
   }
+
   .list-unstyled {
     li {
       border-bottom: $euiBorderThin;
       padding: $euiSizeS;
     }
   }
+
   .empty {
     color: $euiColorDarkShade;
   }
@@ -61,7 +64,8 @@ kbn-management-objects {
   }
 
   .header {
-    .title, .controls {
+    .title,
+    .controls {
       padding-right: 1em;
       display: inline-block;
     }
