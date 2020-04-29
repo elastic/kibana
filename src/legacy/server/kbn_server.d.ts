@@ -153,6 +153,7 @@ export default class KbnServer {
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
+  public uiBundles: any;
 
   constructor(
     settings: Record<string, any>,
