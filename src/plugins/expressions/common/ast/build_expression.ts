@@ -24,13 +24,11 @@ import { parse } from './parse';
 
 export interface ExpressionAstExpressionBuilder {
   /**
-   * Adds a new function to the end of the expression chain.
-   * Functions must be created using `buildExpressionFunction()`.
-   *
-   * @param fnBuilder A `ExpressionAstFunctionBuilder` instance.
-   * @return `this`
+   * Array of each of the `buildExpressionFunction()` instances
+   * in this expression. Use this to remove or reorder functions
+   * in the expression.
    */
-  addFunction: (fnBuilder: ExpressionAstFunctionBuilder) => this;
+  functions: ExpressionAstFunctionBuilder[];
   /**
    * Recursively searches expression for all ocurrences of the
    * function, including in subexpressions.
@@ -95,10 +93,7 @@ export function buildExpression(
     : [];
 
   return {
-    addFunction(fn) {
-      fns.push(fn);
-      return this;
-    },
+    functions: fns,
 
     findFunction(fnName) {
       const foundFns: ExpressionAstFunctionBuilder[] = [];
