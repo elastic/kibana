@@ -163,7 +163,6 @@ export const ViewMenu: FunctionComponent<Props> = ({
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
-    title: strings.getViewMenuLabel(),
     items: [
       {
         name: strings.getRefreshMenuItemLabel(),
