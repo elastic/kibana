@@ -8,10 +8,10 @@ import { PreConfiguredAction } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
-import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../plugins/security/server';
+import { SecurityPluginSetup } from '../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
-import { createAPIKey, invalidateAPIKey } from '../common/api_key_functions';
+import { createAPIKey, invalidateAPIKey } from './lib/api_key';
 
 export interface AlertsClientFactoryOpts {
   logger: Logger;
@@ -71,9 +71,9 @@ export class AlertsClientFactory {
         const user = await securityPluginSetup.authc.getCurrentUser(request);
         return user ? user.username : null;
       },
-      createAPIKey: async () => await createAPIKey(request, securityPluginSetup!),
-      invalidateAPIKey: async (params: InvalidateAPIKeyParams) =>
-        await invalidateAPIKey(params, securityPluginSetup!),
+      createAPIKey: async () => await createAPIKey(request, securityPluginSetup),
+      invalidateAPIKey: async ({ apiKey }: { apiKey: string | null }) =>
+        await invalidateAPIKey({ apiKey }, securityPluginSetup),
       preconfiguredActions: this.preconfiguredActions,
     });
   }

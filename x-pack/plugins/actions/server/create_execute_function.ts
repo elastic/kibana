@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SecurityPluginSetup } from '../../security/server';
+import { getApiKeyForAlertPermissions } from '../../alerting/server';
 import { SavedObjectsClientContract, KibanaRequest } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import {
@@ -20,6 +22,7 @@ interface CreateExecuteFunctionOptions {
   isESOUsingEphemeralEncryptionKey: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
+  securityPluginSetup?: SecurityPluginSetup;
 }
 
 export interface ExecuteOptions {
@@ -36,6 +39,7 @@ export function createExecuteFunction({
   getScopedSavedObjectsClient,
   isESOUsingEphemeralEncryptionKey,
   preconfiguredActions,
+  securityPluginSetup,
 }: CreateExecuteFunctionOptions) {
   return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
     if (isESOUsingEphemeralEncryptionKey === true) {
@@ -43,11 +47,15 @@ export function createExecuteFunction({
         `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
       );
     }
-
     const requestHeaders: Record<string, string> = {};
+    const subApiKey = await getApiKeyForAlertPermissions(
+      getBasePath(spaceId),
+      apiKey,
+      securityPluginSetup
+    );
 
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
+    if (subApiKey) {
+      requestHeaders.authorization = `ApiKey ${subApiKey}`;
     }
 
     // Since we're using API keys and accessing elasticsearch can only be done

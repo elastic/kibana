@@ -188,6 +188,11 @@ describe('Task Runner', () => {
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    securityPluginSetup!.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
     alertType.executor.mockImplementation(
       ({ services: executorServices }: AlertExecutorOptions) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
@@ -213,7 +218,7 @@ describe('Task Runner', () => {
       .toMatchInlineSnapshot(`
                   Array [
                     Object {
-                      "apiKey": "MTIzOmFiYw==",
+                      "apiKey": "YWJjOjEyMw==",
                       "id": "1",
                       "params": Object {
                         "foo": true,
@@ -456,11 +461,6 @@ describe('Task Runner', () => {
       id: 'abc',
       name: '',
     });
-    securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser.mockResolvedValue({
-      invalidated_api_keys: ['abc'],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    });
     const taskRunner = new TaskRunner(
       alertType,
       mockedTaskInstance,
@@ -494,10 +494,6 @@ describe('Task Runner', () => {
         },
       },
     });
-
-    expect(
-      taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser
-    ).toHaveBeenCalledWith({ id: 'abc' });
   });
 
   test(`doesn't use API key when not provided`, async () => {

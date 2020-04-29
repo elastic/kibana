@@ -1012,7 +1012,7 @@ describe('enable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ apiKey: 'MTIzOmFiYw==' });
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
@@ -1172,7 +1172,7 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ apiKey: 'MTIzOmFiYw==' });
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
@@ -1780,7 +1780,7 @@ describe('delete()', () => {
     expect(result).toEqual({ success: true });
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ apiKey: 'MTIzOmFiYw==' });
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -1831,7 +1831,7 @@ describe('delete()', () => {
     alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.delete({ id: '1' });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ apiKey: 'MTIzOmFiYw==' });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
@@ -2929,7 +2929,7 @@ describe('updateApiKey()', () => {
       },
       { version: '123' }
     );
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
+    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ apiKey: 'MTIzOmFiYw==' });
   });
 
   test('falls back to SOC when getDecryptedAsInternalUser throws an error', async () => {

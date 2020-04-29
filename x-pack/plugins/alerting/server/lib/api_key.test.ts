@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Request } from 'hapi';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { securityMock } from '../../security/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from '../../../../src/core/server';
-import { createAPIKey, invalidateAPIKey } from './api_key_functions';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { securityMock } from '../../../security/server/mocks';
+import { KibanaRequest } from '../../../../../src/core/server';
+import {
+  createAPIKey,
+  invalidateAPIKeyById,
+  getApiKeyForAlertPermissions,
+  invalidateAPIKey,
+} from './api_key';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 const savedObjectsClient = savedObjectsClientMock.create();
@@ -48,16 +50,32 @@ test('createAPIKey() returns an API key when security is enabled', async () => {
   });
 });
 
+test('createAPIKey() returns false when security is disabled', async () => {
+  const createAPIKeyResult = await createAPIKey(KibanaRequest.from(fakeRequest));
+
+  expect(createAPIKeyResult).toEqual({
+    apiKeysEnabled: false,
+  });
+});
+
 test('invalidateAPIKey() returns an API key when security is enabled', async () => {
   securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser.mockResolvedValue({
     invalidated_api_keys: ['abc'],
     previously_invalidated_api_keys: [],
     error_count: 0,
   });
-  const invalidateAPIKeyResult = await invalidateAPIKey({ id: 'abc' }, securityPluginSetup);
+  const invalidateAPIKeyResult = await invalidateAPIKeyById({ id: 'abc' }, securityPluginSetup);
 
   expect(invalidateAPIKeyResult).toEqual({
     apiKeysEnabled: true,
     result: { invalidated_api_keys: ['abc'], previously_invalidated_api_keys: [], error_count: 0 },
+  });
+});
+
+test('invalidateAPIKeyById() returns false when security is disabled', async () => {
+  const invalidateAPIKeyResult = await invalidateAPIKeyById({ id: 'abc' });
+
+  expect(invalidateAPIKeyResult).toEqual({
+    apiKeysEnabled: false,
   });
 });

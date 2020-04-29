@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
+import { UserAtSpaceScenarios } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,

@@ -153,7 +153,7 @@ test('executes the task by calling the executor with proper parameters', async (
       getBasePath: expect.any(Function),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey YWJjOjEyMw==',
+        authorization: 'ApiKey MTIzOmFiYw==',
       },
       path: '/',
       route: { settings: {} },
@@ -279,7 +279,7 @@ test('uses sub API key when provided', async () => {
       getBasePath: expect.anything(),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey YWJjOjEyMw==',
+        authorization: 'ApiKey MTIzOmFiYw==',
       },
       path: '/',
       route: { settings: {} },
@@ -296,7 +296,7 @@ test('uses sub API key when provided', async () => {
 
   expect(
     taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser
-  ).toHaveBeenCalledWith({ id: 'abc' });
+  ).toHaveBeenCalledWith({ id: '123' });
 });
 
 test(`doesn't use API key when not provided`, async () => {

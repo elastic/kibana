@@ -27,12 +27,11 @@ import {
   RawAlertAction,
 } from './types';
 import { validateAlertTypeParams } from './lib';
-import { InvalidateAPIKeyParams } from '../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
-import { CreateAPIKeyResult, InvalidateAPIKeyResult } from '../common/api_key_functions';
+import { CreateAPIKeyResult, InvalidateAPIKeyResult } from './lib/api_key';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 
@@ -46,7 +45,7 @@ interface ConstructorOptions {
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
+  invalidateAPIKey: ({ apiKey }: { apiKey: string | null }) => Promise<InvalidateAPIKeyResult>;
   preconfiguredActions: PreConfiguredAction[];
 }
 
@@ -115,9 +114,7 @@ export class AlertsClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
-  private readonly invalidateAPIKey: (
-    params: InvalidateAPIKeyParams
-  ) => Promise<InvalidateAPIKeyResult>;
+  private readonly invalidateAPIKey: ({ apiKey }: { apiKey: string | null }) => Promise<void>;
   private preconfiguredActions: PreConfiguredAction[];
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
 
@@ -142,7 +139,16 @@ export class AlertsClient {
     this.alertTypeRegistry = alertTypeRegistry;
     this.savedObjectsClient = savedObjectsClient;
     this.createAPIKey = createAPIKey;
-    this.invalidateAPIKey = invalidateAPIKey;
+    this.invalidateAPIKey = async ({ apiKey }: { apiKey: string | null }) => {
+      try {
+        const response = await invalidateAPIKey({ apiKey });
+        if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+          this.logger.error(`Failed to invalidate API Key "${apiKey}"`);
+        }
+      } catch (e) {
+        this.logger.error(`Failed to invalidate API Key: ${e.message}`);
+      }
+    };
     this.encryptedSavedObjectsPlugin = encryptedSavedObjectsPlugin;
     this.preconfiguredActions = preconfiguredActions;
   }
@@ -262,7 +268,7 @@ export class AlertsClient {
 
     await Promise.all([
       taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
-      apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+      apiKeyToInvalidate ? this.invalidateAPIKey({ apiKey: apiKeyToInvalidate }) : null,
     ]);
 
     return removeResult;
@@ -288,7 +294,7 @@ export class AlertsClient {
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
-        ? this.invalidateApiKey({ apiKey: alertSavedObject.attributes.apiKey })
+        ? this.invalidateAPIKey({ apiKey: alertSavedObject.attributes.apiKey })
         : null,
       (async () => {
         if (
@@ -398,25 +404,7 @@ export class AlertsClient {
     );
 
     if (apiKeyToInvalidate) {
-      await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
-    }
-  }
-
-  private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
-    if (!apiKey) {
-      return;
-    }
-
-    try {
-      const apiKeyId = Buffer.from(apiKey, 'base64')
-        .toString()
-        .split(':')[0];
-      const response = await this.invalidateAPIKey({ id: apiKeyId });
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
-      }
-    } catch (e) {
-      this.logger.error(`Failed to invalidate API Key: ${e.message}`);
+      await this.invalidateAPIKey({ apiKey: apiKeyToInvalidate });
     }
   }
 
@@ -459,7 +447,7 @@ export class AlertsClient {
       const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
       await this.savedObjectsClient.update('alert', id, { scheduledTaskId: scheduledTask.id });
       if (apiKeyToInvalidate) {
-        await this.invalidateApiKey({ apiKey: apiKeyToInvalidate });
+        await this.invalidateAPIKey({ apiKey: apiKeyToInvalidate });
       }
     }
   }
@@ -506,7 +494,7 @@ export class AlertsClient {
         attributes.scheduledTaskId
           ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
           : null,
-        apiKeyToInvalidate ? this.invalidateApiKey({ apiKey: apiKeyToInvalidate }) : null,
+        apiKeyToInvalidate ? this.invalidateAPIKey({ apiKey: apiKeyToInvalidate }) : null,
       ]);
     }
   }

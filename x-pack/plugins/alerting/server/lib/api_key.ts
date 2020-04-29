@@ -10,8 +10,7 @@ import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
   InvalidateAPIKeyParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../security/server';
+} from '../../../security/server';
 
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
@@ -22,7 +21,7 @@ export type InvalidateAPIKeyResult =
 
 export const createAPIKey = async (
   request: KibanaRequest,
-  securityPluginSetup: SecurityPluginSetup
+  securityPluginSetup?: SecurityPluginSetup
 ): Promise<CreateAPIKeyResult> => {
   if (!securityPluginSetup) {
     return { apiKeysEnabled: false };
@@ -40,9 +39,9 @@ export const createAPIKey = async (
   };
 };
 
-export const invalidateAPIKey = async (
+export const invalidateAPIKeyById = async (
   params: InvalidateAPIKeyParams,
-  securityPluginSetup: SecurityPluginSetup
+  securityPluginSetup?: SecurityPluginSetup
 ): Promise<InvalidateAPIKeyResult> => {
   if (!securityPluginSetup) {
     return { apiKeysEnabled: false };
@@ -58,4 +57,53 @@ export const invalidateAPIKey = async (
     apiKeysEnabled: true,
     result: invalidateAPIKeyResult,
   };
+};
+
+export const getApiKeyForAlertPermissions = async (
+  basePath: string,
+  apiKey?: string | null,
+  securityPluginSetup?: SecurityPluginSetup
+) => {
+  if (!apiKey) {
+    return null;
+  }
+  const requestHeaders: Record<string, string> = { authorization: `ApiKey ${apiKey}` };
+  const fakeRequest = {
+    headers: requestHeaders,
+    getBasePath: () => basePath,
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  };
+  const createResult = await createAPIKey(
+    (fakeRequest as unknown) as KibanaRequest,
+    securityPluginSetup
+  );
+  if (createResult.apiKeysEnabled) {
+    return Buffer.from(`${createResult.result.id}:${createResult.result.api_key}`).toString(
+      'base64'
+    );
+  }
+  return null;
+};
+
+export const invalidateAPIKey = async (
+  { apiKey }: { apiKey: string | null },
+  securityPluginSetup?: SecurityPluginSetup
+): Promise<InvalidateAPIKeyResult> => {
+  if (!apiKey) {
+    return { apiKeysEnabled: false };
+  }
+
+  const apiKeyId = Buffer.from(apiKey, 'base64')
+    .toString()
+    .split(':')[0];
+  return await invalidateAPIKeyById({ id: apiKeyId }, securityPluginSetup);
 };

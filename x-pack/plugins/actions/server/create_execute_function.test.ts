@@ -8,10 +8,12 @@ import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
 import { createExecuteFunction } from './create_execute_function';
 import { savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { securityMock } from '../../security/server/mocks';
 
 const mockTaskManager = taskManagerMock.start();
 const savedObjectsClient = savedObjectsClientMock.create();
 const getBasePath = jest.fn();
+const securityPluginSetup = securityMock.createSetup();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -133,6 +135,11 @@ describe('execute()', () => {
 
   test('uses API key when provided', async () => {
     const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    securityPluginSetup!.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
     const executeFn = createExecuteFunction({
       getBasePath,
       taskManager: mockTaskManager,
@@ -140,6 +147,7 @@ describe('execute()', () => {
       isESOUsingEphemeralEncryptionKey: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
+      securityPluginSetup,
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -166,7 +174,7 @@ describe('execute()', () => {
       getBasePath: expect.anything(),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
+        authorization: 'ApiKey YWJjOjEyMw==',
       },
       path: '/',
       route: { settings: {} },

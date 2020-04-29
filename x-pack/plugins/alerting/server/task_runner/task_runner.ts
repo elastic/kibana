@@ -27,7 +27,7 @@ import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
-import { createAPIKey, invalidateAPIKey } from '../../common/api_key_functions';
+import { getApiKeyForAlertPermissions } from '../lib/api_key';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
@@ -45,7 +45,6 @@ export class TaskRunner {
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
   private alertType: AlertType;
-  private subApiKeyId?: string;
 
   constructor(
     alertType: AlertType,
@@ -70,21 +69,19 @@ export class TaskRunner {
       { namespace }
     );
 
-    return apiKey;
+    const subApiKey = await getApiKeyForAlertPermissions(
+      this.context.getBasePath(spaceId),
+      apiKey,
+      this.context.securityPluginSetup
+    );
+    return subApiKey;
   }
 
   async getServicesWithSpaceLevelPermissions(spaceId: string, apiKey: string | null) {
     const requestHeaders: Record<string, string> = {};
 
     if (apiKey) {
-      const subApiKeyResult = await this.getSubApiKey(spaceId, apiKey);
-      if (subApiKeyResult) {
-        const apiKeyHeaderValue = Buffer.from(
-          `${subApiKeyResult.id}:${subApiKeyResult.api_key}`
-        ).toString('base64');
-        requestHeaders.authorization = `ApiKey ${apiKeyHeaderValue}`;
-        this.subApiKeyId = subApiKeyResult.id;
-      }
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
     }
 
     const fakeRequest = {
@@ -103,33 +100,6 @@ export class TaskRunner {
     };
 
     return this.context.getServices((fakeRequest as unknown) as KibanaRequest);
-  }
-
-  private async getSubApiKey(spaceId: string, apiKey: string) {
-    const requestHeaders: Record<string, string> = { authorization: `ApiKey ${apiKey}` };
-    const fakeRequest = {
-      headers: requestHeaders,
-      getBasePath: () => this.context.getBasePath(spaceId),
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
-
-    const createResult = await createAPIKey(
-      (fakeRequest as unknown) as KibanaRequest,
-      this.context.securityPluginSetup!
-    );
-
-    if (createResult.apiKeysEnabled) {
-      return createResult.result;
-    }
   }
 
   private getExecutionHandler(
@@ -355,10 +325,6 @@ export class TaskRunner {
 
     const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
 
-    // if subApiKey exists, it should be invalidated after usage
-    if (this.subApiKeyId) {
-      await invalidateAPIKey({ id: this.subApiKeyId }, this.context.securityPluginSetup!);
-    }
     return {
       state: map<AlertTaskState, Error, AlertTaskState>(
         state,

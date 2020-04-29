@@ -23,6 +23,6 @@ export {
 export { PluginSetupContract, PluginStartContract } from './plugin';
 export { FindOptions, FindResult } from './alerts_client';
 export { AlertInstance } from './alert_instance';
-export { parseDuration } from './lib';
+export { parseDuration, createAPIKey, getApiKeyForAlertPermissions, invalidateAPIKey } from './lib';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);

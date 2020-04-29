@@ -5,12 +5,14 @@
  */
 
 import { pluck } from 'lodash';
+import { SecurityPluginSetup } from '../../../security/server';
 import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../../plugins/actions/server';
 import { IEventLogger, IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { invalidateAPIKey } from '../lib';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
@@ -23,6 +25,7 @@ interface CreateExecutionHandlerOptions {
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
+  securityPluginSetup?: SecurityPluginSetup;
 }
 
 interface ExecutionHandlerOptions {
@@ -43,6 +46,7 @@ export function createExecutionHandler({
   apiKey,
   alertType,
   eventLogger,
+  securityPluginSetup,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
@@ -104,6 +108,11 @@ export function createExecutionHandler({
 
       event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
       eventLogger.logEvent(event);
+    }
+
+    // if alert subApiKey exists, it should be invalidated after execution
+    if (apiKey) {
+      await invalidateAPIKey({ apiKey }, securityPluginSetup);
     }
   };
 }
