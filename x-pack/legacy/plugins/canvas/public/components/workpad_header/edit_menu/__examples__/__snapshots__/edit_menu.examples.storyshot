@@ -16,6 +16,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu 2 elements selected 1`] = 
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
@@ -49,6 +50,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu 3+ elements selected 1`] =
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
@@ -82,6 +84,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu clipboard data exists 1`] 
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
@@ -115,6 +118,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu default 1`] = `
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
@@ -148,6 +152,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu single element selected 1`
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
@@ -181,6 +186,7 @@ exports[`Storyshots components/WorkpadHeader/EditMenu single grouped element sel
     <button
       aria-label="Edit options"
       className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      data-test-subj="canvasWorkpadEditMenuButton"
       onClick={[Function]}
       type="button"
     >
