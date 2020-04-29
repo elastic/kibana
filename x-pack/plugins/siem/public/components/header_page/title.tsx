@@ -17,9 +17,9 @@ const StyledEuiBetaBadge = styled(EuiBetaBadge)`
 
 StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
-const Badge = styled(EuiBadge)`
+const Badge = (styled(EuiBadge)`
   letter-spacing: 0;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
 interface Props {

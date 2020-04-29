@@ -14,6 +14,10 @@ import {
   HttpServiceSetup,
   IClusterClient,
 } from '../../../../../src/core/server';
+import { SecurityLicense } from '../../common/licensing';
+import { AuthenticatedUser } from '../../common/model';
+import { AuthenticationProvider, SessionInfo } from '../../common/types';
+import { SecurityAuditLogger } from '../audit';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 
@@ -32,7 +36,6 @@ import {
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
-import { SessionInfo } from '../../public';
 import { canRedirectRequest } from './can_redirect_request';
 import { HTTPAuthorizationHeader } from './http_authentication';
 
@@ -43,7 +46,7 @@ export interface ProviderSession {
   /**
    * Name and type of the provider this session belongs to.
    */
-  provider: { type: string; name: string };
+  provider: AuthenticationProvider;
 
   /**
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
@@ -67,6 +70,11 @@ export interface ProviderSession {
    * Cookie "Path" attribute that is validated against the current Kibana server configuration.
    */
   path: string;
+
+  /**
+   * Indicates whether user acknowledged access agreement or not.
+   */
+  accessAgreementAcknowledged?: boolean;
 }
 
 /**
@@ -76,7 +84,7 @@ export interface ProviderLoginAttempt {
   /**
    * Name or type of the provider this login attempt is targeted for.
    */
-  provider: { name: string } | { type: string };
+  provider: Pick<AuthenticationProvider, 'name'> | Pick<AuthenticationProvider, 'type'>;
 
   /**
    * Login attempt can have any form and defined by the specific provider.
@@ -85,8 +93,11 @@ export interface ProviderLoginAttempt {
 }
 
 export interface AuthenticatorOptions {
+  auditLogger: SecurityAuditLogger;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'session' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
+  license: SecurityLicense;
   loggers: LoggerFactory;
   clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
@@ -108,6 +119,11 @@ const providerMap = new Map<
   [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
   [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
 ]);
+
+/**
+ * The route to the access agreement UI.
+ */
+const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
 
 function assertRequest(request: KibanaRequest) {
   if (!(request instanceof KibanaRequest)) {
@@ -135,7 +151,7 @@ function isLoginAttemptWithProviderName(
 
 function isLoginAttemptWithProviderType(
   attempt: unknown
-): attempt is { value: unknown; provider: { type: string } } {
+): attempt is { value: unknown; provider: Pick<AuthenticationProvider, 'type'> } {
   return (
     typeof attempt === 'object' &&
     (attempt as any)?.provider?.type &&
@@ -341,14 +357,7 @@ export class Authenticator {
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const existingSession = await this.getSessionValue(sessionStorage);
 
-    // If request doesn't have any session information, isn't attributed with HTTP Authorization
-    // header and Login Selector is enabled, we must redirect user to the login selector.
-    const useLoginSelector =
-      !existingSession &&
-      this.options.config.authc.selector.enabled &&
-      canRedirectRequest(request) &&
-      HTTPAuthorizationHeader.parseFromRequest(request) == null;
-    if (useLoginSelector) {
+    if (this.shouldRedirectToLoginSelector(request, existingSession)) {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
         `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
@@ -368,7 +377,7 @@ export class Authenticator {
         ownsSession ? existingSession!.state : null
       );
 
-      this.updateSessionValue(sessionStorage, {
+      const updatedSession = this.updateSessionValue(sessionStorage, {
         provider: { type: provider.type, name: providerName },
         isSystemRequest: request.isSystemRequest,
         authenticationResult,
@@ -376,6 +385,20 @@ export class Authenticator {
       });
 
       if (!authenticationResult.notHandled()) {
+        if (
+          authenticationResult.succeeded() &&
+          this.shouldRedirectToAccessAgreement(request, updatedSession)
+        ) {
+          this.logger.debug('Redirecting user to the access agreement screen.');
+          return AuthenticationResult.redirectTo(
+            `${
+              this.options.basePath.serverBasePath
+            }${ACCESS_AGREEMENT_ROUTE}?next=${encodeURIComponent(
+              `${this.options.basePath.get(request)}${request.url.path}`
+            )}`
+          );
+        }
+
         return authenticationResult;
       }
     }
@@ -441,7 +464,7 @@ export class Authenticator {
         now: Date.now(),
         idleTimeoutExpiration: sessionValue.idleTimeoutExpiration,
         lifespanExpiration: sessionValue.lifespanExpiration,
-        provider: sessionValue.provider.name,
+        provider: sessionValue.provider,
       };
     }
     return null;
@@ -453,6 +476,32 @@ export class Authenticator {
    */
   isProviderTypeEnabled(providerType: string) {
     return [...this.providers.values()].some(provider => provider.type === providerType);
+  }
+
+  /**
+   * Acknowledges access agreement on behalf of the currently authenticated user.
+   * @param request Request instance.
+   */
+  async acknowledgeAccessAgreement(request: KibanaRequest) {
+    assertRequest(request);
+
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const existingSession = await this.getSessionValue(sessionStorage);
+    const currentUser = this.options.getCurrentUser(request);
+    if (!existingSession || !currentUser) {
+      throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
+    }
+
+    if (!this.options.license.getFeatures().allowAccessAgreement) {
+      throw new Error('Current license does not allow access agreement acknowledgement.');
+    }
+
+    sessionStorage.set({ ...existingSession, accessAgreementAcknowledged: true });
+
+    this.options.auditLogger.accessAgreementAcknowledged(
+      currentUser.username,
+      existingSession.provider
+    );
   }
 
   /**
@@ -538,14 +587,14 @@ export class Authenticator {
       existingSession,
       isSystemRequest,
     }: {
-      provider: { type: string; name: string };
+      provider: AuthenticationProvider;
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
       isSystemRequest: boolean;
     }
   ) {
     if (!existingSession && !authenticationResult.shouldUpdateState()) {
-      return;
+      return null;
     }
 
     // If authentication succeeds or requires redirect we should automatically extend existing user session,
@@ -563,9 +612,12 @@ export class Authenticator {
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
     ) {
       sessionStorage.clear();
-    } else if (sessionCanBeUpdated) {
+      return null;
+    }
+
+    if (sessionCanBeUpdated) {
       const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
-      sessionStorage.set({
+      const updatedSession = {
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSession!.state,
@@ -573,8 +625,13 @@ export class Authenticator {
         idleTimeoutExpiration,
         lifespanExpiration,
         path: this.serverBasePath,
-      });
+        accessAgreementAcknowledged: existingSession?.accessAgreementAcknowledged,
+      };
+      sessionStorage.set(updatedSession);
+      return updatedSession;
     }
+
+    return existingSession;
   }
 
   private getProviderName(query: any): string | null {
@@ -599,5 +656,49 @@ export class Authenticator {
     const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
+  }
+
+  /**
+   * Checks whether request should be redirected to the Login Selector UI.
+   * @param request Request instance.
+   * @param session Current session value if any.
+   */
+  private shouldRedirectToLoginSelector(request: KibanaRequest, session: ProviderSession | null) {
+    // Request should be redirected to Login Selector UI only if all following conditions are met:
+    //  1. Request can be redirected (not API call)
+    //  2. Request is not authenticated yet
+    //  3. Login Selector UI is enabled
+    //  4. Request isn't attributed with HTTP Authorization header
+    return (
+      canRedirectRequest(request) &&
+      !session &&
+      this.options.config.authc.selector.enabled &&
+      HTTPAuthorizationHeader.parseFromRequest(request) == null
+    );
+  }
+
+  /**
+   * Checks whether request should be redirected to the Access Agreement UI.
+   * @param request Request instance.
+   * @param session Current session value if any.
+   */
+  private shouldRedirectToAccessAgreement(request: KibanaRequest, session: ProviderSession | null) {
+    // Request should be redirected to Access Agreement UI only if all following conditions are met:
+    //  1. Request can be redirected (not API call)
+    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
+    //     session yet (based on the flag we store in the session)
+    //  3. Request is authenticated by the provider that has `accessAgreement` configured
+    //  4. Current license allows access agreement
+    //  5. And it's not a request to the Access Agreement UI itself
+    return (
+      canRedirectRequest(request) &&
+      session != null &&
+      !session.accessAgreementAcknowledged &&
+      (this.options.config.authc.providers as Record<string, any>)[session.provider.type]?.[
+        session.provider.name
+      ]?.accessAgreement &&
+      this.options.license.getFeatures().allowAccessAgreement &&
+      request.url.pathname !== ACCESS_AGREEMENT_ROUTE
+    );
   }
 }
