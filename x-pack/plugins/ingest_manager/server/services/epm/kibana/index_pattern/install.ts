@@ -5,11 +5,14 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
+import {
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_PLACEHOLDER_SUFFIX,
+} from '../../../../constants';
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { InstallationStatus, RegistryPackage } from '../../../../types';
+import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -356,4 +359,36 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   if (field.url_template) params.urlTemplate = field.url_template;
   if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
+};
+
+export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
+  // create a placeholder index to supress errors in the kibana Dashboards app
+  // that no matching indices exist
+  Promise.all(
+    Object.keys(IndexPatternType).map(async indexPattern => {
+      const defaultIndexPatterName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
+      const indexExists = await doesIndexExist(defaultIndexPatterName, callCluster);
+      if (!indexExists) {
+        try {
+          await callCluster('transport.request', {
+            method: 'PUT',
+            path: `/${defaultIndexPatterName}`,
+          });
+        } catch (putErr) {
+          throw new Error(`${defaultIndexPatterName} could not be created`);
+        }
+      }
+    })
+  );
+
+export const doesIndexExist = async (indexName: string, callCluster: CallESAsCurrentUser) => {
+  try {
+    await callCluster('transport.request', {
+      method: 'HEAD',
+      path: indexName,
+    });
+    return true;
+  } catch (err) {
+    return false;
+  }
 };
