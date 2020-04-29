@@ -29,6 +29,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       document.body.innerHTML = err.outerHTML;
     }
 
+    var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
     function loadStyleSheet(url, cb) {
       var dom = document.createElement('link');
       dom.rel = 'stylesheet';
@@ -36,9 +37,10 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       dom.href = url;
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
-      document.head.appendChild(dom);
+      document.head.insertBefore(dom, stylesheetTarget);
     }
 
+    var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
     function loadScript(url, cb) {
       var dom = document.createElement('script');
       {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
@@ -46,7 +48,7 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       dom.src = url;
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
-      document.head.appendChild(dom);
+      document.head.insertBefore(dom, scriptsTarget);
     }
 
     function load(urls, cb) {
