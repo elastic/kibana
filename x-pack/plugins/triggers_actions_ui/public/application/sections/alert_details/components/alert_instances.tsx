@@ -7,7 +7,7 @@
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference, chunk } from 'lodash';
@@ -18,7 +18,6 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
-import './alert_instances.scss';
 
 type AlertInstancesProps = {
   alert: Alert;
@@ -30,78 +29,78 @@ type AlertInstancesProps = {
 export const alertInstancesTableColumns = (
   onMuteAction: (instance: AlertInstanceListItem) => Promise<void>
 ) => [
-    {
-      field: 'instance',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
-        { defaultMessage: 'Instance' }
-      ),
-      sortable: false,
-      truncateText: true,
-      'data-test-subj': 'alertInstancesTableCell-instance',
+  {
+    field: 'instance',
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
+      { defaultMessage: 'Instance' }
+    ),
+    sortable: false,
+    truncateText: true,
+    'data-test-subj': 'alertInstancesTableCell-instance',
+  },
+  {
+    field: 'status',
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
+      { defaultMessage: 'Status' }
+    ),
+    render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
+      return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
     },
-    {
-      field: 'status',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.status',
-        { defaultMessage: 'Status' }
-      ),
-      render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
-        return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
-      },
-      sortable: false,
-      'data-test-subj': 'alertInstancesTableCell-status',
+    sortable: false,
+    'data-test-subj': 'alertInstancesTableCell-status',
+  },
+  {
+    field: 'start',
+    render: (value: Date | undefined, instance: AlertInstanceListItem) => {
+      return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
     },
-    {
-      field: 'start',
-      render: (value: Date | undefined, instance: AlertInstanceListItem) => {
-        return value ? moment(value).format('D MMM YYYY @ HH:mm:ss') : '';
-      },
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start',
-        { defaultMessage: 'Start' }
-      ),
-      sortable: false,
-      'data-test-subj': 'alertInstancesTableCell-start',
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.start',
+      { defaultMessage: 'Start' }
+    ),
+    sortable: false,
+    'data-test-subj': 'alertInstancesTableCell-start',
+  },
+  {
+    field: 'duration',
+    align: CENTER_ALIGNMENT,
+    render: (value: number, instance: AlertInstanceListItem) => {
+      return value ? durationAsString(moment.duration(value)) : '';
     },
-    {
-      field: 'duration',
-      align: CENTER_ALIGNMENT,
-      render: (value: number, instance: AlertInstanceListItem) => {
-        return value ? durationAsString(moment.duration(value)) : '';
-      },
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.duration',
-        { defaultMessage: 'Duration' }
-      ),
-      sortable: false,
-      'data-test-subj': 'alertInstancesTableCell-duration',
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.duration',
+      { defaultMessage: 'Duration' }
+    ),
+    sortable: false,
+    'data-test-subj': 'alertInstancesTableCell-duration',
+  },
+  {
+    field: '',
+    align: RIGHT_ALIGNMENT,
+    name: i18n.translate(
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
+      { defaultMessage: 'Mute' }
+    ),
+    render: (alertInstance: AlertInstanceListItem) => {
+      return (
+        <Fragment>
+          <EuiSwitch
+            label="mute"
+            showLabel={false}
+            compressed={true}
+            checked={alertInstance.isMuted}
+            data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
+            onChange={() => onMuteAction(alertInstance)}
+          />
+        </Fragment>
+      );
     },
-    {
-      field: '',
-      align: RIGHT_ALIGNMENT,
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
-        { defaultMessage: 'Mute' }
-      ),
-      render: (alertInstance: AlertInstanceListItem) => {
-        return (
-          <Fragment>
-            <EuiSwitch
-              name="mute"
-              compressed={true}
-              className="alertInstancesList__muteSwitch"
-              checked={alertInstance.isMuted}
-              data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-              onChange={() => onMuteAction(alertInstance)}
-            />
-          </Fragment>
-        );
-      },
-      sortable: false,
-      'data-test-subj': 'alertInstancesTableCell-actions',
-    },
-  ];
+    sortable: false,
+    'data-test-subj': 'alertInstancesTableCell-actions',
+  },
+];
 
 function durationAsString(duration: Duration): string {
   return [duration.hours(), duration.minutes(), duration.seconds()]
@@ -242,10 +241,10 @@ export function alertInstanceToListItem(
     status: instance
       ? { label: ACTIVE_LABEL, healthColor: 'primary' }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' },
-    start: instance ?.meta ?.lastScheduledActions ?.date,
+    start: instance?.meta?.lastScheduledActions?.date,
     duration: durationSince(
       durationEpoch,
-      instance ?.meta ?.lastScheduledActions ?.date ?.getTime() ?? 0
+      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
     ),
     isMuted,
   };

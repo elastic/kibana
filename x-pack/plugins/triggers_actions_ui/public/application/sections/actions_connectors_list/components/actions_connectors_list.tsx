@@ -186,23 +186,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'referencedByCount',
-      'data-test-subj': 'connectorsTableCell-referencedByCount',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Actions' }
-      ),
-      sortable: false,
-      truncateText: true,
-      render: (value: number, item: ActionConnectorTableItem) => {
-        return (
-          <EuiBadge color="hollow" key={item.id}>
-            {value}
-          </EuiBadge>
-        );
-      },
-    },
-    {
       field: 'isPreconfigured',
       name: '',
       render: (value: number, item: ActionConnectorTableItem) => {
