@@ -13,7 +13,11 @@ import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../jobs/new_job/recognize';
 import { checkViewOrCreateJobs } from '../../../jobs/new_job/recognize/resolvers';
 import { mlJobService } from '../../../services/job_service';
-import { ANOMALY_DETECTION_BREADCRUMB, CREATE_JOB_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
+import { 
+  ANOMALY_DETECTION_BREADCRUMB, 
+  CREATE_JOB_BREADCRUMB, 
+  ML_BREADCRUMB,
+ } from '../../breadcrumbs';
 
 const breadcrumbs = [
   ML_BREADCRUMB,
