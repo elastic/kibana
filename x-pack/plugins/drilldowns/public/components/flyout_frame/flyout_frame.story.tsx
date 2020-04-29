@@ -26,7 +26,7 @@ storiesOf('components/FlyoutFrame', module)
   })
   .add('open in flyout', () => {
     return (
-      <EuiFlyout>
+      <EuiFlyout onClose={() => {}}>
         <FlyoutFrame
           title="Create drilldown"
           footer={<EuiButton>Save</EuiButton>}

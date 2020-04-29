@@ -15,3 +15,9 @@
   align-self: center;
   margin-right: $euiSize;
 }
+
+.header__toggleNavButtonSection {
+  .euiBody--collapsibleNavIsDocked & {
+    display: none;
+  }
+}

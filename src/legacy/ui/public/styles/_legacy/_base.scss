@@ -132,10 +132,8 @@ input[type='checkbox'],
   }
 }
 
-@include euiBreakpoint('l', 'xl') {
-  .euiBody--collapsibleNavIsDocked .euiBottomBar {
-    margin-left: $euiCollapsibleNavWidth;
-  }
+.euiBody--collapsibleNavIsDocked .euiBottomBar {
+  margin-left: $euiCollapsibleNavWidth;
 }
 
 // Utility classes

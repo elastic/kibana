@@ -27,7 +27,7 @@ storiesOf('components/FormCreateDrilldown', module)
   .add('can edit name', () => <DemoEditName />)
   .add('open in flyout', () => {
     return (
-      <EuiFlyout>
+      <EuiFlyout onClose={() => {}}>
         <FormCreateDrilldown />
       </EuiFlyout>
     );

@@ -92,6 +92,7 @@ interface State {
 export class Header extends Component<HeaderProps, State> {
   private subscription?: Rx.Subscription;
   private navDrawerRef = createRef<EuiNavDrawer>();
+  private toggleCollapsibleNavRef = createRef<HTMLButtonElement>();
 
   constructor(props: HeaderProps) {
     super(props);
@@ -214,24 +215,23 @@ export class Header extends Component<HeaderProps, State> {
         <EuiHeader position="fixed">
           <EuiHeaderSection grow={false}>
             {this.state.navType === 'modern' ? (
-              !this.state.isLocked && (
-                <EuiHeaderSectionItem border="right">
-                  <EuiHeaderSectionItemButton
-                    data-test-subj="toggleNavButton"
-                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                      defaultMessage: 'Toggle primary navigation',
-                    })}
-                    onClick={() => {
-                      this.setState({ isOpen: !this.state.isOpen });
-                    }}
-                    aria-expanded={this.state.isOpen}
-                    aria-pressed={this.state.isOpen}
-                    aria-controls={navId}
-                  >
-                    <EuiIcon type="menu" size="m" aria-hidden="true" />
-                  </EuiHeaderSectionItemButton>
-                </EuiHeaderSectionItem>
-              )
+              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                <EuiHeaderSectionItemButton
+                  data-test-subj="toggleNavButton"
+                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                    defaultMessage: 'Toggle primary navigation',
+                  })}
+                  onClick={() => {
+                    this.setState({ isOpen: !this.state.isOpen });
+                  }}
+                  aria-expanded={this.state.isOpen}
+                  aria-pressed={this.state.isOpen}
+                  aria-controls={navId}
+                  ref={this.toggleCollapsibleNavRef}
+                >
+                  <EuiIcon type="menu" size="m" aria-hidden="true" />
+                </EuiHeaderSectionItemButton>
+              </EuiHeaderSectionItem>
             ) : (
               // TODO #64541
               // Delete this block
@@ -283,7 +283,9 @@ export class Header extends Component<HeaderProps, State> {
             homeHref={this.props.homeHref}
             onIsOpenUpdate={(isOpen = !this.state.isOpen) => {
               this.setState({ isOpen });
-              // TODO when EUI is updated, place focus on nav toggle button
+              if (this.toggleCollapsibleNavRef.current) {
+                this.toggleCollapsibleNavRef.current.focus();
+              }
             }}
           />
         ) : (
