@@ -1840,6 +1840,8 @@ export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     index?: boolean;
     // (undocumented)
+    null_value?: number | boolean | string;
+    // (undocumented)
     type: string;
 }
 
