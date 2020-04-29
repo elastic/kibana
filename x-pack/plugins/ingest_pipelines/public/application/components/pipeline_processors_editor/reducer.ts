@@ -9,7 +9,7 @@ import { euiDragDropReorder } from '@elastic/eui';
 import { OnFormUpdateArg } from '../../../shared_imports';
 
 import { DeserializeResult } from './data_in';
-import { getValue, setValue, unsafeProcessorMove } from './utils';
+import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 
 type StateArg = DeserializeResult;
@@ -62,11 +62,17 @@ export const reducer: Reducer<State, Action> = (state, action) => {
         euiDragDropReorder(getValue(path, state), source.index, destination.index)
       );
     } else {
-      return setValue(
-        ['processors'],
-        state,
-        unsafeProcessorMove(state.processors, source, destination)
-      );
+      try {
+        return setValue(
+          ['processors'],
+          state,
+          unsafeProcessorMove(state.processors, source, destination)
+        );
+      } catch (e) {
+        if (e.message === PARENT_CHILD_NEST_ERROR) {
+          return { ...state };
+        }
+      }
     }
   }
 

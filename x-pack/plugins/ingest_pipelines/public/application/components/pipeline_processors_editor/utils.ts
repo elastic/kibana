@@ -87,6 +87,8 @@ export const setValue = <Target = any, Value = any>(
   return result!;
 };
 
+export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
+
 /**
  * Unsafe!
  *
@@ -105,6 +107,10 @@ export const unsafeProcessorMove = (
   source: DraggableLocation,
   destination: DraggableLocation
 ) => {
+  const selectorToSource = source.selector.concat(String(source.index));
+  if (selectorToSource.every((pathSegment, idx) => pathSegment === destination.selector[idx])) {
+    throw new Error(PARENT_CHILD_NEST_ERROR);
+  }
   // Start by setting up references to objects of interest using our selectors
   // At this point, our selectors are consistent with the data passed in.
   const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, processors);

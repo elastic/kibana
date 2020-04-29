@@ -136,4 +136,47 @@ describe('Processors reducer', () => {
       },
     ]);
   });
+
+  it('prevents moving a parent into child list', () => {
+    const processor1 = { type: 'test1', options: {} };
+    const processor2 = { type: 'test2', options: {} };
+    const processor3 = { type: 'test3', options: {} };
+    const processor4 = { type: 'test4', options: {} };
+
+    const s1 = reducer(initialState, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor1 },
+    });
+
+    const s2 = reducer(s1, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor2 },
+    });
+
+    const s3 = reducer(s2, {
+      type: 'addOnFailureProcessor',
+      payload: { onFailureProcessor: processor3, targetSelector: ['1'] },
+    });
+
+    const s4 = reducer(s3, {
+      type: 'addOnFailureProcessor',
+      payload: { onFailureProcessor: processor4, targetSelector: ['1', 'onFailure', '0'] },
+    });
+
+    expect(s4.processors).toEqual([
+      processor1,
+      { ...processor2, onFailure: [{ ...processor3, onFailure: [processor4] }] },
+    ]);
+
+    // Move the parent into a child list
+    const s5 = reducer(s4, {
+      type: 'moveProcessor',
+      payload: {
+        source: { selector: [], index: 1 },
+        destination: { selector: ['1', 'onFailure', '0', 'onFailure', '0', 'onFailure'], index: 0 },
+      },
+    });
+
+    expect(s5.processors).toEqual(s4.processors);
+  });
 });
