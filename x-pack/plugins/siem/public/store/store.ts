@@ -32,6 +32,7 @@ export const createStore = (
 
   const middlewareDependencies = {
     apolloClient$: apolloClient,
+    selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
