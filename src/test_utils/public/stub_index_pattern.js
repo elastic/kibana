@@ -69,7 +69,11 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this._reindexFields = function() {
     this.fields = new IndexPatternFieldList(
       {
-        fieldFormats: { getDefaultInstance: () => '' },
+        fieldFormats: {
+          getDefaultInstance: () => ({
+            convert: val => String(val),
+          }),
+        },
         toastNotifications: {
           addDanger: () => {},
         },

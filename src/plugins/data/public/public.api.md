@@ -459,7 +459,8 @@ class Field implements IFieldType {
     //
     // (undocumented)
     $$spec: FieldSpec;
-    constructor(indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable?: boolean);
+    // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
+    constructor({ fieldFormats, toastNotifications }: Deps, indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable?: boolean);
     // (undocumented)
     aggregatable?: boolean;
     // (undocumented)
@@ -1010,64 +1011,17 @@ export interface IndexPatternAttributes {
     typeMeta: string;
 }
 
-<<<<<<< HEAD
-// Warning: (ae-missing-release-tag) "Field" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-//
-// @public (undocumented)
-export class IndexPatternField implements IFieldType {
-    // Warning: (ae-forgotten-export) The symbol "FieldSpec" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    $$spec: FieldSpec;
-    // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
-    constructor({ fieldFormats, toastNotifications }: Deps, indexPattern: IndexPattern, spec: FieldSpec | IndexPatternField, shortDotsEnable?: boolean);
-    // (undocumented)
-    aggregatable?: boolean;
-    // (undocumented)
-    count?: number;
-    // (undocumented)
-    displayName?: string;
-    // (undocumented)
-    esTypes?: string[];
-    // (undocumented)
-    filterable?: boolean;
-    // (undocumented)
-    format: any;
-    // (undocumented)
-    indexPattern?: IndexPattern;
-    // (undocumented)
-    lang?: string;
-    // (undocumented)
-    name: string;
-    // (undocumented)
-    script?: string;
-    // (undocumented)
-    scripted?: boolean;
-    // (undocumented)
-    searchable?: boolean;
-    // (undocumented)
-    sortable?: boolean;
-    // (undocumented)
-    subType?: IFieldSubType;
-    // (undocumented)
-    type: string;
-    // (undocumented)
-    visualizable?: boolean;
-}
-
 // Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class IndexPatternFieldList extends Array<IndexPatternField> implements IFieldList {
+export class IndexPatternFieldList extends Array<Field> implements IFieldList {
     // Warning: (ae-forgotten-export) The symbol "Deps" needs to be exported by the entry point index.d.ts
     constructor({ fieldFormats, toastNotifications }: Deps_2, indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
-=======
 // Warning: (ae-missing-release-tag) "FieldList" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
 export class IndexPatternFieldList extends Array<Field> implements IFieldList {
     constructor(indexPattern: IndexPattern, specs?: FieldSpec[], shortDotsEnable?: boolean);
->>>>>>> upstream/master
     // (undocumented)
     add: (field: Record<string, any>) => void;
     // (undocumented)

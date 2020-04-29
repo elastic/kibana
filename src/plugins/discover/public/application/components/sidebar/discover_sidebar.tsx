@@ -94,7 +94,7 @@ export function DiscoverSidebar({
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternFieldList | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
-  const services = getServices();
+  const services = useMemo(() => getServices(), []);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts, services);
