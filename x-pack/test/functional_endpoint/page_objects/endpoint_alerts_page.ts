@@ -21,12 +21,12 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
   const parseStyle = (styles: any) =>
     styles
       .split(';')
-      .filter(style => style.split(':')[0] && style.split(':')[1])
-      .map(style => [
+      .filter((style: any) => style.split(':')[0] && style.split(':')[1])
+      .map((style: any) => [
         style
           .split(':')[0]
           .trim()
-          .replace(/-./g, c => c.substr(1).toUpperCase()),
+          .replace(/-./g, (c: any) => c.substr(1).toUpperCase()),
         style
           .split(':')
           .slice(1)
@@ -34,7 +34,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
           .trim(),
       ])
       .reduce(
-        (styleObj, style) => ({
+        (styleObj: any, style: any) => ({
           ...styleObj,
           [style[0]]: style[1],
         }),
