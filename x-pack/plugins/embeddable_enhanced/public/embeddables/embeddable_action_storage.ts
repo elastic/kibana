@@ -8,16 +8,45 @@ import {
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
 } from '../../../advanced_ui_actions/public';
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../../../../../src/plugins/embeddable/public';
+
+export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
+  enhancements?: {
+    dynamicActions?: {
+      events: SerializedEvent[];
+    };
+  };
+}
+
+export type EmbeddableWithDynamicActions<
+  I extends EmbeddableWithDynamicActionsInput = EmbeddableWithDynamicActionsInput,
+  O extends EmbeddableOutput = EmbeddableOutput
+> = IEmbeddable<I, O>;
 
 export class EmbeddableActionStorage extends AbstractActionStorage {
-  constructor(private readonly embbeddable: IEmbeddable) {
+  constructor(private readonly embbeddable: EmbeddableWithDynamicActions) {
     super();
   }
 
-  async create(event: SerializedEvent) {
+  private put(input: EmbeddableWithDynamicActionsInput, events: SerializedEvent[]) {
+    this.embbeddable.updateInput({
+      enhancements: {
+        ...(input.enhancements || {}),
+        dynamicActions: {
+          ...(input.enhancements?.dynamicActions || {}),
+          events,
+        },
+      },
+    });
+  }
+
+  public async create(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as SerializedEvent[];
+    const events = input.enhancements?.dynamicActions?.events || [];
     const exists = !!events.find(({ eventId }) => eventId === event.eventId);
 
     if (exists) {
@@ -27,14 +56,12 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
       );
     }
 
-    this.embbeddable.updateInput({
-      events: [...events, event],
-    });
+    this.put(input, [...events, event]);
   }
 
-  async update(event: SerializedEvent) {
+  public async update(event: SerializedEvent) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as SerializedEvent[];
+    const events = input.enhancements?.dynamicActions?.events || [];
     const index = events.findIndex(({ eventId }) => eventId === event.eventId);
 
     if (index === -1) {
@@ -45,14 +72,12 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
       );
     }
 
-    this.embbeddable.updateInput({
-      events: [...events.slice(0, index), event, ...events.slice(index + 1)],
-    });
+    this.put(input, [...events.slice(0, index), event, ...events.slice(index + 1)]);
   }
 
-  async remove(eventId: string) {
+  public async remove(eventId: string) {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as SerializedEvent[];
+    const events = input.enhancements?.dynamicActions?.events || [];
     const index = events.findIndex(event => eventId === event.eventId);
 
     if (index === -1) {
@@ -63,14 +88,12 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
       );
     }
 
-    this.embbeddable.updateInput({
-      events: [...events.slice(0, index), ...events.slice(index + 1)],
-    });
+    this.put(input, [...events.slice(0, index), ...events.slice(index + 1)]);
   }
 
-  async read(eventId: string): Promise<SerializedEvent> {
+  public async read(eventId: string): Promise<SerializedEvent> {
     const input = this.embbeddable.getInput();
-    const events = (input.events || []) as SerializedEvent[];
+    const events = input.enhancements?.dynamicActions?.events || [];
     const event = events.find(ev => eventId === ev.eventId);
 
     if (!event) {
@@ -83,12 +106,9 @@ export class EmbeddableActionStorage extends AbstractActionStorage {
     return event;
   }
 
-  private __list() {
+  public async list(): Promise<SerializedEvent[]> {
     const input = this.embbeddable.getInput();
-    return (input.events || []) as SerializedEvent[];
-  }
-
-  async list(): Promise<SerializedEvent[]> {
-    return this.__list();
+    const events = input.enhancements?.dynamicActions?.events || [];
+    return events;
   }
 }

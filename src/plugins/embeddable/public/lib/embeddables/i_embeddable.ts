@@ -36,9 +36,9 @@ export interface EmbeddableInput {
   hidePanelTitles?: boolean;
 
   /**
-   * Reserved key for `ui_actions` events.
+   * Reserved key for enhancements added by X-Pack plugins.
    */
-  events?: Array<{ eventId: string }>;
+  enhancements?: unknown;
 
   /**
    * List of action IDs that this embeddable should not render.

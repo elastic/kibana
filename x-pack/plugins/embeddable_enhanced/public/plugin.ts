@@ -19,7 +19,10 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
-import { EmbeddableActionStorage } from './embeddables/embeddable_action_storage';
+import {
+  EmbeddableActionStorage,
+  EmbeddableWithDynamicActions,
+} from './embeddables/embeddable_action_storage';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsSetup,
@@ -108,7 +111,7 @@ export class EmbeddableEnhancedPlugin
   ): EnhancedEmbeddable<E> {
     const enhancedEmbeddable = embeddable as EnhancedEmbeddable<E>;
 
-    const storage = new EmbeddableActionStorage(embeddable);
+    const storage = new EmbeddableActionStorage(embeddable as EmbeddableWithDynamicActions);
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) =>
         (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId,

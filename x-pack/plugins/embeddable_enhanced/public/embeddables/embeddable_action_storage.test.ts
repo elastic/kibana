@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Embeddable, ViewMode } from '../../../../../src/plugins/embeddable/public';
 import {
-  Embeddable,
-  EmbeddableInput,
-  ViewMode,
-} from '../../../../../src/plugins/embeddable/public';
-import { EmbeddableActionStorage } from './embeddable_action_storage';
+  EmbeddableActionStorage,
+  EmbeddableWithDynamicActionsInput,
+} from './embeddable_action_storage';
 import { UiActionsEnhancedSerializedEvent } from '../../../advanced_ui_actions/public';
 import { of } from '../../../../../src/plugins/kibana_utils/public';
 
-class TestEmbeddable extends Embeddable<EmbeddableInput> {
+class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';
   constructor() {
     super({ id: 'test', viewMode: ViewMode.VIEW }, {});
@@ -38,12 +37,12 @@ describe('EmbeddableActionStorage', () => {
         action: {} as any,
       };
 
-      const events1 = embeddable.getInput().events || [];
+      const events1 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events1).toEqual([]);
 
       await storage.create(event);
 
-      const events2 = embeddable.getInput().events || [];
+      const events2 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events2).toEqual([event]);
     });
 
@@ -84,18 +83,18 @@ describe('EmbeddableActionStorage', () => {
         action: {} as any,
       };
 
-      const events1 = embeddable.getInput().events || [];
+      const events1 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events1).toEqual([]);
 
       await storage.create(event1);
 
-      const events2 = embeddable.getInput().events || [];
+      const events2 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events2).toEqual([event1]);
 
       await storage.create(event2);
       await storage.create(event3);
 
-      const events3 = embeddable.getInput().events || [];
+      const events3 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events3).toEqual([event1, event2, event3]);
     });
 
@@ -147,7 +146,7 @@ describe('EmbeddableActionStorage', () => {
       await storage.create(event1);
       await storage.update(event2);
 
-      const events = embeddable.getInput().events || [];
+      const events = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events).toEqual([event2]);
     });
 
@@ -188,17 +187,17 @@ describe('EmbeddableActionStorage', () => {
       await storage.create(event2);
       await storage.create(event3);
 
-      const events1 = embeddable.getInput().events || [];
+      const events1 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events1).toEqual([event1, event2, event3]);
 
       await storage.update(event22);
 
-      const events2 = embeddable.getInput().events || [];
+      const events2 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events2).toEqual([event1, event22, event3]);
 
       await storage.update(event2);
 
-      const events3 = embeddable.getInput().events || [];
+      const events3 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events3).toEqual([event1, event2, event3]);
     });
 
@@ -265,7 +264,7 @@ describe('EmbeddableActionStorage', () => {
       await storage.create(event);
       await storage.remove(event.eventId);
 
-      const events = embeddable.getInput().events || [];
+      const events = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events).toEqual([]);
     });
 
@@ -299,22 +298,22 @@ describe('EmbeddableActionStorage', () => {
       await storage.create(event2);
       await storage.create(event3);
 
-      const events1 = embeddable.getInput().events || [];
+      const events1 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events1).toEqual([event1, event2, event3]);
 
       await storage.remove(event2.eventId);
 
-      const events2 = embeddable.getInput().events || [];
+      const events2 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events2).toEqual([event1, event3]);
 
       await storage.remove(event3.eventId);
 
-      const events3 = embeddable.getInput().events || [];
+      const events3 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events3).toEqual([event1]);
 
       await storage.remove(event1.eventId);
 
-      const events4 = embeddable.getInput().events || [];
+      const events4 = embeddable.getInput().enhancements?.dynamicActions?.events || [];
       expect(events4).toEqual([]);
     });
 
