@@ -21,8 +21,10 @@ const shimCoreStart = {
 };
 
 const shimSetupPlugins: CanvasSetupDeps = {
+  data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
   home: npSetup.plugins.home,
+  usageCollection: npSetup.plugins.usageCollection,
 };
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
@@ -33,8 +35,6 @@ const shimStartPlugins: CanvasStartDeps = {
   __LEGACY: {
     // ToDo: Copy directly into canvas
     absoluteToParsedUrl,
-    // ToDo: Copy directly into canvas
-    formatMsg,
     // ToDo: Won't be a part of New Platform. Will need to handle internally
     trackSubUrlForApp: chrome.trackSubUrlForApp,
   },

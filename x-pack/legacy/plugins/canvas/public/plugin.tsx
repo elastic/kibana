@@ -10,8 +10,10 @@ import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
@@ -20,7 +22,7 @@ import { legacyRegistries } from './legacy_plugin_support';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
-export { CoreStart };
+export { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -28,18 +30,20 @@ export { CoreStart };
  */
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
+  data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   inspector: InspectorStart;
+
   uiActions: UiActionsStart;
   __LEGACY: {
     absoluteToParsedUrl: (url: string, basePath: string) => any;
-    formatMsg: any;
     trackSubUrlForApp: Chrome['trackSubUrlForApp'];
   };
 }
@@ -59,6 +63,7 @@ export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
+  private startPlugins: CanvasStartDeps | undefined;
 
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
@@ -68,14 +73,26 @@ export class CanvasPlugin
     core.application.register({
       id: 'canvas',
       title: 'Canvas App',
-      async mount(context, params) {
+      mount: async (context, params) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
+        // TODO: We only need this to get the __LEGACY stuff that isn't coming from getStartSevices.
+        // We won't need this as soon as we move over to NP Completely
+        if (!this.startPlugins) {
+          throw new Error('Start Plugins not ready at mount time');
+        }
+
+        const canvasStore = await initializeCanvas(
+          core,
+          coreStart,
+          plugins,
+          this.startPlugins,
+          registries
+        );
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 
@@ -94,7 +111,13 @@ export class CanvasPlugin
     canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
 
     // Register core canvas stuff
-    canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
+    canvasApi.addFunctions(
+      initFunctions({
+        timefilter: plugins.data.query.timefilter.timefilter,
+        prependBasePath: core.http.basePath.prepend,
+        typesRegistry: plugins.expressions.__LEGACY.types,
+      })
+    );
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
@@ -104,6 +127,7 @@ export class CanvasPlugin
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
+    this.startPlugins = plugins;
     this.srcPlugin.start(core, plugins);
     initLoadingIndicator(core.http.addLoadingCountSource);
   }

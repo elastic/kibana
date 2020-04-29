@@ -45,6 +45,7 @@ interface Props {
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   hideHeader?: boolean;
@@ -243,7 +244,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),
-      new EditPanelAction(this.props.getEmbeddableFactory),
+      new EditPanelAction(this.props.getEmbeddableFactory, this.props.application),
     ];
 
     const sorted = actions

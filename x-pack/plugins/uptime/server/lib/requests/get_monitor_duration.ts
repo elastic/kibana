@@ -5,11 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
-import {
-  LocationDurationLine,
-  MonitorDurationResult,
-} from '../../../../../legacy/plugins/uptime/common/types';
+import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
+import { QUERY } from '../../../common/constants';
 
 export interface GetMonitorChartsParams {
   /** @member monitorId ID value for the selected monitor */

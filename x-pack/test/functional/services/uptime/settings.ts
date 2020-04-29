@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
 
 export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -25,24 +26,24 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
       await changeInputField(text, 'heartbeat-indices-input-loaded');
     },
     changeErrorThresholdInput: async (text: string) => {
-      await changeInputField(text, 'error-state-threshold-input-loaded');
+      await changeInputField(text, 'expiration-threshold-input-loaded');
     },
     changeWarningThresholdInput: async (text: string) => {
-      await changeInputField(text, 'warning-state-threshold-input-loaded');
+      await changeInputField(text, 'age-threshold-input-loaded');
     },
-    loadFields: async () => {
+    loadFields: async (): Promise<DynamicSettings> => {
       const indInput = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
-      const errorInput = await testSubjects.find('error-state-threshold-input-loaded', 5000);
-      const warningInput = await testSubjects.find('warning-state-threshold-input-loaded', 5000);
+      const expirationInput = await testSubjects.find('expiration-threshold-input-loaded', 5000);
+      const ageInput = await testSubjects.find('age-threshold-input-loaded', 5000);
       const heartbeatIndices = await indInput.getAttribute('value');
-      const errorThreshold = await errorInput.getAttribute('value');
-      const warningThreshold = await warningInput.getAttribute('value');
+      const expiration = await expirationInput.getAttribute('value');
+      const age = await ageInput.getAttribute('value');
 
       return {
         heartbeatIndices,
-        certificatesThresholds: {
-          errorState: errorThreshold,
-          warningState: warningThreshold,
+        certThresholds: {
+          age: parseInt(age, 10),
+          expiration: parseInt(expiration, 10),
         },
       };
     },

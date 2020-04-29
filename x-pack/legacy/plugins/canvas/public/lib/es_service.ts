@@ -10,23 +10,22 @@ import { API_ROUTE } from '../../common/lib/constants';
 // @ts-ignore untyped local
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
-// @ts-ignore untyped local
-import { notify } from './notify';
-import { getCoreStart } from '../legacy';
+import { notifyService } from '../services';
+import { platformService } from '../services';
 
 const { esService: strings } = ErrorStrings;
 
 const getApiPath = function() {
-  const basePath = getCoreStart().http.basePath.get();
+  const basePath = platformService.getService().coreStart.http.basePath.get();
   return basePath + API_ROUTE;
 };
 
 const getSavedObjectsClient = function() {
-  return getCoreStart().savedObjects.client;
+  return platformService.getService().coreStart.savedObjects.client;
 };
 
 const getAdvancedSettings = function() {
-  return getCoreStart().uiSettings;
+  return platformService.getService().coreStart.uiSettings;
 };
 
 export const getFields = (index = '_all') => {
@@ -38,7 +37,7 @@ export const getFields = (index = '_all') => {
         .sort()
     )
     .catch((err: Error) =>
-      notify.error(err, {
+      notifyService.getService().error(err, {
         title: strings.getFieldsFetchErrorMessage(index),
       })
     );
@@ -57,7 +56,9 @@ export const getIndices = () =>
         return savedObject.attributes.title;
       });
     })
-    .catch((err: Error) => notify.error(err, { title: strings.getIndicesFetchErrorMessage() }));
+    .catch((err: Error) =>
+      notifyService.getService().error(err, { title: strings.getIndicesFetchErrorMessage() })
+    );
 
 export const getDefaultIndex = () => {
   const defaultIndexId = getAdvancedSettings().get('defaultIndex');
@@ -66,6 +67,10 @@ export const getDefaultIndex = () => {
     ? getSavedObjectsClient()
         .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
         .then(defaultIndex => defaultIndex.attributes.title)
-        .catch(err => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))
+        .catch(err =>
+          notifyService
+            .getService()
+            .error(err, { title: strings.getDefaultIndexFetchErrorMessage() })
+        )
     : Promise.resolve('');
 };

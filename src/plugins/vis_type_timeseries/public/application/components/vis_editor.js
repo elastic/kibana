@@ -240,3 +240,7 @@ VisEditor.propTypes = {
   timeRange: PropTypes.object,
   appState: PropTypes.object,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { VisEditor as default };

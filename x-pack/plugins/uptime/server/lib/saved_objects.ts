@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  DynamicSettings,
-  defaultDynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../common/constants';
+import { DynamicSettings } from '../../common/runtime_types';
 import { SavedObjectsType, SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { UMSavedObjectsQueryFn } from './adapters';
 
@@ -28,12 +26,12 @@ export const umDynamicSettings: SavedObjectsType = {
       heartbeatIndices: {
         type: 'keyword',
       },
-      certificatesThresholds: {
+      certThresholds: {
         properties: {
-          errorState: {
+          expiration: {
             type: 'long',
           },
-          warningState: {
+          age: {
             type: 'long',
           },
         },
@@ -49,7 +47,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       return obj.attributes;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        return defaultDynamicSettings;
+        return DYNAMIC_SETTINGS_DEFAULTS;
       }
       throw getErr;
     }

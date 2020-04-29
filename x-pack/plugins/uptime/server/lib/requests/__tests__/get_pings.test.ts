@@ -6,7 +6,7 @@
 
 import { getPings } from '../get_pings';
 import { set } from 'lodash';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getAll', () => {
   let mockEsSearchResult: any;
@@ -62,7 +62,7 @@ describe('getAll', () => {
       },
     };
     expectedGetAllParams = {
-      index: defaultDynamicSettings.heartbeatIndices,
+      index: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices,
       body: {
         query: {
           bool: {
@@ -88,7 +88,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     const result = await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -110,7 +110,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'asc',
       size: 12,
@@ -166,7 +166,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       size: 12,
     });
@@ -220,7 +220,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       sort: 'desc',
     });
@@ -274,7 +274,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       monitorId: 'testmonitorid',
     });
@@ -333,7 +333,7 @@ describe('getAll', () => {
     mockEsClient.mockReturnValue(mockEsSearchResult);
     await getPings({
       callES: mockEsClient,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       dateRange: { from: 'now-1h', to: 'now' },
       status: 'down',
     });
