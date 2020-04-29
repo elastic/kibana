@@ -50,6 +50,9 @@ const valueConfig: FieldConfig = {
   ],
 };
 
+/**
+ * Disambiguate name from the Set data structure
+ */
 export const SetProcessor: FunctionComponent = () => {
   return (
     <>

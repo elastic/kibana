@@ -12,6 +12,9 @@ import { ESCommonProcessorOptions } from '../../../../common/types';
  *
  * For instance:
  * ['a', 'b', '0', 'c'] given { a: { b: [ { c: [] } ] } } => []
+ *
+ * Additionally, an empty selector `[]`, is a special indicator
+ * for the root level.
  */
 export type ProcessorSelector = string[];
 

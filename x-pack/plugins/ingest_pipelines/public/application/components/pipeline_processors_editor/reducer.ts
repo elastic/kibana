@@ -21,8 +21,8 @@ interface State extends StateArg {
 
 type Action =
   | {
-      type: 'addProcessor';
-      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
+      type: 'addTopLevelProcessor';
+      payload: { processor: Omit<ProcessorInternal, 'id'> };
     }
   | {
       type: 'addOnFailureProcessor';
@@ -47,8 +47,8 @@ type Action =
   | { type: 'processorForm.update'; payload: OnFormUpdateArg<any> }
   | { type: 'processorForm.close' };
 
-const addSelectorRoot = (path?: string[]) => {
-  return ['processors'].concat(path ?? []);
+const addSelectorRoot = (selector: ProcessorSelector): ProcessorSelector => {
+  return ['processors'].concat(selector);
 };
 
 export const reducer: Reducer<State, Action> = (state, action) => {
@@ -81,10 +81,11 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     return setValue(processorsSelector, state, processors);
   }
 
-  if (action.type === 'addProcessor') {
-    const { processor, selector } = action.payload;
-    const path = addSelectorRoot(selector);
-    return setValue(path, state, getValue(path, state).concat(processor));
+  if (action.type === 'addTopLevelProcessor') {
+    const { processor } = action.payload;
+    // Empty array returns a selector to the base path
+    const selector = addSelectorRoot([]);
+    return setValue(selector, state, getValue(selector, state).concat(processor));
   }
 
   if (action.type === 'addOnFailureProcessor') {

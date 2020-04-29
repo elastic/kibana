@@ -38,7 +38,7 @@ export interface Props {
  * update the in-memory processors data structure.
  */
 type Mode =
-  | { id: 'creatingProcessor'; arg: ProcessorSelector }
+  | { id: 'creatingTopLevelProcessor' }
   | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'idle' };
@@ -74,10 +74,10 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   const onSubmit = useCallback(
     processorTypeAndOptions => {
       switch (mode.id) {
-        case 'creatingProcessor':
+        case 'creatingTopLevelProcessor':
           dispatch({
-            type: 'addProcessor',
-            payload: { processor: processorTypeAndOptions, selector: mode.arg ?? [] },
+            type: 'addTopLevelProcessor',
+            payload: { processor: processorTypeAndOptions },
           });
           break;
         case 'creatingOnFailureProcessor':
@@ -103,7 +103,6 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           break;
         default:
       }
-      setMode({ id: 'idle' });
       dismissFlyout();
     },
     [dispatch, mode]
@@ -148,7 +147,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           )}
         />
         {/* TODO: Translate */}
-        <EuiButton onClick={() => setMode({ id: 'creatingProcessor', arg: [] })}>
+        <EuiButton onClick={() => setMode({ id: 'creatingTopLevelProcessor' })}>
           Add a processor
         </EuiButton>
       </EuiPanel>
