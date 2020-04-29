@@ -6,11 +6,18 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
-// import { contains } from 'vega-lite/build/src/util';
 
 export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+
+  /**
+   * @function parseStyles
+   * Parses a string of inline styles into a javascript object with casing for react
+   *
+   * @param {string} styles
+   * @returns {Object}
+   */
   const parseStyle = styles =>
     styles
       .split(';')
@@ -93,7 +100,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
      * @returns Promise<string[][]>
      * @param style
      */
-    async parseStyles(style: string) {
+    async parseStyles(style: any[]) {
       const $ = [];
       for (let i = 1; i < style.length; i++) {
         const eachStyle = parseStyle(style[i]);
