@@ -54,6 +54,7 @@ describe('Mappings editor: text datatype', () => {
 
     const {
       exists,
+      waitFor,
       waitForFn,
       actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
@@ -62,6 +63,8 @@ describe('Mappings editor: text datatype', () => {
     await act(async () => {
       await startEditField('myField');
     });
+
+    await waitFor('mappingsEditorFieldEdit');
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
@@ -129,7 +132,10 @@ describe('Mappings editor: text datatype', () => {
     const fieldToEdit = 'myField';
 
     // Start edit and immediately save to have all the default values
-    await startEditField(fieldToEdit);
+    await act(async () => {
+      await startEditField(fieldToEdit);
+    });
+    await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     await act(async () => {
@@ -146,7 +152,10 @@ describe('Mappings editor: text datatype', () => {
     expect(data).toEqual(updatedMappings);
 
     // Re-open the edit panel
-    await startEditField(fieldToEdit);
+    await act(async () => {
+      await startEditField('myField');
+    });
+    await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     // When no analyzer is defined, defaults to "Index default"
@@ -173,8 +182,9 @@ describe('Mappings editor: text datatype', () => {
     // Uncheck the "Use same analyzer for search" checkbox and wait for the search analyzer select
     await act(async () => {
       selectCheckBox('useSameAnalyzerForSearchCheckBox.input', false);
-      await waitFor('searchAnalyzer');
     });
+
+    await waitFor('searchAnalyzer');
 
     let searchAnalyzerValue = find('searchAnalyzer.select').props().value;
     expect(searchAnalyzerValue).toEqual('index_default');
@@ -218,7 +228,10 @@ describe('Mappings editor: text datatype', () => {
     expect(data).toEqual(updatedMappings);
 
     // Re-open the flyout and make sure the select have the correct updated value
-    await startEditField(fieldToEdit);
+    await act(async () => {
+      await startEditField('myField');
+    });
+    await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     isUseSameAnalyzerForSearchChecked = getCheckboxValue('useSameAnalyzerForSearchCheckBox.input');
@@ -269,7 +282,10 @@ describe('Mappings editor: text datatype', () => {
     } = testBed;
     const fieldToEdit = 'myField';
 
-    await startEditField(fieldToEdit);
+    await act(async () => {
+      await startEditField(fieldToEdit);
+    });
+    await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     expect(exists('indexAnalyzer-custom')).toBe(true);
@@ -370,13 +386,17 @@ describe('Mappings editor: text datatype', () => {
     const {
       find,
       exists,
+      waitFor,
       waitForFn,
       form: { setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldToEdit = 'myField';
 
-    await startEditField(fieldToEdit);
+    await act(async () => {
+      await startEditField(fieldToEdit);
+    });
+    await waitFor('mappingsEditorFieldEdit');
     await showAdvancedSettings();
 
     // It should have 2 selects

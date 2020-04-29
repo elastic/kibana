@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
 import { registerTestBed, TestBed, nextTick } from '../../../../../../../../../test_utils';
@@ -133,7 +134,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   // Get a nested field in the rendered DOM tree
-  const getFieldAt = async (path: string) => {
+  const getFieldAt = (path: string) => {
     const testSubjectField = `${path.split('.').join('')}Field`;
     return find(testSubjectField as TestSubjects);
   };
@@ -164,10 +165,8 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
   };
 
   const startEditField = async (path: string) => {
-    const field = await getFieldAt(path);
+    const field = getFieldAt(path);
     find('editFieldButton', field).simulate('click');
-    // Wait until the details flyout is open
-    await waitFor('mappingsEditorFieldEdit');
   };
 
   const updateFieldAndCloseFlyout = async () => {
@@ -286,7 +285,7 @@ export const getDataForwardedFactory = (onChangeHandler: jest.MockedFunction<any
     const [arg] = mockCalls[mockCalls.length - 1];
     const { isValid, validate, getData } = arg;
 
-    const isMappingsValid = isValid === undefined ? await validate() : isValid;
+    const isMappingsValid = isValid === undefined ? await act(validate) : isValid;
     const data = getData(isMappingsValid);
 
     return {

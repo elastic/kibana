@@ -46,6 +46,7 @@ describe('Mappings editor: shape datatype', () => {
 
     const {
       exists,
+      waitFor,
       waitForFn,
       actions: { startEditField, updateFieldAndCloseFlyout },
     } = testBed;
@@ -54,6 +55,8 @@ describe('Mappings editor: shape datatype', () => {
     await act(async () => {
       await startEditField('myField');
     });
+
+    await waitFor('mappingsEditorFieldEdit');
 
     // Save the field and close the flyout
     await act(async () => {

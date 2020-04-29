@@ -47,9 +47,7 @@ describe('Mappings editor: core', () => {
       },
     };
 
-    await act(async () => {
-      ({ data } = await getDataForwarded());
-    });
+    ({ data } = await getDataForwarded());
     expect(data).toEqual(expectedMappings);
   });
 
@@ -333,8 +331,9 @@ describe('Mappings editor: core', () => {
 
       await act(async () => {
         await addField(newField.name, newField.type);
-        ({ data } = await getDataForwarded());
       });
+
+      ({ data } = await getDataForwarded());
       expect(data).toEqual(updatedMappings);
 
       /**
@@ -354,8 +353,9 @@ describe('Mappings editor: core', () => {
         await updateJsonEditor('dynamicTemplatesEditor', updatedTemplatesValue);
         await nextTick();
         component.update();
-        ({ data } = await getDataForwarded());
       });
+
+      ({ data } = await getDataForwarded());
       expect(data).toEqual(updatedMappings);
 
       /**
@@ -368,8 +368,9 @@ describe('Mappings editor: core', () => {
       // Disbable dynamic mappings
       await act(async () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
-        ({ data } = await getDataForwarded());
       });
+
+      ({ data } = await getDataForwarded());
 
       // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
       updatedMappings = {

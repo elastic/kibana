@@ -47,6 +47,7 @@ describe('Mappings editor: edit field', () => {
 
     const {
       find,
+      waitFor,
       actions: { startEditField },
     } = testBed;
     const fieldPathToEdit = ['user', 'address', 'street'];
@@ -56,6 +57,8 @@ describe('Mappings editor: edit field', () => {
     await act(async () => {
       await startEditField(fieldPathToEdit.join('.'));
     });
+
+    await waitFor('mappingsEditorFieldEdit');
 
     // It should have the correct title
     expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field '${fieldName}'`);
@@ -88,6 +91,7 @@ describe('Mappings editor: edit field', () => {
     const {
       find,
       exists,
+      waitFor,
       waitForFn,
       component,
       actions: { startEditField, updateFieldAndCloseFlyout },
@@ -97,6 +101,8 @@ describe('Mappings editor: edit field', () => {
     await act(async () => {
       await startEditField('myField');
     });
+
+    await waitFor('mappingsEditorFieldEdit');
 
     await act(async () => {
       // Change the field type
