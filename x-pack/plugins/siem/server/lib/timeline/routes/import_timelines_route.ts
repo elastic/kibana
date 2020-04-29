@@ -11,6 +11,7 @@ import { createPromiseFromStreams } from '../../../../../../../src/legacy/utils'
 import { IRouter } from '../../../../../../../src/core/server';
 
 import { TIMELINE_IMPORT_URL } from '../../../../common/constants';
+import { TimelineType } from '../../../../common/types/timeline';
 
 import { SetupPlugins } from '../../../plugin';
 import { ConfigType } from '../../../config';
@@ -133,7 +134,13 @@ export const importTimelinesRoute = (
                       if (timeline == null) {
                         newTimeline = await createTimelines(
                           frameworkRequest,
-                          parsedTimelineObject,
+                          {
+                            ...parsedTimelineObject,
+                            timelineType:
+                              parsedTimelineObject.timelineType === TimelineType.draft
+                                ? TimelineType.default
+                                : parsedTimelineObject.timelineType,
+                          },
                           null, // timelineSavedObjectId
                           null, // timelineVersion
                           pinnedEventIds,
