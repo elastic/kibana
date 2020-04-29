@@ -40,8 +40,11 @@ export default function canvasCustomElementTest({
       // find the first workpad element (a markdown element) and click it to select it
       await testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent', 20000);
 
+      // click "Edit" menu
+      await testSubjects.click('canvasWorkpadEditMenuButton', 20000);
+
       // click the "Save as new element" button
-      await testSubjects.click('canvasSidebarHeader__saveElementButton', 20000);
+      await testSubjects.click('canvasWorkpadEditMenu__saveElementButton', 20000);
 
       // fill out the custom element form and submit it
       await PageObjects.canvas.fillOutCustomElementForm(

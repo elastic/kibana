@@ -157,7 +157,12 @@ export const EditMenu: FunctionComponent<Props> = ({
   };
 
   const editControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="xs" aria-label={strings.getEditMenuLabel()} onClick={togglePopover}>
+    <EuiButtonEmpty
+      size="xs"
+      aria-label={strings.getEditMenuLabel()}
+      onClick={togglePopover}
+      data-test-subj="canvasWorkpadEditMenuButton"
+    >
       {strings.getEditMenuButtonLabel()}
     </EuiButtonEmpty>
   );
@@ -219,7 +224,7 @@ export const EditMenu: FunctionComponent<Props> = ({
     const alignmentMenuItem = {
       name: strings.getAlignmentMenuItemLabel(),
       className: 'canvasContextMenu',
-      disabled: selectedNodes.length < 2,
+      disabled: groupIsSelected || selectedNodes.length < 2,
       icon: <EuiIcon type="empty" size="m" />,
       panel: {
         id: 2,
@@ -280,7 +285,7 @@ export const EditMenu: FunctionComponent<Props> = ({
     const distributionMenuItem = {
       name: strings.getDistributionMenuItemLabel(),
       className: 'canvasContextMenu',
-      disabled: selectedNodes.length < 3,
+      disabled: groupIsSelected || selectedNodes.length < 3,
       icon: <EuiIcon type="empty" size="m" />,
       panel: {
         id: 3,
@@ -311,6 +316,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       icon: <EuiIcon type="indexOpen" size="m" />,
       disabled: selectedNodes.length < 1,
       className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+      'data-test-subj': 'canvasWorkpadEditMenu__saveElementButton',
       onClick: () => {
         showModal();
         closePopover();
