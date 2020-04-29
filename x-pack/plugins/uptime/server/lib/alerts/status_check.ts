@@ -32,7 +32,7 @@ export const uniqueMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =
 /**
  * Generates a message to include in contexts of alerts.
  * @param monitors the list of monitors to include in the message
- * @param max
+ * @param max the maximum number of items the summary should contain
  */
 export const contextMessage = (monitorIds: string[], max: number): string => {
   const MIN = 2;
