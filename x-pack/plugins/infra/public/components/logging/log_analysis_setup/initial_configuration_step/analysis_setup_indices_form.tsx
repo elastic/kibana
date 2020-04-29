@@ -10,13 +10,13 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
-import { ValidatedIndex } from './validation';
+import { AvailableIndex } from './validation';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   disabled?: boolean;
-  indices: ValidatedIndex[];
+  indices: AvailableIndex[];
   isValidating: boolean;
-  onChangeSelectedIndices: (selectedIndices: ValidatedIndex[]) => void;
+  onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
   valid: boolean;
 }> = ({ disabled = false, indices, isValidating, onChangeSelectedIndices, valid }) => {
   const changeIsIndexSelected = useCallback(

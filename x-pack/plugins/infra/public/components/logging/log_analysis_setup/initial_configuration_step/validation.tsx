@@ -6,6 +6,8 @@
 
 import { ValidationIndicesError } from '../../../../../common/http_api';
 
+export { ValidationIndicesError };
+
 export type ValidationIndicesUIError =
   | ValidationIndicesError
   | { error: 'NETWORK_ERROR' }
@@ -20,7 +22,7 @@ export type DatasetFilter =
       datasets: string[];
     };
 
-interface ValidIndex {
+interface ValidAvailableIndex {
   validity: 'valid';
   name: string;
   isSelected: boolean;
@@ -28,10 +30,18 @@ interface ValidIndex {
   datasetFilter: DatasetFilter;
 }
 
-interface InvalidIndex {
+interface InvalidAvailableIndex {
   validity: 'invalid';
   name: string;
   errors: ValidationIndicesError[];
 }
 
-export type ValidatedIndex = ValidIndex | InvalidIndex;
+interface UnvalidatedAvailableIndex {
+  validity: 'unknown';
+  name: string;
+}
+
+export type AvailableIndex =
+  | ValidAvailableIndex
+  | InvalidAvailableIndex
+  | UnvalidatedAvailableIndex;

@@ -8,10 +8,10 @@ import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } 
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
-import { DatasetFilter, ValidatedIndex, ValidationIndicesUIError } from './validation';
+import { DatasetFilter, AvailableIndex, ValidationIndicesUIError } from './validation';
 
 export const IndexSetupRow: React.FC<{
-  index: ValidatedIndex;
+  index: AvailableIndex;
   isDisabled: boolean;
   onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
   onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
@@ -45,13 +45,13 @@ export const IndexSetupRow: React.FC<{
           <EuiToolTip content={formatValidationError(index.errors)}>
             <EuiIcon type="alert" color="danger" />
           </EuiToolTip>
-        ) : (
+        ) : index.validity === 'valid' ? (
           <IndexSetupDatasetFilter
             availableDatasets={index.availableDatasets}
             datasetFilter={index.datasetFilter}
             onChangeDatasetFilter={changeDatasetFilter}
           />
-        )}
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useReducer } from 'react';
 
 import { isExampleDataIndex } from '../../../../common/log_analysis';
 import {
-  ValidatedIndex,
+  AvailableIndex,
+  ValidationIndicesError,
   ValidationIndicesUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -38,7 +39,22 @@ export const useAnalysisSetupState = <JobType extends string>({
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  const [validatedIndices, setValidatedIndices] = useState<ValidatedIndex[]>([]);
+  const [validatedIndices, dispatchAvailableIndexAction] = useReducer(
+    reduceAvailableIndicesState,
+    sourceConfiguration.indices.map(indexName => ({
+      name: indexName,
+      validity: 'unknown' as const,
+    }))
+  );
+
+  const setValidatedIndices = useCallback(
+    (valueOrFunc: AvailableIndex[] | ((validateIndices: AvailableIndex[]) => AvailableIndex[])) =>
+      dispatchAvailableIndexAction({
+        type: 'legacySet',
+        valueOrFunc,
+      }),
+    []
+  );
 
   const [validateIndicesRequest, validateIndices] = useTrackedPromise(
     {
@@ -47,34 +63,10 @@ export const useAnalysisSetupState = <JobType extends string>({
         return await validateSetupIndices(sourceConfiguration);
       },
       onResolve: ({ data: { errors } }) => {
-        setValidatedIndices(previousValidatedIndices =>
-          sourceConfiguration.indices.map(indexName => {
-            const previousValidatedIndex = previousValidatedIndices.filter(
-              ({ name }) => name === indexName
-            )[0];
-            const indexValiationErrors = errors.filter(({ index }) => index === indexName);
-            if (indexValiationErrors.length > 0) {
-              return {
-                validity: 'invalid',
-                name: indexName,
-                errors: indexValiationErrors,
-              };
-            } else {
-              return {
-                validity: 'valid',
-                name: indexName,
-                isSelected:
-                  previousValidatedIndex?.validity === 'valid'
-                    ? previousValidatedIndex?.isSelected
-                    : !isExampleDataIndex(indexName),
-                availableDatasets: ['a', 'b', 'c'],
-                datasetFilter: {
-                  include: 'all',
-                },
-              };
-            }
-          })
-        );
+        dispatchAvailableIndexAction({
+          type: 'updateWithValidationErrors',
+          validationErrors: errors,
+        });
       },
       onReject: () => {
         setValidatedIndices([]);
@@ -143,4 +135,73 @@ export const useAnalysisSetupState = <JobType extends string>({
     setValidatedIndices,
     validationErrors,
   };
+};
+
+type AvailableIndicesAction =
+  | {
+      type: 'legacySet';
+      valueOrFunc: AvailableIndex[] | ((i: AvailableIndex[]) => AvailableIndex[]);
+    }
+  | { type: 'updateWithValidationErrors'; validationErrors: ValidationIndicesError[] }
+  | { type: 'select'; indexName: string }
+  | { type: 'updateAvailableDatasets'; indexName: string; availableDatasets: string[] };
+
+const reduceAvailableIndicesState = (
+  state: AvailableIndex[],
+  action: AvailableIndicesAction
+): AvailableIndex[] => {
+  switch (action.type) {
+    case 'legacySet':
+      if (typeof action.valueOrFunc === 'function') {
+        return action.valueOrFunc(state);
+      } else {
+        return action.valueOrFunc;
+      }
+    case 'updateWithValidationErrors':
+      return state.map(previousAvailableIndex => {
+        const indexValiationErrors = action.validationErrors.filter(
+          ({ index }) => index === previousAvailableIndex.name
+        );
+
+        if (indexValiationErrors.length > 0) {
+          return {
+            validity: 'invalid',
+            name: previousAvailableIndex.name,
+            errors: indexValiationErrors,
+          };
+        } else if (previousAvailableIndex.validity === 'valid') {
+          return {
+            ...previousAvailableIndex,
+            validity: 'valid',
+            errors: [],
+          };
+        } else {
+          return {
+            validity: 'valid',
+            name: previousAvailableIndex.name,
+            isSelected: isExampleDataIndex(previousAvailableIndex.name),
+            availableDatasets: ['a', 'b', 'c'],
+            datasetFilter: {
+              include: 'all',
+            },
+          };
+        }
+      });
+    case 'updateAvailableDatasets':
+      return state.map(previousAvailableIndex => {
+        if (
+          previousAvailableIndex.name !== action.indexName ||
+          previousAvailableIndex.validity !== 'valid'
+        ) {
+          return previousAvailableIndex;
+        }
+
+        return {
+          ...previousAvailableIndex,
+          availableDatasets: action.availableDatasets,
+        };
+      });
+    case 'select':
+      return state;
+  }
 };
