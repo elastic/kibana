@@ -419,6 +419,44 @@ describe('xy_suggestions', () => {
     });
   });
 
+  test('changes column mappings when suggestion is reorder', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'category',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [strCol('category'), strCol('product'), numCol('price')],
+        layerId: 'first',
+        changeType: 'reorder',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'category',
+          splitAccessor: 'product',
+        },
+      ],
+    });
+  });
+
   test('overwrites column to dimension mappings if a date dimension is added', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {

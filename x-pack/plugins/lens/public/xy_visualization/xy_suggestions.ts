@@ -99,10 +99,13 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)
-  const prioritizedBuckets = prioritizeColumns(buckets.reverse());
+  const prioritizedBuckets = prioritizeColumns([...buckets].reverse());
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
+  }
+  if (table.changeType === 'reorder') {
+    return buckets;
   }
 
   // if existing table is just modified, try to map buckets to the current dimensions
