@@ -48,7 +48,7 @@ export const getAgentConfigsHandler: RequestHandler<
       items,
       agentConfig =>
         listAgents(soClient, {
-          showInactive: true,
+          showInactive: false,
           perPage: 0,
           page: 1,
           kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentConfig.id}`,

@@ -6,7 +6,11 @@
 import { uniq } from 'lodash';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/server';
-import { DEFAULT_AGENT_CONFIG, AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../constants';
+import {
+  DEFAULT_AGENT_CONFIG,
+  AGENT_CONFIG_SAVED_OBJECT_TYPE,
+  AGENT_SAVED_OBJECT_TYPE,
+} from '../constants';
 import {
   Datasource,
   NewAgentConfig,
@@ -16,6 +20,7 @@ import {
   ListWithKuery,
 } from '../types';
 import { DeleteAgentConfigResponse, storedDatasourceToAgentDatasource } from '../../common';
+import { listAgents } from './agents';
 import { datasourceService } from './datasource';
 import { outputService } from './output';
 import { agentConfigUpdateEventHandler } from './agent_config_update';
@@ -266,6 +271,17 @@ class AgentConfigService {
     const defaultConfigId = await this.getDefaultAgentConfigId(soClient);
     if (id === defaultConfigId) {
       throw new Error('The default agent configuration cannot be deleted');
+    }
+
+    const { total } = await listAgents(soClient, {
+      showInactive: false,
+      perPage: 0,
+      page: 1,
+      kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${id}`,
+    });
+
+    if (total > 0) {
+      throw new Error('Cannot delete agent config that is assigned to agent(s)');
     }
 
     if (config.datasources && config.datasources.length) {

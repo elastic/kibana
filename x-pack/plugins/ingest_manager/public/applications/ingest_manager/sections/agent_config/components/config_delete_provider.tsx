@@ -63,11 +63,11 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         notifications.toasts.addSuccess(
           i18n.translate('xpack.ingestManager.deleteAgentConfig.successSingleNotificationTitle', {
             defaultMessage: "Deleted agent config '{id}'",
-            values: { id: data?.id },
+            values: { id: agentConfig },
           })
         );
         if (onSuccessCallback.current) {
-          onSuccessCallback.current(data?.id);
+          onSuccessCallback.current(agentConfig!);
         }
       }
 
@@ -75,7 +75,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
         notifications.toasts.addDanger(
           i18n.translate('xpack.ingestManager.deleteAgentConfig.failureSingleNotificationTitle', {
             defaultMessage: "Error deleting agent config '{id}'",
-            values: { id: data?.id },
+            values: { id: agentConfig },
           })
         );
       }
@@ -151,7 +151,7 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
           ) : agentsCount ? (
             <FormattedMessage
               id="xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent config. Unassign these agents before deleting this agent config."
+              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent configuration. Unassign these agents before deleting this configuration."
               values={{
                 agentsCount,
               }}
