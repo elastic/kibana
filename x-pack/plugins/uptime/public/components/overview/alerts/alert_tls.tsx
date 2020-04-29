@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TlsTranslations } from './translations';
 
 interface SettingsMessageExpressionPopoverProps {
