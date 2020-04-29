@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import React, { Component, lazy, Suspense } from 'react';
 import classNames from 'classnames';
-// import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
