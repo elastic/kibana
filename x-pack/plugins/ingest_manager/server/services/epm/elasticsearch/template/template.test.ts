@@ -259,3 +259,53 @@ test('tests processing object field with dynamic set to strict', () => {
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicStrictMapping));
 });
+
+test('tests processing object field with property', () => {
+  const objectFieldWithPropertyLiteralYml = `
+- name: a
+  type: object
+- name: a.b
+  type: keyword
+  `;
+  const objectFieldWithPropertyMapping = {
+    properties: {
+      a: {
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldWithPropertyLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldWithPropertyMapping));
+});
+
+test('tests processing object field with property, reverse order', () => {
+  const objectFieldWithPropertyReversedLiteralYml = `
+- name: a.b
+  type: keyword
+- name: a
+  type: object
+  `;
+  const objectFieldWithPropertyReversedMapping = {
+    properties: {
+      a: {
+        properties: {
+          b: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldWithPropertyReversedMapping));
+});

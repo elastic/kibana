@@ -108,7 +108,15 @@ function dedupFields(fields: Fields): Fields {
       return f.name === field.name;
     });
     if (found) {
-      if (found.type === 'group' && field.type === 'group' && found.fields && field.fields) {
+      if (
+        (found.type === 'group' || found.type === 'object') &&
+        field.type === 'group' &&
+        field.fields
+      ) {
+        if (!found.fields) {
+          found.fields = [];
+        }
+        found.type = 'group';
         found.fields = dedupFields(found.fields.concat(field.fields));
       } else {
         // only 'group' fields can be merged in this way
