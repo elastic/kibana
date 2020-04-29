@@ -21,10 +21,21 @@ interface Props {
   mapColors: string[];
 }
 
-export function RUMLayerTemplate(props: Props) {
-  return (
-    <div>
-      content goes here
-    </div>
-  );
+interface State {
+
+}
+
+export class RUMLayerTemplate extends Component<Props, State> {
+
+  state: {
+
+  }
+
+  render() {
+    return (
+      <div>
+        content goes here
+      </div>
+    );
+  }
 }
