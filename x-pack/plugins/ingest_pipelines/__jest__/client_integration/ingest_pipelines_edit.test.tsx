@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineFormTestBed } from './helpers/pipeline_form.helpers';
 import { PIPELINE_TO_EDIT } from './helpers/pipelines_edit.helpers';
 
@@ -65,14 +65,14 @@ describe('<PipelinesEdit />', () => {
   describe('form submission', () => {
     it('should send the correct payload with changed values', async () => {
       const UPDATED_DESCRIPTION = 'updated pipeline description';
-      const { actions, form } = testBed;
+      const { actions, form, waitFor } = testBed;
 
       // Make change to description field
       form.setInputValue('descriptionField.input', UPDATED_DESCRIPTION);
 
       await act(async () => {
         actions.clickSubmitButton();
-        await nextTick(100);
+        await waitFor('pipelineForm', 0);
       });
 
       const latestRequest = server.requests[server.requests.length - 1];

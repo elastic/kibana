@@ -6,7 +6,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineFormTestBed } from './helpers/pipeline_form.helpers';
 import { PIPELINE_TO_CLONE } from './helpers/pipelines_clone.helpers';
 
@@ -57,11 +57,11 @@ describe('<PipelinesClone />', () => {
 
   describe('form submission', () => {
     it('should send the correct payload', async () => {
-      const { actions } = testBed;
+      const { actions, waitFor } = testBed;
 
       await act(async () => {
         actions.clickSubmitButton();
-        await nextTick(100);
+        await waitFor('pipelineForm', 0);
       });
 
       const latestRequest = server.requests[server.requests.length - 1];

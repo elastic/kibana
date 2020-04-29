@@ -141,11 +141,11 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should send the correct payload', async () => {
-        const { actions } = testBed;
+        const { actions, waitFor } = testBed;
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick(100);
+          await waitFor('pipelineForm', 0);
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
@@ -160,7 +160,7 @@ describe('<PipelinesCreate />', () => {
       });
 
       test('should surface API errors from the request', async () => {
-        const { component, actions, find, exists } = testBed;
+        const { actions, find, exists, waitFor } = testBed;
 
         const error = {
           status: 409,
@@ -172,8 +172,7 @@ describe('<PipelinesCreate />', () => {
 
         await act(async () => {
           actions.clickSubmitButton();
-          await nextTick(100);
-          component.update();
+          await waitFor('savePipelineError');
         });
 
         expect(exists('savePipelineError')).toBe(true);
