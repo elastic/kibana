@@ -84,14 +84,17 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      * Click the app link within the app menu that has the given name
      * @param name
      */
-    public async clickLink(name: string) {
+    public async clickLink(name: string, closeCollapsibleNav = true) {
       try {
         log.debug(`click "${name}" app link`);
         await this.openCollapsibleNav();
         const nav = await testSubjects.find('collapsibleNav');
         const link = await nav.findByPartialLinkText(name);
         await link.click();
-        await this.closeCollapsibleNav();
+
+        if (closeCollapsibleNav) {
+          await this.closeCollapsibleNav();
+        }
       } finally {
         // Intentionally empty
       }
