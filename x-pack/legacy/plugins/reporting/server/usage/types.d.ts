@@ -60,6 +60,10 @@ export interface AvailableTotal {
 }
 
 type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+export interface LayoutCounts {
+  print: number;
+  preserve_layout: number;
+}
 export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
   printable_pdf: AvailableTotal & {
     app: {
@@ -67,14 +71,16 @@ export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
       dashboard: number;
       visualization: number;
     };
-    layout: {
-      print: number;
-      preserve_layout: number;
-    };
+    layout: LayoutCounts;
   };
 };
 
-export type Statuses =
+type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
+export type AppCounts = {
+  [A in AppNames]: number;
+};
+
+type Statuses =
   | 'cancelled'
   | 'completed'
   | 'completed_with_warnings'
@@ -84,14 +90,9 @@ export type Statuses =
 type StatusCounts = {
   [S in Statuses]?: number;
 };
-
-export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
-export type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
 type StatusByAppCounts = {
   [S in Statuses]?: {
-    [J in BaseJobTypes]?: {
-      [A in AppNames]: number;
-    };
+    [J in BaseJobTypes]?: AppCounts;
   };
 };
 
@@ -109,4 +110,5 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
+export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
