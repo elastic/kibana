@@ -8,6 +8,7 @@ import { SecurityPluginSetup } from './plugin';
 
 import { authenticationMock } from './authentication/index.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { licenseMock } from '../common/licensing/index.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -19,6 +20,7 @@ function createSetupMock() {
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
+    license: licenseMock.create(),
     __legacyCompat: {} as SecurityPluginSetup['__legacyCompat'],
   };
 }

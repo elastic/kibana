@@ -17,11 +17,19 @@
  * under the License.
  */
 
-export function createProxyBundlesRoute({ host, port }: { host: string; port: number }) {
+export function createProxyBundlesRoute({
+  host,
+  port,
+  buildHash,
+}: {
+  host: string;
+  port: number;
+  buildHash: string;
+}) {
   return [
-    buildProxyRouteForBundles('/bundles/', host, port),
-    buildProxyRouteForBundles('/built_assets/dlls/', host, port),
-    buildProxyRouteForBundles('/built_assets/css/', host, port),
+    buildProxyRouteForBundles(`/${buildHash}/bundles/`, host, port),
+    buildProxyRouteForBundles(`/${buildHash}/built_assets/dlls/`, host, port),
+    buildProxyRouteForBundles(`/${buildHash}/built_assets/css/`, host, port),
   ];
 }
 

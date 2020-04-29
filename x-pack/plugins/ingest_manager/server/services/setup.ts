@@ -145,7 +145,7 @@ async function addPackageToConfig(
     config.namespace
   );
   newDatasource.inputs = await datasourceService.assignPackageStream(
-    { pkgName: packageToInstall.name, pkgVersion: packageToInstall.version },
+    packageInfo,
     newDatasource.inputs
   );
 
