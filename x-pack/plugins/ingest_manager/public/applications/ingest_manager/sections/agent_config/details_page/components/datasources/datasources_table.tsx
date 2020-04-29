@@ -56,7 +56,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
 }) => {
   const hasWriteCapabilities = useCapabilities().write;
   const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
-  const editDatasourceLink = useLink(`/configs/${config.id}/edit-datasource/{datasourceId}`);
+  const editDatasourceLink = useLink(`/configs/${config.id}/edit-datasource`);
   const refreshConfig = useConfigRefresh();
 
   // With the datasources provided on input, generate the list of datasources
@@ -216,10 +216,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                   <EuiContextMenuItem
                     disabled={!hasWriteCapabilities}
                     icon="pencil"
-                    href={editDatasourceLink.replace(
-                      encodeURIComponent('{datasourceId}'),
-                      datasource.id
-                    )}
+                    href={`${editDatasourceLink}/${datasource.id}`}
                     key="datasourceEdit"
                   >
                     <FormattedMessage

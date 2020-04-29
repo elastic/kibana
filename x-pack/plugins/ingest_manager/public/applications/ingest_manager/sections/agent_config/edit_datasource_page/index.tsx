@@ -72,11 +72,13 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const { data: agentConfigData } = await sendGetOneAgentConfig(configId);
+        const [{ data: agentConfigData }, { data: datasourceData }] = await Promise.all([
+          sendGetOneAgentConfig(configId),
+          sendGetOneDatasource(datasourceId),
+        ]);
         if (agentConfigData?.item) {
           setAgentConfig(agentConfigData.item);
         }
-        const { data: datasourceData } = await sendGetOneDatasource(datasourceId);
         if (datasourceData?.item) {
           const { id, revision, inputs, ...restOfDatasource } = datasourceData.item;
           // Remove `agent_stream` from all stream info, we assign this after saving
@@ -88,7 +90,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ...restOfInput,
                 streams: streams.map(stream => {
                   const { agent_stream, ...restOfStream } = stream;
-                  return { ...restOfStream };
+                  return restOfStream;
                 }),
               };
             }),
