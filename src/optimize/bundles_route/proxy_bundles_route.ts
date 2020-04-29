@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import { PluginName } from 'src/core/server';
-import { LoadPluginBundle, UnknownPluginInitializer } from './plugin_loader';
+export function createProxyBundlesRoute({ host, port }: { host: string; port: number }) {
+  return [
+    buildProxyRouteForBundles('/bundles/', host, port),
+    buildProxyRouteForBundles('/built_assets/dlls/', host, port),
+    buildProxyRouteForBundles('/built_assets/css/', host, port),
+  ];
+}
 
-/**
- * @param initializerProvider A function provided by the test to resolve initializers.
- */
-const createLoadPluginBundleMock = (
-  initializerProvider: (name: PluginName) => UnknownPluginInitializer
-): jest.Mock<ReturnType<LoadPluginBundle>, Parameters<LoadPluginBundle>> =>
-  jest.fn((addBasePath, pluginName, _ = {}) => {
-    return Promise.resolve(initializerProvider(pluginName)) as any;
-  });
-
-export const loadPluginBundleMock = { create: createLoadPluginBundleMock };
+function buildProxyRouteForBundles(routePath: string, host: string, port: number) {
+  return {
+    path: `${routePath}{path*}`,
+    method: 'GET',
+    handler: {
+      proxy: {
+        host,
+        port,
+        passThrough: true,
+        xforward: true,
+      },
+    },
+    config: { auth: false },
+  };
+}
