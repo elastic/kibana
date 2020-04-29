@@ -27,7 +27,7 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
     async getReportURL(timeout: number) {
       log.debug('getReportURL');
 
-      const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href', timeout);
+      const url = await testSubjects.getAttribute('downloadCompletedReportButton', 'href');
 
       log.debug(`getReportURL got url: ${url}`);
 
