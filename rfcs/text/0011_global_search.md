@@ -4,7 +4,7 @@
 
 # Summary
 
-A core API exposed on both public and server sides, allowing to search for various objects and
+A Kibana API exposed on both public and server side, allowing consumers to search for various objects and
 register result providers.
 
 # Basic example
@@ -24,15 +24,16 @@ coreSetup.globalSearch.registerResultProvider({
 - using the `find` API from the client-side:
 
 ```ts
-coreStart.globalSearch.find('some term').subscribe(({ results, complete }) => {
-    showAsyncSearchIndicator(!complete);
+coreStart.globalSearch.find('some term').subscribe(({ results }) => {
     updateResults(results);
+}, () => {}, () => {
+    showAsyncSearchIndicator(false);
 });
 ```
 
 # Motivation
 
-Kibana should do it's best to assist users searching for and navigating to the various objects present on the Kibana platform.
+Kibana should do its best to assist users searching for and navigating to the various objects present on the Kibana platform.
 
 We should expose an API to make it possible for plugins to search for the various objects present on a Kibana instance.
 
@@ -70,7 +71,7 @@ type GlobalSearchResultType = keyof typeof SEARCH_TYPE;
 interface GlobalSearchOptions {}
 
 /**
- * Representation of a result returned by a {@linlkGlobalSearchResultProvider | result provider}
+ * Representation of a result returned by a {@link GlobalSearchResultProvider | result provider}
  */
 interface GlobalSearchResult {
   /** an id that should be unique for an individual provider's results */
@@ -79,7 +80,7 @@ interface GlobalSearchResult {
   title: string;
   /** the type of result */
   type: GlobalSearchResultType;
-  /** an optional EUI icon name to associate with the search result. If not specified, will use a default icon */
+  /** an optional EUI icon name to associate with the search result */
   icon?: string;
   /** The url to navigate to this result. This can be either an absolute url, or a path relative to the performing request's basePath */
   url: string;
@@ -150,7 +151,7 @@ type GlobalSearchResultProvider = {
 ```
 
 Notes: 
-- The client-side version of `GlobalSearchResultProvider` is slightly difference than the 
+- The client-side version of `GlobalSearchResultProvider` is slightly different than the 
 server one, as there is no `context` parameter on the `find` signature.
 
 ### Plugin API
@@ -166,11 +167,6 @@ type GlobalSearchResponse<ResultType extends GlobalSearchResult = GlobalSearchRe
    * Current results fetched from the providers.
    */
   results: ResultType[];
-  /**
-   * Is the search complete. Will only be true during the last emission of the `GlobalSearchServiceStart.search` result observable.
-   * A search is considered complete either when all underlying providers completed their observable, or when the timeout is reached.
-   */
-  complete: boolean;
 };
 ```
 
@@ -202,9 +198,9 @@ interface GlobalSearchServiceStart {
 interface NavigableGlobalSearchResult extends GlobalSearchResult {
   /**
    * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it 
-   * in a SPA friendly way using `application.navigateTo`, else, a full page refresh will be performed.
+   * in a SPA friendly way using `application.navigateToApp`, else, a full page refresh will be performed.
    */
-  navigateTo: () => void;
+  navigate: () => Promise<void>;
 }
 
 /** @public */
@@ -227,12 +223,12 @@ Notes:
   types are different on the client and server.
   - The `find` start API signature got a `KibanaRequest` for `server`, when this parameter is not present for `public`.
 - The `find` API returns a observable of `NavigableGlobalSearchResult` instead of plain `GlobalSearchResult`. This type 
-is here to enhance results with a `navigateTo` method to let `core` handle the navigation logic, which is 
+is here to enhance results with a `navigate` method to let `core` handle the navigation logic, which is 
 non-trivial. See the [Redirecting to a result](#redirecting-to-a-result) section for more info.
 
 #### http API
 
-An HTTP API will be exposed on `/api/core/global_search/find` to allow the client-side `GlobalSearchService` 
+An internal HTTP API will be exposed on `/internal/core/global_search/find` to allow the client-side `GlobalSearchService` 
 to fetch results from the server-side result providers.
 
 It should be very close to:
@@ -264,8 +260,9 @@ router.post(
 ```
 
 Notes: 
+- This API is only for internal use and communication between the client and the server parts of the `GS` API. When
+the need to expose an API for external consumers will appear, a new public API will be exposed for that.
 - A new `globalSearch` service will be exposed on core's `RequestHandlerContext` to wrap a `find` call with current request.
-- This API should be considered internal until we'll officially need to expose it for external consumers such as ChatOps.
 - Initial implementation will await for all results and then return them as a single response.  As it's supported by 
   the service, it could theoretically be possible to stream the results instead, however that makes the consumption of
   the API from the client more difficult. If this become important at some point, a new `/api/core/global_search/find/async` 
@@ -281,7 +278,7 @@ Notes:
 - `coreStart.globalService` exposes an API to be able to search for objects. This API is available from both public
   and server sides. 
   - When using the server `find` API, only results from providers registered from the server will be returned. 
-  - When using the public `find` API, results from provider registered from either server and public sides will be returned.
+  - When using the public `find` API, results from provider registered from both server and public sides will be returned.
 - During a `find` call, the service will call all the registered result providers and collect their result observables.
   Every time a result provider emits some new results, the `globalSearch` service will:
   - Consolidate/enhance them
@@ -300,9 +297,9 @@ registering result providers from the client should only be done to answer this 
 discouraged, by providing appropriated jsdoc and documentation explaining that it should only
 be used when it is not technically possible to register it from the server side instead.
 
-### results url consolidation
+### results url processing
 
-When retrieving results from providers, the GS service will always start by consolidating them. The most notable (and
+When retrieving results from providers, the GS service will always start by processing them. The most notable (and
 currently only) step is to convert the result url to an absolute one.
 
 #### absolute url conversion logic
@@ -320,7 +317,7 @@ I.E are considered valid:
 - `https://my-other-kibana-instance/some/result`
 - `/app/kibana#/dashboard/some-id`
 
-When consolidating the result, the logic regarding the `url` property is:
+When processing the result, the logic regarding the `url` property is:
 - if the `url` is absolute, return it unchanged
 - if the `url` is a relative path (starts with `/`), it will be converted to an absolute url by prepending the Kibana
 instance's newly introduced `publicAddress`.
@@ -360,10 +357,10 @@ const getAbsoluteUrl = (path: string, request: KibanaRequest) => {
 }
 ```
 
-Search results will then be consolidated before being returned to convert relative urls to absolute ones:
+Search results will then be processed before being returned to convert relative urls to absolute ones:
 
 ```ts
-const consolidateResult(result: GlobalSearchResult, request: KibanaRequest) {
+const processResult(result: GlobalSearchResult, request: KibanaRequest) {
   if(isUrlPath(result.url)) {
     result.url = http.getAbsoluteUrl(result.url, request)
   }
@@ -374,16 +371,16 @@ const consolidateResult(result: GlobalSearchResult, request: KibanaRequest) {
 
 Having absolute urls in GS results is a necessity for external consumers, and makes the API more consistent than mixing
 relative and absolute urls, however this makes it less trivial for UI consumers to redirect to a given result in a SPA
-friendly way (using `application.navigateTo` instead of triggering a full page refresh).
+friendly way (using `application.navigateToApp` instead of triggering a full page refresh).
 
-This is why `NavigableGlobalSearchResult.navigateTo` has been introduced, to let `core` handles this navigation logic.
+This is why `NavigableGlobalSearchResult.navigate` has been introduced, to let `core` handle this navigation logic.
 
-When using `navigateTo` from a result instance, the following logic will be executed:
+When using `navigate` from a result instance, the following logic will be executed:
 
 If all 3 of these criteria are true for `result.url`:
-- The domain of the URL  matches the domain of the `publicUrl`
+- The origin of the URL  matches the origin of the `publicUrl`
 - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
-- The pathname segment after the basePath matches an application route (eg. /app/<id>/)
+- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
 Then: match the pathname segment to the corresponding application and do the SPA navigation to that application using 
 the remaining pathname segment
@@ -528,7 +525,7 @@ See alternatives.
 
 ## Result providers could be only registrable from the server-side API
 
-The fact that some kind of results, and therefor some result providers, must be on the client-side complexifies the API,
+The fact that some kinds of results, and therefore some result providers, must be on the client-side makes the API more complex,
 while making these results not available from the server-side and HTTP APIs.
 
 We could decide to only allow providers registration from the server-side. It would reduce API exposure, while simplifying
@@ -536,7 +533,8 @@ the service implementation. However to do that, we would need to find a solution
  result provider for `application` (and later `management_section`) type provider.
 
 I will directly exclude the option to move the `application` registration (`core.application.register`) from client 
-to server-side, as it's going the opposite way of the KP philosophy while also being an heavy breaking change.
+to server-side, as it's a very heavy impacting (and breaking) change to `core` APIs that would requires more reasons
+than just this RFC/API to consider.
 
 ### AST parsing
 
@@ -582,7 +580,7 @@ url: { absUrl: string } | { application: string; path?: string };
 ```
 
 That was making it way easier to redirect to an internal result from the UI, as we could directly call
-`application.navigateTo(application, { path })`.
+`application.navigateToApp(application, { path })`.
 
 However, that didn't bring answer for the (future) need to be able to search for and redirect to object in 
 different spaces. We could then have changed the structure to
@@ -678,7 +676,8 @@ documentation.
 
 This follows the same patterns we have used for other Core APIs: Observables subscriptions, etc.
 
-This should be taught using the same channels we've leveraged for other Kibana Platform APIs, API documentation mostly.
+This should be taught using the same channels we've leveraged for other Kibana Platform APIs, API documentation and
+example plugins.
 
 # Unresolved questions
 
