@@ -53,7 +53,7 @@ describe('Change password', () => {
       now: Date.now(),
       idleTimeoutExpiration: null,
       lifespanExpiration: null,
-      provider: 'basic',
+      provider: { type: 'basic', name: 'basic' },
     });
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();

@@ -16,17 +16,16 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useEnrollmentApiKeys } from '../enrollment_api_keys';
 import { AgentConfig } from '../../../../../types';
-import { useInput, useCore, sendRequest } from '../../../../../hooks';
+import { useInput, useCore, sendRequest, useGetEnrollmentAPIKeys } from '../../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../../services';
 
 interface Props {
-  onKeyChange: (keyId: string | null) => void;
+  onKeyChange: (keyId: string | undefined) => void;
   agentConfigs: AgentConfig[];
 }
 
-function useCreateApiKeyForm(configId: string | null, onSuccess: (keyId: string) => void) {
+function useCreateApiKeyForm(configId: string | undefined, onSuccess: (keyId: string) => void) {
   const { notifications } = useCore();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
@@ -62,17 +61,16 @@ function useCreateApiKeyForm(configId: string | null, onSuccess: (keyId: string)
 }
 
 export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, agentConfigs }) => {
-  const enrollmentAPIKeysRequest = useEnrollmentApiKeys({
-    currentPage: 1,
-    pageSize: 1000,
+  const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeys({
+    page: 1,
+    perPage: 1000,
   });
 
   const [selectedState, setSelectedState] = useState<{
-    agentConfigId: string | null;
-    enrollmentAPIKeyId: string | null;
+    agentConfigId?: string;
+    enrollmentAPIKeyId?: string;
   }>({
-    agentConfigId: agentConfigs.length ? agentConfigs[0].id : null,
-    enrollmentAPIKeyId: null,
+    agentConfigId: agentConfigs.length ? agentConfigs[0].id : undefined,
   });
   const filteredEnrollmentAPIKeys = React.useMemo(() => {
     if (!selectedState.agentConfigId || !enrollmentAPIKeysRequest.data) {
@@ -99,10 +97,10 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
 
   const [showAPIKeyForm, setShowAPIKeyForm] = useState(false);
   const apiKeyForm = useCreateApiKeyForm(selectedState.agentConfigId, async (keyId: string) => {
-    const res = await enrollmentAPIKeysRequest.refresh();
+    const res = await enrollmentAPIKeysRequest.sendRequest();
     setSelectedState({
       ...selectedState,
-      enrollmentAPIKeyId: res.data?.list.find(key => key.id === keyId)?.id ?? null,
+      enrollmentAPIKeyId: res.data?.list.find(key => key.id === keyId)?.id,
     });
     setShowAPIKeyForm(false);
   });
@@ -135,7 +133,7 @@ export const APIKeySelection: React.FunctionComponent<Props> = ({ onKeyChange, a
               onChange={e =>
                 setSelectedState({
                   agentConfigId: e.target.value,
-                  enrollmentAPIKeyId: null,
+                  enrollmentAPIKeyId: undefined,
                 })
               }
             />
