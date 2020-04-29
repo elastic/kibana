@@ -22,6 +22,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionFunctionDefinitions,
 } from '../expression_functions/types';
+import { format } from './format';
 
 // Gets all optional string keys from an interface.
 type OptionalKeys<T> = {
@@ -103,6 +104,12 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * @return `ExpressionAstFunction`
    */
   toAst: () => ExpressionAstFunction;
+  /**
+   * Converts function to an expression string.
+   *
+   * @return `string`
+   */
+  toString: () => string;
 }
 
 /**
@@ -165,6 +172,10 @@ export function buildExpressionFunction<F extends string>(
         function: fnName,
         arguments: args,
       };
+    },
+
+    toString() {
+      return format({ type: 'expression', chain: [this.toAst()] }, 'expression');
     },
   };
 }
