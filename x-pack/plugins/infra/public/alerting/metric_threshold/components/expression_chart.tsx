@@ -142,7 +142,7 @@ export const ExpressionChart: React.FC<Props> = ({
   }
 
   const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(expression.comparator);
-  const opacity = 0.1;
+  const opacity = 0.3;
   const timeLabel = TIME_LABELS[expression.timeUnit];
 
   return (
