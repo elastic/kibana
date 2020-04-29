@@ -10,19 +10,12 @@ const { join, resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
 const { generate } = require('graphql-code-generator');
 
-const legacyPluginPath = '../../legacy/plugins/siem';
-
 const GRAPHQL_GLOBS = [
-  join(legacyPluginPath, 'public', 'containers', '**', '*.gql_query.ts{,x}'),
+  join('public', 'containers', '**', '*.gql_query.ts{,x}'),
   join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
 ];
-const OUTPUT_INTROSPECTION_PATH = resolve(
-  legacyPluginPath,
-  'public',
-  'graphql',
-  'introspection.json'
-);
-const OUTPUT_CLIENT_TYPES_PATH = resolve(legacyPluginPath, 'public', 'graphql', 'types.ts');
+const OUTPUT_INTROSPECTION_PATH = resolve('public', 'graphql', 'introspection.json');
+const OUTPUT_CLIENT_TYPES_PATH = resolve('public', 'graphql', 'types.ts');
 const OUTPUT_SERVER_TYPES_PATH = resolve('server', 'graphql', 'types.ts');
 const SCHEMA_PATH = resolve(__dirname, 'combined_schema.ts');
 
