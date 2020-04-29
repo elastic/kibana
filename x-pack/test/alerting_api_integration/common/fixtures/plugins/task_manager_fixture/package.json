@@ -1,11 +1,11 @@
 {
-  "name": "aad-fixtures",
+  "name": "task_manager_fixture",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
-  "main": "target/test/plugin_api_integration/plugins/aad",
+  "main": "target/test/plugin_api_integration/plugins/task_manager_fixture",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && tsc"

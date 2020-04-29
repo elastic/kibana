@@ -8,7 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -124,7 +124,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions_simulators')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
+          `--plugin-path=${path.join(
+            __dirname,
+            'fixtures',
+            'plugins',
+            'actions_simulators_legacy'
+          )}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager_fixture')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
