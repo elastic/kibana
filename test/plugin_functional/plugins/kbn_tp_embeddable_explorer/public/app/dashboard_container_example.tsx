@@ -24,7 +24,7 @@ import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
   DashboardContainerInput,
-} from '../../../../../../../../src/plugins/dashboard/public';
+} from '../../../../../../src/plugins/dashboard/public';
 
 import { dashboardInput } from './dashboard_input';
 

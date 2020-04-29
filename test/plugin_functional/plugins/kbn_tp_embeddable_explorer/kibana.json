@@ -1,8 +1,13 @@
 {
   "id": "kbn_tp_embeddable_explorer",
-  "version": "kibana",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
   "requiredPlugins": [
+    "visTypeMarkdown",
+    "visTypeVislib",
+    "data",
     "embeddable",
+    "uiActions",
     "inspector"
   ],
   "server": false,
