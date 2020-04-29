@@ -498,6 +498,7 @@ export class SavedObjectsService
         this.logger,
         migrationsRetryDelay
       ),
+      kibanaVersion: this.coreContext.env.packageInfo.version,
     });
   }
 }

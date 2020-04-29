@@ -44,6 +44,7 @@ export interface MigrationOpts {
   documentMigrator: VersionedTransformer;
   serializer: SavedObjectsSerializer;
   convertToAliasScript?: string;
+  kibanaVersion: string;
 
   /**
    * If specified, templates matching the specified pattern will be removed
@@ -65,6 +66,7 @@ export interface Context {
   serializer: SavedObjectsSerializer;
   obsoleteIndexTemplatePattern?: string;
   convertToAliasScript?: string;
+  kibanaVersion: string;
 }
 
 /**
@@ -90,6 +92,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     serializer: opts.serializer,
     obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
     convertToAliasScript: opts.convertToAliasScript,
+    kibanaVersion: opts.kibanaVersion,
   };
 }
 

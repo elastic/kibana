@@ -39,7 +39,7 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-const blacklist = ['migrationVersion', 'references'];
+const blacklist = ['migrationVersion', 'references', 'valid', 'invalid_attributes'];
 
 export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);

@@ -64,7 +64,10 @@ export class SavedObjectsSerializer {
    */
   public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace, namespaces } = _source;
+    const { type, namespace, namespaces, status = 'valid' } = _source;
+
+    if (status === 'corrupt')
+      throw new Error(`Cannot deserialize corrupt raw saved object document: ${_id}`);
 
     const version =
       _seq_no != null || _primary_term != null
@@ -76,7 +79,9 @@ export class SavedObjectsSerializer {
       id: this.trimIdPrefix(namespace, type, _id),
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
-      attributes: _source[type],
+      ...(status === 'valid'
+        ? { attributes: _source[type] }
+        : { attributes: _source.unsafe_properties?.[type] }),
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
@@ -102,13 +107,14 @@ export class SavedObjectsSerializer {
       references,
     } = savedObj;
     const source = {
-      [type]: attributes,
       type,
       references,
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
+      ...(attributes && { [type]: attributes }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
+      status: 'valid' as 'valid',
     };
 
     return {

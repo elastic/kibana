@@ -125,7 +125,7 @@ function findChangedProp(actual: any, expected: any) {
  *
  * @returns {IndexMapping}
  */
-function defaultMapping(): IndexMapping {
+export function defaultMapping(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {
@@ -158,6 +158,14 @@ function defaultMapping(): IndexMapping {
             type: 'keyword',
           },
         },
+      },
+      // "private" fields, not exposed through any API's
+      status: {
+        type: 'keyword',
+      },
+      unsafe_properties: {
+        enabled: false, // Don't index unsafe properties
+        type: 'object',
       },
     },
   };

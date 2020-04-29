@@ -40,6 +40,7 @@ describe('IndexMigrator', () => {
         migrate: _.identity,
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
+      kibanaVersion: '7.0.0-test',
     };
   });
 
@@ -59,16 +60,19 @@ describe('IndexMigrator', () => {
           _meta: {
             migrationMappingPropertyHashes: {
               foo: '18c78c995965207ed3f6e7fc5c6e55fe',
+              unsafe_properties: '5ef305b18111b77789afefbd36b66171',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+              status: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
             foo: { type: 'long' },
+            unsafe_properties: { enabled: false, type: 'object' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
@@ -82,6 +86,7 @@ describe('IndexMigrator', () => {
                 id: { type: 'keyword' },
               },
             },
+            status: { type: 'keyword' },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -178,17 +183,20 @@ describe('IndexMigrator', () => {
           _meta: {
             migrationMappingPropertyHashes: {
               foo: '625b32086eb1d1203564cf85062dd22e',
+              unsafe_properties: '5ef305b18111b77789afefbd36b66171',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
               namespaces: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+              status: '2f4316de49999235636386fe51dc06c1',
             },
           },
           properties: {
             author: { type: 'text' },
             foo: { type: 'text' },
+            unsafe_properties: { enabled: false, type: 'object' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
             namespaces: { type: 'keyword' },
@@ -202,6 +210,7 @@ describe('IndexMigrator', () => {
                 id: { type: 'keyword' },
               },
             },
+            status: { type: 'keyword' },
           },
         },
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -292,7 +301,7 @@ describe('IndexMigrator', () => {
       {
         body: [
           { index: { _id: 'foo:1', _index: '.kibana_2' } },
-          { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
+          { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [], status: 'valid' },
         ],
       },
     ]);
@@ -301,7 +310,7 @@ describe('IndexMigrator', () => {
       {
         body: [
           { index: { _id: 'foo:2', _index: '.kibana_2' } },
-          { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
+          { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [], status: 'valid' },
         ],
       },
     ]);

@@ -148,5 +148,6 @@ function mockOptions(): KibanaMigratorOptions {
       skip: false,
     },
     callCluster,
+    kibanaVersion: '7.0.0-test',
   };
 }

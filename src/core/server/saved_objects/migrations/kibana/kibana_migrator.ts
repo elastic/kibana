@@ -48,6 +48,7 @@ export interface KibanaMigratorOptions {
   kibanaConfig: KibanaConfigType;
   logger: Logger;
   savedObjectValidations: PropertyValidators;
+  kibanaVersion: string;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -74,6 +75,7 @@ export class KibanaMigrator {
     status: 'waiting',
   });
   private readonly activeMappings: IndexMapping;
+  private readonly kibanaVersion: string;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -85,6 +87,7 @@ export class KibanaMigrator {
     savedObjectsConfig,
     savedObjectValidations,
     logger,
+    kibanaVersion,
   }: KibanaMigratorOptions) {
     this.callCluster = callCluster;
     this.kibanaConfig = kibanaConfig;
@@ -101,6 +104,7 @@ export class KibanaMigrator {
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.kibanaVersion = kibanaVersion;
   }
 
   /**
@@ -162,6 +166,7 @@ export class KibanaMigrator {
         obsoleteIndexTemplatePattern:
           index === kibanaIndexName ? 'kibana_index_template*' : undefined,
         convertToAliasScript: indexMap[index].script,
+        kibanaVersion: this.kibanaVersion,
       });
     });
 

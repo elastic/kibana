@@ -444,6 +444,7 @@ describe('SavedObjectsRepository', () => {
               references,
               ...mockTimestampFields,
               migrationVersion: migrationVersion || { [type]: '1.1.1' },
+              status: 'valid',
             },
             ...mockVersionProps,
           },

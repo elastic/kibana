@@ -40,6 +40,8 @@ export interface SavedObjectsRawDocSource {
   migrationVersion?: SavedObjectsMigrationVersion;
   updated_at?: string;
   references?: SavedObjectReference[];
+  status?: 'valid' | 'invalid' | 'corrupt';
+  unsafe_properties?: Record<string, unknown>;
 
   [typeMapping: string]: any;
 }
