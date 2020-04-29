@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnHeaderOptions, ColumnHeaderType } from './model';
+import { SavedTimeline } from '../../../common/types/timeline';
 
-export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
+export const defaultColumnHeaderType = 'not-filtered';
 
-export const defaultHeaders: ColumnHeaderOptions[] = [
+export const defaultHeaders: SavedTimeline['columns'] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
@@ -42,6 +42,3 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     id: 'user.name',
   },
 ];
-
-/** The default category of fields shown in the Timeline */
-export const DEFAULT_CATEGORY_NAME = 'default ECS';
