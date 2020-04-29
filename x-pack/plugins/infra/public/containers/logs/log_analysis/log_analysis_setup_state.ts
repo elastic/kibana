@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useEffect, useMemo, useState, useReducer } from 'react';
-
+import { isEqual } from 'lodash';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
+import { usePrevious } from 'react-use';
 import { isExampleDataIndex } from '../../../../common/log_analysis';
 import {
   AvailableIndex,
@@ -32,7 +33,7 @@ const fourWeeksInMs = 86400000 * 7 * 4;
 
 export const useAnalysisSetupState = <JobType extends string>({
   cleanUpAndSetUpModule,
-  moduleDescriptor: { validateSetupIndices },
+  moduleDescriptor: { validateSetupDatasets, validateSetupIndices },
   setUpModule,
   sourceConfiguration,
 }: AnalysisSetupStateArguments<JobType>) => {
@@ -45,6 +46,19 @@ export const useAnalysisSetupState = <JobType extends string>({
       name: indexName,
       validity: 'unknown' as const,
     }))
+  );
+
+  const validIndexNames = useMemo(
+    () => validatedIndices.filter(index => index.validity === 'valid').map(index => index.name),
+    [validatedIndices]
+  );
+
+  const selectedIndexNames = useMemo(
+    () =>
+      validatedIndices
+        .filter(index => index.validity === 'valid' && index.isSelected)
+        .map(i => i.name),
+    [validatedIndices]
   );
 
   const setValidatedIndices = useCallback(
@@ -60,7 +74,10 @@ export const useAnalysisSetupState = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await validateSetupIndices(sourceConfiguration);
+        return await validateSetupIndices(
+          sourceConfiguration.indices,
+          sourceConfiguration.timestampField
+        );
       },
       onResolve: ({ data: { errors } }) => {
         dispatchAvailableIndexAction({
@@ -72,20 +89,34 @@ export const useAnalysisSetupState = <JobType extends string>({
         setValidatedIndices([]);
       },
     },
-    [sourceConfiguration.indices]
+    [sourceConfiguration.indices, sourceConfiguration.timestampField]
   );
 
-  useEffect(() => {
-    validateIndices();
-  }, [validateIndices]);
-
-  const selectedIndexNames = useMemo(
-    () =>
-      validatedIndices
-        .filter(index => index.validity === 'valid' && index.isSelected)
-        .map(i => i.name),
-    [validatedIndices]
+  const [validateDatasetsRequest, validateDatasets] = useTrackedPromise(
+    {
+      cancelPreviousOn: 'resolution',
+      createPromise: async () => {
+        return await validateSetupDatasets(
+          validIndexNames,
+          sourceConfiguration.timestampField,
+          startTime ?? 0,
+          endTime ?? Date.now()
+        );
+      },
+      onResolve: ({ data: { datasets } }) => {
+        dispatchAvailableIndexAction({
+          type: 'updateWithAvailableDatasets',
+          availableDatasets: datasets,
+        });
+      },
+    },
+    [validIndexNames, sourceConfiguration.timestampField, startTime, endTime]
   );
+
+  const validateIndicesAndDatasets = useCallback(async () => {
+    await validateIndices();
+    await validateDatasets();
+  }, [validateDatasets, validateIndices]);
 
   const setUp = useCallback(() => {
     return setUpModule(selectedIndexNames, startTime, endTime);
@@ -98,8 +129,10 @@ export const useAnalysisSetupState = <JobType extends string>({
   const isValidating = useMemo(
     () =>
       validateIndicesRequest.state === 'pending' ||
-      validateIndicesRequest.state === 'uninitialized',
-    [validateIndicesRequest.state]
+      validateIndicesRequest.state === 'uninitialized' ||
+      validateDatasetsRequest.state === 'pending' ||
+      validateDatasetsRequest.state === 'uninitialized',
+    [validateDatasetsRequest.state, validateIndicesRequest.state]
   );
 
   const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
@@ -121,6 +154,28 @@ export const useAnalysisSetupState = <JobType extends string>({
         : errors;
     }, []);
   }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
+
+  const prevStartTime = usePrevious(startTime);
+  const prevEndTime = usePrevious(endTime);
+  const prevValidIndexNames = usePrevious(validIndexNames);
+
+  useEffect(() => {
+    if (
+      startTime !== prevStartTime ||
+      endTime !== prevEndTime ||
+      !isEqual(validIndexNames, prevValidIndexNames)
+    ) {
+      validateIndicesAndDatasets();
+    }
+  }, [
+    endTime,
+    prevEndTime,
+    prevStartTime,
+    prevValidIndexNames,
+    startTime,
+    validIndexNames,
+    validateIndicesAndDatasets,
+  ]);
 
   return {
     cleanUpAndSetUp,
@@ -144,7 +199,10 @@ type AvailableIndicesAction =
     }
   | { type: 'updateWithValidationErrors'; validationErrors: ValidationIndicesError[] }
   | { type: 'select'; indexName: string }
-  | { type: 'updateAvailableDatasets'; indexName: string; availableDatasets: string[] };
+  | {
+      type: 'updateWithAvailableDatasets';
+      availableDatasets: Array<{ indexName: string; datasets: string[] }>;
+    };
 
 const reduceAvailableIndicesState = (
   state: AvailableIndex[],
@@ -179,26 +237,27 @@ const reduceAvailableIndicesState = (
           return {
             validity: 'valid',
             name: previousAvailableIndex.name,
-            isSelected: isExampleDataIndex(previousAvailableIndex.name),
-            availableDatasets: ['a', 'b', 'c'],
+            isSelected: !isExampleDataIndex(previousAvailableIndex.name),
+            availableDatasets: [],
             datasetFilter: {
               include: 'all',
             },
           };
         }
       });
-    case 'updateAvailableDatasets':
+    case 'updateWithAvailableDatasets':
       return state.map(previousAvailableIndex => {
-        if (
-          previousAvailableIndex.name !== action.indexName ||
-          previousAvailableIndex.validity !== 'valid'
-        ) {
+        if (previousAvailableIndex.validity !== 'valid') {
           return previousAvailableIndex;
         }
 
+        const datasetsForIndex = action.availableDatasets
+          .filter(({ indexName }) => indexName === previousAvailableIndex.name)
+          .flatMap(({ datasets }) => datasets);
+
         return {
           ...previousAvailableIndex,
-          availableDatasets: action.availableDatasets,
+          availableDatasets: datasetsForIndex,
         };
       });
     case 'select':

@@ -20,6 +20,7 @@ import {
 import { callJobsSummaryAPI } from '../../../containers/logs/log_analysis/api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
+import { callValidateDatasetsAPI } from '../../../containers/logs/log_analysis/api/validate_datasets';
 import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
 
 const moduleId = 'logs_ui_analysis';
@@ -84,7 +85,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string) => {
   return await cleanUpJobsAndDatafeeds(spaceId, sourceId, logEntryRateJobTypes);
 };
 
-const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceConfiguration) => {
+const validateSetupIndices = async (indices: string[], timestampField: string) => {
   return await callValidateIndicesAPI(indices, [
     {
       name: timestampField,
@@ -97,6 +98,15 @@ const validateSetupIndices = async ({ indices, timestampField }: ModuleSourceCon
   ]);
 };
 
+const validateSetupDatasets = async (
+  indices: string[],
+  timestampField: string,
+  startTime: number,
+  endTime: number
+) => {
+  return await callValidateDatasetsAPI(indices, timestampField, startTime, endTime);
+};
+
 export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {
   moduleId,
   jobTypes: logEntryRateJobTypes,
@@ -106,5 +116,6 @@ export const logEntryRateModule: ModuleDescriptor<LogEntryRateJobType> = {
   getModuleDefinition,
   setUpModule,
   cleanUpModule,
+  validateSetupDatasets,
   validateSetupIndices,
 };
