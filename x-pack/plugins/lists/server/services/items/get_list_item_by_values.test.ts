@@ -4,8 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2, getCallAsCurrentUserMock } from '../mocks';
-import { getSearchListItemMock } from '../mocks/get_search_list_item_mock';
+import {
+  LIST_ID,
+  LIST_ITEM_INDEX,
+  TYPE,
+  VALUE,
+  VALUE_2,
+  getCallAsCurrentUserMock,
+  getSearchListItemMock,
+} from '../mocks';
 
 import { getListItemByValues } from './get_list_item_by_values';
 
@@ -29,6 +36,7 @@ describe('get_list_item_by_values', () => {
       type: TYPE,
       value: [VALUE, VALUE_2],
     });
+
     expect(listItem).toEqual([]);
   });
 
@@ -42,6 +50,7 @@ describe('get_list_item_by_values', () => {
       type: TYPE,
       value: [VALUE, VALUE_2],
     });
+
     expect(listItem).toEqual([
       {
         created_at: '2020-04-20T15:25:31.830Z',

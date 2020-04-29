@@ -10,10 +10,10 @@ import {
   getCallAsCurrentUserMock,
   getExportListItemsToStreamOptionsMock,
   getResponseOptionsMock,
+  getSearchListItemMock,
   getWriteNextResponseOptions,
   getWriteResponseHitsToStreamOptionsMock,
 } from '../mocks';
-import { getSearchListItemMock } from '../mocks/get_search_list_item_mock';
 
 import {
   exportListItemsToStream,

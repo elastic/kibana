@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LIST_ID, LIST_INDEX, getCallAsCurrentUserMock, getListItemResponseMock } from '../mocks';
-import { getSearchListItemMock } from '../mocks/get_search_list_item_mock';
+import {
+  LIST_ID,
+  LIST_INDEX,
+  getCallAsCurrentUserMock,
+  getListItemResponseMock,
+  getSearchListItemMock,
+} from '../mocks';
 
 import { getListItem } from './get_list_item';
 
