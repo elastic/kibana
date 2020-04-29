@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { memo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import {
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiDescribedFormGroup,
-  EuiSpacer,
-  EuiButton,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AGENT_CONFIG_PATH } from '../../../../../constants';
 import { AgentConfig } from '../../../../../types';
-import { useCore } from '../../../../../hooks';
-import { AgentConfigDeleteProvider } from '../../../components';
+import { useCore, useCapabilities, sendUpdateAgentConfig } from '../../../../../hooks';
+import { AgentConfigForm, agentConfigFormValidation } from '../../../components';
 
-const CenteredFormGroup = styled(EuiDescribedFormGroup)`
+const FormWrapper = styled.div`
+  max-width: 800px;
   margin-right: auto;
   margin-left: auto;
 `;
@@ -27,181 +23,130 @@ const CenteredFormGroup = styled(EuiDescribedFormGroup)`
 export const ConfigSettingsView = memo<{ config: AgentConfig }>(
   ({ config: originalAgentConfig }) => {
     const { notifications } = useCore();
-    const [config, setConfig] = useState<Partial<AgentConfig>>({
-      name: originalAgentConfig.name,
-      description: originalAgentConfig.description,
-      namespace: originalAgentConfig.namespace,
+    const history = useHistory();
+    const hasWriteCapabilites = useCapabilities().write;
+    const [agentConfig, setAgentConfig] = useState<AgentConfig>({
+      ...originalAgentConfig,
     });
-    const updateConfig = (updatedFields: Partial<AgentConfig>) => {
-      setConfig({
-        ...config,
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [hasChanges, setHasChanges] = useState<boolean>(false);
+    const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+    const validation = agentConfigFormValidation(agentConfig);
+
+    const updateAgentConfig = (updatedFields: Partial<AgentConfig>) => {
+      setAgentConfig({
+        ...agentConfig,
         ...updatedFields,
       });
-    };
-    const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const validation = configValidation(config);
-
-    const fields: {
-      [key: string]: { name: 'name' | 'description' | 'namespace'; label: JSX.Element };
-    } = {
-      name: {
-        name: 'name',
-        label: (
-          <FormattedMessage
-            id="xpack.ingestManager.configForm.nameFieldLabel"
-            defaultMessage="Name"
-          />
-        ),
-      },
-      description: {
-        name: 'description',
-        label: (
-          <FormattedMessage
-            id="xpack.ingestManager.configForm.descriptionFieldLabel"
-            defaultMessage="Description"
-          />
-        ),
-      },
-      namespace: {
-        name: 'namespace',
-        label: (
-          <FormattedMessage
-            id="xpack.ingestManager.configForm.namespaceFieldLabel"
-            defaultMessage="Namespace"
-          />
-        ),
-      },
+      setHasChanges(true);
     };
 
-    const renderField = ({ name, label }: { name: string; label: JSX.Element }) => (
-      <EuiFormRow
-        key={name}
-        label={label}
-        error={touchedFields[name] && validation[name] ? validation[name] : null}
-        isInvalid={Boolean(touchedFields[name] && validation[name])}
-      >
-        <EuiFieldText
-          value={config[name] as string}
-          onChange={e => updateConfig({ [name]: e.target.value })}
-          isInvalid={Boolean(touchedFields[name] && validation[name])}
-          onBlur={() => setTouchedFields({ ...touchedFields, [name]: true })}
-        />
-      </EuiFormRow>
-    );
+    const onSubmit = async () => {
+      setIsLoading(true);
+      try {
+        const { name, description, namespace, monitoring_enabled } = agentConfig;
+        const { data, error } = await sendUpdateAgentConfig(agentConfig.id, {
+          name,
+          description,
+          namespace,
+          monitoring_enabled,
+        });
+        if (data?.success) {
+          notifications.toasts.addSuccess(
+            i18n.translate('xpack.ingestManager.editAgentConfig.successNotificationTitle', {
+              defaultMessage: "Successfully updated '{name}' settings",
+              values: { name: agentConfig.name },
+            })
+          );
+          setHasChanges(false);
+        } else {
+          notifications.toasts.addDanger(
+            error
+              ? error.message
+              : i18n.translate('xpack.ingestManager.editAgentConfig.errorNotificationTitle', {
+                  defaultMessage: 'Unable to update agent config',
+                })
+          );
+        }
+      } catch (e) {
+        notifications.toasts.addDanger(
+          i18n.translate('xpack.ingestManager.editAgentConfig.errorNotificationTitle', {
+            defaultMessage: 'Unable to update agent config',
+          })
+        );
+      }
 
-    const onDelete = () => {
-      // redirect to list page
-      // add toast
+      setIsLoading(false);
     };
 
     return (
-      <EuiForm>
-        <CenteredFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.ingestManager.configForm.generalSettingsGroupTitle"
-                defaultMessage="General settings"
-              />
-            </h4>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.ingestManager.configForm.generalSettingsGroupDescription"
-              defaultMessage="Choose a name and description for your agent configuration."
-            />
-          }
-        >
-          <>
-            {renderField(fields.name)}
-            {renderField(fields.description)}
-          </>
-        </CenteredFormGroup>
-        <CenteredFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.ingestManager.configForm.defaultNamespaceGroupTitle"
-                defaultMessage="Default namespace"
-              />
-            </h4>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.ingestManager.configForm.defaultNamespaceGroupDescription"
-              defaultMessage="Apply a default namespace to data sources that use this configuration. Data sources can specify their own namespaces."
-            />
-          }
-        >
-          <>{renderField(fields.namespace)}</>
-        </CenteredFormGroup>
-        <CenteredFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.ingestManager.configForm.deleteConfigGroupTitle"
-                defaultMessage="Delete configuration"
-              />
-            </h4>
-          }
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.ingestManager.configForm.deleteConfigGroupDescription"
-                defaultMessage="Existing data will not be deleted."
-              />
-              <EuiSpacer size="s" />
-              <AgentConfigDeleteProvider>
-                {deleteAgentConfigPrompt => {
-                  return (
-                    <EuiButton
-                      color="danger"
-                      disabled={Boolean(originalAgentConfig.is_default)}
-                      onClick={() => deleteAgentConfigPrompt(originalAgentConfig.id, onDelete)}
+      <FormWrapper>
+        <AgentConfigForm
+          agentConfig={agentConfig}
+          updateAgentConfig={updateAgentConfig}
+          withSysMonitoring={withSysMonitoring}
+          updateSysMonitoring={newValue => setWithSysMonitoring(newValue)}
+          validation={validation}
+          isEditing={true}
+          onDelete={() => {
+            history.push(AGENT_CONFIG_PATH);
+          }}
+        />
+        {hasChanges ? (
+          <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <FormattedMessage
+                  id="xpack.ingestManager.editAgentConfig.unsavedChangesText"
+                  defaultMessage="You have unsaved changes"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      color="ghost"
+                      onClick={() => {
+                        setAgentConfig({ ...originalAgentConfig });
+                        setHasChanges(false);
+                      }}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.configForm.deleteConfigActionText"
-                        defaultMessage="Delete configuration"
+                        id="xpack.ingestManager.editAgentConfig.cancelButtonText"
+                        defaultMessage="Cancel"
                       />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={onSubmit}
+                      isLoading={isLoading}
+                      isDisabled={
+                        !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
+                      }
+                      iconType="save"
+                      color="primary"
+                      fill
+                    >
+                      {isLoading ? (
+                        <FormattedMessage
+                          id="xpack.ingestManager.editAgentConfig.savingButtonText"
+                          defaultMessage="Saving…"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.ingestManager.editAgentConfig.saveButtonText"
+                          defaultMessage="Save changes"
+                        />
+                      )}
                     </EuiButton>
-                  );
-                }}
-              </AgentConfigDeleteProvider>
-              {originalAgentConfig.is_default ? (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText color="subdued" size="xs">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configForm.unableToDeleteDefaultConfigText"
-                      defaultMessage="Default configuration cannot be deleted"
-                    />
-                  </EuiText>
-                </>
-              ) : null}
-            </>
-          }
-        />
-      </EuiForm>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiBottomBar>
+        ) : null}
+      </FormWrapper>
     );
   }
 );
-
-interface ConfigValidationResults {
-  [key: string]: JSX.Element[];
-}
-
-export const configValidation = (config: Partial<AgentConfig>): ConfigValidationResults => {
-  const errors: ConfigValidationResults = {};
-
-  if (!config.name?.trim()) {
-    errors.name = [
-      <FormattedMessage
-        id="xpack.ingestManager.configForm.nameRequiredErrorMessage"
-        defaultMessage="Config name is required"
-      />,
-    ];
-  }
-
-  return errors;
-};
