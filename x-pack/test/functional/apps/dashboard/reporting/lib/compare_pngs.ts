@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
-import fs from 'fs';
 import { promisify } from 'bluebird';
+import fs from 'fs';
+import path from 'path';
 import { comparePngs } from '../../../../../../../test/functional/services/lib/compare_pngs';
 
-const mkdirAsync = promisify(fs.mkdir);
+const mkdirAsync = promisify<void, fs.PathLike, { recursive: boolean }>(fs.mkdir);
 
-export async function checkIfPngsMatch(actualpngPath, baselinepngPath, screenshotsDirectory, log) {
+export async function checkIfPngsMatch(
+  actualpngPath: string,
+  baselinepngPath: string,
+  screenshotsDirectory: string,
+  log: any
+) {
   log.debug(`checkIfpngsMatch: ${actualpngPath} vs ${baselinepngPath}`);
   // Copy the pngs into the screenshot session directory, as that's where the generated pngs will automatically be
   // stored.
