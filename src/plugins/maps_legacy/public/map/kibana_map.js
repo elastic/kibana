@@ -20,6 +20,7 @@
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
+import 'leaflet-draw';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
