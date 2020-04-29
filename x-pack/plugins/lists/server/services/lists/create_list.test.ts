@@ -40,7 +40,7 @@ describe('crete_list', () => {
       id: LIST_ID,
       index: LIST_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
+    expect(options.callAsCurrentUser).toBeCalledWith('index', expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {

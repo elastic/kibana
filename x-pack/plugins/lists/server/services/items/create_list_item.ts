@@ -14,7 +14,7 @@ import {
   MetaOrUndefined,
   Type,
 } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 import { transformListItemToElasticQuery } from '../utils';
 
 export interface CreateListItemOptions {
@@ -22,7 +22,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -35,7 +35,7 @@ export const createListItem = async ({
   listId,
   type,
   value,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
   user,
   meta,
@@ -58,7 +58,7 @@ export const createListItem = async ({
     ...transformListItemToElasticQuery({ type, value }),
   };
 
-  const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await callAsCurrentUser('index', {
     body,
     id,
     index: listItemIndex,

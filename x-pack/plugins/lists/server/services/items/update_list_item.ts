@@ -13,14 +13,14 @@ import {
   UpdateEsListItemSchema,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getListItem } from './get_list_item';
 
 export interface UpdateListItemOptions {
   id: Id;
   value: string | null | undefined;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -30,14 +30,14 @@ export interface UpdateListItemOptions {
 export const updateListItem = async ({
   id,
   value,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
   user,
   meta,
   dateNow,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const listItem = await getListItem({ dataClient, id, listItemIndex });
+  const listItem = await getListItem({ callAsCurrentUser, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
@@ -48,7 +48,7 @@ export const updateListItem = async ({
       ...transformListItemToElasticQuery({ type: listItem.type, value: value ?? listItem.value }),
     };
 
-    const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
+    const response: CreateDocumentResponse = await callAsCurrentUser('update', {
       body: {
         doc,
       },

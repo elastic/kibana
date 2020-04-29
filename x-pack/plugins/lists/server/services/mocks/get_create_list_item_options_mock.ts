@@ -6,7 +6,7 @@
 
 import { CreateListItemOptions } from '../items';
 
-import { getDataClientMock } from './get_data_client_mock';
+import { getCallAsCurrentUserMock } from './get_data_client_mock';
 import {
   DATE_NOW,
   LIST_ID,
@@ -19,7 +19,7 @@ import {
 } from './lists_services_mock_constants';
 
 export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
-  dataClient: getDataClientMock(),
+  callAsCurrentUser: getCallAsCurrentUserMock(),
   dateNow: DATE_NOW,
   id: LIST_ITEM_ID,
   listId: LIST_ID,

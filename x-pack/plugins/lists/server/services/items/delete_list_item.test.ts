@@ -46,6 +46,6 @@ describe('delete_list_item', () => {
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('delete', deleteQuery);
+    expect(options.callAsCurrentUser).toBeCalledWith('delete', deleteQuery);
   });
 });

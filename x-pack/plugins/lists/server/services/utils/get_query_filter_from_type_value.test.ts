@@ -7,6 +7,14 @@
 import { QueryFilterType, getQueryFilterFromTypeValue } from './get_query_filter_from_type_value';
 
 describe('get_query_filter_from_type_value', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it returns an ip if given an ip', () => {
     const queryFilter = getQueryFilterFromTypeValue({
       listId: 'list-123',

@@ -5,12 +5,12 @@
  */
 import { ImportListItemsToStreamOptions } from '../items';
 
-import { getDataClientMock } from './get_data_client_mock';
+import { getCallAsCurrentUserMock } from './get_data_client_mock';
 import { LIST_ID, LIST_ITEM_INDEX, META, TYPE, USER } from './lists_services_mock_constants';
 import { TestReadable } from './test_readable';
 
 export const getImportListItemsToStreamOptionsMock = (): ImportListItemsToStreamOptions => ({
-  dataClient: getDataClientMock(),
+  callAsCurrentUser: getCallAsCurrentUserMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,

@@ -14,13 +14,13 @@ import {
   NameOrUndefined,
   UpdateEsListSchema,
 } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getList } from '.';
 
 export interface UpdateListOptions {
   id: Id;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listIndex: string;
   user: string;
   name: NameOrUndefined;
@@ -33,14 +33,14 @@ export const updateList = async ({
   id,
   name,
   description,
-  dataClient,
+  callAsCurrentUser,
   listIndex,
   user,
   meta,
   dateNow,
 }: UpdateListOptions): Promise<ListSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const list = await getList({ dataClient, id, listIndex });
+  const list = await getList({ callAsCurrentUser, id, listIndex });
   if (list == null) {
     return null;
   } else {
@@ -51,7 +51,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('update', {
+    const response: CreateDocumentResponse = await callAsCurrentUser('update', {
       body: { doc },
       id,
       index: listIndex,

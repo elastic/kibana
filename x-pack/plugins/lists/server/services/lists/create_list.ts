@@ -7,7 +7,7 @@
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
 
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 import {
   Description,
   IdOrUndefined,
@@ -23,7 +23,7 @@ export interface CreateListOptions {
   type: Type;
   name: Name;
   description: Description;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -36,7 +36,7 @@ export const createList = async ({
   name,
   type,
   description,
-  dataClient,
+  callAsCurrentUser,
   listIndex,
   user,
   meta,
@@ -55,7 +55,7 @@ export const createList = async ({
     updated_at: createdAt,
     updated_by: user,
   };
-  const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await callAsCurrentUser('index', {
     body,
     id,
     index: listIndex,

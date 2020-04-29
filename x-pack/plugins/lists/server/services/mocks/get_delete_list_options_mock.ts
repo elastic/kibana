@@ -6,11 +6,11 @@
 
 import { DeleteListOptions } from '../lists';
 
-import { getDataClientMock } from './get_data_client_mock';
+import { getCallAsCurrentUserMock } from './get_data_client_mock';
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from './lists_services_mock_constants';
 
 export const getDeleteListOptionsMock = (): DeleteListOptions => ({
-  dataClient: getDataClientMock(),
+  callAsCurrentUser: getCallAsCurrentUserMock(),
   id: LIST_ID,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,

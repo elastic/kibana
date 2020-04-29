@@ -7,20 +7,20 @@
 import { SearchResponse } from 'elasticsearch';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 interface GetListOptions {
   id: Id;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listIndex: string;
 }
 
 export const getList = async ({
   id,
-  dataClient,
+  callAsCurrentUser,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  const result: SearchResponse<SearchEsListSchema> = await dataClient.callAsCurrentUser('search', {
+  const result: SearchResponse<SearchEsListSchema> = await callAsCurrentUser('search', {
     body: {
       query: {
         term: {

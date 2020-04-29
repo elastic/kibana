@@ -7,7 +7,7 @@
 import { Readable } from 'stream';
 
 import { MetaOrUndefined, Type } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { BufferLines } from './buffer_lines';
 import { getListItemByValues } from './get_list_item_by_values';
@@ -16,7 +16,7 @@ import { createListItemsBulk } from './create_list_items_bulk';
 export interface ImportListItemsToStreamOptions {
   listId: string;
   stream: Readable;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
   type: Type;
   user: string;
@@ -26,7 +26,7 @@ export interface ImportListItemsToStreamOptions {
 export const importListItemsToStream = ({
   listId,
   stream,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
   type,
   user,
@@ -37,7 +37,7 @@ export const importListItemsToStream = ({
     readBuffer.on('lines', async (lines: string[]) => {
       await writeBufferToItems({
         buffer: lines,
-        dataClient,
+        callAsCurrentUser,
         listId,
         listItemIndex,
         meta,
@@ -54,7 +54,7 @@ export const importListItemsToStream = ({
 
 export interface WriteBufferToItemsOptions {
   listId: string;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
   buffer: string[];
   type: Type;
@@ -69,7 +69,7 @@ export interface LinesResult {
 
 export const writeBufferToItems = async ({
   listId,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
   buffer,
   type,
@@ -77,7 +77,7 @@ export const writeBufferToItems = async ({
   meta,
 }: WriteBufferToItemsOptions): Promise<LinesResult> => {
   const items = await getListItemByValues({
-    dataClient,
+    callAsCurrentUser,
     listId,
     listItemIndex,
     type,
@@ -89,7 +89,7 @@ export const writeBufferToItems = async ({
   const linesProcessed = duplicatesRemoved.length;
   const duplicatesFound = buffer.length - duplicatesRemoved.length;
   await createListItemsBulk({
-    dataClient,
+    callAsCurrentUser,
     listId,
     listItemIndex,
     meta,

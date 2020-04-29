@@ -5,26 +5,26 @@
  */
 
 import { Id, ListItemSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
 }
 
 export const deleteListItem = async ({
   id,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
 }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-  const listItem = await getListItem({ dataClient, id, listItemIndex });
+  const listItem = await getListItem({ callAsCurrentUser, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
-    await dataClient.callAsCurrentUser('delete', {
+    await callAsCurrentUser('delete', {
       id,
       index: listItemIndex,
     });

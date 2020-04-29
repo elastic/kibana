@@ -6,7 +6,7 @@
 
 import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getListItemByValues } from './get_list_item_by_values';
 
@@ -14,7 +14,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
 }
 
@@ -22,11 +22,11 @@ export const deleteListItemByValue = async ({
   listId,
   value,
   type,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
 }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
-    dataClient,
+    callAsCurrentUser,
     listId,
     listItemIndex,
     type,
@@ -38,7 +38,7 @@ export const deleteListItemByValue = async ({
     type,
     value: values,
   });
-  await dataClient.callAsCurrentUser('deleteByQuery', {
+  await callAsCurrentUser('deleteByQuery', {
     body: {
       query: {
         bool: {

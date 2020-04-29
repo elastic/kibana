@@ -5,28 +5,28 @@
  */
 
 import { Id, ListSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getList } from './get_list';
 
 export interface DeleteListOptions {
   id: Id;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listIndex: string;
   listItemIndex: string;
 }
 
 export const deleteList = async ({
   id,
-  dataClient,
+  callAsCurrentUser,
   listIndex,
   listItemIndex,
 }: DeleteListOptions): Promise<ListSchema | null> => {
-  const list = await getList({ dataClient, id, listIndex });
+  const list = await getList({ callAsCurrentUser, id, listIndex });
   if (list == null) {
     return null;
   } else {
-    await dataClient.callAsCurrentUser('deleteByQuery', {
+    await callAsCurrentUser('deleteByQuery', {
       body: {
         query: {
           term: {
@@ -37,7 +37,7 @@ export const deleteList = async ({
       index: listItemIndex,
     });
 
-    await dataClient.callAsCurrentUser('delete', {
+    await callAsCurrentUser('delete', {
       id,
       index: listIndex,
     });

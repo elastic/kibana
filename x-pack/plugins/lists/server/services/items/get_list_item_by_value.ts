@@ -5,13 +5,13 @@
  */
 
 import { ListItemArraySchema, Type } from '../../../common/schemas';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 import { getListItemByValues } from '.';
 
 export interface GetListItemByValueOptions {
   listId: string;
-  dataClient: DataClient;
+  callAsCurrentUser: CallAsCurrentUser;
   listItemIndex: string;
   type: Type;
   value: string;
@@ -19,13 +19,13 @@ export interface GetListItemByValueOptions {
 
 export const getListItemByValue = async ({
   listId,
-  dataClient,
+  callAsCurrentUser,
   listItemIndex,
   type,
   value,
 }: GetListItemByValueOptions): Promise<ListItemArraySchema> =>
   getListItemByValues({
-    dataClient,
+    callAsCurrentUser,
     listId,
     listItemIndex,
     type,

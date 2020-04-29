@@ -9,7 +9,6 @@ import { PassThrough, Readable } from 'stream';
 import { KibanaRequest } from 'kibana/server';
 
 import { SecurityPluginSetup } from '../../../../security/server';
-import { SpacesServiceSetup } from '../../../../spaces/server';
 import {
   Description,
   DescriptionOrUndefined,
@@ -21,14 +20,15 @@ import {
   Type,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
-import { DataClient } from '../../types';
+import { CallAsCurrentUser } from '../../types';
 
 export interface ConstructorOptions {
+  callAsCurrentUser: CallAsCurrentUser;
   config: ConfigType;
-  dataClient: DataClient;
   request: KibanaRequest;
-  spaces: SpacesServiceSetup | undefined | null;
-  security: SecurityPluginSetup;
+  spaceId: string;
+  user: string;
+  security: SecurityPluginSetup | undefined | null;
 }
 
 export interface GetListOptions {
