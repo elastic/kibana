@@ -34,3 +34,10 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   }),
   href: '#/datavisualizer',
 });
+
+export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
+    defaultMessage: 'Machine Learning',
+  }),
+  href: '#/jobs/new_job',
+});
