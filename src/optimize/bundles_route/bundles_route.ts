@@ -18,11 +18,13 @@
  */
 
 import { isAbsolute, extname, join } from 'path';
+
 import Hapi from 'hapi';
-import LruCache from 'lru-cache';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
+
 import { createDynamicAssetResponse } from './dynamic_asset_response';
-import { assertIsNpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
+import { FileHashCache } from './file_hash_cache';
+import { assertIsNpUiPluginPublicDirs, NpUiPluginPublicDirs } from '../np_ui_plugin_public_dirs';
 import { fromRoot } from '../../core/server/utils';
 
 /**
@@ -52,14 +54,14 @@ export function createBundlesRoute({
   dllBundlesPath: string;
   basePublicPath: string;
   builtCssPath: string;
-  npUiPluginPublicDirs?: any[];
+  npUiPluginPublicDirs?: NpUiPluginPublicDirs;
   buildHash: string;
   isDist?: boolean;
 }) {
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the 100 most recently used hashes.
-  const fileHashCache = new LruCache(100);
+  const fileHashCache = new FileHashCache();
   assertIsNpUiPluginPublicDirs(npUiPluginPublicDirs);
 
   if (typeof regularBundlesPath !== 'string' || !isAbsolute(regularBundlesPath)) {
@@ -144,7 +146,7 @@ function buildRouteForBundles({
   publicPath: string;
   routePath: string;
   bundlesPath: string;
-  fileHashCache: LruCache<unknown, unknown>;
+  fileHashCache: FileHashCache;
   replacePublicPath?: boolean;
   isDist: boolean;
 }) {

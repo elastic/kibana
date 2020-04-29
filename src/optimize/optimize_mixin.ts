@@ -18,17 +18,21 @@
  */
 
 import Hapi from 'hapi';
-// @ts-ignore
+
+// @ts-ignore not TS yet
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
-// @ts-ignore
+// @ts-ignore not TS yet
 import { DllCompiler } from './dynamic_dll_plugin';
 import { fromRoot } from '../core/server/utils';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';
 import KbnServer, { KibanaConfig } from '../legacy/server/kbn_server';
 
-// eslint-disable-next-line import/no-default-export
-export default async (kbnServer: KbnServer, server: Hapi.Server, config: KibanaConfig) => {
+export const optimizeMixin = async (
+  kbnServer: KbnServer,
+  server: Hapi.Server,
+  config: KibanaConfig
+) => {
   if (!config.get('optimize.enabled')) return;
 
   // the watch optimizer sets up two threads, one is the server listening

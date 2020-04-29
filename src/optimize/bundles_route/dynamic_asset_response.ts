@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import Util from 'util';
 import Fs from 'fs';
 import { resolve } from 'path';
-
-import Hapi from 'hapi';
-import LruCache from 'lru-cache';
+import { promisify } from 'util';
 
 import Boom from 'boom';
+import Hapi from 'hapi';
 
-// @ts-ignore
+import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 // @ts-ignore
 import { replacePlaceholder } from '../public_path_placeholder';
@@ -35,9 +33,9 @@ const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-const asyncOpen = Util.promisify(Fs.open);
-const asyncClose = Util.promisify(Fs.close);
-const asyncFstat = Util.promisify(Fs.fstat);
+const asyncOpen = promisify(Fs.open);
+const asyncClose = promisify(Fs.close);
+const asyncFstat = promisify(Fs.fstat);
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -57,12 +55,6 @@ const asyncFstat = Util.promisify(Fs.fstat);
  *   - cached hash/etag is based on the file on disk, but modified
  *     by the public path so that individual public paths have
  *     different etags, but can share a cache
- *
- *  @param {Object} options
- *  @property {Hapi.Request} options.request
- *  @property {string} options.bundlesPath
- *  @property {string} options.publicPath
- *  @property {LruCache} options.fileHashCache
  */
 export async function createDynamicAssetResponse({
   request,
@@ -77,11 +69,12 @@ export async function createDynamicAssetResponse({
   h: Hapi.ResponseToolkit;
   bundlesPath: string;
   publicPath: string;
-  fileHashCache: LruCache<unknown, unknown>;
+  fileHashCache: FileHashCache;
   replacePublicPath: boolean;
   isDist: boolean;
 }) {
   let fd: number | undefined;
+
   try {
     const path = resolve(bundlesPath, request.params.path);
 

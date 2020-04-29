@@ -17,34 +17,5 @@
  * under the License.
  */
 
-export function createProxyBundlesRoute({
-  host,
-  port,
-  buildHash,
-}: {
-  host: string;
-  port: number;
-  buildHash: string;
-}) {
-  return [
-    buildProxyRouteForBundles(`/${buildHash}/bundles/`, host, port),
-    buildProxyRouteForBundles(`/${buildHash}/built_assets/dlls/`, host, port),
-    buildProxyRouteForBundles(`/${buildHash}/built_assets/css/`, host, port),
-  ];
-}
-
-function buildProxyRouteForBundles(routePath: string, host: string, port: number) {
-  return {
-    path: `${routePath}{path*}`,
-    method: 'GET',
-    handler: {
-      proxy: {
-        host,
-        port,
-        passThrough: true,
-        xforward: true,
-      },
-    },
-    config: { auth: false },
-  };
-}
+import { optimizeMixin } from './optimize_mixin';
+export default optimizeMixin;
