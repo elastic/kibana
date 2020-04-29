@@ -5,12 +5,12 @@
  */
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../../types';
-import { EndpointAppConstants } from '../../../common/types';
+import { AlertConstants } from '../../../common/alert_constants';
 import { alertListHandlerWrapper } from './list';
 import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
 import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
 
-export const BASE_ALERTS_ROUTE = `${EndpointAppConstants.BASE_API_URL}/alerts`;
+export const BASE_ALERTS_ROUTE = `${AlertConstants.BASE_API_URL}/alerts`;
 
 export function registerAlertRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(
