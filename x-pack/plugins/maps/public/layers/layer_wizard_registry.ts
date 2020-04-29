@@ -20,6 +20,7 @@ export type RenderWizardArguments = {
 };
 
 export type LayerWizard = {
+  checkVisibility?: () => boolean;
   description: string;
   icon: string;
   isIndexingSource?: boolean;
@@ -34,5 +35,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export function getLayerWizards(): LayerWizard[] {
-  return [...registry];
+  return registry.filter(layerWizard => {
+    return layerWizard.checkVisibility ? layerWizard.checkVisibility() : true;
+  });
 }

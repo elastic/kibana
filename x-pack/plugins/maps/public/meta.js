@@ -36,12 +36,15 @@ function fetchFunction(...args) {
   return fetch(...args);
 }
 
+export function isEmsEnabled() {
+  return getInjectedVarFunc()('isEmsEnabled', true);
+}
+
 let emsClient = null;
 let latestLicenseId = null;
 export function getEMSClient() {
   if (!emsClient) {
-    const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
-    if (isEmsEnabled) {
+    if (isEmsEnabled()) {
       const proxyElasticMapsServiceInMaps = getInjectedVarFunc()(
         'proxyElasticMapsServiceInMaps',
         false
@@ -86,7 +89,7 @@ export function getEMSClient() {
 }
 
 export function getGlyphUrl() {
-  if (!getInjectedVarFunc()('isEmsEnabled', true)) {
+  if (!isEmsEnabled()) {
     return '';
   }
   return getInjectedVarFunc()('proxyElasticMapsServiceInMaps', false)
