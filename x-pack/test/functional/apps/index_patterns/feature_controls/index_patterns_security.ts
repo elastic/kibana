@@ -132,7 +132,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.settings.clickKibanaIndexPatterns();
         // The test doesn't actually create an index-pattern, so we check for the empty state
         // instead of the index table
-        await testSubjects.existOrFail('inpEmptyIndexPatternPrompt');
+        await testSubjects.existOrFail('emptyIndexPatternPrompt');
         await testSubjects.missingOrFail('createIndexPatternButton');
       });
 

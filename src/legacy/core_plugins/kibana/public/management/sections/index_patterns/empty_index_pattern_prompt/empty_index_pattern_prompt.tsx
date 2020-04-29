@@ -38,7 +38,12 @@ export const EmptyIndexPatternPrompt: FunctionComponent<Props> = ({
   indexPatternCreationOptions,
 }) => {
   return (
-    <EuiPageContent className="inpEmptyIndexPatternPrompt" grow={false} horizontalPosition="center">
+    <EuiPageContent
+      data-test-subj="emptyIndexPatternPrompt"
+      className="inpEmptyIndexPatternPrompt"
+      grow={false}
+      horizontalPosition="center"
+    >
       <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
         <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">
           <Illustration />
