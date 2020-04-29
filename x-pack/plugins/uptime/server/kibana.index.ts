@@ -5,7 +5,7 @@
  */
 
 import { Request, Server } from 'hapi';
-import { PLUGIN } from '../../../legacy/plugins/uptime/common/constants';
+import { PLUGIN } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
