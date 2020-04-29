@@ -18,13 +18,19 @@
  */
 
 import { resolve } from 'path';
-import { open, fstat, createReadStream, close } from 'fs';
+import Fs from 'fs';
+import { promisify } from 'util';
 
 import Boom from 'boom';
-import { fromNode as fcb } from 'bluebird';
+import Hapi from 'hapi';
 
+import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 import { replacePlaceholder } from '../public_path_placeholder';
+
+const asyncOpen = promisify(Fs.open);
+const asyncClose = promisify(Fs.close);
+const asyncFstat = promisify(Fs.fstat);
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -44,39 +50,46 @@ import { replacePlaceholder } from '../public_path_placeholder';
  *   - cached hash/etag is based on the file on disk, but modified
  *     by the public path so that individual public paths have
  *     different etags, but can share a cache
- *
- *  @param {Object} options
- *  @property {Hapi.Request} options.request
- *  @property {string} options.bundlesPath
- *  @property {string} options.publicPath
- *  @property {LruCache} options.fileHashCache
  */
-export async function createDynamicAssetResponse(options) {
-  const { request, h, bundlesPath, publicPath, fileHashCache, replacePublicPath } = options;
+export async function createDynamicAssetResponse({
+  request,
+  h,
+  bundlesPath,
+  publicPath,
+  fileHashCache,
+  replacePublicPath,
+}: {
+  request: Hapi.Request;
+  h: Hapi.ResponseToolkit;
+  bundlesPath: string;
+  publicPath: string;
+  fileHashCache: FileHashCache;
+  replacePublicPath: boolean;
+}) {
+  let fd: number | undefined;
 
-  let fd;
   try {
     const path = resolve(bundlesPath, request.params.path);
 
     // prevent path traversal, only process paths that resolve within bundlesPath
     if (!path.startsWith(bundlesPath)) {
-      throw Boom.forbidden(null, 'EACCES');
+      throw Boom.forbidden(undefined, 'EACCES');
     }
 
     // we use and manage a file descriptor mostly because
     // that's what Inert does, and since we are accessing
     // the file 2 or 3 times per request it seems logical
-    fd = await fcb(cb => open(path, 'r', cb));
+    fd = await asyncOpen(path, 'r');
 
-    const stat = await fcb(cb => fstat(fd, cb));
+    const stat = await asyncFstat(fd);
     const hash = await getFileHash(fileHashCache, path, stat, fd);
 
-    const read = createReadStream(null, {
+    const read = Fs.createReadStream(null as any, {
       fd,
       start: 0,
       autoClose: true,
     });
-    fd = null; // read stream is now responsible for fd
+    fd = undefined; // read stream is now responsible for fd
 
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
     const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;
@@ -91,8 +104,8 @@ export async function createDynamicAssetResponse(options) {
   } catch (error) {
     if (fd) {
       try {
-        await fcb(cb => close(fd, cb));
-      } catch (error) {
+        await asyncClose(fd);
+      } catch (_) {
         // ignore errors from close, we already have one to report
         // and it's very likely they are the same
       }

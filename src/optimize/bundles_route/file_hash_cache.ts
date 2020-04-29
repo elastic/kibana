@@ -17,26 +17,20 @@
  * under the License.
  */
 
-export function createProxyBundlesRoute({ host, port }) {
-  return [
-    buildProxyRouteForBundles('/bundles/', host, port),
-    buildProxyRouteForBundles('/built_assets/dlls/', host, port),
-    buildProxyRouteForBundles('/built_assets/css/', host, port),
-  ];
-}
+import LruCache from 'lru-cache';
 
-function buildProxyRouteForBundles(routePath, host, port) {
-  return {
-    path: `${routePath}{path*}`,
-    method: 'GET',
-    handler: {
-      proxy: {
-        host,
-        port,
-        passThrough: true,
-        xforward: true,
-      },
-    },
-    config: { auth: false },
-  };
+export class FileHashCache {
+  private lru = new LruCache<string, Promise<string>>(100);
+
+  get(key: string) {
+    return this.lru.get(key);
+  }
+
+  set(key: string, value: Promise<string>) {
+    this.lru.set(key, value);
+  }
+
+  del(key: string) {
+    this.lru.del(key);
+  }
 }
