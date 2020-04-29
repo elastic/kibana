@@ -60,8 +60,14 @@ export interface TileMapPluginStartDependencies {
   data: DataPublicPluginStart;
 }
 
+export interface TileMapPluginSetup {
+  config: any;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TileMapPluginStart {}
+
 /** @internal */
-export class TileMapPlugin implements Plugin<Promise<void>, void> {
+export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginStart> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -93,5 +99,6 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
   public start(core: CoreStart, { data }: TileMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setQueryService(data.query);
+    return {};
   }
 }

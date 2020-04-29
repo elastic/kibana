@@ -39,6 +39,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 
 export const plugin = (initializerContext: PluginInitializerContext) => ({
   setup() {
+    // @ts-ignore
     const config$ = initializerContext.config.create();
     return {
       config: config$,

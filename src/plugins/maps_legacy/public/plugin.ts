@@ -26,6 +26,7 @@ import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyConfigType, MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { ConfigSchema } from '../config';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -45,7 +46,9 @@ export interface MapsLegacySetupDependencies {}
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  constructor(initializerContext: PluginInitializerContext) {
+  initializerContext: PluginInitializerContext<ConfigSchema>;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 

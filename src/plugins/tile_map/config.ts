@@ -20,7 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  url: schema.string(),
+  url: schema.maybe(schema.string()),
   deprecated: schema.any({
     defaultValue: {
       config: {
@@ -32,14 +32,14 @@ export const configSchema = schema.object({
   }),
   options: schema.object({
     attribution: schema.string({ defaultValue: '' }),
-    minZoom: schema.number({ defaultValue: 0 }),
+    minZoom: schema.number({ defaultValue: 0, min: 0 }),
     maxZoom: schema.number({ defaultValue: 10 }),
     tileSize: schema.maybe(schema.number()),
     subdomains: schema.maybe(schema.arrayOf(schema.string())),
     errorTileUrl: schema.maybe(schema.string()),
     tms: schema.maybe(schema.boolean()),
     reuseTiles: schema.maybe(schema.boolean()),
-    bounds: schema.maybe(schema.arrayOf(schema.number())),
+    bounds: schema.maybe(schema.arrayOf(schema.number({ min: 2 }))),
     default: schema.maybe(schema.boolean()),
   }),
 });
