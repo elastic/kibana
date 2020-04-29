@@ -36,11 +36,19 @@ import {
   getCloneFormStateFromJobConfig,
 } from './state';
 
+import { ANALYTICS_STEPS } from '../../../analytics_creation/page';
+
+export interface AnalyticsCreationStep {
+  number: ANALYTICS_STEPS;
+  completed: boolean;
+}
+
 export interface CreateAnalyticsFormProps {
   actions: ActionDispatchers;
   state: State;
   setCurrentStep?: any; // TODO: update
-  step?: any; // TODO: update
+  step?: ANALYTICS_STEPS;
+  stepActivated?: boolean;
 }
 
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {

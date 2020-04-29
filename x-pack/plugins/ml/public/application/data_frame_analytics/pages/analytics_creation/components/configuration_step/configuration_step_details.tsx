@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useMlContext } from '../../../../../contexts/ml';
+import { ANALYTICS_STEPS } from '../../page';
 
 export interface ListItems {
   title: string;
   description: string | JSX.Element;
 }
 
-export const ConfigurationStepDetails: FC<{ state: State }> = ({ state }) => {
+export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
+  setCurrentStep,
+  state,
+}) => {
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
   const { form } = state;
@@ -68,16 +72,30 @@ export const ConfigurationStepDetails: FC<{ state: State }> = ({ state }) => {
   ];
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList compressed listItems={detailsFirstCol} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList compressed listItems={detailsSecondCol} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiDescriptionList compressed listItems={detailsThirdCol} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={detailsFirstCol} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={detailsSecondCol} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={detailsThirdCol} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiButton
+        iconType="pencil"
+        size="s"
+        onClick={() => {
+          setCurrentStep(ANALYTICS_STEPS.CONFIGURATION);
+        }}
+      >
+        {i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.editButtonText', {
+          defaultMessage: 'Edit',
+        })}
+      </EuiButton>
+    </Fragment>
   );
 };

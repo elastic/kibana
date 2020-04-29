@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +13,7 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiSteps,
+  EuiStepStatus,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,77 +22,87 @@ import { useMlContext } from '../../../contexts/ml';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
 
-enum ANALYTICS_STEPS {
-  CONFIGURATION = 'Configuration',
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  ADVANCED = 'Advanced',
-  DETAILS = 'Details',
-  CREATE = 'Create',
-}
-
-export enum ANALYTICS_STEP_NUMBERS {
-  configuration = 1,
-  advanced = 2,
-  details = 3,
-  create = 4,
+export enum ANALYTICS_STEPS {
+  CONFIGURATION,
+  ADVANCED,
+  DETAILS,
+  CREATE,
 }
 
 export const Page: FC = () => {
-  const [currentStep, setCurrentStep] = useState<ANALYTICS_STEP_NUMBERS>(
-    ANALYTICS_STEP_NUMBERS.configuration
-  );
+  const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
+  const [activatedSteps, setActivatedSteps] = useState<boolean[]>([true, false, false, false]);
 
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
 
-  const creationSteps = [
+  useEffect(() => {
+    if (activatedSteps[currentStep] === false) {
+      activatedSteps.splice(currentStep, 1, true);
+      setActivatedSteps(activatedSteps);
+    }
+  }, [currentStep]);
+
+  const analyticsWizardSteps = [
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.configurationStepTitle', {
-        defaultMessage: ANALYTICS_STEPS.CONFIGURATION,
+        defaultMessage: 'Configuration',
       }),
       children: (
         <ConfigurationStep
           {...createAnalyticsForm}
           setCurrentStep={setCurrentStep}
           step={currentStep}
+          stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
         />
       ),
-      step: ANALYTICS_STEP_NUMBERS.configuration,
+      status:
+        currentStep >= ANALYTICS_STEPS.CONFIGURATION ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.advancedStepTitle', {
-        defaultMessage: ANALYTICS_STEPS.ADVANCED,
+        defaultMessage: 'Advanced',
       }),
       children: (
-        <AdvancedStep {...createAnalyticsForm} setCurrentStep={setCurrentStep} step={currentStep} />
+        <AdvancedStep
+          {...createAnalyticsForm}
+          setCurrentStep={setCurrentStep}
+          step={currentStep}
+          stepActivated={activatedSteps[ANALYTICS_STEPS.ADVANCED]}
+        />
       ),
-      step: ANALYTICS_STEP_NUMBERS.advanced,
+      status: currentStep >= ANALYTICS_STEPS.ADVANCED ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.detailsStepTitle', {
-        defaultMessage: ANALYTICS_STEPS.DETAILS,
+        defaultMessage: 'Details',
       }),
       children: (
-        <DetailsStep {...createAnalyticsForm} setCurrentStep={setCurrentStep} step={currentStep} />
+        <DetailsStep
+          {...createAnalyticsForm}
+          setCurrentStep={setCurrentStep}
+          step={currentStep}
+          stepActivated={activatedSteps[ANALYTICS_STEPS.DETAILS]}
+        />
       ),
-      step: ANALYTICS_STEP_NUMBERS.details,
+      status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.createStepTitle', {
-        defaultMessage: ANALYTICS_STEPS.CREATE,
+        defaultMessage: 'Create',
       }),
       children: (
         <CreateStep {...createAnalyticsForm} setCurrentStep={setCurrentStep} step={currentStep} />
       ),
-      step: ANALYTICS_STEP_NUMBERS.create,
+      status: currentStep >= ANALYTICS_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
     },
   ];
-  // EuiPageBody restrictWidth={1200}
+
   return (
     <EuiPage data-test-subj="mlAnalyticsCreationContainer">
-      <EuiPageBody>
+      <EuiPageBody restrictWidth={1200}>
         <EuiPageContent>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
@@ -115,7 +126,7 @@ export const Page: FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiSteps steps={creationSteps} />
+          <EuiSteps steps={analyticsWizardSteps} />
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

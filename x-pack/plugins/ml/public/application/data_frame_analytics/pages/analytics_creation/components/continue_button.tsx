@@ -12,10 +12,13 @@ const continueButtonText = i18n.translate('xpack.dataframe.analytics.creation.co
   defaultMessage: 'Continue',
 });
 
-export const ContinueButton: FC<{ onClick: any }> = ({ onClick }) => (
+export const ContinueButton: FC<{ isDisabled: boolean; onClick: any }> = ({
+  isDisabled,
+  onClick,
+}) => (
   <EuiFlexGroup>
     <EuiFlexItem grow={false}>
-      <EuiButton size="s" onClick={onClick}>
+      <EuiButton isDisabled={isDisabled} size="s" onClick={onClick}>
         {continueButtonText}
       </EuiButton>
     </EuiFlexItem>

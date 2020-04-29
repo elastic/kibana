@@ -9,7 +9,7 @@ import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { ANALYTICS_STEP_NUMBERS } from '../../page';
+import { ANALYTICS_STEPS } from '../../page';
 
 function redirectToAnalyticsManagementPage() {
   window.location.href = '#/data_frame_analytics?';
@@ -27,7 +27,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
 
   const [checked, setChecked] = useState<boolean>(false);
 
-  if (step !== ANALYTICS_STEP_NUMBERS.create) return null;
+  if (step !== ANALYTICS_STEPS.CREATE) return null;
 
   const handleCreation = async () => {
     // create

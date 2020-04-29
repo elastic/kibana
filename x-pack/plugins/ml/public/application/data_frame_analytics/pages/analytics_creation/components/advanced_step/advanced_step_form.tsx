@@ -23,10 +23,16 @@ import {
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
 } from '../../../../common/analytics';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import { ANALYTICS_STEPS } from '../../page';
+import { ContinueButton } from '../continue_button';
 
 const MAX_TREES_LIMIT = 2000;
 
-export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({
+  actions,
+  state,
+  setCurrentStep,
+}) => {
   const { setFormState } = actions;
   const { form, isJobCreated } = state;
   const {
@@ -57,6 +63,8 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state 
 
   const isRegOrClassJob =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+
+  const mmlInvalid = modelMemoryLimitValidationResult !== null;
 
   const outlierDetectionAdvancedConfig = (
     <Fragment>
@@ -489,7 +497,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state 
             label={i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryLimitLabel', {
               defaultMessage: 'Model memory limit',
             })}
-            isInvalid={modelMemoryLimitValidationResult !== null}
+            isInvalid={mmlInvalid}
             error={mmlErrors}
             helpText={i18n.translate(
               'xpack.ml.dataframe.analytics.create.modelMemoryLimitHelpText',
@@ -508,7 +516,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state 
               disabled={isJobCreated}
               value={modelMemoryLimit || ''}
               onChange={e => setFormState({ modelMemoryLimit: e.target.value })}
-              isInvalid={modelMemoryLimitValidationResult !== null}
+              isInvalid={mmlInvalid}
               data-test-subj="mlAnalyticsCreateJobWizardModelMemoryInput"
             />
           </EuiFormRow>
@@ -534,6 +542,13 @@ export const AdvancedStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state 
           {isRegOrClassJob && regAndClassHyperParams}
         </EuiFlexGroup>
       </EuiAccordion>
+      <EuiSpacer />
+      <ContinueButton
+        isDisabled={mmlInvalid}
+        onClick={() => {
+          setCurrentStep(ANALYTICS_STEPS.DETAILS);
+        }}
+      />
     </Fragment>
   );
 };

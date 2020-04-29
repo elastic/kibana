@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useRef } from 'react';
-import { EuiComboBox, EuiFormRow, EuiRange } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -26,10 +26,16 @@ import {
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { shouldAddAsDepVarOption } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
+import { ANALYTICS_STEPS } from '../../page';
+import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { AnalysisFieldsTable } from './analysis_fields_table';
 
-export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
+  actions,
+  state,
+  setCurrentStep,
+}) => {
   const mlContext = useMlContext();
   const { currentIndexPattern: indexPattern } = mlContext;
 
@@ -42,6 +48,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, s
     dependentVariableOptions,
     excludes,
     excludesTableItems,
+    fieldOptionsFetchFail,
     jobType,
     loadingDepVarOptions,
     loadingFieldOptions,
@@ -53,6 +60,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, s
 
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+
+  const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
+
+  const isStepInvalid =
+    dependentVariableEmpty || jobType === undefined || maxDistinctValuesError !== undefined;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
@@ -150,11 +162,11 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, s
       let errorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        e.message !== undefined &&
-        e.message.includes('status_exception') &&
-        e.message.includes('must have at most')
+        e.body?.message !== undefined &&
+        e.body.message.includes('status_exception') &&
+        e.body.message.includes('must have at most')
       ) {
-        errorMessage = e.message;
+        errorMessage = e.body.message;
       }
       const fallbackModelMemoryLimit =
         jobType !== undefined
@@ -203,68 +215,91 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, s
       <JobType type={jobType} setFormState={setFormState} />
       {/* <SourceIndexPreview /> */}
       {isJobTypeWithDepVar && (
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-            defaultMessage: 'Dependent variable',
-          })}
-          helpText={
-            dependentVariableOptions.length === 0 &&
-            dependentVariableFetchFail === false &&
-            indexPattern &&
-            i18n.translate(
-              'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
-              {
-                defaultMessage: 'No numeric type fields were found for this index pattern.',
-              }
-            )
-          }
-          isInvalid={maxDistinctValuesError !== undefined}
-          error={[
-            ...(dependentVariableFetchFail === true
-              ? [
-                  <Fragment>
-                    {i18n.translate(
-                      'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
-                      {
-                        defaultMessage:
-                          'There was a problem fetching fields. Please refresh the page and try again.',
-                      }
-                    )}
-                  </Fragment>,
-                ]
-              : []),
-          ]}
-        >
-          <EuiComboBox
+        <Fragment>
+          <EuiFormRow
             fullWidth
-            aria-label={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
-              {
-                defaultMessage: 'Enter field to be used as dependent variable.',
-              }
-            )}
-            placeholder={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
-              {
-                defaultMessage: 'dependent variable',
-              }
-            )}
-            isDisabled={isJobCreated}
-            isLoading={loadingDepVarOptions}
-            singleSelection={true}
-            options={dependentVariableOptions}
-            selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-            onChange={selectedOptions =>
-              setFormState({
-                dependentVariable: selectedOptions[0].label || '',
-              })
+            isInvalid={maxDistinctValuesError !== undefined}
+            error={[
+              ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+                ? [
+                    <Fragment>
+                      {i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+                        {
+                          defaultMessage: 'Invalid. {message}',
+                          values: { message: maxDistinctValuesError },
+                        }
+                      )}
+                    </Fragment>,
+                  ]
+                : []),
+            ]}
+          >
+            <Fragment />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
+              defaultMessage: 'Dependent variable',
+            })}
+            helpText={
+              dependentVariableOptions.length === 0 &&
+              dependentVariableFetchFail === false &&
+              indexPattern &&
+              i18n.translate(
+                'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
+                {
+                  defaultMessage: 'No numeric type fields were found for this index pattern.',
+                }
+              )
             }
-            isClearable={false}
-            isInvalid={dependentVariable === ''}
-            data-test-subj="mlAnalyticsCreateJobFlyoutDependentVariableSelect"
-          />
-        </EuiFormRow>
+            isInvalid={maxDistinctValuesError !== undefined}
+            error={[
+              ...(dependentVariableFetchFail === true
+                ? [
+                    <Fragment>
+                      {i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError',
+                        {
+                          defaultMessage:
+                            'There was a problem fetching fields. Please refresh the page and try again.',
+                        }
+                      )}
+                    </Fragment>,
+                  ]
+                : []),
+            ]}
+          >
+            <EuiComboBox
+              fullWidth
+              aria-label={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
+                {
+                  defaultMessage: 'Enter field to be used as dependent variable.',
+                }
+              )}
+              placeholder={i18n.translate(
+                'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
+                {
+                  defaultMessage: 'dependent variable',
+                }
+              )}
+              isDisabled={isJobCreated}
+              isLoading={loadingDepVarOptions}
+              singleSelection={true}
+              options={dependentVariableOptions}
+              selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
+              onChange={selectedOptions =>
+                setFormState({
+                  dependentVariable: selectedOptions[0].label || '',
+                })
+              }
+              isClearable={false}
+              isInvalid={dependentVariable === ''}
+              data-test-subj="mlAnalyticsCreateJobFlyoutDependentVariableSelect"
+            />
+          </EuiFormRow>
+        </Fragment>
       )}
       <AnalysisFieldsTable
         tableItems={excludesTableItems}
@@ -297,6 +332,13 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({ actions, s
           />
         </EuiFormRow>
       )}
+      <EuiSpacer />
+      <ContinueButton
+        isDisabled={isStepInvalid}
+        onClick={() => {
+          setCurrentStep(ANALYTICS_STEPS.ADVANCED);
+        }}
+      />
     </Fragment>
   );
 };

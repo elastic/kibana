@@ -5,14 +5,20 @@
  */
 
 import React, { FC, Fragment, useRef } from 'react';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
+import { ContinueButton } from '../continue_button';
+import { ANALYTICS_STEPS } from '../../page';
 
-export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
+export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({
+  actions,
+  state,
+  setCurrentStep,
+}) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -35,6 +41,14 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }
     jobIdValid,
   } = form;
   const forceInput = useRef<HTMLInputElement | null>(null);
+
+  const isStepInvalid =
+    jobIdEmpty === true ||
+    jobIdExists === true ||
+    jobIdValid === false ||
+    destinationIndexNameEmpty === true ||
+    destinationIndexNameValid === false ||
+    (destinationIndexPatternTitleExists === true && createIndexPattern === true);
 
   return (
     <Fragment>
@@ -193,6 +207,13 @@ export const DetailsStepForm: FC<CreateAnalyticsFormProps> = ({ actions, state }
           data-test-subj="mlAnalyticsCreateJobFlyoutCreateIndexPatternSwitch"
         />
       </EuiFormRow>
+      <EuiSpacer />
+      <ContinueButton
+        isDisabled={isStepInvalid}
+        onClick={() => {
+          setCurrentStep(ANALYTICS_STEPS.CREATE);
+        }}
+      />
     </Fragment>
   );
 };
