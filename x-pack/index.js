@@ -14,7 +14,6 @@ import { apm } from './legacy/plugins/apm';
 import { maps } from './legacy/plugins/maps';
 import { spaces } from './legacy/plugins/spaces';
 import { canvas } from './legacy/plugins/canvas';
-import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
@@ -31,7 +30,6 @@ module.exports = function(kibana) {
     apm(kibana),
     maps(kibana),
     canvas(kibana),
-    infra(kibana),
     taskManager(kibana),
     encryptedSavedObjects(kibana),
     ingestManager(kibana),

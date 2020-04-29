@@ -6,7 +6,7 @@
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { convertSavedObjectToSavedSourceConfiguration } from '../../sources/sources';
-import { infraSourceConfigurationSavedObjectType } from '../../sources/saved_object_mappings';
+import { infraSourceConfigurationSavedObjectName } from '../../sources/saved_object_type';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
@@ -180,7 +180,7 @@ const getIndexPattern: (
 ) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
   try {
     const sourceConfiguration = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
     const { metricAlias } = convertSavedObjectToSavedSourceConfiguration(

@@ -12,7 +12,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
@@ -107,7 +107,7 @@ export class InfraSources {
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await requestContext.core.savedObjects.client.create(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
       )
@@ -124,7 +124,7 @@ export class InfraSources {
 
   public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
     await requestContext.core.savedObjects.client.delete(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
   }
@@ -148,7 +148,7 @@ export class InfraSources {
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await requestContext.core.savedObjects.client.update(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
@@ -206,7 +206,7 @@ export class InfraSources {
     sourceId: string
   ) {
     const savedObject = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
@@ -215,7 +215,7 @@ export class InfraSources {
 
   private async getAllSavedSourceConfigurations(requestContext: RequestHandlerContext) {
     const savedObjects = await requestContext.core.savedObjects.client.find({
-      type: infraSourceConfigurationSavedObjectType,
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
