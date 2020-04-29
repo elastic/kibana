@@ -5,16 +5,17 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'endpoint']);
   const testSubjects = getService('testSubjects');
+  const policyTestResources = getService('policyTestResources');
 
   describe('When on the Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
-      // await pageObjects.endpoint.waitForTableToHaveData('policyTable');
     });
 
     it('loads the Policy List Page', async () => {
@@ -28,7 +29,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const policyTotal = await testSubjects.getVisibleText('policyTotalCount');
       expect(policyTotal).to.equal('0 Policies');
     });
-
     it('has correct table headers', async () => {
       const allHeaderCells = await pageObjects.endpoint.tableHeaderVisibleText('policyTable');
       expect(allHeaderCells).to.eql([
@@ -38,6 +38,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'Description',
         'Agent Configuration',
       ]);
+    });
+    it('should show empty table results message', async () => {
+      const [, [noItemsFoundMessage]] = await pageObjects.endpoint.getEndpointAppTableData(
+        'policyTable'
+      );
+      expect(noItemsFoundMessage).to.equal('No items found');
+    });
+
+    describe('and policies exists', () => {
+      let policyInfo: PolicyTestResourceInfo;
+
+      before(async () => {
+        // load/create a policy and then navigate back to the policy view so that the list is refreshed
+        policyInfo = await policyTestResources.createPolicy();
+        await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
+      });
+      after(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
+
+      it('should show policy on the list');
+      it('should show policy name as link');
+      it('should show agent configuration as link');
     });
   });
 }
