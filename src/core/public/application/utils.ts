@@ -40,3 +40,15 @@ export const removeSlashes = (
   }
   return url;
 };
+
+export const appendAppPath = (appBasePath: string, path: string = '') => {
+  // Only prepend slash if not a hash or query path
+  path = path === '' || path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
+  // Do not remove trailing slash when in hashbang
+  const removeTrailing = path.indexOf('#') === -1;
+  return removeSlashes(`${appBasePath}${path}`, {
+    trailing: removeTrailing,
+    duplicates: true,
+    leading: false,
+  });
+};
