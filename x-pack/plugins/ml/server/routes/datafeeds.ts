@@ -159,7 +159,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         body: datafeedConfigSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -235,7 +235,7 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         query: deleteDatafeedQuerySchema,
       },
       options: {
-        tags: ['access:ml:canDeleteJob'],
+        tags: ['access:ml:canDeleteDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -674,7 +674,7 @@ export function jobServiceRoutes({ router, mlLicense }: RouteInitialization) {
         body: schema.object(topCategoriesSchema),
       },
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

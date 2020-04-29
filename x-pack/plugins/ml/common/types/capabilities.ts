@@ -19,6 +19,10 @@ export const userMlCapabilities = {
   canGetFilters: false,
   // Data Frame Analytics
   canGetDataFrameAnalytics: false,
+  // Annotations
+  canGetAnnotations: false,
+  canCreateAnnotation: false,
+  canDeleteAnnotation: false,
 };
 
 export const adminMlCapabilities = {
@@ -27,9 +31,11 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
-  canForecastJob: false,
-  canStartStopDatafeed: false,
   canUpdateJob: false,
+  canForecastJob: false,
+  canCreateDatafeed: false,
+  canDeleteDatafeed: false,
+  canStartStopDatafeed: false,
   canUpdateDatafeed: false,
   canPreviewDatafeed: false,
   // Calendars

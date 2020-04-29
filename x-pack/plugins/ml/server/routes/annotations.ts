@@ -55,7 +55,7 @@ export function annotationRoutes(
         body: getAnnotationsSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canGetAnnotations'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -90,7 +90,7 @@ export function annotationRoutes(
         body: indexAnnotationSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canCreateAnnotation'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -137,7 +137,7 @@ export function annotationRoutes(
         params: deleteAnnotationSchema,
       },
       options: {
-        tags: ['access:ml:canCreateJob'],
+        tags: ['access:ml:canDeleteAnnotation'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
