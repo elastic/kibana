@@ -131,32 +131,30 @@ function dedupFields(fields: Fields): Fields {
           (field.type === 'object' || field.type === 'nested' || field.type === 'group')) ||
         ((found.type === 'object' || found.type === 'nested') && field.type === 'group')
       ) {
-        if (field.type === 'group' || field.type === 'object' || field.type === 'nested') {
-          // if the new field has properties let's dedup and concat them with the already existing found variable in
-          // the array
-          if (field.fields) {
-            // if the found type was object or nested it won't have a fields array so let's initialize it
-            if (!found.fields) {
-              found.fields = [];
-            }
-            found.fields = dedupFields(found.fields.concat(field.fields));
+        // if the new field has properties let's dedup and concat them with the already existing found variable in
+        // the array
+        if (field.fields) {
+          // if the found type was object or nested it won't have a fields array so let's initialize it
+          if (!found.fields) {
+            found.fields = [];
           }
-
-          // if found already had fields or got new ones from the new field coming in we need to assign the right
-          // type to it
-          if (found.fields) {
-            // If this field is supposed to be `nested` and we have fields, we need to preserve the fact that it is
-            // supposed to be `nested` for when the template is actually generated
-            if (found.type === 'nested' || field.type === 'nested') {
-              found.type = 'group-nested';
-            } else {
-              // found was either `group` already or `object` so just set it to `group`
-              found.type = 'group';
-            }
-          }
-          // we need to merge in other properties (like `dynamic`) that might exist
-          Object.assign(found, importantFieldProps);
+          found.fields = dedupFields(found.fields.concat(field.fields));
         }
+
+        // if found already had fields or got new ones from the new field coming in we need to assign the right
+        // type to it
+        if (found.fields) {
+          // If this field is supposed to be `nested` and we have fields, we need to preserve the fact that it is
+          // supposed to be `nested` for when the template is actually generated
+          if (found.type === 'nested' || field.type === 'nested') {
+            found.type = 'group-nested';
+          } else {
+            // found was either `group` already or `object` so just set it to `group`
+            found.type = 'group';
+          }
+        }
+        // we need to merge in other properties (like `dynamic`) that might exist
+        Object.assign(found, importantFieldProps);
         // if `field.type` wasn't group object or nested, then there's a conflict in types, so lets ignore it
       } else {
         // only `group`, `object`, and `nested` fields can be merged in this way
