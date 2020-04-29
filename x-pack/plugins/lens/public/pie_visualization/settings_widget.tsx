@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiFieldNumber } from '@elastic/eui';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationLayerWidgetProps } from '../types';
 
@@ -108,6 +109,26 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
               layers: [{ ...layer, numberDisplay: option }],
             });
           }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
+          defaultMessage: 'Decimal places for percent',
+        })}
+      >
+        <EuiFieldNumber
+          data-test-subj="indexPattern-dimension-formatDecimals"
+          value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+          min={0}
+          max={10}
+          onChange={e => {
+            setState({
+              ...state,
+              layers: [{ ...layer, percentDecimals: Number(e.target.value) }],
+            });
+          }}
+          compressed
+          fullWidth
         />
       </EuiFormRow>
       <EuiFormRow

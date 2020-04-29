@@ -6,6 +6,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { FramePublicAPI, Operation } from '../types';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState } from './types';
 
 export function toExpression(state: PieVisualizationState, frame: FramePublicAPI) {
@@ -19,7 +20,7 @@ function expressionHelper(
 ): Ast | null {
   const layer = state.layers[0];
   const datasource = frame.datasourceLayers[layer.layerId];
-  const operations = layer.slices
+  const operations = layer.groups
     .map(columnId => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
   if (!layer.metric || !operations.length) {
@@ -35,11 +36,12 @@ function expressionHelper(
         arguments: {
           shape: [state.shape],
           hideLabels: [isPreview],
-          slices: operations.map(o => o.columnId),
+          groups: operations.map(o => o.columnId),
           metric: [layer.metric],
           numberDisplay: [layer.numberDisplay],
           categoryDisplay: [layer.categoryDisplay],
           legendDisplay: [layer.legendDisplay],
+          percentDecimals: [layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS],
         },
       },
     ],

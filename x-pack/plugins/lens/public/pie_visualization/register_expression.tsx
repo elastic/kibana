@@ -36,7 +36,7 @@ export const pie: ExpressionFunctionDefinition<
     defaultMessage: 'Pie renderer',
   }),
   args: {
-    slices: {
+    groups: {
       types: ['string'],
       multi: true,
       help: '',
@@ -67,6 +67,10 @@ export const pie: ExpressionFunctionDefinition<
     legendDisplay: {
       types: ['string'],
       options: ['default', 'nested', 'hide'],
+      help: '',
+    },
+    percentDecimals: {
+      types: ['number'],
       help: '',
     },
   },

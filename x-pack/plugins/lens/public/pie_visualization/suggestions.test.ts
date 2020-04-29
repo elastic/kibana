@@ -5,13 +5,13 @@
  */
 
 import { DataType } from '../types';
-import { pieSuggestions } from './suggestions';
+import { suggestions } from './suggestions';
 
 describe('suggestions', () => {
   describe('pie', () => {
     it('should reject multiple layer suggestions', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -26,7 +26,7 @@ describe('suggestions', () => {
 
     it('should reject when layer is different', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -41,14 +41,26 @@ describe('suggestions', () => {
 
     it('should reject when currently active and unchanged data', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
             columns: [],
             changeType: 'unchanged',
           },
-          state: { shape: 'pie', layers: [{ layerId: 'first', slices: [], metric: 'a' }] },
+          state: {
+            shape: 'pie',
+            layers: [
+              {
+                layerId: 'first',
+                groups: [],
+                metric: 'a',
+                numberDisplay: 'hidden',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
+          },
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -56,7 +68,7 @@ describe('suggestions', () => {
 
     it('should reject when table is reordered', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -71,7 +83,7 @@ describe('suggestions', () => {
 
     it('should reject any date operations', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -95,7 +107,7 @@ describe('suggestions', () => {
 
     it('should reject when there are no buckets', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -115,7 +127,7 @@ describe('suggestions', () => {
 
     it('should reject when there are no metrics', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -135,7 +147,7 @@ describe('suggestions', () => {
 
     it('should reject when there are too many buckets', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -171,7 +183,7 @@ describe('suggestions', () => {
 
     it('should reject when there are too many metrics', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -206,7 +218,7 @@ describe('suggestions', () => {
     });
 
     it('should suggest a donut chart as initial state when only one bucket', () => {
-      const suggestions = pieSuggestions({
+      const results = suggestions({
         table: {
           layerId: 'first',
           isMultiRow: true,
@@ -226,12 +238,12 @@ describe('suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].state.shape).toEqual('donut');
+      expect(results).toHaveLength(1);
+      expect(results[0].state.shape).toEqual('donut');
     });
 
     it('should suggest a pie chart as initial state when more than one bucket', () => {
-      const suggestions = pieSuggestions({
+      const results = suggestions({
         table: {
           layerId: 'first',
           isMultiRow: true,
@@ -255,22 +267,35 @@ describe('suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(suggestions).toHaveLength(1);
-      expect(suggestions[0].state.shape).toEqual('pie');
+      expect(results).toHaveLength(1);
+      expect(results[0].state.shape).toEqual('pie');
     });
   });
 
   describe('treemap', () => {
     it('should reject when currently active and unchanged data', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
             columns: [],
             changeType: 'unchanged',
           },
-          state: { shape: 'treemap', layers: [{ layerId: 'first', slices: [], metric: 'a' }] },
+          state: {
+            shape: 'treemap',
+            layers: [
+              {
+                layerId: 'first',
+                groups: [],
+                metric: 'a',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
+          },
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
@@ -278,7 +303,7 @@ describe('suggestions', () => {
 
     it('should reject when there are too many buckets being added', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -308,7 +333,16 @@ describe('suggestions', () => {
           },
           state: {
             shape: 'treemap',
-            layers: [{ layerId: 'first', slices: ['a', 'b'], metric: 'e' }],
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a', 'b'],
+                metric: 'e',
+                numberDisplay: 'value',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
           },
           keptLayerIds: ['first'],
         })
@@ -317,7 +351,7 @@ describe('suggestions', () => {
 
     it('should reject when there are too many metrics', () => {
       expect(
-        pieSuggestions({
+        suggestions({
           table: {
             layerId: 'first',
             isMultiRow: true,
@@ -347,7 +381,16 @@ describe('suggestions', () => {
           },
           state: {
             shape: 'treemap',
-            layers: [{ layerId: 'first', slices: ['a', 'b'], metric: 'e' }],
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a', 'b'],
+                metric: 'e',
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
+            ],
           },
           keptLayerIds: ['first'],
         })

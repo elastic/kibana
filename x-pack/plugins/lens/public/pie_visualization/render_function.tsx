@@ -26,7 +26,7 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { FormatFactory } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { CHART_NAMES } from './constants';
+import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
@@ -49,11 +49,12 @@ export function PieComponent(
   const { chartTheme, isDarkMode, executeTriggerActions } = props;
   const {
     shape,
-    slices,
+    groups,
     metric,
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    percentDecimals,
     hideLabels,
   } = props.args;
 
@@ -68,7 +69,7 @@ export function PieComponent(
   // But the user only configured [bucket, bucket, count]
   const columnGroups: ColumnGroups = [];
   firstTable.columns.forEach(col => {
-    if (slices.includes(col.id)) {
+    if (groups.includes(col.id)) {
       columnGroups.push({
         col,
         metrics: [],
@@ -176,10 +177,12 @@ export function PieComponent(
     config.linkLabel = { maxCount: 0 };
   }
   const metricColumn = firstTable.columns.find(c => c.id === metric)!;
-  const percentFormatter =
-    metricColumn.formatHint && metricColumn.formatHint?.id === 'percent'
-      ? formatters[metricColumn.id]
-      : props.formatFactory({ id: 'percent' });
+  const percentFormatter = props.formatFactory({
+    id: 'percent',
+    params: {
+      pattern: `0,0.${'0'.repeat(percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}%`,
+    },
+  });
 
   const [state, setState] = useState({ isReady: false });
   // It takes a cycle for the chart to render. This prevents

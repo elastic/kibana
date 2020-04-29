@@ -17,8 +17,8 @@ export function getSliceValueWithFallback(
   if (typeof d[metricColumn.id] === 'number' && d[metricColumn.id] !== 0) {
     return d[metricColumn.id];
   }
-  // Sometimes there is missing data for outer slices
-  // When there is missing data, we fall back to the next slices
+  // Sometimes there is missing data for outer groups
+  // When there is missing data, we fall back to the next groups
   // This creates a sunburst effect
   const hasMetric = reverseGroups.find(group => group.metrics.length && d[group.metrics[0].id]);
   return hasMetric ? d[hasMetric.metrics[0].id] || Number.EPSILON : Number.EPSILON;

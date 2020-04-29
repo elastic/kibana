@@ -8,11 +8,12 @@ import { KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
 export interface SharedLayerState {
-  slices: string[];
+  groups: string[];
   metric?: string;
   numberDisplay: 'hidden' | 'percent' | 'value';
   categoryDisplay: 'default' | 'link' | 'inside' | 'hide';
   legendDisplay: 'default' | 'nested' | 'hide';
+  percentDecimals?: number;
 }
 
 export type LayerState = SharedLayerState & {

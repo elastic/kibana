@@ -11,16 +11,16 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { Visualization, OperationMetadata } from '../types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import { LayerState, PieVisualizationState } from './types';
-import { pieSuggestions } from './suggestions';
+import { suggestions } from './suggestions';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 import { SettingsWidget } from './settings_widget';
 
 function newLayerState(layerId: string): LayerState {
   return {
     layerId,
-    slices: [],
+    groups: [],
     metric: undefined,
-    numberDisplay: 'hidden',
+    numberDisplay: 'percent',
     categoryDisplay: 'default',
     legendDisplay: 'default',
   };
@@ -88,7 +88,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
 
   getPersistableState: state => state,
 
-  getSuggestions: pieSuggestions,
+  getSuggestions: suggestions,
 
   getConfiguration({ state, frame, layerId }) {
     const layer = state.layers.find(l => l.layerId === layerId);
@@ -102,16 +102,13 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       .map(({ columnId }) => columnId)
       .filter(columnId => columnId !== layer.metric);
     // When we add a column it could be empty, and therefore have no order
-    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.slices)));
+    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.groups)));
 
     if (state.shape === 'treemap') {
       return {
         groups: [
           {
-            groupId: 'slices',
-            // groupLabel: i18n.translate('xpack.lens.treemap.rectangle', {
-            //   defaultMessage: 'Rectangle',
-            // }),
+            groupId: 'groups',
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
               defaultMessage: 'Group by',
             }),
@@ -123,10 +120,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
           },
           {
             groupId: 'metric',
-            // groupLabel: i18n.translate('xpack.lens.pie.metric', {
-            //   defaultMessage: 'Metric',
-            // }),
-            groupLabel: i18n.translate('xpack.lens.pie.sliceSizeLabel', {
+            groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
               defaultMessage: 'Size by',
             }),
             layerId,
@@ -142,7 +136,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     return {
       groups: [
         {
-          groupId: 'slices',
+          groupId: 'groups',
           groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
             defaultMessage: 'Slice by',
           }),
@@ -154,7 +148,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
         },
         {
           groupId: 'metric',
-          groupLabel: i18n.translate('xpack.lens.pie.sliceSizeLabel', {
+          groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
             defaultMessage: 'Size by',
           }),
           layerId,
@@ -172,18 +166,15 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
       ...prevState,
 
       shape:
-        prevState.shape === 'donut' && prevState.layers.every(l => l.slices.length === 1)
+        prevState.shape === 'donut' && prevState.layers.every(l => l.groups.length === 1)
           ? 'pie'
           : prevState.shape,
       layers: prevState.layers.map(l => {
         if (l.layerId !== layerId) {
           return l;
         }
-        if (groupId === 'slices') {
-          return {
-            ...l,
-            slices: [...l.slices, columnId],
-          };
+        if (groupId === 'groups') {
+          return { ...l, groups: [...l.groups, columnId] };
         }
         return { ...l, metric: columnId };
       }),
@@ -198,15 +189,9 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
         }
 
         if (l.metric === columnId) {
-          return {
-            ...l,
-            metric: undefined,
-          };
+          return { ...l, metric: undefined };
         }
-        return {
-          ...l,
-          slices: l.slices.filter(c => c !== columnId),
-        };
+        return { ...l, groups: l.groups.filter(c => c !== columnId) };
       }),
     };
   },
