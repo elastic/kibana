@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
 import { useMount } from 'react-use';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -15,8 +16,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { useSource } from '../../../../containers/source';
+import { AlertsContextValue } from '../../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import {
   LogDocumentCountAlertParams,
   Comparator,
@@ -64,22 +64,28 @@ export const ExpressionEditor: React.FC<Props> = props => {
   return (
     <>
       {isInternal ? (
-        <SourceConfigStatus {...props}>
+        <SourceStatusWrapper {...props}>
           <Editor {...props} />
-        </SourceConfigStatus>
+        </SourceStatusWrapper>
       ) : (
         <LogSourceProvider sourceId={sourceId} fetch={props.alertsContext.http.fetch}>
-          <SourceConfigStatus {...props}>
+          <SourceStatusWrapper {...props}>
             <Editor {...props} />
-          </SourceConfigStatus>
+          </SourceStatusWrapper>
         </LogSourceProvider>
       )}
     </>
   );
 };
 
-export const SourceConfigStatus: React.FC<Props> = props => {
-  const { initialize, isLoading, isUninitialized, hasFailedLoadingSource } = useLogSourceContext();
+export const SourceStatusWrapper: React.FC<Props> = props => {
+  const {
+    initialize,
+    isLoadingSourceStatus,
+    isUninitialized,
+    hasFailedLoadingSourceStatus,
+    loadSourceStatus,
+  } = useLogSourceContext();
   const { children } = props;
 
   useMount(() => {
@@ -88,11 +94,29 @@ export const SourceConfigStatus: React.FC<Props> = props => {
 
   return (
     <>
-      {isLoading || isUninitialized
-        ? 'Loading source data'
-        : hasFailedLoadingSource
-        ? 'Error loading source data'
-        : children}
+      {isLoadingSourceStatus || isUninitialized ? (
+        <div>
+          <EuiSpacer size="m" />
+          <EuiLoadingSpinner size="l" />
+          <EuiSpacer size="m" />
+        </div>
+      ) : hasFailedLoadingSourceStatus ? (
+        <EuiCallOut
+          title={i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusError', {
+            defaultMessage: 'Sorry, there was a problem loading field information',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <EuiButton onClick={loadSourceStatus} iconType="refresh">
+            {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
+              defaultMessage: 'Try again',
+            })}
+          </EuiButton>
+        </EuiCallOut>
+      ) : (
+        children
+      )}
     </>
   );
 };
@@ -172,8 +196,6 @@ export const Editor: React.FC<Props> = props => {
     [alertParams, setAlertParams]
   );
 
-  // Wait until field info has loaded
-  // if (supportedFields.length === 0) return null;
   // Wait until the alert param defaults have been set
   if (!hasSetDefaults) return null;
 

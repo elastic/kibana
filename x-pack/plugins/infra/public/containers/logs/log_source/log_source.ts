@@ -122,6 +122,10 @@ export const useLogSource = ({
     [loadSourceConfigurationRequest.state]
   );
 
+  const hasFailedLoadingSourceStatus = useMemo(() => loadSourceStatusRequest.state === 'rejected', [
+    loadSourceStatusRequest.state,
+  ]);
+
   const loadSourceFailureMessage = useMemo(
     () =>
       loadSourceConfigurationRequest.state === 'rejected'
@@ -145,6 +149,7 @@ export const useLogSource = ({
   return {
     derivedIndexPattern,
     hasFailedLoadingSource,
+    hasFailedLoadingSourceStatus,
     initialize,
     isLoading,
     isLoadingSourceConfiguration,
