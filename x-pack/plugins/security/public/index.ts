@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './index.scss';
 import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
 import {
   SecurityPlugin,

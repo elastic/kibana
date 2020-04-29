@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_index.scss';
+import './access_agreement_page.scss';
 
 import React, { FormEvent, MouseEvent, useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
