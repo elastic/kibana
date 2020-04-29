@@ -7,23 +7,56 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern } from 'src/plugins/data/public';
-// @ts-ignore
-import { getMapsSavedObjectLoader } from '../angular/services/gis_map_saved_object_loader';
-import { MapEmbeddable, MapEmbeddableInput } from './map_embeddable';
-import { getIndexPatternService, getHttp, getMapsCapabilities } from '../kibana_services';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
-
-import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
-
-import { createMapStore } from '../reducers/store';
-import { addLayerWithoutDataSync } from '../actions/map_actions';
-import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
-import { getInitialLayers } from '../angular/get_initial_layers';
-import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
 import '../index.scss';
+
+let whenModulesLoadedPromise = null;
+
+let getMapsSavedObjectLoader = null;
+let MapEmbeddable;
+let MapEmbeddableInput = null;
+let getIndexPatternService;
+let getHttp;
+let getMapsCapabilities = null;
+let createMapPath;
+let MAP_SAVED_OBJECT_TYPE;
+let APP_ICON = null;
+let createMapStore = null;
+let addLayerWithoutDataSync = null;
+let getQueryableUniqueIndexPatternIds = null;
+let getInitialLayers = null;
+let mergeInputWithSavedMap = null;
+
+async function loadMapDependencies() {
+  if (whenModulesLoadedPromise !== null) {
+    return whenModulesLoadedPromise;
+  }
+
+  whenModulesLoadedPromise = new Promise(async resolve => {
+    const lazyModule = await import('./lazy');
+
+    getMapsSavedObjectLoader = lazyModule.getMapsSavedObjectLoader;
+    getQueryableUniqueIndexPatternIds = lazyModule.getQueryableUniqueIndexPatternIds;
+    MapEmbeddable = lazyModule.MapEmbeddable;
+    MapEmbeddableInput = lazyModule.MapEmbeddableInput;
+    getIndexPatternService = lazyModule.getIndexPatternService;
+    getHttp = lazyModule.getHttp;
+    getMapsCapabilities = lazyModule.getMapsCapabilities;
+    createMapPath = lazyModule.createMapPath;
+    MAP_SAVED_OBJECT_TYPE = lazyModule.MAP_SAVED_OBJECT_TYPE;
+    APP_ICON = lazyModule.APP_ICON;
+    createMapStore = lazyModule.createMapStore;
+    addLayerWithoutDataSync = lazyModule.addLayerWithoutDataSync;
+    getInitialLayers = lazyModule.getInitialLayers;
+    mergeInputWithSavedMap = lazyModule.mergeInputWithSavedMap;
+
+    resolve(true);
+  });
+  return await whenModulesLoadedPromise;
+}
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
@@ -36,6 +69,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async isEditable() {
+    await loadMapDependencies();
     return getMapsCapabilities().save as boolean;
   }
 
@@ -90,6 +124,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     input: MapEmbeddableInput,
     parent?: IContainer
   ) => {
+    await loadMapDependencies();
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -129,6 +164,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
+    await loadMapDependencies();
     const layerList = getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 

@@ -11,7 +11,6 @@ import { EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
-  console.log('get layer wizards');
   const sourceCards = getLayerWizards().map(layerWizard => {
     const icon = layerWizard.icon ? <EuiIcon type={layerWizard.icon} size="l" /> : null;
 

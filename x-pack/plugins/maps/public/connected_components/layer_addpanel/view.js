@@ -99,7 +99,6 @@ export class AddLayerPanel extends Component {
   };
 
   _renderPanelBody() {
-    console.log('panel body')
     if (!this.state.layerWizard) {
       return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
     }

@@ -31,12 +31,10 @@ export type LayerWizard = {
 const registry: LayerWizard[] = [];
 
 export function registerLayerWizard(layerWizard: LayerWizard) {
-  console.log('register wiuzard', layerWizard);
   registry.push(layerWizard);
 }
 
 export function getLayerWizards(): LayerWizard[] {
-  console.log('get layer wizards');
   return registry.filter(layerWizard => {
     return layerWizard.checkVisibility ? layerWizard.checkVisibility() : true;
   });
