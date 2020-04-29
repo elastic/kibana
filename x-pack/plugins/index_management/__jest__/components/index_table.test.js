@@ -8,6 +8,15 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { MemoryRouter } from 'react-router-dom';
+
+/**
+ * The below import is required to avoid a console error warn from brace package
+ * console.warn ../node_modules/brace/index.js:3999
+      Could not load worker ReferenceError: Worker is not defined
+          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
+ */
+import * as stubWebWorker from '../../../../test_utils/stub_web_worker'; // eslint-disable-line no-unused-vars
+
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
 import { Provider } from 'react-redux';
