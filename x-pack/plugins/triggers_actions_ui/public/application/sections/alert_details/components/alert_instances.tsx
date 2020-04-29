@@ -11,7 +11,6 @@ import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference, chunk } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
