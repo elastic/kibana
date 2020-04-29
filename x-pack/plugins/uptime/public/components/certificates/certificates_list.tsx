@@ -92,7 +92,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
       field: 'certificate_not_valid_before',
       sortable: true,
       render: (value: string) => {
-        return moment().diff(moment(value), 'days') + ' days';
+        return moment().diff(moment(value), 'days') + labels.DAYS;
       },
     },
     {

@@ -21,7 +21,7 @@ describe('CertStatus', () => {
 
   it('shallow renders expected elements for valid props', () => {
     const cert = {
-      monitors: [{ name: '', id: 'github' }],
+      monitors: [{ name: '', id: 'github', url: 'https://github.com/' }],
       certificate_not_valid_after: '2020-05-08T00:00:00.000Z',
       certificate_not_valid_before: '2018-05-08T00:00:00.000Z',
       issuer: 'DigiCert SHA2 Extended Validation Server CA',
@@ -34,7 +34,7 @@ describe('CertStatus', () => {
 
   it('renders expected elements for valid props', () => {
     const cert = {
-      monitors: [{ name: '', id: 'github' }],
+      monitors: [{ name: '', id: 'github', url: 'https://github.com/' }],
       certificate_not_valid_after: moment()
         .add('4', 'months')
         .toISOString(),

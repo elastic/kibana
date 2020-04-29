@@ -88,6 +88,7 @@ exports[`CertStatus shallow renders expected elements for valid props 1`] = `
           Object {
             "id": "github",
             "name": "",
+            "url": "https://github.com/",
           },
         ],
         "sha1": "ca06f56b258b7a0d4f2b05470939478651151984",

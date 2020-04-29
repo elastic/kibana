@@ -46,6 +46,10 @@ export const AGE_COL = i18n.translate('xpack.uptime.certs.list.ageCol', {
   defaultMessage: 'Age',
 });
 
+export const DAYS = i18n.translate('xpack.uptime.certs.list.days', {
+  defaultMessage: 'days',
+});
+
 export const FINGERPRINTS_COL = i18n.translate('xpack.uptime.certs.list.expirationDate', {
   defaultMessage: 'Fingerprints',
 });
