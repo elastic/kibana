@@ -65,14 +65,12 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
 
     async expectNoAddElementButton() {
       // Ensure page is fully loaded first by waiting for the refresh button
-      const refreshPopoverExists = await find.existsByCssSelector('#auto-refresh-popover', 20000);
+      const refreshPopoverExists = await testSubjects.exists('canvas-refresh-control', {
+        timeout: 20000,
+      });
       expect(refreshPopoverExists).to.be(true);
 
-      const addElementButtonExists = await find.existsByCssSelector(
-        'button[data-test-subj=add-element-button]',
-        10 // don't need much of a wait at all here, because we already waited for refresh button above
-      );
-      expect(addElementButtonExists).to.be(false);
+      await testSubjects.missingOrFail('add-element-button');
     },
   };
 }
