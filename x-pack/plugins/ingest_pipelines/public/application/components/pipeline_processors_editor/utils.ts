@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DraggableLocation, ProcessorInternal } from './types';
+
 type Path = string[];
 
 /**
@@ -83,4 +85,52 @@ export const setValue = <Target = any, Value = any>(
   }
 
   return result!;
+};
+
+/**
+ * Unsafe!
+ *
+ * This function takes a data structure and mutates it in place.
+ *
+ * It is convenient for updating the processors (see {@link ProcessorInternal})
+ * structure in this way because the structure is recursive. We are moving processors between
+ * different arrays, removing in one, and adding to another. The end result should be consistent
+ * with these actions.
+ *
+ * @remark
+ * This function assumes parents cannot be moved into themselves.
+ */
+export const unsafeProcessorMove = (
+  processors: ProcessorInternal[],
+  source: DraggableLocation,
+  destination: DraggableLocation
+) => {
+  // Start by setting up references to objects of interest using our selectors
+  // At this point, our selectors are consistent with the data passed in.
+  const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, processors);
+  const destinationProcessors = getValue<ProcessorInternal[]>(destination.selector, processors);
+  const processor = sourceProcessors[source.index];
+  const sourceProcessor = getValue<ProcessorInternal>(source.selector.slice(0, -1), processors);
+
+  // First perform the add operation.
+  if (destinationProcessors) {
+    destinationProcessors.splice(destination.index, 0, processor);
+  } else {
+    const targetProcessor = getValue<ProcessorInternal>(
+      destination.selector.slice(0, -1),
+      processors
+    );
+    targetProcessor.onFailure = [processor];
+  }
+
+  // !! Beyond this point, selectors are no longer usable because we have mutated the data structure!
+
+  // Second, we perform the deletion operation
+  sourceProcessors.splice(source.index, 1);
+  // If onFailure is empty, delete the array.
+  if (!sourceProcessors.length) {
+    sourceProcessor.onFailure = undefined;
+  }
+
+  return [...processors];
 };

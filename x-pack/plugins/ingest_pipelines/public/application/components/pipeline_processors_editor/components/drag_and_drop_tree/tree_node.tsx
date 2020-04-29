@@ -25,6 +25,7 @@ interface Props {
   currentDragSelector?: string;
 }
 
+/** This value comes from the {@link ProcessorInternal} type */
 const ON_FAILURE = 'onFailure';
 
 export const TreeNode: FunctionComponent<Props> = ({

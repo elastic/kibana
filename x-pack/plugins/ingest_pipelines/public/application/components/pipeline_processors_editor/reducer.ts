@@ -9,12 +9,12 @@ import { euiDragDropReorder } from '@elastic/eui';
 import { OnFormUpdateArg } from '../../../shared_imports';
 
 import { DeserializeResult } from './data_in';
-import { getValue, setValue } from './utils';
+import { getValue, setValue, unsafeProcessorMove } from './utils';
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 
 type StateArg = DeserializeResult;
 
-interface State extends StateArg {
+export interface State extends StateArg {
   isValid?: boolean;
   validate: () => Promise<boolean>;
 }
@@ -54,7 +54,6 @@ const addSelectorRoot = (selector: ProcessorSelector): ProcessorSelector => {
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {
     const { destination, source } = action.payload;
-
     if (source.selector.join('.') === destination.selector.join('.')) {
       const path = addSelectorRoot(source.selector);
       return setValue(
@@ -63,8 +62,11 @@ export const reducer: Reducer<State, Action> = (state, action) => {
         euiDragDropReorder(getValue(path, state), source.index, destination.index)
       );
     } else {
-      // TODO: Implement
-      return state;
+      return setValue(
+        ['processors'],
+        state,
+        unsafeProcessorMove(state.processors, source, destination)
+      );
     }
   }
 
