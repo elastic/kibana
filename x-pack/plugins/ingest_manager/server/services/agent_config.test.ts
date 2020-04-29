@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { agentConfigService } from './agent_config';
-import { savedObjectsClientMock } from '../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
 import { Output } from '../types';
 
 function getSavedObjectMock(configAttributes: any) {
@@ -61,6 +61,13 @@ describe('agent config', () => {
         },
         datasources: [],
         revision: 1,
+        settings: {
+          monitoring: {
+            enabled: false,
+            logs: false,
+            metrics: false,
+          },
+        },
       });
     });
 

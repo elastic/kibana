@@ -63,7 +63,7 @@ export interface FullAgentConfig {
   revision?: number;
   settings?: {
     monitoring: {
-      use_output: string;
+      use_output?: string;
       enabled: boolean;
       metrics: boolean;
       logs: boolean;
