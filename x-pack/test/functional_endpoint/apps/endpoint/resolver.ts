@@ -21,17 +21,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const toTime = 'Now';
       await esArchiver.load('endpoint/resolver_tree/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
-      await pageObjects.common.sleep(4000);
+      // await pageObjects.common.sleep(4000);
+      await retry.try(async function() {
+        await testSubjects.existOrFail('superDatePickerShowDatesButton');
+      });
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await testSubjects.existOrFail('alertListPage');
       await (await testSubjects.find('alertTypeCellLink')).click();
       await testSubjects.existOrFail('alertDetailFlyout');
       await (await testSubjects.find('overviewResolverTab')).click();
-      await pageObjects.common.sleep(2000);
-    });
-
-    it('loads the Alert resolver', async () => {
-      await testSubjects.existOrFail('resolverEmbeddable');
+      await pageObjects.endpointAlerts.waitForTableToHaveData('resolverEmbeddable');
     });
 
     it('resolver column Process Name exits', async () => {

@@ -10,6 +10,7 @@ import { WebElementWrapper } from '../../../../test/functional/services/lib/web_
 
 export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const parseStyle = styles =>
     styles
       .split(';')
@@ -99,6 +100,15 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
         $.push(eachStyle);
       }
       return $;
+    },
+    async waitForTableToHaveData(dataTestSubj: string) {
+      await retry.waitForWithTimeout('table to have data', 2000, async () => {
+        const tableData = await this.getEndpointAlertResolverTableData(dataTestSubj, 'tr');
+        if (tableData[1][0] === 'No items found') {
+          return false;
+        }
+        return true;
+      });
     },
   };
 }
