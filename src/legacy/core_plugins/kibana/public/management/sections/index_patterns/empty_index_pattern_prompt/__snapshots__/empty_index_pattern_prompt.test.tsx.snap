@@ -3,6 +3,7 @@
 exports[`EmptyIndexPatternPrompt should render normally 1`] = `
 <EuiPageContent
   className="inpEmptyIndexPatternPrompt"
+  data-test-subj="emptyIndexPatternPrompt"
   grow={false}
   horizontalPosition="center"
 >
