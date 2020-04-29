@@ -21,7 +21,7 @@ interface CheckAADRequest extends Hapi.Request {
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting', 'encryptedSavedObjects'],
+    require: ['encryptedSavedObjects'],
     name: 'aad-fixtures',
     init(server: Legacy.Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
