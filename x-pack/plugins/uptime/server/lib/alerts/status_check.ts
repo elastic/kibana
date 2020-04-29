@@ -15,6 +15,7 @@ import { GetMonitorStatusResult } from '../requests';
 import { StatusCheckExecutorParamsType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
+import { commonStateTranslations } from './translations';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -168,72 +169,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         ),
       },
     ],
-    state: [
-      {
-        name: 'firstCheckedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstCheckedAt',
-          {
-            defaultMessage: 'Timestamp indicating when this alert first checked',
-          }
-        ),
-      },
-      {
-        name: 'firstTriggeredAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.firstTriggeredAt',
-          {
-            defaultMessage: 'Timestamp indicating when the alert first triggered',
-          }
-        ),
-      },
-      {
-        name: 'currentTriggerStarted',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.currentTriggerStarted',
-          {
-            defaultMessage:
-              'Timestamp indicating when the current trigger state began, if alert is triggered',
-          }
-        ),
-      },
-      {
-        name: 'isTriggered',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.isTriggered',
-          {
-            defaultMessage: `Flag indicating if the alert is currently triggering`,
-          }
-        ),
-      },
-      {
-        name: 'lastCheckedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastCheckedAt',
-          {
-            defaultMessage: `Timestamp indicating the alert's most recent check time`,
-          }
-        ),
-      },
-      {
-        name: 'lastResolvedAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastResolvedAt',
-          {
-            defaultMessage: `Timestamp indicating the most recent resolution time for this alert`,
-          }
-        ),
-      },
-      {
-        name: 'lastTriggeredAt',
-        description: i18n.translate(
-          'xpack.uptime.alerts.monitorStatus.actionVariables.state.lastTriggeredAt',
-          {
-            defaultMessage: `Timestamp indicating the alert's most recent trigger time`,
-          }
-        ),
-      },
-    ],
+    state: [...commonStateTranslations],
   },
   async executor(options: AlertExecutorOptions) {
     const { params: rawParams } = options;

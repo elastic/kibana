@@ -47,7 +47,6 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
   } else if (isTriggeredNow) {
     cts = currentTriggerStarted;
   }
-
   return {
     currentTriggerStarted: cts,
     firstCheckedAt: firstCheckedAt ?? now,
