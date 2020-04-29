@@ -31,7 +31,6 @@ import {
   PrivateProvider,
   watchMultiDecorator,
   KbnAccessibleClickProvider,
-  configureAppAngularModule,
 } from '../../kibana_legacy/public';
 
 initAngularBootstrap();
@@ -40,7 +39,6 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ui.bootstrap', 'RecursionH
 
 export function getAngularModule(name: string, core: CoreStart, context: PluginInitializerContext) {
   const uiModule = getInnerAngular(name, core);
-  configureAppAngularModule(uiModule, { core, env: context.env }, true);
   return uiModule;
 }
 

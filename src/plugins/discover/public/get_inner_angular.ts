@@ -84,7 +84,6 @@ export function getInnerAngularModuleEmbeddable(
   context: PluginInitializerContext
 ) {
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  configureAppAngularModule(module, { core, env: context.env }, true);
   return module;
 }
 
