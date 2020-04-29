@@ -56,7 +56,6 @@ export function envoyproxyMetricsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/home/assets/envoyproxy_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
