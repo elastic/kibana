@@ -21,8 +21,6 @@
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createRegionMapFn } from './region_map_fn';
 
-jest.mock('ui/new_platform');
-
 describe('interpreter/functions#regionmap', () => {
   const fn = functionWrapper(createRegionMapFn());
   const context = {
