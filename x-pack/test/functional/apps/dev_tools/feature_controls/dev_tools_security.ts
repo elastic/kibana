@@ -231,6 +231,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`navigating to console shows 404`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });
@@ -238,6 +239,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`navigating to search profiler shows 404`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });
@@ -245,6 +247,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`navigating to grok debugger shows 404`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });

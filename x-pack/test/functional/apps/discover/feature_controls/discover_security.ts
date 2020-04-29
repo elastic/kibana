@@ -400,6 +400,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await PageObjects.error.expectNotFound();
       });

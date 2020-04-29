@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -301,17 +301,17 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('listing', () => {
-        it('redirects to Kibana home', async () => {
+        it('shows 404', async () => {
           await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('homeApp');
+          await PageObjects.error.expectNotFound();
         });
       });
 
       describe('edit visualization', () => {
-        it('redirects to Kibana home', async () => {
+        it('shows 404', async () => {
           await PageObjects.common.navigateToActualUrl(
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
@@ -320,7 +320,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
               ensureCurrentUrl: false,
             }
           );
-          await testSubjects.existOrFail('homeApp');
+          await PageObjects.error.expectNotFound();
         });
       });
     });
