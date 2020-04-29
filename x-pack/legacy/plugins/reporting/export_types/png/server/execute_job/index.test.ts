@@ -126,7 +126,7 @@ test(`returns content_type of application/png`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of(Buffer.from('')));
+  generatePngObservable.mockReturnValue(Rx.of('foo'));
 
   const { content_type: contentType } = await executeJob(
     'pngJobId',
@@ -137,10 +137,10 @@ test(`returns content_type of application/png`, async () => {
 });
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
-  const testContent = 'test content';
+  const testContent = 'raw string from get_screenhots';
 
   const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
+  generatePngObservable.mockReturnValue(Rx.of({ base64: testContent }));
 
   const executeJob = await executeJobFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
@@ -150,5 +150,5 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
     cancellationToken
   );
 
-  expect(content).toEqual(Buffer.from(testContent).toString('base64'));
+  expect(content).toEqual(testContent);
 });

@@ -54,13 +54,14 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
           job.layout
         );
       }),
-      map(({ buffer, warnings }) => {
+      map(({ base64, warnings }) => {
         if (apmGeneratePng) apmGeneratePng.end();
 
         return {
           content_type: 'image/png',
-          content: buffer,
-          size: buffer.length,
+          content: base64,
+          size: (base64 && base64.length) || 0,
+
           warnings,
         };
       }),

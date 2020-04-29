@@ -23,7 +23,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ): Rx.Observable<{ buffer: string; warnings: string[] }> {
+  ): Rx.Observable<{ base64: string | null; warnings: string[] }> {
     const apmTrans = apm.startTransaction('reporting generate_png', 'reporting');
     const apmLayout = apmTrans?.startSpan('create_layout', 'setup');
     if (!layoutParams || !layoutParams.dimensions) {
@@ -45,7 +45,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
         if (apmTrans) apmTrans.end();
 
         return {
-          buffer: results[0].screenshots[0].base64EncodedData,
+          base64: results[0].screenshots[0].base64EncodedData,
           warnings: results.reduce((found, current) => {
             if (current.error) {
               found.push(current.error.message);
