@@ -46,7 +46,7 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
-import { removeSlashes } from './utils';
+import { appendAppPath } from './utils';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -82,15 +82,7 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   const appBasePath = mounters.get(appId)?.appRoute
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
-
-  // Only prepend slash if not a hash or query path
-  path = path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
-
-  return removeSlashes(`${appBasePath}${path}`, {
-    trailing: true,
-    duplicates: true,
-    leading: false,
-  });
+  return appendAppPath(appBasePath, path);
 };
 
 const allApplicationsFilter = '__ALL__';
