@@ -11,6 +11,7 @@ describe('Ingest Manager - packageToConfig', () => {
     name: 'mock-package',
     title: 'Mock package',
     version: '0.0.0',
+    latestVersion: '0.0.0',
     description: 'description',
     type: 'mock',
     categories: [],
