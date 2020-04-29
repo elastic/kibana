@@ -133,6 +133,11 @@ export const AnalyzerParameter = ({
     !isDefaultValueInOptions && !isDefaultValueInSubOptions
   );
 
+  const [selectsDefaultValue, setSelectsDefaultValue] = useState({
+    main: mainValue,
+    sub: subValue,
+  });
+
   const fieldConfig = config ? config : getFieldConfig('analyzer');
   const fieldConfigWithLabel = label !== undefined ? { ...fieldConfig, label } : fieldConfig;
 
@@ -144,6 +149,7 @@ export const AnalyzerParameter = ({
     }
 
     field.reset({ resetValue: false });
+    setSelectsDefaultValue({ main: undefined, sub: undefined });
 
     setIsCustom(!isCustom);
   };
@@ -178,8 +184,8 @@ export const AnalyzerParameter = ({
           ) : (
             <AnalyzerParameterSelects
               onChange={field.setValue}
-              mainDefaultValue={mainValue}
-              subDefaultValue={subValue}
+              mainDefaultValue={selectsDefaultValue.main}
+              subDefaultValue={selectsDefaultValue.sub}
               config={fieldConfigWithLabel}
               options={fieldOptions}
               mapOptionsToSubOptions={mapOptionsToSubOptions}
