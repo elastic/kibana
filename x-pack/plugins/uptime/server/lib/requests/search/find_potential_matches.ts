@@ -5,7 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { QueryContext } from './query_context';
 
 // This is the first phase of the query. In it, we find the most recent check groups that matched the given query.

@@ -7,6 +7,7 @@
 import { CoreSetup, CoreStart } from '../../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
+import { platformServiceFactory } from './platform';
 
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
@@ -49,6 +50,7 @@ export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? 
 
 export const services = {
   notify: new CanvasServiceProvider(notifyServiceFactory),
+  platform: new CanvasServiceProvider(platformServiceFactory),
 };
 
 export interface CanvasServices {
@@ -70,4 +72,4 @@ export const stopServices = () => {
   Object.entries(services).forEach(([key, provider]) => provider.stop());
 };
 
-export const { notify: notifyService } = services;
+export const { notify: notifyService, platform: platformService } = services;
