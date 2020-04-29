@@ -62,7 +62,7 @@ exports[`Header should mark the input as invalid 1`] = `
           isInvalid={true}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="kbn.management.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
@@ -170,7 +170,7 @@ exports[`Header should render normally 1`] = `
           isInvalid={false}
           label={
             <FormattedMessage
-              defaultMessage="Index pattern"
+              defaultMessage="Index pattern name"
               id="kbn.management.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />

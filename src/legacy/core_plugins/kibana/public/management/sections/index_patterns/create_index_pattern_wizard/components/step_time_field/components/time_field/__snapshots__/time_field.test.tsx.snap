@@ -5,7 +5,7 @@ exports[`TimeField should render a loading state 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Does your index have time series data? Select the field to use as the main time filter."
+        defaultMessage="Select a primary time field for use with the global time filter."
         id="kbn.management.createIndexPattern.stepTime.timeDescription"
         values={Object {}}
       />
@@ -18,13 +18,6 @@ exports[`TimeField should render a loading state 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <FormattedMessage
-        defaultMessage="No time series data? No problem. Select 'I don't want to use a time filter'."
-        id="kbn.management.createIndexPattern.stepTime.fieldHelpText"
-        values={Object {}}
-      />
-    }
     label={
       <FormattedMessage
         defaultMessage="Time field"
@@ -61,7 +54,7 @@ exports[`TimeField should render a selected time field 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Does your index have time series data? Select the field to use as the main time filter."
+        defaultMessage="Select a primary time field for use with the global time filter."
         id="kbn.management.createIndexPattern.stepTime.timeDescription"
         values={Object {}}
       />
@@ -74,13 +67,6 @@ exports[`TimeField should render a selected time field 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <FormattedMessage
-        defaultMessage="No time series data? No problem. Select 'I don't want to use a time filter'."
-        id="kbn.management.createIndexPattern.stepTime.fieldHelpText"
-        values={Object {}}
-      />
-    }
     label={
       <FormattedMessage
         defaultMessage="Time field"
@@ -130,7 +116,7 @@ exports[`TimeField should render normally 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Does your index have time series data? Select the field to use as the main time filter."
+        defaultMessage="Select a primary time field for use with the global time filter."
         id="kbn.management.createIndexPattern.stepTime.timeDescription"
         values={Object {}}
       />
@@ -143,13 +129,6 @@ exports[`TimeField should render normally 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    helpText={
-      <FormattedMessage
-        defaultMessage="No time series data? No problem. Select 'I don't want to use a time filter'."
-        id="kbn.management.createIndexPattern.stepTime.fieldHelpText"
-        values={Object {}}
-      />
-    }
     label={
       <FormattedMessage
         defaultMessage="Time field"

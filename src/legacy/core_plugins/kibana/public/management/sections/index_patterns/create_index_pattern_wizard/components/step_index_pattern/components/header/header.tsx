@@ -71,7 +71,7 @@ export const Header: React.FC<HeaderProps> = ({
             label={
               <FormattedMessage
                 id="kbn.management.createIndexPattern.step.indexPatternLabel"
-                defaultMessage="Index pattern"
+                defaultMessage="Index pattern name"
               />
             }
             isInvalid={isInputInvalid}

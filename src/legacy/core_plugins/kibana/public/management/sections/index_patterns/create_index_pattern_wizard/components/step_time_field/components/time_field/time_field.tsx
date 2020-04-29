@@ -56,7 +56,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           <p>
             <FormattedMessage
               id="kbn.management.createIndexPattern.stepTime.timeDescription"
-              defaultMessage="Does your index have time series data? Select the field to use as the main time filter."
+              defaultMessage="Select a primary time field for use with the global time filter."
             />
           </p>
         </EuiText>
@@ -81,12 +81,6 @@ export const TimeField: React.FC<TimeFieldProps> = ({
                 </EuiLink>
               </EuiText>
             )
-          }
-          helpText={
-            <FormattedMessage
-              id="kbn.management.createIndexPattern.stepTime.fieldHelpText"
-              defaultMessage="No time series data? No problem. Select 'I don't want to use a time filter'."
-            />
           }
         >
           {isLoading ? (

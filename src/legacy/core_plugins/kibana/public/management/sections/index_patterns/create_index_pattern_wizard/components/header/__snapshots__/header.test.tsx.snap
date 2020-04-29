@@ -25,27 +25,34 @@ exports[`Header should render a different name, prompt, and beta tag if provided
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
         id="kbn.management.createIndexPatternLabel"
         values={
           Object {
-            "helpLink": <ForwardRef
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="index patterns"
-                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
-                values={Object {}}
-              />
-              <EuiIcon
-                className="eui-alignTop"
-                size="s"
-                type="questionInCircle"
-              />
-            </ForwardRef>,
+            "multiple": <strong>
+              multiple
+            </strong>,
+            "single": <EuiCode>
+              filebeat-4-3-22
+            </EuiCode>,
+            "star": <EuiCode>
+              filebeat-*
+            </EuiCode>,
           }
         }
       />
+      <br />
+      <EuiLink
+        external={true}
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Read documentation"
+          id="kbn.management.indexPatternPrompt.documentation"
+          values={Object {}}
+        />
+      </EuiLink>
     </p>
   </EuiText>
   <EuiSpacer
@@ -78,27 +85,34 @@ exports[`Header should render normally 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
         id="kbn.management.createIndexPatternLabel"
         values={
           Object {
-            "helpLink": <ForwardRef
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="index patterns"
-                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
-                values={Object {}}
-              />
-              <EuiIcon
-                className="eui-alignTop"
-                size="s"
-                type="questionInCircle"
-              />
-            </ForwardRef>,
+            "multiple": <strong>
+              multiple
+            </strong>,
+            "single": <EuiCode>
+              filebeat-4-3-22
+            </EuiCode>,
+            "star": <EuiCode>
+              filebeat-*
+            </EuiCode>,
           }
         }
       />
+      <br />
+      <EuiLink
+        external={true}
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Read documentation"
+          id="kbn.management.indexPatternPrompt.documentation"
+          values={Object {}}
+        />
+      </EuiLink>
     </p>
   </EuiText>
 </div>
@@ -125,27 +139,34 @@ exports[`Header should render without including system indices 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+        defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
         id="kbn.management.createIndexPatternLabel"
         values={
           Object {
-            "helpLink": <ForwardRef
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="index patterns"
-                id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
-                values={Object {}}
-              />
-              <EuiIcon
-                className="eui-alignTop"
-                size="s"
-                type="questionInCircle"
-              />
-            </ForwardRef>,
+            "multiple": <strong>
+              multiple
+            </strong>,
+            "single": <EuiCode>
+              filebeat-4-3-22
+            </EuiCode>,
+            "star": <EuiCode>
+              filebeat-*
+            </EuiCode>,
           }
         }
       />
+      <br />
+      <EuiLink
+        external={true}
+        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-patterns.html"
+        target="_blank"
+      >
+        <FormattedMessage
+          defaultMessage="Read documentation"
+          id="kbn.management.indexPatternPrompt.documentation"
+          values={Object {}}
+        />
+      </EuiLink>
     </p>
   </EuiText>
 </div>

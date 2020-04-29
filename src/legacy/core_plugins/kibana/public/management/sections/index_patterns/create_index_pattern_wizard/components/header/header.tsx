@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
+import { getDocLink } from 'ui/documentation_links';
 
 import {
   EuiBetaBadge,
@@ -26,12 +27,11 @@ import {
   EuiText,
   EuiLink,
   EuiSwitch,
-  EuiIcon,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CreateIndexPatternPrompt } from '../../../create_index_pattern_prompt';
 
 interface Props {
   prompt?: React.ReactNode;
@@ -50,8 +50,6 @@ export const Header: React.FunctionComponent<Props> = ({
   onChangeIncludingSystemIndices,
   isBeta = false,
 }) => {
-  const [showFlyout, setShowFlyout] = useState(false);
-
   return (
     <div>
       <EuiTitle>
@@ -80,19 +78,21 @@ export const Header: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="kbn.management.createIndexPatternLabel"
-            defaultMessage="Kibana uses {helpLink} to retrieve data from Elasticsearch indices for things like visualizations."
+            defaultMessage="An index pattern can match a single index, for example, {single}, or {multiple} indices, {star}."
             values={{
-              helpLink: (
-                <EuiLink onClick={() => setShowFlyout(!showFlyout)}>
-                  <FormattedMessage
-                    id="kbn.management.createIndexPattern.emptyStateLabel.indexPatternText"
-                    defaultMessage="index patterns"
-                  />
-                  <EuiIcon type="questionInCircle" size="s" className="eui-alignTop" />
-                </EuiLink>
-              ),
+              multiple: <strong>multiple</strong>,
+              single: <EuiCode>filebeat-4-3-22</EuiCode>,
+              star: <EuiCode>filebeat-*</EuiCode>,
             }}
           />
+
+          <br />
+          <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>
+            <FormattedMessage
+              id="kbn.management.indexPatternPrompt.documentation"
+              defaultMessage="Read documentation"
+            />
+          </EuiLink>
         </p>
       </EuiText>
       {showSystemIndices ? (
@@ -117,8 +117,6 @@ export const Header: React.FunctionComponent<Props> = ({
           {prompt}
         </Fragment>
       ) : null}
-
-      {showFlyout && <CreateIndexPatternPrompt onClose={() => setShowFlyout(false)} />}
     </div>
   );
 };

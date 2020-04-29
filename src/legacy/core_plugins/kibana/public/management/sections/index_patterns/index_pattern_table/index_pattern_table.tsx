@@ -98,35 +98,23 @@ export const IndexPatternTable: React.FunctionComponent<Props> = ({
     <EuiPageContent data-test-subj="indexPatternTable">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false} className="euiIEFlexWrapFix">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2>
-                  <FormattedMessage
-                    id="kbn.management.indexPatternTable.title"
-                    defaultMessage="Index patterns"
-                  />
-                </h2>
-              </EuiTitle>
-              <EuiText size="s" grow={false}>
-                <p>
-                  <FormattedMessage
-                    id="kbn.management.indexPatternTable.indexPatternExplanation"
-                    defaultMessage="Kibana requires an index pattern to identify which indices you want to explore. An
-                                    index pattern can point to a specific index, for example, your log data from
-                                    yesterday, or all indices that contain your log data."
-                  />
-                  <br />
-                  <EuiLink href={getDocLink('indexPatterns.introduction')} target="_blank" external>
-                    <FormattedMessage
-                      id="kbn.management.indexPatternTable.documentation"
-                      defaultMessage="Read documentation"
-                    />
-                  </EuiLink>
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="kbn.management.indexPatternTable.title"
+                defaultMessage="Index patterns"
+              />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="kbn.management.indexPatternTable.indexPatternExplanation"
+                defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
+              />
+            </p>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <CreateButton options={indexPatternCreationOptions}>

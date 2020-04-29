@@ -57,8 +57,8 @@ exports[`EmptyState should render normally 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCard
-          betaBadgeLabel="Basic license"
-          betaBadgeTooltipContent="Requires a Basic license"
+          betaBadgeLabel="Basic"
+          betaBadgeTooltipContent="This feature requires a Basic license."
           className="inpEmptyState__card"
           description={
             <FormattedMessage
@@ -130,7 +130,7 @@ exports[`EmptyState should render normally 1`] = `
                 Object {
                   "description": <ForwardRef
                     external={true}
-                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index.html"
+                    href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/connect-to-elasticsearch.html"
                     target="_blank"
                   >
                     Read documentation
@@ -168,7 +168,7 @@ exports[`EmptyState should render normally 1`] = `
                     />
                   </ForwardRef>,
                   "title": <FormattedMessage
-                    defaultMessage="Pretty sure you have data?"
+                    defaultMessage="Think you already have data?"
                     id="kbn.management.emptyState.haveData"
                     values={Object {}}
                   />,

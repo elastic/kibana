@@ -78,12 +78,12 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
             <EuiCard
               className="inpEmptyState__card"
               betaBadgeLabel={i18n.translate('kbn.management.emptyState.basicLicenseLabel', {
-                defaultMessage: 'Basic license',
+                defaultMessage: 'Basic',
               })}
               betaBadgeTooltipContent={i18n.translate(
                 'kbn.management.emptyState.basicLicenseDescription',
                 {
-                  defaultMessage: 'Requires a Basic license',
+                  defaultMessage: 'This feature requires a Basic license.',
                 }
               )}
               isDisabled
@@ -136,7 +136,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
                       />
                     ),
                     description: (
-                      <EuiLink href={getDocLink('kibana')} target="_blank" external>
+                      <EuiLink href={getDocLink('addData')} target="_blank" external>
                         Read documentation
                       </EuiLink>
                     ),
@@ -151,7 +151,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
                     title: (
                       <FormattedMessage
                         id="kbn.management.emptyState.haveData"
-                        defaultMessage="Pretty sure you have data?"
+                        defaultMessage="Think you already have data?"
                       />
                     ),
                     description: (
