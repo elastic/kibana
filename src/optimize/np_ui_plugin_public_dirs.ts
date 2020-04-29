@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import KbnServer from '../legacy/server/kbn_server';
 
 export type NpUiPluginPublicDirs = Array<{

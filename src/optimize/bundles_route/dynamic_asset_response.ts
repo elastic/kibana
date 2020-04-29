@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
 import Fs from 'fs';
+import { resolve } from 'path';
 import { promisify } from 'util';
 
 import Boom from 'boom';
@@ -26,7 +26,12 @@ import Hapi from 'hapi';
 
 import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
+// @ts-ignore
 import { replacePlaceholder } from '../public_path_placeholder';
+
+const MINUTE = 60;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 const asyncOpen = promisify(Fs.open);
 const asyncClose = promisify(Fs.close);
@@ -58,6 +63,7 @@ export async function createDynamicAssetResponse({
   publicPath,
   fileHashCache,
   replacePublicPath,
+  isDist,
 }: {
   request: Hapi.Request;
   h: Hapi.ResponseToolkit;
@@ -65,6 +71,7 @@ export async function createDynamicAssetResponse({
   publicPath: string;
   fileHashCache: FileHashCache;
   replacePublicPath: boolean;
+  isDist: boolean;
 }) {
   let fd: number | undefined;
 
@@ -82,7 +89,7 @@ export async function createDynamicAssetResponse({
     fd = await asyncOpen(path, 'r');
 
     const stat = await asyncFstat(fd);
-    const hash = await getFileHash(fileHashCache, path, stat, fd);
+    const hash = isDist ? undefined : await getFileHash(fileHashCache, path, stat, fd);
 
     const read = Fs.createReadStream(null as any, {
       fd,
@@ -92,15 +99,21 @@ export async function createDynamicAssetResponse({
     fd = undefined; // read stream is now responsible for fd
 
     const content = replacePublicPath ? replacePlaceholder(read, publicPath) : read;
-    const etag = replacePublicPath ? `${hash}-${publicPath}` : hash;
 
-    return h
+    const response = h
       .response(content)
       .takeover()
       .code(200)
-      .etag(etag)
-      .header('cache-control', 'must-revalidate')
       .type(request.server.mime.path(path).type);
+
+    if (isDist) {
+      response.header('cache-control', `max-age=${365 * DAY}`);
+    } else {
+      response.etag(`${hash}-${publicPath}`);
+      response.header('cache-control', 'must-revalidate');
+    }
+
+    return response;
   } catch (error) {
     if (fd) {
       try {
