@@ -5,49 +5,42 @@
  */
 
 import React, { ChangeEvent } from 'react';
-import {
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export enum OBSERVABILITY_LAYER_TYPE {
   APM_RUM_PERFORMANCE = 'APM_RUM_PERFORMANCE',
   APM_RUM_TRAFFIC = 'APM_RUM_TRAFFIC',
-};
+}
 
 const OBSERVABILITY_LAYER_OPTIONS = [
   {
     value: OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE,
     text: i18n.translate('xpack.maps.observability.apmRumPerformanceLabel', {
-      defaultMessage: 'APM - Real User Monitoring - Performance',
-    })
+      defaultMessage: 'APM RUM Performance',
+    }),
   },
   {
     value: OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC,
     text: i18n.translate('xpack.maps.observability.apmRumTrafficLabel', {
-      defaultMessage: 'APM - Real User Monitoring - Traffic',
-    })
+      defaultMessage: 'APM RUM Traffic',
+    }),
   },
 ];
 
 interface Props {
-  value?: OBSERVABILITY_LAYER_TYPE;
+  value: OBSERVABILITY_LAYER_TYPE | null;
   onChange: (layer: OBSERVABILITY_LAYER_TYPE) => void;
 }
 
-export function ObservabilityLayerSelect(props: Props) {
-
-  function onChange(event: ChangeEvent) {
+export function LayerSelect(props: Props) {
+  function onChange(event: ChangeEvent<HTMLSelectElement>) {
     props.onChange(event.target.value);
-  };
+  }
 
   const options = props.value
     ? OBSERVABILITY_LAYER_OPTIONS
-    : [
-      { value: '', text: ''},
-      ...OBSERVABILITY_LAYER_OPTIONS,
-    ];
+    : [{ value: '', text: '' }, ...OBSERVABILITY_LAYER_OPTIONS];
 
   return (
     <EuiFormRow
@@ -55,11 +48,7 @@ export function ObservabilityLayerSelect(props: Props) {
         defaultMessage: 'Layer',
       })}
     >
-      <EuiSelect
-        options={options}
-        value={props.value ? props.value : ''}
-        onChange={onChange}
-      />
+      <EuiSelect options={options} value={props.value ? props.value : ''} onChange={onChange} />
     </EuiFormRow>
   );
 }
