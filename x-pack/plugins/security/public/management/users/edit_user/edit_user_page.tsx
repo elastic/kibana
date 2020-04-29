@@ -35,7 +35,7 @@ import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
 import { RoleComboBox } from '../../role_combo_box';
-import { isUserDeprecated, getExtendedUserDeprecationNotice } from '../user_utils';
+import { isUserDeprecated, getExtendedUserDeprecationNotice, isUserReserved } from '../user_utils';
 import { UserAPIClient } from '..';
 
 interface Props {
@@ -255,9 +255,9 @@ export class EditUserPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
-                  defaultMessage="After you change the password for the kibana user, you must update the {kibana}
+                  defaultMessage="After you change the password for the {username} user, you must update the {kibana}
                   file and restart Kibana."
-                  values={{ kibana: 'kibana.yml' }}
+                  values={{ kibana: 'kibana.yml', username: user.username }}
                 />
               </p>
             </EuiCallOut>
@@ -370,7 +370,7 @@ export class EditUserPage extends Component<Props, State> {
       isNewUser,
       showDeleteConfirmation,
     } = this.state;
-    const reserved = user.metadata && user.metadata._reserved;
+    const reserved = isUserReserved(user);
     if (!user || !roles) {
       return null;
     }
@@ -439,11 +439,11 @@ export class EditUserPage extends Component<Props, State> {
               </Fragment>
             )}
 
-            {isUserDeprecated(this.state.user) && (
+            {isUserDeprecated(user) && (
               <Fragment>
                 <EuiCallOut
                   data-test-subj="deprecatedUserWarning"
-                  title={getExtendedUserDeprecationNotice(this.state.user)}
+                  title={getExtendedUserDeprecationNotice(user)}
                   color="warning"
                   iconType="alert"
                   size="s"

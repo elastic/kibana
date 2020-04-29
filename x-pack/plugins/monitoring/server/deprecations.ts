@@ -59,7 +59,7 @@ export const deprecations = ({
       if (es) {
         if (es.username === 'elastic') {
           logger(
-            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana" user instead.`
+            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
           );
         }
       }
