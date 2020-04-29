@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SecurityPluginSetup } from '../../../security/server';
 import { Logger } from '../../../../../src/core/server';
 import { RunContext } from '../../../../plugins/task_manager/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
@@ -24,6 +25,7 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
+  securityPluginSetup?: SecurityPluginSetup;
 }
 
 export class TaskRunnerFactory {

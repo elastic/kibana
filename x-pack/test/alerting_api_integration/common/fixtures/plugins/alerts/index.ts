@@ -430,6 +430,20 @@ export default function(kibana: any) {
         defaultActionGroupId: 'default',
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
+      const noopAlertTypeWithLongExecutionTime: AlertType = {
+        id: 'test.noop.long',
+        name: 'Test: Noop',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        async executor({ services, params, state }: AlertExecutorOptions) {
+          await new Promise(r => setTimeout(r, 5000));
+          /* try {
+            await services.savedObjectsClient.get('alert', '1');
+          } catch (e) {
+            
+          } */
+        },
+      };
       const onlyContextVariablesAlertType: AlertType = {
         id: 'test.onlyContextVariables',
         name: 'Test: Only Context Variables',
@@ -459,6 +473,7 @@ export default function(kibana: any) {
       server.newPlatform.setup.plugins.alerting.registerType(noopAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(onlyContextVariablesAlertType);
       server.newPlatform.setup.plugins.alerting.registerType(onlyStateVariablesAlertType);
+      server.newPlatform.setup.plugins.alerting.registerType(noopAlertTypeWithLongExecutionTime);
     },
   });
 }

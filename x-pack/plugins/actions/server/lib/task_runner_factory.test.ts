@@ -15,11 +15,13 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
+import { securityMock } from '../../../security/server/mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
 const mockedActionExecutor = actionExecutorMock.create();
+const securityPluginSetup = securityMock.createSetup();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -43,6 +45,11 @@ beforeAll(() => {
     },
     taskType: 'actions:1',
   };
+  securityPluginSetup!.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+    api_key: '123',
+    id: 'abc',
+    name: '',
+  });
   taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor);
   mockedActionExecutor.initialize(actionExecutorInitializerParams);
   taskRunnerFactory.initialize(taskRunnerFactoryInitializerParams);
@@ -70,6 +77,7 @@ const taskRunnerFactoryInitializerParams = {
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   getBasePath: jest.fn().mockReturnValue(undefined),
   getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  securityPluginSetup,
 };
 
 beforeEach(() => {
@@ -77,6 +85,20 @@ beforeEach(() => {
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
   taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
     services.savedObjectsClient
+  );
+  taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.grantAPIKeyAsInternalUser.mockResolvedValue(
+    {
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    }
+  );
+  taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser.mockResolvedValue(
+    {
+      invalidated_api_keys: ['abc'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    }
   );
 });
 
@@ -131,7 +153,7 @@ test('executes the task by calling the executor with proper parameters', async (
       getBasePath: expect.any(Function),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
+        authorization: 'ApiKey YWJjOjEyMw==',
       },
       path: '/',
       route: { settings: {} },
@@ -230,7 +252,7 @@ test('throws an error with suggested retry logic when return status is error', a
   }
 });
 
-test('uses API key when provided', async () => {
+test('uses sub API key when provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -257,7 +279,7 @@ test('uses API key when provided', async () => {
       getBasePath: expect.anything(),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
+        authorization: 'ApiKey YWJjOjEyMw==',
       },
       path: '/',
       route: { settings: {} },
@@ -271,6 +293,10 @@ test('uses API key when provided', async () => {
       },
     },
   });
+
+  expect(
+    taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser
+  ).toHaveBeenCalledWith({ id: 'abc' });
 });
 
 test(`doesn't use API key when not provided`, async () => {

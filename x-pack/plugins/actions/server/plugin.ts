@@ -6,6 +6,7 @@
 
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { SecurityPluginSetup } from '../../security/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -78,6 +79,7 @@ export interface ActionsPluginsSetup {
   spaces?: SpacesPluginSetup;
   eventLog: IEventLogService;
   usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -99,6 +101,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   private isESOUsingEphemeralEncryptionKey?: boolean;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private security?: SecurityPluginSetup;
 
   constructor(initContext: PluginInitializerContext) {
     this.config = initContext.config
@@ -125,6 +128,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.security = plugins.security;
 
     if (this.isESOUsingEphemeralEncryptionKey) {
       this.logger.warn(
@@ -238,6 +242,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       kibanaIndex,
       isESOUsingEphemeralEncryptionKey,
       preconfiguredActions,
+      security,
     } = this;
 
     actionExecutor!.initialize({
@@ -257,6 +262,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,
+      securityPluginSetup: security,
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);

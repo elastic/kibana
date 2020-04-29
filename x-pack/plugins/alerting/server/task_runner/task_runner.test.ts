@@ -17,6 +17,7 @@ import { actionsMock } from '../../../actions/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { securityMock } from '../../../security/server/mocks';
 
 const alertType = {
   id: 'test',
@@ -26,7 +27,7 @@ const alertType = {
   executor: jest.fn(),
 };
 let fakeTimer: sinon.SinonFakeTimers;
-
+const securityPluginSetup = securityMock.createSetup();
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
 
@@ -71,6 +72,7 @@ describe('Task Runner', () => {
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),
     eventLogger: eventLoggerMock.create(),
+    securityPluginSetup,
   };
 
   const mockedAlertTypeSavedObject = {
@@ -448,7 +450,17 @@ describe('Task Runner', () => {
     );
   });
 
-  test('uses API key when provided', async () => {
+  test('uses sub API key when provided', async () => {
+    securityPluginSetup!.authc.grantAPIKeyAsInternalUser.mockResolvedValueOnce({
+      api_key: '123',
+      id: 'abc',
+      name: '',
+    });
+    securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser.mockResolvedValue({
+      invalidated_api_keys: ['abc'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
     const taskRunner = new TaskRunner(
       alertType,
       mockedTaskInstance,
@@ -469,7 +481,7 @@ describe('Task Runner', () => {
       getBasePath: expect.anything(),
       headers: {
         // base64 encoded "123:abc"
-        authorization: 'ApiKey MTIzOmFiYw==',
+        authorization: 'ApiKey YWJjOjEyMw==',
       },
       path: '/',
       route: { settings: {} },
@@ -482,6 +494,10 @@ describe('Task Runner', () => {
         },
       },
     });
+
+    expect(
+      taskRunnerFactoryInitializerParams.securityPluginSetup!.authc.invalidateAPIKeyAsInternalUser
+    ).toHaveBeenCalledWith({ id: 'abc' });
   });
 
   test(`doesn't use API key when not provided`, async () => {

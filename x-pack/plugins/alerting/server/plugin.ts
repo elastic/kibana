@@ -230,6 +230,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+      securityPluginSetup: security,
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

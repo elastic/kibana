@@ -27,23 +27,14 @@ import {
   RawAlertAction,
 } from './types';
 import { validateAlertTypeParams } from './lib';
-import {
-  InvalidateAPIKeyParams,
-  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
-  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../plugins/security/server';
+import { InvalidateAPIKeyParams } from '../../../plugins/security/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../plugins/encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../plugins/task_manager/server';
 import { taskInstanceToAlertTaskInstance } from './task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
+import { CreateAPIKeyResult, InvalidateAPIKeyResult } from '../common/api_key_functions';
 
 type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
-export type CreateAPIKeyResult =
-  | { apiKeysEnabled: false }
-  | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
-export type InvalidateAPIKeyResult =
-  | { apiKeysEnabled: false }
-  | { apiKeysEnabled: true; result: SecurityPluginInvalidateAPIKeyResult };
 
 interface ConstructorOptions {
   logger: Logger;
@@ -602,7 +593,7 @@ export class AlertsClient {
     actions: RawAlert['actions'],
     references: SavedObjectReference[]
   ) {
-    return actions.map((action, i) => {
+    return actions.map(action => {
       const reference = references.find(ref => ref.name === action.actionRef);
       if (!reference) {
         throw new Error(`Reference ${action.actionRef} not found`);
