@@ -36,6 +36,7 @@ export const findOptionsSchema = schema.object({
   end: optionalDateFieldSchema,
   sort_field: schema.oneOf(
     [
+      schema.literal('@timestamp'),
       schema.literal('event.start'),
       schema.literal('event.end'),
       schema.literal('event.provider'),
@@ -44,7 +45,7 @@ export const findOptionsSchema = schema.object({
       schema.literal('message'),
     ],
     {
-      defaultValue: 'event.start',
+      defaultValue: '@timestamp',
     }
   ),
   sort_order: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {

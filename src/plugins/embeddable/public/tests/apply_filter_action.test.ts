@@ -110,6 +110,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector,
       SavedObjectFinder: () => null,
     }
@@ -145,6 +146,7 @@ test('trying to execute on incompatible context throws an error ', async () => {
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector,
       SavedObjectFinder: () => null,
     }

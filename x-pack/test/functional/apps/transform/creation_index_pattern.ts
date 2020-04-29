@@ -18,7 +18,6 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_index_pattern', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');

@@ -48,7 +48,7 @@ describe('logLegacyThirdPartyPluginDeprecationWarning', () => {
     expect(log.warn).toHaveBeenCalledTimes(1);
     expect(log.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "Some installed third party plugin(s) [plugin] are using the legacy plugin format and will no longer work in a future Kibana release. Please refer to https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html for a list of breaking changes and https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md for documentation on how to migrate legacy plugins.",
+        "Some installed third party plugin(s) [plugin] are using the legacy plugin format and will no longer work in a future Kibana release. Please refer to https://ela.st/kibana-breaking-changes-8-0 for a list of breaking changes and https://ela.st/kibana-platform-migration for documentation on how to migrate legacy plugins.",
       ]
     `);
   });
@@ -65,7 +65,7 @@ describe('logLegacyThirdPartyPluginDeprecationWarning', () => {
     expect(log.warn).toHaveBeenCalledTimes(1);
     expect(log.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "Some installed third party plugin(s) [pluginA, pluginB, pluginC] are using the legacy plugin format and will no longer work in a future Kibana release. Please refer to https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html for a list of breaking changes and https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md for documentation on how to migrate legacy plugins.",
+        "Some installed third party plugin(s) [pluginA, pluginB, pluginC] are using the legacy plugin format and will no longer work in a future Kibana release. Please refer to https://ela.st/kibana-breaking-changes-8-0 for a list of breaking changes and https://ela.st/kibana-platform-migration for documentation on how to migrate legacy plugins.",
       ]
     `);
   });

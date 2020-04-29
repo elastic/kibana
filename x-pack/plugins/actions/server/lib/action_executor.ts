@@ -90,7 +90,9 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
     const actionType = actionTypeRegistry.get(actionTypeId);
 
     let validatedParams: Record<string, unknown>;
@@ -138,13 +140,18 @@ export class ActionExecutor {
       status: 'ok',
     };
 
+    event.event = event.event || {};
+
     if (result.status === 'ok') {
+      event.event.outcome = 'success';
       event.message = `action executed: ${actionLabel}`;
     } else if (result.status === 'error') {
+      event.event.outcome = 'failure';
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
     } else {
+      event.event.outcome = 'failure';
       event.message = `action execution returned unexpected result: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';

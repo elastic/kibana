@@ -113,7 +113,7 @@ export class InfraLogEntriesDomain {
     params: LogEntriesParams
   ): Promise<LogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
 
@@ -156,14 +156,7 @@ export class InfraLogEntriesDomain {
             }
           }
         ),
-        context: FIELDS_FROM_CONTEXT.reduce<LogEntry['context']>((ctx, field) => {
-          // Users might have different types here in their mappings.
-          const value = doc.fields[field];
-          if (typeof value === 'string') {
-            ctx[field] = value;
-          }
-          return ctx;
-        }, {}),
+        context: getContextFromDoc(doc),
       };
     });
 
@@ -179,7 +172,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
@@ -203,7 +196,7 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(
-      requestContext,
+      requestContext.core.savedObjects.client,
       sourceId
     );
     const messageFormattingRules = compileFormattingRules(
@@ -352,3 +345,20 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
     type: 'phrase',
   },
 });
+
+const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
+  // Get all context fields, then test for the presence and type of the ones that go together
+  const containerId = doc.fields['container.id'];
+  const hostName = doc.fields['host.name'];
+  const logFilePath = doc.fields['log.file.path'];
+
+  if (typeof containerId === 'string') {
+    return { 'container.id': containerId };
+  }
+
+  if (typeof hostName === 'string' && typeof logFilePath === 'string') {
+    return { 'host.name': hostName, 'log.file.path': logFilePath };
+  }
+
+  return {};
+};

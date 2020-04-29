@@ -30,10 +30,6 @@ export interface SystemRouteDeps {
   resolveMlCapabilities: ResolveMlCapabilities;
 }
 
-export interface JobServiceRouteDeps {
-  resolveMlCapabilities: ResolveMlCapabilities;
-}
-
 export interface PluginsSetup {
   cloud: CloudSetup;
   features: FeaturesPluginSetup;

@@ -18,7 +18,6 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

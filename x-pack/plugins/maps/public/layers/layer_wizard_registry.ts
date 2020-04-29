@@ -6,16 +6,21 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { ISource } from './sources/source';
-
-export type PreviewSourceHandler = (source: ISource | null) => void;
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 export type RenderWizardArguments = {
-  onPreviewSource: PreviewSourceHandler;
-  inspectorAdapters: object;
+  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  mapColors: string[];
+  // upload arguments
+  isIndexingTriggered: boolean;
+  onRemove: () => void;
+  onIndexReady: () => void;
+  importSuccessHandler: (indexResponses: unknown) => void;
+  importErrorHandler: (indexResponses: unknown) => void;
 };
 
 export type LayerWizard = {
+  checkVisibility?: () => boolean;
   description: string;
   icon: string;
   isIndexingSource?: boolean;
@@ -30,5 +35,7 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export function getLayerWizards(): LayerWizard[] {
-  return [...registry];
+  return registry.filter(layerWizard => {
+    return layerWizard.checkVisibility ? layerWizard.checkVisibility() : true;
+  });
 }

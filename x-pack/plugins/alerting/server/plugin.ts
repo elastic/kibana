@@ -29,6 +29,7 @@ import {
   RequestHandler,
   SharedGlobalConfig,
   ElasticsearchServiceStart,
+  IClusterClient,
 } from '../../../../src/core/server';
 
 import {
@@ -57,6 +58,7 @@ import { Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
+import { setupSavedObjects } from './saved_objects';
 
 const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -133,17 +135,7 @@ export class AlertingPlugin {
       );
     }
 
-    // Encrypted attributes
-    plugins.encryptedSavedObjects.registerType({
-      type: 'alert',
-      attributesToEncrypt: new Set(['apiKey']),
-      attributesToExcludeFromAAD: new Set([
-        'scheduledTaskId',
-        'muteAll',
-        'mutedInstanceIds',
-        'updatedBy',
-      ]),
-    });
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
@@ -270,6 +262,9 @@ export class AlertingPlugin {
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
+      getScopedCallCluster(clusterClient: IClusterClient) {
+        return clusterClient.asScoped(request).callAsCurrentUser;
+      },
     });
   }
 
