@@ -18,7 +18,7 @@
  */
 import { of } from 'rxjs';
 import { duration } from 'moment';
-import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
+import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { CspConfig } from './csp';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
@@ -100,7 +100,9 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
   return mock;
 }
 
-type CoreSetupMockType = MockedKeys<CoreSetup> & jest.Mocked<Pick<CoreSetup, 'getStartServices'>>;
+type CoreSetupMockType = MockedKeys<CoreSetup> & {
+  getStartServices: jest.MockedFunction<StartServicesAccessor<any, any>>;
+};
 
 function createCoreSetupMock({
   pluginStartDeps = {},

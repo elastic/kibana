@@ -30,7 +30,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
-  const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | null>(null);
+  const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
 
   return (
     <EuiFlyout onClose={onClose} size="l" maxWidth={640}>

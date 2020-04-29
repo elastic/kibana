@@ -71,10 +71,10 @@ function getSpanTypes(span: Span) {
   };
 }
 
-const SpanBadge = styled(EuiBadge)`
+const SpanBadge = (styled(EuiBadge)`
   display: inline-block;
   margin-right: ${px(units.quarter)};
-` as any;
+` as unknown) as typeof EuiBadge;
 
 const HttpInfoContainer = styled('div')`
   margin-right: ${px(units.quarter)};
