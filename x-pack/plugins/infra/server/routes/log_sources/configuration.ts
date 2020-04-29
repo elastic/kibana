@@ -82,12 +82,12 @@ export const initLogSourceConfigurationRoutes = ({ framework, sources }: InfraBa
         const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
         const patchedSourceConfiguration = await (sourceConfigurationExists
           ? sources.updateSourceConfiguration(
-              requestContext,
+              requestContext.core.savedObjects.client,
               sourceId,
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
-              requestContext,
+              requestContext.core.savedObjects.client,
               sourceId,
               patchedSourceConfigurationProperties
             ));

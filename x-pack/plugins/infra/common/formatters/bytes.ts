@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { formatNumber } from './number';
-
-export enum InfraWaffleMapDataFormat {
-  bytesDecimal = 'bytesDecimal',
-  bitsDecimal = 'bitsDecimal',
-  abbreviatedNumber = 'abbreviatedNumber',
-}
+import { InfraWaffleMapDataFormat } from '.';
 
 /**
  * The labels are derived from these two Wikipedia articles.
