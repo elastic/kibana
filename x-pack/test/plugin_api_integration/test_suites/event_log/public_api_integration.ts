@@ -83,7 +83,10 @@ export default function({ getService }: FtrProviderContext) {
       const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
       // run one first to create the SO and avoid clashes
       await logTestEvent(id, firstExpectedEvent);
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      // stagger the API calls to ensure the creation order is  as expected
+      for (let index = 0; index < expectedEvents.length; index++) {
+        await logTestEvent(id, expectedEvents[index]);
+      }
 
       await retry.try(async () => {
         const {
