@@ -847,6 +847,14 @@
         ],
       },
       {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
+        ],
+      },
+      {
         groupSlug: 'sinon',
         groupName: 'sinon related packages',
         packageNames: [
