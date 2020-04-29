@@ -96,6 +96,10 @@ export const useAnalysisSetupState = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
+        if (validIndexNames.length === 0) {
+          return { data: { datasets: [] } };
+        }
+
         return await validateSetupDatasets(
           validIndexNames,
           sourceConfiguration.timestampField,
@@ -113,11 +117,6 @@ export const useAnalysisSetupState = <JobType extends string>({
     [validIndexNames, sourceConfiguration.timestampField, startTime, endTime]
   );
 
-  const validateIndicesAndDatasets = useCallback(async () => {
-    await validateIndices();
-    await validateDatasets();
-  }, [validateDatasets, validateIndices]);
-
   const setUp = useCallback(() => {
     return setUpModule(selectedIndexNames, startTime, endTime);
   }, [setUpModule, selectedIndexNames, startTime, endTime]);
@@ -127,11 +126,7 @@ export const useAnalysisSetupState = <JobType extends string>({
   }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime]);
 
   const isValidating = useMemo(
-    () =>
-      validateIndicesRequest.state === 'pending' ||
-      validateIndicesRequest.state === 'uninitialized' ||
-      validateDatasetsRequest.state === 'pending' ||
-      validateDatasetsRequest.state === 'uninitialized',
+    () => validateIndicesRequest.state === 'pending' || validateDatasetsRequest.state === 'pending',
     [validateDatasetsRequest.state, validateIndicesRequest.state]
   );
 
@@ -160,12 +155,16 @@ export const useAnalysisSetupState = <JobType extends string>({
   const prevValidIndexNames = usePrevious(validIndexNames);
 
   useEffect(() => {
+    validateIndices();
+  }, [validateIndices]);
+
+  useEffect(() => {
     if (
       startTime !== prevStartTime ||
       endTime !== prevEndTime ||
       !isEqual(validIndexNames, prevValidIndexNames)
     ) {
-      validateIndicesAndDatasets();
+      validateDatasets();
     }
   }, [
     endTime,
@@ -174,7 +173,7 @@ export const useAnalysisSetupState = <JobType extends string>({
     prevValidIndexNames,
     startTime,
     validIndexNames,
-    validateIndicesAndDatasets,
+    validateDatasets,
   ]);
 
   return {
