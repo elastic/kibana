@@ -99,9 +99,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
                   color="secondary"
@@ -114,7 +114,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                   {saveButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="primary" onClick={onCancel}>
                   <FormattedMessage
                     id="xpack.ingestPipelines.form.cancelButtonLabel"
