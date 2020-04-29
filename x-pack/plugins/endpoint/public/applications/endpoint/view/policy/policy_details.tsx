@@ -52,7 +52,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
 
-  // Handle showing udpate statuses
+  // Handle showing update statuses
   useEffect(() => {
     if (policyUpdateStatus) {
       if (policyUpdateStatus.success) {
@@ -79,7 +79,7 @@ export const PolicyDetails = React.memo(() => {
         });
       }
     }
-  }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
+  }, [notifications.toasts, policyName, policyUpdateStatus]);
 
   const handleBackToListOnClick = useNavigateByRouterEventHandler('/policy');
 

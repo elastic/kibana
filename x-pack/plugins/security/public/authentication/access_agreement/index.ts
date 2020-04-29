@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { checkIfPngsMatch } from './compare_pngs';
+export { accessAgreementApp } from './access_agreement_app';

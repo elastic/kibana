@@ -163,6 +163,7 @@ describe('Login view routes', () => {
 
     it('returns only required license features.', async () => {
       license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
         allowLogin: true,
         allowRbac: false,
         allowRoleDocumentLevelSecurity: true,
