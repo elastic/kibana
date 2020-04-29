@@ -30,9 +30,15 @@ export function PackageCard({
   showInstalledBadge,
   status,
   icons,
+  ...restProps
 }: PackageCardProps) {
   const { toDetailView } = useLinks();
-  const url = toDetailView({ name, version });
+  let urlVersion = version;
+  // if this is an installed package, link to the version installed
+  if ('savedObject' in restProps) {
+    urlVersion = restProps.savedObject.attributes.version || version;
+  }
+  const url = toDetailView({ name, version: urlVersion });
 
   return (
     <Card
