@@ -44,4 +44,6 @@ function disableAdminPrivileges(capabilities: MlCapabilities) {
   Object.keys(adminMlCapabilities).forEach(k => {
     capabilities[k as keyof MlCapabilities] = false;
   });
+  capabilities.canCreateAnnotation = false;
+  capabilities.canDeleteAnnotation = false;
 }
