@@ -67,6 +67,9 @@ const nodeAssets = {
 };
 
 const subMenuAssets = {
+  initialMenuStatus: Symbol(
+    'The state of a Resolver submenu before it has been opened or requested data.'
+  ),
   relatedAlerts: {
     title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
       defaultMessage: 'Related Alerts',
@@ -121,7 +124,10 @@ const NodeSubMenu = styled(
     }: { menuTitle: string; className?: string } & (
       | {
           menuAction?: undefined;
-          optionsWithActions: ResolverSubmenuOptionList | typeof waitingForRelatedEventData;
+          optionsWithActions:
+            | ResolverSubmenuOptionList
+            | typeof subMenuAssets.initialMenuStatus
+            | typeof waitingForRelatedEventData;
         }
       | { menuAction: () => unknown; optionsWithActions?: undefined }
     )) => {
@@ -130,9 +136,14 @@ const NodeSubMenu = styled(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
-          setMenuOpen(!menuIsOpen);
+          if (optionsWithActions === waitingForRelatedEventData) {
+            // dispatch action
+            setMenuOpen(true);
+          } else {
+            setMenuOpen(!menuIsOpen);
+          }
         },
-        [menuIsOpen]
+        [menuIsOpen, optionsWithActions]
       );
       const handleMenuActionClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -172,7 +183,9 @@ const NodeSubMenu = styled(
             {menuTitle}
           </EuiButton>
           {menuIsOpen &&
-            (optionsWithActions === waitingForRelatedEventData ? null : (
+            (typeof optionsWithActions === 'symbol' ? (
+              'loading'
+            ) : (
               <OptionList subMenuOptions={optionsWithActions} />
             ))}
         </div>

@@ -158,7 +158,7 @@ export const waitingForRelatedEventData = Symbol(
  */
 export interface RelatedEventDataEntry {
   related_events: Array<{
-    related_event_id: string;
+    related_event: ResolverEvent;
     related_event_type: RelatedEventType;
   }>;
 }
@@ -170,11 +170,11 @@ export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
   stats: Partial<Record<RelatedEventType, number>>;
 };
 /**
- * This represents a Record that will return either a `RelatedEventDataEntryWithStats`
- * or a `waitingForRelatedEventData` symbol when called with a unique event id.
+ * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
+ * or a `waitingForRelatedEventData` symbol when referenced unique event.
  */
-export type RelatedEventData = Record<
-  string,
+export type RelatedEventData = WeakMap<
+  ResolverEvent,
   RelatedEventDataEntryWithStats | typeof waitingForRelatedEventData
 >;
 
