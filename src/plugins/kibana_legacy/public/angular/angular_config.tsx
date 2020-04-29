@@ -32,6 +32,7 @@ import { cloneDeep, forOwn, get, set } from 'lodash';
 import React, { Fragment } from 'react';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
+import { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -88,7 +89,8 @@ export const configureAppAngularModule = (
           packageInfo: Readonly<PackageInfo>;
         };
       },
-  isLocalAngular: boolean
+  isLocalAngular: boolean,
+  getHistory?: () => History
 ) => {
   const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
   const packageInfo =
@@ -121,6 +123,7 @@ export const configureAppAngularModule = (
     .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(packageInfo.version))
     .run(capture$httpLoadingCount(core))
+    .run(digestOnHashChange(getHistory))
     .run($setupBreadcrumbsAutoClear(core, isLocalAngular))
     .run($setupBadgeAutoClear(core, isLocalAngular))
     .run($setupHelpExtensionAutoClear(core, isLocalAngular))
@@ -139,6 +142,14 @@ const getEsUrl = (newPlatform: CoreStart) => {
     protocol: a.protocol,
     pathname: a.pathname,
   };
+};
+
+const digestOnHashChange = (getHistory?: () => History) => ($rootScope: IRootScopeService) => {
+  if (!getHistory) return;
+  const unlisten = getHistory().listen(() => {
+    $rootScope.$applyAsync();
+  });
+  $rootScope.$on('$destroy', unlisten);
 };
 
 const setupCompileProvider = (devMode: boolean) => ($compileProvider: ICompileProvider) => {

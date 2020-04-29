@@ -59,6 +59,7 @@ import {
 } from '../../kibana_legacy/public';
 import { createDiscoverSidebarDirective } from './application/components/sidebar';
 import { DiscoverStartPlugins } from './plugin';
+import { getScopedHistory } from './kibana_services';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -72,7 +73,7 @@ export function getInnerAngularModule(
 ) {
   initAngularBootstrap();
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
-  configureAppAngularModule(module, { core, env: context.env }, true);
+  configureAppAngularModule(module, { core, env: context.env }, true, getScopedHistory);
   return module;
 }
 

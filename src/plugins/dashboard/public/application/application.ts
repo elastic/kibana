@@ -31,6 +31,7 @@ import {
   CoreStart,
   SavedObjectsClientContract,
   PluginInitializerContext,
+  ScopedHistory,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../kibana_utils/public';
@@ -71,6 +72,7 @@ export interface RenderDeps {
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
   navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  scopedHistory: () => ScopedHistory;
 }
 
 let angularModuleInstance: IModule | null = null;
@@ -82,7 +84,8 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true
+      true,
+      deps.scopedHistory
     );
     initDashboardApp(angularModuleInstance, deps);
   }

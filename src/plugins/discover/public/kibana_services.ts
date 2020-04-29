@@ -17,6 +17,7 @@
  * under the License.
  */
 import { createHashHistory } from 'history';
+import { ScopedHistory } from 'kibana/public';
 import { DiscoverServices } from './build_services';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { search } from '../../data/public';
@@ -61,6 +62,10 @@ export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<Doc
  * Makes sure discover and context are using one instance of history
  */
 export const getHistory = _.once(() => createHashHistory());
+
+export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
+  'scopedHistory'
+);
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';

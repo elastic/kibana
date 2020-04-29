@@ -54,6 +54,8 @@ import {
   setUrlTracker,
   setAngularModule,
   setServices,
+  setScopedHistory,
+  getScopedHistory,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -162,7 +164,7 @@ export class DiscoverPlugin
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
       // this prevents redundant `#` when not in discover app
-      getHistory,
+      getHistory: getScopedHistory,
       baseUrl: core.http.basePath.prepend('/app/discover'),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
@@ -204,6 +206,7 @@ export class DiscoverPlugin
         if (!this.initializeInnerAngular) {
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
+        setScopedHistory(params.history);
         appMounted();
         const {
           plugins: { data: dataStart },

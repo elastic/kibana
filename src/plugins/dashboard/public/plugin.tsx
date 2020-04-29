@@ -31,6 +31,7 @@ import {
   Plugin,
   SavedObjectsClientContract,
   AppUpdater,
+  ScopedHistory,
 } from 'src/core/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import {
@@ -136,6 +137,7 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private getActiveUrl: (() => string) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -208,6 +210,7 @@ export class DashboardPlugin
           ),
         },
       ],
+      getHistory: () => this.currentHistory!,
     });
 
     this.getActiveUrl = getActiveUrl;
@@ -225,6 +228,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.analyze,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+        this.currentHistory = params.history;
         appMounted();
         const {
           embeddable: embeddableStart,
@@ -257,6 +261,7 @@ export class DashboardPlugin
           },
           localStorage: new Storage(localStorage),
           usageCollection,
+          scopedHistory: () => this.currentHistory!,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();

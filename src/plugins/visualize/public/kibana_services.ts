@@ -24,6 +24,7 @@ import {
   ToastsStart,
   PluginInitializerContext,
   I18nStart,
+  ScopedHistory,
 } from 'kibana/public';
 
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
@@ -56,6 +57,7 @@ export interface VisualizeKibanaServices {
   setActiveUrl: (newUrl: string) => void;
   DefaultVisualizationEditor: typeof DefaultEditorController;
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
+  scopedHistory: () => ScopedHistory;
 }
 
 let services: VisualizeKibanaServices | null = null;

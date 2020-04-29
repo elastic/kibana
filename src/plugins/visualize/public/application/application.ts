@@ -53,7 +53,8 @@ export const renderApp = (
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true
+      true,
+      deps.scopedHistory
     );
     initVisualizeApp(angularModuleInstance, deps);
   }

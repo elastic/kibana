@@ -166,8 +166,8 @@ export function createKbnUrlTracker({
     const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
-      if (shouldTrackUrlUpdate(location.pathname)) {
-        setActiveUrl(location.pathname + location.search);
+      if (shouldTrackUrlUpdate(location.hash)) {
+        setActiveUrl(location.hash.substr(1));
       }
     });
   }

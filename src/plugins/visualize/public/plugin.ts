@@ -28,6 +28,7 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from 'kibana/public';
 
 import { Storage, createKbnUrlTracker } from '../../kibana_utils/public';
@@ -63,6 +64,7 @@ export class VisualizePlugin
     Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
+  private currentHistory: ScopedHistory | undefined = undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -90,6 +92,7 @@ export class VisualizePlugin
           ),
         },
       ],
+      getHistory: () => this.currentHistory!,
     });
     this.stopUrlTracking = () => {
       stopUrlTracker();
@@ -106,6 +109,7 @@ export class VisualizePlugin
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        this.currentHistory = params.history;
 
         appMounted();
 
@@ -130,6 +134,7 @@ export class VisualizePlugin
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
           dashboard: pluginsStart.dashboard,
+          scopedHistory: () => this.currentHistory!,
         };
         setServices(deps);
 
