@@ -26,6 +26,8 @@ import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
 
+const uniq = (...items) => Array.from(new Set(items));
+
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
  * @typedef {import('../../server/kbn_server').ResponseToolkit} ResponseToolkit
@@ -138,7 +140,15 @@ export function uiRenderMixin(kbnServer, server, config) {
                   .reverse(),
               ]),
         ];
-        const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
+
+        const kpPluginIds = uniq(
+          // load these plugins first, they are "shared" and other bundles access their
+          // public/index exports without considering topographic sorting by plugin deps (for now)
+          'kibanaUtils',
+          'esUiShared',
+          'kibanaReact',
+          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
+        );
 
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
@@ -153,7 +163,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
 
-          ...['kibanaUtils', 'esUiShared', 'kibanaReact', ...uiPluginIds].map(
+          ...kpPluginIds.map(
             pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
           ),
         ];
@@ -163,7 +173,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...uiPluginIds.reduce(
+          ...kpPluginIds.reduce(
             (acc, pluginId) => ({
               ...acc,
               [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
