@@ -8,8 +8,10 @@ import React, { Component, Fragment } from 'react';
 import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
+import { DisplaySelect, DISPLAY } from './display_select';
 
 interface State {
+  display: DISPLAY;
   layer: OBSERVABILITY_LAYER_TYPE | null;
   metric: OBSERVABILITY_METRIC_TYPE | null;
 }
@@ -18,6 +20,7 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
   state = {
     layer: null,
     metric: null,
+    display: DISPLAY.CHOROPLETH,
   };
 
   _onLayerChange = (layer: OBSERVABILITY_LAYER_TYPE) => {
@@ -26,6 +29,10 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
 
   _onMetricChange = (metric: OBSERVABILITY_METRIC_TYPE) => {
     this.setState({ metric }, this._previewLayer);
+  };
+
+  _onDisplayChange = (display: DISPLAY) => {
+    this.setState({ display }, this._previewLayer);
   };
 
   _previewLayer() {}
@@ -38,6 +45,11 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
           layer={this.state.layer}
           value={this.state.metric}
           onChange={this._onMetricChange}
+        />
+        <DisplaySelect
+          layer={this.state.layer}
+          value={this.state.display}
+          onChange={this._onDisplayChange}
         />
       </Fragment>
     );

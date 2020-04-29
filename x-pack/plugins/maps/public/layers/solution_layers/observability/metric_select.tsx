@@ -54,7 +54,7 @@ interface Props {
 
 export function MetricSelect(props: Props) {
   function onChange(event: ChangeEvent<HTMLSelectElement>) {
-    props.onChange(event.target.value);
+    props.onChange(event.target.value as OBSERVABILITY_METRIC_TYPE);
   }
 
   if (!props.layer) {

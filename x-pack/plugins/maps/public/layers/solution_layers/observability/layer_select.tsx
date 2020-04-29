@@ -35,7 +35,7 @@ interface Props {
 
 export function LayerSelect(props: Props) {
   function onChange(event: ChangeEvent<HTMLSelectElement>) {
-    props.onChange(event.target.value);
+    props.onChange(event.target.value as OBSERVABILITY_LAYER_TYPE);
   }
 
   const options = props.value
