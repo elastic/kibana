@@ -186,7 +186,7 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
         layerId: 'first',
-        changeType: 'unchanged',
+        changeType: 'extended',
         label: 'Datasource title',
       },
       keptLayerIds: [],
@@ -224,7 +224,7 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
-  test('does not hide reduced suggestions if xy visualization is not active', () => {
+  test('hides reduced suggestions if xy visualization is not active', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -236,7 +236,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(0);
-    expect(suggestion.hide).toBeFalsy();
+    expect(suggestion.hide).toBeTruthy();
   });
 
   test('only makes a seriesType suggestion for unchanged table without split', () => {

@@ -122,8 +122,8 @@ export const datatableVisualization: Visualization<
           ],
         },
         previewIcon: chartTableSVG,
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced' || !table.isMultiRow,
+        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
+        hide: true,
       },
     ];
   },

@@ -103,9 +103,16 @@ export interface TableSuggestion {
  * * `unchanged` means the table is the same in the currently active configuration
  * * `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)
  * * `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)
+ * * `reorder` means the table columns have changed order, which change the data as well
  * * `layers` means the change is a change to the layer structure, not to the table
  */
-export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'layers';
+export type TableChangeType =
+  | 'initial'
+  | 'unchanged'
+  | 'reduced'
+  | 'extended'
+  | 'reorder'
+  | 'layers';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;

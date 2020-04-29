@@ -175,6 +175,17 @@ function getSuggestionsForLayer({
     keptLayerIds,
   };
 
+  if (!currentState && changeType === 'unchanged') {
+    return [
+      {
+        ...buildSuggestion(options),
+        title: i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
+          defaultMessage: 'Bar chart',
+        }),
+      },
+    ];
+  }
+
   const isSameState = currentState && changeType === 'unchanged';
 
   if (!isSameState) {
@@ -374,8 +385,11 @@ function buildSuggestion({
   return {
     title,
     score: getScore(yValues, splitBy, changeType),
-    // don't advertise chart of same type but with less data
-    hide: currentState && changeType === 'reduced',
+    hide:
+      // Only advertise very clear changes when XY chart is not active
+      (!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
+      // Don't advertise removing dimensions
+      (currentState && changeType === 'reduced'),
     state,
     previewIcon: getIconForSeries(seriesType),
   };
