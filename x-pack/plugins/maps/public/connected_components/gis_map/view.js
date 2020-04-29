@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
+import { registerLayerWizards } from '../../layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -30,20 +31,13 @@ export class GisMap extends Component {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
     geoFields: [],
-    layerWizardsLoaded: false,
   };
-
-  async _loadLayerWizards() {
-    const loadLayerWizardsModule = await import('../../layers/load_layer_wizards');
-    loadLayerWizardsModule.registerLayerWizards();
-    this.setState({ layerWizardsLoaded: true });
-  }
 
   componentDidMount() {
     this._isMounted = true;
     this._isInitalLoadRenderTimerStarted = false;
     this._setRefreshTimer();
-    this._loadLayerWizards();
+    registerLayerWizards();
   }
 
   componentDidUpdate() {
@@ -165,9 +159,6 @@ export class GisMap extends Component {
       renderTooltipContent,
     } = this.props;
 
-    if (!this.state.layerWizardsLoaded) {
-      return <EuiLoadingSpinner />;
-    }
     const { domId } = this.state;
 
     if (mapInitError) {
