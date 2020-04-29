@@ -13,7 +13,7 @@ import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
-import { UiActionsCollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/public';
 
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
 
@@ -33,7 +33,7 @@ export class DashboardHelloWorldDrilldown
 
   public readonly euiIcon = 'cheer';
 
-  private readonly ReactCollectConfig: React.FC<UiActionsCollectConfigProps<Config>> = ({
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps<Config>> = ({
     config,
     onConfig,
   }) => (

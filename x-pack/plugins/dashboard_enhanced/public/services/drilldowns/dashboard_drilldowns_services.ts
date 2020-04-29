@@ -16,7 +16,7 @@ import {
 } from './actions';
 
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
-import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public/';
+import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
 declare module '../../../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {

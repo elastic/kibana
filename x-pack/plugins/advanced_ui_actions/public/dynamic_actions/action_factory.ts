@@ -10,7 +10,7 @@ import {
   UiActionsPresentable as Presentable,
 } from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
-import { Configurable } from '../util';
+import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import { SerializedAction } from './types';
 
 export class ActionFactory<

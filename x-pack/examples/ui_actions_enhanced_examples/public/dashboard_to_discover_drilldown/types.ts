@@ -9,7 +9,7 @@ import {
   ValueClickTriggerContext,
   EmbeddableContext,
 } from '../../../../../src/plugins/embeddable/public';
-import { UiActionsCollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps } from '../../../../../src/plugins/kibana_utils/public';
 
 export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
@@ -37,4 +37,4 @@ export interface Config {
   carryTimeRange: boolean;
 }
 
-export type CollectConfigProps = UiActionsCollectConfigProps<Config>;
+export type CollectConfigProps = CollectConfigProps<Config>;

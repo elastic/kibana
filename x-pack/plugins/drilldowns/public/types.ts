@@ -57,7 +57,7 @@ export interface DrilldownDefinition<
    * ```tsx
    * import React from 'react';
    * import { uiToReactComponent } from 'src/plugins/kibana_utils';
-   * import { UiActionsCollectConfigProps as CollectConfigProps } from 'src/plugins/ui_actions/public';
+   * import { CollectConfigProps } from 'src/plugins/kibana_utils/public';
    *
    * type Props = CollectConfigProps<Config>;
    *

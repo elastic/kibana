@@ -10,7 +10,7 @@ import { debounce, findIndex } from 'lodash';
 import { CoreStart, SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
-import { UiActionsCollectConfigProps } from '../../../../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { DrilldownFactoryContext } from '../../../../../../drilldowns/public';
 import { Config } from '../types';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
@@ -35,7 +35,7 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-interface CollectConfigProps extends UiActionsCollectConfigProps<Config> {
+interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config> {
   deps: {
     getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
   };
@@ -53,7 +53,7 @@ interface CollectConfigContainerState {
 }
 
 export class CollectConfigContainer extends React.Component<
-  CollectConfigProps,
+  DashboardDrilldownCollectConfigProps,
   CollectConfigContainerState
 > {
   private isMounted = true;
@@ -65,7 +65,7 @@ export class CollectConfigContainer extends React.Component<
     error: undefined,
   };
 
-  constructor(props: CollectConfigProps) {
+  constructor(props: DashboardDrilldownCollectConfigProps) {
     super(props);
     this.debouncedLoadDashboards = debounce(this.loadDashboards.bind(this), 500);
   }

@@ -13,7 +13,7 @@ import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
-import { UiActionsCollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
 
 export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
@@ -23,7 +23,7 @@ export interface Config {
   openInNewTab: boolean;
 }
 
-export type CollectConfigProps = UiActionsCollectConfigProps<Config>;
+export type CollectConfigProps = CollectConfigProps<Config>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 

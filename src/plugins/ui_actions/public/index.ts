@@ -33,11 +33,7 @@ export {
   IncompatibleActionError,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export {
-  Presentable as UiActionsPresentable,
-  Configurable as UiActionsConfigurable,
-  CollectConfigProps as UiActionsCollectConfigProps,
-} from './util';
+export { Presentable as UiActionsPresentable } from './util';
 export {
   Trigger,
   TriggerContext,
