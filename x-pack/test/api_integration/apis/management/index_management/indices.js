@@ -226,7 +226,9 @@ export default function({ getService }) {
             'ilm', // data enricher
             'isRollupIndex', // data enricher
           ];
-          expect(Object.keys(body[0])).to.eql(expectedKeys);
+          const sortedExpectedKeys = expectedKeys.sort();
+          const sortedReceivedKeys = Object.keys(body[0]).sort();
+          expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });
       });
