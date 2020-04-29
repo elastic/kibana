@@ -711,23 +711,27 @@ describe('#start()', () => {
     it('preserves trailing slash when path contains a hash', async () => {
       const { register } = service.setup(setupDeps);
 
-      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/path' }));
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/app-path' }));
 
       const { navigateToApp } = await service.start(startDeps);
-      await navigateToApp('myTestApp', { path: '#/' });
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp#/', undefined);
+      await navigateToApp('app2', { path: '#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/', undefined);
       MockHistory.push.mockClear();
 
-      await navigateToApp('myTestApp', { path: '#/foo/bar/' });
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp#/foo/bar/', undefined);
+      await navigateToApp('app2', { path: '#/foo/bar/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/foo/bar/', undefined);
       MockHistory.push.mockClear();
 
-      await navigateToApp('myTestApp', { path: '/path#/' });
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp/path#/', undefined);
+      await navigateToApp('app2', { path: '/path#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/', undefined);
       MockHistory.push.mockClear();
 
-      await navigateToApp('myTestApp', { path: '/path#/hash/' });
-      expect(MockHistory.push).toHaveBeenCalledWith('/app/myTestApp/path#/hash/', undefined);
+      await navigateToApp('app2', { path: '/path#/hash/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/hash/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path', undefined);
       MockHistory.push.mockClear();
     });
 

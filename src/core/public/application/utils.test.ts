@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { removeSlashes } from './utils';
+import { removeSlashes, appendAppPath } from './utils';
 
 describe('removeSlashes', () => {
   it('only removes duplicates by default', () => {
@@ -49,5 +49,23 @@ describe('removeSlashes', () => {
     expect(
       removeSlashes('/some//url//to/', { leading: true, duplicates: true, trailing: true })
     ).toEqual('some/url/to');
+  });
+});
+
+describe('appendAppPath', () => {
+  it('appends the appBasePath with given path', () => {
+    expect(appendAppPath('/app/my-app', '/some-path')).toEqual('/app/my-app/some-path');
+    expect(appendAppPath('/app/my-app/', 'some-path')).toEqual('/app/my-app/some-path');
+    expect(appendAppPath('/app/my-app', 'some-path')).toEqual('/app/my-app/some-path');
+    expect(appendAppPath('/app/my-app', '')).toEqual('/app/my-app');
+  });
+
+  it('preserves the trailing slash only if included in the hash', () => {
+    expect(appendAppPath('/app/my-app', '/some-path/')).toEqual('/app/my-app/some-path');
+    expect(appendAppPath('/app/my-app', '/some-path#/')).toEqual('/app/my-app/some-path#/');
+    expect(appendAppPath('/app/my-app', '/some-path#/hash/')).toEqual(
+      '/app/my-app/some-path#/hash/'
+    );
+    expect(appendAppPath('/app/my-app', '/some-path#/hash')).toEqual('/app/my-app/some-path#/hash');
   });
 });
