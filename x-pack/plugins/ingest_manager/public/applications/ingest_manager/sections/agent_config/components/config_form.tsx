@@ -260,7 +260,7 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ingestManager.agentConfigForm.monitoringDescription"
-                defaultMessage="Collect data about your agents. This information can be usefull for debugging and understanding perfomance."
+                defaultMessage="Collect data about your agents for debugging and tracking performance."
               />
             </EuiText>
           </EuiFlexItem>
