@@ -59,12 +59,13 @@ export interface AvailableTotal {
   total: number;
 }
 
-type BaseJobTypeKeys = 'csv' | 'PNG';
-export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
+type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
   printable_pdf: AvailableTotal & {
     app: {
-      visualization: number;
+      'canvas workpad': number;
       dashboard: number;
+      visualization: number;
     };
     layout: {
       print: number;
@@ -73,17 +74,26 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
   };
 };
 
-interface StatusCounts {
-  [statusType: string]: number;
-}
+export type Statuses =
+  | 'cancelled'
+  | 'completed'
+  | 'completed_with_warnings'
+  | 'failed'
+  | 'pending'
+  | 'processing';
+type StatusCounts = {
+  [S in Statuses]?: number;
+};
 
-interface StatusByAppCounts {
-  [statusType: string]: {
-    [jobType: string]: {
-      [appName: string]: number;
+export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
+export type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
+type StatusByAppCounts = {
+  [S in Statuses]?: {
+    [J in BaseJobTypes]?: {
+      [A in AppNames]: number;
     };
   };
-}
+};
 
 export type RangeStats = JobTypes & {
   _all: number;
@@ -91,5 +101,12 @@ export type RangeStats = JobTypes & {
   statuses: StatusByAppCounts;
 };
 
-export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
+export type ReportingUsageType = RangeStats & {
+  available: boolean;
+  browser_type: string;
+  enabled: boolean;
+  lastDay: RangeStats;
+  last7Days: RangeStats;
+};
+
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };

@@ -16,6 +16,7 @@ import {
   JobTypes,
   KeyCountBucket,
   RangeStats,
+  ReportingUsageType,
   SearchResponse,
   StatusByAppBucket,
 } from './types';
@@ -73,6 +74,7 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
     const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
     const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
     pdfJobs.app = getKeyCount(pdfAppBuckets) as {
+      'canvas workpad': number;
       visualization: number;
       dashboard: number;
     };
@@ -177,25 +179,27 @@ export async function getReportingUsage(
 
   return callCluster('search', params)
     .then((response: SearchResponse) => handleResponse(response))
-    .then((usage: RangeStatSets) => {
-      // Allow this to explicitly throw an exception if/when this config is deprecated,
-      // because we shouldn't collect browserType in that case!
-      const browserType = config.get('capture', 'browser', 'type');
+    .then(
+      (usage: RangeStatSets): ReportingUsageType => {
+        // Allow this to explicitly throw an exception if/when this config is deprecated,
+        // because we shouldn't collect browserType in that case!
+        const browserType = config.get('capture', 'browser', 'type');
 
-      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-      const availability = exportTypesHandler.getAvailability(
-        xpackMainInfo
-      ) as FeatureAvailabilityMap;
+        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+        const availability = exportTypesHandler.getAvailability(
+          xpackMainInfo
+        ) as FeatureAvailabilityMap;
 
-      const { lastDay, last7Days, ...all } = usage;
+        const { lastDay, last7Days, ...all } = usage;
 
-      return {
-        available: true,
-        browser_type: browserType,
-        enabled: true,
-        lastDay: decorateRangeStats(lastDay, availability),
-        last7Days: decorateRangeStats(last7Days, availability),
-        ...decorateRangeStats(all, availability),
-      };
-    });
+        return {
+          available: true,
+          browser_type: browserType,
+          enabled: true,
+          lastDay: decorateRangeStats(lastDay, availability),
+          last7Days: decorateRangeStats(last7Days, availability),
+          ...decorateRangeStats(all, availability),
+        };
+      }
+    );
 }
