@@ -228,6 +228,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
             packageInfo={packageInfo}
             datasource={datasource}
             updateDatasource={updateDatasource}
+            validationResults={validationResults!}
           />
         ) : null,
     },

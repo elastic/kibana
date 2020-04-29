@@ -246,6 +246,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                     packageInfo={packageInfo}
                     datasource={datasource}
                     updateDatasource={updateDatasource}
+                    validationResults={validationResults!}
                   />
                 ),
               },
@@ -258,7 +259,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
                 ),
                 children: (
                   <StepConfigureDatasource
-                    agentConfig={agentConfig}
                     packageInfo={packageInfo}
                     datasource={datasource}
                     updateDatasource={updateDatasource}
