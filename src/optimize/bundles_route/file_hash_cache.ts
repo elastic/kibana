@@ -17,5 +17,20 @@
  * under the License.
  */
 
-import { optimizeMixin } from './optimize_mixin';
-export default optimizeMixin;
+import LruCache from 'lru-cache';
+
+export class FileHashCache {
+  private lru = new LruCache<string, Promise<string>>(100);
+
+  get(key: string) {
+    return this.lru.get(key);
+  }
+
+  set(key: string, value: Promise<string>) {
+    this.lru.set(key, value);
+  }
+
+  del(key: string) {
+    this.lru.del(key);
+  }
+}
