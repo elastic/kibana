@@ -240,7 +240,7 @@ export class TaskManager {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   public registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
-    this.assertUninitialized('register task definitions');
+    this.assertUninitialized('register task definitions', Object.keys(taskDefinitions).join(', '));
     const duplicate = Object.keys(taskDefinitions).find(k => !!this.definitions[k]);
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
@@ -360,9 +360,11 @@ export class TaskManager {
    * @param {string} message shown if task manager is already initialized
    * @returns void
    */
-  private assertUninitialized(message: string) {
+  private assertUninitialized(message: string, context?: string) {
     if (this.isStarted) {
-      throw new Error(`Cannot ${message} after the task manager is initialized!`);
+      throw new Error(
+        `${context ? `[${context}] ` : ''}Cannot ${message} after the task manager is initialized`
+      );
     }
   }
 }
