@@ -18,29 +18,33 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IIndexPattern } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
+import { InfraSource } from '../../../../common/http_api/source_api';
 import {
   Comparator,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../server/lib/alerting/metric_threshold/types';
 import { MetricsExplorerColor, colorTransformer } from '../../../../common/color_palette';
-import {
-  MetricsExplorerResponse,
-  MetricsExplorerRow,
-  MetricsExplorerAggregation,
-} from '../../../../common/http_api';
+import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
-import { MetricExpression } from '../types';
+import { MetricExpression, AlertContextMeta } from '../types';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { getChartTheme } from '../../../pages/metrics/metrics_explorer/components/helpers/get_chart_theme';
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 
 interface Props {
-  loading: boolean;
-  data: MetricsExplorerResponse | null;
-  id: number;
+  context: AlertsContextValue<AlertContextMeta>;
   expression: MetricExpression;
+  derivedIndexPattern: IIndexPattern;
+  source: InfraSource | null;
+  filterQuery?: string;
+  groupBy?: string;
 }
+
 const tooltipProps = {
   headerFormatter: (tooltipValue: TooltipValue) =>
     moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
@@ -53,7 +57,23 @@ const TIME_LABELS = {
   d: i18n.translate('xpack.infra.metrics.alerts.timeLabels.days', { defaultMessage: 'days' }),
 };
 
-export const ExpressionChart: React.FC<Props> = ({ expression, loading, data, id }) => {
+export const ExpressionChart: React.FC<Props> = ({
+  expression,
+  context,
+  derivedIndexPattern,
+  source,
+  filterQuery,
+  groupBy,
+}) => {
+  const { loading, data } = useMetricsExplorerChartData(
+    expression,
+    context,
+    derivedIndexPattern,
+    source,
+    filterQuery,
+    groupBy
+  );
+
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
@@ -69,17 +89,15 @@ export const ExpressionChart: React.FC<Props> = ({ expression, loading, data, id
 
   const yAxisFormater = useCallback(createFormatterForMetric(metric), [expression]);
 
-  if (loading) {
+  if (loading || !data) {
     return (
       <EmptyContainer>
-        <EuiText color="subdued">Loading chart...</EuiText>
-      </EmptyContainer>
-    );
-  }
-  if (!data) {
-    return (
-      <EmptyContainer>
-        <EuiText color="subdued">Oops, no chart data available</EuiText>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.infra.metrics.alerts.loadingMessage"
+            defaultMessage="Loading"
+          />
+        </EuiText>
       </EmptyContainer>
     );
   }
@@ -102,7 +120,7 @@ export const ExpressionChart: React.FC<Props> = ({ expression, loading, data, id
     rows: firstSeries.rows.map(row => {
       const newRow: MetricsExplorerRow = {
         timestamp: row.timestamp,
-        [`metric_0`]: row[`metric_${id}`] || null,
+        metric_0: row.metric_0 || null,
       };
       thresholds.forEach((thresholdValue, index) => {
         newRow[`metric_threshold_${index}`] = thresholdValue;

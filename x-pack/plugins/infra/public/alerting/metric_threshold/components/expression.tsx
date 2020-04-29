@@ -27,7 +27,6 @@ import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { ExpressionRow } from './expression_row';
 import { MetricThresholdAlertParams, AlertContextMeta, TimeUnit, MetricExpression } from '../types';
-import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { ExpressionChart } from './expression_chart';
 
 interface Props {
@@ -59,13 +58,6 @@ export const Expressions: React.FC<Props> = props => {
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
     createDerivedIndexPattern,
   ]);
-
-  const chartData = useMetricsExplorerChartData(
-    alertParams,
-    alertsContext,
-    derivedIndexPattern,
-    source
-  );
 
   const options = useMemo<MetricsExplorerOptions>(() => {
     if (alertsContext.metadata?.currentOptions?.metrics) {
@@ -224,10 +216,12 @@ export const Expressions: React.FC<Props> = props => {
               expression={e || {}}
             >
               <ExpressionChart
-                loading={chartData.loading}
-                data={chartData.data}
-                id={idx}
                 expression={e}
+                context={alertsContext}
+                derivedIndexPattern={derivedIndexPattern}
+                source={source}
+                filterQuery={alertParams.filterQuery}
+                groupBy={alertParams.groupBy}
               />
             </ExpressionRow>
           );
@@ -296,19 +290,6 @@ export const Expressions: React.FC<Props> = props => {
         })}
         fullWidth
         compressed
-        labelAppend={
-          alertParams.groupBy && chartData.data?.pageInfo.total != null ? (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.infra.metrics.alertFlyout.matchesLabel"
-                defaultMessage="Matches {total}"
-                values={{ total: chartData.data.pageInfo.total }}
-              />
-            </EuiText>
-          ) : (
-            ''
-          )
-        }
       >
         <MetricsExplorerGroupBy
           onChange={onGroupByChange}

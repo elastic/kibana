@@ -6,36 +6,37 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useMemo } from 'react';
-import { first } from 'lodash';
 import { InfraSource } from '../../../../common/http_api/source_api';
-import { MetricThresholdAlertParams, AlertContextMeta } from '../types';
+import { AlertContextMeta, MetricExpression } from '../types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
 
 export const useMetricsExplorerChartData = (
-  params: MetricThresholdAlertParams,
+  expression: MetricExpression,
   context: AlertsContextValue<AlertContextMeta>,
   derivedIndexPattern: IIndexPattern,
-  source: InfraSource | null
+  source: InfraSource | null,
+  filterQuery?: string,
+  groupBy?: string
 ) => {
-  const firstCriteria = first(params.criteria || []);
-  const { timeSize, timeUnit } = firstCriteria || { timeSize: 1, timeUnit: 'm' };
+  const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
   const options: MetricsExplorerOptions = useMemo(
     () => ({
       limit: 1,
       forceInterval: true,
-      groupBy: params.groupBy,
-      filterQuery: params.filterQuery,
-      metrics:
-        params.criteria?.map(criteria => ({
-          field: criteria.metric,
-          aggregation: criteria.aggType,
-        })) || [],
-      aggregation: params.criteria?.[0].aggType || 'avg',
+      groupBy,
+      filterQuery,
+      metrics: [
+        {
+          field: expression.metric,
+          aggregation: expression.aggType,
+        },
+      ],
+      aggregation: expression.aggType || 'avg',
     }),
-    [params]
+    [expression.aggType, expression.metric, filterQuery, groupBy]
   );
   const timerange = useMemo(
     () => ({
