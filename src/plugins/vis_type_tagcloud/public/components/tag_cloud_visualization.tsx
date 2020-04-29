@@ -32,7 +32,7 @@ const MAX_TAG_COUNT = 200;
 
 export function createTagCloudVisualization({ colors }: { colors: any }) {
   const colorScale = d3.scale.ordinal().range(colors.seedColors);
-  return class TagCloudVisualization<> {
+  return class TagCloudVisualization {
     _containerNode: any;
     _vis: any;
     _truncated: boolean;
@@ -109,7 +109,7 @@ export function createTagCloudVisualization({ colors }: { colors: any }) {
       });
       this._feedbackMessage.current.setState({
         shouldShowTruncate: this._truncated,
-        shouldShowIncomplete: this._tagCloud.getStatus() === TagCloud.STATUS.INCOMPLETE,
+        shouldShowIncomplete: this._tagCloud.getStatus() === this._tagCloud.STATUS.INCOMPLETE,
       });
     }
 
@@ -121,7 +121,7 @@ export function createTagCloudVisualization({ colors }: { colors: any }) {
 
     _updateData(data: any) {
       if (!data || !data.rows.length) {
-        this._tagCloud.setData([]);
+        this._tagCloud.setData(data);
         return;
       }
 
