@@ -50,7 +50,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         }
       }
     }
-    return Object.assign(state, { [resultIsEnrichedWithRelatedEventInfo]: statsMap });
+    return { ...state, [resultIsEnrichedWithRelatedEventInfo]: statsMap };
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,
