@@ -88,13 +88,13 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                 />
                 <AlphaBadge
                   iconType="beaker"
-                  label={i18n.translate('xpack.IngestManager.alphaBadge.labelText', {
+                  label={i18n.translate('xpack.ingestManager.alphaBadge.labelText', {
                     defaultMessage: 'Experimental',
                   })}
-                  title={i18n.translate('xpack.IngestManager.alphaBadge.titleText', {
+                  title={i18n.translate('xpack.ingestManager.alphaBadge.titleText', {
                     defaultMessage: 'Experimental',
                   })}
-                  tooltipContent={i18n.translate('xpack.IngestManager.alphaBadge.tooltipText', {
+                  tooltipContent={i18n.translate('xpack.ingestManager.alphaBadge.tooltipText', {
                     defaultMessage:
                       'This plugin might change or be removed in a future release and is not subject to the support SLA.',
                   })}
