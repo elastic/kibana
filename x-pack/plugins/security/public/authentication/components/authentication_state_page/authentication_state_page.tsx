@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_authentication_state_page.scss';
+import './authentication_state_page.scss';
 
 import { EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
