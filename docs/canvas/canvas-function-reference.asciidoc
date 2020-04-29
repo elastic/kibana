@@ -598,8 +598,8 @@ Creates a `datatable` from CSV input.
 [source,js]
 ----
 csv "fruit, stock
-    kiwi, 10
-    Banana, 5"
+  kiwi, 10
+  Banana, 5"
 ----
 
 *Code example*

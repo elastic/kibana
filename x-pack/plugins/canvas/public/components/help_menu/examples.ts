@@ -274,8 +274,8 @@ containerStyle backgroundImage={asset id=asset-f40d2292-cf9e-4f2c-8c6f-a504a25e9
   },
   csv: {
     syntax: `csv "fruit, stock
-    kiwi, 10
-    Banana, 5"`,
+  kiwi, 10
+  Banana, 5"`,
     usage: {
       expression: `csv "fruit,stock
   kiwi,10
