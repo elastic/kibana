@@ -4185,7 +4185,6 @@
     "xpack.apm.alertTypes.errorRate": "错误率",
     "xpack.apm.alertTypes.transactionDuration": "事务持续时间",
     "xpack.apm.apmDescription": "自动从您的应用程序内收集深入全面的性能指标和错误。",
-    "xpack.apm.apmForESDescription": "Elastic Stack 的 APM",
     "xpack.apm.applyFilter": "应用 {title} 筛选",
     "xpack.apm.applyOptions": "应用选项",
     "xpack.apm.breadcrumb.errorsTitle": "错误",

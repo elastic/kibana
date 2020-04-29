@@ -103,7 +103,7 @@ const ApmAppRoot = ({
 };
 
 /**
- * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
+ * This module is rendered asynchronously in the Kibana platform.
  */
 export const renderApp = (
   core: CoreStart,

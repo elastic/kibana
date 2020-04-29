@@ -18,8 +18,7 @@ import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart
 } from '../../alerting/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart

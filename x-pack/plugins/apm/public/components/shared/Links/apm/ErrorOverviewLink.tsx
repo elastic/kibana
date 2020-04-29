@@ -6,7 +6,7 @@
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { pickKeys } from '../../../../utils/pickKeys';
+import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
 
 interface Props extends APMLinkExtendProps {

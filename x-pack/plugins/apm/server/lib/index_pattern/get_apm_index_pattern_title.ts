@@ -5,8 +5,6 @@
  */
 import { APMRequestHandlerContext } from '../../routes/typings';
 
-export async function getApmIndexPatternTitle(
-  context: APMRequestHandlerContext
-) {
+export function getApmIndexPatternTitle(context: APMRequestHandlerContext) {
   return context.config['apm_oss.indexPattern'];
 }

@@ -22,7 +22,7 @@ import {
   LocalUIFilterName
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
-import { pickKeys } from '../../utils/pickKeys';
+import { pickKeys } from '../../../common/utils/pick_keys';
 import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 
 interface TimeRange {

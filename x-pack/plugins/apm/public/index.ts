@@ -22,3 +22,4 @@ export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
 ) => new ApmPlugin(pluginInitializerContext);
 
 export { ApmPluginSetup, ApmPluginStart };
+export { getTraceUrl } from './components/shared/Links/apm/ExternalLinks';

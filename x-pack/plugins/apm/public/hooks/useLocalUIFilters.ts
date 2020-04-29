@@ -18,7 +18,7 @@ import { history } from '../utils/history';
 import { toQuery, fromQuery } from '../components/shared/Links/url_helpers';
 import { removeUndefinedProps } from '../context/UrlParamsContext/helpers';
 import { PROJECTION } from '../../common/projections/typings';
-import { pickKeys } from '../utils/pickKeys';
+import { pickKeys } from '../../common/utils/pick_keys';
 import { useCallApi } from './useCallApi';
 
 const getInitialData = (
