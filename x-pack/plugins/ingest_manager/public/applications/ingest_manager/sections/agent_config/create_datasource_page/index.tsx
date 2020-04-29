@@ -173,6 +173,23 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     const { error } = await saveDatasource();
     if (!error) {
       history.push(`${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
+          defaultMessage: `Successfully added '{datasourceName}'`,
+          values: {
+            datasourceName: datasource.name,
+          },
+        }),
+        text:
+          agentCount && agentConfig
+            ? i18n.translate('xpack.ingestManager.createDatasource.addedNotificationMessage', {
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentConfigName}' configuration`,
+                values: {
+                  agentConfigName: agentConfig.name,
+                },
+              })
+            : undefined,
+      });
     } else {
       notifications.toasts.addError(error, {
         title: 'Error',
