@@ -22,6 +22,8 @@
 // They can stay even after NP cutover
 import './application/index.scss';
 import angular from 'angular';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, PluginInitializerContext } from 'kibana/public';

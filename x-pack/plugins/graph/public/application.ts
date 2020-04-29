@@ -10,7 +10,7 @@
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
-// required for i18nIdDirective
+// required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
 // required for ngRoute
 import 'angular-route';

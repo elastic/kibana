@@ -21,6 +21,8 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 import 'angular-recursion';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, IUiSettingsClient, PluginInitializerContext } from 'kibana/public';
