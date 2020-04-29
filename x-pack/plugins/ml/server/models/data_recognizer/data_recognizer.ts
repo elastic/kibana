@@ -29,7 +29,11 @@ import {
   JobSpecificOverride,
   isGeneralJobOverride,
 } from '../../../common/types/modules';
-import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
+import {
+  getLatestDataOrBucketTimestamp,
+  prefixDatafeedId,
+  splitIndexPatternNames,
+} from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { fieldsServiceProvider } from '../fields_service';
@@ -828,9 +832,7 @@ export class DataRecognizer {
   updateDatafeedIndices(moduleConfig: Module) {
     // if the supplied index pattern contains a comma, split into multiple indices and
     // add each one to the datafeed
-    const indexPatternNames = this.indexPatternName.includes(',')
-      ? this.indexPatternName.split(',').map(i => i.trim())
-      : [this.indexPatternName];
+    const indexPatternNames = splitIndexPatternNames(this.indexPatternName);
 
     moduleConfig.datafeeds.forEach(df => {
       const newIndices: string[] = [];
