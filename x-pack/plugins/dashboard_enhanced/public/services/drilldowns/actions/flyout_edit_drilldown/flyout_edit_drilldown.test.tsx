@@ -17,20 +17,25 @@ const drilldowns = drilldownsPluginMock.createStartContract();
 const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
 const uiActions = uiActionsPlugin.doStart();
 
-uiActionsPlugin.setup.registerActionFactory({
+uiActionsPlugin.setup.registerDrilldown({
   id: 'foo',
   CollectConfig: {} as any,
   createConfig: () => ({}),
   isConfigValid: () => true,
-  create: () => ({
-    id: 'test',
-    execute: async () => {},
-  }),
+  execute: async () => {},
+  getDisplayName: () => 'test',
 });
 
 const actionParams: FlyoutEditDrilldownParams = {
-  drilldowns: () => drilldowns,
-  overlays: () => overlays,
+  start: () => ({
+    core: {
+      overlays,
+    } as any,
+    plugins: {
+      drilldowns,
+    },
+    self: {},
+  }),
 };
 
 test('should create', () => {

@@ -44,7 +44,7 @@ interface StartDependencies {
 
 export interface SetupContract
   extends UiActionsSetup,
-    Pick<UiActionsServiceEnhancements, 'registerActionFactory'> {}
+    Pick<UiActionsServiceEnhancements, 'registerDrilldown'> {}
 
 export interface StartContract
   extends UiActionsStart,

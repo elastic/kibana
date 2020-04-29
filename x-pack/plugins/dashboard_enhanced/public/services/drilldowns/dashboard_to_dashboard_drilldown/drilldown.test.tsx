@@ -87,16 +87,33 @@ describe('.execute() & getHref', () => {
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
     const drilldown = new DashboardToDashboardDrilldown({
-      getApplicationService: () => ({
-        navigateToApp,
-        getUrlForApp,
-      }),
-      getGetUrlGenerator: () => () =>
-        createDirectAccessDashboardLinkGenerator(() =>
-          Promise.resolve({ appBasePath: 'test', useHashedUrl: false })
-        ) as UrlGeneratorContract<string>,
-      getDataPluginActions: () => dataPluginActions,
-      getSavedObjectsClient: () => savedObjectsClient,
+      start: () =>
+        ({
+          core: {
+            application: {
+              navigateToApp,
+              getUrlForApp,
+            },
+            savedObjects: {
+              client: savedObjectsClient,
+            },
+          },
+          plugins: {
+            advancedUiActions: {},
+            data: {
+              actions: dataPluginActions,
+            },
+            share: {
+              urlGenerators: {
+                getUrlGenerator: () =>
+                  createDirectAccessDashboardLinkGenerator(() =>
+                    Promise.resolve({ appBasePath: 'test', useHashedUrl: false })
+                  ) as UrlGeneratorContract<string>,
+              },
+            },
+          },
+          self: {},
+        } as any),
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')

@@ -5,23 +5,22 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import {
   reactToUiComponent,
   toMountPoint,
 } from '../../../../../../../../src/plugins/kibana_react/public';
 import { EmbeddableContext, ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
-import { DrilldownsStart } from '../../../../../../drilldowns/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import { StartDependencies } from '../../../../plugin';
+import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export interface FlyoutEditDrilldownParams {
-  overlays: () => CoreStart['overlays'];
-  drilldowns: () => DrilldownsStart;
+  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
 }
 
 export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_EDIT_DRILLDOWN> {
@@ -48,8 +47,7 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
   }
 
   public async execute(context: EmbeddableContext) {
-    const overlays = this.params.overlays();
-    const drilldowns = this.params.drilldowns();
+    const { core, plugins } = this.params.start();
     const { embeddable } = context;
 
     if (!isEnhancedEmbeddable(embeddable)) {
@@ -58,9 +56,9 @@ export class FlyoutEditDrilldownAction implements ActionByType<typeof OPEN_FLYOU
       );
     }
 
-    const handle = overlays.openFlyout(
+    const handle = core.overlays.openFlyout(
       toMountPoint(
-        <drilldowns.FlyoutManageDrilldowns
+        <plugins.drilldowns.FlyoutManageDrilldowns
           onClose={() => handle.close()}
           placeContext={context}
           viewMode={'manage'}

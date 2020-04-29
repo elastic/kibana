@@ -7,7 +7,6 @@
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
-import { DrilldownService, DrilldownServiceSetupContract } from './services';
 import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
@@ -21,21 +20,17 @@ export interface StartDependencies {
   advancedUiActions: AdvancedUiActionsStart;
 }
 
-export type SetupContract = DrilldownServiceSetupContract;
-
 // eslint-disable-next-line
+export interface SetupContract {}
+
 export interface StartContract {
   FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
 }
 
 export class DrilldownsPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  private readonly service = new DrilldownService();
-
   public setup(core: CoreSetup, plugins: SetupDependencies): SetupContract {
-    const setup = this.service.setup(core, plugins);
-
-    return setup;
+    return {};
   }
 
   public start(core: CoreStart, plugins: StartDependencies): StartContract {

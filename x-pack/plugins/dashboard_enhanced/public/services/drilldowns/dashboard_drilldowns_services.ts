@@ -14,7 +14,6 @@ import {
   OPEN_FLYOUT_ADD_DRILLDOWN,
   OPEN_FLYOUT_EDIT_DRILLDOWN,
 } from './actions';
-
 import { DashboardToDashboardDrilldown } from './dashboard_to_dashboard_drilldown';
 import { createStartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 
@@ -40,30 +39,19 @@ export class DashboardDrilldownsService {
     }
   }
 
-  setupDrilldowns(core: CoreSetup<StartDependencies>, plugins: SetupDependencies) {
-    const getStartServices = createStartServicesGetter<StartDependencies, unknown>(
-      core.getStartServices
-    );
+  setupDrilldowns(
+    core: CoreSetup<StartDependencies>,
+    { advancedUiActions: uiActions }: SetupDependencies
+  ) {
+    const start = createStartServicesGetter(core.getStartServices);
 
-    const overlays = () => getStartServices().core.overlays;
-    const drilldowns = () => getStartServices().plugins.drilldowns;
-    const getSavedObjectsClient = () => getStartServices().core.savedObjects.client;
-    const getApplicationService = () => getStartServices().core.application;
-    const getGetUrlGenerator = () => getStartServices().plugins.share.urlGenerators.getUrlGenerator;
-    const getDataPluginActions = () => getStartServices().plugins.data.actions;
+    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
 
-    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ overlays, drilldowns });
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
+    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
 
-    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ overlays, drilldowns });
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
-
-    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({
-      getSavedObjectsClient,
-      getGetUrlGenerator,
-      getApplicationService,
-      getDataPluginActions,
-    });
-    plugins.drilldowns.registerDrilldown(dashboardToDashboardDrilldown);
+    const dashboardToDashboardDrilldown = new DashboardToDashboardDrilldown({ start });
+    uiActions.registerDrilldown(dashboardToDashboardDrilldown);
   }
 }

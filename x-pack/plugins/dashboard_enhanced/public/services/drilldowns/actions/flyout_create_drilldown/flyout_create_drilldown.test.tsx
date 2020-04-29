@@ -18,8 +18,15 @@ const overlays = coreMock.createStart().overlays;
 const drilldowns = drilldownsPluginMock.createStartContract();
 
 const actionParams: OpenFlyoutAddDrilldownParams = {
-  drilldowns: () => drilldowns,
-  overlays: () => overlays,
+  start: () => ({
+    core: {
+      overlays,
+    } as any,
+    plugins: {
+      drilldowns,
+    },
+    self: {},
+  }),
 };
 
 test('should create', () => {

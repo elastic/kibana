@@ -5,34 +5,29 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
 import { PlaceContext, ActionContext, Config } from './types';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { DrilldownDefinition as Drilldown } from '../../../../../drilldowns/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../advanced_ui_actions/public';
 import { txtGoToDashboard } from './i18n';
-import { DataPublicPluginStart, esFilters } from '../../../../../../../src/plugins/data/public';
+import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { VisualizeEmbeddableContract } from '../../../../../../../src/plugins/visualizations/public';
 import {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
 } from '../../../../../../../src/plugins/embeddable/public';
+import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public';
+import { StartDependencies } from '../../../plugin';
 
 export interface Params {
-  getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
-  getApplicationService: () => Pick<CoreStart['application'], 'getUrlForApp' | 'navigateToApp'>;
-  getGetUrlGenerator: () => SharePluginStart['urlGenerators']['getUrlGenerator'];
-  getDataPluginActions: () => DataPublicPluginStart['actions'];
+  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'advancedUiActions' | 'share'>>;
 }
 
 export class DashboardToDashboardDrilldown
   implements Drilldown<Config, PlaceContext, ActionContext<VisualizeEmbeddableContract>> {
-  constructor(protected readonly params: Params) {
-    this.getDestinationUrl = this.getDestinationUrl.bind(this);
-  }
+  constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
 
@@ -43,7 +38,7 @@ export class DashboardToDashboardDrilldown
   public readonly euiIcon = 'dashboardApp';
 
   private readonly ReactCollectConfig: React.FC<CollectConfigContainer['props']> = props => (
-    <CollectConfigContainer {...props} deps={this.params} />
+    <CollectConfigContainer {...props} params={this.params} />
   );
 
   public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
@@ -63,12 +58,10 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
-    const { getUrlForApp } = await this.params.getApplicationService();
     const dashboardPath = await this.getDestinationUrl(config, context);
-    // note: extracting hash and using 'kibana' as appId will be redundant,
-    // when dashboard move to np urls. (urlGenerator generates np url, which is not supported yet)
     const dashboardHash = dashboardPath.split('#')[1];
-    return getUrlForApp('kibana', {
+
+    return this.params.start().core.application.getUrlForApp('kibana', {
       path: `#${dashboardHash}`,
     });
   };
@@ -77,26 +70,22 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ) => {
-    const { navigateToApp } = await this.params.getApplicationService();
     const dashboardPath = await this.getDestinationUrl(config, context);
-    // note: extracting hash and using 'kibana' as appId will be redundant,
-    // when dashboard move to np urls. (urlGenerator generates np url, which is not supported yet)
     const dashboardHash = dashboardPath.split('#')[1];
-    await navigateToApp('kibana', {
+
+    await this.params.start().core.application.navigateToApp('kibana', {
       path: `#${dashboardHash}`,
     });
   };
 
-  private async getDestinationUrl(
+  private getDestinationUrl = async (
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
-  ): Promise<string> {
-    const getUrlGenerator = await this.params.getGetUrlGenerator();
-
+  ): Promise<string> => {
     const {
       createFiltersFromRangeSelectAction,
       createFiltersFromValueClickAction,
-    } = await this.params.getDataPluginActions();
+    } = this.params.start().plugins.data.actions;
     const {
       timeRange: currentTimeRange,
       query,
@@ -153,11 +142,14 @@ export class DashboardToDashboardDrilldown
       }
     }
 
-    return getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
-      dashboardId: config.dashboardId,
-      query: config.useCurrentFilters ? query : undefined,
-      timeRange,
-      filters: [...existingFilters, ...filtersFromEvent],
-    });
-  }
+    return this.params
+      .start()
+      .plugins.share.urlGenerators.getUrlGenerator(DASHBOARD_APP_URL_GENERATOR)
+      .createUrl({
+        dashboardId: config.dashboardId,
+        query: config.useCurrentFilters ? query : undefined,
+        timeRange,
+        filters: [...existingFilters, ...filtersFromEvent],
+      });
+  };
 }

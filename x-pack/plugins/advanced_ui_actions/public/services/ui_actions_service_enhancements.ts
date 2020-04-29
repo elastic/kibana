@@ -6,6 +6,7 @@
 
 import { ActionFactoryRegistry } from '../types';
 import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
+import { DrilldownDefinition, DrilldownActionFactoryContext } from '../drilldowns';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -53,5 +54,53 @@ export class UiActionsServiceEnhancements {
    */
   public readonly getActionFactories = (): ActionFactory[] => {
     return [...this.actionFactories.values()];
+  };
+
+  /**
+   * Convenience method to register a {@link DrilldownDefinition | drilldown}.
+   */
+  public readonly registerDrilldown = <
+    Config extends object = object,
+    PlaceContext extends object = object,
+    ExecutionContext extends object = object
+  >({
+    id: factoryId,
+    order,
+    CollectConfig,
+    createConfig,
+    isConfigValid,
+    getDisplayName,
+    euiIcon,
+    execute,
+    getHref,
+  }: DrilldownDefinition<Config, PlaceContext, ExecutionContext>): void => {
+    const actionFactory: ActionFactoryDefinition<
+      Config,
+      DrilldownActionFactoryContext<PlaceContext>,
+      ExecutionContext
+    > = {
+      id: factoryId,
+      order,
+      CollectConfig,
+      createConfig,
+      isConfigValid,
+      getDisplayName,
+      getIconType: () => euiIcon,
+      isCompatible: async () => true,
+      create: serializedAction => ({
+        id: '',
+        type: factoryId,
+        getIconType: () => euiIcon,
+        getDisplayName: () => serializedAction.name,
+        execute: async context => await execute(serializedAction.config, context),
+        getHref: getHref ? async context => getHref(serializedAction.config, context) : undefined,
+      }),
+    } as ActionFactoryDefinition<
+      Config,
+      DrilldownActionFactoryContext<PlaceContext>,
+      ExecutionContext
+    >;
+
+    this.registerActionFactory(actionFactory);
   };
 }

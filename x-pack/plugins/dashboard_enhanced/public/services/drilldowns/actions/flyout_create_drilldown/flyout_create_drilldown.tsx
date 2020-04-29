@@ -6,18 +6,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'src/core/public';
 import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { DrilldownsStart } from '../../../../../../drilldowns/public';
 import { isEnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
 import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
+import { StartDependencies } from '../../../../plugin';
+import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 
 export interface OpenFlyoutAddDrilldownParams {
-  overlays: () => CoreStart['overlays'];
-  drilldowns: () => DrilldownsStart;
+  start: StartServicesGetter<Pick<StartDependencies, 'drilldowns'>>;
 }
 
 export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
@@ -50,8 +49,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
   }
 
   public async execute(context: EmbeddableContext) {
-    const overlays = this.params.overlays();
-    const drilldowns = this.params.drilldowns();
+    const { core, plugins } = this.params.start();
     const { embeddable } = context;
 
     if (!isEnhancedEmbeddable(embeddable)) {
@@ -60,9 +58,9 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
       );
     }
 
-    const handle = overlays.openFlyout(
+    const handle = core.overlays.openFlyout(
       toMountPoint(
-        <drilldowns.FlyoutManageDrilldowns
+        <plugins.drilldowns.FlyoutManageDrilldowns
           onClose={() => handle.close()}
           placeContext={context}
           viewMode={'create'}

@@ -23,12 +23,14 @@ export {
   ActionFactory as AdvancedUiActionsActionFactory,
   SerializedAction as UiActionsEnhancedSerializedAction,
   SerializedEvent as UiActionsEnhancedSerializedEvent,
-} from './dynamic_actions';
-
-export {
   AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
   DynamicActionManager as UiActionsEnhancedDynamicActionManager,
   DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
   DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
   MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
 } from './dynamic_actions';
+
+export {
+  DrilldownDefinition as UiActionsEnhancedDrilldownDefinition,
+  DrilldownActionFactoryContext as UiActionsEnhancedDrilldownActionFactoryContext,
+} from './drilldowns';

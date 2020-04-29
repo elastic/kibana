@@ -5,9 +5,11 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '../../../../src/core/public';
-import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { DrilldownsSetup, DrilldownsStart } from '../../../../x-pack/plugins/drilldowns/public';
+import {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from '../../../../x-pack/plugins/advanced_ui_actions/public';
 import { DashboardHelloWorldDrilldown } from './dashboard_hello_world_drilldown';
 import { DashboardToUrlDrilldown } from './dashboard_to_url_drilldown';
 import { DashboardToDiscoverDrilldown } from './dashboard_to_discover_drilldown';
@@ -15,24 +17,25 @@ import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/
 
 export interface SetupDependencies {
   data: DataPublicPluginSetup;
-  drilldowns: DrilldownsSetup;
-  uiActions: UiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  drilldowns: DrilldownsStart;
-  uiActions: UiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
 
 export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {
-  public setup(core: CoreSetup<StartDependencies>, { drilldowns }: SetupDependencies) {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { advancedUiActions: uiActions }: SetupDependencies
+  ) {
     const start = createStartServicesGetter(core.getStartServices);
 
-    drilldowns.registerDrilldown(new DashboardHelloWorldDrilldown());
-    drilldowns.registerDrilldown(new DashboardToUrlDrilldown());
-    drilldowns.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
+    uiActions.registerDrilldown(new DashboardHelloWorldDrilldown());
+    uiActions.registerDrilldown(new DashboardToUrlDrilldown());
+    uiActions.registerDrilldown(new DashboardToDiscoverDrilldown({ start }));
   }
 
   public start(core: CoreStart, plugins: StartDependencies) {}

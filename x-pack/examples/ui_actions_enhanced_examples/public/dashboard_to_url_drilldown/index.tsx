@@ -7,13 +7,13 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
-import { DrilldownDefinition as Drilldown } from '../../../../plugins/drilldowns/public';
+import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
 import {
   EmbeddableContext,
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps } from '../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
 
 export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
@@ -23,7 +23,7 @@ export interface Config {
   openInNewTab: boolean;
 }
 
-export type CollectConfigProps = CollectConfigProps<Config>;
+export type CollectConfigProps = CollectConfigPropsBase<Config>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 

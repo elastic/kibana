@@ -16,5 +16,3 @@ export {
 export function plugin() {
   return new DrilldownsPlugin();
 }
-
-export { DrilldownDefinition, DrilldownFactoryContext } from './types';

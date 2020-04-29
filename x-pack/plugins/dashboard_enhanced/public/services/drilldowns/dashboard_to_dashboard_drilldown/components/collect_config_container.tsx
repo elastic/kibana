@@ -7,13 +7,14 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { CoreStart, SimpleSavedObject } from '../../../../../../../../src/core/public';
+import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { DrilldownFactoryContext } from '../../../../../../drilldowns/public';
+import { UiActionsEnhancedDrilldownActionFactoryContext as DrilldownFactoryContext } from '../../../../../../advanced_ui_actions/public';
 import { Config } from '../types';
 import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+import { Params } from '../drilldown';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,
@@ -36,9 +37,7 @@ const dashboardSavedObjectToMenuItem = (
 });
 
 interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config> {
-  deps: {
-    getSavedObjectsClient: () => CoreStart['savedObjects']['client'];
-  };
+  params: Params;
   context: DrilldownFactoryContext<{
     embeddable: IEmbeddable;
   }>;
@@ -115,10 +114,12 @@ export class CollectConfigContainer extends React.Component<
   }
 
   private async loadSelectedDashboard() {
-    const { config } = this.props;
+    const {
+      config,
+      params: { start },
+    } = this.props;
     if (!config.dashboardId) return;
-    const savedObjectsClient = this.props.deps.getSavedObjectsClient();
-    const savedObject = await savedObjectsClient.get<{ title: string }>(
+    const savedObject = await start().core.savedObjects.client.get<{ title: string }>(
       'dashboard',
       config.dashboardId
     );
@@ -149,7 +150,7 @@ export class CollectConfigContainer extends React.Component<
   private async loadDashboards(searchString?: string) {
     const currentDashboardId = this.props.context.placeContext.embeddable?.parent?.id;
     this.setState({ searchString, isLoading: true });
-    const savedObjectsClient = this.props.deps.getSavedObjectsClient();
+    const savedObjectsClient = this.props.params.start().core.savedObjects.client;
     const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
       type: 'dashboard',
       search: searchString ? `${searchString}*` : undefined,

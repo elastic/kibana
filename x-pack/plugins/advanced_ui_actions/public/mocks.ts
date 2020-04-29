@@ -17,7 +17,7 @@ export type Start = jest.Mocked<AdvancedUiActionsStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     ...uiActionsPluginMock.createSetupContract(),
-    registerActionFactory: jest.fn(),
+    registerDrilldown: jest.fn(),
   };
   return setupContract;
 };
