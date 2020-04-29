@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
+import { registerLayerWizards } from '../../layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -31,12 +32,24 @@ export class GisMap extends Component {
     isInitialLoadRenderTimeoutComplete: false,
     domId: uuid(),
     geoFields: [],
+    layerWizardsLoaded: false,
   };
+
+  async _loadLayerWizards() {
+    const loadLayerWizardsModule = await import('../../layers/load_layer_wizards');
+    console.log('w', loadLayerWizardsModule);
+    loadLayerWizardsModule.registerLayerWizards();
+    this.setState({ layerWizardsLoaded: true });
+  }
 
   componentDidMount() {
     this._isMounted = true;
     this._isInitalLoadRenderTimerStarted = false;
     this._setRefreshTimer();
+
+    console.log('load lauer wizards');
+    // registerLayerWizards();
+    this._loadLayerWizards();
   }
 
   componentDidUpdate() {
@@ -157,6 +170,13 @@ export class GisMap extends Component {
       mapInitError,
       renderTooltipContent,
     } = this.props;
+
+    if (!this.state.layerWizardsLoaded) {
+      console.log('not loaded yet');
+      return <EuiLoadingSpinner />;
+    }
+
+    console.log('loaded');
 
     const { domId } = this.state;
 
