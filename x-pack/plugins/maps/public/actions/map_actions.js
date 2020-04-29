@@ -206,6 +206,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
 }
 
 export function replaceLayerList(newLayerList) {
+  console.log(newLayerList);
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {

@@ -9,6 +9,7 @@ import { RenderWizardArguments } from '../../layer_wizard_registry';
 import { LayerSelect, OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { getMetricOptionsForLayer, MetricSelect, OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DisplaySelect, DISPLAY } from './display_select';
+import { createLayerDescriptor } from './create_layer_descriptor';
 
 interface State {
   display: DISPLAY;
@@ -51,7 +52,11 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
     this.setState({ display }, this._previewLayer);
   };
 
-  _previewLayer() {}
+  _previewLayer() {
+    this.props.previewLayer(
+      createLayerDescriptor({ metric: this.state.metric, display: this.state.display })
+    );
+  }
 
   render() {
     return (
