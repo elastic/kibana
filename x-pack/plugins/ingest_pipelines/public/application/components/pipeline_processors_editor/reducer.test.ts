@@ -177,6 +177,7 @@ describe('Processors reducer', () => {
       },
     });
 
+    // Assert nothing changed
     expect(s5.processors).toEqual(s4.processors);
   });
 });
