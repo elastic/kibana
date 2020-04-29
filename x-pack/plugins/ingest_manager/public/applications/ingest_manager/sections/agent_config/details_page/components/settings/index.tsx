@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
@@ -22,9 +22,13 @@ const FormWrapper = styled.div`
 
 export const ConfigSettingsView = memo<{ config: AgentConfig }>(
   ({ config: originalAgentConfig }) => {
-    const { notifications } = useCore();
+    const {
+      notifications,
+      chrome: { getIsNavDrawerLocked$ },
+    } = useCore();
     const history = useHistory();
     const hasWriteCapabilites = useCapabilities().write;
+    const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
     const [agentConfig, setAgentConfig] = useState<AgentConfig>({
       ...originalAgentConfig,
     });
@@ -32,6 +36,14 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const [hasChanges, setHasChanges] = useState<boolean>(false);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
     const validation = agentConfigFormValidation(agentConfig);
+
+    useEffect(() => {
+      const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+        setIsNavDrawerLocked(newIsNavDrawerLocked);
+      });
+
+      return () => subscription.unsubscribe();
+    });
 
     const updateAgentConfig = (updatedFields: Partial<AgentConfig>) => {
       setAgentConfig({
@@ -93,8 +105,15 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           }}
         />
         {hasChanges ? (
-          <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
-            <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiBottomBar
+            css={{ zIndex: 5 }}
+            className={
+              isNavDrawerLocked
+                ? 'ingestManager__bottomBar-isNavDrawerLocked'
+                : 'ingestManager__bottomBar'
+            }
+          >
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <FormattedMessage
                   id="xpack.ingestManager.editAgentConfig.unsavedChangesText"
