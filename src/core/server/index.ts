@@ -288,7 +288,15 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
-export { RecursiveReadonly } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  modifyUrl,
+  isRelativeUrl,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 
 export {
   SavedObject,

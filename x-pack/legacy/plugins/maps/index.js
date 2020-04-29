@@ -17,7 +17,7 @@ import {
   createMapPath,
   MAP_SAVED_OBJECT_TYPE,
 } from '../../../plugins/maps/common/constants';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export function maps(kibana) {
   return new kibana.Plugin({
