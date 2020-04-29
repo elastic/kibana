@@ -19,12 +19,14 @@
 
 import { createHash } from 'crypto';
 import Boom from 'boom';
-import { resolve } from 'path';
+import Path from 'path';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
+
+const uniq = (...items) => Array.from(new Set(items));
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -39,7 +41,7 @@ import { DllCompiler } from '../../../optimize/dynamic_dll_plugin';
  */
 export function uiRenderMixin(kbnServer, server, config) {
   // render all views from ./views
-  server.setupViews(resolve(__dirname, 'views'));
+  server.setupViews(Path.resolve(__dirname, 'views'));
 
   const translationsCache = { translations: null, hash: null };
   server.route({
@@ -136,6 +138,15 @@ export function uiRenderMixin(kbnServer, server, config) {
               ]),
         ];
 
+        const kpPluginIds = uniq(
+          // load these plugins first, they are "shared" and other bundles access their
+          // public/index exports without considering topographic sorting by plugin deps (for now)
+          'kibanaUtils',
+          'esUiShared',
+          'kibanaReact',
+          ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
+        );
+
         const jsDependencyPaths = [
           ...UiSharedDeps.jsDepFilenames.map(
             filename => `${regularBundlePath}/kbn-ui-shared-deps/${filename}`
@@ -148,20 +159,22 @@ export function uiRenderMixin(kbnServer, server, config) {
                 ...dllJsChunks,
                 `${regularBundlePath}/commons.bundle.js`,
               ]),
-          `${regularBundlePath}/plugin/kibanaUtils/kibanaUtils.plugin.js`,
-          `${regularBundlePath}/plugin/esUiShared/esUiShared.plugin.js`,
-          `${regularBundlePath}/plugin/kibanaReact/kibanaReact.plugin.js`,
+
+          ...kpPluginIds.map(
+            pluginId => `${regularBundlePath}/plugin/${pluginId}/${pluginId}.plugin.js`
+          ),
         ];
 
-        const uiPluginIds = [...kbnServer.newPlatform.__internals.uiPlugins.public.keys()];
-
         // These paths should align with the bundle routes configured in
-        // src/optimize/bundles_route/bundles_route.js
+        // src/optimize/bundles_route/bundles_route.ts
         const publicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'kbn-ui-shared-deps': `${regularBundlePath}/kbn-ui-shared-deps/`,
-          ...uiPluginIds.reduce(
-            (acc, pluginId) => ({ ...acc, [pluginId]: `${regularBundlePath}/plugin/${pluginId}/` }),
+          ...kpPluginIds.reduce(
+            (acc, pluginId) => ({
+              ...acc,
+              [pluginId]: `${regularBundlePath}/plugin/${pluginId}/`,
+            }),
             {}
           ),
         });
