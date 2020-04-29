@@ -538,14 +538,14 @@ export const ActionForm = ({
         );
 
         return (
-          <Fragment key={`keypad-${item.id}`}>
+          <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
             {checkEnabledResult.isEnabled && keyPadItem}
             {checkEnabledResult.isEnabled === false && (
               <EuiToolTip position="top" content={checkEnabledResult.message}>
                 {keyPadItem}
               </EuiToolTip>
             )}
-          </Fragment>
+          </EuiFlexItem>
         );
       });
   }
@@ -638,7 +638,7 @@ export const ActionForm = ({
                 )}
               </EuiFlexGroup>
               <EuiSpacer />
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+              <EuiFlexGroup gutterSize="m" wrap>
                 {isLoadingActionTypes ? (
                   <SectionLoading>
                     <FormattedMessage

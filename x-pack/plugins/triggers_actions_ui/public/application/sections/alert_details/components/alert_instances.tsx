@@ -121,43 +121,14 @@ export function AlertInstances({
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  // const mergedAlertInstances = [
-  //   ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-  //     alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
-  //   ),
-  //   ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-  //     alertInstanceToListItem(durationEpoch, alert, instanceId)
-  //   ),
-  // ];
-
   const mergedAlertInstances = [
-    ...Object.entries({
-      first_instance: {
-        state: { some: 'value 1' },
-        meta: {
-          lastScheduledActions: {
-            group: 'first_group',
-            date: new Date(),
-          },
-        },
-      },
-      second_instance: {
-        state: { some: 'value 2' },
-        meta: {
-          lastScheduledActions: {
-            group: 'second_group',
-            date: new Date(),
-          },
-        },
-      },
-    }).map(([instanceId, instance]) =>
+    ...Object.entries(alertInstances).map(([instanceId, instance]) =>
       alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
     ),
     ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
       alertInstanceToListItem(durationEpoch, alert, instanceId)
     ),
   ];
-
   const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
 
   const onMuteAction = async (instance: AlertInstanceListItem) => {
