@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../lib/lib';
 import { UMRestApiRouteFactory } from '.';
-import { API_URLS } from '../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../common/constants';
 
 const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 25;

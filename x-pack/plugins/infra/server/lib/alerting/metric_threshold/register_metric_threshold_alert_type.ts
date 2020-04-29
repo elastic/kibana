@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
+import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 
 const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
@@ -17,7 +18,10 @@ const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
-export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
+export async function registerMetricThresholdAlertType(
+  alertingPlugin: PluginSetupContract,
+  libs: InfraBackendLibs
+) {
   if (!alertingPlugin) {
     throw new Error(
       'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'

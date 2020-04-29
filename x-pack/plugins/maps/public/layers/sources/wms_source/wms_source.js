@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
 import { AbstractTMSSource } from '../tms_source';
-import { TileLayer } from '../../tile_layer';
-import { WMSCreateSourceEditor } from './wms_create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 
-const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
@@ -52,20 +48,6 @@ export class WMSSource extends AbstractTMSSource {
     ];
   }
 
-  _createDefaultLayerDescriptor(options) {
-    return TileLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-  }
-
-  createDefaultLayer(options) {
-    return new TileLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this,
-    });
-  }
-
   async getDisplayName() {
     return this._descriptor.serviceUrl;
   }
@@ -94,24 +76,3 @@ registerSource({
   ConstructorFunction: WMSSource,
   type: SOURCE_TYPES.WMS,
 });
-
-export const wmsLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.wmsDescription', {
-    defaultMessage: 'Maps from OGC Standard WMS',
-  }),
-  icon: 'grid',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = WMSSource.createDescriptor(sourceConfig);
-      const source = new WMSSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <WMSCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

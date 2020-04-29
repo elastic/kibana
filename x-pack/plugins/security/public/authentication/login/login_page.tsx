@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './login_page.scss';
+
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
@@ -120,10 +122,9 @@ export class LoginPage extends Component<Props, State> {
     requiresSecureConnection,
     isSecureConnection,
     selector,
-    showLoginForm,
+    loginHelp,
   }: LoginState & { isSecureConnection: boolean }) => {
-    const isLoginExplicitlyDisabled =
-      !showLoginForm && (!selector.enabled || selector.providers.length === 0);
+    const isLoginExplicitlyDisabled = selector.providers.length === 0;
     if (isLoginExplicitlyDisabled) {
       return (
         <DisabledLoginForm
@@ -223,10 +224,10 @@ export class LoginPage extends Component<Props, State> {
       <LoginForm
         http={this.props.http}
         notifications={this.props.notifications}
-        showLoginForm={showLoginForm}
         selector={selector}
         infoMessage={infoMessageMap.get(parse(window.location.href, true).query.msg?.toString())}
         loginAssistanceMessage={this.props.loginAssistanceMessage}
+        loginHelp={loginHelp}
       />
     );
   };

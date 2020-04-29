@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { sourceQuery } from '../../../../legacy/plugins/siem/public/containers/source/index.gql_query';
-import { SourceQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { sourceQuery } from '../../../../plugins/siem/public/containers/source/index.gql_query';
+import { SourceQuery } from '../../../../plugins/siem/public/graphql/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
