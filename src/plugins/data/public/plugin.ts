@@ -56,7 +56,12 @@ import {
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
 } from '../../ui_actions/public';
-import { ACTION_GLOBAL_APPLY_FILTER, createFilterAction, createFiltersFromEvent } from './actions';
+import {
+  ACTION_GLOBAL_APPLY_FILTER,
+  createFilterAction,
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+} from './actions';
 import { ApplyGlobalFilterActionContext } from './actions/apply_filter_action';
 import {
   selectRangeAction,
@@ -134,6 +139,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
@@ -154,7 +160,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
@@ -170,7 +176,8 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
 
     const dataServices = {
       actions: {
-        createFiltersFromEvent,
+        createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
       },
       autocomplete: this.autocomplete.start(),
       fieldFormats,

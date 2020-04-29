@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   kibanaResponseFactory,
   Logger,
   SavedObjectsClient,
@@ -39,7 +39,7 @@ import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
 interface CreateReindexWorker {
   logger: Logger;
-  elasticsearchService: ElasticsearchServiceSetup;
+  elasticsearchService: ElasticsearchServiceStart;
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
@@ -54,11 +54,11 @@ export function createReindexWorker({
   licensing,
   apmIndexPatterns,
 }: CreateReindexWorker) {
-  const { adminClient } = elasticsearchService;
+  const esClient = elasticsearchService.legacy.client;
   return new ReindexWorker(
     savedObjects,
     credentialStore,
-    adminClient,
+    esClient,
     logger,
     licensing,
     apmIndexPatterns

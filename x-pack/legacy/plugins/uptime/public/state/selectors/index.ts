@@ -24,9 +24,7 @@ export const monitorLocationsSelector = (state: AppState, monitorId: string) => 
 
 export const monitorStatusSelector = (state: AppState) => state.monitorStatus.status;
 
-export const selectDynamicSettings = (state: AppState) => {
-  return state.dynamicSettings;
-};
+export const selectDynamicSettings = (state: AppState) => state.dynamicSettings;
 
 export const selectIndexPattern = ({ indexPattern }: AppState) => {
   return { indexPattern: indexPattern.index_pattern, loading: indexPattern.loading };
@@ -44,6 +42,16 @@ export const selectPingHistogram = ({ ping, ui }: AppState) => {
 export const selectPingList = ({ pingList, ui: { lastRefresh } }: AppState) => ({
   pings: pingList,
   lastRefresh,
+});
+
+export const snapshotDataSelector = ({
+  snapshot: { count, loading },
+  ui: { lastRefresh, esKuery },
+}: AppState) => ({
+  count,
+  lastRefresh,
+  loading,
+  esKuery,
 });
 
 const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;

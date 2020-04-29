@@ -119,7 +119,7 @@ export const anomalyDetectionJobSchema = {
 };
 
 export const jobIdSchema = schema.object({
-  /** Job id */
+  /** Job ID. */
   jobId: schema.string(),
 });
 

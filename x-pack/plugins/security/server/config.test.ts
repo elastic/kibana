@@ -27,8 +27,11 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
                 "order": 0,
                 "showInSelector": true,
               },
@@ -70,8 +73,11 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
                 "order": 0,
                 "showInSelector": true,
               },
@@ -113,8 +119,11 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
                 "order": 0,
                 "showInSelector": true,
               },
@@ -499,20 +508,6 @@ describe('config schema', () => {
 `);
       });
 
-      it('does not allow custom description', () => {
-        expect(() =>
-          ConfigSchema.validate({
-            authc: {
-              providers: { basic: { basic1: { order: 0, description: 'Some description' } } },
-            },
-          })
-        ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.basic.basic1.description]: \`basic\` provider does not support custom description."
-`);
-      });
-
       it('cannot be hidden from selector', () => {
         expect(() =>
           ConfigSchema.validate({
@@ -548,7 +543,9 @@ describe('config schema', () => {
           Object {
             "basic": Object {
               "basic1": Object {
+                "description": "Log in with Elasticsearch",
                 "enabled": true,
+                "icon": "logoElastic",
                 "order": 0,
                 "showInSelector": true,
               },
@@ -568,20 +565,6 @@ describe('config schema', () => {
 "[authc.providers]: types that failed validation:
 - [authc.providers.0]: expected value of type [array] but got [Object]
 - [authc.providers.1.token.token1.order]: expected value of type [number] but got [undefined]"
-`);
-      });
-
-      it('does not allow custom description', () => {
-        expect(() =>
-          ConfigSchema.validate({
-            authc: {
-              providers: { token: { token1: { order: 0, description: 'Some description' } } },
-            },
-          })
-        ).toThrowErrorMatchingInlineSnapshot(`
-"[authc.providers]: types that failed validation:
-- [authc.providers.0]: expected value of type [array] but got [Object]
-- [authc.providers.1.token.token1.description]: \`token\` provider does not support custom description."
 `);
       });
 
@@ -620,7 +603,9 @@ describe('config schema', () => {
           Object {
             "token": Object {
               "token1": Object {
+                "description": "Log in with Elasticsearch",
                 "enabled": true,
+                "icon": "logoElastic",
                 "order": 0,
                 "showInSelector": true,
               },
@@ -897,12 +882,16 @@ describe('config schema', () => {
         Object {
           "basic": Object {
             "basic1": Object {
+              "description": "Log in with Elasticsearch",
               "enabled": true,
+              "icon": "logoElastic",
               "order": 0,
               "showInSelector": true,
             },
             "basic2": Object {
+              "description": "Log in with Elasticsearch",
               "enabled": false,
+              "icon": "logoElastic",
               "order": 1,
               "showInSelector": true,
             },
@@ -1049,20 +1038,12 @@ describe('createConfig()', () => {
         "sortedProviders": Array [
           Object {
             "name": "saml",
-            "options": Object {
-              "description": undefined,
-              "order": 0,
-              "showInSelector": true,
-            },
+            "order": 0,
             "type": "saml",
           },
           Object {
             "name": "basic",
-            "options": Object {
-              "description": undefined,
-              "order": 1,
-              "showInSelector": true,
-            },
+            "order": 1,
             "type": "basic",
           },
         ],
@@ -1153,47 +1134,27 @@ describe('createConfig()', () => {
       Array [
         Object {
           "name": "oidc1",
-          "options": Object {
-            "description": undefined,
-            "order": 0,
-            "showInSelector": true,
-          },
+          "order": 0,
           "type": "oidc",
         },
         Object {
           "name": "saml2",
-          "options": Object {
-            "description": undefined,
-            "order": 1,
-            "showInSelector": true,
-          },
+          "order": 1,
           "type": "saml",
         },
         Object {
           "name": "saml1",
-          "options": Object {
-            "description": undefined,
-            "order": 2,
-            "showInSelector": true,
-          },
+          "order": 2,
           "type": "saml",
         },
         Object {
           "name": "basic1",
-          "options": Object {
-            "description": undefined,
-            "order": 3,
-            "showInSelector": true,
-          },
+          "order": 3,
           "type": "basic",
         },
         Object {
           "name": "oidc2",
-          "options": Object {
-            "description": undefined,
-            "order": 4,
-            "showInSelector": true,
-          },
+          "order": 4,
           "type": "oidc",
         },
       ]

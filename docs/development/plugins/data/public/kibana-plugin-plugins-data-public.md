@@ -12,6 +12,7 @@
 |  [AggTypeFieldFilters](./kibana-plugin-plugins-data-public.aggtypefieldfilters.md) | A registry to store  which are used to filter down available fields for a specific visualization and . |
 |  [AggTypeFilters](./kibana-plugin-plugins-data-public.aggtypefilters.md) | A registry to store  which are used to filter down available aggregations for a specific visualization and . |
 |  [Field](./kibana-plugin-plugins-data-public.field.md) |  |
+|  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
 |  [IndexPatternFieldList](./kibana-plugin-plugins-data-public.indexpatternfieldlist.md) |  |
@@ -49,7 +50,6 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParamOption](./kibana-plugin-plugins-data-public.aggparamoption.md) |  |
 |  [DataPublicPluginSetup](./kibana-plugin-plugins-data-public.datapublicpluginsetup.md) |  |
 |  [DataPublicPluginStart](./kibana-plugin-plugins-data-public.datapublicpluginstart.md) |  |
@@ -118,6 +118,7 @@
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsQuerySortValue](./kibana-plugin-plugins-data-public.esquerysortvalue.md) |  |
