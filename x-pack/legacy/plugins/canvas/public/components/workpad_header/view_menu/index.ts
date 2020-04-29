@@ -92,7 +92,8 @@ const mergeProps = (
     ...ownProps,
     toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
     enterFullscreen: () => dispatchProps.setFullscreen(true),
-    fitToWindow: () => getFitZoomScale(boundingBox, workpadWidth, workpadHeight),
+    fitToWindow: () =>
+      dispatchProps.setZoomScale(getFitZoomScale(boundingBox, workpadWidth, workpadHeight)),
   };
 };
 
