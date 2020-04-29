@@ -2,21 +2,12 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-data-public](./kibana-plugin-plugins-data-public.md) &gt; [AggConfigOptions](./kibana-plugin-plugins-data-public.aggconfigoptions.md)
 
-## AggConfigOptions interface
+## AggConfigOptions type
 
 <b>Signature:</b>
 
 ```typescript
-export interface AggConfigOptions 
+export declare type AggConfigOptions = Assign<AggConfigSerialized, {
+    type: IAggType;
+}>;
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [enabled](./kibana-plugin-plugins-data-public.aggconfigoptions.enabled.md) | <code>boolean</code> |  |
-|  [id](./kibana-plugin-plugins-data-public.aggconfigoptions.id.md) | <code>string</code> |  |
-|  [params](./kibana-plugin-plugins-data-public.aggconfigoptions.params.md) | <code>Record&lt;string, any&gt;</code> |  |
-|  [schema](./kibana-plugin-plugins-data-public.aggconfigoptions.schema.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-data-public.aggconfigoptions.type.md) | <code>IAggType</code> |  |
-

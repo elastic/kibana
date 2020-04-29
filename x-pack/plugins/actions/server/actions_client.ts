@@ -135,7 +135,7 @@ export class ActionsClient {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
       name: result.attributes.name as string,
-      config: result.attributes.config as Record<string, any>,
+      config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
     };
   }
@@ -228,7 +228,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, any> = {};
+  const aggs: Record<string, unknown> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'src/core/server';
-import { safeLoad } from 'js-yaml';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeleteDatasourcesResponse,
@@ -229,7 +228,7 @@ async function _assignPackageStreamToStream(
   stream: DatasourceInputStream
 ) {
   if (!stream.enabled) {
-    return { ...stream, pkg_stream: undefined };
+    return { ...stream, agent_stream: undefined };
   }
   const dataset = getDataset(stream.dataset);
   const assetsData = await getAssetsDataForPackageKey(pkgInfo, _isAgentStream, dataset);
@@ -239,20 +238,13 @@ async function _assignPackageStreamToStream(
     throw new Error(`Stream template not found for dataset ${dataset}`);
   }
 
-  // Populate template variables from input config and stream config
-  const data: { [k: string]: string | string[] } = {};
-  if (input.config) {
-    for (const key of Object.keys(input.config)) {
-      data[key] = input.config[key].value;
-    }
-  }
-  if (stream.config) {
-    for (const key of Object.keys(stream.config)) {
-      data[key] = stream.config[key].value;
-    }
-  }
-  const yaml = safeLoad(createStream(data, pkgStream.buffer.toString()));
-  stream.pkg_stream = yaml;
+  const yaml = createStream(
+    // Populate template variables from input vars and stream vars
+    Object.assign({}, input.vars, stream.vars),
+    pkgStream.buffer.toString()
+  );
+  stream.agent_stream = yaml;
+
   return { ...stream };
 }
 

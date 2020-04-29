@@ -22,6 +22,7 @@ import {
 
 import { ImportTimelineResponse } from './routes/utils/import_timelines';
 import { ImportTimelinesSchemaRt } from './routes/schemas/import_timelines_schema';
+import { BadRequestError } from '../detection_engine/errors/bad_request_error';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -38,8 +39,11 @@ export const decodeOrThrow = <A, O, I>(
   pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 export const validateTimelines = (): Transform =>
-  createMapStream((obj: ImportTimelineResponse) => decodeOrThrow(ImportTimelinesSchemaRt)(obj));
-
+  createMapStream((obj: ImportTimelineResponse) =>
+    obj instanceof Error
+      ? new BadRequestError(obj.message)
+      : decodeOrThrow(ImportTimelinesSchemaRt)(obj)
+  );
 export const createTimelinesStreamFromNdJson = (ruleLimit: number) => {
   return [
     createSplitStream('\n'),
