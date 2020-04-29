@@ -11,7 +11,7 @@
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
-/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
+/src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/vis_type_table/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
@@ -224,7 +224,7 @@
 /x-pack/test/detection_engine_api_integration @elastic/siem
 /x-pack/test/api_integration/apis/siem @elastic/siem
 /x-pack/plugins/case @elastic/siem
+/x-pack/plugins/lists @elastic/siem
 
 # Security Intelligence And Analytics
-/x-pack/legacy/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 /x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

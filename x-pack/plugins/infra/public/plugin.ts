@@ -21,7 +21,6 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -52,8 +51,6 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
-
     core.application.register({
       id: 'logs',
       title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -67,6 +64,8 @@ export class Plugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, LogsRouter } = await this.downloadAssets();
+
+        await this.registerLogsAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -92,6 +91,8 @@ export class Plugin
         const [coreStart, pluginsStart] = await core.getStartServices();
         const plugins = getMergedPlugins(pluginsSetup, pluginsStart as ClientPluginsStart);
         const { startApp, composeLibs, MetricsRouter } = await this.downloadAssets();
+
+        await this.registerMetricsAlertType(pluginsSetup);
 
         return startApp(
           composeLibs(coreStart),
@@ -135,5 +136,25 @@ export class Plugin
       LogsRouter,
       MetricsRouter,
     };
+  }
+
+  // NOTE: apm is importing from `infra/public` and async importing that
+  // allow us to reduce the apm bundle size
+  private async registerLogsAlertType(pluginsSetup: ClientPluginsSetup) {
+    const { getAlertType } = await import('./components/alerting/logs/log_threshold_alert_type');
+
+    if (!pluginsSetup.triggers_actions_ui.alertTypeRegistry.has(getAlertType().id)) {
+      pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    }
+  }
+
+  private async registerMetricsAlertType(pluginsSetup: ClientPluginsSetup) {
+    const { getAlertType } = await import(
+      './components/alerting/metrics/metric_threshold_alert_type'
+    );
+
+    if (!pluginsSetup.triggers_actions_ui.alertTypeRegistry.has(getAlertType().id)) {
+      pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    }
   }
 }
