@@ -37,6 +37,7 @@ import {
 } from '../../../../plugins/maps_legacy/public';
 import { setFormatService, setNotifications } from './kibana_services';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { RegionMapsConfigType } from './index';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
@@ -90,6 +91,11 @@ export class RegionMapPlugin implements Plugin<Promise<void>, void> {
     visualizations.createBaseVisualization(
       createRegionMapTypeDefinition(visualizationDependencies)
     );
+
+    const config = this.initializerContext.config.get<RegionMapsConfigType>();
+    return {
+      config,
+    };
   }
 
   public start(core: CoreStart, { data }: RegionMapPluginStartDependencies) {

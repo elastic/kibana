@@ -20,6 +20,11 @@
 import { PluginInitializerContext } from '../../../../core/public';
 import { RegionMapPlugin as Plugin } from './plugin';
 
+export interface RegionMapsConfigType {
+  includeElasticMapsService: boolean;
+  layers: any[];
+}
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);
 }
