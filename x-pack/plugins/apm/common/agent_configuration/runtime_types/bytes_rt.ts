@@ -10,17 +10,35 @@ import { i18n } from '@kbn/i18n';
 import { amountAndUnitToObject } from '../amount_and_unit';
 import { getRangeType } from './get_range_type';
 
-export const BYTE_UNITS = ['b', 'kb', 'mb'];
+function toBytes(amount: number, unit: string) {
+  switch (unit) {
+    case 'kb':
+      return amount * 2 ** 10;
+    case 'mb':
+      return amount * 2 ** 20;
+    case 'b':
+    default:
+      return amount;
+  }
+}
 
 export function getBytesRt({
-  min = -Infinity,
-  max = Infinity,
+  min,
+  max,
   units
 }: {
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
   units: string[];
 }) {
+  const { amount: minAmount, unit: minUnit } = min
+    ? amountAndUnitToObject(min)
+    : { amount: -Infinity, unit: 'b' };
+
+  const { amount: maxAmount, unit: maxUnit } = max
+    ? amountAndUnitToObject(max)
+    : { amount: Infinity, unit: 'b' };
+
   const message = i18n.translate('xpack.apm.agentConfig.bytes.errorText', {
     defaultMessage: `{rangeType, select,
         between {Must be between {min} and {max} with unit: {units}}
@@ -32,7 +50,7 @@ export function getBytesRt({
       min,
       max,
       units: units.join(', '),
-      rangeType: getRangeType(min, max)
+      rangeType: getRangeType(minAmount, maxAmount)
     }
   });
 
@@ -42,11 +60,16 @@ export function getBytesRt({
     (input, context) => {
       return either.chain(t.string.validate(input, context), inputAsString => {
         const { amount, unit } = amountAndUnitToObject(inputAsString);
-        const amountAsInt = parseInt(amount, 10);
         const isValidUnit = units.includes(unit);
-        const isValid = amountAsInt >= min && amountAsInt <= max && isValidUnit;
 
-        return isValid
+        const inputAsBytes = toBytes(amount, unit);
+        const minAsBytes = toBytes(minAmount, minUnit);
+        const maxAsBytes = toBytes(maxAmount, maxUnit);
+
+        const isValidAmount =
+          inputAsBytes >= minAsBytes && inputAsBytes <= maxAsBytes;
+
+        return isValidUnit && isValidAmount
           ? t.success(inputAsString)
           : t.failure(input, context, message);
       });

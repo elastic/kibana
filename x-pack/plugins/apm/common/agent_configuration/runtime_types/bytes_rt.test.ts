@@ -8,23 +8,66 @@ import { getBytesRt } from './bytes_rt';
 import { isRight } from 'fp-ts/lib/Either';
 
 describe('bytesRt', () => {
-  const bytesRt = getBytesRt({
-    min: 0,
-    units: ['b', 'mb', 'kb']
-  });
+  describe('must accept any amount and unit', () => {
+    const bytesRt = getBytesRt({
+      units: ['b', 'mb', 'kb']
+    });
+    describe('it should not accept', () => {
+      ['mb', 1, '1', '5gb', '6tb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(false);
+        });
+      });
+    });
 
-  describe('it should not accept', () => {
-    ['mb', '-1kb', '5gb', '6tb'].map(input => {
-      it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(bytesRt.decode(input))).toBe(false);
+    describe('it should accept', () => {
+      ['-1b', '0mb', '1b', '2kb', '3mb', '1000mb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(true);
+        });
       });
     });
   });
+  describe('must be at least 0b', () => {
+    const bytesRt = getBytesRt({
+      min: '0b',
+      units: ['b', 'mb', 'kb']
+    });
 
-  describe('it should accept', () => {
-    ['1b', '2kb', '3mb'].map(input => {
-      it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(bytesRt.decode(input))).toBe(true);
+    describe('it should not accept', () => {
+      ['mb', '-1kb', '5gb', '6tb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(false);
+        });
+      });
+    });
+
+    describe('it should accept', () => {
+      ['1b', '2kb', '3mb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(true);
+        });
+      });
+    });
+  });
+  describe('must be between 500b and 1mb', () => {
+    const bytesRt = getBytesRt({
+      min: '500b',
+      max: '1kb',
+      units: ['b', 'mb', 'kb']
+    });
+    describe('it should not accept', () => {
+      ['mb', '-1b', '1b', '499b', '1025b', '2kb', '1mb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(false);
+        });
+      });
+    });
+    describe('it should accept', () => {
+      ['500b', '1024b', '1kb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          expect(isRight(bytesRt.decode(input))).toBe(true);
+        });
       });
     });
   });

@@ -80,8 +80,8 @@ interface IntegerSetting extends BaseSetting {
 
 interface BytesSetting extends BaseSetting {
   type: 'bytes';
-  min?: number;
-  max?: number;
+  min?: string;
+  max?: string;
   units?: string[];
 }
 

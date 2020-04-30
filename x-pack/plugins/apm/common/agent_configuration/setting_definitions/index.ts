@@ -50,7 +50,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
 
     case 'bytes': {
       const units = setting.units ?? ['b', 'kb', 'mb'];
-      const min = setting.min ?? 0;
+      const min = setting.min ?? '0b';
       const max = setting.max;
 
       return {

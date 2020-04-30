@@ -4,7 +4,7 @@ exports[`settingDefinitions should have correct default values 1`] = `
 Array [
   Object {
     "key": "api_request_size",
-    "min": 0,
+    "min": "0b",
     "type": "bytes",
     "units": Array [
       "b",

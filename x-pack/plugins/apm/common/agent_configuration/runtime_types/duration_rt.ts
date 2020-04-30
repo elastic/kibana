@@ -8,11 +8,11 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import moment, { unitOfTime } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { amountAndUnitToObject } from '../amount_and_unit';
+import { amountAndUnitToObject, AmountAndUnit } from '../amount_and_unit';
 import { getRangeType } from './get_range_type';
 
-function getDuration({ amount, unit }: { amount: string; unit: string }) {
-  return moment.duration(parseInt(amount, 10), unit as unitOfTime.Base);
+function getDuration({ amount, unit }: AmountAndUnit) {
+  return moment.duration(amount, unit as unitOfTime.Base);
 }
 
 export function getDurationRt({
@@ -38,8 +38,8 @@ export function getDurationRt({
       min,
       max,
       rangeType: getRangeType(
-        minAmountAndUnit ? parseInt(minAmountAndUnit.amount, 10) : undefined,
-        maxAmountAndUnit ? parseInt(maxAmountAndUnit.amount, 10) : undefined
+        minAmountAndUnit ? minAmountAndUnit.amount : undefined,
+        maxAmountAndUnit ? maxAmountAndUnit.amount : undefined
       )
     }
   });
