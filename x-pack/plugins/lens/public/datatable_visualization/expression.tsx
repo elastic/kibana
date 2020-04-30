@@ -196,6 +196,8 @@ export function DatatableComponent(props: DatatableRenderProps) {
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field]?.convert(value);
+                const fieldName = col?.meta?.aggConfigParams.field;
+
                 if (filterable) {
                   return (
                     <EuiFlexGroup
@@ -223,7 +225,10 @@ export function DatatableComponent(props: DatatableRenderProps) {
                               aria-label={i18n.translate(
                                 'xpack.lens.filterForValueButtonAriaLabel',
                                 {
-                                  defaultMessage: 'Filter for value',
+                                  defaultMessage: `Filter for {value}`,
+                                  values: {
+                                    value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
+                                  },
                                 }
                               )}
                               data-test-subj="lensDatatableFilterFor"
@@ -243,7 +248,12 @@ export function DatatableComponent(props: DatatableRenderProps) {
                                 aria-label={i18n.translate(
                                   'xpack.lens.filterOutValueButtonAriaLabel',
                                   {
-                                    defaultMessage: 'Filter out value',
+                                    defaultMessage: `Filter out {value}`,
+                                    values: {
+                                      value: `${
+                                        fieldName ? `${fieldName}: ` : ''
+                                      }${formattedValue}`,
+                                    },
                                   }
                                 )}
                                 data-test-subj="lensDatatableFilterOut"

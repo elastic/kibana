@@ -4,10 +4,11 @@
 
 .lnsDataTable__filter {
   opacity: 0;
-  transition: opacity 250ms ease-in-out;
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
 }
 
-.lnsDataTable__cell:hover  {
+.lnsDataTable__cell:hover,
+.lnsDataTable__cell:focus-within {
   .lnsDataTable__filter {
     opacity: 1;
   }
