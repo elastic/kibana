@@ -11,36 +11,48 @@ import {
   MapRecord,
 } from '../case/types';
 
-const createMock = (): jest.Mocked<ExternalService> => ({
-  getIncident: jest.fn().mockImplementation(() =>
+const createMock = (): jest.Mocked<ExternalService> => {
+  const service = {
+    getIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        short_description: 'title from servicenow',
+        description: 'description from servicenow',
+      })
+    ),
+    createIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-1',
+        title: 'INC01',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
+      })
+    ),
+    updateIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-2',
+        title: 'INC02',
+        pushedDate: '2020-03-10T12:24:20.000Z',
+        url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
+      })
+    ),
+    createComment: jest.fn(),
+  };
+
+  service.createComment.mockImplementationOnce(() =>
     Promise.resolve({
-      short_description: 'title from servicenow',
-      description: 'description from servicenow',
-    })
-  ),
-  createIncident: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      id: 'incident-1',
-      title: 'INC01',
+      commentId: 'case-comment-1',
       pushedDate: '2020-03-10T12:24:20.000Z',
-      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
     })
-  ),
-  updateIncident: jest.fn().mockImplementation(() =>
+  );
+
+  service.createComment.mockImplementationOnce(() =>
     Promise.resolve({
-      id: 'incident-2',
-      title: 'INC02',
-      pushedDate: '2020-03-10T12:24:20.000Z',
-      url: 'https://instance.service-now.com/nav_to.do?uri=incident.do?sys_id=123',
-    })
-  ),
-  createComment: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      commentId: 'comment-1',
+      commentId: 'case-comment-2',
       pushedDate: '2020-03-10T12:24:20.000Z',
     })
-  ),
-});
+  );
+  return service;
+};
 
 const externalServiceMock = {
   create: createMock,

@@ -53,7 +53,7 @@ export const mapParams = (
   return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
     const field = mapping.get(curr);
     if (field) {
-      prev[field.target] = get(curr, params);
+      prev[field.target] = get(params, curr);
     }
     return prev;
   }, {});

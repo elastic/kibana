@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+} from '../../../../common/fixtures/plugins/actions_simulators';
 
 const mapping = [
   {
@@ -325,8 +325,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 actionId: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subAction]: expected at least one defined value but got [undefined]',
+                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
               });
             });
         });
@@ -344,7 +343,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subAction]: types that failed validation:\n- [subAction.0]: expected value to equal [getIncident]\n- [subAction.1]: expected value to equal [pushToService]\n- [subAction.2]: expected value to equal [handshake]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]',
               });
             });
         });
@@ -362,7 +361,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -380,7 +379,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.caseId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -403,7 +402,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -427,7 +426,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.createdAt]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.createdAt]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -455,7 +454,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -483,7 +482,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -511,7 +510,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: [subActionParams.comments.0.createdAt]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.createdAt]: expected value of type [string] but got [undefined]',
               });
             });
         });

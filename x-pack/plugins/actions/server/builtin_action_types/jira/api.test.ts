@@ -11,11 +11,11 @@ import { ExternalService } from '../case/types';
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
 
-  beforeAll(() => {
+  beforeEach(() => {
     externalService = externalServiceMock.create();
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -26,7 +26,7 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: '1',
+          id: 'incident-1',
           title: 'CK-1',
           pushedDate: '2020-04-27T10:59:46.202Z',
           url: 'https://siem-kibana.atlassian.net/browse/CK-1',
@@ -48,7 +48,7 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: '1',
+          id: 'incident-1',
           title: 'CK-1',
           pushedDate: '2020-04-27T10:59:46.202Z',
           url: 'https://siem-kibana.atlassian.net/browse/CK-1',
@@ -74,7 +74,7 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params });
         expect(externalService.createComment).toHaveBeenCalledTimes(2);
         expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-          incidentId: '1',
+          incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-1',
             version: 'WzU3LDFd',
@@ -94,7 +94,7 @@ describe('api', () => {
         });
 
         expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-          incidentId: '1',
+          incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-2',
             version: 'WlK3LDFd',
@@ -120,8 +120,8 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params: apiParams });
 
         expect(res).toEqual({
-          id: 'incident-2',
-          title: 'INC02',
+          id: 'incident-1',
+          title: 'CK-1',
           pushedDate: '2020-04-27T10:59:46.202Z',
           url: 'https://siem-kibana.atlassian.net/browse/CK-1',
           comments: [
@@ -142,8 +142,8 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: 'incident-2',
-          title: 'INC02',
+          id: 'incident-1',
+          title: 'CK-1',
           pushedDate: '2020-04-27T10:59:46.202Z',
           url: 'https://siem-kibana.atlassian.net/browse/CK-1',
         });
@@ -169,7 +169,7 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params });
         expect(externalService.createComment).toHaveBeenCalledTimes(2);
         expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-2',
+          incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-1',
             version: 'WzU3LDFd',
@@ -189,7 +189,7 @@ describe('api', () => {
         });
 
         expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-          incidentId: 'incident-2',
+          incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-2',
             version: 'WlK3LDFd',

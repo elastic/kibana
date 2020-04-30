@@ -11,41 +11,55 @@ import {
   MapRecord,
 } from '../case/types';
 
-const createMock = (): jest.Mocked<ExternalService> => ({
-  getIncident: jest.fn().mockImplementation(() =>
+const createMock = (): jest.Mocked<ExternalService> => {
+  const service = {
+    getIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-1',
+        key: 'CK-1',
+        summary: 'title from jira',
+        description: 'description from jira',
+        created: '2020-04-27T10:59:46.202Z',
+        updated: '2020-04-27T10:59:46.202Z',
+      })
+    ),
+    createIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-1',
+        title: 'CK-1',
+        pushedDate: '2020-04-27T10:59:46.202Z',
+        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      })
+    ),
+    updateIncident: jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        id: 'incident-1',
+        title: 'CK-1',
+        pushedDate: '2020-04-27T10:59:46.202Z',
+        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+      })
+    ),
+    createComment: jest.fn(),
+  };
+
+  service.createComment.mockImplementationOnce(() =>
     Promise.resolve({
-      id: '1',
-      key: 'CK-1',
-      summary: 'title from jira',
-      description: 'description from jira',
-      created: '2020-04-27T10:59:46.202Z',
-      updated: '2020-04-27T10:59:46.202Z',
-    })
-  ),
-  createIncident: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      id: '1',
-      title: 'CK-1',
-      pushedDate: '2020-04-27T10:59:46.202Z',
-      url: 'https://siem-kibana.atlassian.net/browse/CK-1',
-    })
-  ),
-  updateIncident: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      id: 'incident-2',
-      title: 'INC02',
-      pushedDate: '2020-04-27T10:59:46.202Z',
-      url: 'https://siem-kibana.atlassian.net/browse/CK-1',
-    })
-  ),
-  createComment: jest.fn().mockImplementation(() =>
-    Promise.resolve({
-      commentId: 'comment-1',
+      commentId: 'case-comment-1',
       pushedDate: '2020-04-27T10:59:46.202Z',
       externalCommentId: '1',
     })
-  ),
-});
+  );
+
+  service.createComment.mockImplementationOnce(() =>
+    Promise.resolve({
+      commentId: 'case-comment-2',
+      pushedDate: '2020-04-27T10:59:46.202Z',
+      externalCommentId: '2',
+    })
+  );
+
+  return service;
+};
 
 const externalServiceMock = {
   create: createMock,

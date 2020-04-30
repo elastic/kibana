@@ -11,11 +11,12 @@ import { ExternalService } from '../case/types';
 describe('api', () => {
   let externalService: jest.Mocked<ExternalService>;
 
-  beforeAll(() => {
+  beforeEach(() => {
     externalService = externalServiceMock.create();
+    jest.clearAllMocks();
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
