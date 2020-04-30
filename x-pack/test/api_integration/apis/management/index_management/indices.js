@@ -200,7 +200,7 @@ export default function({ getService }) {
         ];
         const sortedExpectedKeys = expectedKeys.sort();
         const sortedReceivedKeys = Object.keys(body[0]).sort();
-        expect(sortedReceivedKeys).to.equal(sortedExpectedKeys);
+        expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
 
