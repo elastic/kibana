@@ -34,8 +34,8 @@ export const CertType = t.intersection([
     sha256: t.string,
   }),
   t.partial({
-    certificate_not_valid_after: t.string,
-    certificate_not_valid_before: t.string,
+    not_after: t.string,
+    not_before: t.string,
     common_name: t.string,
     issuer: t.string,
     sha1: t.string,

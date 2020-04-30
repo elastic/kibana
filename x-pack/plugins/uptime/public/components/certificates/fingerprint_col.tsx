@@ -19,9 +19,11 @@ const EmptyButton = styled(EuiButtonEmpty)`
 const Span = styled.span`
   margin-right: 8px;
 `;
+
 interface Props {
   cert: Cert;
 }
+
 export const FingerprintCol: React.FC<Props> = ({ cert }) => {
   const ShaComponent = ({ text, val }: { text: string; val: string }) => {
     return (

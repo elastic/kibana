@@ -26,8 +26,8 @@ export type CertFields =
   | 'issuer'
   | 'common_name'
   | 'monitors'
-  | 'certificate_not_valid_after'
-  | 'certificate_not_valid_before';
+  | 'not_after'
+  | 'not_before';
 
 export interface CertSort {
   field: CertFields;
@@ -57,12 +57,10 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
 
   const columns = [
     {
-      field: 'certificate_not_valid_after',
+      field: 'not_after',
       name: labels.STATUS_COL,
       sortable: true,
-      render: (val: string, item: Cert) => {
-        return <CertStatus cert={item} />;
-      },
+      render: (val: string, item: Cert) => <CertStatus cert={item} />,
     },
     {
       name: labels.COMMON_NAME_COL,
@@ -81,19 +79,15 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
     },
     {
       name: labels.VALID_UNTIL_COL,
-      field: 'certificate_not_valid_after',
+      field: 'not_after',
       sortable: true,
-      render: (value: string) => {
-        return moment(value).format('L LT');
-      },
+      render: (value: string) => moment(value).format('L LT'),
     },
     {
       name: labels.AGE_COL,
-      field: 'certificate_not_valid_before',
+      field: 'not_before',
       sortable: true,
-      render: (value: string) => {
-        return moment().diff(moment(value), 'days') + ' ' + labels.DAYS;
-      },
+      render: (value: string) => moment().diff(moment(value), 'days') + ' ' + labels.DAYS,
     },
     {
       name: labels.FINGERPRINTS_COL,

@@ -19,9 +19,10 @@ describe('getCerts', () => {
         _score: 0,
         _source: {
           tls: {
-            certificate_not_valid_before: '2019-08-16T01:40:25.000Z',
             server: {
               x509: {
+                not_before: '2019-08-16T01:40:25.000Z',
+                not_after: '2020-07-16T03:15:39.000Z',
                 subject: {
                   common_name: 'r2.shared.global.fastly.net',
                 },
@@ -34,7 +35,6 @@ describe('getCerts', () => {
                 sha256: '12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d',
               },
             },
-            certificate_not_valid_after: '2020-07-16T03:15:39.000Z',
           },
           monitor: {
             name: 'Real World Test',
@@ -99,15 +99,13 @@ describe('getCerts', () => {
       to: 'now+1h',
       search: 'my_common_name',
       size: 30,
-      sortBy: 'tls.certificate_not_valid_after',
+      sortBy: 'not_after',
       direction: 'desc',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "certs": Array [
           Object {
-            "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
-            "certificate_not_valid_before": "2019-08-16T01:40:25.000Z",
             "common_name": "r2.shared.global.fastly.net",
             "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
             "monitors": Array [
@@ -117,6 +115,8 @@ describe('getCerts', () => {
                 "url": undefined,
               },
             ],
+            "not_after": "2020-07-16T03:15:39.000Z",
+            "not_before": "2019-08-16T01:40:25.000Z",
             "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
             "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
           },
@@ -137,8 +137,8 @@ describe('getCerts', () => {
                 "tls.server.x509.subject.common_name",
                 "tls.server.hash.sha1",
                 "tls.server.hash.sha256",
-                "tls.certificate_not_valid_before",
-                "tls.certificate_not_valid_after",
+                "tls.server.x509.not_after",
+                "tls.server.x509.not_before",
               ],
               "aggs": Object {
                 "total": Object {
@@ -207,7 +207,7 @@ describe('getCerts', () => {
               "size": 30,
               "sort": Array [
                 Object {
-                  "undefined": Object {
+                  "tls.server.x509.not_after": Object {
                     "order": "desc",
                   },
                 },

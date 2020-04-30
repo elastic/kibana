@@ -15,7 +15,7 @@ describe('CertificateList', () => {
       size: 10,
     };
     const sort: CertSort = {
-      field: 'certificate_not_valid_after',
+      field: 'not_after',
       direction: 'asc',
     };
 

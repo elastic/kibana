@@ -62,7 +62,7 @@ exports[`CertificateList shallow renders expected elements for valid props 1`] =
     sort={
       Object {
         "direction": "asc",
-        "field": "certificate_not_valid_after",
+        "field": "not_after",
       }
     }
   />

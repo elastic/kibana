@@ -43,3 +43,10 @@ export const SHORT_TIMESPAN_LOCALE = {
     yy: '%d Yr',
   },
 };
+
+export enum CERT_STATUS {
+  OK = 'OK',
+  EXPIRING_SOON = 'EXPIRING_SOON',
+  EXPIRED = 'EXPIRED',
+  TOO_OLD = 'TOO_OLD',
+}

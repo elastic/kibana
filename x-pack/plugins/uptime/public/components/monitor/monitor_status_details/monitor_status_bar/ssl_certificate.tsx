@@ -11,8 +11,8 @@ import { Link } from 'react-router-dom';
 import { EuiSpacer, EuiText, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Tls } from '../../../../../common/runtime_types';
-import { CERT_STATUS, useCertStatus } from '../../../../hooks';
-import { CERTIFICATES_ROUTE } from '../../../../../common/constants';
+import { useCertStatus } from '../../../../hooks';
+import { CERT_STATUS, CERTIFICATES_ROUTE } from '../../../../../common/constants';
 
 interface Props {
   /**
@@ -22,19 +22,19 @@ interface Props {
 }
 
 export const MonitorSSLCertificate = ({ tls }: Props) => {
-  const certStatus = useCertStatus(tls?.certificate_not_valid_after);
+  const certStatus = useCertStatus(tls?.not_after);
 
   const isExpiringSoon = certStatus === CERT_STATUS.EXPIRING_SOON;
 
   const isExpired = certStatus === CERT_STATUS.EXPIRED;
 
-  const relativeDate = moment(tls?.certificate_not_valid_after).fromNow();
+  const relativeDate = moment(tls?.not_after).fromNow();
 
   return certStatus ? (
     <>
       <EuiText>
         {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificate.title', {
-          defaultMessage: 'TLS Certificate',
+          defaultMessage: 'Certificate',
         })}
       </EuiText>
       <EuiSpacer size="s" />
@@ -49,14 +49,14 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
                 ? i18n.translate(
                     'xpack.uptime.monitorStatusBar.sslCertificateExpired.label.ariaLabel',
                     {
-                      defaultMessage: 'SSL certificate expired {validityDate}',
+                      defaultMessage: 'Expired {validityDate}',
                       values: { validityDate: relativeDate },
                     }
                   )
                 : i18n.translate(
                     'xpack.uptime.monitorStatusBar.sslCertificateExpiry.label.ariaLabel',
                     {
-                      defaultMessage: 'SSL certificate expires {validityDate}',
+                      defaultMessage: 'Expires {validityDate}',
                       values: { validityDate: relativeDate },
                     }
                   )
@@ -65,7 +65,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
             {isExpired ? (
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.sslCertificateExpired.badgeContent"
-                defaultMessage="SSL certificate expired {emphasizedText}"
+                defaultMessage="Expired {emphasizedText}"
                 values={{
                   emphasizedText: <EuiBadge color={'danger'}>{relativeDate}</EuiBadge>,
                 }}
@@ -73,7 +73,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
             ) : (
               <FormattedMessage
                 id="xpack.uptime.monitorStatusBar.sslCertificateExpiry.badgeContent"
-                defaultMessage="SSL certificate expires {emphasizedText}"
+                defaultMessage="Expires {emphasizedText}"
                 values={{
                   emphasizedText: (
                     <EuiBadge color={isExpiringSoon ? 'warning' : 'default'}>
@@ -89,7 +89,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
           <Link to={CERTIFICATES_ROUTE} className="eui-displayInline">
             <EuiText>
               {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificate.overview', {
-                defaultMessage: 'Certificate Overview',
+                defaultMessage: 'Certificate overview',
               })}
             </EuiText>
           </Link>

@@ -13,7 +13,7 @@ const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 25;
 const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
-const DEFAULT_SORT = 'tls.certificate_not_valid_after';
+const DEFAULT_SORT = 'not_after';
 const DEFAULT_DIRECTION = 'asc';
 
 export const createGetCertsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({

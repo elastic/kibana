@@ -44,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await uptimeService.navigation.refreshApp();
-      await uptimeService.cert.certificateExist({ certId, monitorId });
+      await uptimeService.cert.certificateExists({ certId, monitorId });
     });
 
     it('performs search against monitor id', async () => {

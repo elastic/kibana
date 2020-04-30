@@ -47,7 +47,7 @@ export const CertificatesPage: React.FC = () => {
 
   const [page, setPage] = useState({ index: 0, size: getPageSizeValue() });
   const [sort, setSort] = useState<CertSort>({
-    field: 'certificate_not_valid_after',
+    field: 'not_after',
     direction: 'asc',
   });
   const [search, setSearch] = useState('');

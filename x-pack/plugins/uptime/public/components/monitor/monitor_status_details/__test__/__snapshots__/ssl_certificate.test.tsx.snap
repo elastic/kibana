@@ -5,7 +5,7 @@ Array [
   <div
     class="euiText euiText--medium"
   >
-    TLS Certificate
+    Certificate
   </div>,
   <div
     class="euiSpacer euiSpacer--s"
@@ -17,10 +17,10 @@ Array [
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        aria-label="SSL certificate expires in 2 months"
+        aria-label="Expires in 2 months"
         class="euiText euiText--small eui-displayInline euiText--constrainedWidth"
       >
-        SSL certificate expires 
+        Expires 
         <span
           class="euiBadge euiBadge--iconLeft"
           style="background-color:#d3dae6;color:#000"
@@ -47,7 +47,7 @@ Array [
         <div
           class="euiText euiText--medium"
         >
-          Certificate Overview
+          Certificate overview
         </div>
       </a>
     </div>
@@ -111,7 +111,7 @@ exports[`SSL Certificate component shallow renders 1`] = `
   <MonitorSSLCertificate
     tls={
       Object {
-        "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
+        "not_after": "2020-04-24T11:41:38.200Z",
       }
     }
   />

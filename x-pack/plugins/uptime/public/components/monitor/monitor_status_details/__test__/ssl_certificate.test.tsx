@@ -22,7 +22,7 @@ describe('SSL Certificate component', () => {
       .toString();
 
     monitorTls = {
-      certificate_not_valid_after: dateInTwoMonths,
+      not_after: dateInTwoMonths,
     };
 
     const spy = jest.spyOn(redux, 'useDispatch');
@@ -34,7 +34,7 @@ describe('SSL Certificate component', () => {
 
   it('shallow renders', () => {
     const monitorTls1 = {
-      certificate_not_valid_after: '2020-04-24T11:41:38.200Z',
+      not_after: '2020-04-24T11:41:38.200Z',
     };
     const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls1} />);
     expect(component).toMatchSnapshot();
@@ -47,7 +47,7 @@ describe('SSL Certificate component', () => {
 
   it('renders null if invalid date', () => {
     monitorTls = {
-      certificate_not_valid_after: 'i am so invalid date',
+      not_after: 'i am so invalid date',
     };
     const component = renderWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
     expect(component).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('SSL Certificate component', () => {
       .add(5, 'day')
       .toString();
     monitorTls = {
-      certificate_not_valid_after: dateIn5Days,
+      not_after: dateIn5Days,
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 
@@ -77,7 +77,7 @@ describe('SSL Certificate component', () => {
       .add(40, 'day')
       .toString();
     monitorTls = {
-      certificate_not_valid_after: dateIn40Days,
+      not_after: dateIn40Days,
     };
     const component = mountWithRouter(<MonitorSSLCertificate tls={monitorTls} />);
 

@@ -9,8 +9,8 @@ import { CertResult, GetCertsParams } from '../../../common/runtime_types';
 
 enum SortFields {
   'issuer' = 'tls.server.x509.issuer.common_name',
-  'certificate_not_valid_after' = 'tls.certificate_not_valid_after',
-  'certificate_not_valid_before' = 'tls.certificate_not_valid_before',
+  'not_after' = 'tls.server.x509.not_after',
+  'not_before' = 'tls.server.x509.not_before',
   'common_name' = 'tls.server.x509.subject.common_name',
 }
 
@@ -65,8 +65,8 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
         'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
         'tls.server.hash.sha256',
-        'tls.certificate_not_valid_before',
-        'tls.certificate_not_valid_after',
+        'tls.server.x509.not_after',
+        'tls.server.x509.not_before',
       ],
       collapse: {
         field: 'tls.server.hash.sha256',
@@ -115,10 +115,12 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   const certs = (result?.hits?.hits ?? []).map((hit: any) => {
     const {
       _source: {
-        tls: { server, certificate_not_valid_after, certificate_not_valid_before },
+        tls: { server },
       },
     } = hit;
 
+    const notAfter = server?.x509?.not_after;
+    const notBefore = server?.x509?.not_before;
     const issuer = server?.x509?.issuer?.common_name;
     const commonName = server?.x509?.subject?.common_name;
     const sha1 = server?.hash?.sha1;
@@ -132,11 +134,11 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
 
     return {
       monitors,
-      certificate_not_valid_after,
-      certificate_not_valid_before,
       issuer,
       sha1,
       sha256,
+      not_after: notAfter,
+      not_before: notBefore,
       common_name: commonName,
     };
   });

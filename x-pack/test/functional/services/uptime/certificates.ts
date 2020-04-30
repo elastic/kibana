@@ -23,7 +23,7 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
         await testSubjects.existOrFail('uptimeCertificatesLink');
       });
     },
-    async certificateExist(cert: { certId: string; monitorId: string }) {
+    async certificateExists(cert: { certId: string; monitorId: string }) {
       return retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail(cert.certId);
         await testSubjects.existOrFail('monitor-page-link-' + cert.monitorId);

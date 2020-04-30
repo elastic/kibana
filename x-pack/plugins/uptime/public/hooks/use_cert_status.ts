@@ -7,13 +7,7 @@
 import moment from 'moment';
 import { useSelector } from 'react-redux';
 import { selectDynamicSettings } from '../state/selectors';
-
-export enum CERT_STATUS {
-  OK = 'OK',
-  EXPIRING_SOON = 'EXPIRING_SOON',
-  EXPIRED = 'EXPIRED',
-  TOO_OLD = 'TOO_OLD',
-}
+import { CERT_STATUS } from '../../common/constants';
 
 export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   const dss = useSelector(selectDynamicSettings);

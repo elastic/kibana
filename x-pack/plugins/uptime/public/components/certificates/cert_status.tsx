@@ -7,33 +7,25 @@
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
 import { Cert } from '../../../common/runtime_types';
-import { CERT_STATUS, useCertStatus } from '../../hooks';
+import { useCertStatus } from '../../hooks';
 import * as labels from './translations';
+import { CERT_STATUS } from '../../../common/constants';
 
 interface Props {
   cert: Cert;
 }
 
 export const CertStatus: React.FC<Props> = ({ cert }) => {
-  const certStatus = useCertStatus(
-    cert?.certificate_not_valid_after,
-    cert?.certificate_not_valid_before
-  );
+  const certStatus = useCertStatus(cert?.not_after, cert?.not_before);
 
-  const isExpiringSoon = certStatus === CERT_STATUS.EXPIRING_SOON;
-
-  const isTooOld = certStatus === CERT_STATUS.TOO_OLD;
-
-  const isExpired = certStatus === CERT_STATUS.EXPIRED;
-
-  if (isExpiringSoon) {
+  if (certStatus === CERT_STATUS.EXPIRING_SOON) {
     return (
       <EuiHealth color="warning">
         <span>{labels.EXPIRES_SOON}</span>
       </EuiHealth>
     );
   }
-  if (isExpired) {
+  if (certStatus === CERT_STATUS.EXPIRED) {
     return (
       <EuiHealth color="danger">
         <span>{labels.EXPIRED}</span>
@@ -41,7 +33,7 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
     );
   }
 
-  if (isTooOld) {
+  if (certStatus === CERT_STATUS.TOO_OLD) {
     return (
       <EuiHealth color="danger">
         <span>{labels.TOO_OLD}</span>

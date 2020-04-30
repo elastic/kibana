@@ -3148,30 +3148,18 @@
                       "properties": {
                         "common_name": {
                           "type": "keyword",
+                          "fields": {
+                            "text": {
+                              "type": "text",
+                              "norms": false,
+                              "analyzer": "simple"
+                            }
+                          },
                           "ignore_above": 1024
                         },
                         "distinguished_name": {
                           "type": "keyword",
                           "ignore_above": 1024
-                        },
-                        "subject": {
-                          "properties": {
-                            "common_name": {
-                              "type": "keyword",
-                              "fields": {
-                                "text": {
-                                  "type": "text",
-                                  "norms": false,
-                                  "analyzer": "simple"
-                                }
-                              },
-                              "ignore_above": 1024
-                            },
-                            "distinguished_name": {
-                              "type": "keyword",
-                              "ignore_above": 1024
-                            }
-                          }
                         }
                       }
                     },
