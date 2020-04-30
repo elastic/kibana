@@ -22,8 +22,9 @@ import { VectorStyle } from '../../styles/vector/vector_style';
 import { EMSFileSource } from '../../sources/ems_file_source';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { VectorLayer } from '../../vector_layer';
+import { HeatmapLayer } from '../../heatmap_layer';
 
-// redefining constant to avoid making maps app depend on APM plugin
+// redefining APM constant to avoid making maps app depend on APM plugin
 const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
 
 function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
@@ -65,11 +66,11 @@ function createAmpSourceQuery(layer: OBSERVABILITY_LAYER_TYPE) {
 }
 
 function getGeoGridRequestType(display: DISPLAY): RENDER_AS {
-  if (display === HEATMAP) {
+  if (display === DISPLAY.HEATMAP) {
     return RENDER_AS.HEATMAP;
   }
 
-  if (display === HEATMAP) {
+  if (display === DISPLAY.GRIDS) {
     return RENDER_AS.GRIDS;
   }
 
@@ -132,10 +133,17 @@ export function createLayerDescriptor({
     });
   }
 
-  const geoGridSource = ESGeoGridSource.createDescriptor({
+  const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId: APM_INDEX_PATTERN_ID,
     geoField: 'client.geo.location',
     requestType: getGeoGridRequestType(display),
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
+
+  if (display === DISPLAY.HEATMAP) {
+    return HeatmapLayer.createDescriptor({
+      query: apmSourceQuery,
+      sourceDescriptor: geoGridSourceDescriptor,
+    });
+  }
 }
