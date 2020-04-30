@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE
 } from '../../../../common/elasticsearch_fieldnames';
-import { severity } from '../../../../../../../plugins/apm/common/ml_job_constants';
+import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
 const getBorderColor = (el: cytoscape.NodeSingular) => {
