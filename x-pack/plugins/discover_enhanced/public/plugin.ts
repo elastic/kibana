@@ -7,6 +7,8 @@
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { PluginInitializerContext } from 'kibana/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
+import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
 import {
   EmbeddableSetup,
   EmbeddableStart,
@@ -22,13 +24,15 @@ declare module '../../../../src/plugins/ui_actions/public' {
 }
 
 export interface DiscoverEnhancedSetupDependencies {
-  uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
+  share?: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface DiscoverEnhancedStartDependencies {
-  uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
+  share?: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export class DiscoverEnhancedPlugin
@@ -38,10 +42,14 @@ export class DiscoverEnhancedPlugin
 
   setup(
     core: CoreSetup<DiscoverEnhancedStartDependencies>,
-    { uiActions }: DiscoverEnhancedSetupDependencies
+    { uiActions, share }: DiscoverEnhancedSetupDependencies
   ) {
-    const viewInDiscoverAction = new ViewInDiscoverAction();
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, viewInDiscoverAction);
+    const start = createStartServicesGetter(core.getStartServices);
+
+    if (!!share) {
+      const viewInDiscoverAction = new ViewInDiscoverAction({ start });
+      uiActions.attachAction(CONTEXT_MENU_TRIGGER, viewInDiscoverAction);
+    }
   }
 
   start(core: CoreStart, plugins: DiscoverEnhancedStartDependencies) {}

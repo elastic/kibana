@@ -103,7 +103,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private docViewsRegistry: DocViewsRegistry | null = null;
 
   setup(core: CoreSetup, { share }: SetupDependencies): DiscoverSetup {
-    if (share) {
+    if (!!share) {
       const urlGenerator = new DiscoverUrlGenerator({
         appBasePath: 'kibana',
         useHash: core.uiSettings.get('state:storeInSessionStorage'),
