@@ -21,10 +21,11 @@ import 'source-map-support/register';
 
 import Path from 'path';
 
-import { run, REPO_ROOT, createFlagError } from '@kbn/dev-utils';
+import { run, REPO_ROOT, createFlagError, createFailError, CiStatsReporter } from '@kbn/dev-utils';
 
 import { logOptimizerState } from './log_optimizer_state';
 import { OptimizerConfig } from './optimizer';
+import { reportOptimizerStats } from './report_optimizer_stats';
 import { runOptimizer } from './run_optimizer';
 
 run(
@@ -81,6 +82,11 @@ run(
       throw createFlagError('expected --scan-dir to be a string');
     }
 
+    const reportStatsName = flags['report-stats'];
+    if (reportStatsName !== undefined && typeof reportStatsName !== 'string') {
+      throw createFlagError('expected --report-stats to be a string');
+    }
+
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
@@ -95,14 +101,24 @@ run(
       includeCoreBundle,
     });
 
-    await runOptimizer(config)
-      .pipe(logOptimizerState(log, config))
-      .toPromise();
+    let update$ = runOptimizer(config);
+
+    if (reportStatsName) {
+      const reporter = CiStatsReporter.fromEnv(log);
+
+      if (!reporter.isEnabled()) {
+        throw createFailError('Unable to initialize CiStatsReporter from env');
+      }
+
+      update$ = update$.pipe(reportOptimizerStats(reporter, reportStatsName));
+    }
+
+    await update$.pipe(logOptimizerState(log, config)).toPromise();
   },
   {
     flags: {
       boolean: ['core', 'watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
-      string: ['workers', 'scan-dir'],
+      string: ['workers', 'scan-dir', 'report-stats'],
       default: {
         core: true,
         examples: true,
@@ -120,6 +136,7 @@ run(
         --dist             create bundles that are suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
+        --report-stats=[name] attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
       `,
     },
   }

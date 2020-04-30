@@ -17,7 +17,7 @@ import {
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -110,7 +110,16 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { saved_objects: [{ type: 'action', id: actionId, ...namespace }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'action',
+            id: actionId,
+            ...namespace,
+          },
+        ],
+      },
     };
 
     eventLogger.startTiming(event);
@@ -140,13 +149,18 @@ export class ActionExecutor {
       status: 'ok',
     };
 
+    event.event = event.event || {};
+
     if (result.status === 'ok') {
+      event.event.outcome = 'success';
       event.message = `action executed: ${actionLabel}`;
     } else if (result.status === 'error') {
+      event.event.outcome = 'failure';
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
     } else {
+      event.event.outcome = 'failure';
       event.message = `action execution returned unexpected result: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';

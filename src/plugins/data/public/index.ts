@@ -204,11 +204,13 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
 
 /*
@@ -255,6 +257,7 @@ export {
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   FieldList as IndexPatternFieldList,
+  Field,
 } from './index_patterns';
 
 export {

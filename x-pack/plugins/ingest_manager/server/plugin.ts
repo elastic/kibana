@@ -39,6 +39,8 @@ import {
   registerAgentRoutes,
   registerEnrollmentApiKeyRoutes,
   registerInstallScriptRoutes,
+  registerOutputRoutes,
+  registerSettingsRoutes,
 } from './routes';
 
 import { IngestManagerConfigType } from '../common';
@@ -148,8 +150,11 @@ export class IngestManagerPlugin
     const config = await this.config$.pipe(first()).toPromise();
 
     // Register routes
+    registerSetupRoutes(router, config);
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
+    registerOutputRoutes(router);
+    registerSettingsRoutes(router);
     registerDataStreamRoutes(router);
 
     // Conditional routes
@@ -158,7 +163,6 @@ export class IngestManagerPlugin
     }
 
     if (config.fleet.enabled) {
-      registerSetupRoutes(router);
       registerAgentRoutes(router);
       registerEnrollmentApiKeyRoutes(router);
       registerInstallScriptRoutes({

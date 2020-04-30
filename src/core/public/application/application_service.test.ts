@@ -87,7 +87,7 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
     });
 
-    it('allows to register a statusUpdater for the application', async () => {
+    it('allows to register an AppUpdater for the application', async () => {
       const setup = service.setup(setupDeps);
 
       const pluginId = Symbol('plugin');
@@ -118,6 +118,7 @@ describe('#setup()', () => {
       updater$.next(app => ({
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
+        defaultPath: 'foo/bar',
       }));
 
       applications = await applications$.pipe(take(1)).toPromise();
@@ -128,6 +129,7 @@ describe('#setup()', () => {
           legacy: false,
           navLinkStatus: AppNavLinkStatus.default,
           status: AppStatus.inaccessible,
+          defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
         })
       );
@@ -209,7 +211,7 @@ describe('#setup()', () => {
     });
   });
 
-  describe('registerAppStatusUpdater', () => {
+  describe('registerAppUpdater', () => {
     it('updates status fields', async () => {
       const setup = service.setup(setupDeps);
 
@@ -412,6 +414,36 @@ describe('#setup()', () => {
           tooltip: 'App inaccessible due to reason',
         })
       );
+    });
+
+    it('allows to update the basePath', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1' }));
+
+      const updater = new BehaviorSubject<AppUpdater>(app => ({}));
+      setup.registerAppUpdater(updater);
+
+      const start = await service.start(startDeps);
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({ defaultPath: 'default-path' }));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default-path', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({ defaultPath: 'another-path' }));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/another-path', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({}));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
+      MockHistory.push.mockClear();
     });
   });
 
@@ -674,6 +706,57 @@ describe('#start()', () => {
 
       await navigateToApp('app2', { path: '#/hash/router/path' });
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path#/hash/router/path', undefined);
+    });
+
+    it('preserves trailing slash when path contains a hash', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/app-path' }));
+
+      const { navigateToApp } = await service.start(startDeps);
+      await navigateToApp('app2', { path: '#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '#/foo/bar/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/foo/bar/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path#/hash/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/hash/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path', undefined);
+      MockHistory.push.mockClear();
+    });
+
+    it('appends the defaultPath when the path parameter is not specified', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), createApp({ id: 'app1', defaultPath: 'default/path' }));
+      register(
+        Symbol(),
+        createApp({ id: 'app2', appRoute: '/custom-app-path', defaultPath: '/my-base' })
+      );
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('app1', { path: 'defined-path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/defined-path', undefined);
+
+      await navigateToApp('app1', {});
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default/path', undefined);
+
+      await navigateToApp('app2', { path: 'defined-path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom-app-path/defined-path', undefined);
+
+      await navigateToApp('app2', {});
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom-app-path/my-base', undefined);
     });
 
     it('includes state if specified', async () => {

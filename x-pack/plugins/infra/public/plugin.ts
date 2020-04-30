@@ -21,7 +21,8 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
+import { getAlertType as getMetricsAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
+import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -52,7 +53,8 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getMetricsAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
 
     core.application.register({
       id: 'logs',
