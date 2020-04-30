@@ -21,6 +21,7 @@ import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
+import 'leaflet.heat';
 
 /**
  * Map overlay: canvas layer with leaflet.heat plugin
@@ -34,7 +35,7 @@ export class HeatmapMarkers extends EventEmitter {
     super();
     this._geojsonFeatureCollection = featureCollection;
     const points = dataToHeatArray(featureCollection, max);
-    this._leafletLayer = L.heatLayer(points, options);
+    this._leafletLayer = new L.HeatLayer(points, options);
     this._tooltipFormatter = options.tooltipFormatter;
     this._zoom = zoom;
     this._disableTooltips = false;
