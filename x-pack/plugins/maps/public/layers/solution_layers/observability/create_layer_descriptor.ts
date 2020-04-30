@@ -6,12 +6,21 @@
 
 import uuid from 'uuid/v4';
 import { AggDescriptor, LayerDescriptor } from '../../../../common/descriptor_types';
-import { AGG_TYPE, FIELD_ORIGIN, STYLE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
+import {
+  AGG_TYPE,
+  FIELD_ORIGIN,
+  GRID_RESOLUTION,
+  RENDER_AS,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+} from '../../../../common/constants';
 import { getJoinAggKey } from '../../../../common/get_join_key';
+import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { EMSFileSource } from '../../sources/ems_file_source';
+import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { VectorLayer } from '../../vector_layer';
 
 // redefining constant to avoid making maps app depend on APM plugin
@@ -38,17 +47,49 @@ function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
   }
 }
 
+// All APM indices match APM index pattern. Need to apply query to filter to specific document types
+// https://www.elastic.co/guide/en/kibana/current/apm-settings-kb.html
+function createAmpSourceQuery(layer: OBSERVABILITY_LAYER_TYPE) {
+  // APM transaction documents
+  let query;
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE || layer === APM_RUM_TRAFFIC) {
+    query = 'processor.event:"transaction"';
+  }
+
+  return query
+    ? {
+        language: 'kuery',
+        query,
+      }
+    : undefined;
+}
+
+function getGeoGridRequestType(display: DISPLAY): RENDER_AS {
+  if (display === HEATMAP) {
+    return RENDER_AS.HEATMAP;
+  }
+
+  if (display === HEATMAP) {
+    return RENDER_AS.GRIDS;
+  }
+
+  return RENDER_AS.POINT;
+}
+
 export function createLayerDescriptor({
+  layer,
   metric,
   display,
 }: {
+  layer: OBSERVABILITY_LAYER_TYPE;
   metric: OBSERVABILITY_METRIC_TYPE;
   display: DISPLAY;
 }): LayerDescriptor | null {
-  if (!metric || !display) {
+  if (!layer || !metric || !display) {
     return null;
   }
 
+  const apmSourceQuery = createAmpSourceQuery(layer);
   const metricsDescriptor = createAggDescriptor(metric);
 
   if (display === DISPLAY.CHOROPLETH) {
@@ -68,6 +109,7 @@ export function createLayerDescriptor({
             indexPatternTitle: 'apm-*', // TODO look up from APM_OSS.indexPattern
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
+            whereQuery: apmSourceQuery,
           },
         },
       ],
@@ -89,4 +131,11 @@ export function createLayerDescriptor({
       }),
     });
   }
+
+  const geoGridSource = ESGeoGridSource.createDescriptor({
+    indexPatternId: APM_INDEX_PATTERN_ID,
+    geoField: 'client.geo.location',
+    requestType: getGeoGridRequestType(display),
+    resolution: GRID_RESOLUTION.MOST_FINE,
+  });
 }

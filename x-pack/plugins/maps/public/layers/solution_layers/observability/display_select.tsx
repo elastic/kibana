@@ -12,7 +12,7 @@ export enum DISPLAY {
   CHOROPLETH = 'CHOROPLETH',
   CLUSTERS = 'CLUSTERS',
   GRIDS = 'GRIDS',
-  HEAT_MAP = 'HEAT_MAP',
+  HEATMAP = 'HEATMAP',
 }
 
 const DISPLAY_OPTIONS = [
@@ -35,7 +35,7 @@ const DISPLAY_OPTIONS = [
     }),
   },
   {
-    value: DISPLAY.HEAT_MAP,
+    value: DISPLAY.HEATMAP,
     text: i18n.translate('xpack.maps.observability.heatMapLabel', {
       defaultMessage: 'Heat map',
     }),
