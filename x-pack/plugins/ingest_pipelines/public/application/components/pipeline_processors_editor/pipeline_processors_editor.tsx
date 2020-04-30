@@ -5,7 +5,7 @@
  */
 
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
-import { EuiPanel, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
