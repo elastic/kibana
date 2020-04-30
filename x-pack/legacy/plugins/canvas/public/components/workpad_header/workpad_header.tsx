@@ -118,7 +118,7 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
             )}
             <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
               <EuiButtonIcon
-                iconType={isWriteable ? 'eye' : 'eyeClosed'}
+                iconType={isWriteable ? 'eyeClosed' : 'eye'}
                 onClick={toggleWriteable}
                 size="s"
                 aria-label={getEditToggleToolTipText()}
