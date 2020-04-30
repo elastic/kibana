@@ -128,7 +128,7 @@ export interface GetOneAgentEventsRequest {
 }
 
 export interface GetOneAgentEventsResponse {
-  list: AgentEvent[];
+  list: Array<AgentEvent & { id: string }>;
   total: number;
   page: number;
   perPage: number;
