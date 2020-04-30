@@ -24,11 +24,17 @@ export const RedirectToTimelinesPage = ({
   },
   location: { search },
 }: TimelineComponentProps) => (
-  <RedirectWrapper to={`/${SiemPageName.timelines}/${tabName}${search}`} />
+  <RedirectWrapper
+    to={
+      tabName
+        ? `/${SiemPageName.timelines}/${tabName}${search}`
+        : `/${SiemPageName.timelines}/${TimelineType.default}${search}`
+    }
+  />
 );
 
 export const getTimelinesUrl = (search?: string) =>
-  `#/link-to/${SiemPageName.timelines}/${TimelineType.default}${appendSearch(search)}`;
+  `#/link-to/${SiemPageName.timelines}${appendSearch(search)}`;
 
 export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral, search?: string) =>
   `#/link-to/${SiemPageName.timelines}/${tabName}${appendSearch(search)}`;

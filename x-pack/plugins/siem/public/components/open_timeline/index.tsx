@@ -244,17 +244,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         timelineTypes,
         totalCount,
       });
-    }, [
-      pageIndex,
-      pageSize,
-      search,
-      sortField,
-      sortDirection,
-      timelines,
-      timelineTypes,
-      totalCount,
-      onlyFavorites,
-    ]);
+    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
 
     return !isModal ? (
       <OpenTimeline
