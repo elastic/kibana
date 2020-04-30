@@ -22,7 +22,6 @@ import { ConsolePageProvider } from './console_page';
 import { ContextPageProvider } from './context_page';
 import { DashboardPageProvider } from './dashboard_page';
 import { DiscoverPageProvider } from './discover_page';
-// @ts-ignore not TS yet
 import { ErrorPageProvider } from './error_page';
 import { HeaderPageProvider } from './header_page';
 import { HomePageProvider } from './home_page';
@@ -33,7 +32,6 @@ import { NewsfeedPageProvider } from './newsfeed_page';
 import { PointSeriesPageProvider } from './point_series_page';
 import { SettingsPageProvider } from './settings_page';
 import { SharePageProvider } from './share_page';
-// @ts-ignore not TS yet
 import { ShieldPageProvider } from './shield_page';
 import { TimePickerProvider } from './time_picker';
 import { TimelionPageProvider } from './timelion_page';
