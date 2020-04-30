@@ -134,6 +134,7 @@ export class TaskRunner {
       spaceId,
       alertType: this.alertType,
       eventLogger: this.context.eventLogger,
+      securityPluginSetup: this.context.securityPluginSetup,
     });
   }
 
