@@ -122,15 +122,14 @@ const NodeSubMenu = styled(
       menuAction,
       optionsWithActions,
       className,
-    }: { menuTitle: string; className?: string } & (
+    }: { menuTitle: string; className?: string; menuAction: () => unknown; } & (
       | {
-          menuAction?: undefined;
           optionsWithActions:
             | ResolverSubmenuOptionList
             | typeof subMenuAssets.initialMenuStatus
             | typeof waitingForRelatedEventData;
         }
-      | { menuAction: () => unknown; optionsWithActions?: undefined }
+      | { optionsWithActions?: undefined }
     )) => {
       const [menuIsOpen, setMenuOpen] = useState(false);
       const handleMenuOpenClick = useCallback(
@@ -161,7 +160,7 @@ const NodeSubMenu = styled(
          */
         return (
           <div className={className}>
-            <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
+            <EuiButton onClick={ handleMenuActionClick } color="ghost" size="s" tabIndex={-1}>
               {menuTitle}
             </EuiButton>
           </div>
@@ -174,7 +173,7 @@ const NodeSubMenu = styled(
       return (
         <div className={className + (menuIsOpen ? ' is-open' : '')}>
           <EuiButton
-            onClick={handleMenuOpenClick}
+            onClick={optionsWithActions === subMenuAssets.initialMenuStatus ? handleMenuActionClick : handleMenuOpenClick}
             color="ghost"
             size="s"
             iconType="arrowUp"
@@ -343,6 +342,17 @@ export const ProcessEventDot = styled(
         [animationTarget, dispatch, nodeId]
       );
 
+      const handleRelatedEventRequest = useCallback(
+        () => {
+          console.log('in dispatch')
+          dispatch({
+            type: 'appRequestedRelatedEventData',
+            payload: [selfId]
+          });
+        },
+        [dispatch, selfId]
+      );
+
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
        * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
@@ -473,16 +483,18 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedEvents.title}
-                      optionsWithActions={[
-                        { optionTitle: '10 DNS', action: () => {} },
-                        { optionTitle: '10 File', action: () => {} },
-                      ]}
+                      // optionsWithActions={[
+                      //   { optionTitle: '10 DNS', action: () => {} },
+                      //   { optionTitle: '10 File', action: () => {} },
+                      // ]}
+                      optionsWithActions={subMenuAssets.initialMenuStatus}
+                      menuAction={handleRelatedEventRequest}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedAlerts.title}
-                      menuAction={() => {}}
+                      menuAction={()=>{}}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

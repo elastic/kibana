@@ -83,6 +83,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      * When this data is inlined with results, there won't be a need for this.
      */
     if (action.type === 'appRequestedRelatedEventData') {
+      console.log('middleware handling related request');
       const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
       //An array, but assume it has a length of 1 
       const idsToFetchRelatedEventsFor = action.payload;
@@ -99,7 +100,9 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         }
         for await (const result of getEachRelatedEventsResult(idsToFetchRelatedEventsFor)){
           //pack up the results into response
-          
+          for (const relatedEvent of result){
+            console.log('related Event: %o', relatedEvent)
+          }
         }
       }
       // return api.dispatch({
