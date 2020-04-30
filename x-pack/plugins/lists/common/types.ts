@@ -28,7 +28,3 @@ export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infe
 export type Identity<T> = {
   [P in keyof T]: T[P];
 };
-
-export type NonNullableObject<T> = {
-  [P in keyof T]: NonNullable<T[P]>;
-};
