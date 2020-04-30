@@ -3,7 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
 
 import { FormSchema, fieldValidators, ValidationFuncArg } from '../../../../../shared_imports';
 import { parseJson, stringifyJson } from '../../../../lib';
@@ -17,6 +21,27 @@ export const documentsSchema: FormSchema = {
       {
         defaultMessage: 'Documents',
       }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.form.onFailureFieldHelpText"
+        defaultMessage="Use JSON format: {code}"
+        values={{
+          code: (
+            <EuiCode>
+              {JSON.stringify([
+                {
+                  _index: 'index',
+                  _id: 'id',
+                  _source: {
+                    foo: 'bar',
+                  },
+                },
+              ])}
+            </EuiCode>
+          ),
+        }}
+      />
     ),
     serializer: parseJson,
     deserializer: stringifyJson,
