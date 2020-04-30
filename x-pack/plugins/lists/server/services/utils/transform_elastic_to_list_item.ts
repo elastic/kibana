@@ -9,13 +9,15 @@ import { SearchResponse } from 'elasticsearch';
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
+export interface TransformElasticToListItemOptions {
+  response: SearchResponse<SearchEsListItemSchema>;
+  type: Type;
+}
+
 export const transformElasticToListItem = ({
   response,
   type,
-}: {
-  response: SearchResponse<SearchEsListItemSchema>;
-  type: Type;
-}): ListItemArraySchema => {
+}: TransformElasticToListItemOptions): ListItemArraySchema => {
   return response.hits.hits.map(hit => {
     const {
       _id,
@@ -64,11 +66,10 @@ export const transformElasticToListItem = ({
         };
       }
     }
-    // TypeScript is not happy unless I have this line here
     return assertUnreachable();
   });
 };
 
-export const assertUnreachable = (): never => {
+const assertUnreachable = (): never => {
   throw new Error('Unknown type in elastic_to_list_items');
 };

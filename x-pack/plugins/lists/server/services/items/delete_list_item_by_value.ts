@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
-import { DataClient } from '../../types';
 
 import { getListItemByValues } from './get_list_item_by_values';
 
@@ -14,7 +15,7 @@ export interface DeleteListItemByValueOptions {
   listId: string;
   type: Type;
   value: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
@@ -22,11 +23,11 @@ export const deleteListItemByValue = async ({
   listId,
   value,
   type,
-  dataClient,
+  callCluster,
   listItemIndex,
 }: DeleteListItemByValueOptions): Promise<ListItemArraySchema> => {
   const listItems = await getListItemByValues({
-    dataClient,
+    callCluster,
     listId,
     listItemIndex,
     type,
@@ -38,7 +39,7 @@ export const deleteListItemByValue = async ({
     type,
     value: values,
   });
-  await dataClient.callAsCurrentUser('deleteByQuery', {
+  await callCluster('deleteByQuery', {
     body: {
       query: {
         bool: {
