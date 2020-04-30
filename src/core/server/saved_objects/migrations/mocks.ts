@@ -17,30 +17,27 @@
  * under the License.
  */
 
-import { flow } from 'lodash';
-import { SavedObjectMigrationFn, SavedObjectsType } from 'kibana/server';
+import { SavedObjectMigrationContext } from './types';
+import { SavedObjectsMigrationLogger } from './core';
 
-const resetCount: SavedObjectMigrationFn<any, any> = doc => ({
-  ...doc,
-  attributes: {
-    ...doc.attributes,
-    failedRequests: 0,
-  },
-});
+const createLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
+  const mock = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warning: jest.fn(),
+    warn: jest.fn(),
+  };
 
-export const tsvbTelemetrySavedObjectType: SavedObjectsType = {
-  name: 'tsvb-validation-telemetry',
-  hidden: false,
-  namespaceType: 'agnostic',
-  mappings: {
-    properties: {
-      failedRequests: {
-        type: 'long',
-      },
-    },
-  },
-  migrations: {
-    '7.7.0': flow<SavedObjectMigrationFn>(resetCount),
-    '7.8.0': flow<SavedObjectMigrationFn>(resetCount),
-  },
+  return mock;
+};
+
+const createContextMock = (): jest.Mocked<SavedObjectMigrationContext> => {
+  const mock = {
+    log: createLoggerMock(),
+  };
+  return mock;
+};
+
+export const migrationMocks = {
+  createContext: createContextMock,
 };
