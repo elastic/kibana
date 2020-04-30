@@ -67,9 +67,10 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, assets] = await Promise.all([
+  const [item, savedObject, latestPackage, assets] = await Promise.all([
     Registry.fetchInfo(pkgName, pkgVersion),
     getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchFindLatestPackage(pkgName),
     Registry.getArchiveInfo(pkgName, pkgVersion),
   ] as const);
   // adding `as const` due to regression in TS 3.7.2
@@ -79,6 +80,7 @@ export async function getPackageInfo(options: {
   // add properties that aren't (or aren't yet) on Registry response
   const updated = {
     ...item,
+    latestVersion: latestPackage.version,
     title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(assets || []),
   };
