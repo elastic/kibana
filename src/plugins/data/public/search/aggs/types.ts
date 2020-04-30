@@ -25,6 +25,7 @@ import {
   AggParamsRange,
   AggParamsIpRange,
   AggParamsDateRange,
+  AggParamsFilter,
   AggParamsSignificantTerms,
   AggParamsTerms,
   AggType,
@@ -100,6 +101,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
+  [BUCKET_TYPES.FILTER]: AggParamsFilter;
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
 }

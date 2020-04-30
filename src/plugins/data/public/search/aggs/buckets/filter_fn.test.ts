@@ -18,15 +18,15 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggDateRange } from './date_range_fn';
+import { aggFilter } from './filter_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggDateRange', () => {
-    const fn = functionWrapper(aggDateRange());
+  describe('aggFilter', () => {
+    const fn = functionWrapper(aggFilter());
 
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
-        field: 'date_field',
+        field: 'geo_field',
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -35,13 +35,12 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
-              "field": "date_field",
+              "field": "geo_field",
+              "geo_bounding_box": undefined,
               "json": undefined,
-              "ranges": undefined,
-              "time_zone": undefined,
             },
             "schema": undefined,
-            "type": "date_range",
+            "type": "filter",
           },
         }
       `);
@@ -49,12 +48,10 @@ describe('agg_expression_functions', () => {
 
     test('includes optional params when they are provided', () => {
       const actual = fn({
-        field: 'date_field',
-        time_zone: 'UTC +3',
-        ranges: JSON.stringify([
-          { from: 'now-1w/w', to: 'now' },
-          { from: 1588163532470, to: 1588163532481 },
-        ]),
+        field: 'geo_field',
+        geo_bounding_box: JSON.stringify({
+          wkt: 'BBOX (-74.1, -71.12, 40.73, 40.01)',
+        }),
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -62,29 +59,21 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
-            "field": "date_field",
+            "field": "geo_field",
+            "geo_bounding_box": Object {
+              "wkt": "BBOX (-74.1, -71.12, 40.73, 40.01)",
+            },
             "json": undefined,
-            "ranges": Array [
-              Object {
-                "from": "now-1w/w",
-                "to": "now",
-              },
-              Object {
-                "from": 1588163532470,
-                "to": 1588163532481,
-              },
-            ],
-            "time_zone": "UTC +3",
           },
           "schema": undefined,
-          "type": "date_range",
+          "type": "filter",
         }
       `);
     });
 
     test('correctly parses json string argument', () => {
       const actual = fn({
-        field: 'date_field',
+        field: 'ip_field',
         json: '{ "foo": true }',
       });
 
@@ -92,7 +81,7 @@ describe('agg_expression_functions', () => {
 
       expect(() => {
         fn({
-          field: 'date_field',
+          field: 'ip_field',
           json: '/// intentionally malformed json ///',
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);

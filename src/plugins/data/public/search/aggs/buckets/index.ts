@@ -22,6 +22,7 @@ export * from './bucket_agg_types';
 export * from './date_histogram';
 export * from './date_range';
 export * from './range';
+export * from './filter';
 export * from './ip_range';
 export * from './lib/cidr_mask';
 export * from './lib/date_range';

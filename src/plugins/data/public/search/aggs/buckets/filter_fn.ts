@@ -23,66 +23,59 @@ import { ExpressionFunctionDefinition } from '../../../../../expressions/public'
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggDateRange';
+const fnName = 'aggFilter';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_RANGE>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
 
-type Arguments = Assign<AggArgs, { ranges?: string }>;
+type Arguments = Assign<AggArgs, { geo_bounding_box?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
-export const aggDateRange = (): FunctionDefinition => ({
+export const aggFilter = (): FunctionDefinition => ({
   name: fnName,
-  help: i18n.translate('data.search.aggs.function.buckets.dateRange.help', {
-    defaultMessage: 'Generates a serialized agg config for a Range agg',
+  help: i18n.translate('data.search.aggs.function.buckets.filter.help', {
+    defaultMessage: 'Generates a serialized agg config for a Filter agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.id.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.dateRange.enabled.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.schema.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
     field: {
       types: ['string'],
       required: true,
-      help: i18n.translate('data.search.aggs.buckets.dateRange.field.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.field.help', {
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    ranges: {
+    geo_bounding_box: {
       types: ['string'],
       required: false,
-      help: i18n.translate('data.search.aggs.buckets.dateRange.ranges.help', {
-        defaultMessage: 'Serialized ranges to use for this aggregation.',
-      }),
-    },
-    time_zone: {
-      types: ['string'],
-      required: false,
-      help: i18n.translate('data.search.aggs.buckets.dateRange.timeZone.help', {
-        defaultMessage: 'Time zone to use for this aggregation.',
+      help: i18n.translate('data.search.aggs.buckets.filter.geo_bounding_box.help', {
+        defaultMessage: 'Allowing to filter hits based on a point location using a bounding box. ',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.json.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
@@ -96,11 +89,11 @@ export const aggDateRange = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.DATE_RANGE,
+        type: BUCKET_TYPES.FILTER,
         params: {
           ...rest,
           json: getParsedValue(args, 'json'),
-          ranges: getParsedValue(args, 'ranges'),
+          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
         },
       },
     };

@@ -27,13 +27,11 @@ const fnName = 'aggTerms';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.TERMS>;
+
 // Since the orderAgg param is an agg nested in a subexpression, we need to
 // overwrite the param type to expect a value of type AggExpressionType.
-type Arguments = AggArgs &
-  Assign<
-    AggArgs,
-    { orderAgg?: AggArgs['orderAgg'] extends undefined ? undefined : AggExpressionType }
-  >;
+type Arguments = Assign<AggArgs, { orderAgg?: AggExpressionType }>;
+
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
@@ -151,11 +149,6 @@ export const aggTerms = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-    const json = getParsedValue(args, 'json');
-
-    // Need to spread this object to work around TS bug:
-    // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
-    const orderAgg = args.orderAgg?.value ? { ...args.orderAgg.value } : undefined;
 
     return {
       type: 'agg_type',
@@ -166,8 +159,8 @@ export const aggTerms = (): FunctionDefinition => ({
         type: BUCKET_TYPES.TERMS,
         params: {
           ...rest,
-          orderAgg,
-          json,
+          orderAgg: args.orderAgg?.value,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

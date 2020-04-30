@@ -82,8 +82,6 @@ export const aggRange = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-    const json = getParsedValue(args, 'json');
-    const ranges = getParsedValue(args, 'ranges');
 
     return {
       type: 'agg_type',
@@ -94,8 +92,8 @@ export const aggRange = (): FunctionDefinition => ({
         type: BUCKET_TYPES.RANGE,
         params: {
           ...rest,
-          ranges,
-          json,
+          json: getParsedValue(args, 'json'),
+          ranges: getParsedValue(args, 'ranges'),
         },
       },
     };

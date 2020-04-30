@@ -92,7 +92,6 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
-    const json = getParsedValue(args, 'json');
 
     return {
       type: 'agg_type',
@@ -103,7 +102,7 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         type: BUCKET_TYPES.SIGNIFICANT_TERMS,
         params: {
           ...rest,
-          json,
+          json: getParsedValue(args, 'json'),
         },
       },
     };
