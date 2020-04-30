@@ -88,13 +88,6 @@ export class InfraServerPlugin {
     this.config$ = context.config.create<InfraConfig>();
   }
 
-  getLibs() {
-    if (!this.libs) {
-      throw new Error('libs not set up yet');
-    }
-    return this.libs;
-  }
-
   async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
     await new Promise(resolve => {
       this.config$.subscribe(configValue => {
