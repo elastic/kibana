@@ -41,6 +41,10 @@ export const datatableVisualization: Visualization<
     },
   ],
 
+  getVisualizationTypeId() {
+    return 'lnsDatatable';
+  },
+
   getLayerIds(state) {
     return state.layers.map(l => l.layerId);
   },
@@ -122,7 +126,7 @@ export const datatableVisualization: Visualization<
           ],
         },
         previewIcon: chartTableSVG,
-        // don't show table suggestions on bottom row, but keep when doing chart switching
+        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },
     ];

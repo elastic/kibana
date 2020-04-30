@@ -99,10 +99,13 @@ function getBucketMappings(table: TableSuggestion, currentState?: State) {
   // reverse the buckets before prioritization to always use the most inner
   // bucket of the highest-prioritized group as x value (don't use nested
   // buckets as split series)
-  const prioritizedBuckets = prioritizeColumns(buckets.reverse());
+  const prioritizedBuckets = prioritizeColumns([...buckets].reverse());
 
   if (!currentLayer || table.changeType === 'initial') {
     return prioritizedBuckets;
+  }
+  if (table.changeType === 'reorder') {
+    return buckets;
   }
 
   // if existing table is just modified, try to map buckets to the current dimensions
@@ -175,23 +178,24 @@ function getSuggestionsForLayer({
     keptLayerIds,
   };
 
+  // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     return [
-      buildSuggestion({
-        ...options,
+      {
+        ...buildSuggestion(options),
         title: i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
           defaultMessage: 'Bar chart',
         }),
-      }),
+      },
     ];
   }
 
   const isSameState = currentState && changeType === 'unchanged';
-
   if (!isSameState) {
     return buildSuggestion(options);
   }
 
+  // Suggestions are either changing the data, or changing the way the data is used
   const sameStateSuggestions: Array<VisualizationSuggestion<State>> = [];
 
   // if current state is using the same data, suggest same chart with different presentational configuration
@@ -384,11 +388,12 @@ function buildSuggestion({
 
   return {
     title,
-    score: currentState
-      ? getScore(yValues, splitBy, changeType)
-      : getScore(yValues, splitBy, changeType) / 2, // Lower score for non-XY charts
-    // don't advertise chart of same type but with less data
-    hide: (!currentState && changeType === 'reorder') || (currentState && changeType === 'reduced'),
+    score: getScore(yValues, splitBy, changeType),
+    hide:
+      // Only advertise very clear changes when XY chart is not active
+      (!currentState && changeType !== 'unchanged' && changeType !== 'extended') ||
+      // Don't advertise removing dimensions
+      (currentState && changeType === 'reduced'),
     state,
     previewIcon: getIconForSeries(seriesType),
   };
