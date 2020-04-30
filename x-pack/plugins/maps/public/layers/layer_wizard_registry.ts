@@ -20,7 +20,7 @@ export type RenderWizardArguments = {
 };
 
 export type LayerWizard = {
-  checkVisibility?: () => boolean;
+  checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
   isIndexingSource?: boolean;
@@ -34,8 +34,9 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
   registry.push(layerWizard);
 }
 
-export function getLayerWizards(): LayerWizard[] {
-  return registry.filter(layerWizard => {
-    return layerWizard.checkVisibility ? layerWizard.checkVisibility() : true;
+export async function getLayerWizards(): Promise<LayerWizard[]> {
+  const checkVisibilityPromises = registry.filter(async layerWizard => {
+    return layerWizard.checkVisibility ? await layerWizard.checkVisibility() : true;
   });
+  return await Promise.all(checkVisibilityPromises);
 }
