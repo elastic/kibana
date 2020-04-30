@@ -27,7 +27,11 @@ import { DiscoverFieldSearch } from './discover_field_search';
 import { IndexPatternAttributes } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternFieldList, IndexPatternField, IndexPattern } from '../../../../../data/public';
+import {
+  IIndexPatternFieldList,
+  IndexPatternField,
+  IndexPattern,
+} from '../../../../../data/public';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -92,7 +96,7 @@ export function DiscoverSidebar({
 }: DiscoverSidebarProps) {
   const [openFieldMap, setOpenFieldMap] = useState(new Map());
   const [showFields, setShowFields] = useState(false);
-  const [fields, setFields] = useState<IndexPatternFieldList | null>(null);
+  const [fields, setFields] = useState<IIndexPatternFieldList | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
 

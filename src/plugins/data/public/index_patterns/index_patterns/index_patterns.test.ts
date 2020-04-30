@@ -25,6 +25,7 @@ import {
   SavedObjectsFindResponsePublic,
   CoreStart,
 } from 'kibana/public';
+import { FieldFormatsStart } from '../../field_formats';
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
@@ -63,8 +64,9 @@ describe('IndexPatterns', () => {
 
     const core = {} as CoreStart;
     const http = {} as HttpSetup;
+    const fieldFormats = {} as FieldFormatsStart;
 
-    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http, fieldFormats);
   });
 
   test('does cache gets for the same id', async () => {

@@ -32,6 +32,8 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
+import { getIndexPatternFieldListCreator, CreateIndexPatternFieldList } from '../fields';
+import { FieldFormatsStart } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -43,12 +45,22 @@ export class IndexPatternsService {
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
   private apiClient: IndexPatternsApiClient;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
+  createFieldList: CreateIndexPatternFieldList;
 
-  constructor(core: CoreStart, savedObjectsClient: SavedObjectsClientContract, http: HttpStart) {
+  constructor(
+    core: CoreStart,
+    savedObjectsClient: SavedObjectsClientContract,
+    http: HttpStart,
+    fieldFormats: FieldFormatsStart
+  ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats,
+      toastNotifications: core.notifications.toasts,
+    });
   }
 
   private async refreshSavedObjectsCache() {
