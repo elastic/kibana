@@ -13,6 +13,9 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiToolTip,
+  EuiIcon,
   EuiFieldSearch,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
@@ -59,6 +62,7 @@ interface Props {
     filterQuery?: string;
     sourceId?: string;
     filterQueryText?: string;
+    alertOnNoData?: boolean;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
@@ -296,6 +300,28 @@ export const Expressions: React.FC<Props> = props => {
           />
         </EuiButtonEmpty>
       </div>
+
+      <EuiSpacer size={'m'} />
+      <EuiCheckbox
+        id="metrics-alert-no-data-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+              defaultMessage: "Alert me if there's no data",
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        checked={alertParams.alertOnNoData}
+        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+      />
 
       <EuiSpacer size={'m'} />
 

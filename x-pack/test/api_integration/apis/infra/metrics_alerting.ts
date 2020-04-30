@@ -39,6 +39,7 @@ export default function({ getService }: FtrProviderContext) {
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
@@ -54,23 +55,45 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
+      });
+      it('should work with a filterQuery in KQL format', async () => {
+        const searchBody = getElasticsearchMetricQuery(
+          getSearchParams('avg'),
+          '@timestamp',
+          undefined,
+          '"agent.hostname":"foo"'
+        );
+        const result = await client.search({
+          index,
+          body: searchBody,
+        });
+        expect(result.error).to.not.be.ok();
+        expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), 'agent.id');
+          const searchBody = getElasticsearchMetricQuery(
+            getSearchParams(aggType),
+            '@timestamp',
+            'agent.id'
+          );
           const result = await client.search({
             index,
             body: searchBody,
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
+          '@timestamp',
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -80,6 +103,7 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
   });

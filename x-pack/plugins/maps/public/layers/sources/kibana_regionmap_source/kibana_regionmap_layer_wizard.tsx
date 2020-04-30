@@ -12,8 +12,14 @@ import { KibanaRegionmapSource, sourceTitle } from './kibana_regionmap_source';
 import { VectorLayer } from '../../vector_layer';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
+// @ts-ignore
+import { getKibanaRegionList } from '../../../meta';
 
 export const kibanaRegionMapLayerWizardConfig: LayerWizard = {
+  checkVisibility: () => {
+    const regions = getKibanaRegionList();
+    return regions.length;
+  },
   description: i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
     defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',
   }),
