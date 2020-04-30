@@ -535,12 +535,12 @@ describe('PluginsService', () => {
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
           Map {
             "plugin-1" => Object {
-              "publicAssetsDir": <absolute path>/x-pack/path-1/public/assets,
-              "publicTargetDir": <absolute path>/x-pack/path-1/target/public,
+              "publicAssetsDir": <absolute path>/path-1/public/assets,
+              "publicTargetDir": <absolute path>/path-1/target/public,
             },
             "plugin-2" => Object {
-              "publicAssetsDir": <absolute path>/x-pack/path-2/public/assets,
-              "publicTargetDir": <absolute path>/x-pack/path-2/target/public,
+              "publicAssetsDir": <absolute path>/path-2/public/assets,
+              "publicTargetDir": <absolute path>/path-2/target/public,
             },
           }
         `);
