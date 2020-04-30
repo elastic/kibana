@@ -5,7 +5,6 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
@@ -36,7 +35,6 @@ export const registerUpdateRoute = ({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params;
-
       const { description, processors, version, on_failure } = req.body;
 
       try {
