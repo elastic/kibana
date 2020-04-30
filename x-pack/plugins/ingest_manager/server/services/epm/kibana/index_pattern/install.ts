@@ -362,20 +362,20 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
 };
 
 export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
-  // create a placeholder index to supress errors in the kibana Dashboards app
+  // create placeholder indices to supress errors in the kibana Dashboards app
   // that no matching indices exist
   Promise.all(
     Object.keys(IndexPatternType).map(async indexPattern => {
-      const defaultIndexPatterName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
-      const indexExists = await doesIndexExist(defaultIndexPatterName, callCluster);
+      const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
+      const indexExists = await doesIndexExist(defaultIndexPatternName, callCluster);
       if (!indexExists) {
         try {
           await callCluster('transport.request', {
             method: 'PUT',
-            path: `/${defaultIndexPatterName}`,
+            path: `/${defaultIndexPatternName}`,
           });
         } catch (putErr) {
-          throw new Error(`${defaultIndexPatterName} could not be created`);
+          throw new Error(`${defaultIndexPatternName} could not be created`);
         }
       }
     })
