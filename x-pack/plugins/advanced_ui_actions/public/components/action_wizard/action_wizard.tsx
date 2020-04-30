@@ -169,8 +169,14 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
     return <div>No action factories to pick from</div>;
   }
 
+  // The below style is applied to fix Firefox rendering bug.
+  // See: https://github.com/elastic/kibana/pull/61219/#pullrequestreview-402903330
+  const firefoxBugFix = {
+    willChange: 'opacity',
+  };
+
   return (
-    <EuiFlexGroup gutterSize="m" wrap={true}>
+    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
       {[...actionFactories]
         .sort((f1, f2) => f2.order - f1.order)
         .map(actionFactory => (
