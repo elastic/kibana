@@ -197,10 +197,6 @@ export function PieComponent(
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
-  const hasZeroes = firstTable.rows.some(row => {
-    const value = row[metricColumn.id];
-    return typeof value === 'number' && value === 0;
-  });
   if (firstTable.rows.length === 0 || hasNegative) {
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">

@@ -238,8 +238,11 @@ describe('suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(results).toHaveLength(1);
-      expect(results[0].state.shape).toEqual('donut');
+      expect(results).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({ shape: 'donut' }),
+        })
+      );
     });
 
     it('should suggest a pie chart as initial state when more than one bucket', () => {
@@ -267,8 +270,67 @@ describe('suggestions', () => {
         keptLayerIds: ['first'],
       });
 
-      expect(results).toHaveLength(1);
-      expect(results[0].state.shape).toEqual('pie');
+      expect(results).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({ shape: 'pie' }),
+        })
+      );
+    });
+
+    it('should keep the layer settings when switching from treemap', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'treemap',
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a'],
+                metric: 'b',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'nested',
+                percentDecimals: 0,
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        })
+      ).toContainEqual(
+        expect.objectContaining({
+          state: {
+            shape: 'donut',
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a'],
+                metric: 'b',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'nested',
+                percentDecimals: 0,
+              },
+            ],
+          },
+        })
+      );
     });
   });
 
@@ -395,6 +457,62 @@ describe('suggestions', () => {
           keptLayerIds: ['first'],
         })
       ).toHaveLength(0);
+    });
+
+    it('should keep the layer settings when switching from pie', () => {
+      expect(
+        suggestions({
+          table: {
+            layerId: 'first',
+            isMultiRow: true,
+            columns: [
+              {
+                columnId: 'a',
+                operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+              },
+              {
+                columnId: 'b',
+                operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+              },
+            ],
+            changeType: 'unchanged',
+          },
+          state: {
+            shape: 'pie',
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a'],
+                metric: 'b',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'nested',
+                percentDecimals: 0,
+              },
+            ],
+          },
+          keptLayerIds: ['first'],
+        })
+      ).toContainEqual(
+        expect.objectContaining({
+          state: {
+            shape: 'treemap',
+            layers: [
+              {
+                layerId: 'first',
+                groups: ['a'],
+                metric: 'b',
+
+                numberDisplay: 'hidden',
+                categoryDisplay: 'inside',
+                legendDisplay: 'nested',
+                percentDecimals: 0,
+              },
+            ],
+          },
+        })
+      );
     });
   });
 });

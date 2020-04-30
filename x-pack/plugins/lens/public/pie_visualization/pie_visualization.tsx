@@ -51,6 +51,10 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
     },
   ],
 
+  getVisualizationTypeId(state) {
+    return state.shape;
+  },
+
   getLayerIds(state) {
     return state.layers.map(l => l.layerId);
   },

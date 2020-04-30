@@ -40,7 +40,7 @@ export function suggestions({
 
   if (groups.length <= MAX_PIE_BUCKETS) {
     let newShape: PieVisualizationState['shape'] = 'donut';
-    if (state && state.shape === 'donut' && groups.length !== 1) {
+    if (groups.length !== 1) {
       newShape = 'pie';
     }
 
@@ -50,14 +50,21 @@ export function suggestions({
       state: {
         shape: newShape,
         layers: [
-          {
-            layerId: table.layerId,
-            groups: groups.map(col => col.columnId),
-            metric: metrics[0].columnId,
-            numberDisplay: state?.layers[0]?.numberDisplay || 'percent',
-            categoryDisplay: state?.layers[0]?.categoryDisplay || 'default',
-            legendDisplay: state?.layers[0]?.legendDisplay || 'default',
-          },
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map(col => col.columnId),
+                metric: metrics[0].columnId,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map(col => col.columnId),
+                metric: metrics[0].columnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
         ],
       },
       previewIcon: 'bullseye',
@@ -76,14 +83,21 @@ export function suggestions({
       state: {
         shape: 'treemap',
         layers: [
-          {
-            layerId: table.layerId,
-            groups: groups.map(col => col.columnId),
-            metric: metrics[0].columnId,
-            numberDisplay: state?.layers[0]?.numberDisplay || 'percent',
-            categoryDisplay: state?.layers[0]?.categoryDisplay || 'default',
-            legendDisplay: state?.layers[0]?.legendDisplay || 'default',
-          },
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map(col => col.columnId),
+                metric: metrics[0].columnId,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map(col => col.columnId),
+                metric: metrics[0].columnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+              },
         ],
       },
       previewIcon: 'bullseye',
