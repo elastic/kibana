@@ -5,36 +5,33 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
 import { deriveTypeFromItem, transformElasticToListItem } from '../utils';
 
 interface GetListItemOptions {
   id: Id;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
 export const getListItem = async ({
   id,
-  dataClient,
+  callCluster,
   listItemIndex,
 }: GetListItemOptions): Promise<ListItemSchema | null> => {
-  const listItemES: SearchResponse<SearchEsListItemSchema> = await dataClient.callAsCurrentUser(
-    'search',
-    {
-      body: {
-        query: {
-          term: {
-            _id: id,
-          },
+  const listItemES: SearchResponse<SearchEsListItemSchema> = await callCluster('search', {
+    body: {
+      query: {
+        term: {
+          _id: id,
         },
       },
-      ignoreUnavailable: true,
-      index: listItemIndex,
-    }
-  );
+    },
+    ignoreUnavailable: true,
+    index: listItemIndex,
+  });
 
   if (listItemES.hits.hits.length) {
     const type = deriveTypeFromItem({ item: listItemES.hits.hits[0]._source });
