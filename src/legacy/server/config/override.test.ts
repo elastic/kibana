@@ -99,14 +99,28 @@ describe('override(target, source)', function() {
       foo: {
         bar: 1,
       },
+      'baz.box.boot.bar.bar': 20,
     };
 
     const source = {
       'foo.bar': 2,
+      'baz.box.boot': {
+        'bar.foo': 10,
+      },
     };
 
     expect(override(target, source)).toMatchInlineSnapshot(`
       Object {
+        "baz": Object {
+          "box": Object {
+            "boot": Object {
+              "bar": Object {
+                "bar": 20,
+                "foo": 10,
+              },
+            },
+          },
+        },
         "foo": Object {
           "bar": 2,
         },
