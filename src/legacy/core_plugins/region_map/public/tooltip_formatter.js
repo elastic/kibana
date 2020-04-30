@@ -17,39 +17,24 @@
  * under the License.
  */
 
-import $ from 'jquery';
-import template from './tooltip.html';
+export function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
+  if (!metric) {
+    return '';
+  }
 
-export const TileMapTooltipFormatter = $injector => {
-  const $rootScope = $injector.get('$rootScope');
-  const $compile = $injector.get('$compile');
+  const details = [];
+  if (fieldName && metric) {
+    details.push({
+      label: fieldName,
+      value: metric.term,
+    });
+  }
 
-  const $tooltipScope = $rootScope.$new();
-  const $el = $('<div>').html(template);
-
-  $compile($el)($tooltipScope);
-
-  return function tooltipFormatter(metric, fieldFormatter, fieldName, metricName) {
-    if (!metric) {
-      return '';
-    }
-
-    $tooltipScope.details = [];
-    if (fieldName && metric) {
-      $tooltipScope.details.push({
-        label: fieldName,
-        value: metric.term,
-      });
-    }
-
-    if (metric) {
-      $tooltipScope.details.push({
-        label: metricName,
-        value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
-      });
-    }
-
-    $tooltipScope.$apply();
-    return $el.html();
-  };
-};
+  if (metric) {
+    details.push({
+      label: metricName,
+      value: fieldFormatter ? fieldFormatter.convert(metric.value, 'text') : metric.value,
+    });
+  }
+  return details;
+}

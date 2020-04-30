@@ -9,13 +9,13 @@ jest.mock('./lib/send_email', () => ({
 }));
 
 import { Logger } from '../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
+import { actionsMock } from '../mocks';
 import {
   ActionParamsType,
   ActionTypeConfigType,
@@ -26,13 +26,8 @@ import {
 const sendEmailMock = sendEmail as jest.Mock;
 
 const ACTION_TYPE_ID = '.email';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: async (path: string, opts: unknown) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;

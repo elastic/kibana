@@ -32,6 +32,8 @@ export {
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents

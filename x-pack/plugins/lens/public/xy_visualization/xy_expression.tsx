@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 import {
   Chart,
   Settings,
@@ -62,6 +63,7 @@ type XYChartRenderProps = XYChartProps & {
   chartTheme: PartialTheme;
   formatFactory: FormatFactory;
   timeZone: string;
+  histogramBarTarget: number;
   executeTriggerActions: UiActionsStart['executeTriggerActions'];
 };
 
@@ -114,6 +116,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartTheme: PartialTheme;
+  histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -134,6 +137,7 @@ export const getXyChartRenderer = (dependencies: {
           formatFactory={formatFactory}
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
+          histogramBarTarget={dependencies.histogramBarTarget}
           executeTriggerActions={executeTriggerActions}
         />
       </I18nProvider>,
@@ -173,6 +177,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartTheme,
+  histogramBarTarget,
   executeTriggerActions,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
@@ -215,10 +220,20 @@ export function XYChart({
   const shouldRotate = isHorizontalChart(layers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
-  // add minInterval only for single row value as it cannot be determined from dataset
-  const minInterval = layers.every(layer => data.tables[layer.layerId].rows.length <= 1)
-    ? parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds()
-    : undefined;
+
+  function calculateMinInterval() {
+    // add minInterval only for single row value as it cannot be determined from dataset
+    if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+      if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
+        return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
+
+      const { fromDate, toDate } = data.dateRange;
+      const duration = moment(toDate).diff(moment(fromDate));
+      const targetMs = duration / histogramBarTarget;
+      return isNaN(targetMs) ? 0 : Math.max(Math.floor(targetMs), 1);
+    }
+    return undefined;
+  }
 
   const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
 
@@ -226,7 +241,7 @@ export function XYChart({
     ? {
         min: data.dateRange?.fromDate.getTime(),
         max: data.dateRange?.toDate.getTime(),
-        minInterval,
+        minInterval: calculateMinInterval(),
       }
     : undefined;
 

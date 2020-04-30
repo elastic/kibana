@@ -53,6 +53,7 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
+        histogramBarTarget: core.uiSettings.get<number>('histogram:barTarget'),
       })
     );
 

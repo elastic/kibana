@@ -10,18 +10,13 @@ jest.mock('./lib/send_email', () => ({
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
 import { ActionParamsType, ActionTypeConfigType } from './es_index';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.index';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
 let actionType: ActionType;
 
@@ -196,9 +191,9 @@ describe('execute()', () => {
     await actionType.executor(executorOptions);
 
     const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1].body[1].field_to_use_for_time;
+    const timeValue = calls[0][1]?.body[1].field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1].body[1].field_to_use_for_time;
+    delete calls[0][1]?.body[1].field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [

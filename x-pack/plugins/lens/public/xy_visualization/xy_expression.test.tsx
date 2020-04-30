@@ -179,7 +179,7 @@ const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatata
       id: 'c',
       name: 'c',
       formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: '10s' } },
+      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
     },
     { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
   ],
@@ -295,6 +295,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -342,6 +343,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
@@ -376,15 +378,17 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
 
+        // real auto interval is 30mins = 1800000
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
           Object {
             "max": 1546491600000,
             "min": 1546405200000,
-            "minInterval": 10000,
+            "minInterval": 1728000,
           }
         `);
       });
@@ -410,6 +414,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
@@ -418,7 +423,7 @@ describe('xy_expression', () => {
         Object {
           "max": 1546491600000,
           "min": 1546405200000,
-          "minInterval": 10000,
+          "minInterval": 1728000,
         }
       `);
       });
@@ -446,6 +451,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
@@ -489,6 +495,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
@@ -522,6 +529,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -537,6 +545,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -553,6 +562,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -569,6 +579,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -643,6 +654,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -681,6 +693,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -698,6 +711,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -718,6 +732,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -736,6 +751,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="CEST"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -753,6 +769,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -777,6 +794,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -795,6 +813,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -855,6 +874,7 @@ describe('xy_expression', () => {
             formatFactory={getFormatSpy}
             timeZone="UTC"
             chartTheme={{}}
+            histogramBarTarget={50}
             executeTriggerActions={executeTriggerActions}
           />
         );
@@ -1049,6 +1069,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -1065,6 +1086,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -1081,6 +1103,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -1098,6 +1121,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
@@ -1114,6 +1138,7 @@ describe('xy_expression', () => {
           args={{ ...args, layers: [{ ...args.layers[0], accessors: ['a'] }] }}
           formatFactory={getFormatSpy}
           chartTheme={{}}
+          histogramBarTarget={50}
           timeZone="UTC"
           executeTriggerActions={executeTriggerActions}
         />
@@ -1134,6 +1159,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
