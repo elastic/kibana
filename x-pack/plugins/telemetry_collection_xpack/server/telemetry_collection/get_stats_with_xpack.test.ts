@@ -66,7 +66,14 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       } as any,
       context
     );
-    expect(stats.map(({ timestamp, ...rest }) => rest)).toMatchSnapshot();
+    stats.forEach(entry => {
+      expect(entry).toMatchSnapshot({
+        timestamp: expect.any(String),
+        stack_stats: {
+          ingest_solutions: expect.any(Object), // Don't want to test it here. It comes from OSS and already tested there
+        },
+      });
+    });
   });
 
   test('X-Pack telemetry (license + X-Pack)', async () => {
@@ -98,6 +105,13 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       } as any,
       context
     );
-    expect(stats.map(({ timestamp, ...rest }) => rest)).toMatchSnapshot();
+    stats.forEach(entry => {
+      expect(entry).toMatchSnapshot({
+        timestamp: expect.any(String),
+        stack_stats: {
+          ingest_solutions: expect.any(Object), // Don't want to test it here. It comes from OSS and already tested there
+        },
+      });
+    });
   });
 });

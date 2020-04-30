@@ -10,6 +10,7 @@ import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
 import { coreMock } from 'src/core/server/mocks';
+import { baseIngestSolutionsPayload } from '../../../../../src/plugins/telemetry/server/telemetry_collection/ingest_solutions/__fixtures__';
 
 describe('get_all_stats', () => {
   const start = 0;
@@ -154,6 +155,7 @@ describe('get_all_stats', () => {
               },
               cloud: undefined,
             },
+            ingest_solutions: baseIngestSolutionsPayload,
           },
         },
       ];
@@ -169,7 +171,9 @@ describe('get_all_stats', () => {
         .onCall(3)
         .returns(Promise.resolve({})) // Beats stats
         .onCall(4)
-        .returns(Promise.resolve({})); // Beats state
+        .returns(Promise.resolve({})) // Beats state
+        .onCall(5)
+        .returns(Promise.resolve({})); // get_ingest_solutions
 
       expect(
         await getAllStats(
@@ -221,6 +225,7 @@ describe('get_all_stats', () => {
         kibana: (kibanaStats as unknown) as KibanaStats,
         logstash: (logstashStats as unknown) as ClustersHighLevelStats,
         beats: {},
+        ingestSolutions: {},
       });
 
       const [a, b, c] = expectedClusters;

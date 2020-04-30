@@ -17,13 +17,24 @@
  * under the License.
  */
 
-export {
-  INGEST_SOLUTIONS_ID,
-  IngestSolutionsIndex,
-  IngestSolutionsPayload,
-  buildIngestSolutionsPayload,
-} from './ingest_solutions';
-export { getLocalStats, TelemetryLocalStats } from './get_local_stats';
-export { getLocalLicense } from './get_local_license';
-export { getClusterUuids } from './get_cluster_stats';
-export { registerCollection } from './register_collection';
+import { IngestSolutionsPayload } from '../ingest_solutions';
+
+export const baseIngestSolutionsPayload: IngestSolutionsPayload = {
+  data_providers: {
+    apm: { index_count: 0 },
+    metricbeat: { index_count: 0 },
+    heartbeat: { index_count: 0 },
+    prometheusbeat: { index_count: 0 },
+    filebeat: { index_count: 0 },
+    functionbeat: { index_count: 0 },
+    fluentd: { index_count: 0 },
+    telegraf: { index_count: 0 },
+    fluentbit: { index_count: 0 },
+    nginx: { index_count: 0 },
+    apache: { index_count: 0 },
+    logs: { index_count: 0 },
+    auditbeat: { index_count: 0 },
+    winlogbeat: { index_count: 0 },
+    packetbeat: { index_count: 0 },
+  },
+};

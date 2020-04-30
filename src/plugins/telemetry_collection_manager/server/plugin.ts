@@ -208,9 +208,10 @@ export class TelemetryCollectionManagerPlugin
           return encryptTelemetry(usageData, { useProdKey: this.isDistributable });
         }
       } catch (err) {
-        this.logger.debug(
+        this.logger.warn(
           `Failed to collect any usage with registered collection ${collection.title}.`
         );
+        this.logger.warn(err);
         // swallow error to try next collection;
       }
     }

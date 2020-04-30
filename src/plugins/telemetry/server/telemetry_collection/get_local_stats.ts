@@ -24,6 +24,11 @@ import {
 import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
+import {
+  getIngestSolutions,
+  INGEST_SOLUTIONS_ID,
+  IngestSolutionsPayload,
+} from './ingest_solutions/ingest_solutions';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -38,6 +43,7 @@ export function handleLocalStats(
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats,
+  ingestSolutions: IngestSolutionsPayload,
   context: StatsCollectionContext
 ) {
   return {
@@ -48,6 +54,7 @@ export function handleLocalStats(
     cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {
+      [INGEST_SOLUTIONS_ID]: ingestSolutions,
       kibana: handleKibanaStats(context, kibana),
     },
   };
@@ -67,12 +74,13 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
 
   return await Promise.all(
     clustersDetails.map(async clustersDetail => {
-      const [clusterInfo, clusterStats, kibana] = await Promise.all([
+      const [clusterInfo, clusterStats, kibana, ingestSolutions] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
         getKibana(usageCollection, callCluster),
+        getIngestSolutions(callCluster),
       ]);
-      return handleLocalStats(clusterInfo, clusterStats, kibana, context);
+      return handleLocalStats(clusterInfo, clusterStats, kibana, ingestSolutions, context);
     })
   );
 };

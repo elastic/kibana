@@ -92,9 +92,7 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 4,
           "allocated_processors": 1,
@@ -164,6 +162,25 @@
       }
     },
     "stack_stats": {
+      "ingest_solutions": {
+        "data_providers": {
+          "apm": { "index_count": 0 },
+          "metricbeat": { "index_count": 0 },
+          "heartbeat": { "index_count": 0 },
+          "prometheusbeat": { "index_count": 0 },
+          "filebeat": { "index_count": 0 },
+          "functionbeat": { "index_count": 0 },
+          "fluentd": { "index_count": 0 },
+          "telegraf": { "index_count": 0 },
+          "fluentbit": { "index_count": 0 },
+          "nginx": { "index_count": 0 },
+          "apache": { "index_count": 0 },
+          "logs": { "index_count": 0 },
+          "auditbeat": { "index_count": 0 },
+          "winlogbeat": { "index_count": 0 },
+          "packetbeat": { "index_count": 0 }
+        }
+      },
       "xpack": {
         "security": {
           "available": false,
@@ -214,9 +231,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {
@@ -383,9 +398,7 @@
           "master": 1,
           "ingest": 1
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 4,
           "allocated_processors": 1,
@@ -455,40 +468,47 @@
       }
     },
     "stack_stats": {
+      "ingest_solutions": {
+        "data_providers": {
+          "apm": { "index_count": 0 },
+          "metricbeat": { "index_count": 0 },
+          "heartbeat": { "index_count": 0 },
+          "prometheusbeat": { "index_count": 0 },
+          "filebeat": { "index_count": 0 },
+          "functionbeat": { "index_count": 0 },
+          "fluentd": { "index_count": 0 },
+          "telegraf": { "index_count": 0 },
+          "fluentbit": { "index_count": 0 },
+          "nginx": { "index_count": 0 },
+          "apache": { "index_count": 0 },
+          "logs": { "index_count": 0 },
+          "auditbeat": { "index_count": 0 },
+          "winlogbeat": { "index_count": 0 },
+          "packetbeat": { "index_count": 0 }
+        }
+      },
       "xpack": {
         "security": {
           "available": true,
           "enabled": true,
           "realms": {
             "file": {
-              "name": [
-                "default_file"
-              ],
+              "name": ["default_file"],
               "available": true,
-              "size": [
-                0
-              ],
+              "size": [0],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "ldap": {
               "available": true,
               "enabled": false
             },
             "native": {
-              "name": [
-                "default_native"
-              ],
+              "name": ["default_native"],
               "available": true,
-              "size": [
-                2
-              ],
+              "size": [2],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "active_directory": {
               "available": true,
@@ -523,9 +543,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {
@@ -700,9 +718,7 @@
           "master": 2,
           "ingest": 2
         },
-        "versions": [
-          "7.0.0-alpha1"
-        ],
+        "versions": ["7.0.0-alpha1"],
         "os": {
           "available_processors": 8,
           "allocated_processors": 2,
@@ -772,40 +788,47 @@
       }
     },
     "stack_stats": {
+      "ingest_solutions": {
+        "data_providers": {
+          "apm": { "index_count": 0 },
+          "metricbeat": { "index_count": 0 },
+          "heartbeat": { "index_count": 0 },
+          "prometheusbeat": { "index_count": 0 },
+          "filebeat": { "index_count": 0 },
+          "functionbeat": { "index_count": 0 },
+          "fluentd": { "index_count": 0 },
+          "telegraf": { "index_count": 0 },
+          "fluentbit": { "index_count": 0 },
+          "nginx": { "index_count": 0 },
+          "apache": { "index_count": 0 },
+          "logs": { "index_count": 0 },
+          "auditbeat": { "index_count": 0 },
+          "winlogbeat": { "index_count": 0 },
+          "packetbeat": { "index_count": 0 }
+        }
+      },
       "xpack": {
         "security": {
           "available": true,
           "enabled": true,
           "realms": {
             "file": {
-              "name": [
-                "default_file"
-              ],
+              "name": ["default_file"],
               "available": true,
-              "size": [
-                0
-              ],
+              "size": [0],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "ldap": {
               "available": true,
               "enabled": false
             },
             "native": {
-              "name": [
-                "default_native"
-              ],
+              "name": ["default_native"],
               "available": true,
-              "size": [
-                1
-              ],
+              "size": [1],
               "enabled": true,
-              "order": [
-                2147483647
-              ]
+              "order": [2147483647]
             },
             "active_directory": {
               "available": true,
@@ -840,9 +863,7 @@
             }
           },
           "audit": {
-            "outputs": [
-              "logfile"
-            ],
+            "outputs": ["logfile"],
             "enabled": false
           },
           "ipfilter": {
