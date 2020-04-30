@@ -104,7 +104,10 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             ) : (
               <EuiFlexGroup justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
-                  <EuiLoadingChart size="xl" />
+                  <EuiLoadingChart
+                    size="xl"
+                    data-test-subj={`loading_mlMaxAnomalyScoreEmbeddable_${id}`}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
