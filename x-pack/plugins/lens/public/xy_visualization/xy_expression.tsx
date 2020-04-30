@@ -264,13 +264,16 @@ export function XYChart({
             layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
           const table = data.tables[firstLayerWithData.layerId];
 
-          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
-          const timeFieldName = xDomain && xAxisFieldName;
+          const xAxisColumnIndex = table.columns.findIndex(
+            el => el.id === firstLayerWithData.xAccessor
+          );
+          const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
+
           const context: RangeSelectTriggerContext = {
             data: {
               range: [min, max],
               table,
-              column: table.columns.findIndex(el => el.id === firstLayerWithData.xAccessor),
+              column: xAxisColumnIndex,
             },
             timeFieldName,
           };
@@ -312,7 +315,8 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName = xAxisColumn?.meta?.aggConfigParams?.field;
+          const xAxisFieldName = table.columns.find(el => el.id === layer.xAccessor)?.meta
+            ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: ValueClickTriggerContext = {
