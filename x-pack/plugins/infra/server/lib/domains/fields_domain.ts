@@ -29,9 +29,10 @@ export class InfraFieldsDomain {
 
     const fields = await this.adapter.getIndexFields(
       requestContext,
-      `${includeMetricIndices ? configuration.metricAlias : ''},${
-        includeLogIndices ? configuration.logAlias : ''
-      }`
+      [
+        ...(includeMetricIndices ? [configuration.metricAlias] : []),
+        ...(includeLogIndices ? [configuration.logAlias] : []),
+      ].join(',')
     );
 
     return fields;

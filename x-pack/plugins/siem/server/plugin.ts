@@ -38,6 +38,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
+import { APP_ID, APP_ICON } from '../common/constants';
 
 export { CoreSetup, CoreStart };
 
@@ -62,7 +63,6 @@ export interface PluginSetup {}
 export interface PluginStart {}
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
-  readonly name = 'siem';
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
   private context: PluginInitializerContext;
@@ -70,7 +70,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', this.name);
+    this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.siemClientFactory = new SiemClientFactory();
 
@@ -91,7 +91,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
+    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
@@ -110,12 +110,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     plugins.features.registerFeature({
-      id: this.name,
+      id: APP_ID,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
       order: 1100,
-      icon: 'securityAnalyticsApp',
+      icon: APP_ICON,
       navLinkId: 'siem',
       app: ['siem', 'kibana'],
       catalogue: ['siem'],

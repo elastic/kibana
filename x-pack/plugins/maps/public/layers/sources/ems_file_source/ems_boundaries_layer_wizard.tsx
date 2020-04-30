@@ -12,8 +12,13 @@ import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry'
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { EMSFileSource, sourceTitle } from './ems_file_source';
+// @ts-ignore
+import { isEmsEnabled } from '../../../meta';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
+  checkVisibility: () => {
+    return isEmsEnabled();
+  },
   description: i18n.translate('xpack.maps.source.emsFileDescription', {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),
