@@ -40,7 +40,7 @@ interface Params {
   >;
 }
 
-export class ViewInDiscoverAction implements Action<EmbeddableContext> {
+export class ViewInDiscoverContextMenuAction implements Action<EmbeddableContext> {
   public readonly id = ACTION_VIEW_IN_DISCOVER;
 
   public readonly type = ACTION_VIEW_IN_DISCOVER;
