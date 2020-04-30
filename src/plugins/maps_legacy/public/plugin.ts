@@ -46,16 +46,16 @@ export interface MapsLegacySetupDependencies {}
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  initializerContext: PluginInitializerContext<ConfigSchema>;
+  _initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.initializerContext = initializerContext;
+    this._initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
     bindSetupCoreAndPlugins(core);
 
-    const config = this.initializerContext.config.get<MapsLegacyConfigType>();
+    const config = this._initializerContext.config.get<MapsLegacyConfigType>();
 
     return {
       serviceSettings: new ServiceSettings(config, config.tilemap),

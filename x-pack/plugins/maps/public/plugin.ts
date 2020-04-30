@@ -49,7 +49,7 @@ export interface MapsPluginSetupDependencies {
   home: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsLegacy: any;
+  mapsLegacy: { config: unknown };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
