@@ -70,11 +70,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
   const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
 
-  const refreshData = useCallback(() => {
-    refreshAgentConfig();
-    refreshAgentStatus();
-  }, [refreshAgentConfig, refreshAgentStatus]);
-
   const headerLeftContent = useMemo(
     () => (
       <React.Fragment>
