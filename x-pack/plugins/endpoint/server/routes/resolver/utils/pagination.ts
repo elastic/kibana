@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
-import { extractEventID } from './normalize';
+import { entityId } from '../../../../common/models/event';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export interface PaginationParams {
@@ -15,12 +15,19 @@ export interface PaginationParams {
   eventID?: string;
 }
 
+export interface PaginatedResults {
+  totals: Record<string, number>;
+  results: ResolverEvent[];
+  // content holder for any other extra aggregation counts
+  extras?: Record<string, Record<string, number>>;
+}
+
 interface PaginationCursor {
   timestamp: number;
   eventID: string;
 }
 
-function urlEncodeCursor(data: PaginationCursor) {
+function urlEncodeCursor(data: PaginationCursor): string {
   const value = JSON.stringify(data);
   return Buffer.from(value, 'utf8')
     .toString('base64')
@@ -56,10 +63,16 @@ export function getPaginationParams(limit: number, after?: string): PaginationPa
   return { size: limit };
 }
 
-export function paginate(pagination: PaginationParams, field: string, query: JsonObject) {
+export function paginate(
+  pagination: PaginationParams,
+  tiebreaker: string,
+  aggregator: string,
+  query: JsonObject
+): JsonObject {
   const { size, timestamp, eventID } = pagination;
-  query.sort = [{ '@timestamp': 'asc' }, { [field]: 'asc' }];
-  query.aggs = { total: { value_count: { field } } };
+  query.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+  query.aggs = query.aggs || {};
+  query.aggs = Object.assign({}, query.aggs, { totals: { terms: { field: aggregator, size } } });
   query.size = size;
   if (timestamp && eventID) {
     query.search_after = [timestamp, eventID] as Array<number | string>;
@@ -67,25 +80,28 @@ export function paginate(pagination: PaginationParams, field: string, query: Jso
   return query;
 }
 
-export function paginatedResults(
-  response: SearchResponse<ResolverEvent>
-): { total: number; results: ResolverEvent[]; nextCursor: string | null } {
-  const total = response.aggregations?.total?.value || 0;
+export function buildPaginationCursor(total: number, results: ResolverEvent[]): string | null {
+  if (total > results.length && results.length > 0) {
+    const lastResult = results[results.length - 1];
+    const cursor = {
+      timestamp: lastResult['@timestamp'],
+      eventID: entityId(lastResult),
+    };
+    return urlEncodeCursor(cursor);
+  }
+  return null;
+}
+
+export function paginatedResults(response: SearchResponse<ResolverEvent>): PaginatedResults {
   if (response.hits.hits.length === 0) {
-    return { total, results: [], nextCursor: null };
+    return { totals: {}, results: [] };
   }
 
-  const results: ResolverEvent[] = [];
-  for (const hit of response.hits.hits) {
-    results.push(hit._source);
-  }
+  const totals = response.aggregations?.totals?.buckets?.reduce(
+    (cummulative: any, bucket: any) => ({ ...cummulative, [bucket.key]: bucket.doc_count }),
+    {}
+  );
 
-  // results will be at least 1 because of length check at the top of the function
-  const next = results[results.length - 1];
-  const cursor = {
-    timestamp: next['@timestamp'],
-    eventID: extractEventID(next),
-  };
-
-  return { total, results, nextCursor: urlEncodeCursor(cursor) };
+  const results = response.hits.hits.map(hit => hit._source);
+  return { totals, results };
 }

@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { schema } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'kibana/server';
 import { VisTypeVislibServerPlugin } from './plugin';
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+};
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new VisTypeVislibServerPlugin(initContext);
