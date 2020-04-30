@@ -21,12 +21,15 @@ import {
   MetricsExplorerChartType,
 } from '../hooks/use_metrics_explorer_options';
 
+type NumberOrString = string | number;
+
 interface Props {
   metric: MetricsExplorerOptionsMetric;
-  id: string | number;
+  id: NumberOrString | NumberOrString[];
   series: MetricsExplorerSeries;
   type: MetricsExplorerChartType;
   stack: boolean;
+  opacity?: number;
 }
 
 export const MetricExplorerSeriesChart = (props: Props) => {
@@ -36,13 +39,17 @@ export const MetricExplorerSeriesChart = (props: Props) => {
   return <MetricsExplorerAreaChart {...props} />;
 };
 
-export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Props) => {
+export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack, opacity }: Props) => {
   const color =
     (metric.color && colorTransformer(metric.color)) ||
     colorTransformer(MetricsExplorerColor.color0);
 
-  const yAccessor = `metric_${id}`;
-  const chartId = `series-${series.id}-${yAccessor}`;
+  const yAccessors = Array.isArray(id)
+    ? id.map(i => `metric_${i}`).slice(id.length - 1, id.length)
+    : [`metric_${id}`];
+  const y0Accessors =
+    Array.isArray(id) && id.length > 1 ? id.map(i => `metric_${i}`).slice(0, 1) : undefined;
+  const chartId = `series-${series.id}-${yAccessors.join('-')}`;
 
   const seriesAreaStyle: RecursivePartial<AreaSeriesStyle> = {
     line: {
@@ -50,19 +57,21 @@ export const MetricsExplorerAreaChart = ({ metric, id, series, type, stack }: Pr
       visible: true,
     },
     area: {
-      opacity: 0.5,
+      opacity: opacity || 0.5,
       visible: type === MetricsExplorerChartType.area,
     },
   };
+
   return (
     <AreaSeries
-      id={yAccessor}
+      id={chartId}
       key={chartId}
       name={createMetricLabel(metric)}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor="timestamp"
-      yAccessors={[yAccessor]}
+      yAccessors={yAccessors}
+      y0Accessors={y0Accessors}
       data={series.rows}
       stackAccessors={stack ? ['timestamp'] : void 0}
       areaSeriesStyle={seriesAreaStyle}
