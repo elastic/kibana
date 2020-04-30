@@ -6,11 +6,12 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import { AlertConstants } from '../../common/alerts/alert_constants';
-import { alertListHandlerWrapper } from './list';
-import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
+import { alertListHandlerWrapper } from './handlers/list';
+import { alertDetailsHandlerWrapper } from './handlers/details';
+import { alertDetailsReqSchema } from './handlers/details/schemas';
 import { alertingIndexGetQuerySchema } from '../../common/alerts/schema/alert_index';
 import { indexPatternGetParamsSchema } from '../../common/alerts/schema/index_pattern';
-import { handleIndexPattern } from './index_pattern';
+import { handleIndexPattern } from './handlers/index_pattern';
 
 export const BASE_ALERTS_ROUTE = `${AlertConstants.BASE_API_URL}/alerts`;
 

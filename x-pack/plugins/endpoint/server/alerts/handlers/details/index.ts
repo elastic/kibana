@@ -6,10 +6,10 @@
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { AlertEvent } from '../../../../common/types';
-import { AlertConstants } from '../../../../common/alert_constants';
+import { AlertConstants } from '../../../../common/alerts/alert_constants';
 import { EndpointAppContext } from '../../../types';
-import { AlertDetailsRequestParams } from '../types';
-import { AlertDetailsPagination } from './lib';
+import { AlertDetailsRequestParams } from '../../../../common/alerts/types';
+import { AlertDetailsPagination } from './lib/pagination';
 import { getHostData } from '../../../routes/metadata';
 
 export const alertDetailsHandlerWrapper = function(

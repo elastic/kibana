@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IndexPatternRetriever } from './index_pattern';
+import { IndexPatternRetriever } from './alerts/index_pattern';
 import { AgentService } from '../../ingest_manager/server';
 
 /**

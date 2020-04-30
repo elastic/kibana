@@ -6,7 +6,7 @@
 
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { decode } from '../../../server/routes/handlers/list/lib/node_modules/rison-node';
+import { decode } from 'rison-node';
 import { AlertConstants } from '../alert_constants';
 
 /**

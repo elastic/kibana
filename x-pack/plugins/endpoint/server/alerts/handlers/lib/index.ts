@@ -5,10 +5,10 @@
  */
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
+import { AlertEvent } from '../../../../common/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { esQuery } from '../../../../../../../src/plugins/data/server';
 import {
-  AlertEvent,
   AlertAPIOrdering,
   AlertSearchQuery,
   AlertSearchRequest,
@@ -16,7 +16,7 @@ import {
   AlertSort,
   UndefinedResultPosition,
 } from '../../../../common/alerts/types';
-import { AlertConstants } from '../../../../common/alert_constants';
+import { AlertConstants } from '../../../../common/alerts/alert_constants';
 
 function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {

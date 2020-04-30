@@ -9,8 +9,8 @@ import { RisonValue, encode } from 'rison-node';
 import { RequestHandlerContext } from 'src/core/server';
 import { AlertHits, AlertSearchQuery } from '../../../../../common/alerts/types';
 import { EndpointConfigType } from '../../../../config';
-import { Pagination } from '../../lib';
-import { BASE_ALERTS_ROUTE } from '../../routes';
+import { Pagination } from '../../lib/pagination';
+import { BASE_ALERTS_ROUTE } from '../../../routes';
 
 /**
  * Pagination class for alert list.
