@@ -83,12 +83,26 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     /**
      * Click the app link within the app menu that has the given name
      * @param name
+     * @param options.closeCollapsibleNav
+     * @param options.category - optional field to ensure that a link is clicked in a particular category
+     *                           helpful when there may be a recent link with the same name as an app
      */
-    public async clickLink(name: string, closeCollapsibleNav = true) {
+    public async clickLink(
+      name: string,
+      {
+        closeCollapsibleNav = true,
+        category,
+      }: { closeCollapsibleNav?: boolean; category?: string } = {}
+    ) {
       try {
         log.debug(`click "${name}" app link`);
         await this.openCollapsibleNav();
-        const nav = await testSubjects.find('collapsibleNav');
+        let nav;
+        if (typeof category === 'string') {
+          nav = await testSubjects.find(`collapsibleNavGroup-${category}`);
+        } else {
+          nav = await testSubjects.find('collapsibleNav');
+        }
         const link = await nav.findByPartialLinkText(name);
         await link.click();
 

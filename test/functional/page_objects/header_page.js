@@ -30,13 +30,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
   class HeaderPage {
     async clickDiscover() {
-      await appsMenu.clickLink('Discover');
+      await appsMenu.clickLink('Discover', 'kibana');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize', 'kibana');
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
@@ -50,7 +50,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDashboard() {
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', 'kibana');
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -60,7 +60,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickStackManagement() {
-      await appsMenu.clickLink('Stack Management');
+      await appsMenu.clickLink('Stack Management', 'management');
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 

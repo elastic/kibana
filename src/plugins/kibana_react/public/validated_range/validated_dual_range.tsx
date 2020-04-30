@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
@@ -35,8 +35,8 @@ interface Props extends Omit<EuiDualRangeProps, 'value' | 'onChange' | 'min' | '
   label?: string;
   formRowDisplay?: EuiFormRowDisplayKeys;
   onChange?: (val: [string, string]) => void;
-  min?: ValueMember;
-  max?: ValueMember;
+  min?: number;
+  max?: number;
 }
 
 interface State {
@@ -121,8 +121,16 @@ export class ValidatedDualRange extends Component<Props> {
           fullWidth={fullWidth}
           value={this.state.value}
           onChange={this._onChange}
-          // @ts-ignore
-          focusable={false} // remove when #59039 is fixed
+          minInputProps={{
+            'aria-label': i18n.translate('kibana-react.dualRangeControl.minInputAriaLabel', {
+              defaultMessage: 'Range minimum',
+            }),
+          }}
+          maxInputProps={{
+            'aria-label': i18n.translate('kibana-react.dualRangeControl.maxInputAriaLabel', {
+              defaultMessage: 'Range maximum',
+            }),
+          }}
           {...rest}
         />
       </EuiFormRow>

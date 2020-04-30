@@ -190,6 +190,7 @@ export function CollapsibleNav({
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id)}
               onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen)}
+              data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup
                 aria-label={i18n.translate('core.ui.primaryNavSection.screenReaderLabel', {

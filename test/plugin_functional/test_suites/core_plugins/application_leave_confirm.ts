@@ -59,7 +59,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     describe('when navigating to a legacy app', () => {
       it('prevents navigation if user click cancel on the alert dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('Core Legacy Compat', false);
+        await appsMenu.clickLink('Core Legacy Compat', { closeCollapsibleNav: false });
 
         const alert = await browser.getAlert();
         expect(alert).not.to.eql(null);
@@ -68,7 +68,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
       });
       it('allows navigation if user click leave on the alert dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
-        await appsMenu.clickLink('Core Legacy Compat', false);
+        await appsMenu.clickLink('Core Legacy Compat', { closeCollapsibleNav: false });
 
         const alert = await browser.getAlert();
         expect(alert).not.to.eql(null);
