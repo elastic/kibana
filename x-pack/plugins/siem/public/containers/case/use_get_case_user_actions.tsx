@@ -68,14 +68,13 @@ const getPushedInfo = (
   }, [] as string[]);
 
   const caseServices: CaseServices = pushActionConnectorIds.reduce((acc, cId) => {
-    const userActionsForPushLessServiceUpdates = caseUserActions
-      .filter(
-        mua =>
-          mua.action !== 'push-to-service' ||
-          (mua.action === 'push-to-service' &&
-            cId === getExternalService(`${mua.newValue}`)?.connector_id)
-      )
-      .filter(aft => !(aft.action === 'update' && aft.actionField[0] === 'connector_id'));
+    const userActionsForPushLessServiceUpdates = caseUserActions.filter(
+      mua =>
+        (mua.action !== 'push-to-service' &&
+          !(mua.action === 'update' && mua.actionField[0] === 'connector_id')) ||
+        (mua.action === 'push-to-service' &&
+          cId === getExternalService(`${mua.newValue}`)?.connector_id)
+    );
 
     return {
       ...acc,
