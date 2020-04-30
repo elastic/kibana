@@ -10,7 +10,6 @@ import { CoreStart } from 'kibana/public';
 export function setReadonlyBadge({ application, chrome }: CoreStart) {
   const canSave = application.capabilities.apm.save;
   const { setBadge } = chrome;
-
   setBadge(
     !canSave
       ? {

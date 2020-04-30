@@ -38,6 +38,7 @@ import { TransactionDurationAlertTrigger } from './components/shared/Transaction
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
+import { createStaticIndexPattern } from './services/rest/index_pattern';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -85,6 +86,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         const { renderApp } = await import('./application');
         // Get start services
         const [coreStart] = await core.getStartServices();
+
+        // render APM feedback link in global help menu
+        setHelpExtension(coreStart);
+        setReadonlyBadge(coreStart);
+
+        // Automatically creates static index pattern and stores as saved object
+        createStaticIndexPattern().catch(e => {
+          // eslint-disable-next-line no-console
+          console.log('Error creating static index pattern', e);
+        });
+
         return renderApp(coreStart, pluginSetupDeps, params, config);
       }
     });
@@ -92,9 +104,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     createCallApmApi(core.http);
 
-    // render APM feedback link in global help menu
-    setHelpExtension(core);
-    setReadonlyBadge(core);
     toggleAppLinkInNav(core, this.initializerContext.config.get());
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({

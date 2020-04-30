@@ -31,6 +31,7 @@ import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { APM_FEATURE } from './feature';
+import { apmIndices, apmTelemetry } from './saved_objects';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -63,6 +64,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
+
+    core.savedObjects.registerType(apmIndices);
+    core.savedObjects.registerType(apmTelemetry);
 
     if (plugins.actions && plugins.alerting) {
       registerApmAlerts({

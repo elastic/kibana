@@ -12,7 +12,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { $ElementType } from 'utility-types';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -25,7 +25,6 @@ import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink'
 import { ServiceMap } from '../ServiceMap';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
-import { createStaticIndexPattern } from '../../../services/rest/index_pattern';
 
 function getHomeTabs({
   serviceMapEnabled = true
@@ -87,14 +86,6 @@ export function Home({ tab }: Props) {
   const selectedTab = homeTabs.find(
     homeTab => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
-
-  useEffect(() => {
-    // Automatically creates static index pattern and stores as saved object
-    createStaticIndexPattern().catch(e => {
-      // eslint-disable-next-line no-console
-      console.log('Error creating static index pattern', e);
-    });
-  }, []);
 
   return (
     <div>
