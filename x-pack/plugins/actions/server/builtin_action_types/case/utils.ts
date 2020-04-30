@@ -145,34 +145,30 @@ export const throwIfNotAlive = (
   }
 };
 
-export const request = async ({
+export const request = async <T = unknown>({
   axios,
   url,
   method = 'get',
-  data = {},
+  data,
 }: {
   axios: AxiosInstance;
   url: string;
   method?: Method;
-  // This will have to remain `any` until we can extend connectors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: T;
 }): Promise<AxiosResponse> => {
-  const res = await axios(url, { method, data });
+  const res = await axios(url, { method, data: data ?? {} });
   throwIfNotAlive(res.status, res.headers['content-type']);
   return res;
 };
 
-export const patch = ({
+export const patch = async <T = unknown>({
   axios,
   url,
   data,
 }: {
   axios: AxiosInstance;
   url: string;
-  // This will have to remain `any` until we can extend connectors with generics
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: T;
 }): Promise<AxiosResponse> => {
   return request({
     axios,

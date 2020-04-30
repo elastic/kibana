@@ -10,7 +10,13 @@ import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } fr
 import { addTimeZoneToDate, patch, request, getErrorMessage } from '../case/utils';
 
 import * as i18n from './translations';
-import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
+import {
+  ServiceNowPublicConfigurationType,
+  ServiceNowSecretConfigurationType,
+  CreateIncidentRequest,
+  UpdateIncidentRequest,
+  CreateCommentRequest,
+} from './types';
 
 const API_VERSION = 'v2';
 const INCIDENT_URL = `api/now/${API_VERSION}/table/incident`;
@@ -57,7 +63,7 @@ export const createExternalService = ({
 
   const createIncident = async ({ incident }: ExternalServiceParams) => {
     try {
-      const res = await request({
+      const res = await request<CreateIncidentRequest>({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
@@ -79,7 +85,7 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      const res = await patch({
+      const res = await patch<UpdateIncidentRequest>({
         axios: axiosInstance,
         url: `${incidentUrl}/${incidentId}`,
         data: { ...incident },
@@ -103,7 +109,7 @@ export const createExternalService = ({
 
   const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
     try {
-      const res = await patch({
+      const res = await patch<CreateCommentRequest>({
         axios: axiosInstance,
         url: `${commentUrl}/${incidentId}`,
         data: { [field]: comment.comment },

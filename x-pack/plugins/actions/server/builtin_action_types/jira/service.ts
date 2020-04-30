@@ -7,7 +7,13 @@
 import axios from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
-import { JiraPublicConfigurationType, JiraSecretConfigurationType } from './types';
+import {
+  JiraPublicConfigurationType,
+  JiraSecretConfigurationType,
+  CreateIncidentRequest,
+  UpdateIncidentRequest,
+  CreateCommentRequest,
+} from './types';
 
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../case/utils';
@@ -66,7 +72,7 @@ export const createExternalService = ({
     // The function makes two calls when creating an issue. One to create the issue and one to get
     // the created issue with all the necessary fields.
     try {
-      const res = await request({
+      const res = await request<CreateIncidentRequest>({
         axios: axiosInstance,
         url: `${incidentUrl}`,
         method: 'post',
@@ -92,7 +98,7 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      await request({
+      await request<UpdateIncidentRequest>({
         axios: axiosInstance,
         method: 'put',
         url: `${incidentUrl}/${incidentId}`,
@@ -119,7 +125,7 @@ export const createExternalService = ({
 
   const createComment = async ({ incidentId, comment, field }: ExternalServiceParams) => {
     try {
-      const res = await request({
+      const res = await request<CreateCommentRequest>({
         axios: axiosInstance,
         method: 'post',
         url: getCommentsURL(incidentId),

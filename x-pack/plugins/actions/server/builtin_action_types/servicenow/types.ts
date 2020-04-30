@@ -8,3 +8,14 @@ export {
   ExternalIncidentServiceConfiguration as ServiceNowPublicConfigurationType,
   ExternalIncidentServiceSecretConfiguration as ServiceNowSecretConfigurationType,
 } from '../case/types';
+
+export interface CreateIncidentRequest {
+  summary: string;
+  description: string;
+}
+
+export type UpdateIncidentRequest = Partial<CreateIncidentRequest>;
+
+export interface CreateCommentRequest {
+  [key: string]: string;
+}
