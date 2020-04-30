@@ -80,12 +80,11 @@ export default function({ getService }: FtrProviderContext) {
     it('should support sorting by event end', async () => {
       const id = uuid.v4();
 
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
-      // run one first to create the SO and avoid clashes
-      await logTestEvent(id, firstExpectedEvent);
-      // stagger the API calls to ensure the creation order is  as expected
-      for (let index = 0; index < expectedEvents.length; index++) {
-        await logTestEvent(id, expectedEvents[index]);
+      const expectedEvents: IEvent[] = [];
+      for (let index = 0; index < 6; index++) {
+        const event = fakeEvent(id);
+        await logTestEvent(id, event);
+        expectedEvents.push(event);
       }
 
       await retry.try(async () => {
@@ -93,11 +92,8 @@ export default function({ getService }: FtrProviderContext) {
           body: { data: foundEvents },
         } = await findEvents(id, { sort_field: 'event.end', sort_order: 'desc' });
 
-        expect(foundEvents.length).to.be(6);
-        assertEventsFromApiMatchCreatedEvents(
-          foundEvents,
-          [firstExpectedEvent, ...expectedEvents].reverse()
-        );
+        expect(foundEvents.length).to.be(expectedEvents.length);
+        assertEventsFromApiMatchCreatedEvents(foundEvents, expectedEvents.reverse());
       });
     });
 
@@ -177,7 +173,9 @@ export default function({ getService }: FtrProviderContext) {
   ) {
     try {
       foundEvents.forEach((foundEvent: IValidatedEvent, index: number) => {
-        expect(foundEvent!.event).to.eql(expectedEvents[index]!.event);
+        expect(omit(foundEvent!.event ?? {}, 'start', 'end', 'duration')).to.eql(
+          expectedEvents[index]!.event
+        );
         expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
         expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
       });
