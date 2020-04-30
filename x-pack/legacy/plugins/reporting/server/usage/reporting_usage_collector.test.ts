@@ -347,8 +347,12 @@ describe('data modeling', () => {
   });
 
   test('Cast various example data to the TypeScript definition', () => {
-    // cd x-pack ; node ../scripts/es_archiver load reporting/archived_reports
-    const documentary: ReportingUsageType = {
+    const check = (obj: ReportingUsageType) => {
+      return typeof obj;
+    };
+
+    // just check that the example objects can be cast to ReportingUsageType
+    check({
       PNG: { available: true, total: 7 },
       _all: 21,
       available: true,
@@ -382,9 +386,8 @@ describe('data modeling', () => {
           printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
         },
       },
-    };
-
-    const testimonial: ReportingUsageType = {
+    });
+    check({
       PNG: { available: true, total: 3 },
       _all: 4,
       available: true,
@@ -416,8 +419,8 @@ describe('data modeling', () => {
       statuses: {
         completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
       },
-    };
-    const physical: ReportingUsageType = {
+    });
+    check({
       available: true,
       browser_type: 'chromium',
       enabled: true,
@@ -445,11 +448,7 @@ describe('data modeling', () => {
       },
       csv: { available: true, total: 0 },
       PNG: { available: true, total: 0 },
-    };
-
-    expect(typeof documentary).toMatchInlineSnapshot();
-    expect(typeof testimonial).toMatchInlineSnapshot();
-    expect(typeof physical).toMatchInlineSnapshot();
+    });
   });
 });
 
