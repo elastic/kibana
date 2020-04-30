@@ -694,12 +694,6 @@ example plugins.
 
 # Unresolved questions
 
-## terminology / naming
-
-Are the current types, services and api names acceptable:
-   - `GlobalSearch` ts prefix
-   - `core.globalSearch` / `GlobalSearchService`
-   - `GlobalSearchResultProvider`
-   - `core.globalSearch.find`
+N/A
 
      
