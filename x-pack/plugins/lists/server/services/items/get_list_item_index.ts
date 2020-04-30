@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
-
-import { SpacesServiceSetup } from '../../../../spaces/server';
-import { getSpace } from '../utils';
-
-interface GetListItemIndexOptions {
-  spaces: SpacesServiceSetup | undefined | null;
-  request: KibanaRequest;
+export interface GetListItemIndexOptions {
+  spaceId: string;
   listsItemsIndexName: string;
 }
 
 export const getListItemIndex = ({
-  spaces,
-  request,
+  spaceId,
   listsItemsIndexName,
-}: GetListItemIndexOptions): string => `${listsItemsIndexName}-${getSpace({ request, spaces })}`;
+}: GetListItemIndexOptions): string => `${listsItemsIndexName}-${spaceId}`;

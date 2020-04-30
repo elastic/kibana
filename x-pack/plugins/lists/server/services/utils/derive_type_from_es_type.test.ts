@@ -10,6 +10,14 @@ import { Type } from '../../../common/schemas';
 import { deriveTypeFromItem } from './derive_type_from_es_type';
 
 describe('derive_type_from_es_type', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it returns the item ip if it exists', () => {
     const item = getSearchEsListItemMock();
     const derivedType = deriveTypeFromItem({ item });

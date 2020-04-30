@@ -26,6 +26,7 @@ export interface IIndexPattern {
   id?: string;
   type?: string;
   timeFieldName?: string;
+  getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<
     string,
     {
