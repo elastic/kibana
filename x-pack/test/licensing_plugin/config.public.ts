@@ -16,7 +16,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     kbnTestServer: {
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
-
+        '--no-base-path',
         // Required to load new platform plugin provider via `--plugin-path` flag.
         '--env.name=development',
         `--plugin-path=${path.resolve(

@@ -1,0 +1,8 @@
+{
+  "id": "coreProviderPlugin",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": ["core_plugin_a", "core_plugin_b", "licensing"],
+  "server": false,
+  "ui": true
+}
