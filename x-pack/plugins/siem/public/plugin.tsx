@@ -12,6 +12,7 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import {
   HomePublicPluginSetup,
@@ -90,6 +91,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
       title: APP_NAME,
       order: 9000,
       euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
