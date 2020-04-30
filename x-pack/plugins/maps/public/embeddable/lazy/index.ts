@@ -9,7 +9,6 @@
 export * from '../../angular/services/gis_map_saved_object_loader';
 export * from '../map_embeddable';
 export * from '../../kibana_services';
-export * from '../../../common/constants';
 export * from '../../reducers/store';
 export * from '../../actions/map_actions';
 export * from '../../selectors/map_selectors';

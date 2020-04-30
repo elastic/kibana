@@ -12,6 +12,7 @@ import {
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
+import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 
 let whenModulesLoadedPromise = null;
 
@@ -21,16 +22,13 @@ let MapEmbeddableInput = null;
 let getIndexPatternService;
 let getHttp;
 let getMapsCapabilities = null;
-let createMapPath;
-let MAP_SAVED_OBJECT_TYPE;
-let APP_ICON = null;
 let createMapStore = null;
 let addLayerWithoutDataSync = null;
 let getQueryableUniqueIndexPatternIds = null;
 let getInitialLayers = null;
 let mergeInputWithSavedMap = null;
 
-async function loadMapDependencies() {
+async function waitForMapDependencies() {
   if (whenModulesLoadedPromise !== null) {
     return whenModulesLoadedPromise;
   }
@@ -45,9 +43,6 @@ async function loadMapDependencies() {
     getIndexPatternService = lazyModule.getIndexPatternService;
     getHttp = lazyModule.getHttp;
     getMapsCapabilities = lazyModule.getMapsCapabilities;
-    createMapPath = lazyModule.createMapPath;
-    MAP_SAVED_OBJECT_TYPE = lazyModule.MAP_SAVED_OBJECT_TYPE;
-    APP_ICON = lazyModule.APP_ICON;
     createMapStore = lazyModule.createMapStore;
     addLayerWithoutDataSync = lazyModule.addLayerWithoutDataSync;
     getInitialLayers = lazyModule.getInitialLayers;
@@ -69,7 +64,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   async isEditable() {
-    await loadMapDependencies();
+    await waitForMapDependencies();
     return getMapsCapabilities().save as boolean;
   }
 
@@ -121,10 +116,10 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
 
   createFromSavedObject = async (
     savedObjectId: string,
-    input: MapEmbeddableInput,
+    input: MapsEmbeddableInput,
     parent?: IContainer
   ) => {
-    await loadMapDependencies();
+    await waitForMapDependencies();
     const savedMap = await this._fetchSavedMap(savedObjectId);
     const layerList = getInitialLayers(savedMap.layerListJSON);
     const indexPatterns = await this._getIndexPatterns(layerList);
@@ -164,7 +159,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   };
 
   create = async (input: MapEmbeddableInput, parent?: IContainer) => {
-    await loadMapDependencies();
+    await waitForMapDependencies();
     const layerList = getInitialLayers();
     const indexPatterns = await this._getIndexPatterns(layerList);
 
