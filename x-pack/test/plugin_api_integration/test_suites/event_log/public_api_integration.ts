@@ -7,7 +7,7 @@
 import { merge, omit, times, chunk, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { IValidatedEvent } from '../../../../plugins/event_log/server/types';
@@ -19,7 +19,9 @@ export default function({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Event Log public API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/64723
+  // FLAKY: https://github.com/elastic/kibana/issues/64812
+  describe.skip('Event Log public API', () => {
     it('should allow querying for events by Saved Object', async () => {
       const id = uuid.v4();
 
@@ -43,10 +45,8 @@ export default function({ getService }: FtrProviderContext) {
     it('should support pagination for events', async () => {
       const id = uuid.v4();
 
-      const timestamp = moment();
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () =>
-        fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')))
-      );
+      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
+
       // run one first to create the SO and avoid clashes
       await logTestEvent(id, firstExpectedEvent);
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
@@ -82,10 +82,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should support sorting by event end', async () => {
       const id = uuid.v4();
 
-      const timestamp = moment();
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () =>
-        fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')))
-      );
+      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
       // run one first to create the SO and avoid clashes
       await logTestEvent(id, firstExpectedEvent);
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
@@ -106,21 +103,24 @@ export default function({ getService }: FtrProviderContext) {
     it('should support date ranges for events', async () => {
       const id = uuid.v4();
 
-      const timestamp = moment();
-
-      const firstEvent = fakeEvent(id, fakeEventTiming(timestamp));
+      // write a document that shouldn't be found in the inclusive date range search
+      const firstEvent = fakeEvent(id);
       await logTestEvent(id, firstEvent);
-      await delay(100);
 
-      const start = timestamp.add(1, 's').toISOString();
+      // wait a second, get the start time for the date range search
+      await delay(1000);
+      const start = new Date().toISOString();
 
-      const expectedEvents = times(6, () => fakeEvent(id, fakeEventTiming(timestamp.add(1, 's'))));
+      // write the documents that we should be found in the date range searches
+      const expectedEvents = times(6, () => fakeEvent(id));
       await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
 
-      const end = timestamp.add(1, 's').toISOString();
+      // get the end time for the date range search
+      const end = new Date().toISOString();
 
-      await delay(100);
-      const lastEvent = fakeEvent(id, fakeEventTiming(timestamp.add(1, 's')));
+      // write a document that shouldn't be found in the inclusive date range search
+      await delay(1000);
+      const lastEvent = fakeEvent(id);
       await logTestEvent(id, lastEvent);
 
       await retry.try(async () => {
@@ -195,33 +195,17 @@ export default function({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
-  function fakeEventTiming(start: Moment): Partial<IEvent> {
-    return {
-      event: {
-        start: start.toISOString(),
-        end: start
-          .clone()
-          .add(500, 'milliseconds')
-          .toISOString(),
-      },
-    };
-  }
-
   function fakeEvent(id: string, overrides: Partial<IEvent> = {}): IEvent {
-    const start = moment().toISOString();
-    const end = moment().toISOString();
     return merge(
       {
         event: {
           provider: 'event_log_fixture',
           action: 'test',
-          start,
-          end,
-          duration: 1000000,
         },
         kibana: {
           saved_objects: [
             {
+              rel: 'primary',
               namespace: 'default',
               type: 'event_log_test',
               id,

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RelatedEventsQuery } from './related_events';
-import { EndpointAppConstants } from '../../../../common/types';
 import { fakeEventIndexPattern } from './children.test';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 describe('related events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date().getTime();
     expect(
-      new RelatedEventsQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id', {
+      new RelatedEventsQuery(legacyEventIndexPattern, 'awesome-id', {
         size: 1,
         timestamp,
         eventID: 'foo',
@@ -48,7 +48,7 @@ describe('related events query', () => {
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'endgame.serial_event_id': 'asc' }],
       },
-      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      index: legacyEventIndexPattern,
     });
   });
 

@@ -25,7 +25,7 @@ import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
@@ -174,7 +174,16 @@ export class TaskRunner {
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { saved_objects: [{ type: 'alert', id: alertId, namespace }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            namespace,
+          },
+        ],
+      },
     };
     eventLogger.startTiming(event);
 
@@ -202,12 +211,16 @@ export class TaskRunner {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
       event.error.message = err.message;
+      event.event = event.event || {};
+      event.event.outcome = 'failure';
       eventLogger.logEvent(event);
       throw err;
     }
 
     eventLogger.stopTiming(event);
     event.message = `alert executed: ${alertLabel}`;
+    event.event = event.event || {};
+    event.event.outcome = 'success';
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -389,7 +402,14 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
         alerting: {
           instance_id: id,
         },
-        saved_objects: [{ type: 'alert', id: params.alertId, namespace: params.namespace }],
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: params.alertId,
+            namespace: params.namespace,
+          },
+        ],
       },
       message,
     };

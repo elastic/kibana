@@ -33,6 +33,7 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     description: schema.maybe(schema.string()),
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
+    accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
     ...overrides,
   };
 }
@@ -166,6 +167,7 @@ export const ConfigSchema = schema.object({
             description: undefined,
             hint: undefined,
             icon: undefined,
+            accessAgreement: undefined,
           },
         },
         token: undefined,
@@ -245,25 +247,19 @@ export function createConfig(
   const sortedProviders: Array<{
     type: keyof ProvidersConfigType;
     name: string;
-    options: { order: number; showInSelector: boolean; description?: string };
+    order: number;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
-    for (const [name, { enabled, showInSelector, order, description }] of Object.entries(
-      providerGroup ?? {}
-    )) {
+    for (const [name, { enabled, order }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        sortedProviders.push({
-          type: type as any,
-          name,
-          options: { order, showInSelector, description },
-        });
+        sortedProviders.push({ type: type as any, name, order });
       }
     }
   }
 
-  sortedProviders.sort(({ options: { order: orderA } }, { options: { order: orderB } }) =>
+  sortedProviders.sort(({ order: orderA }, { order: orderB }) =>
     orderA < orderB ? -1 : orderA > orderB ? 1 : 0
   );
 
@@ -273,7 +269,8 @@ export function createConfig(
     typeof config.authc.selector.enabled === 'boolean'
       ? config.authc.selector.enabled
       : !isUsingLegacyProvidersFormat &&
-        sortedProviders.filter(provider => provider.options.showInSelector).length > 1;
+        sortedProviders.filter(({ type, name }) => providers[type]?.[name].showInSelector).length >
+          1;
 
   return {
     ...config,
