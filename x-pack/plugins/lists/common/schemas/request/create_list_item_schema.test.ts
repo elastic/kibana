@@ -9,13 +9,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { CreateListSchema, createListSchema } from './create_list_schema';
-import { getCreateListSchemaMock } from './create_list_schema.mock';
+import { getCreateListItemSchemaMock } from './create_list_item_schema.mock';
+import { CreateListItemSchema, createListItemSchema } from './create_list_item_schema';
 
-describe('create_list_schema', () => {
-  test('it should validate a typical lists request', () => {
-    const payload = getCreateListSchemaMock();
-    const decoded = createListSchema.decode(payload);
+describe('create_list_item_schema', () => {
+  test('it should validate a typical list item request', () => {
+    const payload = getCreateListItemSchemaMock();
+    const decoded = createListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -24,25 +24,38 @@ describe('create_list_schema', () => {
   });
 
   test('it should accept an undefined for an id', () => {
-    const payload = getCreateListSchemaMock();
+    const payload = getCreateListItemSchemaMock();
     delete payload.id;
-    const decoded = createListSchema.decode(payload);
+    const decoded = createListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
+
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
   });
 
   test('it should accept an undefined for meta', () => {
-    const payload = getCreateListSchemaMock();
+    const payload = getCreateListItemSchemaMock();
     delete payload.meta;
-    const decoded = createListSchema.decode(payload);
+    const decoded = createListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
+
     expect(getPaths(left(message.errors))).toEqual([]);
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should not allow an extra key to be sent in', () => {
+    const payload: CreateListItemSchema & { extraKey?: string } = getCreateListItemSchemaMock();
+    payload.extraKey = 'some new value';
+    const decoded = createListItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
+    expect(message.schema).toEqual({});
+  });
+
+  /*
   test('it should not allow an extra key to be sent in', () => {
     const payload: CreateListSchema & { extraKey?: string } = getCreateListSchemaMock();
     payload.extraKey = 'some new value';
@@ -52,4 +65,5 @@ describe('create_list_schema', () => {
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
     expect(message.schema).toEqual({});
   });
+  */
 });
