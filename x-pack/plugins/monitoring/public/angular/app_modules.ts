@@ -6,6 +6,7 @@
 
 import angular, { IWindowService } from 'angular';
 import '../views/all';
+// required for `ngSanitize` angular module
 import 'angular-sanitize';
 import 'angular-route';
 import '../index.scss';

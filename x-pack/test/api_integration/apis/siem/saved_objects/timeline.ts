@@ -15,10 +15,10 @@ import ApolloClient from 'apollo-client';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { deleteTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/delete/persist.gql_query';
-import { persistTimelineFavoriteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/favorite/persist.gql_query';
-import { persistTimelineMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/persist.gql_query';
-import { TimelineResult } from '../../../../../legacy/plugins/siem/public/graphql/types';
+import { deleteTimelineMutation } from '../../../../../plugins/siem/public/containers/timeline/delete/persist.gql_query';
+import { persistTimelineFavoriteMutation } from '../../../../../plugins/siem/public/containers/timeline/favorite/persist.gql_query';
+import { persistTimelineMutation } from '../../../../../plugins/siem/public/containers/timeline/persist.gql_query';
+import { TimelineResult } from '../../../../../plugins/siem/public/graphql/types';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

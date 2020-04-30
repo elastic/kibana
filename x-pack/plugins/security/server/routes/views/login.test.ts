@@ -15,7 +15,7 @@ import {
   RouteConfig,
 } from '../../../../../../src/core/server';
 import { SecurityLicense } from '../../../common/licensing';
-import { LoginState } from '../../../common/login_state';
+import { LoginSelectorProvider } from '../../../common/login_state';
 import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
 
@@ -141,6 +141,10 @@ describe('Login view routes', () => {
   });
 
   describe('Login state route', () => {
+    function getAuthcConfig(authcConfig: Record<string, unknown> = {}) {
+      return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
+    }
+
     let routeHandler: RequestHandler<any, any, any, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
@@ -159,6 +163,7 @@ describe('Login view routes', () => {
 
     it('returns only required license features.', async () => {
       license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
         allowLogin: true,
         allowRbac: false,
         allowRoleDocumentLevelSecurity: true,
@@ -176,9 +181,11 @@ describe('Login view routes', () => {
       const expectedPayload = {
         allowLogin: true,
         layout: 'error-es-unavailable',
-        showLoginForm: true,
         requiresSecureConnection: false,
-        selector: { enabled: false, providers: [] },
+        selector: {
+          enabled: false,
+          providers: [{ name: 'basic', type: 'basic', usesLoginForm: true }],
+        },
       };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
@@ -198,9 +205,11 @@ describe('Login view routes', () => {
       const expectedPayload = {
         allowLogin: true,
         layout: 'form',
-        showLoginForm: true,
         requiresSecureConnection: false,
-        selector: { enabled: false, providers: [] },
+        selector: {
+          enabled: false,
+          providers: [{ name: 'basic', type: 'basic', usesLoginForm: true }],
+        },
       };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
@@ -229,22 +238,46 @@ describe('Login view routes', () => {
       });
     });
 
-    it('returns `showLoginForm: true` only if either `basic` or `token` provider is enabled.', async () => {
+    it('returns `useLoginForm: true` for `basic` and `token` providers.', async () => {
       license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
 
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
-      const cases: Array<[boolean, ConfigType['authc']['sortedProviders']]> = [
-        [false, []],
-        [true, [{ type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } }]],
-        [true, [{ type: 'token', name: 'token1', options: { order: 0, showInSelector: true } }]],
+      const cases: Array<[LoginSelectorProvider[], ConfigType['authc']]> = [
+        [[], getAuthcConfig({ providers: { basic: { basic1: { order: 0, enabled: false } } } })],
+        [
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({ providers: { basic: { basic1: { order: 0 } } } }),
+        ],
+        [
+          [
+            {
+              name: 'token1',
+              type: 'token',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({ providers: { token: { token1: { order: 0 } } } }),
+        ],
       ];
 
-      for (const [showLoginForm, sortedProviders] of cases) {
-        config.authc.sortedProviders = sortedProviders;
+      for (const [providers, authcConfig] of cases) {
+        config.authc = authcConfig;
 
-        const expectedPayload = expect.objectContaining({ showLoginForm });
+        const expectedPayload = expect.objectContaining({
+          selector: { enabled: false, providers },
+        });
         await expect(
           routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
         ).resolves.toEqual({
@@ -261,81 +294,142 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
-      const cases: Array<[
-        boolean,
-        ConfigType['authc']['sortedProviders'],
-        LoginState['selector']['providers']
-      ]> = [
-        // selector is disabled, providers shouldn't be returned.
+      const cases: Array<[ConfigType['authc'], LoginSelectorProvider[]]> = [
+        // selector is disabled, multiple providers, but only basic provider should be returned.
         [
-          false,
+          getAuthcConfig({
+            selector: { enabled: false },
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'realm1' } },
+            },
+          }),
           [
-            { type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } },
-            { type: 'saml', name: 'saml1', options: { order: 1, showInSelector: true } },
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
           ],
-          [],
         ],
-        // selector is enabled, but only basic/token is available, providers shouldn't be returned.
+        // selector is enabled, but only basic/token is available and should be returned.
         [
-          true,
-          [{ type: 'basic', name: 'basic1', options: { order: 0, showInSelector: true } }],
-          [],
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: { basic: { basic1: { order: 0 } } },
+          }),
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
         ],
-        // selector is enabled, non-basic/token providers should be returned
+        // selector is enabled, all providers should be returned
         [
-          true,
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: {
+                basic1: {
+                  order: 0,
+                  description: 'some-desc1',
+                  hint: 'some-hint1',
+                  icon: 'logoElastic',
+                },
+              },
+              saml: {
+                saml1: { order: 1, description: 'some-desc2', realm: 'realm1', icon: 'some-icon2' },
+                saml2: { order: 2, description: 'some-desc3', hint: 'some-hint3', realm: 'realm2' },
+              },
+            },
+          }),
           [
             {
               type: 'basic',
               name: 'basic1',
-              options: { order: 0, showInSelector: true, description: 'some-desc1' },
+              description: 'some-desc1',
+              hint: 'some-hint1',
+              icon: 'logoElastic',
+              usesLoginForm: true,
             },
             {
               type: 'saml',
               name: 'saml1',
-              options: { order: 1, showInSelector: true, description: 'some-desc2' },
+              description: 'some-desc2',
+              icon: 'some-icon2',
+              usesLoginForm: false,
             },
             {
               type: 'saml',
               name: 'saml2',
-              options: { order: 2, showInSelector: true, description: 'some-desc3' },
+              description: 'some-desc3',
+              hint: 'some-hint3',
+              usesLoginForm: false,
             },
           ],
-          [
-            { type: 'saml', name: 'saml1', description: 'some-desc2' },
-            { type: 'saml', name: 'saml2', description: 'some-desc3' },
-          ],
         ],
-        // selector is enabled, only non-basic/token providers that are enabled in selector should be returned.
+        // selector is enabled, only providers that are enabled should be returned.
         [
-          true,
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: {
+                basic1: {
+                  order: 0,
+                  description: 'some-desc1',
+                  hint: 'some-hint1',
+                  icon: 'some-icon1',
+                },
+              },
+              saml: {
+                saml1: {
+                  order: 1,
+                  description: 'some-desc2',
+                  realm: 'realm1',
+                  showInSelector: false,
+                },
+                saml2: {
+                  order: 2,
+                  description: 'some-desc3',
+                  hint: 'some-hint3',
+                  icon: 'some-icon3',
+                  realm: 'realm2',
+                },
+              },
+            },
+          }),
           [
             {
               type: 'basic',
               name: 'basic1',
-              options: { order: 0, showInSelector: true, description: 'some-desc1' },
-            },
-            {
-              type: 'saml',
-              name: 'saml1',
-              options: { order: 1, showInSelector: false, description: 'some-desc2' },
+              description: 'some-desc1',
+              hint: 'some-hint1',
+              icon: 'some-icon1',
+              usesLoginForm: true,
             },
             {
               type: 'saml',
               name: 'saml2',
-              options: { order: 2, showInSelector: true, description: 'some-desc3' },
+              description: 'some-desc3',
+              hint: 'some-hint3',
+              icon: 'some-icon3',
+              usesLoginForm: false,
             },
           ],
-          [{ type: 'saml', name: 'saml2', description: 'some-desc3' }],
         ],
       ];
 
-      for (const [selectorEnabled, sortedProviders, expectedProviders] of cases) {
-        config.authc.selector.enabled = selectorEnabled;
-        config.authc.sortedProviders = sortedProviders;
+      for (const [authcConfig, expectedProviders] of cases) {
+        config.authc = authcConfig;
 
         const expectedPayload = expect.objectContaining({
-          selector: { enabled: selectorEnabled, providers: expectedProviders },
+          selector: { enabled: authcConfig.selector.enabled, providers: expectedProviders },
         });
         await expect(
           routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)

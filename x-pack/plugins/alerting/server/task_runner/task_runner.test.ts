@@ -165,12 +165,14 @@ describe('Task Runner', () => {
       Object {
         "event": Object {
           "action": "execute",
+          "outcome": "success",
         },
         "kibana": Object {
           "saved_objects": Array [
             Object {
               "id": "1",
               "namespace": undefined,
+              "rel": "primary",
               "type": "alert",
             },
           ],
@@ -226,12 +228,14 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "execute",
+              "outcome": "success",
             },
             "kibana": Object {
               "saved_objects": Array [
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -252,6 +256,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -272,6 +277,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
                 Object {
@@ -342,12 +348,14 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "execute",
+              "outcome": "success",
             },
             "kibana": Object {
               "saved_objects": Array [
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -368,6 +376,7 @@ describe('Task Runner', () => {
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
@@ -558,12 +567,14 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "outcome": "failure",
             },
             "kibana": Object {
               "saved_objects": Array [
                 Object {
                   "id": "1",
                   "namespace": undefined,
+                  "rel": "primary",
                   "type": "alert",
                 },
               ],
