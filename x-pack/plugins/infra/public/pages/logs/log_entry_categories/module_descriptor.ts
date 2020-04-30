@@ -72,20 +72,26 @@ const setUpModule = async (
       },
     },
   ];
-  const query =
-    datasetFilter.type === 'includeSome'
-      ? {
-          bool: {
-            filter: [
+  const query = {
+    bool: {
+      filter: [
+        ...(datasetFilter.type === 'includeSome'
+          ? [
               {
                 terms: {
                   'event.dataset': datasetFilter.datasets,
                 },
               },
-            ],
+            ]
+          : []),
+        {
+          exists: {
+            field: 'message',
           },
-        }
-      : undefined;
+        },
+      ],
+    },
+  };
 
   return callSetupMlModuleAPI(
     moduleId,
