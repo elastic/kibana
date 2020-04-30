@@ -48,7 +48,7 @@ export default function({ getService, getPageObjects }) {
 
       log.debug('create long_window_logstash index pattern');
       // NOTE: long_window_logstash load does NOT create index pattern
-      await PageObjects.settings.createIndexPattern('long-window-logstash-');
+      await PageObjects.settings.createIndexPattern('long-window-logstash-*');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await browser.refresh();
 

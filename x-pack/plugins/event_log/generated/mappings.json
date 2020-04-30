@@ -86,6 +86,10 @@
                 },
                 "saved_objects": {
                     "properties": {
+                        "rel": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
                         "namespace": {
                             "type": "keyword",
                             "ignore_above": 1024

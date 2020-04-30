@@ -39,17 +39,29 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
       <EuiFlexItem>
         <EuiText>
           <h1>
-            <FormattedMessage
-              id="xpack.ingestManager.createDatasource.pageTitle"
-              defaultMessage="Add data source"
-            />
+            {from === 'edit' ? (
+              <FormattedMessage
+                id="xpack.ingestManager.editDatasource.pageTitle"
+                defaultMessage="Edit data source"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ingestManager.createDatasource.pageTitle"
+                defaultMessage="Add data source"
+              />
+            )}
           </h1>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSpacer size="s" />
         <EuiText color="subdued" size="s">
-          {from === 'config' ? (
+          {from === 'edit' ? (
+            <FormattedMessage
+              id="xpack.ingestManager.editDatasource.pageDescription"
+              defaultMessage="Follow the instructions below to edit this data source."
+            />
+          ) : from === 'config' ? (
             <FormattedMessage
               id="xpack.ingestManager.createDatasource.pageDescriptionfromConfig"
               defaultMessage="Follow the instructions below to add an integration to this agent configuration."
@@ -68,7 +80,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
     <EuiFlexGroup justifyContent="flexEnd" direction={'row'} gutterSize="xl">
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
-        {agentConfig && from === 'config' ? (
+        {agentConfig && (from === 'config' || from === 'edit') ? (
           <EuiDescriptionList style={{ textAlign: 'right' }} textStyle="reverse">
             <EuiDescriptionListTitle>
               <FormattedMessage
