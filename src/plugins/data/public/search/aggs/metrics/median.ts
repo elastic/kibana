@@ -27,6 +27,11 @@ const medianTitle = i18n.translate('data.search.aggs.metrics.medianTitle', {
   defaultMessage: 'Median',
 });
 
+export interface AggParamsMedian {
+  field: string;
+  json?: string;
+}
+
 export interface MedianMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

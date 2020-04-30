@@ -26,3 +26,8 @@ export { AggParamsCardinality } from './cardinality';
 export { AggParamsCount } from './count';
 export { AggParamsGeoBounds } from './geo_bounds';
 export { AggParamsGeoCentroid } from './geo_centroid';
+export { AggParamsMax } from './max';
+export { AggParamsMedian } from './median';
+export { AggParamsMin } from './min';
+export { AggParamsStdDeviation } from './std_deviation';
+export { AggParamsSum } from './sum';

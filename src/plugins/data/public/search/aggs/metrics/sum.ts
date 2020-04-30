@@ -27,6 +27,11 @@ const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
   defaultMessage: 'Sum',
 });
 
+export interface AggParamsSum {
+  field: string;
+  json?: string;
+}
+
 export interface SumMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

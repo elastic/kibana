@@ -27,6 +27,11 @@ const minTitle = i18n.translate('data.search.aggs.metrics.minTitle', {
   defaultMessage: 'Min',
 });
 
+export interface AggParamsMin {
+  field: string;
+  json?: string;
+}
+
 export interface MinMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

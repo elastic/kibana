@@ -28,6 +28,11 @@ import {
   AggParamsCount,
   AggParamsGeoBounds,
   AggParamsGeoCentroid,
+  AggParamsMax,
+  AggParamsMedian,
+  AggParamsMin,
+  AggParamsStdDeviation,
+  AggParamsSum,
   AggType,
   aggTypeFieldFilters,
   AggTypesRegistrySetup,
@@ -103,4 +108,9 @@ export interface AggParamsMapping {
   count: AggParamsCount;
   geo_bounds: AggParamsGeoBounds;
   geo_centroid: AggParamsGeoCentroid;
+  max: AggParamsMax;
+  median: AggParamsMedian;
+  min: AggParamsMin;
+  std_deviation: AggParamsStdDeviation;
+  sum: AggParamsSum;
 }

@@ -27,6 +27,11 @@ const maxTitle = i18n.translate('data.search.aggs.metrics.maxTitle', {
   defaultMessage: 'Max',
 });
 
+export interface AggParamsMax {
+  field: string;
+  json?: string;
+}
+
 export interface MaxMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

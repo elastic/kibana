@@ -25,6 +25,10 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_respons
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsStdDeviation {
+  field: string;
+  json?: string;
+}
 interface ValProp {
   valProp: string[];
   title: string;
