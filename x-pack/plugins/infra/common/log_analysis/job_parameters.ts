@@ -69,3 +69,25 @@ export const combineDatasetFilters = (
     datasets: [...includedDatasets],
   };
 };
+
+export const filterDatasetFilter = (
+  datasetFilter: DatasetFilter,
+  predicate: (dataset: string) => boolean
+): DatasetFilter => {
+  if (datasetFilter.type === 'includeAll') {
+    return datasetFilter;
+  } else {
+    const newDatasets = datasetFilter.datasets.filter(predicate);
+
+    if (newDatasets.length > 0) {
+      return {
+        type: 'includeSome',
+        datasets: newDatasets,
+      };
+    } else {
+      return {
+        type: 'includeAll',
+      };
+    }
+  }
+};
