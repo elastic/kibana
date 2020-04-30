@@ -57,6 +57,11 @@ export const EditConnector = React.memo(
       setIsEditConnector(true);
     }, []);
 
+    const onCancelConnector = useCallback(async () => {
+      form.setFieldValue('connector', selectedConnector);
+      setIsEditConnector(false);
+    }, [form, selectedConnector]);
+
     const onSubmitConnector = useCallback(async () => {
       const { isValid, data: newData } = await form.submit();
       if (isValid && newData.connector) {
@@ -70,11 +75,11 @@ export const EditConnector = React.memo(
           <EuiFlexItem grow={false}>
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
-          {isLoading && <EuiLoadingSpinner data-test-subj="connector-list-loading" />}
+          {isLoading && <EuiLoadingSpinner data-test-subj="connector-loading" />}
           {!isLoading && (
-            <EuiFlexItem data-test-subj="connector-list-edit" grow={false}>
+            <EuiFlexItem data-test-subj="connector-edit" grow={false}>
               <EuiButtonIcon
-                data-test-subj="connector-list-edit-button"
+                data-test-subj="connector-edit-button"
                 isDisabled={disabled}
                 aria-label={i18n.EDIT_CONNECTOR}
                 iconType={'pencil'}
@@ -125,7 +130,7 @@ export const EditConnector = React.memo(
                     <EuiButtonEmpty
                       data-test-subj="edit-connectors-cancel"
                       iconType="cross"
-                      onClick={setIsEditConnector.bind(null, false)}
+                      onClick={onCancelConnector}
                       size="s"
                     >
                       {i18n.CANCEL}

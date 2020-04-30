@@ -19,6 +19,7 @@ import {
 import { flattenCaseSavedObject } from '../utils';
 import { initGetCaseApi } from './get_case';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
 
 describe('GET case', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -119,5 +120,52 @@ describe('GET case', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
 
     expect(response.status).toEqual(400);
+  });
+  it(`case w/o connector_id - returns the case with connector id when 3rd party unconfigured`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_DETAILS_URL,
+      method: 'get',
+      params: {
+        case_id: 'mock-no-connector_id',
+      },
+      query: {
+        includeComments: false,
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload.connector_id).toEqual('none');
+  });
+  it(`case w/o connector_id - returns the case with connector id when 3rd party configured`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_DETAILS_URL,
+      method: 'get',
+      params: {
+        case_id: 'mock-no-connector_id',
+      },
+      query: {
+        includeComments: false,
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload.connector_id).toEqual('123');
   });
 });

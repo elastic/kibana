@@ -20,6 +20,7 @@ describe('usePostPushToService', () => {
   const updateCase = jest.fn();
   const samplePush = {
     caseId: pushedCase.id,
+    caseServices: {},
     connectorName: 'sample',
     connectorId: '22',
     updateCase,
@@ -76,7 +77,7 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush.connectorId,
-        formatServiceRequestData(basicCase),
+        formatServiceRequestData(basicCase, 'none', {}),
         abortCtrl.signal
       );
     });

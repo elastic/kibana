@@ -23,10 +23,10 @@ import { CaseServices } from '../../../../containers/case/use_get_case_user_acti
 import { parseString } from '../../../../containers/case/utils';
 
 export interface UserActionTreeProps {
-  data: Case;
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
   connectors: Connector[];
+  data: Case;
   fetchUserActions: () => void;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
@@ -245,6 +245,7 @@ export const UserActionTree = React.memo(
               firstPush,
               connectors,
             });
+
             return (
               <UserActionItem
                 key={action.actionId}

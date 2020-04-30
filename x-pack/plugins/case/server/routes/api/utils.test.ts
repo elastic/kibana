@@ -275,7 +275,7 @@ describe('Utils', () => {
     });
 
     it('it handles total comments correctly when caseId is not in extraCaseData', () => {
-      const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 2 }];
+      const extraCaseData = [{ caseId: mockCases[0].id, totalComments: 0 }];
       const res = flattenCaseSavedObjects([mockCases[0]], extraCaseData, '123');
 
       expect(res).toEqual([
@@ -311,14 +311,12 @@ describe('Utils', () => {
       const extraCaseData = [
         {
           caseId: mockCaseNoConnectorId.id,
-          totalComment: 2,
-          connectorId: '123',
-          caseVersion: '700',
+          totalComment: 0,
         },
       ];
 
       // @ts-ignore this is to update old case saved objects to include connector_id
-      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData);
+      const res = flattenCaseSavedObjects([mockCaseNoConnectorId], extraCaseData, '123');
       expect(res).toEqual([
         {
           id: mockCaseNoConnectorId.id,
@@ -343,8 +341,8 @@ describe('Utils', () => {
             username: 'elastic',
           },
           comments: [],
-          totalComment: 2,
-          version: '700',
+          totalComment: 0,
+          version: 'WzAsMV0=',
         },
       ]);
     });
@@ -352,9 +350,7 @@ describe('Utils', () => {
       const extraCaseData = [
         {
           caseId: mockCaseNoConnectorId.id,
-          totalComment: 2,
-          connectorId: 'none',
-          caseVersion: '700',
+          totalComment: 0,
         },
       ];
 
@@ -384,8 +380,8 @@ describe('Utils', () => {
             username: 'elastic',
           },
           comments: [],
-          totalComment: 2,
-          version: '700',
+          totalComment: 0,
+          version: 'WzAsMV0=',
         },
       ]);
     });
@@ -432,7 +428,7 @@ describe('Utils', () => {
     it('inserts missing connectorId', () => {
       const extraCaseData = {
         totalComment: 2,
-        connectorId: '123',
+        caseConfigureConnectorId: '123',
       };
 
       // @ts-ignore this is to update old case saved objects to include connector_id
@@ -461,14 +457,13 @@ describe('Utils', () => {
         },
         comments: [],
         totalComment: 2,
-        version: '700',
+        version: 'WzAsMV0=',
       });
     });
     it('inserts missing connectorId (none)', () => {
       const extraCaseData = {
         totalComment: 2,
-        connectorId: 'none',
-        version: '700',
+        caseConfigureConnectorId: 'none',
       };
 
       // @ts-ignore this is to update old case saved objects to include connector_id
@@ -497,7 +492,7 @@ describe('Utils', () => {
         },
         comments: [],
         totalComment: 2,
-        version: '700',
+        version: 'WzAsMV0=',
       });
     });
   });

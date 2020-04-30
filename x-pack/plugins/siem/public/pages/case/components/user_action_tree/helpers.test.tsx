@@ -19,8 +19,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'tags',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -44,8 +43,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'title',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(
@@ -60,8 +58,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'description',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
@@ -72,8 +69,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'status',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.REOPENED_CASE.toLowerCase()} ${i18n.CASE}`);
@@ -84,8 +80,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'status',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.CLOSED_CASE.toLowerCase()} ${i18n.CASE}`);
@@ -96,8 +91,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'comment',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`);
@@ -108,8 +102,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'pushed',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: true,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -132,8 +125,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'pushed',
-      firstIndexPushToService: 0,
-      index: 1,
+      firstPush: false,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -156,8 +148,7 @@ describe('User action tree helpers', () => {
       action,
       connectors,
       field: 'tags',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     const wrapper = mount(<>{result}</>);

@@ -15,6 +15,7 @@ import {
   mockCaseComments,
 } from '../__fixtures__';
 import { initPatchCasesApi } from './patch_cases';
+import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
 
 describe('PATCH cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -53,7 +54,7 @@ describe('PATCH cases', () => {
         closed_at: '2019-11-25T21:54:48.952Z',
         closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
         comments: [],
-        connector_id: '123',
+        connector_id: 'none',
         created_at: '2019-11-25T21:54:48.952Z',
         created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
         description: 'This is a brand new case of a bad meanie defacing data',
@@ -87,6 +88,7 @@ describe('PATCH cases', () => {
     const theContext = createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 
@@ -106,6 +108,50 @@ describe('PATCH cases', () => {
         status: 'open',
         tags: ['LOLBins'],
         title: 'Another bad one',
+        totalComment: 0,
+        updated_at: '2019-11-25T21:54:48.952Z',
+        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        version: 'WzE3LDFd',
+      },
+    ]);
+  });
+  it(`Patches a case without a connector_id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-no-connector_id',
+            status: 'closed',
+            version: 'WzAsMV0=',
+          },
+        ],
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: [mockCaseNoConnectorId],
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload).toEqual([
+      {
+        closed_at: '2019-11-25T21:54:48.952Z',
+        closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
+        comments: [],
+        connector_id: 'none',
+        created_at: '2019-11-25T21:54:48.952Z',
+        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
+        description: 'This is a brand new case of a bad meanie defacing data',
+        id: 'mock-no-connector_id',
+        external_service: null,
+        status: 'closed',
+        tags: ['defacement'],
+        title: 'Super Bad Security Issue',
         totalComment: 0,
         updated_at: '2019-11-25T21:54:48.952Z',
         updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },

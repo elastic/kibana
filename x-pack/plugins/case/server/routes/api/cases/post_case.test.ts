@@ -15,6 +15,7 @@ import {
 } from '../__fixtures__';
 import { initPostCaseApi } from './post_case';
 import { CASES_URL } from '../../../../common/constants';
+import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -106,6 +107,7 @@ describe('POST cases', () => {
     const theContext = createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
       })
     );
 

@@ -35,7 +35,7 @@ const noConnectorOption = {
         <EuiIconExtended type="minusInCircle" size={ICON_SIZE} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <span>{i18n.NO_CONNECTOR}</span>
+        <span data-test-subj={`dropdown-connector-no-connector`}>{i18n.NO_CONNECTOR}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   ),
@@ -65,7 +65,9 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <span>{connector.name}</span>
+                  <span data-test-subj={`dropdown-connector-${connector.id}`}>
+                    {connector.name}
+                  </span>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),

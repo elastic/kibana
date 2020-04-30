@@ -19,6 +19,7 @@ import {
   CasesFindResponse,
 } from '../../../../case/common/api/cases';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
 const basicCommentId = 'basic-comment-id';
@@ -88,7 +89,7 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
 };
 
-const basicPush = {
+export const basicPush = {
   connectorId: '123',
   connectorName: 'connector name',
   externalId: 'external_id',
