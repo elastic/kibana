@@ -14,7 +14,6 @@ import { ExecutorParamsSchema } from './schema';
 
 import {
   CreateExternalServiceArgs,
-  ExternalIncidentServiceConfiguration,
   CreateActionTypeArgs,
   ExecutorParams,
   MapRecord,
@@ -57,7 +56,7 @@ export const mapParams = (
       prev[field.target] = get(curr, params);
     }
     return prev;
-  }, {} as AnyParams);
+  }, {});
 };
 
 export const createConnectorExecutor = ({
@@ -66,14 +65,9 @@ export const createConnectorExecutor = ({
 }: CreateExternalServiceBasicArgs) => async (
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> => {
-  const actionId = execOptions.actionId;
-  const {
-    casesConfiguration: { mapping: configurationMapping },
-  } = execOptions.config as ExternalIncidentServiceConfiguration;
-
+  const { actionId, config, params, secrets } = execOptions;
+  const { subAction, subActionParams } = params as ExecutorParams;
   let data = {};
-  const params = execOptions.params as ExecutorParams;
-  const { subAction, subActionParams } = params;
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
     Pick<ActionTypeExecutorResult, 'actionId'> = {
@@ -82,8 +76,8 @@ export const createConnectorExecutor = ({
   };
 
   const externalService = createExternalService({
-    config: execOptions.config,
-    secrets: execOptions.secrets,
+    config,
+    secrets,
   });
 
   if (!api[subAction]) {
@@ -98,7 +92,7 @@ export const createConnectorExecutor = ({
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
     const { comments, externalId, ...restParams } = pushToServiceParams;
 
-    const mapping = buildMap(configurationMapping);
+    const mapping = buildMap(config.casesConfiguration.mapping);
     const externalCase = mapParams(restParams, mapping);
 
     data = await api.pushToService({
