@@ -12,8 +12,6 @@ export const transformListItemToElasticQuery = ({
 }: {
   type: Type;
   value: string;
-  // We disable the consistent return since we want to use typescript for exhaustive type checks
-  // eslint-disable-next-line consistent-return
 }): EsDataTypeUnion => {
   switch (type) {
     case 'ip': {
@@ -27,4 +25,9 @@ export const transformListItemToElasticQuery = ({
       };
     }
   }
+  return assertUnreachable(type);
+};
+
+const assertUnreachable = (type: string): never => {
+  throw new Error(`Unknown type: "${type}" in transformListItemToElasticQuery`);
 };
