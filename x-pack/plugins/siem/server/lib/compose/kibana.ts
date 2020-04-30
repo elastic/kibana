@@ -27,9 +27,9 @@ import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
 import { ElasticsearchUncommonProcessesAdapter, UncommonProcesses } from '../uncommon_processes';
-import { Note } from '../note/saved_object';
-import { PinnedEvent } from '../pinned_event/saved_object';
-import { Timeline } from '../timeline/saved_object';
+import * as note from '../note/saved_object';
+import * as pinnedEvent from '../pinned_event/saved_object';
+import * as timeline from '../timeline/saved_object';
 import { ElasticsearchMatrixHistogramAdapter, MatrixHistogram } from '../matrix_histogram';
 
 export function compose(
@@ -40,10 +40,6 @@ export function compose(
   const framework = new KibanaBackendFrameworkAdapter(core, plugins, isProductionMode);
   const sources = new Sources(new ConfigurationSourcesAdapter());
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
-
-  const timeline = new Timeline();
-  const note = new Note();
-  const pinnedEvent = new PinnedEvent();
 
   const domainLibs: AppDomainLibs = {
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),

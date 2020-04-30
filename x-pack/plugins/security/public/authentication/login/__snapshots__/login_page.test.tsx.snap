@@ -121,10 +121,15 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   selector={
     Object {
       "enabled": false,
-      "providers": Array [],
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
     }
   }
-  showLoginForm={true}
 />
 `;
 
@@ -155,10 +160,15 @@ exports[`LoginPage enabled form state renders as expected when info message is s
   selector={
     Object {
       "enabled": false,
-      "providers": Array [],
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
     }
   }
-  showLoginForm={true}
 />
 `;
 
@@ -189,10 +199,55 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   selector={
     Object {
       "enabled": false,
-      "providers": Array [],
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
     }
   }
-  showLoginForm={true}
+/>
+`;
+
+exports[`LoginPage enabled form state renders as expected when loginHelp is set 1`] = `
+<LoginForm
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "get": [MockFunction],
+    }
+  }
+  infoMessage="Your session has timed out. Please log in again."
+  loginAssistanceMessage=""
+  loginHelp="**some-help**"
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  selector={
+    Object {
+      "enabled": false,
+      "providers": Array [
+        Object {
+          "name": "basic1",
+          "type": "basic",
+          "usesLoginForm": true,
+        },
+      ],
+    }
+  }
 />
 `;
 
@@ -279,10 +334,15 @@ exports[`LoginPage page renders as expected 1`] = `
           selector={
             Object {
               "enabled": false,
-              "providers": Array [],
+              "providers": Array [
+                Object {
+                  "name": "basic1",
+                  "type": "basic",
+                  "usesLoginForm": true,
+                },
+              ],
             }
           }
-          showLoginForm={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

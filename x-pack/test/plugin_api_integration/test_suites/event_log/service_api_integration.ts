@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import uuid from 'uuid';
 import expect from '@kbn/expect/expect.js';
 import { IEvent } from '../../../../plugins/event_log/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -97,10 +98,10 @@ export default function({ getService }: FtrProviderContext) {
         await registerProviderActions('provider4', ['action1', 'action2']);
       }
 
-      const eventId = '1';
+      const eventId = uuid.v4();
       const event: IEvent = {
         event: { action: 'action1', provider: 'provider4' },
-        kibana: { saved_objects: [{ type: 'event_log_test', id: eventId }] },
+        kibana: { saved_objects: [{ rel: 'primary', type: 'event_log_test', id: eventId }] },
       };
       await logTestEvent(eventId, event);
 
