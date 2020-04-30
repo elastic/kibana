@@ -22,8 +22,15 @@ import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized } from '../types';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsCumulativeSum {
+  buckets_path: string;
+  customMetric?: AggConfigSerialized;
+  metricAgg?: string;
+  json?: string;
+}
 export interface CumulativeSumMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

@@ -33,6 +33,17 @@ import {
   AggParamsMin,
   AggParamsStdDeviation,
   AggParamsSum,
+  AggParamsBucketAvg,
+  AggParamsBucketMax,
+  AggParamsBucketMin,
+  AggParamsBucketSum,
+  AggParamsCumulativeSum,
+  AggParamsDerivative,
+  AggParamsMovingAvg,
+  AggParamsPercentileRanks,
+  AggParamsPercentiles,
+  AggParamsSerialDiff,
+  AggParamsTopHit,
   AggType,
   aggTypeFieldFilters,
   AggTypesRegistrySetup,
@@ -113,4 +124,15 @@ export interface AggParamsMapping {
   min: AggParamsMin;
   std_deviation: AggParamsStdDeviation;
   sum: AggParamsSum;
+  bucket_avg: AggParamsBucketAvg;
+  bucket_max: AggParamsBucketMax;
+  bucket_min: AggParamsBucketMin;
+  bucket_sum: AggParamsBucketSum;
+  cumulative_sum: AggParamsCumulativeSum;
+  derivative: AggParamsDerivative;
+  moving_avg: AggParamsMovingAvg;
+  percentile_ranks: AggParamsPercentileRanks;
+  percentiles: AggParamsPercentiles;
+  serial_diff: AggParamsSerialDiff;
+  top_hit: AggParamsTopHit;
 }

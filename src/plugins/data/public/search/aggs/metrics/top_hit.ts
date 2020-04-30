@@ -24,6 +24,15 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsTopHit {
+  field: string;
+  aggregate: 'min' | 'max' | 'sum' | 'average' | 'concat';
+  sortField: string;
+  size?: number;
+  sortOrder?: 'desc' | 'asc';
+  json?: string;
+}
+
 export interface TopHitMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

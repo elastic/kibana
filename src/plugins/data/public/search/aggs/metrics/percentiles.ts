@@ -26,6 +26,12 @@ import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';
 import { GetInternalStartServicesFn } from '../../../types';
 
+export interface AggParamsPercentiles {
+  field: string;
+  percents?: number[];
+  json?: string;
+}
+
 export type IPercentileAggConfig = IResponseAggConfig;
 
 export interface PercentilesMetricAggDependencies {
