@@ -609,7 +609,7 @@ describe('xy_expression', () => {
       wrapper
         .find(Settings)
         .first()
-        .prop('onBrushEnd')!(1585757732783, 1585758880838);
+        .prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
       expect(executeTriggerActions).toHaveBeenCalledWith('SELECT_RANGE_TRIGGER', {
         data: {
