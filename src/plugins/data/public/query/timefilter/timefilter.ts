@@ -164,7 +164,9 @@ export class Timefilter {
   };
 
   public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
-    return getTime(indexPattern, timeRange ? timeRange : this._time, this.getForceNow());
+    return getTime(indexPattern, timeRange ? timeRange : this._time, {
+      forceNow: this.getForceNow(),
+    });
   };
 
   public getBounds(): TimeRangeBounds {
