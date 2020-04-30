@@ -97,7 +97,7 @@ export const AppContainer: FunctionComponent<Props> = ({
     <Fragment>
       {appNotFound && <AppNotFound />}
       {showSpinner && (
-        <div className="appContainerLoading">
+        <div className="appContainer__loading">
           <EuiLoadingSpinner size="l" />
         </div>
       )}
