@@ -10,14 +10,8 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE
 } from '../../../../common/elasticsearch_fieldnames';
+import { severity } from '../../../../../../../plugins/apm/common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
-
-enum severity {
-  critical = 'critical',
-  major = 'major',
-  minor = 'minor',
-  warning = 'warning'
-}
 
 const getBorderColor = (el: cytoscape.NodeSingular) => {
   const nodeSeverity = el.data('severity');

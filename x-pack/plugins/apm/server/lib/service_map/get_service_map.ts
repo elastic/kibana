@@ -17,6 +17,7 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { dedupeConnections } from './dedupe_connections';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
+import { addAnomaliesToServicesData } from './ml_helpers';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -137,6 +138,39 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
+async function getAnomaliesData(options: IEnvOptions) {
+  const { setup } = options;
+  const { client } = setup;
+  const params = {
+    index: '.ml-anomalies-*',
+    body: {
+      size: 0,
+      query: {
+        exists: {
+          field: 'bucket_span'
+        }
+      },
+      aggs: {
+        jobs: {
+          terms: {
+            field: 'job_id',
+            size: 10
+          },
+          aggs: {
+            max_score: {
+              max: {
+                field: 'anomaly_score'
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return await client.search(params);
+}
+
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
 export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 
@@ -148,8 +182,15 @@ export async function getServiceMap(options: IEnvOptions) {
     getServicesData(options)
   ]);
 
+  const anomaliesResponse = await getAnomaliesData(options);
+
+  const servicesDataWithAnomalies = addAnomaliesToServicesData(
+    servicesData,
+    anomaliesResponse
+  );
+
   return dedupeConnections({
     ...connectionData,
-    services: servicesData
+    services: servicesDataWithAnomalies
   });
 }
