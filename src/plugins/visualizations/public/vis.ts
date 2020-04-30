@@ -28,6 +28,7 @@
  */
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
+import { Assign } from '@kbn/utility-types';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
 import { VisType } from './vis_types';
@@ -60,7 +61,7 @@ export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
   indexPattern?: IndexPattern;
-  searchSource: ISearchSource;
+  searchSource?: ISearchSource;
   savedSearchId?: string;
 }
 
@@ -75,13 +76,12 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
     searchSource.setParent(savedSearch.searchSource);
   }
-  searchSource!.setField('size', 0);
+  searchSource.setField('size', 0);
   return searchSource;
 };
 
-interface PartialVisState extends Omit<SerializedVis, 'data'> {
-  data: Partial<SerializedVisData>;
-}
+type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
+
 export class Vis {
   public readonly type: VisType;
   public readonly id?: string;
@@ -91,9 +91,7 @@ export class Vis {
   // Session state is for storing information that is transitory, and will not be saved with the visualization.
   // For instance, map bounds, which depends on the view port, browser window size, etc.
   public sessionState: Record<string, any> = {};
-  public data: VisData = {
-    searchSource: {} as ISearchSource,
-  };
+  public data: VisData = {};
 
   public readonly uiState: PersistedState;
 
@@ -130,7 +128,7 @@ export class Vis {
       this.description = state.description;
     }
     if (state.params || typeChanged) {
-      this.params = this.getParams(state.params!);
+      this.params = this.getParams(state.params);
     }
 
     if (state.data && state.data.searchSource) {
@@ -139,10 +137,12 @@ export class Vis {
     }
     if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
-      this.data.searchSource = await getSearchSource(
-        this.data.searchSource,
-        this.data.savedSearchId
-      );
+      if (this.data.searchSource) {
+        this.data.searchSource = await getSearchSource(
+          this.data.searchSource,
+          this.data.savedSearchId
+        );
+      }
     }
     if (state.data && state.data.aggs) {
       const configStates = this.initializeDefaultsFromSchemas(
@@ -162,7 +162,7 @@ export class Vis {
   clone() {
     const { data, ...restOfSerialized } = this.serialize();
     const vis = new Vis(this.type.name, restOfSerialized as any);
-    vis.setState(restOfSerialized as any);
+    vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)
       : undefined;
@@ -184,7 +184,7 @@ export class Vis {
       uiState: this.uiState.toJSON(),
       data: {
         aggs: aggs as any,
-        searchSource: this.data.searchSource!.getSerializedFields(),
+        searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
         savedSearchId: this.data.savedSearchId,
       },
     };

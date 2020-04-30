@@ -35,7 +35,7 @@ import { extractReferences, injectReferences } from './saved_visualization_refer
 import { IIndexPattern } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
 
-export const convertToSerializedVis = async (savedVis: ISavedVis): Promise<SerializedVis> => {
+export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
   const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
 
   const aggs = searchSourceFields && searchSourceFields.index ? visState.aggs || [] : visState.aggs;

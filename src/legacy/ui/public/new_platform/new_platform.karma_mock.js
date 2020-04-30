@@ -525,6 +525,7 @@ export const npStart = {
       docViews: {
         DocViewer: () => null,
       },
+      savedSearchLoader: {},
     },
   },
 };
