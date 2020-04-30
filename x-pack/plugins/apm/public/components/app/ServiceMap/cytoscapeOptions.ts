@@ -17,17 +17,17 @@ const getBorderColor = (el: cytoscape.NodeSingular) => {
   const nodeSeverity = el.data('severity');
   if (el.hasClass('primary') || el.selected()) {
     return theme.euiColorPrimary;
-  } else if (nodeSeverity === severity.warning) {
-    return theme.euiColorVis0;
-  } else if (
-    nodeSeverity === severity.minor ||
-    nodeSeverity === severity.major
-  ) {
-    return theme.euiColorVis5;
-  } else if (nodeSeverity === severity.critical) {
-    return theme.euiColorVis9;
-  } else {
-    return theme.euiColorMediumShade;
+  }
+
+  switch (nodeSeverity) {
+    case severity.warning:
+      return theme.euiColorVis0;
+    case severity.minor || severity.major:
+      return theme.euiColorVis5;
+    case severity.critical:
+      return theme.euiColorVis9;
+    default:
+      return theme.euiColorMediumShade;
   }
 };
 
