@@ -295,6 +295,7 @@ This means that ILM would "rollover" the current index, say
 which would "inherit" everything from the index template, and then ILM will
 set the write index of the the alias to the new index.  This would happen
 when the original index grew past 50 GB, or was created more than 30 days ago.
+After rollover, the indices will be removed after 90 days to avoid disks to fill up.
 
 For more relevant information on ILM, see:
 [getting started with ILM doc][] and [write index alias behavior][]:
