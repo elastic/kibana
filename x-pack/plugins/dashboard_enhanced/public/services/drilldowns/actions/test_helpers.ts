@@ -15,6 +15,7 @@ import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actio
 import { uiActionsEnhancedPluginMock } from '../../../../../advanced_ui_actions/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
+  public rootType = 'dashboard';
   public readonly type = 'mock';
   private readonly triggers: Array<keyof TriggerContextMapping> = [];
   constructor(
@@ -31,7 +32,7 @@ export class MockEmbeddable extends Embeddable {
   }
   public getRoot() {
     return {
-      type: 'dashboard',
+      type: this.rootType,
     } as Embeddable;
   }
 }

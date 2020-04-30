@@ -49,6 +49,7 @@ interface CompatibilityParams {
   isEdit?: boolean;
   isValueClickTriggerSupported?: boolean;
   isEmbeddableEnhanced?: boolean;
+  rootType?: string;
 }
 
 describe('isCompatible', () => {
@@ -59,6 +60,7 @@ describe('isCompatible', () => {
       isEdit = true,
       isValueClickTriggerSupported = true,
       isEmbeddableEnhanced = true,
+      rootType = 'dashboard',
     }: CompatibilityParams,
     expectedResult: boolean = true
   ): Promise<void> {
@@ -70,6 +72,8 @@ describe('isCompatible', () => {
         >,
       }
     );
+
+    embeddable.rootType = rootType;
 
     if (isEmbeddableEnhanced) {
       embeddable = enhanceEmbeddable(embeddable);
@@ -104,6 +108,12 @@ describe('isCompatible', () => {
   test('not compatible if in view mode', async () => {
     await assertNonCompatibility({
       isEdit: false,
+    });
+  });
+
+  test('not compatible if root embeddable is not "dashboard"', async () => {
+    await assertNonCompatibility({
+      rootType: 'visualization',
     });
   });
 });
