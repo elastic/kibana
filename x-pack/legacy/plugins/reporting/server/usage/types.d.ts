@@ -48,7 +48,6 @@ export interface SearchResponse {
       buckets: {
         all: AggregationResultBuckets;
         last7Days: AggregationResultBuckets;
-        lastDay: AggregationResultBuckets;
       };
     };
   };
@@ -106,7 +105,6 @@ export type ReportingUsageType = RangeStats & {
   available: boolean;
   browser_type: string;
   enabled: boolean;
-  lastDay: RangeStats;
   last7Days: RangeStats;
 };
 

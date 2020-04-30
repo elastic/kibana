@@ -101,7 +101,6 @@ function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
 type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
 
 type RangeStatSets = Partial<RangeStats> & {
-  lastDay: Partial<RangeStats>;
   last7Days: Partial<RangeStats>;
 };
 
@@ -110,15 +109,13 @@ async function handleResponse(response: SearchResponse): Promise<Partial<RangeSt
   if (!buckets) {
     return {};
   }
-  const { lastDay, last7Days, all } = buckets;
+  const { last7Days, all } = buckets;
 
-  const lastDayUsage = lastDay ? getAggStats(lastDay) : {};
   const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
   const allUsage = all ? getAggStats(all) : {};
 
   return {
     last7Days: last7DaysUsage,
-    lastDay: lastDayUsage,
     ...allUsage,
   };
 }
@@ -141,7 +138,6 @@ export async function getReportingUsage(
           filters: {
             filters: {
               all: { match_all: {} },
-              lastDay: { range: { created_at: { gte: 'now-1d/d' } } },
               last7Days: { range: { created_at: { gte: 'now-7d/d' } } },
             },
           },
@@ -186,13 +182,12 @@ export async function getReportingUsage(
           xpackMainInfo
         ) as FeatureAvailabilityMap;
 
-        const { lastDay, last7Days, ...all } = usage;
+        const { last7Days, ...all } = usage;
 
         return {
           available: true,
           browser_type: browserType,
           enabled: true,
-          lastDay: decorateRangeStats(lastDay, availability),
           last7Days: decorateRangeStats(last7Days, availability),
           ...decorateRangeStats(all, availability),
         };
