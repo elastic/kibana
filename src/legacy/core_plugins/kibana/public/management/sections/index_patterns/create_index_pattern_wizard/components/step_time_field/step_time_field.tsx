@@ -181,7 +181,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
-              <h3 style={{ textAlign: 'center' }}>
+              <h3 className="eui-textCenter">
                 <FormattedMessage
                   id="kbn.management.createIndexPattern.stepTime.creatingLabel"
                   defaultMessage="Creating index pattern…"

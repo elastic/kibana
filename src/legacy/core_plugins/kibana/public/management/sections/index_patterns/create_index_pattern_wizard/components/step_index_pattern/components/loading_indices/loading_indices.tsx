@@ -33,7 +33,7 @@ export const LoadingIndices = ({ ...rest }) => (
   >
     <EuiFlexItem grow={false}>
       <EuiTitle size="s">
-        <h3 style={{ textAlign: 'center' }}>
+        <h3 className="eui-textCenter">
           <FormattedMessage
             id="kbn.management.createIndexPattern.step.loadingHeader"
             defaultMessage="Looking for matching indices…"
