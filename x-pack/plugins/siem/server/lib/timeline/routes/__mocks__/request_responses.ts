@@ -5,6 +5,7 @@
  */
 import * as rt from 'io-ts';
 import {
+  TIMELINE_DRAFT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
@@ -14,6 +15,7 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
+import { draftTimelineSchema } from '../schemas/draft_timelines_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -80,6 +82,14 @@ export const createTimelineWithoutTimelineId = {
   timelineType: TimelineType.default,
 };
 
+export const createDraftTimelineWithoutTimelineId = {
+  templateTimelineId: null,
+  timeline: inputTimeline,
+  timelineId: null,
+  version: null,
+  timelineType: TimelineType.draft,
+};
+
 export const createTemplateTimelineWithoutTimelineId = {
   templateTimelineId: null,
   timeline: inputTemplateTimeline,
@@ -90,6 +100,11 @@ export const createTemplateTimelineWithoutTimelineId = {
 
 export const createTimelineWithTimelineId = {
   ...createTimelineWithoutTimelineId,
+  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+};
+
+export const createDraftTimelineWithTimelineId = {
+  ...createDraftTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
 };
 
@@ -137,6 +152,13 @@ export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
     body: {
       file: { hapi: { filename: filename ?? 'filename.ndjson' } },
     },
+  });
+
+export const getDraftTimelinesRequest = (mockQuery: rt.TypeOf<typeof draftTimelineSchema>) =>
+  requestMock.create({
+    method: 'get',
+    path: TIMELINE_DRAFT_URL,
+    query: mockQuery,
   });
 
 export const mockTimelinesSavedObjects = () => ({

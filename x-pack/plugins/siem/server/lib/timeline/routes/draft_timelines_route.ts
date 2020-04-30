@@ -12,9 +12,8 @@ import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
-import { draftTimelinesQuerySchema } from './schemas/draft_timelines_schema';
+import { draftTimelineSchema } from './schemas/draft_timelines_schema';
 import { draftTimelineDefaults } from '../default_timeline';
-// import { TimelineType } from '../../../graphql/types';
 
 export const draftTimelinesRoute = (
   router: IRouter,
@@ -25,17 +24,17 @@ export const draftTimelinesRoute = (
     {
       path: TIMELINE_DRAFT_URL,
       validate: {
-        query: buildRouteValidation(draftTimelinesQuerySchema),
+        query: buildRouteValidation(draftTimelineSchema),
       },
       options: {
         tags: ['access:siem'],
       },
     },
     async (context, request, response) => {
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        // const siemResponse = buildSiemResponse(response);
+      const frameworkRequest = await buildFrameworkRequest(context, security, request);
+      const siemResponse = buildSiemResponse(response);
 
+      try {
         const {
           timeline: [draftTimeline],
         } = await getDraftTimeline(frameworkRequest);
@@ -92,7 +91,6 @@ export const draftTimelinesRoute = (
         return response.ok({});
       } catch (err) {
         const error = transformError(err);
-        const siemResponse = buildSiemResponse(response);
 
         return siemResponse.error({
           body: error.message,
