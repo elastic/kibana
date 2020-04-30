@@ -70,7 +70,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
           {
             id: 'my-slack1',
             actionTypeId: '.slack',
-            name: 'Slack#xyz',
+            name: 'Slack#xyztest',
             config: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
