@@ -63,20 +63,17 @@ export interface LayoutCounts {
   print: number;
   preserve_layout: number;
 }
-export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
-  printable_pdf: AvailableTotal & {
-    app: {
-      'canvas workpad': number;
-      dashboard: number;
-      visualization: number;
-    };
-    layout: LayoutCounts;
-  };
-};
 
 type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
 export type AppCounts = {
-  [A in AppNames]: number;
+  [A in AppNames]?: number;
+};
+
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
+  printable_pdf: AvailableTotal & {
+    app: AppCounts;
+    layout: LayoutCounts;
+  };
 };
 
 type Statuses =

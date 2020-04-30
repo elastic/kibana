@@ -12,7 +12,7 @@ import {
   getReportingUsageCollector,
 } from './reporting_usage_collector';
 import { ReportingConfig } from '../types';
-import { SearchResponse } from './types';
+import { SearchResponse, ReportingUsageType } from './types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 
@@ -344,6 +344,112 @@ describe('data modeling', () => {
     );
     const usageStats = await fetch(callClusterMock as any);
     expect(usageStats).toMatchSnapshot();
+  });
+
+  test('Cast various example data to the TypeScript definition', () => {
+    // cd x-pack ; node ../scripts/es_archiver load reporting/archived_reports
+    const documentary: ReportingUsageType = {
+      PNG: { available: true, total: 7 },
+      _all: 21,
+      available: true,
+      browser_type: 'chromium',
+      csv: { available: true, total: 4 },
+      enabled: true,
+      last7Days: {
+        PNG: { available: true, total: 0 },
+        _all: 0,
+        csv: { available: true, total: 0 },
+        printable_pdf: {
+          app: { dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 0, print: 0 },
+          total: 0,
+        },
+        status: { completed: 0, failed: 0 },
+        statuses: {},
+      },
+      printable_pdf: {
+        app: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        available: true,
+        layout: { preserve_layout: 7, print: 3 },
+        total: 10,
+      },
+      status: { completed: 21, failed: 0 },
+      statuses: {
+        completed: {
+          PNG: { dashboard: 3, visualization: 4 },
+          csv: {},
+          printable_pdf: { 'canvas workpad': 3, dashboard: 3, visualization: 4 },
+        },
+      },
+    };
+
+    const testimonial: ReportingUsageType = {
+      PNG: { available: true, total: 3 },
+      _all: 4,
+      available: true,
+      browser_type: 'chromium',
+      csv: { available: true, total: 0 },
+      enabled: true,
+      last7Days: {
+        PNG: { available: true, total: 3 },
+        _all: 4,
+        csv: { available: true, total: 0 },
+        printable_pdf: {
+          app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+          available: true,
+          layout: { preserve_layout: 1, print: 0 },
+          total: 1,
+        },
+        status: { completed: 4, failed: 0 },
+        statuses: {
+          completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
+        },
+      },
+      printable_pdf: {
+        app: { 'canvas workpad': 1, dashboard: 0, visualization: 0 },
+        available: true,
+        layout: { preserve_layout: 1, print: 0 },
+        total: 1,
+      },
+      status: { completed: 4, failed: 0 },
+      statuses: {
+        completed: { PNG: { visualization: 3 }, printable_pdf: { 'canvas workpad': 1 } },
+      },
+    };
+    const physical: ReportingUsageType = {
+      available: true,
+      browser_type: 'chromium',
+      enabled: true,
+      last7Days: {
+        _all: 0,
+        status: { completed: 0, failed: 0 },
+        statuses: {},
+        printable_pdf: {
+          available: true,
+          total: 0,
+          app: { dashboard: 0, visualization: 0 },
+          layout: { preserve_layout: 0, print: 0 },
+        },
+        csv: { available: true, total: 0 },
+        PNG: { available: true, total: 0 },
+      },
+      _all: 0,
+      status: { completed: 0, failed: 0 },
+      statuses: {},
+      printable_pdf: {
+        available: true,
+        total: 0,
+        app: { dashboard: 0, visualization: 0 },
+        layout: { preserve_layout: 0, print: 0 },
+      },
+      csv: { available: true, total: 0 },
+      PNG: { available: true, total: 0 },
+    };
+
+    expect(typeof documentary).toMatchInlineSnapshot();
+    expect(typeof testimonial).toMatchInlineSnapshot();
+    expect(typeof physical).toMatchInlineSnapshot();
   });
 });
 
