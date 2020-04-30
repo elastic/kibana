@@ -39,19 +39,23 @@ const filters: AggTypeFilter[] = [
     return doesSchemaAllowAggType;
   },
   /**
-   * If rollup index pattern, check its capabilities
-   * and limit available aggregations based on that.
+   * Check index pattern aggregation restrictions and limit available aggTypes.
    */
   (aggType, indexPattern, aggConfig, aggFilter) => {
-    if (indexPattern.type !== 'rollup') {
+    const aggRestrictions = indexPattern.getAggregationRestrictions();
+
+    if (!aggRestrictions) {
       return true;
     }
-    const aggName = aggType.name;
-    const aggs = indexPattern.typeMeta && indexPattern.typeMeta.aggs;
 
-    // Return doc_count (which is collected by default for rollup date histogram, histogram, and terms)
-    // and the rest of the defined metrics from capabilities.
-    return aggName === 'count' || (!!aggs && Object.keys(aggs).includes(aggName)) || false;
+    const aggName = aggType.name;
+    // Only return agg types which are specified in the agg restrictions,
+    // except for `count` which should always be returned.
+    return (
+      aggName === 'count' ||
+      (!!aggRestrictions && Object.keys(aggRestrictions).includes(aggName)) ||
+      false
+    );
   },
 ];
 

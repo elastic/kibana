@@ -23,17 +23,19 @@ type AggTypeFieldFilter = (field: IndexPatternField, aggConfig: IAggConfig) => b
 
 const filters: AggTypeFieldFilter[] = [
   /**
-   * If rollup index pattern, check its capabilities
+   * Check index pattern aggregation restrictions
    * and limit available fields for a given aggType based on that.
    */
   (field, aggConfig) => {
     const indexPattern = aggConfig.getIndexPattern();
-    if (!indexPattern || indexPattern.type !== 'rollup') {
+    const aggRestrictions = indexPattern.getAggregationRestrictions();
+
+    if (!aggRestrictions) {
       return true;
     }
+
     const aggName = aggConfig.type && aggConfig.type.name;
-    const aggFields =
-      indexPattern.typeMeta && indexPattern.typeMeta.aggs && indexPattern.typeMeta.aggs[aggName];
+    const aggFields = aggRestrictions[aggName];
     return !!aggFields && !!aggFields[field.name];
   },
 ];
