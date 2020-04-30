@@ -110,8 +110,8 @@ export const pushedCase: Case = {
 };
 
 export const serviceConnector: ServiceConnectorCaseResponse = {
-  number: '123',
-  incidentId: '444',
+  title: '123',
+  id: '444',
   pushedDate: basicUpdatedAt,
   url: 'connector.com',
   comments: [
@@ -136,12 +136,13 @@ export const casePushParams = {
   caseId: basicCaseId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  incidentId: null,
+  externalId: null,
   title: 'what a cool value',
   commentId: null,
   updatedAt: basicCreatedAt,
   updatedBy: elasticUser,
   description: 'nice',
+  comments: null,
 };
 export const actionTypeExecutorResult = {
   actionId: 'string',

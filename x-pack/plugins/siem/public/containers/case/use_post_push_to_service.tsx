@@ -112,8 +112,8 @@ export const usePostPushToService = (): UsePostPushToService => {
           {
             connector_id: connectorId,
             connector_name: connectorName,
-            external_id: responseService.incidentId,
-            external_title: responseService.number,
+            external_id: responseService.id,
+            external_title: responseService.title,
             external_url: responseService.url,
           },
           abortCtrl.signal
@@ -212,7 +212,7 @@ export const formatServiceRequestData = (
             : null,
       })),
     description,
-    incidentId: actualExternalService?.externalId ?? null,
+    externalId: actualExternalService?.externalId ?? null,
     title,
     updatedAt,
     updatedBy:
