@@ -699,7 +699,10 @@ export function getSearchErrorType({ message }: Pick<SearchError, 'message'>): "
 // Warning: (ae-missing-release-tag) "getTime" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, forceNow?: Date): import("../..").RangeFilter | undefined;
+export function getTime(indexPattern: IIndexPattern | undefined, timeRange: TimeRange, options?: {
+    forceNow?: Date;
+    fieldName?: string;
+}): import("../..").RangeFilter | undefined;
 
 // Warning: (ae-missing-release-tag) "IAggConfig" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -841,6 +844,8 @@ export interface IIndexPattern {
     }>;
     // (undocumented)
     fields: IFieldType[];
+    // (undocumented)
+    getTimeField?(): IFieldType | undefined;
     // (undocumented)
     id?: string;
     // (undocumented)
