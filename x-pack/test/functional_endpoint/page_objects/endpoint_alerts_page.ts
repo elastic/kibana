@@ -102,7 +102,7 @@ export function EndpointAlertsPageProvider({ getService }: FtrProviderContext) {
      * @param element
      */
     async parseStyles(dataTestSubj: string, element: string) {
-      const tableData = await this.getEndpointAlertResolverTableData(dataTestSubj, element);
+      const tableData = await this.getEndpointAlertResolverNodeData(dataTestSubj, element);
       const $ = [];
       for (let i = 1; i < tableData.length; i++) {
         const eachStyle = parseStyle(tableData[i]);

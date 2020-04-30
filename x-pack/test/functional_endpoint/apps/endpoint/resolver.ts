@@ -20,7 +20,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       const toTime = 'Now';
       await esArchiver.load('endpoint/resolver_tree/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
-      // await pageObjects.common.sleep(4000);
       await retry.try(async function() {
         await testSubjects.existOrFail('superDatePickerShowDatesButton');
       });
@@ -65,7 +64,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverEmbeddable',
         'tr'
       );
-
       await retry.try(async function() {
         await (await testSubjects.find('zoom-out')).click();
         const Nodes = await testSubjects.findAll('resolverNode');
@@ -99,6 +97,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(parseFloat(OriginalNodeDataStyle[i].top)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].top)
         );
+        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
+          parseFloat(NewNodeDataStyle[i].left)
+        );
       }
       await (await testSubjects.find('center-button')).click();
     });
@@ -118,11 +119,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(parseFloat(NewNodeDataStyle[i].top)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].top)
         );
+        expect(parseFloat(OriginalNodeDataStyle[i].left)).to.equal(
+          parseFloat(NewNodeDataStyle[i].left)
+        );
       }
       await (await testSubjects.find('center-button')).click();
     });
 
-    it('resolver Nodes navigation Left', async () => {
+    it('resolver Nodes navigation Right', async () => {
       const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -137,11 +141,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].left)
         );
+        expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
+          parseFloat(OriginalNodeDataStyle[i].top)
+        );
       }
       await (await testSubjects.find('center-button')).click();
     });
 
-    it('resolver Nodes navigation Right', async () => {
+    it('resolver Nodes navigation  Left', async () => {
       const OriginalNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -156,6 +163,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
+        );
+        expect(parseFloat(NewNodeDataStyle[i].top)).to.equal(
+          parseFloat(OriginalNodeDataStyle[i].top)
         );
       }
       await (await testSubjects.find('center-button')).click();
@@ -210,7 +220,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-
       for (let i = 1; i < NewNodeDataStyle.length; i++) {
         expect(parseFloat(OriginalNodeDataStyle[i].left)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].left)
