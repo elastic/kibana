@@ -41,6 +41,10 @@ export const datatableVisualization: Visualization<
     },
   ],
 
+  getVisualizationTypeId() {
+    return 'lnsDatatable';
+  },
+
   getLayerIds(state) {
     return state.layers.map(l => l.layerId);
   },
@@ -122,8 +126,8 @@ export const datatableVisualization: Visualization<
           ],
         },
         previewIcon: chartTableSVG,
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced' || !table.isMultiRow,
+        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
+        hide: true,
       },
     ];
   },
