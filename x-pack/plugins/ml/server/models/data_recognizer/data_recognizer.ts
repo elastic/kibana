@@ -973,20 +973,20 @@ export class DataRecognizer {
       const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
 
       // Checks if all jobs in the module have the same time field configured
+      const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
+        .time_field;
       const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
-        ({ job }) =>
-          job.config.data_description.time_field ===
-          this.jobsForModelMemoryEstimation[0].job.config.data_description.time_field
+        ({ job }) => job.config.data_description.time_field === firstJobTimeField
       );
 
       if (isSameTimeFields && (start === undefined || end === undefined)) {
         // In case of time range is not provided and the time field is the same
         // set the fallback range for all jobs
         // as there may not be a common query, we use a match_all
-        const { start: fallbackStart, end: fallbackEnd } = await this.getFallbackTimeRange(
-          this.jobsForModelMemoryEstimation[0].job.config.data_description.time_field,
-          { match_all: {} }
-        );
+        const {
+          start: fallbackStart,
+          end: fallbackEnd,
+        } = await this.getFallbackTimeRange(firstJobTimeField, { match_all: {} });
         start = fallbackStart;
         end = fallbackEnd;
       }
