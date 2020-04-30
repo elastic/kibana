@@ -5,6 +5,7 @@
  */
 
 import { omit } from 'lodash/fp';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 export const mockDuplicateIdErrors = [];
 
@@ -146,6 +147,13 @@ export const mockGetTimelineValue = {
   updatedBy: 'angela',
   noteIds: [],
   pinnedEventIds: ['k-gi8nABm-sIqJ_scOoS'],
+};
+
+export const mockGetTemplateTimelineValue = {
+  ...mockGetTimelineValue,
+  timelineType: TimelineType.template,
+  templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  templateTimelineVersion: 1,
 };
 
 export const mockParsedTimelineObject = omit(

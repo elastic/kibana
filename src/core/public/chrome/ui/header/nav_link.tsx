@@ -67,7 +67,7 @@ export function createNavLink(
     order,
     tooltip,
   } = navLink;
-  let href = navLink.baseUrl;
+  let href = navLink.url ?? navLink.baseUrl;
 
   if (legacy) {
     href = url && !active ? url : baseUrl;
