@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datasource, NewDatasource, DatasourceInput } from '../types';
+import { Datasource, DatasourceInput } from '../types';
 import { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
 
 describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
-  const mockNewDatasource: NewDatasource = {
+  const mockDatasource: Datasource = {
+    id: 'some-uuid',
     name: 'mock-datasource',
     description: '',
     config_id: '',
@@ -15,18 +16,13 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
     output_id: '',
     namespace: 'default',
     inputs: [],
-  };
-
-  const mockDatasource: Datasource = {
-    ...mockNewDatasource,
-    id: 'some-uuid',
     revision: 1,
   };
 
   const mockInput: DatasourceInput = {
     type: 'test-logs',
     enabled: true,
-    config: {
+    vars: {
       inputVar: { value: 'input-value' },
       inputVar2: { value: undefined },
       inputVar3: {
@@ -40,11 +36,11 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-foo',
         enabled: true,
         dataset: 'foo',
-        config: {
+        vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
         },
-        pkg_stream: {
+        agent_stream: {
           fooKey: 'fooValue1',
           fooKey2: ['fooValue2'],
         },
@@ -53,7 +49,7 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-bar',
         enabled: true,
         dataset: 'bar',
-        config: {
+        vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },
           barVar3: {
@@ -103,17 +99,6 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         name: 'mock-package',
         version: '0.0.0',
       },
-      inputs: [],
-    });
-  });
-
-  it('uses name for id when id is not provided in case of new datasource', () => {
-    expect(storedDatasourceToAgentDatasource(mockNewDatasource)).toEqual({
-      id: 'mock-datasource',
-      name: 'mock-datasource',
-      namespace: 'default',
-      enabled: true,
-      use_output: 'default',
       inputs: [],
     });
   });

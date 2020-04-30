@@ -165,6 +165,7 @@ describe('Task Runner', () => {
       Object {
         "event": Object {
           "action": "execute",
+          "outcome": "success",
         },
         "kibana": Object {
           "saved_objects": Array [
@@ -226,6 +227,7 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "execute",
+              "outcome": "success",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -342,6 +344,7 @@ describe('Task Runner', () => {
           Object {
             "event": Object {
               "action": "execute",
+              "outcome": "success",
             },
             "kibana": Object {
               "saved_objects": Array [
@@ -558,6 +561,7 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "outcome": "failure",
             },
             "kibana": Object {
               "saved_objects": Array [

@@ -50,7 +50,7 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailParams, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { panel, name, version, assets, title, removable } = props;
+  const { panel, name, version, assets, title, removable, latestVersion } = props;
   switch (panel) {
     case 'settings':
       return (
@@ -60,6 +60,7 @@ export function ContentPanel(props: ContentPanelProps) {
           assets={assets}
           title={title}
           removable={removable}
+          latestVersion={latestVersion}
         />
       );
     case 'data-sources':

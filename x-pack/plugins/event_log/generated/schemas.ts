@@ -41,6 +41,7 @@ export const EventSchema = schema.maybe(
         start: ecsDate(),
         duration: ecsNumber(),
         end: ecsDate(),
+        outcome: ecsString(),
       })
     ),
     error: schema.maybe(

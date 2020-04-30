@@ -5,7 +5,7 @@
  */
 
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 
 export const getBaseBreadcrumb = () => ({
   text: 'Canvas',
@@ -24,6 +24,6 @@ export const getWorkpadBreadcrumb = ({
 };
 
 export const setBreadcrumb = (paths: ChromeBreadcrumb | ChromeBreadcrumb[]) => {
-  const setBreadCrumbs = getCoreStart().chrome.setBreadcrumbs;
+  const setBreadCrumbs = platformService.getService().coreStart.chrome.setBreadcrumbs;
   setBreadCrumbs(Array.isArray(paths) ? paths : [paths]);
 };

@@ -4237,7 +4237,7 @@
   resolved "https://registry.yarnpkg.com/@types/js-search/-/js-search-1.4.0.tgz#f2d4afa176a4fc7b17fb46a1593847887fa1fb7b"
   integrity sha1-8tSvoXak/HsX+0ahWThHiH+h+3s=
 
-"@types/js-yaml@^3.11.1", "@types/js-yaml@^3.12.1":
+"@types/js-yaml@^3.11.1":
   version "3.12.1"
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
   integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
@@ -4797,6 +4797,11 @@
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.5.0.tgz#146c2a29ee7d3bae4bf2fcb274636e264c813c45"
   integrity sha512-41qEJgBH/TWgo5NFSvBCJ1qkoi3Q6ONSF2avrHq1LVEZfYpdHmj0y9SuTK+u9ZhG1sYQKBL1AWXKyLWP4RaUoQ==
+
+"@types/set-value@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-2.0.0.tgz#63d386b103926dcf49b50e16e0f6dd49983046be"
+  integrity sha512-k8dCJEC80F/mbsIOZ5Hj3YSzTVVVBwMdtP/M9Rtc2TM4F5etVd+2UG8QUiAUfbXm4fABedL2tBZnrBheY7UwpA==
 
 "@types/shot@*":
   version "4.0.0"
@@ -6838,15 +6843,7 @@ axios@^0.18.0:
     follow-redirects "1.5.10"
     is-buffer "^2.0.2"
 
-axios@^0.19.0:
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.0.tgz#8e09bff3d9122e133f7b8101c8fbdd00ed3d2ab8"
-  integrity sha512-1uvKqKQta3KBxIz14F2v06AEHZ/dIoeKfbTRkK1E5oqjDnuEerLmYTgJB5AiQZHJcljpg1TuRzdjDR06qNk0DQ==
-  dependencies:
-    follow-redirects "1.5.10"
-    is-buffer "^2.0.2"
-
-axios@^0.19.2:
+axios@^0.19.0, axios@^0.19.2:
   version "0.19.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.2.tgz#3ea36c5d8818d0d5f8a8a97a6d36b86cdc00cb27"
   integrity sha512-fjgm5MvRHLhx+osE2xoekY70AhARk3a6hkN+3Io1jc00jtquGvxYlKlsFUhmUET0V5te6CcZI7lcv2Ym61mjHA==
@@ -26917,6 +26914,13 @@ set-value@^2.0.0, set-value@^2.0.1:
     is-extendable "^0.1.1"
     is-plain-object "^2.0.3"
     split-string "^3.0.1"
+
+set-value@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/set-value/-/set-value-3.0.2.tgz#74e8ecd023c33d0f77199d415409a40f21e61b90"
+  integrity sha512-npjkVoz+ank0zjlV9F47Fdbjfj/PfXyVhZvGALWsyIYU/qrMzpi6avjKW3/7KeSU2Df3I46BrN1xOI1+6vW0hA==
+  dependencies:
+    is-plain-object "^2.0.4"
 
 setimmediate@^1.0.4, setimmediate@^1.0.5:
   version "1.0.5"

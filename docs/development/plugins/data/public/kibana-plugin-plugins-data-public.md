@@ -11,9 +11,10 @@
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
 |  [AggTypeFieldFilters](./kibana-plugin-plugins-data-public.aggtypefieldfilters.md) | A registry to store  which are used to filter down available fields for a specific visualization and . |
 |  [AggTypeFilters](./kibana-plugin-plugins-data-public.aggtypefilters.md) | A registry to store  which are used to filter down available aggregations for a specific visualization and . |
+|  [Field](./kibana-plugin-plugins-data-public.field.md) |  |
+|  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
-|  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
 |  [IndexPatternFieldList](./kibana-plugin-plugins-data-public.indexpatternfieldlist.md) |  |
 |  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |
@@ -42,7 +43,7 @@
 |  [getEsPreference(uiSettings, sessionId)](./kibana-plugin-plugins-data-public.getespreference.md) |  |
 |  [getQueryLog(uiSettings, storage, appName, language)](./kibana-plugin-plugins-data-public.getquerylog.md) |  |
 |  [getSearchErrorType({ message })](./kibana-plugin-plugins-data-public.getsearcherrortype.md) |  |
-|  [getTime(indexPattern, timeRange, forceNow)](./kibana-plugin-plugins-data-public.gettime.md) |  |
+|  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
 
 ## Interfaces

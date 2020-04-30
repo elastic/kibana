@@ -6,15 +6,16 @@
 
 import React from 'react';
 import { LogAnalysisCapabilitiesProvider } from '../../containers/logs/log_analysis';
-import { SourceProvider } from '../../containers/source';
+import { LogSourceProvider } from '../../containers/logs/log_source';
+// import { SourceProvider } from '../../containers/source';
 import { useSourceId } from '../../containers/source_id';
 
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
 
   return (
-    <SourceProvider sourceId={sourceId}>
+    <LogSourceProvider sourceId={sourceId}>
       <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
-    </SourceProvider>
+    </LogSourceProvider>
   );
 };
