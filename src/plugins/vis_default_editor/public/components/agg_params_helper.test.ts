@@ -133,6 +133,7 @@ describe('DefaultEditorAggParams helpers', () => {
             { name: '@timestamp', type: 'date' },
             { name: 'geo_desc', type: 'string' },
           ],
+          getAggregationRestrictions: jest.fn(),
         })),
         params: {
           orderBy: 'orderBy',
