@@ -11,6 +11,6 @@ export { CONTEXT_DEFAULTS } from './context_defaults';
 export * from './capabilities';
 export * from './settings_defaults';
 export { PLUGIN } from './plugin';
-export { QUERY, STATES } from './query';
+export { QUERY } from './query';
 export * from './ui';
 export * from './rest_api';
