@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { zipWith } from 'lodash';
-
 import {
   ExternalServiceApi,
   ExternalServiceParams,
-  ExternalServiceCommentResponse,
-  Comment,
   PushToServiceResponse,
   GetIncidentApiHandlerArgs,
   HandshakeApiHandlerArgs,
@@ -70,29 +66,21 @@ const pushToServiceHandler = async ({
   ) {
     const commentsTransformed = transformComments(comments, ['informationAdded']);
 
-    // Create comments sequentially.
-    const promises = commentsTransformed.reduce(async (prevPromise, currentComment) => {
-      const totalComments = await prevPromise;
+    res.comments = [];
+    for (const currentComment of commentsTransformed) {
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
         field: mapping.get('comments')?.target ?? 'comments',
       });
-      return [...totalComments, comment];
-    }, Promise.resolve([] as ExternalServiceCommentResponse[]));
-
-    const createdComments = await promises;
-
-    const zippedComments: ExternalServiceCommentResponse[] = zipWith(
-      commentsTransformed,
-      createdComments,
-      (a: Comment, b: ExternalServiceCommentResponse) => ({
-        commentId: a.commentId,
-        pushedDate: b.pushedDate,
-      })
-    );
-
-    res.comments = [...zippedComments];
+      res.comments = [
+        ...(res.comments ?? []),
+        {
+          commentId: comment.commentId,
+          pushedDate: comment.pushedDate,
+        },
+      ];
+    }
   }
 
   return res;
