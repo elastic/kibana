@@ -1,0 +1,113 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import {
+  SavedObjectSaveModal,
+  OnSaveProps,
+  SaveModalState,
+} from '../../../../saved_objects/public';
+
+interface SavedVisInfo {
+  id: string;
+  title: string;
+  description: string;
+}
+
+interface VisualizeSaveModalProps {
+  originatingApp?: string;
+  savedVisInfo: SavedVisInfo;
+  onClose: () => void;
+  onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
+}
+
+export function VisualizeSaveModal(props: VisualizeSaveModalProps) {
+  const [returnToOriginMode, setReturnToOriginMode] = useState(Boolean(props.originatingApp));
+  const { savedVisInfo } = props;
+
+  const returnLabel = i18n.translate('visualize.saveDialog.returnToOriginLabel', {
+    defaultMessage: 'Return',
+  });
+  const addLabel = i18n.translate('visualize.saveDialog.addToOriginLabel', {
+    defaultMessage: 'Add',
+  });
+
+  const getReturnToOriginSwitch = (state: SaveModalState) => {
+    if (!props.originatingApp) {
+      return;
+    }
+    let origin = props.originatingApp!;
+
+    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
+    if (origin.startsWith('kibana:')) {
+      origin = origin.split(':')[1];
+    }
+
+    if (
+      !state.copyOnSave ||
+      origin === 'dashboard' // dashboard supports adding a copied panel on save...
+    ) {
+      const originVerb = !savedVisInfo.id || state.copyOnSave ? addLabel : returnLabel;
+      return (
+        <Fragment>
+          <EuiFormRow>
+            <EuiSwitch
+              data-test-subj="returnToOriginModeSwitch"
+              checked={returnToOriginMode}
+              onChange={event => {
+                setReturnToOriginMode(event.target.checked);
+              }}
+              label={
+                <FormattedMessage
+                  id="visualize.saveDialog.originAfterSavingSwitchLabel"
+                  defaultMessage="{originVerb} to {origin} after saving"
+                  values={{ originVerb, origin }}
+                />
+              }
+            />
+          </EuiFormRow>
+        </Fragment>
+      );
+    } else {
+      setReturnToOriginMode(false);
+    }
+  };
+
+  const onModalSave = (onSaveProps: OnSaveProps) => {
+    props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
+  };
+
+  return (
+    <SavedObjectSaveModal
+      onSave={onModalSave}
+      onClose={props.onClose}
+      title={savedVisInfo.title}
+      showCopyOnSave={savedVisInfo.id ? true : false}
+      initialCopyOnSave={Boolean(savedVisInfo.id) && returnToOriginMode}
+      objectType="visualization"
+      options={getReturnToOriginSwitch}
+      description={savedVisInfo.description}
+      showDescription={true}
+    />
+  );
+}

@@ -23,22 +23,26 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { EditPanelContext } from '..';
+import { EMBEDDABLE_ORIGINATING_APP_PARAM, EmbeddableContext } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
-export const EDIT_PANEL_ORIGINATING_APP = 'editPanelOriginatingApp';
 
-export class EditPanelAction implements Action<EditPanelContext> {
+export class EditPanelAction implements Action<EmbeddableContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
   public order = 15;
+  public currentAppId: string | undefined;
 
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart
-  ) {}
+  ) {
+    this.application.currentAppId$.subscribe(
+      (appId: string | undefined) => (this.currentAppId = appId)
+    );
+  }
 
-  public getDisplayName({ embeddable }: EditPanelContext) {
+  public getDisplayName({ embeddable }: EmbeddableContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
@@ -55,7 +59,7 @@ export class EditPanelAction implements Action<EditPanelContext> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: EditPanelContext) {
+  public async isCompatible({ embeddable }: EmbeddableContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
         embeddable.getOutput().editable &&
@@ -66,7 +70,7 @@ export class EditPanelAction implements Action<EditPanelContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute(context: EditPanelContext) {
+  public async execute(context: EmbeddableContext) {
     const appTarget = this.getAppTarget(context);
 
     if (appTarget) {
@@ -81,7 +85,9 @@ export class EditPanelAction implements Action<EditPanelContext> {
     }
   }
 
-  public getAppTarget({ embeddable }: EditPanelContext): { app: string; path: string } | undefined {
+  public getAppTarget({
+    embeddable,
+  }: EmbeddableContext): { app: string; path: string } | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
@@ -89,9 +95,16 @@ export class EditPanelAction implements Action<EditPanelContext> {
     }
   }
 
-  public async getHref({ embeddable, originatingApp }: EditPanelContext): Promise<string> {
+  public async getHref({ embeddable }: EmbeddableContext): Promise<string> {
     let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    editUrl += `?${EDIT_PANEL_ORIGINATING_APP}=${originatingApp}`;
+    if (editUrl) {
+      editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
+
+      // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
+      if (this.currentAppId === 'kibana') {
+        editUrl += `:${window.location.hash.split(/[\/\?]/)[1]}`;
+      }
+    }
     return editUrl ? editUrl : '';
   }
 }

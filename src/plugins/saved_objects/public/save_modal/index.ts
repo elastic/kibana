@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { SavedObjectSaveModal, OnSaveProps } from './saved_object_save_modal';
+export { SavedObjectSaveModal, OnSaveProps, SaveModalState } from './saved_object_save_modal';
 export { showSaveModal, SaveResult } from './show_saved_object_save_modal';

@@ -25,6 +25,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
+  EMBEDDABLE_ORIGINATING_APP_PARAM,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
@@ -118,8 +119,14 @@ export class VisualizeEmbeddableFactory
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
+    let originitingAppParam = this.deps.start().core.application.currentAppId$.getValue();
+
+    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
+    if (originitingAppParam === 'kibana') {
+      originitingAppParam += `:${window.location.hash.split(/[\/\?]/)[1]}`;
+    }
     showNewVisModal({
-      editorParams: ['addToDashboard'],
+      editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originitingAppParam}`],
     });
     return undefined;
   }

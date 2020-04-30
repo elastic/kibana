@@ -22,6 +22,7 @@ import './index.scss';
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
+export { EMBEDDABLE_ORIGINATING_APP_PARAM } from './types';
 export {
   Adapters,
   ACTION_ADD_PANEL,
@@ -33,7 +34,6 @@ export {
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
   ACTION_EDIT_PANEL,
-  EDIT_PANEL_ORIGINATING_APP,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,

@@ -257,10 +257,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     return await buildContextMenuForActions({
       actions: sorted,
-      actionContext: {
-        embeddable: this.props.embeddable,
-        originatingApp: window.location.hash.split('/')[1],
-      },
+      actionContext: { embeddable: this.props.embeddable },
       closeMenu: this.closeMyContextMenuPanel,
     });
   };
