@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import Boom from 'boom';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
@@ -20,9 +21,9 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw new Error('integration does not exist');
+  if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
-    throw new Error(`The ${pkgName} integration is installed by default and cannot be removed`);
+    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
   const installedObjects = installation.installed || [];
 
   // Delete the manager saved object with references to the asset objects
@@ -121,8 +122,12 @@ export async function deleteKibanaSavedObjectsAssets(
   const deletePromises = installedObjects.map(({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
-      savedObjectsClient.delete(assetType, id);
+      return savedObjectsClient.delete(assetType, id);
     }
   });
-  await Promise.all(deletePromises);
+  try {
+    await Promise.all(deletePromises);
+  } catch (err) {
+    throw new Error('error deleting saved object asset');
+  }
 }

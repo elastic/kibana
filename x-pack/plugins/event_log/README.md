@@ -274,9 +274,15 @@ PUT _ilm/policy/event_log_policy
       "hot": {                      
         "actions": {
           "rollover": {             
-            "max_size": "5GB",
+            "max_size": "50GB",
             "max_age": "30d"
           }
+        }
+      },
+      "delete": {
+        "min_age": "90d",
+        "actions": {
+          "delete": {}
         }
       }
     }
@@ -285,10 +291,11 @@ PUT _ilm/policy/event_log_policy
 ```
 
 This means that ILM would "rollover" the current index, say
-`.kibana-event-log-000001` by creating a new index `.kibana-event-log-000002`,
+`.kibana-event-log-8.0.0-000001` by creating a new index `.kibana-event-log-8.0.0-000002`,
 which would "inherit" everything from the index template, and then ILM will
 set the write index of the the alias to the new index.  This would happen
-when the original index grew past 5 GB, or was created more than 30 days ago.
+when the original index grew past 50 GB, or was created more than 30 days ago.
+After rollover, the indices will be removed after 90 days to avoid disks to fill up.
 
 For more relevant information on ILM, see:
 [getting started with ILM doc][] and [write index alias behavior][]:
