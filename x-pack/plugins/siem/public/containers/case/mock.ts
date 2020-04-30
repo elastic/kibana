@@ -135,6 +135,7 @@ export const casePushParams = {
   updatedAt: basicCreatedAt,
   updatedBy: elasticUser,
   description: 'nice',
+  comments: null,
 };
 export const actionTypeExecutorResult = {
   actionId: 'string',

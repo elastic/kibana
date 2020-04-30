@@ -79,7 +79,6 @@ describe('api', () => {
           incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-1',
-            version: 'WzU3LDFd',
             comment: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             createdAt: '2020-03-13T08:34:53.450Z',
             createdBy: {
@@ -99,7 +98,6 @@ describe('api', () => {
           incidentId: 'incident-1',
           comment: {
             commentId: 'case-comment-2',
-            version: 'WlK3LDFd',
             comment: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             createdAt: '2020-03-13T08:34:53.450Z',
             createdBy: {
@@ -175,7 +173,6 @@ describe('api', () => {
           incidentId: 'incident-2',
           comment: {
             commentId: 'case-comment-1',
-            version: 'WzU3LDFd',
             comment: 'A comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             createdAt: '2020-03-13T08:34:53.450Z',
             createdBy: {
@@ -195,7 +192,6 @@ describe('api', () => {
           incidentId: 'incident-2',
           comment: {
             commentId: 'case-comment-2',
-            version: 'WlK3LDFd',
             comment: 'Another comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
             createdAt: '2020-03-13T08:34:53.450Z',
             createdBy: {

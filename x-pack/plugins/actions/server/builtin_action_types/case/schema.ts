@@ -41,8 +41,8 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
 );
 
 export const UserSchema = schema.object({
-  fullName: schema.oneOf([schema.nullable(schema.string()), schema.maybe(schema.string())]),
-  username: schema.oneOf([schema.nullable(schema.string()), schema.maybe(schema.string())]),
+  fullName: schema.nullable(schema.string()),
+  username: schema.nullable(schema.string()),
 });
 
 const EntityInformation = {
@@ -57,7 +57,6 @@ export const EntityInformationSchema = schema.object(EntityInformation);
 export const CommentSchema = schema.object({
   commentId: schema.string(),
   comment: schema.string(),
-  version: schema.maybe(schema.string()),
   ...EntityInformation,
 });
 
@@ -70,8 +69,8 @@ export const ExecutorSubActionSchema = schema.oneOf([
 export const ExecutorSubActionPushParamsSchema = schema.object({
   caseId: schema.string(),
   title: schema.string(),
-  description: schema.maybe(schema.string()),
-  comments: schema.maybe(schema.arrayOf(CommentSchema)),
+  description: schema.nullable(schema.string()),
+  comments: schema.nullable(schema.arrayOf(CommentSchema)),
   externalId: schema.nullable(schema.string()),
   ...EntityInformation,
 });

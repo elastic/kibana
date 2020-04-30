@@ -99,7 +99,6 @@ const executorParams: ExecutorSubActionPushParams = {
   comments: [
     {
       commentId: 'case-comment-1',
-      version: 'WzU3LDFd',
       comment: 'A comment',
       createdAt: '2020-04-27T10:59:46.202Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -108,7 +107,6 @@ const executorParams: ExecutorSubActionPushParams = {
     },
     {
       commentId: 'case-comment-2',
-      version: 'WlK3LDFd',
       comment: 'Another comment',
       createdAt: '2020-04-27T10:59:46.202Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },

@@ -78,7 +78,6 @@ const fullParams: PushToServiceApiParams = {
   comments: [
     {
       commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-      version: 'WzU3LDFd',
       comment: 'first comment',
       createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -87,7 +86,6 @@ const fullParams: PushToServiceApiParams = {
     },
     {
       commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-      version: 'WzU3LDFd',
       comment: 'second comment',
       createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -335,7 +333,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -347,7 +344,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -361,7 +357,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -376,7 +371,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (updated at 2020-03-15T08:34:53.450Z by Another User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -393,7 +387,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -405,7 +398,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -419,7 +411,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: '', username: 'elastic' },
@@ -431,7 +422,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-03-13T08:34:53.450Z by elastic)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: '', username: 'elastic' },
@@ -445,7 +435,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic', username: 'elastic' },
@@ -457,7 +446,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-04-13T08:34:53.450Z by Elastic2)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic', username: 'elastic' },
@@ -471,7 +459,6 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic', username: 'elastic' },
@@ -483,7 +470,6 @@ describe('transformComments', () => {
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-04-13T08:34:53.450Z by elastic2)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic', username: 'elastic' },
