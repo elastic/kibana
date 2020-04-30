@@ -41,7 +41,7 @@ export class MonitoringPlugin
     const monitoring = this.initializerContext.config.get();
 
     if (!monitoring.ui.enabled || !monitoring.enabled) {
-      return monitoring.ui.enabled;
+      return false;
     }
 
     if (home) {
