@@ -10,7 +10,10 @@ import { api } from './api';
 import { config } from './config';
 import { validate } from './validators';
 import { createExternalService } from './service';
-import { ConnectorPublicConfiguration, ConnectorSecretConfiguration } from '../case/schema';
+import {
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from '../case/schema';
 
 export const getActionType = createConnector({
   api,
@@ -18,7 +21,7 @@ export const getActionType = createConnector({
   validate,
   createExternalService,
   validationSchema: {
-    config: ConnectorPublicConfiguration,
-    secrets: ConnectorSecretConfiguration,
+    config: ExternalIncidentServiceConfiguration,
+    secrets: ExternalIncidentServiceSecretConfiguration,
   },
 });

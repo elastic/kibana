@@ -7,13 +7,16 @@
 import { isEmpty } from 'lodash';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ConnectorSecretConfigurationType, ConnectorPublicConfigurationType } from './types';
+import {
+  ExternalIncidentServiceConfiguration,
+  ExternalIncidentServiceSecretConfiguration,
+} from './types';
 
 import * as i18n from './translations';
 
 export const validateCommonConfig = (
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ConnectorPublicConfigurationType
+  configObject: ExternalIncidentServiceConfiguration
 ) => {
   try {
     if (isEmpty(configObject.casesConfiguration.mapping)) {
@@ -28,5 +31,5 @@ export const validateCommonConfig = (
 
 export const validateCommonSecrets = (
   configurationUtilities: ActionsConfigurationUtilities,
-  secrets: ConnectorSecretConfigurationType
+  secrets: ExternalIncidentServiceSecretConfiguration
 ) => {};

@@ -5,6 +5,6 @@
  */
 
 export {
-  ConnectorPublicConfigurationType as ServiceNowPublicConfigurationType,
-  ConnectorSecretConfigurationType as ServiceNowSecretConfigurationType,
+  ExternalIncidentServiceConfiguration as ServiceNowPublicConfigurationType,
+  ExternalIncidentServiceSecretConfiguration as ServiceNowSecretConfigurationType,
 } from '../case/types';

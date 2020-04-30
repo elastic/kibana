@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../case/types';
+import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import { JiraPublicConfigurationType, JiraSecretConfigurationType } from './types';
 
 import * as i18n from './translations';
@@ -22,7 +22,7 @@ const VIEW_INCIDENT_URL = `browse`;
 export const createExternalService = ({
   config,
   secrets,
-}: ExternalServiceCredential): ExternalService => {
+}: ExternalServiceCredentials): ExternalService => {
   const { apiUrl: url, projectKey } = config as JiraPublicConfigurationType;
   const { apiToken, email } = secrets as JiraSecretConfigurationType;
 

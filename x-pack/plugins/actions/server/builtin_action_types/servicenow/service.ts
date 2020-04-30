@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { ExternalServiceCredential, ExternalService, ExternalServiceParams } from '../case/types';
+import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import { addTimeZoneToDate, patch, request, getErrorMessage } from '../case/utils';
 
 import * as i18n from './translations';
@@ -22,7 +22,7 @@ const VIEW_INCIDENT_URL = `nav_to.do?uri=incident.do?sys_id=`;
 export const createExternalService = ({
   config,
   secrets,
-}: ExternalServiceCredential): ExternalService => {
+}: ExternalServiceCredentials): ExternalService => {
   const { apiUrl: url } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 

@@ -5,9 +5,9 @@
  */
 
 import { validateCommonConfig, validateCommonSecrets } from '../case/validators';
-import { ConnectorValidation } from '../case/types';
+import { ExternalServiceValidation } from '../case/types';
 
-export const validate: ConnectorValidation = {
+export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
 };

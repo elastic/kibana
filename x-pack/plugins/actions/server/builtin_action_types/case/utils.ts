@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, flow } from 'lodash';
+import { curry, flow, get } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AxiosInstance, Method, AxiosResponse } from 'axios';
 
@@ -13,18 +13,18 @@ import { ActionTypeExecutorOptions, ActionTypeExecutorResult, ActionType } from 
 import { ExecutorParamsSchema } from './schema';
 
 import {
-  CreateConnectorArgs,
-  ConnectorPublicConfigurationType,
+  CreateExternalServiceArgs,
+  ExternalIncidentServiceConfiguration,
   CreateActionTypeArgs,
   ExecutorParams,
   MapRecord,
   AnyParams,
-  CreateConnectorBasicArgs,
+  CreateExternalServiceBasicArgs,
   PrepareFieldsForTransformArgs,
   PipedField,
   TransformFieldsArgs,
   Comment,
-  ExecutorActionParams,
+  ExecutorSubActionPushParams,
 } from './types';
 
 import * as transformers from './transformers';
@@ -48,13 +48,13 @@ export const buildMap = (mapping: MapRecord[]): Map<string, MapRecord> => {
 };
 
 export const mapParams = (
-  params: Partial<ExecutorActionParams>,
+  params: Partial<ExecutorSubActionPushParams>,
   mapping: Map<string, MapRecord>
 ): AnyParams => {
   return Object.keys(params).reduce((prev: AnyParams, curr: string): AnyParams => {
     const field = mapping.get(curr);
     if (field) {
-      prev[field.target] = params[curr];
+      prev[field.target] = get(curr, params);
     }
     return prev;
   }, {} as AnyParams);
@@ -63,20 +63,17 @@ export const mapParams = (
 export const createConnectorExecutor = ({
   api,
   createExternalService,
-}: CreateConnectorBasicArgs) => async (
+}: CreateExternalServiceBasicArgs) => async (
   execOptions: ActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult> => {
   const actionId = execOptions.actionId;
   const {
     casesConfiguration: { mapping: configurationMapping },
-  } = execOptions.config as ConnectorPublicConfigurationType;
+  } = execOptions.config as ExternalIncidentServiceConfiguration;
 
+  let data = {};
   const params = execOptions.params as ExecutorParams;
   const { subAction, subActionParams } = params;
-  const { comments, externalId, ...restParams } = subActionParams;
-
-  const mapping = buildMap(configurationMapping);
-  const externalCase = mapParams(restParams as ExecutorActionParams, mapping);
 
   const res: Pick<ActionTypeExecutorResult, 'status'> &
     Pick<ActionTypeExecutorResult, 'actionId'> = {
@@ -90,14 +87,26 @@ export const createConnectorExecutor = ({
   });
 
   if (!api[subAction]) {
-    throw new Error('[Action][Connector] Unsupported subAction type');
+    throw new Error('[Action][ExternalService] Unsupported subAction type.');
   }
 
-  const data = await api[subAction]({
-    externalService,
-    mapping,
-    params: { ...subActionParams, externalCase },
-  });
+  if (subAction !== 'pushToService') {
+    throw new Error('[Action][ExternalService] subAction not implemented.');
+  }
+
+  if (subAction === 'pushToService') {
+    const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
+    const { comments, externalId, ...restParams } = pushToServiceParams;
+
+    const mapping = buildMap(configurationMapping);
+    const externalCase = mapParams(restParams, mapping);
+
+    data = await api.pushToService({
+      externalService,
+      mapping,
+      params: { ...pushToServiceParams, externalCase },
+    });
+  }
 
   return {
     ...res,
@@ -111,7 +120,7 @@ export const createConnector = ({
   validate,
   createExternalService,
   validationSchema,
-}: CreateConnectorArgs) => {
+}: CreateExternalServiceArgs) => {
   return ({
     configurationUtilities,
     executor = createConnectorExecutor({ api, createExternalService }),

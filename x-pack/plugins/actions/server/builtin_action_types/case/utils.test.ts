@@ -21,7 +21,7 @@ import {
 } from './utils';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
-import { Comment, MapRecord, ApiParams } from './types';
+import { Comment, MapRecord, PushToServiceApiParams } from './types';
 
 jest.mock('axios');
 const axiosMock = (axios as unknown) as jest.Mock;
@@ -62,7 +62,7 @@ const maliciousMapping: MapRecord[] = [
   { source: 'unsupportedSource', target: 'comments', actionType: 'nothing' },
 ];
 
-const fullParams: ApiParams = {
+const fullParams: PushToServiceApiParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   title: 'a title',
   description: 'a description',

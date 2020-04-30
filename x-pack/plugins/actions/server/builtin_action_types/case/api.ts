@@ -7,12 +7,14 @@
 import { zipWith } from 'lodash';
 
 import {
-  ConnectorApi,
+  ExternalServiceApi,
   ExternalServiceParams,
   ExternalServiceCommentResponse,
   Comment,
   PushToServiceResponse,
-  ConnectorApiHandlerArgs,
+  GetIncidentApiHandlerArgs,
+  HandshakeApiHandlerArgs,
+  PushToServiceApiHandlerArgs,
 } from './types';
 import { prepareFieldsForTransformation, transformFields, transformComments } from './utils';
 
@@ -20,18 +22,18 @@ const handshakeHandler = async ({
   externalService,
   mapping,
   params,
-}: ConnectorApiHandlerArgs) => {};
+}: HandshakeApiHandlerArgs) => {};
 const getIncidentHandler = async ({
   externalService,
   mapping,
   params,
-}: ConnectorApiHandlerArgs) => {};
+}: GetIncidentApiHandlerArgs) => {};
 
 const pushToServiceHandler = async ({
   externalService,
   mapping,
   params,
-}: ConnectorApiHandlerArgs): Promise<PushToServiceResponse> => {
+}: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { externalId, comments } = params;
   const updateIncident = externalId ? true : false;
   const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
@@ -96,7 +98,7 @@ const pushToServiceHandler = async ({
   return res;
 };
 
-export const api: ConnectorApi = {
+export const api: ExternalServiceApi = {
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,

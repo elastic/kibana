@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExternalService, ApiParams, ExecutorActionParams, MapRecord } from '../case/types';
+import {
+  ExternalService,
+  PushToServiceApiParams,
+  ExecutorSubActionPushParams,
+  MapRecord,
+} from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => ({
   getIncident: jest.fn().mockImplementation(() =>
@@ -63,7 +68,7 @@ mapping.set('short_description', {
   actionType: 'overwrite',
 });
 
-const executorParams: ExecutorActionParams = {
+const executorParams: ExecutorSubActionPushParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   externalId: 'incident-3',
   createdAt: '2020-03-13T08:34:53.450Z',
@@ -94,7 +99,7 @@ const executorParams: ExecutorActionParams = {
   ],
 };
 
-const apiParams: ApiParams = {
+const apiParams: PushToServiceApiParams = {
   ...executorParams,
   externalCase: { short_description: 'Incident title', description: 'Incident description' },
 };

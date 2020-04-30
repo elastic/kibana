@@ -5,11 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConnectorPublicConfiguration } from '../case/schema';
+import { ExternalIncidentServiceConfiguration } from '../case/schema';
 
 export const JiraPublicConfiguration = {
   projectKey: schema.string(),
-  ...ConnectorPublicConfiguration,
+  ...ExternalIncidentServiceConfiguration,
 };
 
 export const JiraPublicConfigurationSchema = schema.object(JiraPublicConfiguration);

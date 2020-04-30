@@ -11,49 +11,59 @@
 import { TypeOf } from '@kbn/config-schema';
 
 import {
-  ConnectorPublicConfigurationSchema,
-  ConnectorSecretConfigurationSchema,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchema,
   CaseConfigurationSchema,
   MapRecordSchema,
   CommentSchema,
-  ExecutorActionParamsSchema,
+  ExecutorSubActionPushParamsSchema,
+  ExecutorSubActionGetIncidentParamsSchema,
+  ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
 
 export interface AnyParams {
-  [index: string]: string | number | object | null | undefined;
+  [index: string]: string | number | object | undefined | null;
 }
 
-export type ConnectorPublicConfigurationType = TypeOf<typeof ConnectorPublicConfigurationSchema>;
-export type ConnectorSecretConfigurationType = TypeOf<typeof ConnectorSecretConfigurationSchema>;
+export type ExternalIncidentServiceConfiguration = TypeOf<
+  typeof ExternalIncidentServiceConfigurationSchema
+>;
+export type ExternalIncidentServiceSecretConfiguration = TypeOf<
+  typeof ExternalIncidentServiceSecretConfigurationSchema
+>;
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorActionParams = TypeOf<typeof ExecutorActionParamsSchema> & AnyParams;
+export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+
+export type ExecutorSubActionGetIncidentParams = TypeOf<
+  typeof ExecutorSubActionGetIncidentParamsSchema
+>;
+
+export type ExecutorSubActionHandshakeParams = TypeOf<
+  typeof ExecutorSubActionHandshakeParamsSchema
+>;
 
 export type CaseConfiguration = TypeOf<typeof CaseConfigurationSchema>;
 export type MapRecord = TypeOf<typeof MapRecordSchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
 
-export interface ApiParams extends ExecutorActionParams {
-  externalCase: Record<string, any>;
-}
-
-export interface ConnectorConfiguration {
+export interface ExternalServiceConfiguration {
   id: string;
   name: string;
 }
 
-export interface ExternalServiceCredential {
+export interface ExternalServiceCredentials {
   config: Record<string, any>;
   secrets: Record<string, any>;
 }
 
-export interface ConnectorValidation {
+export interface ExternalServiceValidation {
   config: (configurationUtilities: any, configObject: any) => void;
   secrets: (configurationUtilities: any, secrets: any) => void;
 }
 
-export interface ExternalServiceCaseResponse {
+export interface ExternalServiceIncidentResponse {
   id: string;
   title: string;
   url: string;
@@ -72,35 +82,50 @@ export interface ExternalServiceParams {
 
 export interface ExternalService {
   getIncident: (id: string) => Promise<any>;
-  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceCaseResponse>;
-  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceCaseResponse>;
+  createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
+  updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   createComment: (params: ExternalServiceParams) => Promise<ExternalServiceCommentResponse>;
 }
 
-export interface ConnectorApiHandlerArgs {
-  externalService: ExternalService;
-  mapping: Map<string, any>;
-  params: ApiParams;
+export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
+  externalCase: Record<string, any>;
 }
 
-export interface PushToServiceResponse extends ExternalServiceCaseResponse {
+export interface ExternalServiceApiHandlerArgs {
+  externalService: ExternalService;
+  mapping: Map<string, any>;
+}
+
+export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: PushToServiceApiParams;
+}
+
+export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionGetIncidentParams;
+}
+
+export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionHandshakeParams;
+}
+
+export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
   comments?: ExternalServiceCommentResponse[];
 }
 
-export interface ConnectorApi {
-  handshake: (args: ConnectorApiHandlerArgs) => Promise<void>;
-  pushToService: (args: ConnectorApiHandlerArgs) => Promise<PushToServiceResponse>;
-  getIncident: (args: ConnectorApiHandlerArgs) => Promise<void>;
+export interface ExternalServiceApi {
+  handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
+  pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
+  getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
 }
 
-export interface CreateConnectorBasicArgs {
-  api: ConnectorApi;
-  createExternalService: (credentials: ExternalServiceCredential) => ExternalService;
+export interface CreateExternalServiceBasicArgs {
+  api: ExternalServiceApi;
+  createExternalService: (credentials: ExternalServiceCredentials) => ExternalService;
 }
 
-export interface CreateConnectorArgs extends CreateConnectorBasicArgs {
-  config: ConnectorConfiguration;
-  validate: ConnectorValidation;
+export interface CreateExternalServiceArgs extends CreateExternalServiceBasicArgs {
+  config: ExternalServiceConfiguration;
+  validate: ExternalServiceValidation;
   validationSchema: { config: any; secrets: any };
 }
 
@@ -117,13 +142,13 @@ export interface PipedField {
 }
 
 export interface PrepareFieldsForTransformArgs {
-  params: ApiParams;
+  params: PushToServiceApiParams;
   mapping: Map<string, MapRecord>;
   defaultPipes?: string[];
 }
 
 export interface TransformFieldsArgs {
-  params: ExecutorActionParams;
+  params: PushToServiceApiParams;
   fields: PipedField[];
   currentIncident?: ExternalServiceParams;
 }

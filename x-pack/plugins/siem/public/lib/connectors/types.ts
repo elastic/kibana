@@ -8,14 +8,14 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { ActionType } from '../../../../triggers_actions_ui/public';
-import { ConnectorPublicConfigurationType } from '../../../../actions/server/builtin_action_types/case/types';
+import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
 export interface Connector extends ActionType {
   logo: string;
 }
 
 export interface ActionConnector {
-  config: ConnectorPublicConfigurationType;
+  config: ExternalIncidentServiceConfiguration;
   secrets: {};
 }
 
