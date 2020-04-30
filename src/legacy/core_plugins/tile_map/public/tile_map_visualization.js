@@ -19,30 +19,24 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { npStart } from 'ui/new_platform';
 import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-import { scaleBounds, geoContains } from '../../../../plugins/maps_legacy/public';
+import {
+  scaleBounds,
+  geoContains,
+  mapTooltipProvider,
+} from '../../../../plugins/maps_legacy/public';
+import { tooltipFormatter } from './tooltip_formatter';
 
-export const createTileMapVisualization = ({
-  serviceSettings,
-  $injector,
-  getZoomPrecision,
-  getPrecision,
-  notificationService,
-}) => {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
-    serviceSettings,
-    notificationService
-  );
-  const tooltipFormatter = new TileMapTooltipFormatterProvider($injector);
+export const createTileMapVisualization = dependencies => {
+  const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
 
   return class CoordinateMapsVisualization extends BaseMapsVisualization {
     constructor(element, vis) {
       super(element, vis);
 
       this._geohashLayer = null;
+      this._tooltipFormatter = mapTooltipProvider(element, tooltipFormatter);
     }
 
     updateGeohashAgg = () => {
@@ -190,18 +184,15 @@ export const createTileMapVisualization = ({
       const metricDimension = this._params.dimensions.metric;
       const metricLabel = metricDimension ? metricDimension.label : '';
       const metricFormat = getFormat(metricDimension && metricDimension.format);
-      const boundTooltipFormatter = tooltipFormatter.bind(
-        null,
-        metricLabel,
-        metricFormat.getConverterFor('text')
-      );
 
       return {
         label: metricLabel,
         valueFormatter: this._geoJsonFeatureCollectionAndMeta
           ? metricFormat.getConverterFor('text')
           : null,
-        tooltipFormatter: this._geoJsonFeatureCollectionAndMeta ? boundTooltipFormatter : null,
+        tooltipFormatter: this._geoJsonFeatureCollectionAndMeta
+          ? this._tooltipFormatter.bind(null, metricLabel, metricFormat.getConverterFor('text'))
+          : null,
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         colorRamp: newParams.colorSchema,

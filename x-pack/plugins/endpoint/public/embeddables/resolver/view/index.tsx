@@ -8,6 +8,7 @@ import React, { useLayoutEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
 import { Panel } from './panel';
@@ -59,6 +60,7 @@ export const Resolver = styled(
 
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
+    const hasError = useSelector(selectors.hasError);
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
 
     useLayoutEffect(() => {
@@ -73,6 +75,16 @@ export const Resolver = styled(
         {isLoading ? (
           <div className="loading-container">
             <EuiLoadingSpinner size="xl" />
+          </div>
+        ) : hasError ? (
+          <div className="loading-container">
+            <div>
+              {' '}
+              <FormattedMessage
+                id="xpack.endpoint.resolver.loadingError"
+                defaultMessage="Error loading data."
+              />
+            </div>
           </div>
         ) : (
           <StyledResolverContainer

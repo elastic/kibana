@@ -59,12 +59,14 @@ import {
   setData,
   setSavedObjects,
   setNotifications,
+  setKibanaMapFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/vis_type_vega/public/services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setInjectedVarFunc } from '../../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../../plugins/maps_legacy/public/map/service_settings';
+import { getKibanaMapFactoryProvider } from '../../../../../../plugins/maps_legacy/public';
 
 const THRESHOLD = 0.1;
 const PIXEL_DIFF = 30;
@@ -77,6 +79,18 @@ describe('VegaVisualizations', () => {
   let vegaVisualizationDependencies;
   let vegaVisType;
 
+  const coreSetupMock = {
+    notifications: {
+      toasts: {},
+    },
+    uiSettings: {
+      get: () => {},
+    },
+    injectedMetadata: {
+      getInjectedVar: () => {},
+    },
+  };
+  setKibanaMapFactory(getKibanaMapFactoryProvider(coreSetupMock));
   setInjectedVars({
     emsTileLayerId: {},
     enableExternalUrls: true,

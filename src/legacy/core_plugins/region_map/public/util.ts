@@ -18,8 +18,7 @@
  */
 
 import { FileLayer, VectorLayer } from '../../../../plugins/maps_legacy/public';
-// TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { ORIGIN } from '../../../../plugins/maps_legacy/public';
 
 export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
   ...layer,
