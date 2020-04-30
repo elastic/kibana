@@ -48,13 +48,13 @@ export type CreateIndexPatternFieldList = (
 export const getIndexPatternFieldListCreator: (
   dependencies: FieldListDependencies
 ) => CreateIndexPatternFieldList = ({ fieldFormats, toastNotifications }) => (
-  indexPattern,
-  specs = [],
-  shortDotsEnable = false
+  ...fieldListParams
 ) => {
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<Field['type'], FieldMap> = new Map();
+    private indexPattern: IndexPattern;
+    private shortDotsEnable: boolean;
     private setByName = (field: Field) => this.byName.set(field.name, field);
     private setByGroup = (field: Field) => {
       if (typeof this.groups.get(field.type) === 'undefined') {
@@ -64,8 +64,10 @@ export const getIndexPatternFieldListCreator: (
     };
     private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
 
-    constructor() {
+    constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
       super();
+      this.indexPattern = indexPattern;
+      this.shortDotsEnable = shortDotsEnable;
 
       specs.map(field => this.add(field));
     }
@@ -73,7 +75,7 @@ export const getIndexPatternFieldListCreator: (
     getByName = (name: Field['name']) => this.byName.get(name);
     getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
     add = (field: FieldSpec) => {
-      const newField = new Field(indexPattern, field, shortDotsEnable, {
+      const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
         toastNotifications,
       });
@@ -91,7 +93,7 @@ export const getIndexPatternFieldListCreator: (
     };
 
     update = (field: FieldSpec) => {
-      const newField = new Field(indexPattern, field, shortDotsEnable, {
+      const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
         fieldFormats,
         toastNotifications,
       });
@@ -103,5 +105,5 @@ export const getIndexPatternFieldListCreator: (
     };
   }
 
-  return new FieldList();
+  return new FieldList(...fieldListParams);
 };
