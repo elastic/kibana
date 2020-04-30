@@ -9,7 +9,7 @@ import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
 import { Refetch } from '../../store/inputs/model';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteral } from '../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -194,4 +194,11 @@ export type DispatchUpdateTimeline = ({
 export enum TimelineTabsStyle {
   tab = 'tab',
   filter = 'filter',
+}
+
+export interface TimelineTab {
+  id: TimelineTypeLiteral;
+  name: string;
+  disabled: boolean;
+  href: string;
 }

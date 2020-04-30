@@ -77,8 +77,10 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
         },
         onlyUserFavorite: filterBy === 'favorites',
         timelineTypes: null,
+        timelines,
+        totalCount,
       });
-    }, [filterBy]);
+    }, [filterBy, timelines, totalCount]);
 
     return (
       <>

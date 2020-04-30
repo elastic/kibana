@@ -39,7 +39,6 @@ import {
   OpenTimelineResult,
   OnToggleShowNotes,
   OnDeleteOneTimeline,
-  TimelineTabsStyle,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
@@ -241,9 +240,21 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         search,
         sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
         onlyUserFavorite: onlyFavorites,
+        timelines,
         timelineTypes,
+        totalCount,
       });
-    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
+    }, [
+      pageIndex,
+      pageSize,
+      search,
+      sortField,
+      sortDirection,
+      timelines,
+      timelineTypes,
+      totalCount,
+      onlyFavorites,
+    ]);
 
     return !isModal ? (
       <OpenTimeline

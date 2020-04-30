@@ -233,8 +233,10 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       onlyUserFavorite: onlyFavorites,
       timelineTypes: TimelineType.default,
+      timelines,
+      totalCount: timelineCount,
     });
-  }, [onlyFavorites, pageSize, searchTimelineValue]);
+  }, [onlyFavorites, pageSize, searchTimelineValue, timelines, timelineCount]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>
@@ -266,8 +268,12 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           },
         }}
         singleSelection={true}
-        options={getSelectableOptions({ timelines, onlyFavorites, searchTimelineValue })}
-        timelineTypes="default"
+        options={getSelectableOptions({
+          timelines,
+          onlyFavorites,
+          searchTimelineValue,
+          timelineTypes: TimelineType.default,
+        })}
       >
         {(list, search) => (
           <>

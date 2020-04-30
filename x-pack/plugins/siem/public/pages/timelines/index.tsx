@@ -9,9 +9,12 @@ import { ApolloConsumer } from 'react-apollo';
 import { isEmpty } from 'lodash/fp';
 import { Router, Switch, Route, Redirect, useHistory } from 'react-router-dom';
 
+import { ChromeBreadcrumb } from '../../../../../../src/core/public';
+
 import { TimelineType } from '../../../common/types/timeline';
 import { TAB_TIMELINES, TAB_TEMPLATES } from '../../components/open_timeline/translations';
 import { getTimelineTabsUrl } from '../../components/link_to';
+import { TimelineRouteSpyState } from '../../utils/route/types';
 
 import { SiemPageName } from '../home/types';
 
@@ -35,15 +38,6 @@ export const getBreadcrumbs = (
       href: `${getTimelineTabsUrl(TimelineType.default, !isEmpty(search[1]) ? search[1] : '')}`,
     },
   ];
-  if (params.detailName != null) {
-    breadcrumb = [
-      ...breadcrumb,
-      {
-        text: params.detailName,
-        href: `${getTimelineTabsUrl(params.detailName, !isEmpty(search[1]) ? search[1] : '')}`,
-      },
-    ];
-  }
 
   const tabName = params?.tabName;
   if (!tabName) return breadcrumb;
