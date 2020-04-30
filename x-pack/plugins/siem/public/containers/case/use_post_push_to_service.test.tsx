@@ -53,7 +53,7 @@ describe('usePostPushToService', () => {
         updatedBy: null,
       },
     ],
-    incidentId: basicPush.externalId,
+    externalId: basicPush.externalId,
     description: pushedCase.description,
     title: pushedCase.title,
     updatedAt: pushedCase.updatedAt,
