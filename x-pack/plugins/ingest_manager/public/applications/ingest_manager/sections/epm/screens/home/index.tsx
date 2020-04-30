@@ -14,7 +14,7 @@ import {
 } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
-import { CategorySummaryItem } from '../../../../types';
+import { CategorySummaryItem, PackageListItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
@@ -67,14 +67,27 @@ export function EPMHomePage() {
 function InstalledPackages() {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
-  const packages =
-    allPackages && allPackages.response && selectedCategory === ''
-      ? allPackages.response.filter(pkg => pkg.status === 'installed')
-      : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
     defaultMessage: 'Installed integrations',
   });
+
+  const allInstalledPackages =
+    allPackages && allPackages.response
+      ? allPackages.response.filter(pkg => pkg.status === 'installed')
+      : [];
+
+  const updatablePackages = allInstalledPackages.reduce<PackageListItem[]>((acc, item) => {
+    if ('savedObject' in item) {
+      if (item.version > item.savedObject.attributes.version) {
+        return acc.concat(item);
+      }
+    }
+    return acc;
+  }, []);
+
+  const packages =
+    selectedCategory === 'updates_available' ? [...updatablePackages] : [...allInstalledPackages];
 
   const categories = [
     {
@@ -82,14 +95,14 @@ function InstalledPackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
       title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
-      count: 0, // TODO: Update with real count when available
+      count: updatablePackages.length,
     },
   ];
 
@@ -134,7 +147,6 @@ function AvailablePackages() {
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
-
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories}
