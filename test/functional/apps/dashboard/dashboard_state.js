@@ -127,9 +127,7 @@ export default function({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    // TODO this needs to be investigated, it returns the header length of 2 , which I think is correct
-    // But the test is expecting 0?
-    it.skip('Saved search will update when the query is changed in the URL', async () => {
+    it('Saved search will update when the query is changed in the URL', async () => {
       const currentQuery = await queryBar.getQueryString();
       expect(currentQuery).to.equal('');
       const currentUrl = await browser.getCurrentUrl();
@@ -140,6 +138,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const headers = await PageObjects.discover.getColumnHeaders();
+      // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
     });
 

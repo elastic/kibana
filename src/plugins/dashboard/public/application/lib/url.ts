@@ -27,7 +27,7 @@
  * output: 39292992
  */
 export function getDashboardIdFromUrl(url: string): string | undefined {
-  const [, dashboardId] = url.match(/dashboard\/(.*?)(\/|\?|$)/) ?? [
+  const [, dashboardId] = url.match(/view\/(.*?)(\/|\?|$)/) ?? [
     undefined, // full match
     undefined, // group with dashboardId
   ];
