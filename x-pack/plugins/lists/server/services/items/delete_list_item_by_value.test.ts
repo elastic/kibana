@@ -52,6 +52,6 @@ describe('delete_list_item_by_value', () => {
       },
       index: '.items',
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
   });
 });
