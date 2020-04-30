@@ -5,6 +5,7 @@
  */
 
 import { TaskManager as TaskManagerClass } from './task_manager';
+import { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
 
 export type TaskManager = PublicMethodsOf<TaskManagerClass>;
 
