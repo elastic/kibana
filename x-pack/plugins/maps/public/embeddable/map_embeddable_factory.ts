@@ -34,19 +34,19 @@ async function waitForMapDependencies() {
   }
 
   whenModulesLoadedPromise = new Promise(async resolve => {
-    const lazyModule = await import('./lazy');
-
-    getMapsSavedObjectLoader = lazyModule.getMapsSavedObjectLoader;
-    getQueryableUniqueIndexPatternIds = lazyModule.getQueryableUniqueIndexPatternIds;
-    MapEmbeddable = lazyModule.MapEmbeddable;
-    MapEmbeddableInput = lazyModule.MapEmbeddableInput;
-    getIndexPatternService = lazyModule.getIndexPatternService;
-    getHttp = lazyModule.getHttp;
-    getMapsCapabilities = lazyModule.getMapsCapabilities;
-    createMapStore = lazyModule.createMapStore;
-    addLayerWithoutDataSync = lazyModule.addLayerWithoutDataSync;
-    getInitialLayers = lazyModule.getInitialLayers;
-    mergeInputWithSavedMap = lazyModule.mergeInputWithSavedMap;
+    ({
+      getMapsSavedObjectLoader,
+      getQueryableUniqueIndexPatternIds,
+      MapEmbeddable,
+      MapEmbeddableInput,
+      getIndexPatternService,
+      getHttp,
+      getMapsCapabilities,
+      createMapStore,
+      addLayerWithoutDataSync,
+      getInitialLayers,
+      mergeInputWithSavedMap,
+    } = await import('./lazy'));
 
     resolve(true);
   });
