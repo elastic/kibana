@@ -21,7 +21,14 @@ const isObject = (v: any): v is Record<string, any> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const assignDeep = (target: Record<string, any>, source: Record<string, any>) => {
-  for (const [key, value] of Object.entries(source)) {
+  for (let [key, value] of Object.entries(source)) {
+    // unwrap dot-separated keys
+    if (key.includes('.')) {
+      const [first, ...others] = key.split('.');
+      key = first;
+      value = { [others.join('.')]: value };
+    }
+
     if (isObject(value)) {
       if (!target.hasOwnProperty(key)) {
         target[key] = {};

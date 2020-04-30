@@ -93,4 +93,24 @@ describe('override(target, source)', function() {
     expect(target).not.toHaveProperty('box');
     expect(source.foo).not.toHaveProperty('baz');
   });
+
+  it('explodes keys with dots in them', () => {
+    const target = {
+      foo: {
+        bar: 1,
+      },
+    };
+
+    const source = {
+      'foo.bar': 2,
+    };
+
+    expect(override(target, source)).toMatchInlineSnapshot(`
+      Object {
+        "foo": Object {
+          "bar": 2,
+        },
+      }
+    `);
+  });
 });
