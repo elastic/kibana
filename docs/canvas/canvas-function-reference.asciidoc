@@ -184,7 +184,7 @@ filters
 ----
 `as` casts any primitive value (`string`, `number`, `date`, `null`) into a `datatable` with a single row and a single column with the given name (or defaults to `"value"` if no name is provided). This is useful when piping a primitive value into a function that only takes `datatable` as an input.
 
-In the example above, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
+In the example, `ply` expects each `fn` subexpression to return a `datatable` in order to merge the results of each `fn` back into a `datatable`, but using a `math` aggregation in the subexpressions returns a single `math` value, which is then cast into a `datatable` using `as`.
 
 *Accepts:* `string`, `boolean`, `number`, `null`
 
