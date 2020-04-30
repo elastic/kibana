@@ -16,6 +16,10 @@ function formatData(txt) {
   return numeral(txt).format(DATA_FORMAT);
 }
 
+function roundTo3DecimalPlace(value) {
+  return typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
+}
+
 export function formatValues([key, value]) {
   // time
   switch (key) {
@@ -63,7 +67,16 @@ export function formatValues([key, value]) {
     // numbers rounded to 3 decimal places
     case 'average_search_time_per_bucket_ms':
     case 'exponential_average_search_time_per_hour_ms':
-      value = typeof value === 'number' ? roundToDecimalPlace(value, 3).toLocaleString() : value;
+      value = roundTo3DecimalPlace(value);
+      break;
+    case 'total_bucket_processing_time_ms':
+      value = roundTo3DecimalPlace(value);
+      break;
+    case 'average_bucket_processing_time_ms':
+      value = roundTo3DecimalPlace(value);
+      break;
+    case 'exponential_average_bucket_processing_time_ms':
+      value = roundTo3DecimalPlace(value);
       break;
 
     default:
