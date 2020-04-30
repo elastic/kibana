@@ -60,7 +60,10 @@ const style: cytoscape.Stylesheet[] = [
           ? theme.euiColorPrimary
           : theme.euiColorMediumShade,
       'border-width': 2,
-      color: theme.textColors.text,
+      color: (el: cytoscape.NodeSingular) =>
+        el.hasClass('primary') || el.selected()
+          ? theme.euiColorPrimaryText
+          : theme.textColors.text,
       // theme.euiFontFamily doesn't work here for some reason, so we're just
       // specifying a subset of the fonts for the label text.
       'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
@@ -78,8 +81,9 @@ const style: cytoscape.Stylesheet[] = [
       'overlay-opacity': 0,
       shape: (el: cytoscape.NodeSingular) =>
         isService(el) ? (isIE11 ? 'rectangle' : 'ellipse') : 'diamond',
-      'text-background-color': theme.euiColorLightestShade,
-      'text-background-opacity': 0,
+      'text-background-color': theme.euiColorPrimary,
+      'text-background-opacity': (el: cytoscape.NodeSingular) =>
+        el.hasClass('primary') || el.selected() ? 0.1 : 0,
       'text-background-padding': theme.paddingSizes.xs,
       'text-background-shape': 'roundrectangle',
       'text-margin-y': parseInt(theme.paddingSizes.s, 10),
