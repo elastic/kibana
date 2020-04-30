@@ -259,7 +259,9 @@ export class ClusterManager {
 
     const ignorePaths = [
       /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,
-      /\.test\.(js|ts)$/,
+      /\.test\.(js|tsx?)$/,
+      /\.md$/,
+      /debug\.log$/,
       ...pluginInternalDirsIgnore,
       fromRoot('src/legacy/server/sass/__tmp__'),
       fromRoot('x-pack/legacy/plugins/reporting/.chromium'),
