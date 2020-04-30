@@ -15,7 +15,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { LensMultiTable, FormatFactory } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
-import { getExecuteTriggerActions } from './services';
+import { getExecuteTriggerActions } from '../services';
 import { PieComponent } from './render_function';
 
 export interface PieRender {

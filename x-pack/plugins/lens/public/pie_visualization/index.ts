@@ -11,7 +11,7 @@ import { pieVisualization } from './pie_visualization';
 import { pie, getPieRenderer } from './register_expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { setExecuteTriggerActions } from './services';
+import { setExecuteTriggerActions } from '../services';
 
 export interface PieVisualizationPluginSetupPlugins {
   editorFrame: EditorFrameSetup;
