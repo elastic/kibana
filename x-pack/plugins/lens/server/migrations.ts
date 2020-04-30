@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, flow } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { SavedObjectMigrationFn } from 'src/core/server';
 
@@ -156,5 +156,5 @@ export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
   },
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
-  '7.8.0': flow(removeLensAutoDate, addTimeFieldToEsaggs),
+  '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),
 };
