@@ -8,9 +8,9 @@ import React from 'react';
 import { EuiCallOut, EuiOverlayMask, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AgentConfig } from '../../../../types';
+import { AgentConfig } from '../../../types';
 
-export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
+export const ConfirmDeployConfigModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
@@ -21,7 +21,7 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.confirmModalTitle"
+            id="xpack.ingestManager.agentConfig.confirmModalTitle"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -29,13 +29,13 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
         onConfirm={onConfirm}
         cancelButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.deleteApiKeys.confirmModal.cancelButtonLabel"
+            id="xpack.ingestManager.agentConfig.confirmModalCancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         confirmButtonText={
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.confirmModalConfirmButtonLabel"
+            id="xpack.ingestManager.agentConfig.confirmModalConfirmButtonLabel"
             defaultMessage="Save and deploy changes"
           />
         }
@@ -43,7 +43,7 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
       >
         <EuiCallOut
           iconType="iInCircle"
-          title={i18n.translate('xpack.ingestManager.createDatasource.confirmModalCalloutTitle', {
+          title={i18n.translate('xpack.ingestManager.agentConfig.confirmModalCalloutTitle', {
             defaultMessage:
               'This action will update {agentCount, plural, one {# agent} other {# agents}}',
             values: {
@@ -52,7 +52,7 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
           })}
         >
           <FormattedMessage
-            id="xpack.ingestManager.createDatasource.confirmModalCalloutDescription"
+            id="xpack.ingestManager.agentConfig.confirmModalCalloutDescription"
             defaultMessage="Fleet has detected that the selected agent configuration, {configName}, is already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
             that use this configuration."
@@ -63,7 +63,7 @@ export const ConfirmCreateDatasourceModal: React.FunctionComponent<{
         </EuiCallOut>
         <EuiSpacer size="l" />
         <FormattedMessage
-          id="xpack.ingestManager.createDatasource.confirmModalDescription"
+          id="xpack.ingestManager.agentConfig.confirmModalDescription"
           defaultMessage="This action can not be undone. Are you sure you wish to continue?"
         />
       </EuiConfirmModal>
