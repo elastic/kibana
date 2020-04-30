@@ -5,7 +5,11 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { EmbeddableContext, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableContext,
+  IEmbeddable,
+  ViewMode,
+} from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { DISCOVER_APP_URL_GENERATOR } from '../../../../../../src/plugins/discover/public';
@@ -56,6 +60,7 @@ export class ViewInDiscoverAction implements Action<EmbeddableContext> {
   public async isCompatible({ embeddable }: EmbeddableContext) {
     if (!isVisualizeEmbeddable(embeddable)) return false;
     if (!this.getIndexPattern(embeddable)) return false;
+    if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
     return true;
   }
 
