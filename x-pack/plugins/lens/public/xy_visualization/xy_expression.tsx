@@ -178,7 +178,17 @@ export function XYChart({
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
-  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
+  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
+    return (
+      !xAccessor ||
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
+    );
+  });
+
+  if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
@@ -196,15 +206,15 @@ export function XYChart({
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = Object.values(data.tables)[0].columns.find(
-    ({ id }) => id === layers[0].xAccessor
+    ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
   // use default number formatter for y axis and use formatting hint if there is just a single y column
   let yAxisFormatter = formatFactory({ id: 'number' });
-  if (layers.length === 1 && layers[0].accessors.length === 1) {
+  if (filteredLayers.length === 1 && filteredLayers[0].accessors.length === 1) {
     const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
-      ({ id }) => id === layers[0].accessors[0]
+      ({ id }) => id === filteredLayers[0].accessors[0]
     );
     if (firstYAxisColumn && firstYAxisColumn.formatHint) {
       yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
@@ -212,14 +222,17 @@ export function XYChart({
   }
 
   const chartHasMoreThanOneSeries =
-    layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
-  const shouldRotate = isHorizontalChart(layers);
+    filteredLayers.length > 1 || data.tables[filteredLayers[0].layerId].columns.length > 2;
+  const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
   function calculateMinInterval() {
     // add minInterval only for single row value as it cannot be determined from dataset
-    if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+    if (
+      data.dateRange &&
+      filteredLayers.every(layer => data.tables[layer.layerId].rows.length <= 1)
+    ) {
       if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
         return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
 
@@ -232,7 +245,7 @@ export function XYChart({
   }
 
   const xDomain =
-    data.dateRange && layers.every(l => l.xScaleType === 'time')
+    data.dateRange && filteredLayers.every(l => l.xScaleType === 'time')
       ? {
           min: data.dateRange.fromDate.getTime(),
           max: data.dateRange.toDate.getTime(),
@@ -253,7 +266,7 @@ export function XYChart({
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
-          const layer = layers.find(l =>
+          const layer = filteredLayers.find(l =>
             xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
@@ -311,7 +324,7 @@ export function XYChart({
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
-        hide={layers[0].hide}
+        hide={filteredLayers[0].hide}
         tickFormat={d => xAxisFormatter.convert(d)}
       />
 
@@ -320,11 +333,11 @@ export function XYChart({
         position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
-        hide={layers[0].hide}
+        hide={filteredLayers[0].hide}
         tickFormat={d => yAxisFormatter.convert(d)}
       />
 
-      {layers.map(
+      {filteredLayers.map(
         (
           {
             splitAccessor,
@@ -339,16 +352,6 @@ export function XYChart({
           },
           index
         ) => {
-          if (
-            !xAccessor ||
-            !accessors.length ||
-            !data.tables[layerId] ||
-            data.tables[layerId].rows.length === 0 ||
-            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
-          ) {
-            return;
-          }
-
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -364,7 +367,7 @@ export function XYChart({
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,
