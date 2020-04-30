@@ -12,7 +12,8 @@ import {
 } from '../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import {
   getMlJobId,
-  getMlPrefix
+  getMlPrefix,
+  encodeForMlApi
 } from '../../../../../../plugins/apm/common/ml_job_constants';
 import { callApi } from './callApi';
 import { ESFilter } from '../../../../../../plugins/apm/typings/elasticsearch';
@@ -53,13 +54,16 @@ export async function startMLJob({
   http: HttpSetup;
 }) {
   const transactionIndices = await getTransactionIndices(http);
-  const groups = ['apm', serviceName.toLowerCase()];
+  const groups = [
+    'apm',
+    encodeForMlApi(serviceName),
+    encodeForMlApi(transactionType)
+  ];
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [TRANSACTION_TYPE]: transactionType } }
   ];
-  groups.push(transactionType.toLowerCase());
   return callApi<StartedMLJobApiResponse>(http, {
     method: 'POST',
     pathname: `/api/ml/modules/setup/apm_transaction`,

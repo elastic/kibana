@@ -15,9 +15,9 @@ interface Props {
   count: number;
 }
 
-const Badge = styled(EuiBadge)`
+const Badge = (styled(EuiBadge)`
   margin-top: ${px(units.eighth)};
-`;
+` as unknown) as typeof EuiBadge;
 
 export const ErrorCountSummaryItemBadge = ({ count }: Props) => (
   <Badge color={euiThemeLight.euiColorDanger}>

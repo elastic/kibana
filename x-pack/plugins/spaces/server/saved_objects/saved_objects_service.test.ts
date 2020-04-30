@@ -58,7 +58,7 @@ describe('SpacesSavedObjectsService', () => {
               "6.6.0": [Function],
             },
             "name": "space",
-            "namespaceAgnostic": true,
+            "namespaceType": "agnostic",
           },
         ]
       `);

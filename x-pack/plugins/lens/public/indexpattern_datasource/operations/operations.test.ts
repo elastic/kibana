@@ -5,8 +5,7 @@
  */
 
 import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from './index';
-import { AvgIndexPatternColumn, MinIndexPatternColumn } from './definitions/metrics';
-import { CountIndexPatternColumn } from './definitions/count';
+import { AvgIndexPatternColumn } from './definitions/metrics';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 
@@ -197,33 +196,21 @@ describe('getOperationTypesForField', () => {
       expect(column.operationType).toEqual('avg');
       expect(column.sourceField).toEqual(field.name);
     });
-
-    it('should pick a suitable field operation if none is passed in', () => {
-      const field = expectedIndexPatterns[1].fields[1];
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        field,
-      }) as MinIndexPatternColumn;
-      expect(column.operationType).toEqual('avg');
-      expect(column.sourceField).toEqual(field.name);
-    });
-
-    it('should pick a suitable document operation if none is passed in', () => {
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        field: documentField,
-      }) as CountIndexPatternColumn;
-      expect(column.operationType).toEqual('count');
-    });
   });
 
   describe('getAvailableOperationsByMetaData', () => {
+    it('should put the average operation first', () => {
+      const numberOperation = getAvailableOperationsByMetadata(expectedIndexPatterns[1]).find(
+        ({ operationMetaData }) =>
+          !operationMetaData.isBucketed && operationMetaData.dataType === 'number'
+      )!;
+      expect(numberOperation.operations[0]).toEqual(
+        expect.objectContaining({
+          operationType: 'avg',
+        })
+      );
+    });
+
     it('should list out all field-operation tuples for different operation meta data', () => {
       expect(getAvailableOperationsByMetadata(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
         Array [
@@ -278,17 +265,22 @@ describe('getOperationTypesForField', () => {
             "operations": Array [
               Object {
                 "field": "bytes",
+                "operationType": "avg",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "sum",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "min",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
                 "operationType": "max",
-                "type": "field",
-              },
-              Object {
-                "field": "bytes",
-                "operationType": "avg",
                 "type": "field",
               },
               Object {
@@ -304,11 +296,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "cardinality",
-                "type": "field",
-              },
-              Object {
-                "field": "bytes",
-                "operationType": "sum",
                 "type": "field",
               },
             ],

@@ -22,7 +22,7 @@ import MarkdownIt from 'markdown-it';
 import { EMSClient } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import { getInjectedVarFunc } from '../kibana_services';
-import { ORIGIN } from '../common/origin';
+import { ORIGIN } from '../common/constants/origin';
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
@@ -67,6 +67,10 @@ export class ServiceSettings {
 
   shouldShowZoomMessage({ origin }) {
     return origin === ORIGIN.EMS && this._showZoomMessage;
+  }
+
+  enableZoomMessage() {
+    this._showZoomMessage = true;
   }
 
   disableZoomMessage() {
@@ -148,11 +152,12 @@ export class ServiceSettings {
   }
 
   /**
-   * Add optional query-parameters to all requests
+   * Set optional query-parameters for all requests
    *
    * @param additionalQueryParams
    */
-  addQueryParams(additionalQueryParams) {
+  setQueryParams(additionalQueryParams) {
+    // Functions more as a "set" than an "add" in ems-client
     this._emsClient.addQueryParams(additionalQueryParams);
   }
 

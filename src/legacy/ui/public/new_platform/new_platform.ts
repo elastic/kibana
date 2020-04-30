@@ -59,7 +59,6 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
-import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
   SavedObjectsManagementPluginSetup,
@@ -69,6 +68,7 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
 import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
@@ -87,7 +87,6 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
-  visTypeVega: VisTypeVegaSetup;
   discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
@@ -116,6 +115,7 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
   indexPatternManagement: IndexPatternManagementStart;
 }
 

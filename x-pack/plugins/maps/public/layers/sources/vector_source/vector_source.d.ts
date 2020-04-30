@@ -14,6 +14,7 @@ import {
   VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -31,8 +32,10 @@ export interface IVectorSource extends ISource {
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
-  getFieldByName(fieldName: string): IField;
+  getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
+  getFieldNames(): string[];
+  getApplyGlobalQuery(): boolean;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -44,6 +47,21 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
-  getFieldByName(fieldName: string): IField;
+  getFieldByName(fieldName: string): IField | null;
   getSyncMeta(): VectorSourceSyncMeta;
+  getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]>;
+  canFormatFeatureProperties(): boolean;
+  getApplyGlobalQuery(): boolean;
+  getFieldNames(): string[];
+}
+
+export interface ITiledSingleLayerVectorSource extends IVectorSource {
+  getUrlTemplateWithMeta(): Promise<{
+    layerName: string;
+    urlTemplate: string;
+    minSourceZoom: number;
+    maxSourceZoom: number;
+  }>;
+  getMinZoom(): number;
+  getMaxZoom(): number;
 }

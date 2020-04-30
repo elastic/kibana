@@ -49,14 +49,14 @@ class ServiceNow {
   }: {
     url: string;
     method?: Method;
-    data?: any;
+    data?: unknown;
   }): Promise<AxiosResponse> {
     const res = await this.axios(url, { method, data });
     this._throwIfNotAlive(res.status, res.headers['content-type']);
     return res;
   }
 
-  private _patch({ url, data }: { url: string; data: any }): Promise<AxiosResponse> {
+  private _patch({ url, data }: { url: string; data: unknown }): Promise<AxiosResponse> {
     return this._request({
       url,
       method: 'patch',
@@ -147,7 +147,14 @@ class ServiceNow {
     comments: Comment[],
     field: string
   ): Promise<CommentResponse[]> {
-    const res = await Promise.all(comments.map(c => this.createComment(incidentId, c, field)));
+    // Create comments sequentially.
+    const promises = comments.reduce(async (prevPromise, currentComment) => {
+      const totalComments = await prevPromise;
+      const res = await this.createComment(incidentId, currentComment, field);
+      return [...totalComments, res];
+    }, Promise.resolve([] as CommentResponse[]));
+
+    const res = await promises;
     return res;
   }
 

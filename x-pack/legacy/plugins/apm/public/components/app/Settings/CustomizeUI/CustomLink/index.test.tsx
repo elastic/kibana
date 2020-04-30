@@ -35,7 +35,7 @@ const data = [
 ];
 
 describe('CustomLink', () => {
-  let callApmApiSpy: Function;
+  let callApmApiSpy: jasmine.Spy;
   beforeAll(() => {
     callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
   });
@@ -101,7 +101,7 @@ describe('CustomLink', () => {
       ]);
     });
 
-    it('checks if create custom link button is available and working', () => {
+    it('checks if create custom link button is available and working', async () => {
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -113,6 +113,7 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(getByText('Create custom link'));
       });
+      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       expect(queryByText('Create link')).toBeInTheDocument();
     });
   });
@@ -144,8 +145,10 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
       });
-      await wait(() => component.queryByText('Create link'));
-      expect(component.queryByText('Create link')).toBeInTheDocument();
+      await wait(() =>
+        expect(component.queryByText('Create link')).toBeInTheDocument()
+      );
+      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       return component;
     };
 

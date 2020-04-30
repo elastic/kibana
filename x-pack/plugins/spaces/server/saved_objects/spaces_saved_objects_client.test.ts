@@ -13,21 +13,21 @@ import { SavedObjectTypeRegistry } from 'src/core/server';
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
   name: 'foo',
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   hidden: false,
   mappings: { properties: {} },
 });
 
 typeRegistry.registerType({
   name: 'bar',
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   hidden: false,
   mappings: { properties: {} },
 });
 
 typeRegistry.registerType({
   name: 'space',
-  namespaceAgnostic: true,
+  namespaceType: 'agnostic',
   hidden: true,
   mappings: { properties: {} },
 });

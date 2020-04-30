@@ -1645,3 +1645,667 @@ export const traceChildStartBeforeParent = {
   },
   errorsPerTransaction: {}
 };
+
+export const inferredSpans = {
+  trace: {
+    items: [
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        source: {
+          ip: '172.18.0.8'
+        },
+        processor: {
+          name: 'transaction',
+          event: 'transaction'
+        },
+        url: {
+          path: '/api/products/2',
+          scheme: 'http',
+          port: 3000,
+          domain: '172.18.0.7',
+          full: 'http://172.18.0.7:3000/api/products/2'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.786Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        client: {
+          ip: '172.18.0.8'
+        },
+        http: {
+          request: {
+            headers: {
+              Accept: ['*/*'],
+              'User-Agent': ['Python/3.7 aiohttp/3.3.2'],
+              Host: ['172.18.0.7:3000'],
+              'Accept-Encoding': ['gzip, deflate']
+            },
+            method: 'get',
+            socket: {
+              encrypted: false,
+              remote_address: '172.18.0.8'
+            }
+          },
+          response: {
+            headers: {
+              'Transfer-Encoding': ['chunked'],
+              Date: ['Thu, 09 Apr 2020 11:36:01 GMT'],
+              'Content-Type': ['application/json;charset=UTF-8']
+            },
+            status_code: 200,
+            finished: true,
+            headers_sent: true
+          },
+          version: '1.1'
+        },
+        user_agent: {
+          original: 'Python/3.7 aiohttp/3.3.2',
+          name: 'Other',
+          device: {
+            name: 'Other'
+          }
+        },
+        transaction: {
+          duration: {
+            us: 237537
+          },
+          result: 'HTTP 2xx',
+          name: 'APIRestController#product',
+          span_count: {
+            dropped: 0,
+            started: 3
+          },
+          id: 'f2387d37260d00bd',
+          type: 'request',
+          sampled: true
+        },
+        timestamp: {
+          us: 1586432160786001
+        }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: 'f2387d37260d00bd'
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.810Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        span: {
+          duration: {
+            us: 204574
+          },
+          subtype: 'inferred',
+          name: 'ServletInvocableHandlerMethod#invokeAndHandle',
+          id: 'a5df600bd7bd5e38',
+          type: 'app'
+        },
+        timestamp: {
+          us: 1586432160810441
+        }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: 'a5df600bd7bd5e38'
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          type: 'apm-server',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.810Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        timestamp: {
+          us: 1586432160810441
+        },
+        span: {
+          duration: {
+            us: 102993
+          },
+          stacktrace: [
+            {
+              library_frame: true,
+              exclude_from_grouping: false,
+              filename: 'InvocableHandlerMethod.java',
+              line: {
+                number: -1
+              },
+              function: 'doInvoke'
+            },
+            {
+              exclude_from_grouping: false,
+              library_frame: true,
+              filename: 'InvocableHandlerMethod.java',
+              line: {
+                number: -1
+              },
+              function: 'invokeForRequest'
+            }
+          ],
+          subtype: 'inferred',
+          name: 'APIRestController#product',
+          id: '808dc34fc41ce522',
+          type: 'app'
+        }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: 'f2387d37260d00bd'
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        labels: {
+          productId: '2'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.832Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        timestamp: {
+          us: 1586432160832300
+        },
+        span: {
+          duration: {
+            us: 99295
+          },
+          name: 'OpenTracing product span',
+          id: '41226ae63af4f235',
+          type: 'unknown'
+        },
+        child: { ids: ['8d80de06aa11a6fc'] }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: '808dc34fc41ce522'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.859Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        timestamp: {
+          us: 1586432160859600
+        },
+        span: {
+          duration: {
+            us: 53835
+          },
+          subtype: 'inferred',
+          name: 'Loader#executeQueryStatement',
+          id: '8d80de06aa11a6fc',
+          type: 'app'
+        }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: '41226ae63af4f235'
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        destination: {
+          address: 'postgres',
+          port: 5432
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.903Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        timestamp: {
+          us: 1586432160903236
+        },
+        span: {
+          duration: {
+            us: 10211
+          },
+          subtype: 'postgresql',
+          destination: {
+            service: {
+              resource: 'postgresql',
+              name: 'postgresql',
+              type: 'db'
+            }
+          },
+          name: 'SELECT FROM products',
+          action: 'query',
+          id: '3708d5623658182f',
+          type: 'db',
+          db: {
+            statement:
+              'select product0_.id as col_0_0_, product0_.sku as col_1_0_, product0_.name as col_2_0_, product0_.description as col_3_0_, product0_.cost as col_4_0_, product0_.selling_price as col_5_0_, product0_.stock as col_6_0_, producttyp1_.id as col_7_0_, producttyp1_.name as col_8_0_, (select sum(orderline2_.amount) from order_lines orderline2_ where orderline2_.product_id=product0_.id) as col_9_0_ from products product0_ left outer join product_types producttyp1_ on product0_.type_id=producttyp1_.id where product0_.id=?',
+            type: 'sql',
+            user: {
+              name: 'postgres'
+            }
+          }
+        }
+      },
+      {
+        container: {
+          id: 'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+        },
+        parent: {
+          id: '41226ae63af4f235'
+        },
+        process: {
+          pid: 6,
+          title: '/opt/java/openjdk/bin/java',
+          ppid: 1
+        },
+        agent: {
+          name: 'java',
+          ephemeral_id: '1cb5c830-c677-4b13-b340-ab1502f527c3',
+          version: '1.15.1-SNAPSHOT'
+        },
+        destination: {
+          address: 'postgres',
+          port: 5432
+        },
+        processor: {
+          name: 'transaction',
+          event: 'span'
+        },
+        observer: {
+          hostname: '7189f754b5a3',
+          id: 'f32d8d9f-a9f9-4355-8370-548dfd8024dc',
+          ephemeral_id: 'bff20764-0195-4f78-aa84-d799fc47b954',
+          type: 'apm-server',
+          version: '8.0.0',
+          version_major: 8
+        },
+        trace: {
+          id: '3b0dc77f3754e5bcb9da0e4c15e0db97'
+        },
+        '@timestamp': '2020-04-09T11:36:00.859Z',
+        ecs: {
+          version: '1.5.0'
+        },
+        service: {
+          node: {
+            name:
+              'fc2ae281f56fb84728bc9b5e6c17f3d13bbb7f4efd461158558e5c38e655abad'
+          },
+          environment: 'production',
+          name: 'opbeans-java',
+          runtime: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          language: {
+            name: 'Java',
+            version: '11.0.6'
+          },
+          version: 'None'
+        },
+        host: {
+          hostname: 'fc2ae281f56f',
+          os: {
+            platform: 'Linux'
+          },
+          ip: '172.18.0.7',
+          name: 'fc2ae281f56f',
+          architecture: 'amd64'
+        },
+        transaction: {
+          id: 'f2387d37260d00bd'
+        },
+        timestamp: {
+          us: 1586432160859508
+        },
+        span: {
+          duration: {
+            us: 4503
+          },
+          subtype: 'postgresql',
+          destination: {
+            service: {
+              resource: 'postgresql',
+              name: 'postgresql',
+              type: 'db'
+            }
+          },
+          name: 'empty query',
+          action: 'query',
+          id: '9871cfd612368932',
+          type: 'db',
+          db: {
+            rows_affected: 0,
+            statement: '(empty query)',
+            type: 'sql',
+            user: {
+              name: 'postgres'
+            }
+          }
+        }
+      }
+    ],
+    exceedsMax: false,
+    errorDocs: []
+  },
+  errorsPerTransaction: {}
+};

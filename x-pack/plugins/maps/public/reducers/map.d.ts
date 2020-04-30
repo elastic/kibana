@@ -39,6 +39,15 @@ export type MapContext = {
   hideViewControl: boolean;
 };
 
+export type MapSettings = {
+  maxZoom: number;
+  minZoom: number;
+  showSpatialFilters: boolean;
+  spatialFiltersAlpa: number;
+  spatialFiltersFillColor: string;
+  spatialFiltersLineColor: string;
+};
+
 export type MapState = {
   ready: boolean;
   mapInitError?: string | null;
@@ -49,4 +58,6 @@ export type MapState = {
   __transientLayerId: string | null;
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
+  settings: MapSettings;
+  __rollbackSettings: MapSettings | null;
 };

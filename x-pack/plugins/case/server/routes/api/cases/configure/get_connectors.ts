@@ -8,6 +8,8 @@ import Boom from 'boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
+import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
+
 /*
  * Be aware that this api will only return 20 connectors
  */
@@ -17,7 +19,7 @@ const CASE_SERVICE_NOW_ACTION = '.servicenow';
 export function initCaseConfigureGetActionConnector({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/configure/connectors/_find',
+      path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
       validate: false,
     },
     async (context, request, response) => {

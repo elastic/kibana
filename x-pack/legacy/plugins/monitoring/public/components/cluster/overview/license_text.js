@@ -6,6 +6,7 @@
 
 import React from 'react';
 import moment from 'moment-timezone';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { capitalize } from 'lodash';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,7 +19,7 @@ export function LicenseText({ license, showLicenseExpiration }) {
   }
 
   return (
-    <EuiLink href="#/license">
+    <EuiLink href={getSafeForExternalLink('#/license')}>
       <FormattedMessage
         id="xpack.monitoring.cluster.overview.licenseText.toLicensePageLinkLabel"
         defaultMessage="{licenseType} license {willExpireOn}"

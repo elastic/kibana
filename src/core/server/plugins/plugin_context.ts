@@ -136,6 +136,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   deps: PluginsServiceSetupDeps,
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreSetup {
+  const router = deps.http.createRouter('', plugin.opaqueId);
+
   return {
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
@@ -155,7 +157,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
         null,
         plugin.opaqueId
       ),
-      createRouter: () => deps.http.createRouter('', plugin.opaqueId),
+      createRouter: () => router,
+      resources: deps.httpResources.createRegistrar(router),
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,

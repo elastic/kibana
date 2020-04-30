@@ -9,14 +9,13 @@ import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import React from 'react';
 import { SOURCE_TYPES, FIELD_ORIGIN } from '../../../../common/constants';
 import { getEMSClient } from '../../../meta';
-import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 import { registerSource } from '../source_registry';
 
-const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
   defaultMessage: 'EMS Boundaries',
 });
 
@@ -161,19 +160,3 @@ registerSource({
   ConstructorFunction: EMSFileSource,
   type: SOURCE_TYPES.EMS_FILE,
 });
-
-export const emsBoundariesLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.emsFileDescription', {
-    defaultMessage: 'Administrative boundaries from Elastic Maps Service',
-  }),
-  icon: 'emsApp',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
-      const source = new EMSFileSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-    return <EMSFileCreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

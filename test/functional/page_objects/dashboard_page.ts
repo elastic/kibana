@@ -215,6 +215,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
     }
 
     public async clickCreateDashboardPrompt() {

@@ -11,7 +11,7 @@ export const CASE_SAVED_OBJECT = 'cases';
 export const caseSavedObjectType: SavedObjectsType = {
   name: CASE_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       closed_at: {

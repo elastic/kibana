@@ -6,7 +6,7 @@
 
 import React, { MouseEventHandler } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 // @ts-ignore untyped local
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
@@ -39,16 +39,16 @@ export const ControlSettings = ({
   };
 
   const popoverButton = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
-    <EuiToolTip position="bottom" content={strings.getTooltip()}>
-      <EuiButtonIcon iconType="gear" aria-label={strings.getTooltip()} onClick={handleClick} />
-    </EuiToolTip>
+    <EuiButtonEmpty size="xs" aria-label={strings.getButtonLabel()} onClick={handleClick}>
+      {strings.getButtonLabel()}
+    </EuiButtonEmpty>
   );
 
   return (
     <Popover
       id="auto-refresh-popover"
       button={popoverButton}
-      anchorPosition="rightUp"
+      anchorPosition="downLeft"
       panelClassName="canvasControlSettings__popover"
     >
       {() => (

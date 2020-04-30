@@ -6,14 +6,14 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY } from '../../../../common/constants';
 import {
-  MonitorSummary,
-  SummaryHistogram,
   Check,
+  Histogram,
+  MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+} from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
@@ -250,11 +250,8 @@ export const enrichMonitorGroups: MonitorEnricher = async (
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
     const monitorId = get<string>(monitor, 'key.monitor_id');
     monitorIds.push(monitorId);
-    let state = get<any>(monitor, 'state.value');
-    state = {
-      ...state,
-      timestamp: state['@timestamp'],
-    };
+    const state: any = monitor.state?.value;
+    state.timestamp = state['@timestamp'];
     const { checks } = state;
     if (checks) {
       state.checks = sortBy<SortChecks, Check>(checks, checksSortBy);
@@ -289,7 +286,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 const getHistogramForMonitors = async (
   queryContext: QueryContext,
   monitorIds: string[]
-): Promise<{ [key: string]: SummaryHistogram }> => {
+): Promise<{ [key: string]: Histogram }> => {
   const params = {
     index: queryContext.heartbeatIndices,
     body: {
@@ -317,7 +314,7 @@ const getHistogramForMonitors = async (
         by_id: {
           terms: {
             field: 'monitor.id',
-            size: STATES.LEGACY_STATES_QUERY_SIZE,
+            size: queryContext.size,
           },
           aggs: {
             histogram: {

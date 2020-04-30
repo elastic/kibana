@@ -140,6 +140,7 @@ function DatatableComponent(props: DatatableProps & { formatFactory: FormatFacto
       <EuiBasicTable
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
+        tableLayout="auto"
         columns={props.args.columns.columnIds
           .map(field => {
             const col = firstTable.columns.find(c => c.id === field);

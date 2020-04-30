@@ -151,7 +151,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               : []
           }
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            editActionConfig('index', selected[0].value);
+            editActionConfig('index', selected.length > 0 ? selected[0].value : '');
             const indices = selected.map(s => s.value as string);
 
             // reset time field and expression fields if indices are deleted

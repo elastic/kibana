@@ -7,15 +7,14 @@
 import _ from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN, AGG_TYPE } from '../../../../common/constants';
+import { AGG_TYPE, DEFAULT_MAX_BUCKETS_LIMIT, FIELD_ORIGIN } from '../../../../common/constants';
+import { getJoinAggKey } from '../../../../common/get_join_key';
 import { ESDocField } from '../../fields/es_doc_field';
-import { AbstractESAggSource, AGG_DELIMITER } from '../es_agg_source';
+import { AbstractESAggSource } from '../es_agg_source';
 import { getField, addFieldToDSL, extractPropertiesFromBucket } from '../../util/es_agg_utils';
 
 const TERMS_AGG_NAME = 'join';
 
-const FIELD_NAME_PREFIX = '__kbnjoin__';
-const GROUP_BY_DELIMITER = '_groupby_';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
 
 export function extractPropertiesMap(rawEsData, countPropertyName) {
@@ -64,11 +63,11 @@ export class ESTermSource extends AbstractESAggSource {
   }
 
   getAggKey(aggType, fieldName) {
-    const metricKey =
-      aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${fieldName}` : aggType;
-    return `${FIELD_NAME_PREFIX}${metricKey}${GROUP_BY_DELIMITER}${
-      this._descriptor.indexPatternTitle
-    }.${this._termField.getName()}`;
+    return getJoinAggKey({
+      aggType,
+      aggFieldName: fieldName,
+      rightSourceId: this._descriptor.id,
+    });
   }
 
   getAggLabel(aggType, fieldName) {

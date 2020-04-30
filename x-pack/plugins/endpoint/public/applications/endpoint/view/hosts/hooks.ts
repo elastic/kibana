@@ -5,10 +5,28 @@
  */
 
 import { useSelector } from 'react-redux';
-import { GlobalState, HostListState } from '../../types';
+import { useMemo } from 'react';
+import { GlobalState, HostState } from '../../types';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
-export function useHostListSelector<TSelected>(selector: (state: HostListState) => TSelected) {
+export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function(state: GlobalState) {
     return selector(state.hostList);
   });
 }
+
+/**
+ * Returns an object that contains Kibana Logs app and URL information for a given host id
+ * @param hostId
+ */
+export const useHostLogsUrl = (hostId: string): { url: string; appId: string; appPath: string } => {
+  const { services } = useKibana();
+  return useMemo(() => {
+    const appPath = `/stream?logFilter=(expression:'host.id:${hostId}',kind:kuery)`;
+    return {
+      url: `${services.application.getUrlForApp('logs')}${appPath}`,
+      appId: 'logs',
+      appPath,
+    };
+  }, [hostId, services.application]);
+};

@@ -12,7 +12,7 @@ export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     management: {
       icon: 'lensApp',
       defaultSearchField: 'title',
@@ -46,7 +46,7 @@ export function setupSavedObjects(core: CoreSetup) {
   core.savedObjects.registerType({
     name: 'lens-ui-telemetry',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: {
       properties: {
         name: {

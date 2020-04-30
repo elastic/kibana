@@ -5,16 +5,18 @@
  */
 
 import _ from 'lodash';
+import { Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
 import { OriginalColumn } from './rename_columns';
+import { dateHistogramOperation } from './operations/definitions';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
   columns: Record<string, IndexPatternColumn>,
   columnOrder: string[]
-) {
+): Ast | null {
   if (columnOrder.length === 0) {
     return null;
   }
@@ -40,29 +42,64 @@ function getExpressionForLayer(
       };
     }, {} as Record<string, OriginalColumn>);
 
-    const formatterOverrides = columnEntries
-      .map(([id, col]) => {
-        const format = col.params && 'format' in col.params ? col.params.format : undefined;
-        if (!format) {
-          return null;
-        }
-        const base = `| lens_format_column format="${format.id}" columnId="${id}"`;
-        if (typeof format.params?.decimals === 'number') {
-          return base + ` decimals=${format.params.decimals}`;
-        }
-        return base;
-      })
-      .filter(expr => !!expr)
-      .join(' ');
+    type FormattedColumn = Required<Extract<IndexPatternColumn, { params?: { format: unknown } }>>;
 
-    return `esaggs
-      index="${indexPattern.id}"
-      metricsAtAllLevels=false
-      partialRows=false
-      includeFormatHints=true
-      aggConfigs={lens_auto_date aggConfigs='${JSON.stringify(
-        aggs
-      )}'} | lens_rename_columns idMap='${JSON.stringify(idMap)}' ${formatterOverrides}`;
+    const columnsWithFormatters = columnEntries.filter(
+      ([, col]) => col.params && 'format' in col.params && col.params.format
+    ) as Array<[string, FormattedColumn]>;
+    const formatterOverrides: ExpressionFunctionAST[] = columnsWithFormatters.map(([id, col]) => {
+      const format = (col as FormattedColumn).params!.format;
+      const base: ExpressionFunctionAST = {
+        type: 'function',
+        function: 'lens_format_column',
+        arguments: {
+          format: [format.id],
+          columnId: [id],
+        },
+      };
+      if (typeof format.params?.decimals === 'number') {
+        return {
+          ...base,
+          arguments: {
+            ...base.arguments,
+            decimals: [format.params.decimals],
+          },
+        };
+      }
+      return base;
+    });
+
+    const allDateHistogramFields = Object.values(columns)
+      .map(column =>
+        column.operationType === dateHistogramOperation.type ? column.sourceField : null
+      )
+      .filter((field): field is string => Boolean(field));
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'esaggs',
+          arguments: {
+            index: [indexPattern.id],
+            metricsAtAllLevels: [false],
+            partialRows: [false],
+            includeFormatHints: [true],
+            timeFields: allDateHistogramFields,
+            aggConfigs: [JSON.stringify(aggs)],
+          },
+        },
+        {
+          type: 'function',
+          function: 'lens_rename_columns',
+          arguments: {
+            idMap: [JSON.stringify(idMap)],
+          },
+        },
+        ...formatterOverrides,
+      ],
+    };
   }
 
   return null;

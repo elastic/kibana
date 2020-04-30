@@ -51,6 +51,7 @@ const createExecutionHandlerParams = {
 beforeEach(() => {
   jest.resetAllMocks();
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 });
 
 test('calls actionsPlugin.execute per selected action', async () => {
@@ -94,6 +95,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
+                "rel": "primary",
                 "type": "alert",
               },
               Object {
@@ -111,6 +113,7 @@ test('calls actionsPlugin.execute per selected action', async () => {
 
 test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => {
   // Mock two calls, one for check against actions[0] and the second for actions[1]
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
   createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
   const executionHandler = createExecutionHandler({
@@ -146,6 +149,50 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
     spaceId: 'default',
     apiKey: createExecutionHandlerParams.apiKey,
   });
+});
+
+test('trow error error message when action type is disabled', async () => {
+  createExecutionHandlerParams.actionsPlugin.preconfiguredActions = [];
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockReturnValue(false);
+  createExecutionHandlerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(false);
+  const executionHandler = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [
+      ...createExecutionHandlerParams.actions,
+      {
+        id: '2',
+        group: 'default',
+        actionTypeId: '.slack',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+    ],
+  });
+
+  await executionHandler({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
+
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(0);
+
+  createExecutionHandlerParams.actionsPlugin.isActionExecutable.mockImplementation(() => true);
+  const executionHandlerForPreconfiguredAction = createExecutionHandler({
+    ...createExecutionHandlerParams,
+    actions: [...createExecutionHandlerParams.actions],
+  });
+  await executionHandlerForPreconfiguredAction({
+    actionGroup: 'default',
+    state: {},
+    context: {},
+    alertInstanceId: '2',
+  });
+  expect(createExecutionHandlerParams.actionsPlugin.execute).toHaveBeenCalledTimes(1);
 });
 
 test('limits actionsPlugin.execute per action group', async () => {

@@ -32,33 +32,32 @@ const metricExamples = [
 describe('getMetricFields', () => {
   it('should override name and label of count metric', async () => {
     const source = new ESTermSource({
+      id: '1234',
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
     });
     const metrics = source.getMetricFields();
-    expect(metrics[0].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
+    expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
     expect(await metrics[0].getLabel()).toEqual('Count of myIndex');
   });
 
   it('should override name and label of sum metric', async () => {
     const source = new ESTermSource({
+      id: '1234',
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
     });
     const metrics = source.getMetricFields();
-    expect(metrics[0].getName()).toEqual(
-      '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField'
-    );
+    expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');
     expect(await metrics[0].getLabel()).toEqual('my custom label');
-    expect(metrics[1].getName()).toEqual('__kbnjoin__count_groupby_myIndex.myTermField');
+    expect(metrics[1].getName()).toEqual('__kbnjoin__count__1234');
     expect(await metrics[1].getLabel()).toEqual('Count of myIndex');
   });
 });
 
 describe('extractPropertiesMap', () => {
-  const minPropName =
-    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
+  const minPropName = '__kbnjoin__min_of_avlAirTemp__1234';
   const responseWithNumberTypes = {
     aggregations: {
       join: {
@@ -81,7 +80,7 @@ describe('extractPropertiesMap', () => {
       },
     },
   };
-  const countPropName = '__kbnjoin__count_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
+  const countPropName = '__kbnjoin__count__1234';
 
   let propertiesMap;
   beforeAll(() => {

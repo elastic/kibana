@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
+import { ImmutableMiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
 import {
   sendGetDatasource,
@@ -14,7 +14,7 @@ import {
 import { PolicyData } from '../../../../../common/types';
 import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
-export const policyDetailsMiddlewareFactory: MiddlewareFactory<PolicyDetailsState> = coreStart => {
+export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = coreStart => {
   const http = coreStart.http;
 
   return ({ getState, dispatch }) => next => async action => {
