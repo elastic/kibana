@@ -16,7 +16,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
-import * as selectors from '../../../../store/alerts/selectors';
+import * as selectors from '../../../store/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
 import { AlertDetailResolver } from '../../resolver';

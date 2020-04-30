@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useAlertListSelector } from '../../hooks/use_alerts_selector';
-import * as selectors from '../../../../store/alerts/selectors';
+import * as selectors from '../../../store/selectors';
 import {
   GeneralAccordion,
   HostAccordion,

@@ -5,7 +5,7 @@
  */
 
 import { AlertListState, ImmutableReducer } from '../../types';
-import { AppAction } from '../action';
+import { AppAction } from '../../store/action';
 import { Immutable } from '../../../../../common/types';
 
 const initialState = (): Immutable<AlertListState> => {

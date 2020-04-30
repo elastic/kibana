@@ -8,7 +8,7 @@ import { EndpointAppContext } from '../../types';
 import { AlertConstants } from '../../../common/alert_constants';
 import { alertListHandlerWrapper } from './list';
 import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
-import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
+import { alertingIndexGetQuerySchema } from '../../../common/alerts/schema/alert_index';
 
 export const BASE_ALERTS_ROUTE = `${AlertConstants.BASE_API_URL}/alerts`;
 

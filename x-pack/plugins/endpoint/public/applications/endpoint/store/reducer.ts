@@ -6,7 +6,7 @@
 
 import { hostListReducer } from './hosts';
 import { AppAction } from './action';
-import { alertListReducer } from './alerts';
+import { alertListReducer } from '../alerts/store';
 import { GlobalState, ImmutableReducer } from '../types';
 import { policyListReducer } from './policy_list';
 import { policyDetailsReducer } from './policy_details';

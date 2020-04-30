@@ -7,7 +7,7 @@ import * as React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
-import { AlertIndex } from './alerts';
+import { AlertIndex } from '../alerts/view';
 import { HostList } from './hosts';
 import { PolicyList } from './policy';
 import { PolicyDetails } from './policy';

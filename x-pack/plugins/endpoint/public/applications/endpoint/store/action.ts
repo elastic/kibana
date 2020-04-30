@@ -5,7 +5,7 @@
  */
 
 import { HostAction } from './hosts';
-import { AlertAction } from './alerts';
+import { AlertAction } from '../alerts/store';
 import { RoutingAction } from './routing';
 import { PolicyListAction } from './policy_list';
 import { PolicyDetailsAction } from './policy_details';

@@ -11,7 +11,7 @@ import {
 } from '../../../../../../src/core/server/mocks';
 import { registerAlertRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
-import { alertingIndexGetQuerySchema } from '../../../common/schema/alert_index';
+import { alertingIndexGetQuerySchema } from '../../../common/alerts/schema/alert_index';
 import { createMockAgentService, createMockIndexPatternRetriever } from '../../mocks';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 

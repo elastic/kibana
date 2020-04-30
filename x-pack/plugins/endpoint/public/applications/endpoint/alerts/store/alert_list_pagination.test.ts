@@ -9,12 +9,12 @@ import { History } from 'history';
 import { alertListReducer } from './reducer';
 import { AlertListState, AlertingIndexUIQueryParams } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
-import { AppAction } from '../action';
+import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';
 import { DepsStartMock, depsStartMock } from '../../mocks';
 import { createBrowserHistory } from 'history';
 import { uiQueryParams } from './selectors';
-import { urlFromQueryParams } from '../../view/alerts/url_from_query_params';
+import { urlFromQueryParams } from '../view/url_from_query_params';
 import { Immutable } from '../../../../../common/types';
 
 describe('alert list pagination', () => {

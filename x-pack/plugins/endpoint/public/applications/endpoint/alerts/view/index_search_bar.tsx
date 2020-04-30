@@ -12,9 +12,9 @@ import { Query, TimeRange } from 'src/plugins/data/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
-import * as selectors from '../../store/alerts/selectors';
+import * as selectors from '../store/selectors';
 import { EndpointPluginServices } from '../../../../plugin';
-import { clone } from '../../models/index_pattern';
+import { clone } from '../models/index_pattern';
 
 export const AlertIndexSearchBar = memo(() => {
   const history = useHistory();

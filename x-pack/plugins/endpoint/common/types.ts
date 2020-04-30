@@ -6,8 +6,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import { alertingIndexGetQuerySchema } from './schema/alert_index';
-import { indexPatternGetParamsSchema } from './schema/index_pattern';
+import { alertingIndexGetQuerySchema } from './alerts/schema/alert_index';
+import { indexPatternGetParamsSchema } from './alerts/schema/index_pattern';
 import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
