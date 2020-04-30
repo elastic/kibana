@@ -21,8 +21,7 @@
 import { functionWrapper } from '../../expressions/common/expression_functions/specs/tests/utils';
 import { createTileMapFn } from './tile_map_fn';
 
-jest.mock('ui/new_platform');
-jest.mock('../../../../plugins/maps_legacy/public', () => ({
+jest.mock('../../maps_legacy/public', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
       type: 'FeatureCollection',
