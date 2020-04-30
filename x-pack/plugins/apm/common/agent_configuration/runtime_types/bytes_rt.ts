@@ -37,7 +37,7 @@ export function getBytesRt({
 
   const { amount: maxAmount, unit: maxUnit } = max
     ? amountAndUnitToObject(max)
-    : { amount: Infinity, unit: 'b' };
+    : { amount: Infinity, unit: 'mb' };
 
   const message = i18n.translate('xpack.apm.agentConfig.bytes.errorText', {
     defaultMessage: `{rangeType, select,
