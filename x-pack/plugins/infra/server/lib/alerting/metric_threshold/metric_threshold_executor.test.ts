@@ -327,6 +327,8 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   }
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
+  } else if (metric === 'test.metric.3') {
+    return mocks.emptyMetricResponse;
   }
   return mocks.basicMetricResponse;
 });
