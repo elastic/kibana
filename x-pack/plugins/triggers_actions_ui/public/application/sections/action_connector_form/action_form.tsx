@@ -148,9 +148,9 @@ export const ActionForm = ({
       const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
       const hasActionsDisabled = actions.some(
         action =>
-          !actionTypesIndex[action.actionTypeId].enabled &&
+          !actionTypesIndex![action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
-            actionTypesIndex[action.actionTypeId],
+            actionTypesIndex![action.actionTypeId],
             preconfiguredConnectors
           ).isEnabled
       );
