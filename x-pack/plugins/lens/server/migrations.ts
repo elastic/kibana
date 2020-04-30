@@ -131,7 +131,8 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
   }
 };
 
-export const migrations: Record<string, SavedObjectMigrationFn> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
   '7.7.0': doc => {
     const newDoc = cloneDeep(doc);
     if (newDoc.attributes?.visualizationType === 'lnsXY') {
