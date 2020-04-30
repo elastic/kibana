@@ -77,17 +77,9 @@ function InstalledPackages() {
       ? allPackages.response.filter(pkg => pkg.status === 'installed')
       : [];
 
-  const updatablePackages = allInstalledPackages.reduce<PackageListItem[]>((acc, item) => {
-    if ('savedObject' in item) {
-      if (item.version > item.savedObject.attributes.version) {
-        return acc.concat(item);
-      }
-    }
-    return acc;
-  }, []);
-
-  const packages =
-    selectedCategory === 'updates_available' ? [...updatablePackages] : [...allInstalledPackages];
+  const updatablePackages = allInstalledPackages.filter(
+    item => 'savedObject' in item && item.version > item.savedObject.attributes.version
+  );
 
   const categories = [
     {
@@ -119,7 +111,7 @@ function InstalledPackages() {
       isLoading={isLoadingPackages}
       controls={controls}
       title={title}
-      list={packages}
+      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
   );
 }
