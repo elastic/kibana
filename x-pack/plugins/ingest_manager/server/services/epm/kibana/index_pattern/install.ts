@@ -363,7 +363,7 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
 
 export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
   // create placeholder indices to supress errors in the kibana Dashboards app
-  // that no matching indices exist
+  // that no matching indices exist https://github.com/elastic/kibana/issues/62343
   Promise.all(
     Object.keys(IndexPatternType).map(async indexPattern => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
