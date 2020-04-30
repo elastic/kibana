@@ -26,7 +26,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Visualize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('discover');
       await PageObjects.common.navigateToApp('visualize');
     });
 

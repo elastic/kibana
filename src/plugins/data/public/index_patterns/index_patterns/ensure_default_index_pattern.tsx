@@ -67,10 +67,13 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
         clearTimeout(timeoutId);
       }
 
-      const bannerMessage = i18n.translate('kibana_utils.indexPattern.bannerLabel', {
-        defaultMessage:
-          "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
-      });
+      const bannerMessage = i18n.translate(
+        'data.indexPatterns.ensureDefaultIndexPattern.bannerLabel',
+        {
+          defaultMessage:
+            "In order to visualize and explore data in Kibana, you'll need to create an index pattern to retrieve data from Elasticsearch.",
+        }
+      );
 
       // Avoid being hostile to new users who don't have an index pattern setup yet
       // give them a friendly info message instead of a terse error message

@@ -265,6 +265,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`doesn't show save button`, async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.sleep(10000);
         await PageObjects.common.waitForTopNavToBeVisible();
         await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
         await testSubjects.missingOrFail('discoverSaveButton');

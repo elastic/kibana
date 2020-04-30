@@ -41,19 +41,9 @@ import { i18n } from '@kbn/i18n';
 import { Welcome } from './welcome';
 import { getServices } from '../kibana_services';
 import { FeatureCatalogueCategory } from '../../services';
+import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
-
-const createAppNavigationHandler = targetUrl => event => {
-  if (event.altKey || event.metaKey || event.ctrlKey) {
-    return;
-  }
-  if (targetUrl.startsWith('/app/')) {
-    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl);
-    event.preventDefault();
-    getServices().application.navigateToApp(appId, { path });
-  }
-};
 
 export class Home extends Component {
   constructor(props) {

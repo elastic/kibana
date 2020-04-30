@@ -57,7 +57,7 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
-        "kibana",
+        "dashboards",
       ],
       "catalogue": Array [
         "dashboard",
@@ -92,7 +92,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
-        "kibana",
+        "dashboards",
       ],
       "catalogue": Array [
         "dashboard",
@@ -127,7 +127,7 @@ Array [
         "console",
       ],
       "app": Array [
-        "kibana",
+        "dev_tools",
       ],
       "catalogue": Array [
         "console",
@@ -151,7 +151,7 @@ Array [
         "console",
       ],
       "app": Array [
-        "kibana",
+        "dev_tools",
       ],
       "catalogue": Array [
         "console",
@@ -177,7 +177,7 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
-        "kibana",
+        "discover",
       ],
       "catalogue": Array [
         "discover",
@@ -187,11 +187,10 @@ Array [
         "all": Array [
           "search",
           "query",
+          "index-pattern",
           "url",
         ],
-        "read": Array [
-          "index-pattern",
-        ],
+        "read": Array [],
       },
       "ui": Array [
         "show",
@@ -205,7 +204,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
-        "kibana",
+        "discover",
       ],
       "catalogue": Array [
         "discover",
@@ -400,7 +399,7 @@ Array [
     "privilege": Object {
       "api": Array [],
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
       ],
       "catalogue": Array [
@@ -432,7 +431,7 @@ Array [
   Object {
     "privilege": Object {
       "app": Array [
-        "kibana",
+        "visualize",
         "lens",
       ],
       "catalogue": Array [
