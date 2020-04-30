@@ -22,6 +22,7 @@ import { SavedObjectsPublicPlugin } from './plugin';
 export {
   OnSaveProps,
   SavedObjectSaveModal,
+  SavedObjectSaveModalOrigin,
   SaveModalState,
   SaveResult,
   showSaveModal,

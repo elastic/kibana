@@ -14,11 +14,11 @@ import { isObject } from 'lodash';
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { parse } from 'query-string';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
-import { DashboardConstants } from '../../../../src/plugins/dashboard/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
@@ -130,33 +130,44 @@ export class LensPlugin {
         };
         const redirectTo = (
           routeProps: RouteComponentProps<{ id?: string }>,
-          addToDashboardMode: boolean,
-          id?: string
+          originatingApp: string,
+          id?: string,
+          returnToOrigin?: boolean,
+          newlyCreated?: boolean
         ) => {
           if (!id) {
             routeProps.history.push('/lens');
-          } else if (!addToDashboardMode) {
+          } else if (!originatingApp) {
             routeProps.history.push(`/lens/edit/${id}`);
-          } else if (addToDashboardMode && id) {
+          } else if (!!originatingApp && id && returnToOrigin) {
             routeProps.history.push(`/lens/edit/${id}`);
-            const lastDashboardLink = coreStart.chrome.navLinks.get('kibana:dashboard');
-            if (!lastDashboardLink || !lastDashboardLink.url) {
-              throw new Error('Cannot get last dashboard url');
+            const originatingAppLink = coreStart.chrome.navLinks.get(originatingApp);
+            if (!originatingAppLink || !originatingAppLink.url) {
+              throw new Error('Cannot get originating app url');
             }
-            const urlVars = getUrlVars(lastDashboardLink.url);
-            updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-            const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardLink.url, id, urlVars);
-            window.history.pushState({}, '', dashboardUrl);
+
+            // TODO: Remove this and use application.redirectTo after https://github.com/elastic/kibana/pull/63443
+            if (originatingApp === 'kibana:dashboard') {
+              const addLensId = newlyCreated ? id : '';
+              const urlVars = getUrlVars(originatingAppLink.url);
+              updateUrlTime(urlVars); // we need to pass in timerange in query params directly
+              const dashboardUrl = addEmbeddableToDashboardUrl(
+                originatingAppLink.url,
+                addLensId,
+                urlVars
+              );
+              window.history.pushState({}, '', dashboardUrl);
+            } else {
+              window.location.href = originatingAppLink.url;
+            }
           }
         };
 
         const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
           trackUiEvent('loaded');
-          const addToDashboardMode =
-            !!routeProps.location.search &&
-            routeProps.location.search.includes(
-              DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM
-            );
+          const urlParams = parse(routeProps.location.search) as Record<string, string>;
+          const originatingApp = urlParams.embeddableOriginatingApp;
+
           return (
             <App
               core={coreStart}
@@ -166,8 +177,10 @@ export class LensPlugin {
               storage={new Storage(localStorage)}
               docId={routeProps.match.params.id}
               docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-              redirectTo={id => redirectTo(routeProps, addToDashboardMode, id)}
-              addToDashboardMode={addToDashboardMode}
+              redirectTo={(id, returnToOrigin, newlyCreated) =>
+                redirectTo(routeProps, originatingApp, id, returnToOrigin, newlyCreated)
+              }
+              originatingApp={originatingApp}
             />
           );
         };

@@ -120,11 +120,14 @@ export class VisualizeEmbeddableFactory
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     let originitingAppParam = this.deps.start().core.application.currentAppId$.getValue();
-
     // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
     if (originitingAppParam === 'kibana') {
       originitingAppParam += `:${window.location.hash.split(/[\/\?]/)[1]}`;
     }
+    console.log(
+      'visualize embeddable factory create!',
+      `${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originitingAppParam}`
+    );
     showNewVisModal({
       editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originitingAppParam}`],
     });

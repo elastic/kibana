@@ -76,7 +76,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
     title: this.props.title,
-    copyOnSave: this.props.initialCopyOnSave,
+    copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
     isLoading: false,

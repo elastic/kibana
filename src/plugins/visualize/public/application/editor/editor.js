@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
 import React from 'react';
-import { VisualizeSaveModal } from './visualize_save_modal';
 import { makeStateful, useVisualizeAppState, addEmbeddableToDashboardUrl } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -40,7 +39,7 @@ import {
   subscribeWithScope,
   migrateLegacyQuery,
 } from '../../../../kibana_legacy/public';
-import { showSaveModal } from '../../../../saved_objects/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '../../../../saved_objects/public';
 import { esFilters, connectToQueryState, syncQueryStateWithUrl } from '../../../../data/public';
 
 import { initVisEditorDirective } from './visualization_editor';
@@ -111,10 +110,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  const editOriginatingApp = $route.current.params[EMBEDDABLE_ORIGINATING_APP_PARAM];
+  const originatingApp = $route.current.params[EMBEDDABLE_ORIGINATING_APP_PARAM];
   removeQueryParam(history, EMBEDDABLE_ORIGINATING_APP_PARAM);
 
-  $scope.getOriginatingApp = () => editOriginatingApp;
+  $scope.getOriginatingApp = () => originatingApp;
 
   const visStateToEditorState = () => {
     const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
@@ -159,6 +158,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
             }),
             emphasize: true,
             iconType: 'check',
+            'data-test-subj': 'visualizationSaveAndReturnButton',
             description: i18n.translate(
               'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
@@ -193,7 +193,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       ? [
           {
             id: 'save',
-            emphasize: !savedVis.id || !$scope.getOriginatingApp(),
             label:
               savedVis.id && $scope.getOriginatingApp()
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
@@ -202,6 +201,8 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                 : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
                     defaultMessage: 'save',
                   }),
+            emphasize: !savedVis.id || !$scope.getOriginatingApp(),
+            'data-test-subj': 'visualizationSaveButton',
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -248,9 +249,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               };
 
               const saveModal = (
-                <VisualizeSaveModal
-                  savedVisInfo={savedVis}
+                <SavedObjectSaveModalOrigin
+                  documentInfo={savedVis}
                   onSave={onSave}
+                  objectType={'visualization'}
                   onClose={() => {}}
                   originatingApp={$scope.getOriginatingApp()}
                 />
@@ -670,7 +672,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               history.replace(appPath);
               setActiveUrl(appPath);
               const lastAppType = $scope.getOriginatingApp();
-              let href = chrome.navLinks.get(`${lastAppType}`).url;
+              let href = chrome.navLinks.get(lastAppType).url;
 
               // TODO: Remove this and use application.redirectTo after https://github.com/elastic/kibana/pull/63443
               if (lastAppType === 'kibana:dashboard') {

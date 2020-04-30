@@ -22,33 +22,30 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectSaveModal,
-  OnSaveProps,
-  SaveModalState,
-} from '../../../../saved_objects/public';
+import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
 
-interface SavedVisInfo {
-  id: string;
+interface SaveModalDocumentInfo {
+  id?: string;
   title: string;
-  description: string;
+  description?: string;
 }
 
-interface VisualizeSaveModalProps {
+interface OriginSaveModalProps {
   originatingApp?: string;
-  savedVisInfo: SavedVisInfo;
+  documentInfo: SaveModalDocumentInfo;
+  objectType: string;
   onClose: () => void;
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
 }
 
-export function VisualizeSaveModal(props: VisualizeSaveModalProps) {
+export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   const [returnToOriginMode, setReturnToOriginMode] = useState(Boolean(props.originatingApp));
-  const { savedVisInfo } = props;
+  const { documentInfo } = props;
 
-  const returnLabel = i18n.translate('visualize.saveDialog.returnToOriginLabel', {
+  const returnLabel = i18n.translate('savedObjects.saveModalOrigin.returnToOriginLabel', {
     defaultMessage: 'Return',
   });
-  const addLabel = i18n.translate('visualize.saveDialog.addToOriginLabel', {
+  const addLabel = i18n.translate('savedObjects.saveModalOrigin.addToOriginLabel', {
     defaultMessage: 'Add',
   });
 
@@ -67,7 +64,7 @@ export function VisualizeSaveModal(props: VisualizeSaveModalProps) {
       !state.copyOnSave ||
       origin === 'dashboard' // dashboard supports adding a copied panel on save...
     ) {
-      const originVerb = !savedVisInfo.id || state.copyOnSave ? addLabel : returnLabel;
+      const originVerb = !documentInfo.id || state.copyOnSave ? addLabel : returnLabel;
       return (
         <Fragment>
           <EuiFormRow>
@@ -79,7 +76,7 @@ export function VisualizeSaveModal(props: VisualizeSaveModalProps) {
               }}
               label={
                 <FormattedMessage
-                  id="visualize.saveDialog.originAfterSavingSwitchLabel"
+                  id="savedObjects.saveModalOrigin.originAfterSavingSwitchLabel"
                   defaultMessage="{originVerb} to {origin} after saving"
                   values={{ originVerb, origin }}
                 />
@@ -101,12 +98,12 @@ export function VisualizeSaveModal(props: VisualizeSaveModalProps) {
     <SavedObjectSaveModal
       onSave={onModalSave}
       onClose={props.onClose}
-      title={savedVisInfo.title}
-      showCopyOnSave={savedVisInfo.id ? true : false}
-      initialCopyOnSave={Boolean(savedVisInfo.id) && returnToOriginMode}
-      objectType="visualization"
+      title={documentInfo.title}
+      showCopyOnSave={documentInfo.id ? true : false}
+      initialCopyOnSave={Boolean(documentInfo.id) && returnToOriginMode}
+      objectType={props.objectType}
       options={getReturnToOriginSwitch}
-      description={savedVisInfo.description}
+      description={documentInfo.description}
       showDescription={true}
     />
   );
