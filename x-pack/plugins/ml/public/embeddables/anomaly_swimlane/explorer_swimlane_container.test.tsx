@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ExplorerSwimlaneContainer } from './explorer_swimlane_container';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneServices,
@@ -15,10 +16,6 @@ import {
 import { CoreStart } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
-// @ts-ignore
-import { ExplorerSwimlane } from '../../application/explorer/explorer_swimlane';
-// @ts-ignore
-import { MlTooltipComponent } from '../../application/components/chart_tooltip';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 
 jest.mock('./swimlane_input_resolver', () => ({
@@ -34,6 +31,8 @@ jest.mock('../../application/explorer/explorer_swimlane', () => ({
 jest.mock('../../application/components/chart_tooltip', () => ({
   MlTooltipComponent: jest.fn(),
 }));
+
+const defaultOptions = { wrapper: I18nProvider };
 
 describe('ExplorerSwimlaneContainer', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
@@ -75,7 +74,8 @@ describe('ExplorerSwimlaneContainer', () => {
         }
         services={services}
         refresh={refresh}
-      />
+      />,
+      defaultOptions
     );
     expect(
       await findByTestId('mlMaxAnomalyScoreEmbeddable_test-swimlane-embeddable')
@@ -98,7 +98,8 @@ describe('ExplorerSwimlaneContainer', () => {
         }
         services={services}
         refresh={refresh}
-      />
+      />,
+      defaultOptions
     );
     const errorMessage = await findByText('Something went wrong');
     expect(errorMessage).toBeDefined();
@@ -113,7 +114,8 @@ describe('ExplorerSwimlaneContainer', () => {
         }
         services={services}
         refresh={refresh}
-      />
+      />,
+      defaultOptions
     );
     expect(
       await findByTestId('loading_mlMaxAnomalyScoreEmbeddable_test-swimlane-embeddable')
