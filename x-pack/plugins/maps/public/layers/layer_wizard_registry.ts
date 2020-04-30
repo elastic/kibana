@@ -35,8 +35,13 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
 }
 
 export async function getLayerWizards(): Promise<LayerWizard[]> {
-  const checkVisibilityPromises = registry.filter(async layerWizard => {
-    return layerWizard.checkVisibility ? await layerWizard.checkVisibility() : true;
+  const promises = registry.map(async layerWizard => {
+    return {
+      ...layerWizard,
+      isVisible: layerWizard.checkVisibility ? await layerWizard.checkVisibility() : true,
+    };
   });
-  return await Promise.all(checkVisibilityPromises);
+  return await Promise.all(promises).filter(({ isVisible }) => {
+    return isVisible;
+  });
 }

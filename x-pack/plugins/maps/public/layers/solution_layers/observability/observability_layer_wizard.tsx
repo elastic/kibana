@@ -13,8 +13,12 @@ import { getIndexPatternService } from '../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   checkVisibility: async () => {
-    const apmIndexPattern = await getIndexPatternService().get(APM_INDEX_PATTERN_ID);
-    return !!apmIndexPattern;
+    try {
+      await getIndexPatternService().get(APM_INDEX_PATTERN_ID);
+      return true;
+    } catch (e) {
+      return false;
+    }
   },
   description: i18n.translate('xpack.maps.observability.desc', {
     defaultMessage: 'Observability layers',
