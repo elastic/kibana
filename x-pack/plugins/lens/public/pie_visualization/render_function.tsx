@@ -30,6 +30,7 @@ import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import './visualization.scss';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
