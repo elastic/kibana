@@ -14,7 +14,8 @@ import {
   units,
   fontSizes,
   unit,
-} from '../../../../../../../legacy/plugins/apm/public/style/variables';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../../apm/public/style/variables';
 import { tint } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 

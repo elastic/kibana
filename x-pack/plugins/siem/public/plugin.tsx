@@ -31,7 +31,7 @@ import { SecurityPluginSetup } from '../../security/public';
 import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana/services';
-import { serviceNowActionType } from './lib/connectors';
+import { serviceNowActionType, jiraActionType } from './lib/connectors';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -84,6 +84,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     core.application.register({
       id: APP_ID,
