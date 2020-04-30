@@ -72,3 +72,47 @@ export const commonStateTranslations = [
     ),
   },
 ];
+
+export const tlsTranslations = {
+  alertFactoryName: i18n.translate('xpack.uptime.alerts.tls', {
+    defaultMessage: 'Uptime TLS',
+  }),
+  actionVariables: [
+    {
+      name: 'count',
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.count', {
+        defaultMessage: 'The number of certs detected by the alert executor',
+      }),
+    },
+    {
+      name: 'expiringCount',
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.expiringCount', {
+        defaultMessage: 'The number of expiring certs detected by the alert.',
+      }),
+    },
+    {
+      name: 'expiringCommonNameAndDate',
+      description: i18n.translate(
+        'xpack.uptime.alerts.tls.actionVariables.state.expiringCommonNameAndDate',
+        {
+          defaultMessage: 'The common names and expiration date/time of the detected certs',
+        }
+      ),
+    },
+    {
+      name: 'agingCount',
+      description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.agingCount', {
+        defaultMessage: 'The number of detected certs that are becoming too old.',
+      }),
+    },
+    {
+      name: 'agingCommonNameAndDate',
+      description: i18n.translate(
+        'xpack.uptime.alerts.tls.actionVariables.state.agingCommonNameAndDate',
+        {
+          defaultMessage: 'The common names and expiration date/time of the detected certs.',
+        }
+      ),
+    },
+  ],
+};

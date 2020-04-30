@@ -6,13 +6,12 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { UptimeAlertTypeFactory } from './types';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert } from '../../../common/runtime_types';
-import { commonStateTranslations } from './translations';
+import { commonStateTranslations, tlsTranslations } from './translations';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
@@ -92,9 +91,7 @@ export const getCertSummary = (
 
 export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.tls',
-  name: i18n.translate('xpack.uptime.alerts.tls', {
-    defaultMessage: 'Uptime TLS',
-  }),
+  name: tlsTranslations.alertFactoryName,
   validate: {
     params: schema.object({}),
   },
@@ -107,45 +104,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   ],
   actionVariables: {
     context: [],
-    state: [
-      {
-        name: 'count',
-        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.count', {
-          defaultMessage: 'The number of certs detected by the alert executor',
-        }),
-      },
-      {
-        name: 'expiringCount',
-        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.expiringCount', {
-          defaultMessage: 'The number of expiring certs detected by the alert.',
-        }),
-      },
-      {
-        name: 'expiringCommonNameAndDate',
-        description: i18n.translate(
-          'xpack.uptime.alerts.tls.actionVariables.state.expiringCommonNameAndDate',
-          {
-            defaultMessage: 'The common names and expiration date/time of the detected certs',
-          }
-        ),
-      },
-      {
-        name: 'agingCount',
-        description: i18n.translate('xpack.uptime.alerts.tls.actionVariables.state.agingCount', {
-          defaultMessage: 'The number of detected certs that are becoming too old.',
-        }),
-      },
-      {
-        name: 'agingCommonNameAndDate',
-        description: i18n.translate(
-          'xpack.uptime.alerts.tls.actionVariables.state.agingCommonNameAndDate',
-          {
-            defaultMessage: 'The common names and expiration date/time of the detected certs.',
-          }
-        ),
-      },
-      ...commonStateTranslations,
-    ],
+    state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
   async executor(options) {
     const {
