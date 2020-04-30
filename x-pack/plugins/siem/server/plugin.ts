@@ -71,7 +71,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup, plugins: SetupPlugins) {
+  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
     if (hasListsFeature()) {
