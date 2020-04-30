@@ -29,6 +29,8 @@ export const IndexSetupRow: React.FC<{
     [index.name, onChangeDatasetFilter]
   );
 
+  const isSelected = index.validity === 'valid' && index.isSelected;
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -37,7 +39,7 @@ export const IndexSetupRow: React.FC<{
           id={index.name}
           label={<EuiCode>{index.name}</EuiCode>}
           onChange={changeIsSelected}
-          checked={index.validity === 'valid' && index.isSelected}
+          checked={isSelected}
           disabled={isDisabled || index.validity === 'invalid'}
         />
       </EuiFlexItem>
@@ -50,6 +52,7 @@ export const IndexSetupRow: React.FC<{
           <IndexSetupDatasetFilter
             availableDatasets={index.availableDatasets}
             datasetFilter={index.datasetFilter}
+            isDisabled={!isSelected || isDisabled}
             onChangeDatasetFilter={changeDatasetFilter}
           />
         ) : null}

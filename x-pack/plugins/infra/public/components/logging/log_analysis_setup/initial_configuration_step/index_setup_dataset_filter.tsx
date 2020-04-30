@@ -20,8 +20,9 @@ import { useVisibilityState } from '../../../../utils/use_visibility_state';
 export const IndexSetupDatasetFilter: React.FC<{
   availableDatasets: string[];
   datasetFilter: DatasetFilter;
+  isDisabled?: boolean;
   onChangeDatasetFilter: (datasetFilter: DatasetFilter) => void;
-}> = ({ availableDatasets, datasetFilter, onChangeDatasetFilter }) => {
+}> = ({ availableDatasets, datasetFilter, isDisabled, onChangeDatasetFilter }) => {
   const { isVisible, hide, show } = useVisibilityState(false);
 
   const changeDatasetFilter = useCallback(
@@ -52,7 +53,7 @@ export const IndexSetupDatasetFilter: React.FC<{
   );
 
   const datasetFilterButton = (
-    <EuiFilterButton isSelected={isVisible} onClick={show}>
+    <EuiFilterButton disabled={isDisabled} isSelected={isVisible} onClick={show}>
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
         defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
