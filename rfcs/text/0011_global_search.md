@@ -66,9 +66,15 @@ type GlobalSearchResultType = keyof typeof SEARCH_TYPE;
 
 /**
  * Options provided to {@link GlobalSearchResultProvider | result providers} `find` method.
- * Currently empty and only present to keep the API future-proof.
  */
-interface GlobalSearchOptions {}
+interface GlobalSearchProviderFindOptions {
+  /**
+   * A custom preference token associated with a search 'session' that should be used to get consistent scoring
+   * when performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere
+   * than an elasticsearch cluster.
+   */
+  preference: string;
+}
 
 /**
  * Representation of a result returned by a {@link GlobalSearchResultProvider | result provider}
@@ -122,7 +128,7 @@ type GlobalSearchResultProvider = {
   id: string;
   find(
     term: string,
-    options: GlobalSearchOptions,
+    options: GlobalSearchProviderFindOptions,
     context: GlobalSearchProviderContext
   ): Observable<GlobalSearchResult[]>;
 };
@@ -145,7 +151,7 @@ type GlobalSearchResultProvider = {
   id: string;
   find(
     term: string,
-    options: GlobalSearchOptions,
+    options: GlobalSearchProviderFindOptions,
   ): Observable<GlobalSearchResult[]>;
 };
 ```
@@ -173,6 +179,19 @@ type GlobalSearchResponse<ResultType extends GlobalSearchResult = GlobalSearchRe
 #### server API
 
 ```ts
+/**
+ * Options for the {@link GlobalSearchServiceStart.find | find API}
+ */
+interface GlobalSearchFindOptions {
+  /**
+   * a custom preference token associated with a search 'session' that should be used to get consistent scoring
+   * when performing calls to ES. Can also be used as a 'session' token for providers returning data from elsewhere
+   * than an elasticsearch cluster.
+   * If not specified, a random token will be generated and used when callingn the underlying result providers.
+   */
+  preference?: string;
+}
+
 /** @public */
 interface GlobalSearchServiceSetup {
   registerResultProvider(provider: GlobalSearchResultProvider);
@@ -182,7 +201,7 @@ interface GlobalSearchServiceSetup {
 interface GlobalSearchServiceStart {
   find(
     term: string,
-    options: GlobalSearchOptions,
+    options: GlobalSearchFindOptions,
     request: KibanaRequest
   ): Observable<GlobalSearchResponse>;
 }
@@ -191,6 +210,12 @@ interface GlobalSearchServiceStart {
 #### public API
 
 ```ts
+/**
+ * Options for the {@link GlobalSearchServiceStart.find | find API}
+ * Currently empty and only present for keeping the API future-proof.
+ */
+interface GlobalSearchFindOptions {}
+
 /**
  * Enhanced {@link GlobalSearchResult | result type} for the client-side,
  * to allow navigating to a given result.
@@ -212,7 +237,7 @@ interface GlobalSearchServiceSetup {
 interface GlobalSearchServiceStart {
   find(
     term: string,
-    options: GlobalSearchOptions,
+    options: GlobalSearchFindOptions,
   ): Observable<GlobalSearchResponse<NavigableGlobalSearchResult>>;
 }
 ```
@@ -240,7 +265,9 @@ router.post(
     validate: {
       body: schema.object({
         term: schema.string(),
-        options: schema.maybe(schema.object({})),
+        options: schema.maybe(schema.object({
+          preference: schema.maybe(schema.string()),
+        })),
       }),
     },
   },
@@ -405,7 +432,7 @@ A very naive implementation of this behavior would be:
 ```ts
 search(
   term: string,
-  options: GlobalSearchOptions,
+  options: GlobalSearchFindOptions,
   request: KibanaRequest
 ): Observable<GlobalSearchResponse> {
   const fromProviders$ = this.providers.map(p =>
@@ -442,7 +469,7 @@ A very naive implementation of this behavior would be:
 ```
 search(
   term: string,
-  options: GlobalSearchOptions,
+  options: GlobalSearchFindOptions,
 ): Observable<GlobalSearchResponse> {
   const fromProviders$ = this.providers.map(p =>
     p.find(term, options)
@@ -635,7 +662,7 @@ only uses the last one (For example in the UI, a debounced `find` triggered on e
 a new search is performed and the previous, potentially still executing, `find` call will still be executed), it can't
 cancel the previous active search, resulting on potential useless http calls and resources consumption.
 
-We could add an optional cancellation signal or observable in `GlobalSearchOptions` and propagate it to result providers.
+We could add an optional cancellation signal or observable in `GlobalSearchFindOptions` and propagate it to result providers.
 That way `find` calls could be aborted.
 
 However result providers would still have to manually handles this signal to cancel any http call or 
