@@ -1262,10 +1262,10 @@
   dependencies:
     "@elastic/apm-rum-core" "^5.2.0"
 
-"@elastic/charts@19.0.0":
-  version "19.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.0.0.tgz#d789054dfcc134f6483c5dc5f11fc2cdf4cefdd2"
-  integrity sha512-2iwgCR2oTxwfCC+Cq5mYfLXQPnEizy7Itjr6ZX8wdSbV5hOW8O6Y4q3ewgLXzX1N1qmJ6ziu2XcbJi2oJgY2uw==
+"@elastic/charts@19.1.1":
+  version "19.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-19.1.1.tgz#8794ae7df470cf838e882322b2d973f923869b35"
+  integrity sha512-smoq6CYI28uvZloUtHTDYb0lOv8aYkmuWaUlKkvcq7Eylw+WJxAcZuS5LQzUMDV04HxDu0tuJGE1JeZGfRM/jg==
   dependencies:
     classnames "^2.2.6"
     d3-array "^1.2.4"
