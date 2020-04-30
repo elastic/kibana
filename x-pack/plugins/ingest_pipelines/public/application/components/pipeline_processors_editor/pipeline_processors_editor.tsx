@@ -114,43 +114,41 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiPanel>
-        <DragAndDropTree
-          onDragEnd={args => {
-            dispatch({
-              type: 'moveProcessor',
-              payload: args,
-            });
-          }}
-          processors={processors}
-          nodeComponent={({ processor, selector }) => (
-            <PipelineProcessorEditorItem
-              onClick={type => {
-                switch (type) {
-                  case 'edit':
-                    setMode({ id: 'editingProcessor', arg: { processor, selector } });
-                    break;
-                  case 'delete':
-                    // TODO: This should have a delete confirmation modal
-                    dispatch({
-                      type: 'removeProcessor',
-                      payload: { selector },
-                    });
-                    break;
-                  case 'addOnFailure':
-                    setMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                    break;
-                }
-              }}
-              processor={processor}
-            />
-          )}
-        />
-        {/* TODO: Translate */}
-        <EuiButton onClick={() => setMode({ id: 'creatingTopLevelProcessor' })}>
-          Add a processor
-        </EuiButton>
-      </EuiPanel>
+      <DragAndDropTree
+        onDragEnd={args => {
+          dispatch({
+            type: 'moveProcessor',
+            payload: args,
+          });
+        }}
+        processors={processors}
+        nodeComponent={({ processor, selector }) => (
+          <PipelineProcessorEditorItem
+            onClick={type => {
+              switch (type) {
+                case 'edit':
+                  setMode({ id: 'editingProcessor', arg: { processor, selector } });
+                  break;
+                case 'delete':
+                  // TODO: This should have a delete confirmation modal
+                  dispatch({
+                    type: 'removeProcessor',
+                    payload: { selector },
+                  });
+                  break;
+                case 'addOnFailure':
+                  setMode({ id: 'creatingOnFailureProcessor', arg: selector });
+                  break;
+              }
+            }}
+            processor={processor}
+          />
+        )}
+      />
+      {/* TODO: Translate */}
+      <EuiButton onClick={() => setMode({ id: 'creatingTopLevelProcessor' })}>
+        Add a processor
+      </EuiButton>
       {mode.id !== 'idle' ? (
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}
