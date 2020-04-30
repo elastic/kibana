@@ -93,7 +93,7 @@ test('tests processing text field with multi fields', () => {
   const fields: Field[] = safeLoad(textWithMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(textWithMultiFieldsMapping));
+  expect(mappings).toEqual(textWithMultiFieldsMapping);
 });
 
 test('tests processing keyword field with multi fields', () => {
@@ -127,7 +127,7 @@ test('tests processing keyword field with multi fields', () => {
   const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithMultiFieldsMapping));
+  expect(mappings).toEqual(keywordWithMultiFieldsMapping);
 });
 
 test('tests processing keyword field with multi fields with analyzed text field', () => {
@@ -159,7 +159,7 @@ test('tests processing keyword field with multi fields with analyzed text field'
   const fields: Field[] = safeLoad(keywordWithAnalyzedMultiFieldsLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(keywordWithAnalyzedMultiFieldsMapping));
+  expect(mappings).toEqual(keywordWithAnalyzedMultiFieldsMapping);
 });
 
 test('tests processing object field with no other attributes', () => {
@@ -177,7 +177,7 @@ test('tests processing object field with no other attributes', () => {
   const fields: Field[] = safeLoad(objectFieldLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldMapping));
+  expect(mappings).toEqual(objectFieldMapping);
 });
 
 test('tests processing object field with enabled set to false', () => {
@@ -197,7 +197,7 @@ test('tests processing object field with enabled set to false', () => {
   const fields: Field[] = safeLoad(objectFieldEnabledFalseLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldEnabledFalseMapping));
+  expect(mappings).toEqual(objectFieldEnabledFalseMapping);
 });
 
 test('tests processing object field with dynamic set to false', () => {
@@ -217,7 +217,7 @@ test('tests processing object field with dynamic set to false', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicFalseLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicFalseMapping));
+  expect(mappings).toEqual(objectFieldDynamicFalseMapping);
 });
 
 test('tests processing object field with dynamic set to true', () => {
@@ -237,7 +237,7 @@ test('tests processing object field with dynamic set to true', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicTrueLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicTrueMapping));
+  expect(mappings).toEqual(objectFieldDynamicTrueMapping);
 });
 
 test('tests processing object field with dynamic set to strict', () => {
@@ -257,7 +257,7 @@ test('tests processing object field with dynamic set to strict', () => {
   const fields: Field[] = safeLoad(objectFieldDynamicStrictLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldDynamicStrictMapping));
+  expect(mappings).toEqual(objectFieldDynamicStrictMapping);
 });
 
 test('tests processing object field with property', () => {
@@ -282,7 +282,7 @@ test('tests processing object field with property', () => {
   const fields: Field[] = safeLoad(objectFieldWithPropertyLiteralYml);
   const processedFields = processFields(fields);
   const mappings = generateMappings(processedFields);
-  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldWithPropertyMapping));
+  expect(mappings).toEqual(objectFieldWithPropertyMapping);
 });
 
 test('tests processing object field with property, reverse order', () => {

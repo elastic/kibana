@@ -71,13 +71,14 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
 
       switch (type) {
         case 'group':
-          fieldProps = generateMappings(field.fields!);
-          attemptAddDynamicAndEnabled(fieldProps, field);
+          fieldProps = { ...generateMappings(field.fields!), ...generateDynamicAndEnabled(field) };
           break;
         case 'group-nested':
-          fieldProps = generateMappings(field.fields!);
-          fieldProps.type = 'nested';
-          attemptAddNestedProps(fieldProps, field);
+          fieldProps = {
+            ...generateMappings(field.fields!),
+            ...generateNestedProps(field),
+            type: 'nested',
+          };
           break;
         case 'integer':
           fieldProps.type = 'long';
@@ -101,12 +102,10 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           }
           break;
         case 'object':
-          fieldProps.type = 'object';
-          attemptAddDynamicAndEnabled(fieldProps, field);
+          fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
           break;
         case 'nested':
-          fieldProps.type = 'nested';
-          attemptAddNestedProps(fieldProps, field);
+          fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
@@ -133,17 +132,19 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   return { properties: props };
 }
 
-function attemptAddDynamicAndEnabled(props: Properties, field: Field) {
+function generateDynamicAndEnabled(field: Field) {
+  const props: Properties = {};
   if (field.hasOwnProperty('enabled')) {
     props.enabled = field.enabled;
   }
   if (field.hasOwnProperty('dynamic')) {
     props.dynamic = field.dynamic;
   }
+  return props;
 }
 
-function attemptAddNestedProps(props: Properties, field: Field) {
-  attemptAddDynamicAndEnabled(props, field);
+function generateNestedProps(field: Field) {
+  const props = generateDynamicAndEnabled(field);
 
   if (field.hasOwnProperty('include_in_parent')) {
     props.include_in_parent = field.include_in_parent;
@@ -151,6 +152,7 @@ function attemptAddNestedProps(props: Properties, field: Field) {
   if (field.hasOwnProperty('include_in_root')) {
     props.include_in_root = field.include_in_root;
   }
+  return props;
 }
 
 function generateMultiFields(fields: Fields): MultiFields {
