@@ -35,9 +35,9 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/apm/**/*',
   'x-pack/legacy/plugins/canvas/tasks/**/*',
   'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
@@ -58,6 +58,11 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // TODO fix file names in APM to remove these
+  'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/apm/scripts/**/*',
+  'x-pack/plugins/apm/e2e/**/*',
 ];
 
 /**
@@ -160,12 +165,11 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'webpackShims/ui-bootstrap.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
-  'x-pack/legacy/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
-  'x-pack/legacy/plugins/monitoring/public/icons/alert-blue.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-gray.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-green.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-red.svg',
-  'x-pack/legacy/plugins/monitoring/public/icons/health-yellow.svg',
+  'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
+  'x-pack/plugins/monitoring/public/icons/health-gray.svg',
+  'x-pack/plugins/monitoring/public/icons/health-green.svg',
+  'x-pack/plugins/monitoring/public/icons/health-red.svg',
+  'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
   'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
   'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
   'x-pack/legacy/plugins/reporting/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
