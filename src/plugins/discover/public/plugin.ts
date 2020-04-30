@@ -34,7 +34,7 @@ import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { SharePluginStart } from 'src/plugins/share/public';
+import { SharePluginStart, SharePluginSetup } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
@@ -43,7 +43,7 @@ import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../d
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
-
+import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
@@ -59,6 +59,17 @@ import {
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
+import {
+  DiscoverUrlGeneratorState,
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGenerator,
+} from './url_generator';
+
+declare module '../../share/public' {
+  export interface UrlGeneratorStateMapping {
+    [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
+  }
+}
 
 /**
  * @public
@@ -82,6 +93,7 @@ export interface DiscoverStart {
  * @internal
  */
 export interface DiscoverSetupPlugins {
+  share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
   kibanaLegacy: KibanaLegacySetup;
@@ -131,6 +143,14 @@ export class DiscoverPlugin
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
+    if (plugins.share) {
+      const urlGenerator = new DiscoverUrlGenerator({
+        appBasePath: 'kibana',
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      });
+      plugins.share.urlGenerators.registerUrlGenerator(urlGenerator);
+    }
+
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
