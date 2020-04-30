@@ -12,7 +12,7 @@ import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContex
 
 describe('ApmIndices', () => {
   it('should not get stuck in infinite loop', async () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
+    const spy = spyOn(hooks, 'useFetcher').and.returnValue({
       data: undefined,
       status: 'loading'
     });
@@ -30,6 +30,6 @@ describe('ApmIndices', () => {
       </h2>
     `);
 
-    await wait();
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });
