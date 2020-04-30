@@ -87,3 +87,7 @@ This page has moved. Please see <<coordinate-map>>.
 
 This page has moved. Please see <<region-map>>.
 
+[role="exclude",id="development-embedding-visualizations"]
+== Embedding Visualizations
+
+This page was deleted. See <<development-visualize-index>>.
