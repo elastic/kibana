@@ -302,6 +302,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
         </Fragment>
       )}
       <AnalysisFieldsTable
+        excludes={excludes}
         tableItems={excludesTableItems}
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
