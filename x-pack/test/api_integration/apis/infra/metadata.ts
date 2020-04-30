@@ -29,11 +29,6 @@ const timeRange800withAws = {
   to: DATES[`8.0.0`].logs_and_metrics_with_aws.max,
 };
 
-const timeRange800 = {
-  from: DATES['8.0.0'].logs_and_metrics.min,
-  to: DATES[`8.0.0`].logs_and_metrics.max,
-};
-
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
