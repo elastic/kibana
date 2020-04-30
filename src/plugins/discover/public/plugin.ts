@@ -20,7 +20,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { auto } from 'angular';
-import { CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { SharePluginSetup, SharePluginStart } from '../../share/public';
 import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
 import { DocViewInput, DocViewInputFn, DocViewRenderProps } from './doc_views/doc_views_types';
 import { DocViewsRegistry } from './doc_views/doc_views_registry';
@@ -29,8 +30,28 @@ import { JsonCodeBlock } from './components/json_code_block/json_code_block';
 import { DocViewer } from './components/doc_viewer/doc_viewer';
 import { setDocViewsRegistry } from './services';
 import { createSavedSearchesLoader } from './saved_searches';
+import {
+  DISCOVER_APP_URL_GENERATOR,
+  DiscoverUrlGeneratorState,
+  DiscoverUrlGenerator,
+} from './url_generator';
+import { UrlGeneratorState } from '../../share/public';
 
 import './index.scss';
+
+declare module '../../share/public' {
+  export interface UrlGeneratorStateMapping {
+    [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
+  }
+}
+
+interface SetupDependencies {
+  share?: SharePluginSetup;
+}
+
+interface StartDependencies {
+  share?: SharePluginStart;
+}
 
 /**
  * @public
@@ -81,7 +102,15 @@ export interface DiscoverStart {
 export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
   private docViewsRegistry: DocViewsRegistry | null = null;
 
-  setup(core: CoreSetup): DiscoverSetup {
+  setup(core: CoreSetup, { share }: SetupDependencies): DiscoverSetup {
+    if (share) {
+      const urlGenerator = new DiscoverUrlGenerator({
+        appBasePath: 'kibana',
+        useHash: core.uiSettings.get('state:storeInSessionStorage'),
+      });
+      share.urlGenerators.registerUrlGenerator(urlGenerator);
+    }
+
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -109,7 +138,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
   }
 
-  start() {
+  start(core: CoreStart, { share }: StartDependencies) {
     return {
       docViews: {
         DocViewer,

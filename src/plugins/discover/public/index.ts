@@ -32,3 +32,5 @@ export function plugin() {
 
 export { createSavedSearchesLoader } from './saved_searches/saved_searches';
 export { SavedSearchLoader, SavedSearch } from './saved_searches/types';
+
+export { DISCOVER_APP_URL_GENERATOR } from './url_generator';
