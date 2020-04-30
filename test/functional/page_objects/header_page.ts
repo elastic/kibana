@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function HeaderPageProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
@@ -30,13 +32,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
   class HeaderPage {
     async clickDiscover() {
-      await appsMenu.clickLink('Discover', 'kibana');
+      await appsMenu.clickLink('Discover', { category: 'kibana' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
-      await appsMenu.clickLink('Visualize', 'kibana');
+      await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
@@ -50,7 +52,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickDashboard() {
-      await appsMenu.clickLink('Dashboard', 'kibana');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -60,7 +62,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickStackManagement() {
-      await appsMenu.clickLink('Stack Management', 'management');
+      await appsMenu.clickLink('Stack Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
