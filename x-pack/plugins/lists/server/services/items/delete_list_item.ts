@@ -4,27 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { Id, ListItemSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
 
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
   id: Id;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
 }
 
 export const deleteListItem = async ({
   id,
-  dataClient,
+  callCluster,
   listItemIndex,
 }: DeleteListItemOptions): Promise<ListItemSchema | null> => {
-  const listItem = await getListItem({ dataClient, id, listItemIndex });
+  const listItem = await getListItem({ callCluster, id, listItemIndex });
   if (listItem == null) {
     return null;
   } else {
-    await dataClient.callAsCurrentUser('delete', {
+    await callCluster('delete', {
       id,
       index: listItemIndex,
     });
