@@ -17,4 +17,31 @@
  * under the License.
  */
 
-export * from './legacy_dependencies_plugin';
+import { TmsLayer } from '../../index';
+import { MapTypes } from './map_types';
+
+export interface WMSOptions {
+  selectedTmsLayer?: TmsLayer;
+  enabled: boolean;
+  url?: string;
+  options: {
+    version?: string;
+    layers?: string;
+    format: string;
+    transparent: boolean;
+    attribution?: string;
+    styles?: string;
+  };
+}
+
+export interface TileMapVisParams {
+  colorSchema: string;
+  mapType: MapTypes;
+  isDesaturated: boolean;
+  addTooltip: boolean;
+  heatClusterSize: number;
+  legendPosition: 'bottomright' | 'bottomleft' | 'topright' | 'topleft';
+  mapZoom: number;
+  mapCenter: [number, number];
+  wms: WMSOptions;
+}

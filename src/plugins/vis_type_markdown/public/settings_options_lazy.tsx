@@ -17,20 +17,14 @@
  * under the License.
  */
 
-import { VectorLayer, FileLayerField } from '../../../../plugins/maps_legacy/public';
-import { WMSOptions } from '../../tile_map/public/types';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
-export interface RegionMapVisParams {
-  readonly addTooltip: true;
-  readonly legendPosition: 'bottomright';
-  colorSchema: string;
-  emsHotLink?: string | null;
-  mapCenter: [number, number];
-  mapZoom: number;
-  outlineWeight: number | '';
-  isDisplayWarning: boolean;
-  showAllShapes: boolean;
-  selectedLayer?: VectorLayer;
-  selectedJoinField?: FileLayerField;
-  wms: WMSOptions;
-}
+// @ts-ignore
+const SettingsOptionsComponent = lazy(() => import('./settings_options'));
+
+export const SettingsOptions = (props: any) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <SettingsOptionsComponent {...props} />
+  </Suspense>
+);

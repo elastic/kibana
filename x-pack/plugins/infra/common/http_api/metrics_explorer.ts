@@ -13,6 +13,7 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'cardinality',
   'rate',
   'count',
+  'sum',
 ] as const;
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
@@ -54,6 +55,7 @@ export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
   afterKey: rt.union([rt.string, rt.null, rt.undefined]),
   limit: rt.union([rt.number, rt.null, rt.undefined]),
   filterQuery: rt.union([rt.string, rt.null, rt.undefined]),
+  forceInterval: rt.boolean,
 });
 
 export const metricsExplorerRequestBodyRT = rt.intersection([

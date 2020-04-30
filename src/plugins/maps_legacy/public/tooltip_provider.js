@@ -17,7 +17,27 @@
  * under the License.
  */
 
-export enum ORIGIN {
-  EMS = 'elastic_maps_service',
-  KIBANA_YML = 'self_hosted',
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+
+function getToolTipContent(details) {
+  return ReactDOMServer.renderToStaticMarkup(
+    <table>
+      <tbody>
+        {details.map((detail, i) => (
+          <tr key={i}>
+            <td className="visTooltip__label">{detail.label}</td>
+            <td className="visTooltip__value">{detail.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export function mapTooltipProvider(element, formatter) {
+  return (...args) => {
+    const details = formatter(...args);
+    return details && getToolTipContent(details);
+  };
 }
