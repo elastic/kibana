@@ -4,28 +4,65 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import axios from 'axios';
+
 import {
   normalizeMapping,
   buildMap,
   mapParams,
-  appendField,
-  appendInformationToField,
   prepareFieldsForTransformation,
   transformFields,
   transformComments,
-} from './helpers';
-import { mapping, finalMapping } from './mock';
-import { SUPPORTED_SOURCE_FIELDS } from './constants';
-import { MapEntry, Params, Comment } from './types';
+  addTimeZoneToDate,
+  throwIfNotAlive,
+  request,
+  patch,
+  getErrorMessage,
+} from './utils';
 
-const maliciousMapping: MapEntry[] = [
+import { SUPPORTED_SOURCE_FIELDS } from './constants';
+import { Comment, MapRecord, PushToServiceApiParams } from './types';
+
+jest.mock('axios');
+const axiosMock = (axios as unknown) as jest.Mock;
+
+const mapping: MapRecord[] = [
+  { source: 'title', target: 'short_description', actionType: 'overwrite' },
+  { source: 'description', target: 'description', actionType: 'append' },
+  { source: 'comments', target: 'comments', actionType: 'append' },
+];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const finalMapping: Map<string, any> = new Map();
+
+finalMapping.set('title', {
+  target: 'short_description',
+  actionType: 'overwrite',
+});
+
+finalMapping.set('description', {
+  target: 'description',
+  actionType: 'append',
+});
+
+finalMapping.set('comments', {
+  target: 'comments',
+  actionType: 'append',
+});
+
+finalMapping.set('short_description', {
+  target: 'title',
+  actionType: 'overwrite',
+});
+
+const maliciousMapping: MapRecord[] = [
   { source: '__proto__', target: 'short_description', actionType: 'nothing' },
   { source: 'description', target: '__proto__', actionType: 'nothing' },
   { source: 'comments', target: 'comments', actionType: 'nothing' },
   { source: 'unsupportedSource', target: 'comments', actionType: 'nothing' },
 ];
 
-const fullParams: Params = {
+const fullParams: PushToServiceApiParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   title: 'a title',
   description: 'a description',
@@ -33,15 +70,14 @@ const fullParams: Params = {
   createdBy: { fullName: 'Elastic User', username: 'elastic' },
   updatedAt: null,
   updatedBy: null,
-  incidentId: null,
-  incident: {
+  externalId: null,
+  externalCase: {
     short_description: 'a title',
     description: 'a description',
   },
   comments: [
     {
       commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-      version: 'WzU3LDFd',
       comment: 'first comment',
       createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -50,7 +86,6 @@ const fullParams: Params = {
     },
     {
       commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-      version: 'WzU3LDFd',
       comment: 'second comment',
       createdAt: '2020-03-13T08:34:53.450Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -60,7 +95,7 @@ const fullParams: Params = {
   ],
 };
 
-describe('sanitizeMapping', () => {
+describe('normalizeMapping', () => {
   test('remove malicious fields', () => {
     const sanitizedMapping = normalizeMapping(SUPPORTED_SOURCE_FIELDS, maliciousMapping);
     expect(sanitizedMapping.every(m => m.source !== '__proto__' && m.target !== '__proto__')).toBe(
@@ -194,7 +229,10 @@ describe('transformFields', () => {
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+        updatedBy: {
+          username: 'anotherUser',
+          fullName: 'Another User',
+        },
       },
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
@@ -204,7 +242,10 @@ describe('transformFields', () => {
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+        updatedBy: {
+          username: 'anotherUser',
+          fullName: 'Another User',
+        },
       },
       fields,
       currentIncident: {
@@ -244,7 +285,10 @@ describe('transformFields', () => {
     });
 
     const res = transformFields({
-      params: { ...fullParams, createdBy: { fullName: null, username: 'elastic' } },
+      params: {
+        ...fullParams,
+        createdBy: { fullName: '', username: 'elastic' },
+      },
       fields,
     });
 
@@ -259,7 +303,10 @@ describe('transformFields', () => {
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { username: 'anotherUser', fullName: 'Another User' },
+        updatedBy: {
+          username: 'anotherUser',
+          fullName: 'Another User',
+        },
       },
       mapping: finalMapping,
       defaultPipes: ['informationUpdated'],
@@ -269,7 +316,7 @@ describe('transformFields', () => {
       params: {
         ...fullParams,
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { username: 'anotherUser', fullName: null },
+        updatedBy: { username: 'anotherUser', fullName: '' },
       },
       fields,
     });
@@ -281,60 +328,11 @@ describe('transformFields', () => {
   });
 });
 
-describe('appendField', () => {
-  test('prefix correctly', () => {
-    expect('my_prefixmy_value ').toEqual(appendField({ value: 'my_value', prefix: 'my_prefix' }));
-  });
-
-  test('suffix correctly', () => {
-    expect('my_value my_suffix').toEqual(appendField({ value: 'my_value', suffix: 'my_suffix' }));
-  });
-
-  test('prefix and suffix correctly', () => {
-    expect('my_prefixmy_value my_suffix').toEqual(
-      appendField({ value: 'my_value', prefix: 'my_prefix', suffix: 'my_suffix' })
-    );
-  });
-});
-
-describe('appendInformationToField', () => {
-  test('creation mode', () => {
-    const res = appendInformationToField({
-      value: 'my value',
-      user: 'Elastic Test User',
-      date: '2020-03-13T08:34:53.450Z',
-      mode: 'create',
-    });
-    expect(res).toEqual('my value (created at 2020-03-13T08:34:53.450Z by Elastic Test User)');
-  });
-
-  test('update mode', () => {
-    const res = appendInformationToField({
-      value: 'my value',
-      user: 'Elastic Test User',
-      date: '2020-03-13T08:34:53.450Z',
-      mode: 'update',
-    });
-    expect(res).toEqual('my value (updated at 2020-03-13T08:34:53.450Z by Elastic Test User)');
-  });
-
-  test('add mode', () => {
-    const res = appendInformationToField({
-      value: 'my value',
-      user: 'Elastic Test User',
-      date: '2020-03-13T08:34:53.450Z',
-      mode: 'add',
-    });
-    expect(res).toEqual('my value (added at 2020-03-13T08:34:53.450Z by Elastic Test User)');
-  });
-});
-
 describe('transformComments', () => {
   test('transform creation comments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -342,11 +340,10 @@ describe('transformComments', () => {
         updatedBy: null,
       },
     ];
-    const res = transformComments(comments, fullParams, ['informationCreated']);
+    const res = transformComments(comments, ['informationCreated']);
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (created at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -360,32 +357,36 @@ describe('transformComments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+        updatedBy: {
+          fullName: 'Another User',
+          username: 'anotherUser',
+        },
       },
     ];
-    const res = transformComments(comments, fullParams, ['informationUpdated']);
+    const res = transformComments(comments, ['informationUpdated']);
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (updated at 2020-03-15T08:34:53.450Z by Another User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
         updatedAt: '2020-03-15T08:34:53.450Z',
-        updatedBy: { fullName: 'Another User', username: 'anotherUser' },
+        updatedBy: {
+          fullName: 'Another User',
+          username: 'anotherUser',
+        },
       },
     ]);
   });
+
   test('transform added comments', () => {
     const comments: Comment[] = [
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -393,11 +394,10 @@ describe('transformComments', () => {
         updatedBy: null,
       },
     ];
-    const res = transformComments(comments, fullParams, ['informationAdded']);
+    const res = transformComments(comments, ['informationAdded']);
     expect(res).toEqual([
       {
         commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
-        version: 'WzU3LDFd',
         comment: 'first comment (added at 2020-03-13T08:34:53.450Z by Elastic User)',
         createdAt: '2020-03-13T08:34:53.450Z',
         createdBy: { fullName: 'Elastic User', username: 'elastic' },
@@ -405,5 +405,172 @@ describe('transformComments', () => {
         updatedBy: null,
       },
     ]);
+  });
+
+  test('transform comments without fullname', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: '', username: 'elastic' },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ];
+    const res = transformComments(comments, ['informationAdded']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment (added at 2020-03-13T08:34:53.450Z by elastic)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: '', username: 'elastic' },
+        updatedAt: null,
+        updatedBy: null,
+      },
+    ]);
+  });
+
+  test('adds update user correctly', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic', username: 'elastic' },
+        updatedAt: '2020-04-13T08:34:53.450Z',
+        updatedBy: { fullName: 'Elastic2', username: 'elastic' },
+      },
+    ];
+    const res = transformComments(comments, ['informationAdded']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment (added at 2020-04-13T08:34:53.450Z by Elastic2)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic', username: 'elastic' },
+        updatedAt: '2020-04-13T08:34:53.450Z',
+        updatedBy: { fullName: 'Elastic2', username: 'elastic' },
+      },
+    ]);
+  });
+
+  test('adds update user with empty fullname correctly', () => {
+    const comments: Comment[] = [
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic', username: 'elastic' },
+        updatedAt: '2020-04-13T08:34:53.450Z',
+        updatedBy: { fullName: '', username: 'elastic2' },
+      },
+    ];
+    const res = transformComments(comments, ['informationAdded']);
+    expect(res).toEqual([
+      {
+        commentId: 'b5b4c4d0-574e-11ea-9e2e-21b90f8a9631',
+        comment: 'first comment (added at 2020-04-13T08:34:53.450Z by elastic2)',
+        createdAt: '2020-03-13T08:34:53.450Z',
+        createdBy: { fullName: 'Elastic', username: 'elastic' },
+        updatedAt: '2020-04-13T08:34:53.450Z',
+        updatedBy: { fullName: '', username: 'elastic2' },
+      },
+    ]);
+  });
+});
+
+describe('addTimeZoneToDate', () => {
+  test('adds timezone with default', () => {
+    const date = addTimeZoneToDate('2020-04-14T15:01:55.456Z');
+    expect(date).toBe('2020-04-14T15:01:55.456Z GMT');
+  });
+
+  test('adds timezone correctly', () => {
+    const date = addTimeZoneToDate('2020-04-14T15:01:55.456Z', 'PST');
+    expect(date).toBe('2020-04-14T15:01:55.456Z PST');
+  });
+});
+
+describe('throwIfNotAlive ', () => {
+  test('throws correctly when status is invalid', async () => {
+    expect(() => {
+      throwIfNotAlive(404, 'application/json');
+    }).toThrow('Instance is not alive.');
+  });
+
+  test('throws correctly when content is invalid', () => {
+    expect(() => {
+      throwIfNotAlive(200, 'application/html');
+    }).toThrow('Instance is not alive.');
+  });
+
+  test('do NOT throws with custom validStatusCodes', async () => {
+    expect(() => {
+      throwIfNotAlive(404, 'application/json', [404]);
+    }).not.toThrow('Instance is not alive.');
+  });
+});
+
+describe('request', () => {
+  beforeEach(() => {
+    axiosMock.mockImplementation(() => ({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    }));
+  });
+
+  test('it fetch correctly with defaults', async () => {
+    const res = await request({ axios, url: '/test' });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'get', data: {} });
+    expect(res).toEqual({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    });
+  });
+
+  test('it fetch correctly', async () => {
+    const res = await request({ axios, url: '/test', method: 'post', data: { id: '123' } });
+
+    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'post', data: { id: '123' } });
+    expect(res).toEqual({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    });
+  });
+
+  test('it throws correctly', async () => {
+    axiosMock.mockImplementation(() => ({
+      status: 404,
+      headers: { 'content-type': 'application/json' },
+      data: { incidentId: '123' },
+    }));
+
+    await expect(request({ axios, url: '/test' })).rejects.toThrow();
+  });
+});
+
+describe('patch', () => {
+  beforeEach(() => {
+    axiosMock.mockImplementation(() => ({
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    }));
+  });
+
+  test('it fetch correctly', async () => {
+    await patch({ axios, url: '/test', data: { id: '123' } });
+    expect(axiosMock).toHaveBeenCalledWith('/test', { method: 'patch', data: { id: '123' } });
+  });
+});
+
+describe('getErrorMessage', () => {
+  test('it returns the correct error message', () => {
+    const msg = getErrorMessage('My connector name', 'An error has occurred');
+    expect(msg).toBe('[Action][My connector name]: An error has occurred');
   });
 });
