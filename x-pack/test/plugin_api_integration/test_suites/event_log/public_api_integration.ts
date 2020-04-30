@@ -80,12 +80,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should support sorting by event end', async () => {
       const id = uuid.v4();
 
-      const expectedEvents: IEvent[] = [];
-      for (let index = 0; index < 6; index++) {
-        const event = fakeEvent(id);
-        await logTestEvent(id, event);
-        expectedEvents.push(event);
-      }
+      const expectedEvents = await logFakeEvents(id, 6);
 
       await retry.try(async () => {
         const {
@@ -109,8 +104,7 @@ export default function({ getService }: FtrProviderContext) {
       const start = new Date().toISOString();
 
       // write the documents that we should be found in the date range searches
-      const expectedEvents = times(6, () => fakeEvent(id));
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      const expectedEvents = await logFakeEvents(id, 6);
 
       // get the end time for the date range search
       const end = new Date().toISOString();
@@ -214,5 +208,15 @@ export default function({ getService }: FtrProviderContext) {
       },
       overrides
     );
+  }
+
+  async function logFakeEvents(savedObjectId: string, eventsToLog: number): Promise<IEvent[]> {
+    const expectedEvents: IEvent[] = [];
+    for (let index = 0; index < eventsToLog; index++) {
+      const event = fakeEvent(savedObjectId);
+      await logTestEvent(savedObjectId, event);
+      expectedEvents.push(event);
+    }
+    return expectedEvents;
   }
 }
