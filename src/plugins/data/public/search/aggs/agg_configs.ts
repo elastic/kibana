@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
-import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
+import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
@@ -51,7 +51,7 @@ export interface AggConfigsOptions {
   fieldFormats: FieldFormatsStart;
 }
 
-export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
+export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
 /**
  * @name AggConfigs

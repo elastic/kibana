@@ -16,30 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { createSearchSource as createSearchSourceFactory } from './create_search_source';
+import { createSearchSourceFromJSON } from './create_search_source';
 import { IIndexPattern } from '../../../common/index_patterns';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { Filter } from '../../../common/es_query/filters';
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
 
-describe('createSearchSource', function() {
-  let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
+describe('createSearchSource', () => {
   const indexPatternMock: IIndexPattern = {} as IIndexPattern;
   let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
+  let dependencies: any;
+  let createSearchSource: ReturnType<typeof createSearchSourceFromJSON>;
 
   beforeEach(() => {
+    const core = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
+
+    dependencies = {
+      searchService: data.search,
+      uiSettings: core.uiSettings,
+      injectedMetadata: core.injectedMetadata,
+    };
+
     indexPatternContractMock = ({
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
     } as unknown) as jest.Mocked<IndexPatternsContract>;
-    createSearchSource = createSearchSourceFactory(indexPatternContractMock);
+
+    createSearchSource = createSearchSourceFromJSON(indexPatternContractMock, dependencies);
   });
 
-  it('should fail if JSON is invalid', () => {
+  test('should fail if JSON is invalid', () => {
     expect(createSearchSource('{', [])).rejects.toThrow();
     expect(createSearchSource('0', [])).rejects.toThrow();
     expect(createSearchSource('"abcdefg"', [])).rejects.toThrow();
   });
 
-  it('should set fields', async () => {
+  test('should set fields', async () => {
     const searchSource = await createSearchSource(
       JSON.stringify({
         highlightAll: true,
@@ -50,6 +63,7 @@ describe('createSearchSource', function() {
       }),
       []
     );
+
     expect(searchSource.getOwnField('highlightAll')).toBe(true);
     expect(searchSource.getOwnField('query')).toEqual({
       query: '',
@@ -57,7 +71,7 @@ describe('createSearchSource', function() {
     });
   });
 
-  it('should resolve referenced index pattern', async () => {
+  test('should resolve referenced index pattern', async () => {
     const searchSource = await createSearchSource(
       JSON.stringify({
         indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
@@ -70,11 +84,12 @@ describe('createSearchSource', function() {
         },
       ]
     );
+
     expect(indexPatternContractMock.get).toHaveBeenCalledWith('123-456');
     expect(searchSource.getOwnField('index')).toBe(indexPatternMock);
   });
 
-  it('should set filters and resolve referenced index patterns', async () => {
+  test('should set filters and resolve referenced index patterns', async () => {
     const searchSource = await createSearchSource(
       JSON.stringify({
         filter: [
@@ -110,6 +125,7 @@ describe('createSearchSource', function() {
       ]
     );
     const filters = searchSource.getOwnField('filter') as Filter[];
+
     expect(filters[0]).toMatchInlineSnapshot(`
       Object {
         "$state": Object {
@@ -135,7 +151,7 @@ describe('createSearchSource', function() {
     `);
   });
 
-  it('should migrate legacy queries on the fly', async () => {
+  test('should migrate legacy queries on the fly', async () => {
     const searchSource = await createSearchSource(
       JSON.stringify({
         highlightAll: true,
@@ -143,6 +159,7 @@ describe('createSearchSource', function() {
       }),
       []
     );
+
     expect(searchSource.getOwnField('query')).toEqual({
       query: 'a:b',
       language: 'lucene',

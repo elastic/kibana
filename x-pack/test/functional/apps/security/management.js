@@ -19,7 +19,8 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
-  describe('Management', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/61173
+  describe.skip('Management', function() {
     this.tags(['skipFirefox']);
 
     before(async () => {

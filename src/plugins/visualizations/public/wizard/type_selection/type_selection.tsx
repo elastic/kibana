@@ -27,7 +27,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiKeyPadMenu,
-  EuiKeyPadMenuItemButton,
+  EuiKeyPadMenuItem,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiScreenReaderOnly,
@@ -262,7 +262,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     };
 
     return (
-      <EuiKeyPadMenuItemButton
+      <EuiKeyPadMenuItem
         key={visType.name}
         label={<span data-test-subj="visTypeTitle">{visType.title}</span>}
         onClick={onClick}
@@ -282,7 +282,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           icon={visType.icon}
           image={!('aliasUrl' in visType) ? visType.image : undefined}
         />
-      </EuiKeyPadMenuItemButton>
+      </EuiKeyPadMenuItem>
     );
   };
 

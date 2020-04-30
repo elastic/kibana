@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
+import { transform, defaults, isFunction } from 'lodash';
 import { SavedObjectReference } from 'kibana/public';
 import { migrateLegacyQuery } from '../../../../kibana_legacy/public';
 import { InvalidJSONProperty } from '../../../../kibana_utils/public';
-import { SearchSource } from './search_source';
+import { SearchSourceDependencies, SearchSource, ISearchSource } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
 
@@ -38,12 +38,16 @@ import { SearchSourceFields } from './types';
  * returned by `serializeSearchSource` and `references`, a list of references including the ones
  * returned by `serializeSearchSource`.
  *
+ *
  * @public */
-export const createSearchSource = (indexPatterns: IndexPatternsContract) => async (
+export const createSearchSourceFromJSON = (
+  indexPatterns: IndexPatternsContract,
+  searchSourceDependencies: SearchSourceDependencies
+) => async (
   searchSourceJson: string,
   references: SavedObjectReference[]
-) => {
-  const searchSource = new SearchSource();
+): Promise<ISearchSource> => {
+  const searchSource = new SearchSource({}, searchSourceDependencies);
 
   // if we have a searchSource, set its values based on the searchSourceJson field
   let searchSourceValues: Record<string, unknown>;
@@ -90,17 +94,17 @@ export const createSearchSource = (indexPatterns: IndexPatternsContract) => asyn
   }
 
   const searchSourceFields = searchSource.getFields();
-  const fnProps = _.transform(
+  const fnProps = transform(
     searchSourceFields,
     function(dynamic, val, name) {
-      if (_.isFunction(val) && name) dynamic[name] = val;
+      if (isFunction(val) && name) dynamic[name] = val;
     },
     {}
   );
 
   // This assignment might hide problems because the type of values passed from the parsed JSON
   // might not fit the SearchSourceFields interface.
-  const newFields: SearchSourceFields = _.defaults(searchSourceValues, fnProps);
+  const newFields: SearchSourceFields = defaults(searchSourceValues, fnProps);
 
   searchSource.setFields(newFields);
   const query = searchSource.getOwnField('query');

@@ -96,16 +96,23 @@ export interface PostNewAgentActionResponse {
 }
 
 export interface PostAgentUnenrollRequest {
-  body: { kuery: string } | { ids: string[] };
+  params: {
+    agentId: string;
+  };
 }
 
 export interface PostAgentUnenrollResponse {
-  results: Array<{
-    success: boolean;
-    error?: any;
-    id: string;
-    action: string;
-  }>;
+  success: boolean;
+}
+
+export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { config_id: string };
+}
+
+export interface PutAgentReassignResponse {
   success: boolean;
 }
 

@@ -6,10 +6,10 @@
 
 import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
-import { GlobalState, HostListState } from '../../types';
+import { GlobalState, HostState } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
-export function useHostListSelector<TSelected>(selector: (state: HostListState) => TSelected) {
+export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
   return useSelector(function(state: GlobalState) {
     return selector(state.hostList);
   });

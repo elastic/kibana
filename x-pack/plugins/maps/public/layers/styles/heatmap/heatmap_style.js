@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { AbstractStyle } from '../abstract_style';
+import { AbstractStyle } from '../style';
 import { HeatmapStyleEditor } from './components/heatmap_style_editor';
 import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME } from './components/heatmap_constants';

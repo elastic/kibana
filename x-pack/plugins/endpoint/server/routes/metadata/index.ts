@@ -61,9 +61,9 @@ export function registerEndpointRoutes(router: IRouter, endpointAppContext: Endp
     },
     async (context, req, res) => {
       try {
-        const index = await endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
-          context
-        );
+        const index = await endpointAppContext.service
+          .getIndexPatternRetriever()
+          .getMetadataIndexPattern(context);
         const queryParams = await kibanaRequestToMetadataListESQuery(
           req,
           endpointAppContext,
@@ -117,9 +117,9 @@ export async function getHostData(
   metadataRequestContext: MetadataRequestContext,
   id: string
 ): Promise<HostInfo | undefined> {
-  const index = await metadataRequestContext.endpointAppContext.indexPatternRetriever.getMetadataIndexPattern(
-    metadataRequestContext.requestHandlerContext
-  );
+  const index = await metadataRequestContext.endpointAppContext.service
+    .getIndexPatternRetriever()
+    .getMetadataIndexPattern(metadataRequestContext.requestHandlerContext);
   const query = getESQueryHostMetadataByID(id, index);
   const response = (await metadataRequestContext.requestHandlerContext.core.elasticsearch.dataClient.callAsCurrentUser(
     'search',
@@ -171,7 +171,6 @@ async function enrichHostMetadata(
   try {
     /**
      * Get agent status by elastic agent id if available or use the host id.
-     * https://github.com/elastic/endpoint-app-team/issues/354
      */
 
     if (!elasticAgentId) {
@@ -179,10 +178,12 @@ async function enrichHostMetadata(
       log.warn(`Missing elastic agent id, using host id instead ${elasticAgentId}`);
     }
 
-    const status = await metadataRequestContext.endpointAppContext.agentService.getAgentStatusById(
-      metadataRequestContext.requestHandlerContext.core.savedObjects.client,
-      elasticAgentId
-    );
+    const status = await metadataRequestContext.endpointAppContext.service
+      .getAgentService()
+      .getAgentStatusById(
+        metadataRequestContext.requestHandlerContext.core.savedObjects.client,
+        elasticAgentId
+      );
     hostStatus = HOST_STATUS_MAPPING.get(status) || HostStatus.ERROR;
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {

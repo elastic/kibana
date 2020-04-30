@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { KibanaRegionmapSource, kibanaRegionMapLayerWizardConfig } from './kibana_regionmap_source';
+export { kibanaRegionMapLayerWizardConfig } from './kibana_regionmap_layer_wizard';
+export { KibanaRegionmapSource } from './kibana_regionmap_source';

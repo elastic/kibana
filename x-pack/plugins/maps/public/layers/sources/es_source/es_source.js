@@ -9,8 +9,8 @@ import {
   getAutocompleteService,
   fetchSearchSourceAndRecordWithInspector,
   getIndexPatternService,
-  SearchSource,
   getTimeFilter,
+  getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import _ from 'lodash';
@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 
 import { copyPersistentState } from '../../../reducers/util';
-import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../es_geo_grid_source/geo_tile_utils';
 
@@ -125,8 +124,9 @@ export class AbstractESSource extends AbstractVectorSource {
     if (isTimeAware) {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create(initialSearchContext);
 
-    const searchSource = new SearchSource(initialSearchContext);
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
@@ -135,7 +135,8 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     if (searchFilters.sourceQuery) {
-      const layerSearchSource = new SearchSource();
+      const layerSearchSource = searchService.searchSource.create();
+
       layerSearchSource.setField('index', indexPattern);
       layerSearchSource.setField('query', searchFilters.sourceQuery);
       searchSource.setParent(layerSearchSource);
@@ -174,9 +175,11 @@ export class AbstractESSource extends AbstractVectorSource {
       };
     }
 
+    const minLon = esBounds.top_left.lon;
+    const maxLon = esBounds.bottom_right.lon;
     return {
-      minLon: esBounds.top_left.lon,
-      maxLon: esBounds.bottom_right.lon,
+      minLon: minLon > maxLon ? minLon - 360 : minLon,
+      maxLon,
       minLat: esBounds.bottom_right.lat,
       maxLat: esBounds.top_left.lat,
     };
@@ -221,9 +224,7 @@ export class AbstractESSource extends AbstractVectorSource {
   async supportsFitToBounds() {
     try {
       const geoField = await this._getGeoField();
-      // geo_bounds aggregation only supports geo_point
-      // there is currently no backend support for getting bounding box of geo_shape field
-      return geoField.type !== ES_GEO_FIELD_TYPE.GEO_SHAPE;
+      return geoField.aggregatable;
     } catch (error) {
       return false;
     }
@@ -294,7 +295,9 @@ export class AbstractESSource extends AbstractVectorSource {
     }, {});
 
     const indexPattern = await this.getIndexPattern();
-    const searchSource = new SearchSource();
+    const searchService = getSearchService();
+    const searchSource = searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
     searchSource.setField('aggs', aggs);

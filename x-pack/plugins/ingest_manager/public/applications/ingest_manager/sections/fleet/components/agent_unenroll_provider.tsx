@@ -39,7 +39,8 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
   ) => {
     if (
       agentsToUnenroll === undefined ||
-      (Array.isArray(agentsToUnenroll) && agentsToUnenroll.length === 0)
+      // !Only supports unenrolling one agent
+      (Array.isArray(agentsToUnenroll) && agentsToUnenroll.length !== 1)
     ) {
       throw new Error('No agents specified for unenrollment');
     }
@@ -60,55 +61,27 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
     setIsLoading(true);
 
     try {
-      const unenrollByKuery = typeof agents === 'string';
-      const { data, error } = await sendRequest<PostAgentUnenrollResponse>({
-        path: agentRouteService.getUnenrollPath(),
+      const agentId = agents[0];
+      const { error } = await sendRequest<PostAgentUnenrollResponse>({
+        path: agentRouteService.getUnenrollPath(agentId),
         method: 'post',
-        body: JSON.stringify({
-          kuery: unenrollByKuery ? agents : undefined,
-          ids: !unenrollByKuery ? agents : undefined,
-        }),
       });
 
       if (error) {
         throw new Error(error.message);
       }
 
-      const results = data ? data.results : [];
-
-      const successfulResults = results.filter(result => result.success);
-      const failedResults = results.filter(result => !result.success);
-
-      if (successfulResults.length) {
-        const hasMultipleSuccesses = successfulResults.length > 1;
-        const successMessage = hasMultipleSuccesses
-          ? i18n.translate('xpack.ingestManager.unenrollAgents.successMultipleNotificationTitle', {
-              defaultMessage: 'Unenrolled {count} agents',
-              values: { count: successfulResults.length },
-            })
-          : i18n.translate('xpack.ingestManager.unenrollAgents.successSingleNotificationTitle', {
-              defaultMessage: "Unenrolled agent '{id}'",
-              values: { id: successfulResults[0].id },
-            });
-        core.notifications.toasts.addSuccess(successMessage);
-      }
-
-      if (failedResults.length) {
-        const hasMultipleFailures = failedResults.length > 1;
-        const failureMessage = hasMultipleFailures
-          ? i18n.translate('xpack.ingestManager.unenrollAgents.failureMultipleNotificationTitle', {
-              defaultMessage: 'Error unenrolling {count} agents',
-              values: { count: failedResults.length },
-            })
-          : i18n.translate('xpack.ingestManager.unenrollAgents.failureSingleNotificationTitle', {
-              defaultMessage: "Error unenrolling agent '{id}'",
-              values: { id: failedResults[0].id },
-            });
-        core.notifications.toasts.addDanger(failureMessage);
-      }
+      const successMessage = i18n.translate(
+        'xpack.ingestManager.unenrollAgents.successSingleNotificationTitle',
+        {
+          defaultMessage: "Unenrolled agent '{id}'",
+          values: { id: agentId },
+        }
+      );
+      core.notifications.toasts.addSuccess(successMessage);
 
       if (onSuccessCallback.current) {
-        onSuccessCallback.current(successfulResults.map(result => result.id));
+        onSuccessCallback.current([agentId]);
       }
     } catch (e) {
       core.notifications.toasts.addDanger(

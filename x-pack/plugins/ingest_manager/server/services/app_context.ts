@@ -34,6 +34,9 @@ class AppContextService {
   public stop() {}
 
   public getEncryptedSavedObjects() {
+    if (!this.encryptedSavedObjects) {
+      throw new Error('Encrypted saved object start service not set.');
+    }
     return this.encryptedSavedObjects;
   }
 

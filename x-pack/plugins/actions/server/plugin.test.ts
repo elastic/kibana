@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
@@ -72,7 +72,9 @@ describe('Actions Plugin', () => {
     });
 
     it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
-      await plugin.setup(coreSetup, pluginsSetup);
+      // coreMock.createSetup doesn't support Plugin generics
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await plugin.setup(coreSetup as any, pluginsSetup);
       expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
@@ -81,7 +83,9 @@ describe('Actions Plugin', () => {
 
     describe('routeHandlerContext.getActionsClient()', () => {
       it('should not throw error when ESO plugin not using a generated key', async () => {
-        await plugin.setup(coreSetup, {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, {
           ...pluginsSetup,
           encryptedSavedObjects: {
             ...pluginsSetup.encryptedSavedObjects,
@@ -93,8 +97,8 @@ describe('Actions Plugin', () => {
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
-          {
+        const actionsContextHandler = ((await handler[1](
+          ({
             core: {
               savedObjects: {
                 client: {},
@@ -103,32 +107,34 @@ describe('Actions Plugin', () => {
                 adminClient: jest.fn(),
               },
             },
-          } as any,
+          } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as any;
-        actionsContextHandler.getActionsClient();
+        )) as unknown) as RequestHandlerContext['actions'];
+        actionsContextHandler!.getActionsClient();
       });
 
       it('should throw error when ESO plugin using a generated key', async () => {
-        await plugin.setup(coreSetup, pluginsSetup);
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
 
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = (await handler[1](
-          {
+        const actionsContextHandler = ((await handler[1](
+          ({
             core: {
               savedObjects: {
                 client: {},
               },
             },
-          } as any,
+          } as unknown) as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as any;
-        expect(() => actionsContextHandler.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
+        )) as unknown) as RequestHandlerContext['actions'];
+        expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
         );
       });
@@ -144,13 +150,17 @@ describe('Actions Plugin', () => {
       };
 
       beforeEach(async () => {
-        setup = await plugin.setup(coreSetup, pluginsSetup);
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setup = await plugin.setup(coreSetup as any, pluginsSetup);
       });
 
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
             ...sampleActionType,
+            // we're faking an invalid value, this requires stripping the typing
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             minimumLicenseRequired: 'foo' as any,
           })
         ).toThrowErrorMatchingInlineSnapshot(`"\\"foo\\" is not a valid license type"`);
@@ -211,7 +221,9 @@ describe('Actions Plugin', () => {
 
     describe('getActionsClientWithRequest()', () => {
       it('should not throw error when ESO plugin not using a generated key', async () => {
-        await plugin.setup(coreSetup, {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, {
           ...pluginsSetup,
           encryptedSavedObjects: {
             ...pluginsSetup.encryptedSavedObjects,
@@ -224,7 +236,9 @@ describe('Actions Plugin', () => {
       });
 
       it('should throw error when ESO plugin using generated key', async () => {
-        await plugin.setup(coreSetup, pluginsSetup);
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await plugin.setup(coreSetup as any, pluginsSetup);
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
         expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);

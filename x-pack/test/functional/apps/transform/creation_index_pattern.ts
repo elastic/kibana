@@ -18,7 +18,6 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_index_pattern', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -90,7 +89,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -144,7 +143,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -180,14 +179,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreview(
-            testData.expected.sourcePreview.columns,
-            testData.expected.sourcePreview.rows
+        it('shows the index preview', async () => {
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
           );
         });
 

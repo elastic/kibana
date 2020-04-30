@@ -35,7 +35,7 @@ export default function({ getService }: FtrProviderContext) {
     });
   }
 
-  async function checkSessionCookie(sessionCookie: Cookie) {
+  async function checkSessionCookie(sessionCookie: Cookie, username = 'a@b.c') {
     expect(sessionCookie.key).to.be('sid');
     expect(sessionCookie.value).to.not.be.empty();
     expect(sessionCookie.path).to.be('/');
@@ -59,7 +59,7 @@ export default function({ getService }: FtrProviderContext) {
       'authentication_provider',
     ]);
 
-    expect(apiResponse.body.username).to.be('a@b.c');
+    expect(apiResponse.body.username).to.be(username);
   }
 
   describe('SAML authentication', () => {
@@ -668,6 +668,29 @@ export default function({ getService }: FtrProviderContext) {
       const existingUsername = 'a@b.c';
       let existingSessionCookie: Cookie;
 
+      const testScenarios: Array<[string, () => Promise<void>]> = [
+        // Default scenario when active cookie has an active access token.
+        ['when access token is valid', async () => {}],
+        // Scenario when active cookie has an expired access token. Access token expiration is set
+        // to 15s for API integration tests so we need to wait for 20s to make sure token expires.
+        ['when access token is expired', async () => await delay(20000)],
+        // Scenario when active cookie references to access/refresh token pair that were already
+        // removed from Elasticsearch (to simulate 24h when expired tokens are removed).
+        [
+          'when access token document is missing',
+          async () => {
+            const esResponse = await getService('legacyEs').deleteByQuery({
+              index: '.security-tokens',
+              q: 'doc_type:token',
+              refresh: true,
+            });
+            expect(esResponse)
+              .to.have.property('deleted')
+              .greaterThan(0);
+          },
+        ],
+      ];
+
       beforeEach(async () => {
         const captureURLResponse = await supertest
           .get('/abc/xyz/handshake?one=two three')
@@ -701,76 +724,76 @@ export default function({ getService }: FtrProviderContext) {
         )!;
       });
 
-      it('should renew session and redirect to the home page if login is for the same user', async () => {
-        const samlAuthenticationResponse = await supertest
-          .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', existingSessionCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) })
-          .expect('location', '/')
-          .expect(302);
+      for (const [description, setup] of testScenarios) {
+        it(`should renew session and redirect to the home page if login is for the same user ${description}`, async () => {
+          await setup();
 
-        const newSessionCookie = request.cookie(
-          samlAuthenticationResponse.headers['set-cookie'][0]
-        )!;
-        expect(newSessionCookie.value).to.not.be.empty();
-        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+          const samlAuthenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .set('kbn-xsrf', 'xxx')
+            .set('Cookie', existingSessionCookie.cookieString())
+            .send({ SAMLResponse: await createSAMLResponse({ username: existingUsername }) })
+            .expect(302);
 
-        // Tokens from old cookie are invalidated.
-        const rejectedResponse = await supertest
-          .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', existingSessionCookie.cookieString())
-          .expect(400);
-        expect(rejectedResponse.body).to.have.property(
-          'message',
-          'Both access and refresh tokens are expired.'
-        );
+          expect(samlAuthenticationResponse.headers.location).to.be('/');
 
-        // Only tokens from new session are valid.
-        const acceptedResponse = await supertest
-          .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', newSessionCookie.cookieString())
-          .expect(200);
-        expect(acceptedResponse.body).to.have.property('username', existingUsername);
-      });
+          const newSessionCookie = request.cookie(
+            samlAuthenticationResponse.headers['set-cookie'][0]
+          )!;
+          expect(newSessionCookie.value).to.not.be.empty();
+          expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
 
-      it('should create a new session and redirect to the `overwritten_session` if login is for another user', async () => {
-        const newUsername = 'c@d.e';
-        const samlAuthenticationResponse = await supertest
-          .post('/api/security/saml/callback')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', existingSessionCookie.cookieString())
-          .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
-          .expect('location', '/security/overwritten_session')
-          .expect(302);
+          // Tokens from old cookie are invalidated.
+          const rejectedResponse = await supertest
+            .get('/internal/security/me')
+            .set('kbn-xsrf', 'xxx')
+            .set('Cookie', existingSessionCookie.cookieString())
+            .expect(400);
+          expect(rejectedResponse.body).to.have.property(
+            'message',
+            'Both access and refresh tokens are expired.'
+          );
 
-        const newSessionCookie = request.cookie(
-          samlAuthenticationResponse.headers['set-cookie'][0]
-        )!;
-        expect(newSessionCookie.value).to.not.be.empty();
-        expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+          // Only tokens from new session are valid.
+          await checkSessionCookie(newSessionCookie);
+        });
 
-        // Tokens from old cookie are invalidated.
-        const rejectedResponse = await supertest
-          .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', existingSessionCookie.cookieString())
-          .expect(400);
-        expect(rejectedResponse.body).to.have.property(
-          'message',
-          'Both access and refresh tokens are expired.'
-        );
+        it(`should create a new session and redirect to the \`overwritten_session\` if login is for another user ${description}`, async () => {
+          await setup();
 
-        // Only tokens from new session are valid.
-        const acceptedResponse = await supertest
-          .get('/internal/security/me')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', newSessionCookie.cookieString())
-          .expect(200);
-        expect(acceptedResponse.body).to.have.property('username', newUsername);
-      });
+          const newUsername = 'c@d.e';
+          const samlAuthenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .set('kbn-xsrf', 'xxx')
+            .set('Cookie', existingSessionCookie.cookieString())
+            .send({ SAMLResponse: await createSAMLResponse({ username: newUsername }) })
+            .expect(302);
+
+          expect(samlAuthenticationResponse.headers.location).to.be(
+            '/security/overwritten_session'
+          );
+
+          const newSessionCookie = request.cookie(
+            samlAuthenticationResponse.headers['set-cookie'][0]
+          )!;
+          expect(newSessionCookie.value).to.not.be.empty();
+          expect(newSessionCookie.value).to.not.equal(existingSessionCookie.value);
+
+          // Tokens from old cookie are invalidated.
+          const rejectedResponse = await supertest
+            .get('/internal/security/me')
+            .set('kbn-xsrf', 'xxx')
+            .set('Cookie', existingSessionCookie.cookieString())
+            .expect(400);
+          expect(rejectedResponse.body).to.have.property(
+            'message',
+            'Both access and refresh tokens are expired.'
+          );
+
+          // Only tokens from new session are valid.
+          await checkSessionCookie(newSessionCookie, newUsername);
+        });
+      }
     });
 
     describe('handshake with very long URL path or fragment', () => {

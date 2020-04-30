@@ -231,6 +231,15 @@ export const timelineSavedObjectMappings = {
     title: {
       type: 'text',
     },
+    templateTimelineId: {
+      type: 'text',
+    },
+    templateTimelineVersion: {
+      type: 'integer',
+    },
+    timelineType: {
+      type: 'keyword',
+    },
     dateRange: {
       properties: {
         start: {

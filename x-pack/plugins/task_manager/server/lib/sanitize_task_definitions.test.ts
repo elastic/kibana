@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { RunContext } from '../task';
+import { RunContext, TaskDictionary, TaskDefinition } from '../task';
 import { sanitizeTaskDefinitions } from './sanitize_task_definitions';
 
 interface Opts {
@@ -14,7 +14,7 @@ interface Opts {
 
 const getMockTaskDefinitions = (opts: Opts) => {
   const { numTasks } = opts;
-  const tasks: any = {};
+  const tasks: Record<string, unknown> = {};
 
   for (let i = 0; i < numTasks; i++) {
     const type = `test_task_type_${i}`;
@@ -35,7 +35,7 @@ const getMockTaskDefinitions = (opts: Opts) => {
       },
     };
   }
-  return tasks;
+  return (tasks as unknown) as TaskDictionary<TaskDefinition>;
 };
 
 describe('sanitizeTaskDefinitions', () => {
