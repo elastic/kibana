@@ -9,12 +9,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
 
-import { getListRequest } from './mocks/utils';
 import { CreateListSchema, CreateListSchemaPartial, createListSchema } from './create_list_schema';
+import { getCreateListSchemaMock } from './create_list_schema.mock';
 
 describe('create_list_schema', () => {
   test('it should validate a typical lists request', () => {
-    const payload = getListRequest();
+    const payload = getCreateListSchemaMock();
     const decoded = createListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
@@ -31,7 +31,7 @@ describe('create_list_schema', () => {
   });
 
   test('it should accept an undefined for an id', () => {
-    const payload = getListRequest();
+    const payload = getCreateListSchemaMock();
     delete payload.id;
     const decoded = createListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -47,7 +47,7 @@ describe('create_list_schema', () => {
   });
 
   test('it should accept an undefined for meta', () => {
-    const payload = getListRequest();
+    const payload = getCreateListSchemaMock();
     delete payload.meta;
     const decoded = createListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -63,7 +63,7 @@ describe('create_list_schema', () => {
   });
 
   test('it should not allow an extra key to be sent in', () => {
-    const payload: CreateListSchema & { extraKey?: string } = getListRequest();
+    const payload: CreateListSchema & { extraKey?: string } = getCreateListSchemaMock();
     payload.extraKey = 'some new value';
     const decoded = createListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateListSchema } from '../create_list_schema';
+import { CreateListSchema } from './create_list_schema';
 
-export const getListRequest = (): CreateListSchema => ({
+export const getCreateListSchemaMock = (): CreateListSchema => ({
   description: 'Description of a list item',
   id: 'some-list-id',
   meta: {},
