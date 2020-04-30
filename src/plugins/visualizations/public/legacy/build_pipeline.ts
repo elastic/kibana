@@ -17,14 +17,20 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import moment from 'moment';
-import { SerializedFieldFormat } from '../../../../plugins/expressions/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  parseExpression,
+  SerializedFieldFormat,
+} from '../../../../plugins/expressions/public';
 import {
   IAggConfig,
   fieldFormats,
   search,
   TimefilterContract,
+  TimeRange,
 } from '../../../../plugins/data/public';
 import { Vis, VisParams } from '../types';
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -57,12 +63,7 @@ export interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (
-  params: VisParams,
-  schemas: Schemas,
-  uiState: any,
-  meta?: { savedObjectId?: string }
-) => string;
+type buildVisFunction = (params: VisParams, schemas: Schemas, uiState?: any) => string;
 type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
@@ -191,7 +192,7 @@ export const prepareJson = (variable: string, data?: object): string => {
     .replace(/'/g, `\\'`)}' `;
 };
 
-export const escapeString = (data: string): string => {
+const escapeString = (data: string): string => {
   return data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
 };
 
@@ -200,38 +201,6 @@ export const prepareString = (variable: string, data?: string): string => {
     return '';
   }
   return `${variable}='${escapeString(data)}' `;
-};
-
-export const prepareValue = (variable: string, data: any, raw: boolean = false) => {
-  if (data === undefined) {
-    return '';
-  }
-  if (raw) {
-    return `${variable}=${data} `;
-  }
-  switch (typeof data) {
-    case 'string':
-      return prepareString(variable, data);
-    case 'object':
-      return prepareJson(variable, data);
-    default:
-      return `${variable}=${data} `;
-  }
-};
-
-export const prepareDimension = (variable: string, data: any) => {
-  if (data === undefined) {
-    return '';
-  }
-
-  let expr = `${variable}={visdimension ${data.accessor} `;
-  if (data.format) {
-    expr += prepareValue('format', data.format.id);
-    expr += prepareJson('formatParams', data.format.params);
-  }
-  expr += '} ';
-
-  return expr;
 };
 
 const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): void => {
@@ -258,49 +227,49 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: params => {
-    return `vega ${prepareString('spec', params.spec)}`;
+  vega: ({ spec }) => {
+    return buildExpressionFunction('vega', { spec }).toString();
   },
   input_control_vis: params => {
-    return `input_control_vis ${prepareJson('visConfig', params)}`;
+    return buildExpressionFunction('input_control_vis', {
+      visConfig: JSON.stringify(params),
+    }).toString();
   },
   metrics: (params, schemas, uiState = {}) => {
-    const paramsJson = prepareJson('params', params);
-    const uiStateJson = prepareJson('uiState', uiState);
-
-    const paramsArray = [paramsJson, uiStateJson].filter(param => Boolean(param));
-    return `tsvb ${paramsArray.join(' ')}`;
+    return buildExpressionFunction('tsvb', {
+      params: JSON.stringify(params),
+      uiState: JSON.stringify(uiState),
+    }).toString();
   },
-  timelion: params => {
-    const expression = prepareString('expression', params.expression);
-    const interval = prepareString('interval', params.interval);
-    return `timelion_vis ${expression}${interval}`;
+  timelion: ({ expression, interval }) => {
+    return buildExpressionFunction('timelion_vis', {
+      expression,
+      interval,
+    }).toString();
   },
-  markdown: params => {
-    const { markdown, fontSize, openLinksInNewTab } = params;
-    let escapedMarkdown = '';
-    if (typeof markdown === 'string' || markdown instanceof String) {
-      escapedMarkdown = escapeString(markdown.toString());
-    }
-    let expr = `markdownvis '${escapedMarkdown}' `;
-    expr += prepareValue('font', `{font size=${fontSize}}`, true);
-    expr += prepareValue('openLinksInNewTab', openLinksInNewTab);
-    return expr;
+  markdown: ({ markdown, fontSize, openLinksInNewTab }) => {
+    const font = buildExpression([buildExpressionFunction('font', { size: fontSize })]);
+    return buildExpressionFunction('markdownVis', {
+      markdown: markdown ?? '',
+      font,
+      openLinksInNewTab,
+    }).toString();
   },
   table: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.table(schemas, params),
-    };
-    return `kibana_table ${prepareJson('visConfig', visConfig)}`;
+    return buildExpressionFunction('kibana_table', {
+      visConfig: JSON.stringify({
+        ...params,
+        ...buildVisConfig.table(schemas, params),
+      }),
+    }).toString();
   },
   metric: (params, schemas) => {
     const {
       percentageMode,
       useRanges,
       colorSchema,
-      metricColorMode,
-      colorsRange,
+      metricColorMode: colorMode,
+      colorsRange = [],
       labels,
       invertColors,
       style,
@@ -314,65 +283,122 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       });
     }
 
-    let expr = `metricvis `;
-    expr += prepareValue('percentageMode', percentageMode);
-    expr += prepareValue('colorSchema', colorSchema);
-    expr += prepareValue('colorMode', metricColorMode);
-    expr += prepareValue('useRanges', useRanges);
-    expr += prepareValue('invertColors', invertColors);
-    expr += prepareValue('showLabels', labels && labels.show);
-    if (style) {
-      expr += prepareValue('bgFill', style.bgFill);
-      expr += prepareValue('font', `{font size=${style.fontSize}}`, true);
-      expr += prepareValue('subText', style.subText);
-      expr += prepareDimension('bucket', bucket);
-    }
+    const fontFn = style
+      ? buildExpression([buildExpressionFunction('font', { size: style.fontSize })])
+      : undefined;
 
-    if (colorsRange) {
-      colorsRange.forEach((range: any) => {
-        expr += prepareValue('colorRange', `{range from=${range.from} to=${range.to}}`, true);
-      });
-    }
-
-    metrics.forEach((metric: SchemaConfig) => {
-      expr += prepareDimension('metric', metric);
+    const colorRangeFns = colorsRange.map((range: { from: number; to: number }) => {
+      return buildExpression([
+        buildExpressionFunction('range', {
+          from: range.from,
+          to: range.to,
+        }),
+      ]);
     });
 
-    return expr;
+    const visdimensionMetricFns = metrics.length
+      ? metrics.map((metric: SchemaConfig) => {
+          const fn = buildExpressionFunction('visdimension', { accessor: metric.accessor });
+          if (metric.format?.id) {
+            fn.addArgument('format', metric.format.id);
+          }
+          if (metric.format?.params) {
+            fn.addArgument('formatParams', JSON.stringify(metric.format.params));
+          }
+          return buildExpression([fn]);
+        })
+      : undefined;
+
+    const visdimensionBucketFn =
+      bucket && style
+        ? buildExpressionFunction('visdimension', { accessor: bucket.accessor })
+        : undefined;
+
+    if (visdimensionBucketFn && bucket.format) {
+      if (bucket.format?.id) {
+        visdimensionBucketFn.addArgument('format', bucket.format.id);
+      }
+      if (bucket.format?.params) {
+        visdimensionBucketFn.addArgument('formatParams', JSON.stringify(bucket.format.params));
+      }
+    }
+
+    const args = {
+      percentageMode,
+      colorSchema,
+      colorMode,
+      useRanges,
+      invertColors,
+      showLabels: labels?.show,
+      bgFill: style?.bgFill,
+      font: fontFn,
+      subText: style?.subText,
+      colorRange: colorRangeFns,
+      metric: visdimensionMetricFns ? visdimensionMetricFns : undefined,
+      bucket: visdimensionBucketFn ? buildExpression([visdimensionBucketFn]) : undefined,
+    };
+
+    return buildExpressionFunction('metricvis', {
+      ...omit(args, i => i === null || typeof i === 'undefined'),
+    }).toString();
   },
   tagcloud: (params, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = params;
-    const { metric, bucket } = buildVisConfig.tagcloud(schemas);
-    let expr = `tagcloud metric={visdimension ${metric.accessor}} `;
-    expr += prepareValue('scale', scale);
-    expr += prepareValue('orientation', orientation);
-    expr += prepareValue('minFontSize', minFontSize);
-    expr += prepareValue('maxFontSize', maxFontSize);
-    expr += prepareValue('showLabel', showLabel);
-    expr += prepareDimension('bucket', bucket);
+    const visConfig = buildVisConfig.tagcloud(schemas);
 
-    return expr;
+    const visdimensionMetric = visConfig.metric
+      ? buildExpressionFunction('visdimension', { accessor: visConfig.metric.accessor })
+      : undefined;
+
+    const visdimensionBucket = visConfig.bucket
+      ? buildExpressionFunction('visdimension', { accessor: visConfig.bucket.accessor })
+      : undefined;
+
+    if (visdimensionBucket && visConfig.bucket.format) {
+      visdimensionBucket.addArgument('format', visConfig.bucket.format.id);
+      visdimensionBucket.addArgument(
+        'formatParams',
+        JSON.stringify(visConfig.bucket.format.params)
+      );
+    }
+
+    const args = {
+      metric: visdimensionMetric ? buildExpression([visdimensionMetric]) : undefined,
+      bucket: visdimensionBucket ? buildExpression([visdimensionBucket]) : undefined,
+      scale,
+      orientation,
+      minFontSize,
+      maxFontSize,
+      showLabel,
+    };
+
+    return buildExpressionFunction('tagcloud', {
+      ...omit(args, i => i === null || typeof i === 'undefined'),
+    }).toString();
   },
   region_map: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.region_map(schemas),
-    };
-    return `regionmap ${prepareJson('visConfig', visConfig)}`;
+    return buildExpressionFunction('regionmap', {
+      visConfig: JSON.stringify({
+        ...params,
+        ...buildVisConfig.region_map(schemas),
+      }),
+    }).toString();
   },
   tile_map: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.tile_map(schemas),
-    };
-    return `tilemap ${prepareJson('visConfig', visConfig)}`;
+    return buildExpressionFunction('tilemap', {
+      visConfig: JSON.stringify({
+        ...params,
+        ...buildVisConfig.tile_map(schemas),
+      }),
+    }).toString();
   },
   pie: (params, schemas) => {
-    const visConfig = {
-      ...params,
-      ...buildVisConfig.pie(schemas),
-    };
-    return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
+    return buildExpressionFunction('kibana_pie', {
+      visConfig: JSON.stringify({
+        ...params,
+        ...buildVisConfig.pie(schemas),
+      }),
+    }).toString();
   },
 };
 
@@ -442,6 +468,7 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
+/** @internal */
 export const buildVislibDimensions = async (
   vis: any,
   params: {
@@ -550,3 +577,93 @@ export const buildPipeline = async (
 
   return pipeline;
 };
+
+export async function buildVisExpression(
+  vis: Vis,
+  params: {
+    timefilter: TimefilterContract;
+    timeRange?: TimeRange;
+    abortSignal?: AbortSignal;
+  }
+) {
+  const { indexPattern, savedSearchId, searchSource } = vis.data;
+  const { uiState } = vis;
+  const query = searchSource!.getField('query');
+  const filters = searchSource!.getField('filter');
+
+  // context
+  const pipeline = buildExpression([buildExpressionFunction('kibana', {})]);
+  const kibanaContext = buildExpressionFunction('kibana_context', {});
+
+  if (query && typeof query === 'string') {
+    // TODO:
+    // The typings for `Query` are `string | { [key: string]: any }
+    // Will it ever be in object format when coming from vis.data?
+    kibanaContext.addArgument('q', query);
+  }
+
+  if (filters) {
+    kibanaContext.addArgument('filters', JSON.stringify(filters));
+  }
+
+  if (savedSearchId) {
+    kibanaContext.addArgument('savedSearchId', savedSearchId);
+  }
+
+  // request handler
+  if (vis.type.requestHandler === 'courier' && indexPattern?.id) {
+    pipeline.functions.push(
+      buildExpressionFunction('esaggs', {
+        index: indexPattern.id,
+        metricsAtAllLevels: vis.isHierarchical(),
+        partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+        aggConfigs: JSON.stringify(vis.data.aggs?.aggs || '[]'),
+      })
+    );
+  }
+
+  const schemas = getSchemas(vis, {
+    timeRange: params.timeRange,
+    timefilter: params.timefilter,
+  });
+
+  if (buildPipelineVisFunction[vis.type.name]) {
+    // TODO: temporarily parsing string here
+    const { chain } = parseExpression(
+      buildPipelineVisFunction[vis.type.name](vis.params, schemas, uiState)
+    );
+    chain.forEach(({ function: fnName, arguments: args }) =>
+      pipeline.functions.push(buildExpressionFunction(fnName, args))
+    );
+  } else if (vislibCharts.includes(vis.type.name)) {
+    const visConfig = { ...vis.params };
+    visConfig.dimensions = await buildVislibDimensions(vis, params);
+
+    pipeline.functions.push(
+      buildExpressionFunction('vislib', {
+        type: vis.type.name,
+        visConfig: JSON.stringify(visConfig),
+      })
+    );
+  } else if (vis.type.toExpression) {
+    pipeline.functions.push(await vis.type.toExpression(vis, params));
+  } else {
+    const visConfig = { ...vis.params };
+    visConfig.dimensions = schemas;
+
+    const visFn = buildExpressionFunction('visualization', {
+      type: vis.type.name,
+      visConfig: JSON.stringify(visConfig),
+      metricsAtAllLevels: vis.isHierarchical(),
+      partialRows: vis.type.requiresPartialRows || vis.params.showPartialRows || false,
+    });
+
+    if (indexPattern) {
+      visFn.addArgument('index', indexPattern.id);
+    }
+
+    pipeline.functions.push(visFn);
+  }
+
+  return pipeline.toString();
+}

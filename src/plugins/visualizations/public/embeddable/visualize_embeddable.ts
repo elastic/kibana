@@ -37,7 +37,7 @@ import {
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/expressions/public';
-import { buildPipeline } from '../legacy/build_pipeline';
+import { buildVisExpression } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -332,7 +332,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.abortController.abort();
     }
     this.abortController = new AbortController();
-    this.expression = await buildPipeline(this.vis, {
+    this.expression = await buildVisExpression(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,

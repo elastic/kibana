@@ -40,6 +40,12 @@ export type ExpressionFunctionVisualization = ExpressionFunctionDefinition<
   Promise<Render<VisResponseValue>>
 >;
 
+declare module '../../../../plugins/expressions/public' {
+  interface ExpressionFunctionDefinitions {
+    visualization: ExpressionFunctionVisualization;
+  }
+}
+
 export const visualization = (): ExpressionFunctionVisualization => ({
   name: 'visualization',
   type: 'render',
