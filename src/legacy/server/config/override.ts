@@ -17,21 +17,29 @@
  * under the License.
  */
 
-import _ from 'lodash';
+const isObject = (v: any): v is Record<string, any> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
 
-export default function(dot, flatObject) {
-  const fullObject = {};
-  _.each(flatObject, function(value, key) {
-    const keys = key.split(dot);
-    (function walk(memo, keys, value) {
-      const _key = keys.shift();
-      if (keys.length === 0) {
-        memo[_key] = value;
-      } else {
-        if (!memo[_key]) memo[_key] = {};
-        walk(memo[_key], keys, value);
+const assignDeep = (target: Record<string, any>, source: Record<string, any>) => {
+  for (const [key, value] of Object.entries(source)) {
+    if (isObject(value)) {
+      if (!target.hasOwnProperty(key)) {
+        target[key] = {};
       }
-    })(fullObject, keys, value);
-  });
-  return fullObject;
-}
+
+      assignDeep(target[key], value);
+    } else {
+      target[key] = value;
+    }
+  }
+};
+
+const override = (...sources: Array<Record<string, any>>): Record<string, any> => {
+  const result = {};
+
+  for (const object of sources) {
+    assignDeep(result, object);
+  }
+
+  return result;
+};
