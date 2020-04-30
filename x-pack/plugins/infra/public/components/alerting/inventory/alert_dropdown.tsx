@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { AlertFlyout } from './alert_flyout';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-export const MetricsAlertDropdown = () => {
+export const InventoryAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
   const kibana = useKibana();
