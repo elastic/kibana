@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { ElasticsearchServiceSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -16,12 +16,13 @@ import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/client';
 import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
 import { createConfig$ } from './create_config';
+import { getSpaceId } from './get_space_id';
+import { getUser } from './get_user';
 
 export class ListPlugin {
   private readonly logger: Logger;
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
-  private elasticsearch: ElasticsearchServiceSetup | undefined | null;
   private security: SecurityPluginSetup | undefined | null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -38,7 +39,6 @@ export class ListPlugin {
     );
     this.spaces = plugins.spaces?.spacesService;
     this.config = config;
-    this.elasticsearch = core.elasticsearch;
     this.security = plugins.security;
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
@@ -56,28 +56,28 @@ export class ListPlugin {
 
   private createRouteHandlerContext = (): ContextProvider => {
     return async (context, request): ContextProviderReturn => {
-      const { spaces, config, security, elasticsearch } = this;
+      const { spaces, config, security } = this;
       const {
         core: {
-          elasticsearch: { dataClient },
+          elasticsearch: {
+            dataClient: { callAsCurrentUser },
+          },
         },
       } = context;
       if (config == null) {
         throw new TypeError('Configuration is required for this plugin to operate');
-      } else if (elasticsearch == null) {
-        throw new TypeError('Elastic Search is required for this plugin to operate');
-      } else if (security == null) {
-        // TODO: This might be null, test authentication being turned off.
-        throw new TypeError('Security plugin is required for this plugin to operate');
       } else {
+        const spaceId = getSpaceId({ request, spaces });
+        const user = getUser({ request, security });
         return {
           getListClient: (): ListClient =>
             new ListClient({
+              callCluster: callAsCurrentUser,
               config,
-              dataClient,
               request,
               security,
-              spaces,
+              spaceId,
+              user,
             }),
         };
       }

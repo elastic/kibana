@@ -5,12 +5,12 @@
  */
 import { WriteBufferToItemsOptions } from '../items';
 
-import { getDataClientMock } from './get_data_client_mock';
+import { getCallClusterMock } from './get_call_cluster_mock';
 import { LIST_ID, LIST_ITEM_INDEX, META, TYPE, USER } from './lists_services_mock_constants';
 
 export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({
   buffer: [],
-  dataClient: getDataClientMock(),
+  callCluster: getCallClusterMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
