@@ -12,7 +12,7 @@ export const inventoryViewSavedObjectName = 'inventory-view';
 export const inventoryViewSavedObjectType: SavedObjectsType = {
   name: inventoryViewSavedObjectName,
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   management: {
     importableAndExportable: true,
   },

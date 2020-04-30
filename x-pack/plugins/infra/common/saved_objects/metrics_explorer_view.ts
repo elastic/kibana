@@ -12,7 +12,7 @@ export const metricsExplorerViewSavedObjectName = 'metrics-explorer-view';
 export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
   name: metricsExplorerViewSavedObjectName,
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   management: {
     importableAndExportable: true,
   },

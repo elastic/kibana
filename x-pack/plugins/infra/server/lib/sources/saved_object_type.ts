@@ -12,7 +12,7 @@ export const infraSourceConfigurationSavedObjectName = 'infrastructure-ui-source
 export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
   name: infraSourceConfigurationSavedObjectName,
   hidden: false,
-  namespaceType: 'agnostic',
+  namespaceType: 'single',
   management: {
     importableAndExportable: true,
   },
