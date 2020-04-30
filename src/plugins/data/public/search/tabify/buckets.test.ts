@@ -19,6 +19,11 @@
 
 import { TabifyBuckets } from './buckets';
 import { AggGroupNames } from '../aggs';
+import moment from 'moment';
+
+interface Bucket {
+  key: number | string;
+}
 
 describe('Buckets wrapper', () => {
   const check = (aggResp: any, count: number, keys: string[]) => {
@@ -187,9 +192,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -204,9 +209,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -221,9 +226,9 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 100,
-        lte: 400,
-        name: 'date',
+        from: moment(100),
+        to: moment(400),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
@@ -238,13 +243,47 @@ describe('Buckets wrapper', () => {
         },
       };
       const timeRange = {
-        gte: 150,
-        lte: 350,
-        name: 'date',
+        from: moment(150),
+        to: moment(350),
+        timeFields: ['date'],
       };
       const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
 
       expect(buckets).toHaveLength(4);
+    });
+
+    test('does drop bucket when multiple time fields specified', () => {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date',
+        },
+      };
+      const timeRange = {
+        from: moment(100),
+        to: moment(350),
+        timeFields: ['date', 'other_datefield'],
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+
+      expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([100, 200]);
+    });
+
+    test('does not drop bucket when no timeFields have been specified', () => {
+      const aggParams = {
+        drop_partials: true,
+        field: {
+          name: 'date',
+        },
+      };
+      const timeRange = {
+        from: moment(100),
+        to: moment(350),
+        timeFields: [],
+      };
+      const buckets = new TabifyBuckets(aggResp, aggParams, timeRange);
+
+      expect(buckets.buckets.map((b: Bucket) => b.key)).toEqual([0, 100, 200, 300]);
     });
   });
 });
