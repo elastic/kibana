@@ -31,10 +31,16 @@ export function getIlmPolicy() {
         hot: {
           actions: {
             rollover: {
-              max_size: '5GB',
+              max_size: '50GB',
               max_age: '30d',
               // max_docs: 1, // you know, for testing
             },
+          },
+        },
+        delete: {
+          min_age: '90d',
+          actions: {
+            delete: {},
           },
         },
       },

@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig } from '../../../../../../../../common/types/models';
+import { AgentConfig } from '../../../../../types';
 import {
   useGetOneAgentConfigFull,
   useGetEnrollmentAPIKeys,
@@ -45,7 +45,7 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
     page: 1,
     perPage: 1000,
   });
-  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id as string);
+  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id);
 
   if (fullConfigRequest.isLoading && !fullConfigRequest.data) {
     return <Loading />;
