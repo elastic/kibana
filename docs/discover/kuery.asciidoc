@@ -54,6 +54,8 @@ Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`.
 
 `>, >=, <, <=` are all valid range operators.
 
+`AND, NOT` are valid comparison operators.
+
 Exist queries are simple and do not require a special operator. `response:*` will find all docs where the response
 field exists.
 
