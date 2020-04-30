@@ -5,16 +5,37 @@
  */
 import React, { useMemo } from 'react';
 import { useRouteMatch, Switch, Route } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  EuiLink,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+} from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AgentRefreshContext } from './hooks';
-import { FLEET_AGENTS_PATH, FLEET_AGENT_DETAIL_PATH } from '../../../constants';
+import {
+  FLEET_AGENTS_PATH,
+  FLEET_AGENT_DETAIL_PATH,
+  AGENT_CONFIG_DETAILS_PATH,
+} from '../../../constants';
 import { Loading, Error } from '../../../components';
-import { useGetOneAgent, useLink } from '../../../hooks';
+import { useGetOneAgent, useGetOneAgentConfig, useLink } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-import { AgentEventsTable, AgentDetailSection } from './components';
+import { AgentHealth } from '../components';
+import { AgentEventsTable, AgentDetailsActionMenu } from './components';
+
+const Divider = styled.div`
+  width: 0;
+  height: 100%;
+  border-left: ${props => props.theme.eui.euiBorderThin};
+`;
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -26,9 +47,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       pollIntervalMs: 5000,
     }
   );
+  const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
+    agentData?.item?.config_id
+  );
+
   const agentListUrl = useLink(FLEET_AGENTS_PATH);
   const agentActivityTabUrl = useLink(`${FLEET_AGENT_DETAIL_PATH}${agentId}/activity`);
   const agentDetailsTabUrl = useLink(`${FLEET_AGENT_DETAIL_PATH}${agentId}/details`);
+  const agentConfigUrl = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   const headerLeftContent = useMemo(
     () => (
@@ -61,6 +87,57 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [agentData, agentId, agentListUrl]
   );
 
+  const headerRightContent = useMemo(
+    () =>
+      agentData && agentData.item ? (
+        <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
+          {[
+            {
+              label: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
+                defaultMessage: 'Status',
+              }),
+              content: <AgentHealth agent={agentData.item} />,
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.ingestManager.agentDetails.agentConfigLabel', {
+                defaultMessage: 'Configuration',
+              }),
+              content: (
+                <EuiLink href={`${agentConfigUrl}${agentData.item.config_id}`}>
+                  {isAgentConfigLoading ? (
+                    <Loading />
+                  ) : (
+                    agentConfigData?.item?.name || agentData.item.config_id
+                  )}
+                </EuiLink>
+              ),
+            },
+            { isDivider: true },
+            {
+              content: <AgentDetailsActionMenu agent={agentData.item} />,
+            },
+          ].map((item, index) => (
+            <EuiFlexItem grow={false} key={index}>
+              {item.isDivider ?? false ? (
+                <Divider />
+              ) : item.label ? (
+                <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+                  <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              ) : (
+                item.content
+              )}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ) : (
+        undefined
+      ),
+    [agentConfigData, agentConfigUrl, agentData, isAgentConfigLoading]
+  );
+
   const headerTabs = useMemo(() => {
     return [
       {
@@ -69,7 +146,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           defaultMessage: 'Activity log',
         }),
         href: agentActivityTabUrl,
-        isSelected: !tabId || tabId === 'activity_log',
+        isSelected: !tabId || tabId === 'activity',
       },
       {
         id: 'details',
@@ -86,6 +163,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     <AgentRefreshContext.Provider value={{ refresh: () => sendRequest() }}>
       <WithHeaderLayout
         leftColumn={headerLeftContent}
+        rightColumn={headerRightContent}
         tabs={(headerTabs as unknown) as EuiTabProps[]}
       >
         {isLoading && isInitialRequest ? (
