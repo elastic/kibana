@@ -11,8 +11,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_CONFIG_PATH } from '../../../../../constants';
 import { AgentConfig } from '../../../../../types';
-import { useCore, useCapabilities, sendUpdateAgentConfig } from '../../../../../hooks';
-import { AgentConfigForm, agentConfigFormValidation } from '../../../components';
+import {
+  useCore,
+  useCapabilities,
+  sendUpdateAgentConfig,
+  useConfig,
+  sendGetAgentStatus,
+} from '../../../../../hooks';
+import {
+  AgentConfigForm,
+  agentConfigFormValidation,
+  ConfirmDeployConfigModal,
+} from '../../../components';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -26,6 +36,9 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
       notifications,
       chrome: { getIsNavDrawerLocked$ },
     } = useCore();
+    const {
+      fleet: { enabled: isFleetEnabled },
+    } = useConfig();
     const history = useHistory();
     const hasWriteCapabilites = useCapabilities().write;
     const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
@@ -34,6 +47,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [hasChanges, setHasChanges] = useState<boolean>(false);
+    const [agentCount, setAgentCount] = useState<number>(0);
     const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
     const validation = agentConfigFormValidation(agentConfig);
 
@@ -53,7 +67,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
       setHasChanges(true);
     };
 
-    const onSubmit = async () => {
+    const submitUpdateAgentConfig = async () => {
       setIsLoading(true);
       try {
         const { name, description, namespace, monitoring_enabled } = agentConfig;
@@ -87,12 +101,40 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           })
         );
       }
-
       setIsLoading(false);
+    };
+
+    const onSubmit = async () => {
+      // Retrieve agent count if fleet is enabled
+      if (isFleetEnabled) {
+        setIsLoading(true);
+        const { data } = await sendGetAgentStatus({ configId: agentConfig.id });
+        if (data?.results.total) {
+          setAgentCount(data.results.total);
+        } else {
+          await submitUpdateAgentConfig();
+        }
+      } else {
+        await submitUpdateAgentConfig();
+      }
     };
 
     return (
       <FormWrapper>
+        {agentCount ? (
+          <ConfirmDeployConfigModal
+            agentCount={agentCount}
+            agentConfig={agentConfig}
+            onConfirm={() => {
+              setAgentCount(0);
+              submitUpdateAgentConfig();
+            }}
+            onCancel={() => {
+              setAgentCount(0);
+              setIsLoading(false);
+            }}
+          />
+        ) : null}
         <AgentConfigForm
           agentConfig={agentConfig}
           updateAgentConfig={updateAgentConfig}
