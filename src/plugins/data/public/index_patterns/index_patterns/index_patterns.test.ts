@@ -62,7 +62,9 @@ describe('IndexPatterns', () => {
         }) as Promise<SavedObjectsFindResponsePublic<any>>
     );
 
-    const core = {} as CoreStart;
+    const core = {
+      notifications: {},
+    } as CoreStart;
     const http = {} as HttpSetup;
     const fieldFormats = {} as FieldFormatsStart;
 

@@ -55,12 +55,11 @@ jest.mock('../../../kibana_services', () => ({
         }
       },
     },
-    fieldFormats: {
-      getDefaultInstance: () => ({
-        convert: (value: unknown) => String(value),
-      }),
-    },
   }),
+}));
+
+jest.mock('./lib/get_index_pattern_field_list', () => ({
+  getIndexPatternFieldList: jest.fn(indexPattern => indexPattern.fields),
 }));
 
 function getCompProps() {
