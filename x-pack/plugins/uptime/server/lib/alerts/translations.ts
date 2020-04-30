@@ -115,4 +115,36 @@ export const tlsTranslations = {
       ),
     },
   ],
+  validAfterExpiredString: (date: string, relativeDate: number) =>
+    i18n.translate('xpack.uptime.alerts.tls.validAfterExpiredString', {
+      defaultMessage: `expired on {date} {relativeDate} days ago`,
+      values: {
+        date,
+        relativeDate,
+      },
+    }),
+  validAfterExpiringString: (date: string, relativeDate: number) =>
+    i18n.translate('xpack.uptime.alerts.tls.validAfterExpiringString', {
+      defaultMessage: `expires on {date} in {relativeDate} days.`,
+      values: {
+        date,
+        relativeDate,
+      },
+    }),
+  validBeforeExpiredString: (date: string, relativeDate: number) =>
+    i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiredString', {
+      defaultMessage: 'valid since {date}, {relativeDate} days ago.',
+      values: {
+        date,
+        relativeDate,
+      },
+    }),
+  validBeforeExpiringString: (date: string, relativeDate: number) =>
+    i18n.translate('xpack.uptime.alerts.tls.validBeforeExpiringString', {
+      defaultMessage: 'invalid until {date}, {relativeDate} days from now.',
+      values: {
+        date,
+        relativeDate,
+      },
+    }),
 };

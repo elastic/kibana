@@ -46,16 +46,16 @@ const getValidAfter = ({ certificate_not_valid_after: date }: Cert) => {
   if (!date) return 'Error, missing `certificate_not_valid_after` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
-    ? `expired on ${date} ${relativeDate} days ago`
-    : `expires on ${date} in ${Math.abs(relativeDate)} days.`;
+    ? tlsTranslations.validAfterExpiredString(date, relativeDate)
+    : tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate));
 };
 
 const getValidBefore = ({ certificate_not_valid_before: date }: Cert): string => {
   if (!date) return 'Error, missing `certificate_not_valid_before` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
-    ? `valid since ${date}, ${relativeDate} days ago.`
-    : `invalid until ${date}, ${Math.abs(relativeDate)} days from now.`;
+    ? tlsTranslations.validBeforeExpiredString(date, relativeDate)
+    : tlsTranslations.validBeforeExpiringString(date, Math.abs(relativeDate));
 };
 
 export const getCertSummary = (
