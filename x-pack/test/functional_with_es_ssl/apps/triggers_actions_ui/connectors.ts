@@ -21,10 +21,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Connectors', function() {
     before(async () => {
       await alerting.actions.createAction({
-        name: `server-log-${Date.now()}`,
-        actionTypeId: '.server-log',
+        name: `slack-${Date.now()}`,
+        actionTypeId: '.slack',
         config: {},
-        secrets: {},
+        secrets: {
+          webhookUrl: 'https://test',
+        },
       });
 
       await pageObjects.common.navigateToApp('triggersActions');
@@ -36,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      await testSubjects.click('.server-log-card');
+      await testSubjects.click('.slack-card');
 
       const nameInput = await testSubjects.find('nameInput');
       await nameInput.click();
@@ -66,7 +68,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      await testSubjects.click('.server-log-card');
+      await testSubjects.click('.slack-card');
 
       const nameInput = await testSubjects.find('nameInput');
       await nameInput.click();
@@ -110,7 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        await testSubjects.click('.server-log-card');
+        await testSubjects.click('.slack-card');
 
         const nameInput = await testSubjects.find('nameInput');
         await nameInput.click();
@@ -148,7 +150,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        await testSubjects.click('.server-log-card');
+        await testSubjects.click('.slack-card');
 
         const nameInput = await testSubjects.find('nameInput');
         await nameInput.click();
