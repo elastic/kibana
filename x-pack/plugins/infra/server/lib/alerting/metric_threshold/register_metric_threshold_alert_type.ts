@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { PluginSetupContract } from '../../../../../alerting/server';
@@ -77,7 +78,23 @@ export async function registerMetricThresholdAlertType(
       params: schema.object({
         criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
         groupBy: schema.maybe(schema.string()),
-        filterQuery: schema.maybe(schema.string()),
+        filterQuery: schema.maybe(
+          schema.string({
+            validate(value) {
+              const errorMessage =
+                'filterQuery must be a valid Elasticsearch filter expressed in JSON';
+              try {
+                const parsedValue = JSON.parse(value);
+                if (!isEmpty(parsedValue.bool)) {
+                  return undefined;
+                }
+                return errorMessage;
+              } catch (e) {
+                return errorMessage;
+              }
+            },
+          })
+        ),
         sourceId: schema.string(),
         alertOnNoData: schema.maybe(schema.boolean()),
       }),

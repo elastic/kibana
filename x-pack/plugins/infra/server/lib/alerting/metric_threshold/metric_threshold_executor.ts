@@ -60,18 +60,7 @@ const getParsedFilterQuery: (
   filterQuery: string | undefined
 ) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
   if (!filterQuery) return {};
-  try {
-    return JSON.parse(filterQuery).bool;
-  } catch (e) {
-    return [
-      {
-        query_string: {
-          query: filterQuery,
-          analyze_wildcard: true,
-        },
-      },
-    ];
-  }
+  return JSON.parse(filterQuery).bool;
 };
 
 export const getElasticsearchMetricQuery = (

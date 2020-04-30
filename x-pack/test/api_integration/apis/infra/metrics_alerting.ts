@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });
-      it('should work with a filterQuery in KQL format', async () => {
+      it('should not work with a filterQuery in KQL format', async () => {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
           undefined,
@@ -66,9 +66,9 @@ export default function({ getService }: FtrProviderContext) {
           index,
           body: searchBody,
         });
-        expect(result.error).to.not.be.ok();
-        expect(result.hits).to.be.ok();
-        expect(result.aggregations).to.be.ok();
+        expect(result.error).to.be.ok();
+        expect(result.hits).to.not.be.ok();
+        expect(result.aggregations).to.not.be.ok();
       });
     });
     describe('querying with a groupBy parameter', () => {
