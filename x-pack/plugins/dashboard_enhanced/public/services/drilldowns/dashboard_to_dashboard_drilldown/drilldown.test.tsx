@@ -25,6 +25,9 @@ import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../../../src/plugins/embeddable/public';
+import { SavedObjectLoader } from '../../../../../../../src/plugins/saved_objects/public';
+import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_utils/public/core';
+import { StartDependencies } from '../../../plugin';
 
 describe('.isConfigValid()', () => {
   const drilldown = new DashboardToDashboardDrilldown({} as any);
@@ -87,33 +90,38 @@ describe('.execute() & getHref', () => {
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
 
     const drilldown = new DashboardToDashboardDrilldown({
-      start: () =>
-        ({
-          core: {
-            application: {
-              navigateToApp,
-              getUrlForApp,
-            },
-            savedObjects: {
-              client: savedObjectsClient,
+      start: ((() => ({
+        core: {
+          application: {
+            navigateToApp,
+            getUrlForApp,
+          },
+          savedObjects: {
+            client: savedObjectsClient,
+          },
+        },
+        plugins: {
+          advancedUiActions: {},
+          data: {
+            actions: dataPluginActions,
+          },
+          share: {
+            urlGenerators: {
+              getUrlGenerator: () =>
+                createDirectAccessDashboardLinkGenerator(() =>
+                  Promise.resolve({
+                    appBasePath: 'test',
+                    useHashedUrl: false,
+                    savedDashboardLoader: ({} as unknown) as SavedObjectLoader,
+                  })
+                ) as UrlGeneratorContract<string>,
             },
           },
-          plugins: {
-            advancedUiActions: {},
-            data: {
-              actions: dataPluginActions,
-            },
-            share: {
-              urlGenerators: {
-                getUrlGenerator: () =>
-                  createDirectAccessDashboardLinkGenerator(() =>
-                    Promise.resolve({ appBasePath: 'test', useHashedUrl: false })
-                  ) as UrlGeneratorContract<string>,
-              },
-            },
-          },
-          self: {},
-        } as any),
+        },
+        self: {},
+      })) as unknown) as StartServicesGetter<
+        Pick<StartDependencies, 'data' | 'advancedUiActions' | 'share'>
+      >,
     });
     const selectRangeFiltersSpy = jest
       .spyOn(dataPluginActions, 'createFiltersFromRangeSelectAction')
