@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
-import { Router, Switch, Route, Redirect, useHistory } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 
 import { TimelineType } from '../../../common/types/timeline';
 import { TAB_TIMELINES, TAB_TEMPLATES } from '../../components/open_timeline/translations';
-import { getTimelineTabsUrl, getTimelinesUrl } from '../../components/link_to';
+import { getTimelinesUrl } from '../../components/link_to';
 import { TimelineRouteSpyState } from '../../utils/route/types';
 
 import { SiemPageName } from '../home/types';
