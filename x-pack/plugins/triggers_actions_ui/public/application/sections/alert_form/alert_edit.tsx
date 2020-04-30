@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useReducer, useState } from 'react';
+import React, { Fragment, useCallback, useReducer, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -43,6 +43,9 @@ export const AlertEdit = ({
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
+  const setAlert = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  };
 
   const {
     reloadAlerts,
@@ -55,6 +58,8 @@ export const AlertEdit = ({
 
   const closeFlyout = useCallback(() => {
     setEditFlyoutVisibility(false);
+    setAlert('alert', initialAlert);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setEditFlyoutVisibility]);
 
   if (!editFlyoutVisible) {
