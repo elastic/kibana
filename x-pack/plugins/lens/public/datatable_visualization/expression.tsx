@@ -196,7 +196,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field]?.convert(value);
-                const fieldName = col?.meta?.aggConfigParams.field;
+                const fieldName = col?.meta?.aggConfigParams?.field;
 
                 if (filterable) {
                   return (
