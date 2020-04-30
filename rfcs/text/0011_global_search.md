@@ -93,8 +93,17 @@ interface GlobalSearchResult {
   /** the score of the result, from 1 (lowest) to 100 (highest) */
   score: number;
   /** an optional record of metadata for this result */
-  meta?: Record<string, any>;
+  meta?: Record<string, Serializable>;
 }
+```
+
+Notes:
+- The `Serializable` type should be implemented and exposed from `core`. A base implementation could be:
+
+```ts
+type Serializable = string | number | boolean | PrimitiveArray | PrimitiveRecord;
+interface PrimitiveArray extends Array<Serializable> {}
+interface PrimitiveRecord extends Record<string, Serializable> {}
 ```
 
 #### server
