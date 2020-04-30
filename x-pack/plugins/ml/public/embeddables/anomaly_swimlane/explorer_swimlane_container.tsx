@@ -12,6 +12,7 @@ import {
   EuiLoadingChart,
   EuiResizeObserver,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
@@ -90,17 +91,19 @@ export const ExplorerSwimlaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
             <EuiSpacer size="m" />
 
             {chartWidth > 0 && swimlaneData && swimlaneType ? (
-              <MlTooltipComponent>
-                {tooltipService => (
-                  <ExplorerSwimlane
-                    chartWidth={chartWidth}
-                    timeBuckets={timeBuckets}
-                    swimlaneData={swimlaneData}
-                    swimlaneType={swimlaneType}
-                    tooltipService={tooltipService}
-                  />
-                )}
-              </MlTooltipComponent>
+              <EuiText color="subdued" size="s">
+                <MlTooltipComponent>
+                  {tooltipService => (
+                    <ExplorerSwimlane
+                      chartWidth={chartWidth}
+                      timeBuckets={timeBuckets}
+                      swimlaneData={swimlaneData}
+                      swimlaneType={swimlaneType}
+                      tooltipService={tooltipService}
+                    />
+                  )}
+                </MlTooltipComponent>
+              </EuiText>
             ) : (
               <EuiFlexGroup justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
