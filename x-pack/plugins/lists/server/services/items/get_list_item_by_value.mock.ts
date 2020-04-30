@@ -3,17 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { WriteBufferToItemsOptions } from '../items';
 
-import { getCallClusterMock } from './get_call_cluster_mock';
-import { LIST_ID, LIST_ITEM_INDEX, META, TYPE, USER } from './lists_services_mock_constants';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { GetListItemByValueOptions } from '../items';
+import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE } from '../../../common/constants.mock';
 
-export const getWriteBufferToItemsOptionsMock = (): WriteBufferToItemsOptions => ({
-  buffer: [],
+export const getListItemByValueOptionsMocks = (): GetListItemByValueOptions => ({
   callCluster: getCallClusterMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
-  meta: META,
   type: TYPE,
-  user: USER,
+  value: VALUE,
 });

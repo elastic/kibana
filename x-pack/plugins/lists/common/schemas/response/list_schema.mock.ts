@@ -4,26 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListSchema } from '../../../common/schemas';
+import { ListSchema } from '../../../common/schemas';
+import { DATE_NOW, DESCRIPTION, LIST_ID, NAME, USER } from '../../../common/constants.mock';
 
-import {
-  DATE_NOW,
-  DESCRIPTION,
-  META,
-  NAME,
-  TIE_BREAKER,
-  TYPE,
-  USER,
-} from './lists_services_mock_constants';
-
-export const getIndexESListMock = (): IndexEsListSchema => ({
+export const getListResponseMock = (): ListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
-  meta: META,
+  id: LIST_ID,
+  meta: {},
   name: NAME,
-  tie_breaker_id: TIE_BREAKER,
-  type: TYPE,
+  tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+  type: 'ip',
   updated_at: DATE_NOW,
   updated_by: USER,
 });

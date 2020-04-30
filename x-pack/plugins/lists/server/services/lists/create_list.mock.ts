@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { UpdateListOptions } from '../lists';
 
-import { getCallClusterMock } from './get_call_cluster_mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { CreateListOptions } from '../lists';
 import {
   DATE_NOW,
   DESCRIPTION,
@@ -13,10 +13,12 @@ import {
   LIST_INDEX,
   META,
   NAME,
+  TIE_BREAKER,
+  TYPE,
   USER,
-} from './lists_services_mock_constants';
+} from '../../../common/constants.mock';
 
-export const getUpdateListOptionsMock = (): UpdateListOptions => ({
+export const getCreateListOptionsMock = (): CreateListOptions => ({
   callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
   description: DESCRIPTION,
@@ -24,5 +26,7 @@ export const getUpdateListOptionsMock = (): UpdateListOptions => ({
   listIndex: LIST_INDEX,
   meta: META,
   name: NAME,
+  tieBreaker: TIE_BREAKER,
+  type: TYPE,
   user: USER,
 });

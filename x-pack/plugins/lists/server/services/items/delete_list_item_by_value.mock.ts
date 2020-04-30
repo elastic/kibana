@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetListItemByValueOptions } from '../items';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { DeleteListItemByValueOptions } from '../items';
+import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE } from '../../../common/constants.mock';
 
-import { getCallClusterMock } from './get_call_cluster_mock';
-import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE } from './lists_services_mock_constants';
-
-export const getListItemByValueOptionsMocks = (): GetListItemByValueOptions => ({
+export const getDeleteListItemByValueOptionsMock = (): DeleteListItemByValueOptions => ({
   callCluster: getCallClusterMock(),
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,

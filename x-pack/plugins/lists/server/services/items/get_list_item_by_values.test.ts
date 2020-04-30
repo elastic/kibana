@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LIST_ID,
-  LIST_ITEM_INDEX,
-  TYPE,
-  VALUE,
-  VALUE_2,
-  getCallClusterMock,
-  getSearchListItemMock,
-} from '../mocks';
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE, VALUE_2 } from '../../../common/constants.mock';
 
 import { getListItemByValues } from './get_list_item_by_values';
 

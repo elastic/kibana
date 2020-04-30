@@ -6,16 +6,15 @@
 
 import { Stream } from 'stream';
 
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   ExportListItemsToStreamOptions,
   GetResponseOptions,
   WriteNextResponseOptions,
   WriteResponseHitsToStreamOptions,
 } from '../items';
-
-import { LIST_ID, LIST_ITEM_INDEX } from './lists_services_mock_constants';
-import { getSearchListItemMock } from './get_search_list_item_mock';
-import { getCallClusterMock } from './get_call_cluster_mock';
+import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStreamOptions => ({
   callCluster: getCallClusterMock(getSearchListItemMock()),

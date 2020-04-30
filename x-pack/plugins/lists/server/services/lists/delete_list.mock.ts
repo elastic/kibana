@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import { DeleteListOptions } from '../lists';
-
-import { getCallClusterMock } from './get_call_cluster_mock';
-import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from './lists_services_mock_constants';
+import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 export const getDeleteListOptionsMock = (): DeleteListOptions => ({
   callCluster: getCallClusterMock(),

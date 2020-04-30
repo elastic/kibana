@@ -9,7 +9,7 @@ import { CreateListSchema } from '../create_list_schema';
 export const getListRequest = (): CreateListSchema => ({
   description: 'Description of a list item',
   id: 'some-list-id',
-  meta: undefined,
+  meta: {},
   name: 'Name of a list item',
   type: 'ip',
 });

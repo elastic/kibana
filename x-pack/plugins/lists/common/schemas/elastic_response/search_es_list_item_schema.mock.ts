@@ -7,10 +7,27 @@
 import { SearchResponse } from 'elasticsearch';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
+import {
+  DATE_NOW,
+  LIST_ID,
+  LIST_INDEX,
+  LIST_ITEM_ID,
+  USER,
+  VALUE,
+} from '../../../common/constants.mock';
+import { getShardMock } from '../../get_shard.mock';
 
-import { getShardMock } from './get_shard_mock';
-import { LIST_INDEX, LIST_ITEM_ID } from './lists_services_mock_constants';
-import { getSearchEsListItemMock } from './get_search_es_list_item_mock';
+export const getSearchEsListItemMock = (): SearchEsListItemSchema => ({
+  created_at: DATE_NOW,
+  created_by: USER,
+  ip: VALUE,
+  keyword: undefined,
+  list_id: LIST_ID,
+  meta: {},
+  tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+  updated_at: DATE_NOW,
+  updated_by: USER,
+});
 
 export const getSearchListItemMock = (): SearchResponse<SearchEsListItemSchema> => ({
   _scroll_id: '123',

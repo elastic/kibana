@@ -4,29 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateListItemOptions } from '../items';
-
-import { getCallClusterMock } from './get_call_cluster_mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { CreateListItemsBulkOptions } from '../items';
 import {
   DATE_NOW,
   LIST_ID,
-  LIST_ITEM_ID,
   LIST_ITEM_INDEX,
   META,
-  TIE_BREAKER,
+  TIE_BREAKERS,
   TYPE,
   USER,
-} from './lists_services_mock_constants';
+  VALUE,
+  VALUE_2,
+} from '../../../common/constants.mock';
 
-export const getCreateListItemOptionsMock = (): CreateListItemOptions => ({
+export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions => ({
   callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
-  id: LIST_ITEM_ID,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,
-  tieBreaker: TIE_BREAKER,
+  tieBreaker: TIE_BREAKERS,
   type: TYPE,
   user: USER,
-  value: '127.0.0.1',
+  value: [VALUE, VALUE_2],
 });

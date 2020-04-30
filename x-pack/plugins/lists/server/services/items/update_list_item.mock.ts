@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import { UpdateListItemOptions } from '../items';
-
-import { getCallClusterMock } from './get_call_cluster_mock';
 import {
   DATE_NOW,
   LIST_ITEM_ID,
@@ -13,7 +12,7 @@ import {
   META,
   USER,
   VALUE,
-} from './lists_services_mock_constants';
+} from '../../../common/constants.mock';
 
 export const getUpdateListItemOptionsMock = (): UpdateListItemOptions => ({
   callCluster: getCallClusterMock(),
