@@ -14,6 +14,9 @@ import {
   TutorialsCategory
 } from '../../../../../src/plugins/home/server';
 
+// duplicated in x-pack/plugins/apm/common/index_pattern_constants.ts
+const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
     'Collect in-depth performance metrics and errors from inside your applications.'
@@ -39,6 +42,7 @@ export const tutorialProvider = ({
   const savedObjects = [
     {
       ...apmIndexPattern,
+      id: APM_STATIC_INDEX_PATTERN_ID,
       attributes: {
         ...apmIndexPattern.attributes,
         title: indexPatternTitle
