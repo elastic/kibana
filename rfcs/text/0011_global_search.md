@@ -74,6 +74,12 @@ interface GlobalSearchProviderFindOptions {
    * than an elasticsearch cluster.
    */
   preference: string;
+  /**
+   * Observable that emit once if and when the `find` call has been aborted by the consumer, or when the timeout period as been reached.
+   * When a `find` request is aborted, the service will stop emitting any new result to the consumer anyway, but
+   * this can (and should) be used to cancel any pending asynchronous task and complete the result observable.
+   */
+  aborted$: Observable<void>;
 }
 
 /**
@@ -189,7 +195,7 @@ type GlobalSearchResponse<ResultType extends GlobalSearchResult = GlobalSearchRe
 
 ```ts
 /**
- * Options for the {@link GlobalSearchServiceStart.find | find API}
+ * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
  */
 interface GlobalSearchFindOptions {
   /**
@@ -199,6 +205,11 @@ interface GlobalSearchFindOptions {
    * If not specified, a random token will be generated and used when callingn the underlying result providers.
    */
   preference?: string;
+  /**
+   * Optional observable to notify that the associated `find` call should be canceled.
+   * If/when provided and emitting, the result observable will be completed and no further result emission will be performed.
+   */
+  aborted$?: Observable<void>;
 }
 
 /** @public */
@@ -220,10 +231,15 @@ interface GlobalSearchServiceStart {
 
 ```ts
 /**
- * Options for the {@link GlobalSearchServiceStart.find | find API}
- * Currently empty and only present for keeping the API future-proof.
+ * Options for the client-side {@link GlobalSearchServiceStart.find | find API}
  */
-interface GlobalSearchFindOptions {}
+interface GlobalSearchFindOptions {
+  /**
+   * Optional observable to notify that the associated `find` call should be canceled.
+   * If/when provided and emitting, the result observable will be completed and no further result emission will be performed.
+   */
+  aborted$?: Observable<void>;
+}
 
 /**
  * Enhanced {@link GlobalSearchResult | result type} for the client-side,
@@ -283,7 +299,7 @@ router.post(
   async (ctx, req, res) => {
     const { term, options } = req.body;
     const results = await ctx.core.globalSearch
-      .find(term, options)
+      .find(term, { ...options, $aborted: req.events.aborted$ })
       .pipe(last())
       .toPromise();
     return res.ok({
@@ -444,12 +460,13 @@ search(
   options: GlobalSearchFindOptions,
   request: KibanaRequest
 ): Observable<GlobalSearchResponse> {
+  const aborted$ = merge(timeout$, options.$aborted).pipe(first())
   const fromProviders$ = this.providers.map(p =>
-    p.find(term, options, contextFromRequest(request))
+    p.find(term, { ...options, aborted$ }, contextFromRequest(request))
   );
   const results: GlobalSearchResult[] = [];
   return merge([...fromProviders$]).pipe(
-    takeUntil(timeout$),
+    takeUntil(aborted$),
     map(newResults => {
       results.push(...newResults);
       return order(results);
@@ -480,14 +497,15 @@ search(
   term: string,
   options: GlobalSearchFindOptions,
 ): Observable<GlobalSearchResponse> {
+  const aborted$ = merge(timeout$, options.$aborted).pipe(first())
   const fromProviders$ = this.providers.map(p =>
-    p.find(term, options)
+    p.find(term, { ...options, aborted$ })
   );
-  const fromServer$ = of(this.fetchServerResults(term, options))
+  const fromServer$ = of(this.fetchServerResults(term, options, aborted$))
 
   const results: GlobalSearchResult[] = [];
   return merge([...fromProviders$, fromServer$]).pipe(
-    takeUntil(timeout$),
+    takeUntil(aborted$),
     map(newResults => {
       results.push(...newResults);
       return order(results);
@@ -550,8 +568,13 @@ How this field is populated from each individual provider is considered an imple
 
 ### Search cancellation
 
-In initial implementation, once triggered, a given call to `GlobalSearchServiceStart.find` 
-(and underlying search provider's `find` method) cannot be canceled, neither from the public nor server API.
+Consumers can cancel a `find` call at any time by providing a cancellation observable with 
+the `GlobalSearchFindOptions.aborted$` option and then emitting from it.
+
+When this observable is provided and emitting, the GS service will complete the result observable.
+
+This observable will also be passed down to the underlying result providers, that can leverage it to cancel any pending
+asynchronous task and perform cleanup if necessary.
 
 # Drawbacks
 
@@ -661,25 +684,6 @@ has some limitations:
 We could change the API to accept plain strings for `GlobalSearchResult.type`. However, atm this enum approach 
 is needed as the ordinal values of the entries is used in results sorting. Changing to plain strings forces to find 
 an alternative sorting logic.
-
-## triggered searches could be cancelable
-
-In current specifications, once a search has been triggered, it's not possible to cancel it (see [Search cancellation](#search-cancellation))
-
-Main drawback of this decision is that if a `find` API consumer is going to perform multiple `find` requests and 
-only uses the last one (For example in the UI, a debounced `find` triggered on end-user keypress: On every new keypress,
-a new search is performed and the previous, potentially still executing, `find` call will still be executed), it can't
-cancel the previous active search, resulting on potential useless http calls and resources consumption.
-
-We could add an optional cancellation signal or observable in `GlobalSearchFindOptions` and propagate it to result providers.
-That way `find` calls could be aborted.
-
-However result providers would still have to manually handles this signal to cancel any http call or 
-other asynchronous task that could be pending. 
-
-Notes:
-- As this can be implemented with an additional option, this would be a non-breaking change and so could be done at 
-  a later time (even if it means that existing result provider would not handles this option until they implements it).
 
 ## The GlobalSearch service could be provided as a plugin instead of a core service
 
