@@ -478,7 +478,7 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
     layerId,
     updatedLayer,
     label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
-    changeType: 'extended',
+    changeType: 'reorder',
   });
 }
 
