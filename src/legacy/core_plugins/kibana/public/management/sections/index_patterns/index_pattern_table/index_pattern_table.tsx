@@ -27,9 +27,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiLink,
 } from '@elastic/eui';
-import { getDocLink } from 'ui/documentation_links';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CreateButton } from '../create_button';
