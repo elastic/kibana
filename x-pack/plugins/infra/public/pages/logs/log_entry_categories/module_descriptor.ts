@@ -7,16 +7,16 @@
 import {
   bucketSpan,
   categoriesMessageField,
+  DatasetFilter,
   getJobId,
   LogEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   partitionField,
 } from '../../../../common/log_analysis';
-
 import {
+  cleanUpJobsAndDatafeeds,
   ModuleDescriptor,
   ModuleSourceConfiguration,
-  cleanUpJobsAndDatafeeds,
 } from '../../../containers/logs/log_analysis';
 import { callJobsSummaryAPI } from '../../../containers/logs/log_analysis/api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_get_module';
@@ -49,6 +49,7 @@ const getModuleDefinition = async () => {
 const setUpModule = async (
   start: number | undefined,
   end: number | undefined,
+  datasetFilter: DatasetFilter,
   { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration
 ) => {
   const indexNamePattern = indices.join(',');
@@ -66,10 +67,25 @@ const setUpModule = async (
           indexPattern: indexNamePattern,
           timestampField,
           bucketSpan,
+          datasetFilter,
         },
       },
     },
   ];
+  const query =
+    datasetFilter.type === 'includeSome'
+      ? {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'event.dataset': datasetFilter.datasets,
+                },
+              },
+            ],
+          },
+        }
+      : undefined;
 
   return callSetupMlModuleAPI(
     moduleId,
@@ -78,7 +94,9 @@ const setUpModule = async (
     spaceId,
     sourceId,
     indexNamePattern,
-    jobOverrides
+    jobOverrides,
+    [],
+    query
   );
 };
 

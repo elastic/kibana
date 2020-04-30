@@ -7,7 +7,11 @@
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { usePrevious } from 'react-use';
-import { isExampleDataIndex } from '../../../../common/log_analysis';
+import {
+  combineDatasetFilters,
+  DatasetFilter,
+  isExampleDataIndex,
+} from '../../../../common/log_analysis';
 import {
   AvailableIndex,
   ValidationIndicesError,
@@ -19,7 +23,8 @@ import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_modu
 type SetupHandler = (
   indices: string[],
   startTime: number | undefined,
-  endTime: number | undefined
+  endTime: number | undefined,
+  datasetFilter: DatasetFilter
 ) => void;
 
 interface AnalysisSetupStateArguments<JobType extends string> {
@@ -58,6 +63,18 @@ export const useAnalysisSetupState = <JobType extends string>({
       validatedIndices
         .filter(index => index.validity === 'valid' && index.isSelected)
         .map(i => i.name),
+    [validatedIndices]
+  );
+
+  const datasetFilter = useMemo(
+    () =>
+      validatedIndices
+        .flatMap(validatedIndex =>
+          validatedIndex.validity === 'valid'
+            ? validatedIndex.datasetFilter
+            : { type: 'includeAll' as const }
+        )
+        .reduce(combineDatasetFilters, { type: 'includeAll' as const }),
     [validatedIndices]
   );
 
@@ -118,12 +135,12 @@ export const useAnalysisSetupState = <JobType extends string>({
   );
 
   const setUp = useCallback(() => {
-    return setUpModule(selectedIndexNames, startTime, endTime);
-  }, [setUpModule, selectedIndexNames, startTime, endTime]);
+    return setUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
+  }, [setUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
 
   const cleanUpAndSetUp = useCallback(() => {
-    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime);
-  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime]);
+    return cleanUpAndSetUpModule(selectedIndexNames, startTime, endTime, datasetFilter);
+  }, [cleanUpAndSetUpModule, selectedIndexNames, startTime, endTime, datasetFilter]);
 
   const isValidating = useMemo(
     () => validateIndicesRequest.state === 'pending' || validateDatasetsRequest.state === 'pending',
@@ -178,6 +195,7 @@ export const useAnalysisSetupState = <JobType extends string>({
 
   return {
     cleanUpAndSetUp,
+    datasetFilter,
     endTime,
     isValidating,
     selectedIndexNames,
@@ -239,7 +257,7 @@ const reduceAvailableIndicesState = (
             isSelected: !isExampleDataIndex(previousAvailableIndex.name),
             availableDatasets: [],
             datasetFilter: {
-              include: 'all',
+              type: 'includeAll' as const,
             },
           };
         }

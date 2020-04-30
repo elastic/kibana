@@ -14,8 +14,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
+import { DatasetFilter } from '../../../../../common/log_analysis';
 import { useVisibilityState } from '../../../../utils/use_visibility_state';
-import { DatasetFilter } from './validation';
 
 export const IndexSetupDatasetFilter: React.FC<{
   availableDatasets: string[];
@@ -32,8 +32,8 @@ export const IndexSetupDatasetFilter: React.FC<{
 
       onChangeDatasetFilter(
         selectedDatasets.length === 0
-          ? { include: 'all' }
-          : { include: 'some', datasets: selectedDatasets }
+          ? { type: 'includeAll' }
+          : { type: 'includeSome', datasets: selectedDatasets }
       );
     },
     [onChangeDatasetFilter]
@@ -44,7 +44,7 @@ export const IndexSetupDatasetFilter: React.FC<{
       availableDatasets.map(datasetName => ({
         label: datasetName,
         checked:
-          datasetFilter.include === 'some' && datasetFilter.datasets.includes(datasetName)
+          datasetFilter.type === 'includeSome' && datasetFilter.datasets.includes(datasetName)
             ? 'on'
             : undefined,
       })),
@@ -55,11 +55,11 @@ export const IndexSetupDatasetFilter: React.FC<{
     <EuiFilterButton isSelected={isVisible} onClick={show}>
       <FormattedMessage
         id="xpack.infra.analysisSetup.indexDatasetFilterIncludeAllButtonLabel"
-        defaultMessage="{includeType, select, all {All datasets} some {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
+        defaultMessage="{includeType, select, includeAll {All datasets} includeSome {{includedDatasetCount, plural, one {# dataset} other {# datasets}}}}"
         values={{
-          includeType: datasetFilter.include,
+          includeType: datasetFilter.type,
           includedDatasetCount:
-            datasetFilter.include === 'some' ? datasetFilter.datasets.length : 0,
+            datasetFilter.type === 'includeSome' ? datasetFilter.datasets.length : 0,
         }}
       />
     </EuiFilterButton>

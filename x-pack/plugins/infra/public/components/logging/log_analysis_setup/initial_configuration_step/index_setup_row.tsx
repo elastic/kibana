@@ -7,8 +7,9 @@
 import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
+import { DatasetFilter } from '../../../../../common/log_analysis';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
-import { DatasetFilter, AvailableIndex, ValidationIndicesUIError } from './validation';
+import { AvailableIndex, ValidationIndicesUIError } from './validation';
 
 export const IndexSetupRow: React.FC<{
   index: AvailableIndex;

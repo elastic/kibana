@@ -5,6 +5,7 @@
  */
 
 import { ValidationIndicesError } from '../../../../../common/http_api';
+import { DatasetFilter } from '../../../../../common/log_analysis';
 
 export { ValidationIndicesError };
 
@@ -12,15 +13,6 @@ export type ValidationIndicesUIError =
   | ValidationIndicesError
   | { error: 'NETWORK_ERROR' }
   | { error: 'TOO_FEW_SELECTED_INDICES' };
-
-export type DatasetFilter =
-  | {
-      include: 'all';
-    }
-  | {
-      include: 'some';
-      datasets: string[];
-    };
 
 interface ValidAvailableIndex {
   validity: 'valid';

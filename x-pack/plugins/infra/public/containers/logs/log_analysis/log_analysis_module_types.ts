@@ -12,6 +12,7 @@ import {
   ValidationIndicesResponsePayload,
   ValidateLogEntryDatasetsResponsePayload,
 } from '../../../../common/http_api/log_analysis';
+import { DatasetFilter } from '../../../../common/log_analysis';
 
 export interface ModuleDescriptor<JobType extends string> {
   moduleId: string;
@@ -23,6 +24,7 @@ export interface ModuleDescriptor<JobType extends string> {
   setUpModule: (
     start: number | undefined,
     end: number | undefined,
+    datasetFilter: DatasetFilter,
     sourceConfiguration: ModuleSourceConfiguration
   ) => Promise<SetupMlModuleResponsePayload>;
   cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
