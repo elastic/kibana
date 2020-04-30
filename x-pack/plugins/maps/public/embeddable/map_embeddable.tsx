@@ -15,7 +15,6 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
-  EmbeddableInput,
   EmbeddableOutput,
 } from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
@@ -43,7 +42,6 @@ import {
   setHiddenLayers,
   setMapSettings,
 } from '../actions/map_actions';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -56,31 +54,8 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 
-interface MapEmbeddableConfig {
-  editUrl?: string;
-  indexPatterns: IIndexPattern[];
-  editable: boolean;
-  title?: string;
-  layerList: unknown[];
-  settings?: MapSettings;
-}
-
-export interface MapEmbeddableInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  filters: Filter[];
-  query?: Query;
-  refreshConfig: RefreshInterval;
-  isLayerTOCOpen: boolean;
-  openTOCDetails?: string[];
-  disableTooltipControl?: boolean;
-  disableInteractive?: boolean;
-  hideToolbarOverlay?: boolean;
-  hideLayerControl?: boolean;
-  hideViewControl?: boolean;
-  mapCenter?: MapCenterAndZoom;
-  hiddenLayers?: string[];
-  hideFilterActions?: boolean;
-}
+import { MapEmbeddableInput, MapEmbeddableConfig } from './types';
+export { MapEmbeddableInput, MapEmbeddableConfig };
 
 export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
