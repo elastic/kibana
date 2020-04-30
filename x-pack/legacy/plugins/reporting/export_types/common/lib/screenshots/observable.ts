@@ -7,7 +7,7 @@
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { CaptureConfig } from '../../../../server/types';
-import { PAGELOAD_SELECTOR } from '../../constants';
+import { DEFAULT_PAGELOAD_SELECTOR } from '../../constants';
 import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -57,7 +57,7 @@ export function screenshotsObservableFactory(
                 // it's loaded the next page.
                 const page = index + 1;
                 const pageLoadSelector =
-                  page > 1 ? `[data-shared-page="${page}"]` : PAGELOAD_SELECTOR;
+                  page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
                 return openUrl(
                   captureConfig,
