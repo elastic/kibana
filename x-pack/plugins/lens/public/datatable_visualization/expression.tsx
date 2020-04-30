@@ -215,22 +215,19 @@ export function DatatableComponent(props: DatatableRenderProps) {
                         >
                           <EuiToolTip
                             position="bottom"
-                            content={i18n.translate('xpack.lens.filterForValueButtonTooltip', {
-                              defaultMessage: 'Filter for value',
+                            content={i18n.translate('xpack.lens.includeValueButtonTooltip', {
+                              defaultMessage: 'Include value',
                             })}
                           >
                             <EuiButtonIcon
                               iconType="plusInCircle"
                               color="text"
-                              aria-label={i18n.translate(
-                                'xpack.lens.filterForValueButtonAriaLabel',
-                                {
-                                  defaultMessage: `Filter for {value}`,
-                                  values: {
-                                    value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
-                                  },
-                                }
-                              )}
+                              aria-label={i18n.translate('xpack.lens.includeValueButtonAriaLabel', {
+                                defaultMessage: `Include {value}`,
+                                values: {
+                                  value: `${fieldName ? `${fieldName}: ` : ''}${formattedValue}`,
+                                },
+                              })}
                               data-test-subj="lensDatatableFilterFor"
                               onClick={() => handleFilterClick(field, value, colIndex)}
                             />
@@ -238,17 +235,17 @@ export function DatatableComponent(props: DatatableRenderProps) {
                           <EuiFlexItem grow={false}>
                             <EuiToolTip
                               position="bottom"
-                              content={i18n.translate('xpack.lens.filterOutValueButtonTooltip', {
-                                defaultMessage: 'Filter out value',
+                              content={i18n.translate('xpack.lens.excludeValueButtonTooltip', {
+                                defaultMessage: 'Exclude value',
                               })}
                             >
                               <EuiButtonIcon
                                 iconType="minusInCircle"
                                 color="text"
                                 aria-label={i18n.translate(
-                                  'xpack.lens.filterOutValueButtonAriaLabel',
+                                  'xpack.lens.excludeValueButtonAriaLabel',
                                   {
-                                    defaultMessage: `Filter out {value}`,
+                                    defaultMessage: `Exclude {value}`,
                                     values: {
                                       value: `${
                                         fieldName ? `${fieldName}: ` : ''
