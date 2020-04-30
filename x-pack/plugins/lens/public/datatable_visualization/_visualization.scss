@@ -7,9 +7,7 @@
   transition: opacity $euiAnimSpeedNormal ease-in-out;
 }
 
-.lnsDataTable__cell:hover,
-.lnsDataTable__cell:focus-within {
-  .lnsDataTable__filter {
-    opacity: 1;
-  }
-}
+.lnsDataTable__cell:hover .lnsDataTable__filter,
+.lnsDataTable__filter:focus-within {
+  opacity: 1;
+} 
