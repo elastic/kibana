@@ -97,10 +97,7 @@ export class UiActionsService {
     this.actions.delete(actionId);
   };
 
-  public readonly attachAction = <TriggerId extends keyof TriggerContextMapping>(
-    triggerId: TriggerId,
-    actionId: string
-  ): void => {
+  public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -139,11 +136,11 @@ export class UiActionsService {
    *
    * `addTriggerAction` also infers better typing of the `action` argument.
    */
-  public readonly addTriggerAction = <TType extends TriggerId>(
-    triggerId: TType,
+  public readonly addTriggerAction = <T extends TriggerId>(
+    triggerId: T,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: Action<TriggerContextMapping[TType]>
+    action: Action<TriggerContextMapping[T]>
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
