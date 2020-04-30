@@ -34,7 +34,7 @@ const assignDeep = (target: Record<string, any>, source: Record<string, any>) =>
   }
 };
 
-const override = (...sources: Array<Record<string, any>>): Record<string, any> => {
+export const override = (...sources: Array<Record<string, any>>): Record<string, any> => {
   const result = {};
 
   for (const object of sources) {

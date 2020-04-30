@@ -37,17 +37,60 @@ describe('override(target, source)', function() {
         client: {
           type: 'nosql',
         },
+        foo: {
+          bar: {
+            baz: 1,
+          },
+        },
       },
     };
 
-    expect(override(target, source)).toEqual({
-      test: {
-        enable: true,
-        host: ['host-01', 'host-02'],
-        client: {
-          type: 'nosql',
+    expect(override(target, source)).toMatchInlineSnapshot(`
+      Object {
+        "test": Object {
+          "client": Object {
+            "type": "nosql",
+          },
+          "enable": true,
+          "foo": Object {
+            "bar": Object {
+              "baz": 1,
+            },
+          },
+          "host": Array [
+            "host-01",
+            "host-02",
+          ],
         },
+      }
+    `);
+  });
+
+  it('does not mutate arguments', () => {
+    const target = {
+      foo: {
+        bar: 1,
+        baz: 1,
       },
-    });
+    };
+
+    const source = {
+      foo: {
+        bar: 2,
+      },
+      box: 2,
+    };
+
+    expect(override(target, source)).toMatchInlineSnapshot(`
+      Object {
+        "box": 2,
+        "foo": Object {
+          "bar": 2,
+          "baz": 1,
+        },
+      }
+    `);
+    expect(target).not.toHaveProperty('box');
+    expect(source.foo).not.toHaveProperty('baz');
   });
 });
