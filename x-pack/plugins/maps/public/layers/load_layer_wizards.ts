@@ -21,7 +21,6 @@ import { emsBaseMapLayerWizardConfig } from './sources/ems_tms_source';
 import { kibanaRegionMapLayerWizardConfig } from './sources/kibana_regionmap_source';
 // @ts-ignore
 import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source';
-// @ts-ignore
 import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 // @ts-ignore
 import { wmsLayerWizardConfig } from './sources/wms_source';
@@ -38,7 +37,6 @@ export function registerLayerWizards() {
   // Registration order determines display order
   // @ts-ignore
   registerLayerWizard(uploadLayerWizardConfig);
-  // @ts-ignore
   registerLayerWizard(ObservabilityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
@@ -56,7 +54,6 @@ export function registerLayerWizards() {
   registerLayerWizard(kibanaRegionMapLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(kibanaBasemapLayerWizardConfig);
-  // @ts-ignore
   registerLayerWizard(tmsLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(wmsLayerWizardConfig);
