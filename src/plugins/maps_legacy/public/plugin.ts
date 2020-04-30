@@ -46,9 +46,9 @@ export interface MapsLegacySetupDependencies {}
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this._initializerContext = initializerContext;
   }
 
