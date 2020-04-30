@@ -22,9 +22,22 @@ import { buildExpression } from './build_expression';
 import { buildExpressionFunction } from './build_function';
 
 describe('buildExpressionFunction()', () => {
+  let subexp: ExpressionAstExpression;
   let ast: ExpressionAstExpression;
 
   beforeEach(() => {
+    subexp = {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'hello',
+          arguments: {
+            world: [false, true],
+          },
+        },
+      ],
+    };
     ast = {
       type: 'expression',
       chain: [
@@ -33,20 +46,7 @@ describe('buildExpressionFunction()', () => {
           function: 'foo',
           arguments: {
             bar: ['baz'],
-            subexp: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: 'hello',
-                    arguments: {
-                      world: [false, true],
-                    },
-                  },
-                ],
-              },
-            ],
+            subexp: [subexp],
           },
         },
       ],
@@ -83,6 +83,7 @@ describe('buildExpressionFunction()', () => {
     const fn = buildExpressionFunction('hello', { world: [true] });
     expect(Object.keys(fn)).toMatchInlineSnapshot(`
       Array [
+        "type",
         "name",
         "arguments",
         "addArgument",
@@ -127,23 +128,108 @@ describe('buildExpressionFunction()', () => {
     `);
   });
 
+  describe('handles subexpressions as args', () => {
+    test('when provided an AST for the subexpression', () => {
+      const fn = buildExpressionFunction('hello', { world: [true] });
+      fn.addArgument('subexp', buildExpression(subexp).toAst());
+      expect(fn.toAst().arguments.subexp).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "world": Array [
+                    false,
+                    true,
+                  ],
+                },
+                "function": "hello",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    test('when provided a function builder for the subexpression', () => {
+      // test using `markdownVis`, which expects a subexpression
+      // using the `font` function
+      const anotherSubexpression = buildExpression([buildExpressionFunction('font', { size: 12 })]);
+      const fn = buildExpressionFunction('markdownVis', {
+        markdown: 'hello',
+        openLinksInNewTab: true,
+        font: anotherSubexpression,
+      });
+      expect(fn.toAst().arguments.font).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "size": Array [
+                    12,
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    test('when subexpressions are changed by reference', () => {
+      const fontFn = buildExpressionFunction('font', { size: 12 });
+      const fn = buildExpressionFunction('markdownVis', {
+        markdown: 'hello',
+        openLinksInNewTab: true,
+        font: buildExpression([fontFn]),
+      });
+      fontFn.addArgument('color', 'blue');
+      fontFn.replaceArgument('size', [72]);
+      expect(fn.toAst().arguments.font).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "color": Array [
+                    "blue",
+                  ],
+                  "size": Array [
+                    72,
+                  ],
+                },
+                "function": "font",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('#addArgument', () => {
     test('allows you to add a new argument', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
-      fn.addArgument('foo', ['bar']);
+      fn.addArgument('world', false);
       expect(fn.toAst().arguments).toMatchInlineSnapshot(`
         Object {
-          "foo": Array [
-            "bar",
-          ],
           "world": Array [
             true,
+            false,
           ],
         }
       `);
     });
 
-    test('wraps new primitive arguments in an array', () => {
+    test('creates new args if they do not yet exist', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
       fn.addArgument('foo', 'bar');
       expect(fn.toAst().arguments).toMatchInlineSnapshot(`
@@ -158,46 +244,10 @@ describe('buildExpressionFunction()', () => {
       `);
     });
 
-    test('throws an error when adding an arg which already exists', () => {
-      const fn = buildExpressionFunction('hello', { world: [true] });
-      expect(() => {
-        fn.addArgument('world', false);
-      }).toThrowError();
-    });
-
-    test('handles subexpressions as args', () => {
-      const fn = buildExpressionFunction('hello', { world: [true] });
-      fn.addArgument('subexp', ast.chain[0].arguments.subexp);
-      expect(fn.toAst().arguments).toMatchInlineSnapshot(`
-        Object {
-          "subexp": Array [
-            Object {
-              "chain": Array [
-                Object {
-                  "arguments": Object {
-                    "world": Array [
-                      false,
-                      true,
-                    ],
-                  },
-                  "function": "hello",
-                  "type": "function",
-                },
-              ],
-              "type": "expression",
-            },
-          ],
-          "world": Array [
-            true,
-          ],
-        }
-      `);
-    });
-
     test('mutates a function already associated with an expression', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
       const exp = buildExpression([fn]);
-      fn.addArgument('foo', ['bar']);
+      fn.addArgument('foo', 'bar');
       expect(exp.toAst().chain).toMatchInlineSnapshot(`
         Array [
           Object {

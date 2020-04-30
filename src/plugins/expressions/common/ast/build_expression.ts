@@ -22,7 +22,16 @@ import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_f
 import { format } from './format';
 import { parse } from './parse';
 
+/** @internal */
+export function isExpressionBuilder(arg: any): arg is ExpressionAstExpressionBuilder {
+  return arg?.type === 'expression_builder';
+}
+
 export interface ExpressionAstExpressionBuilder {
+  /**
+   * Used to identify expression builder objects.
+   */
+  type: 'expression_builder';
   /**
    * Array of each of the `buildExpressionFunction()` instances
    * in this expression. Use this to remove or reorder functions
@@ -93,6 +102,7 @@ export function buildExpression(
     : [];
 
   return {
+    type: 'expression_builder',
     functions: fns,
 
     findFunction(fnName) {
