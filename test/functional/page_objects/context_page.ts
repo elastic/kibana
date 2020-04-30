@@ -18,14 +18,14 @@
  */
 
 import rison from 'rison-node';
-
+import { FtrProviderContext } from '../ftr_provider_context';
 import getUrl from '../../../src/test_utils/get_url';
 
 const DEFAULT_INITIAL_STATE = {
   columns: ['@message'],
 };
 
-export function ContextPageProvider({ getService, getPageObjects }) {
+export function ContextPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const config = getService('config');
   const retry = getService('retry');
@@ -34,7 +34,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
 
   class ContextPage {
-    async navigateTo(indexPattern, anchorId, overrideInitialState = {}) {
+    public async navigateTo(indexPattern: string, anchorId: string, overrideInitialState = {}) {
       const initialState = rison.encode({
         ...DEFAULT_INITIAL_STATE,
         ...overrideInitialState,
@@ -53,23 +53,23 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(1000);
     }
 
-    async getPredecessorCountPicker() {
+    public async getPredecessorCountPicker() {
       return await testSubjects.find('predecessorsCountPicker');
     }
 
-    async getSuccessorCountPicker() {
+    public async getSuccessorCountPicker() {
       return await testSubjects.find('successorsCountPicker');
     }
 
-    async getPredecessorLoadMoreButton() {
+    public async getPredecessorLoadMoreButton() {
       return await testSubjects.find('predecessorsLoadMoreButton');
     }
 
-    async getSuccessorLoadMoreButton() {
+    public async getSuccessorLoadMoreButton() {
       return await testSubjects.find('successorsLoadMoreButton');
     }
 
-    async clickPredecessorLoadMoreButton() {
+    public async clickPredecessorLoadMoreButton() {
       log.debug('Click Predecessor Load More Button');
       await retry.try(async () => {
         const predecessorButton = await this.getPredecessorLoadMoreButton();
@@ -79,7 +79,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickSuccessorLoadMoreButton() {
+    public async clickSuccessorLoadMoreButton() {
       log.debug('Click Successor Load More Button');
       await retry.try(async () => {
         const sucessorButton = await this.getSuccessorLoadMoreButton();
@@ -89,7 +89,7 @@ export function ContextPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async waitUntilContextLoadingHasFinished() {
+    public async waitUntilContextLoadingHasFinished() {
       return await retry.try(async () => {
         const successorLoadMoreButton = await this.getSuccessorLoadMoreButton();
         const predecessorLoadMoreButton = await this.getPredecessorLoadMoreButton();
