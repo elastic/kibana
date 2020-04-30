@@ -77,7 +77,7 @@ export class UiActionsService {
 
   public readonly registerAction = <A extends ActionDefinition>(
     definition: A
-  ): ActionInternal<A> => {
+  ): Action<ActionContext<A>> => {
     if (this.actions.has(definition.id)) {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
