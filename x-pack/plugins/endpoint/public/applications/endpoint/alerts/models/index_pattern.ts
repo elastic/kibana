@@ -5,8 +5,8 @@
  */
 
 import { all } from 'deepmerge';
-import { Immutable } from '../../../../common/types';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IIndexPattern } from 'src/plugins/data/public';
+import { Immutable } from '../../../../../common/alerts/types';
 
 /**
  * Model for the `IIndexPattern` interface exported by the `data` plugin.

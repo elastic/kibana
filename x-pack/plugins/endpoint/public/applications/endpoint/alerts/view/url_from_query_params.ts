@@ -5,7 +5,8 @@
  */
 
 import querystring from 'querystring';
-import { AlertingIndexUIQueryParams, EndpointAppLocation } from '../../types';
+import { AlertingIndexUIQueryParams } from '../../../../../common/alerts/types';
+import { EndpointAppLocation } from '../../types';
 
 /**
  * Return a relative URL for `AlertingIndexUIQueryParams`.

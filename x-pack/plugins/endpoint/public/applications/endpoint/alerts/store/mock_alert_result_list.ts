@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertResultList, AlertDetails } from '../../../../../common/types';
+import { AlertResultList, AlertDetails } from '../../../../../common/alerts/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 export const mockAlertResultList: (options?: {

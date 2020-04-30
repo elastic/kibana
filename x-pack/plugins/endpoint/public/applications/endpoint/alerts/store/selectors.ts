@@ -9,10 +9,18 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import { encode, decode } from 'rison-node';
 import { Query, TimeRange, Filter } from 'src/plugins/data/public';
-import { AlertListState, AlertingIndexUIQueryParams, CreateStructuredSelector } from '../../types';
-import { Immutable, AlertingIndexGetQueryInput } from '../../../../../common/types';
+import {
+  encode,
+  decode,
+} from '../../../../../server/routes/handlers/list/lib/node_modules/rison-node';
+import { CreateStructuredSelector } from '../../types';
+import {
+  Immutable,
+  AlertingIndexGetQueryInput,
+  AlertListState,
+  AlertingIndexUIQueryParams,
+} from '../../../../../common/alerts/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 

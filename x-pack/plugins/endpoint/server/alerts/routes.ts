@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
-import { AlertConstants } from '../../../common/alert_constants';
+import { EndpointAppContext } from '../types';
+import { AlertConstants } from '../../common/alerts/alert_constants';
 import { alertListHandlerWrapper } from './list';
 import { alertDetailsHandlerWrapper, alertDetailsReqSchema } from './details';
-import { alertingIndexGetQuerySchema } from '../../../common/alerts/schema/alert_index';
+import { alertingIndexGetQuerySchema } from '../../common/alerts/schema/alert_index';
+import { indexPatternGetParamsSchema } from '../../common/alerts/schema/index_pattern';
+import { handleIndexPattern } from './index_pattern';
 
 export const BASE_ALERTS_ROUTE = `${AlertConstants.BASE_API_URL}/alerts`;
 
@@ -33,5 +35,16 @@ export function registerAlertRoutes(router: IRouter, endpointAppContext: Endpoin
       options: { authRequired: true },
     },
     alertDetailsHandlerWrapper(endpointAppContext)
+  );
+
+  const log = endpointAppContext.logFactory.get('index_pattern');
+
+  router.get(
+    {
+      path: `${AlertConstants.INDEX_PATTERN_ROUTE}/{datasetPath}`,
+      validate: { params: indexPatternGetParamsSchema },
+      options: { authRequired: true },
+    },
+    handleIndexPattern(log, endpointAppContext)
   );
 }

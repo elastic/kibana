@@ -10,7 +10,7 @@ import { AlertConstants } from '../../../../common/alert_constants';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
-import { getHostData } from '../../metadata';
+import { getHostData } from '../../../routes/metadata';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext

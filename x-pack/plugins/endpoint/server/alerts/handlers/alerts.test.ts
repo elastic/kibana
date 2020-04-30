@@ -9,7 +9,7 @@ import {
   httpServiceMock,
   loggingServiceMock,
 } from '../../../../../../src/core/server/mocks';
-import { registerAlertRoutes } from './index';
+import { registerAlertRoutes } from './routes';
 import { EndpointConfigSchema } from '../../config';
 import { alertingIndexGetQuerySchema } from '../../../common/alerts/schema/alert_index';
 import { createMockAgentService, createMockIndexPatternRetriever } from '../../mocks';
