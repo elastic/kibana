@@ -3,8 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { SavedObjectsClientContract } from 'kibana/server';
 import { AgentStatus } from '../../common/types/models';
+import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 
@@ -35,6 +37,7 @@ export interface AgentService {
 export { datasourceService } from './datasource';
 export { agentConfigService } from './agent_config';
 export { outputService } from './output';
+export { settingsService };
 
 // Plugin services
 export { appContextService } from './app_context';

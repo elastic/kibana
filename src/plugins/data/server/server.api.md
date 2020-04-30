@@ -611,7 +611,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
     // (undocumented)
     setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").FieldFormatInstanceType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };

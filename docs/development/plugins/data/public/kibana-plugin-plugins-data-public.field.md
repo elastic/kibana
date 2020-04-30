@@ -22,6 +22,7 @@ export declare class Field implements IFieldType
 |  --- | --- | --- | --- |
 |  [$$spec](./kibana-plugin-plugins-data-public.field.__spec.md) |  | <code>FieldSpec</code> |  |
 |  [aggregatable](./kibana-plugin-plugins-data-public.field.aggregatable.md) |  | <code>boolean</code> |  |
+|  [conflictDescriptions](./kibana-plugin-plugins-data-public.field.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt;</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.field.count.md) |  | <code>number</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.field.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.field.estypes.md) |  | <code>string[]</code> |  |

@@ -236,6 +236,7 @@ kibana_vars=(
     xpack.security.session.idleTimeout
     xpack.security.session.lifespan
     xpack.security.loginAssistanceMessage
+    xpack.security.loginHelp
     xpack.security.public.protocol
     xpack.security.public.hostname
     xpack.security.public.port

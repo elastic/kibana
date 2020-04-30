@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ChildrenQuery } from './children';
-import { EndpointAppConstants } from '../../../../common/types';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 export const fakeEventIndexPattern = 'events-endpoint-*';
 
@@ -12,7 +12,7 @@ describe('children events query', () => {
   it('generates the correct legacy queries', () => {
     const timestamp = new Date().getTime();
     expect(
-      new ChildrenQuery(EndpointAppConstants.LEGACY_EVENT_INDEX_NAME, 'awesome-id', {
+      new ChildrenQuery(legacyEventIndexPattern, 'awesome-id', {
         size: 1,
         timestamp,
         eventID: 'foo',
@@ -48,7 +48,7 @@ describe('children events query', () => {
         size: 1,
         sort: [{ '@timestamp': 'asc' }, { 'endgame.serial_event_id': 'asc' }],
       },
-      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      index: legacyEventIndexPattern,
     });
   });
 

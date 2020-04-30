@@ -74,7 +74,21 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      await callCluster('indices.deleteTemplate', { name });
+      const callClusterParams: {
+        method: string;
+        path: string;
+        ignore: number[];
+      } = {
+        method: 'DELETE',
+        path: `/_index_template/${name}`,
+        ignore: [404],
+      };
+      // This uses the catch-all endpoint 'transport.request' because there is no
+      // convenience endpoint using the new _index_template API yet.
+      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+      // which does not support v2 templates.
+      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+      await callCluster('transport.request', callClusterParams);
     } catch {
       throw new Error(`error deleting template ${name}`);
     }

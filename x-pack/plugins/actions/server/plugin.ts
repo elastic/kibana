@@ -18,6 +18,7 @@ import {
   IContextProvider,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
+  IClusterClient,
 } from '../../../../src/core/server';
 
 import {
@@ -302,6 +303,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
+      getScopedCallCluster(clusterClient: IClusterClient) {
+        return clusterClient.asScoped(request).callAsCurrentUser;
+      },
     });
   }
 

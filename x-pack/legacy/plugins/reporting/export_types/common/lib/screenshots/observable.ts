@@ -21,10 +21,18 @@ import { waitForVisualizations } from './wait_for_visualizations';
 const DEFAULT_SCREENSHOT_CLIP_HEIGHT = 1200;
 const DEFAULT_SCREENSHOT_CLIP_WIDTH = 1800;
 
+export type ScreenshotsObservableFn = ({
+  logger,
+  urls,
+  conditionalHeaders,
+  layout,
+  browserTimezone,
+}: ScreenshotObservableOpts) => Rx.Observable<ScreenshotResults[]>;
+
 export function screenshotsObservableFactory(
   captureConfig: CaptureConfig,
   browserDriverFactory: HeadlessChromiumDriverFactory
-) {
+): ScreenshotsObservableFn {
   return function screenshotsObservable({
     logger,
     urls,

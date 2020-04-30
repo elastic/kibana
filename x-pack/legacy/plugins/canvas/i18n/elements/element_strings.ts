@@ -23,7 +23,7 @@ interface ElementStringDict {
 export const getElementStrings = (): ElementStringDict => ({
   areaChart: {
     displayName: i18n.translate('xpack.canvas.elements.areaChartDisplayName', {
-      defaultMessage: 'Area chart',
+      defaultMessage: 'Area',
     }),
     help: i18n.translate('xpack.canvas.elements.areaChartHelpText', {
       defaultMessage: 'A line chart with a filled body',
@@ -31,7 +31,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   bubbleChart: {
     displayName: i18n.translate('xpack.canvas.elements.bubbleChartDisplayName', {
-      defaultMessage: 'Bubble chart',
+      defaultMessage: 'Bubble',
     }),
     help: i18n.translate('xpack.canvas.elements.bubbleChartHelpText', {
       defaultMessage: 'A customizable bubble chart',
@@ -39,31 +39,31 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   debug: {
     displayName: i18n.translate('xpack.canvas.elements.debugDisplayName', {
-      defaultMessage: 'Debug',
+      defaultMessage: 'Debug data',
     }),
     help: i18n.translate('xpack.canvas.elements.debugHelpText', {
       defaultMessage: 'Just dumps the configuration of the element',
     }),
   },
-  donut: {
-    displayName: i18n.translate('xpack.canvas.elements.donutChartDisplayName', {
-      defaultMessage: 'Donut chart',
-    }),
-    help: i18n.translate('xpack.canvas.elements.donutChartHelpText', {
-      defaultMessage: 'A customizable donut chart',
-    }),
-  },
-  dropdown_filter: {
+  dropdownFilter: {
     displayName: i18n.translate('xpack.canvas.elements.dropdownFilterDisplayName', {
-      defaultMessage: 'Dropdown filter',
+      defaultMessage: 'Dropdown select',
     }),
     help: i18n.translate('xpack.canvas.elements.dropdownFilterHelpText', {
       defaultMessage: 'A dropdown from which you can select values for an "exactly" filter',
     }),
   },
+  filterDebug: {
+    displayName: i18n.translate('xpack.canvas.elements.filterDebugDisplayName', {
+      defaultMessage: 'Debug filters',
+    }),
+    help: i18n.translate('xpack.canvas.elements.filterDebugHelpText', {
+      defaultMessage: 'Shows the underlying global filters in a workpad',
+    }),
+  },
   horizontalBarChart: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalBarChartDisplayName', {
-      defaultMessage: 'Horizontal bar chart',
+      defaultMessage: 'Horizontal bar',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalBarChartHelpText', {
       defaultMessage: 'A customizable horizontal bar chart',
@@ -71,7 +71,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   horizontalProgressBar: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalProgressBarDisplayName', {
-      defaultMessage: 'Horizontal progress bar',
+      defaultMessage: 'Horizontal bar',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalProgressBarHelpText', {
       defaultMessage: 'Displays progress as a portion of a horizontal bar',
@@ -79,7 +79,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   horizontalProgressPill: {
     displayName: i18n.translate('xpack.canvas.elements.horizontalProgressPillDisplayName', {
-      defaultMessage: 'Horizontal progress pill',
+      defaultMessage: 'Horizontal pill',
     }),
     help: i18n.translate('xpack.canvas.elements.horizontalProgressPillHelpText', {
       defaultMessage: 'Displays progress as a portion of a horizontal pill',
@@ -95,7 +95,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   lineChart: {
     displayName: i18n.translate('xpack.canvas.elements.lineChartDisplayName', {
-      defaultMessage: 'Line chart',
+      defaultMessage: 'Line',
     }),
     help: i18n.translate('xpack.canvas.elements.lineChartHelpText', {
       defaultMessage: 'A customizable line chart',
@@ -119,7 +119,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   pie: {
     displayName: i18n.translate('xpack.canvas.elements.pieDisplayName', {
-      defaultMessage: 'Pie chart',
+      defaultMessage: 'Pie',
     }),
     help: i18n.translate('xpack.canvas.elements.pieHelpText', {
       defaultMessage: 'Pie chart',
@@ -135,7 +135,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressGauge: {
     displayName: i18n.translate('xpack.canvas.elements.progressGaugeDisplayName', {
-      defaultMessage: 'Progress gauge',
+      defaultMessage: 'Gauge',
     }),
     help: i18n.translate('xpack.canvas.elements.progressGaugeHelpText', {
       defaultMessage: 'Displays progress as a portion of a gauge',
@@ -143,7 +143,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressSemicircle: {
     displayName: i18n.translate('xpack.canvas.elements.progressSemicircleDisplayName', {
-      defaultMessage: 'Progress semicircle',
+      defaultMessage: 'Semicircle',
     }),
     help: i18n.translate('xpack.canvas.elements.progressSemicircleHelpText', {
       defaultMessage: 'Displays progress as a portion of a semicircle',
@@ -151,7 +151,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   progressWheel: {
     displayName: i18n.translate('xpack.canvas.elements.progressWheelDisplayName', {
-      defaultMessage: 'Progress wheel',
+      defaultMessage: 'Wheel',
     }),
     help: i18n.translate('xpack.canvas.elements.progressWheelHelpText', {
       defaultMessage: 'Displays progress as a portion of a wheel',
@@ -189,15 +189,7 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'A scrollable grid for displaying data in a tabular format',
     }),
   },
-  tiltedPie: {
-    displayName: i18n.translate('xpack.canvas.elements.tiltedPieDisplayName', {
-      defaultMessage: 'Tilted pie chart',
-    }),
-    help: i18n.translate('xpack.canvas.elements.tiltedPieHelpText', {
-      defaultMessage: 'A customizable tilted pie chart',
-    }),
-  },
-  time_filter: {
+  timeFilter: {
     displayName: i18n.translate('xpack.canvas.elements.timeFilterDisplayName', {
       defaultMessage: 'Time filter',
     }),
@@ -207,7 +199,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   verticalBarChart: {
     displayName: i18n.translate('xpack.canvas.elements.verticalBarChartDisplayName', {
-      defaultMessage: 'Vertical bar chart',
+      defaultMessage: 'Vertical bar',
     }),
     help: i18n.translate('xpack.canvas.elements.verticalBarChartHelpText', {
       defaultMessage: 'A customizable vertical bar chart',
@@ -215,7 +207,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   verticalProgressBar: {
     displayName: i18n.translate('xpack.canvas.elements.verticalProgressBarDisplayName', {
-      defaultMessage: 'Vertical progress bar',
+      defaultMessage: 'Vertical bar',
     }),
     help: i18n.translate('xpack.canvas.elements.verticalProgressBarHelpText', {
       defaultMessage: 'Displays progress as a portion of a vertical bar',
@@ -223,7 +215,7 @@ export const getElementStrings = (): ElementStringDict => ({
   },
   verticalProgressPill: {
     displayName: i18n.translate('xpack.canvas.elements.verticalProgressPillDisplayName', {
-      defaultMessage: 'Vertical progress pill',
+      defaultMessage: 'Vertical pill',
     }),
     help: i18n.translate('xpack.canvas.elements.verticalProgressPillHelpText', {
       defaultMessage: 'Displays progress as a portion of a vertical pill',

@@ -50,6 +50,8 @@ export {
   DefaultPackages,
   TemplateRef,
   IndexTemplateMappings,
+  Settings,
+  SettingsSOAttributes,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

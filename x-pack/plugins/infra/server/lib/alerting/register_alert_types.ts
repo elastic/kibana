@@ -6,13 +6,15 @@
 
 import { PluginSetupContract } from '../../../../alerting/server';
 import { registerMetricThresholdAlertType } from './metric_threshold/register_metric_threshold_alert_type';
+import { registerLogThresholdAlertType } from './log_threshold/register_log_threshold_alert_type';
+import { InfraBackendLibs } from '../infra_types';
 
-const registerAlertTypes = (alertingPlugin: PluginSetupContract) => {
+const registerAlertTypes = (alertingPlugin: PluginSetupContract, libs: InfraBackendLibs) => {
   if (alertingPlugin) {
-    const registerFns = [registerMetricThresholdAlertType];
+    const registerFns = [registerMetricThresholdAlertType, registerLogThresholdAlertType];
 
     registerFns.forEach(fn => {
-      fn(alertingPlugin);
+      fn(alertingPlugin, libs);
     });
   }
 };

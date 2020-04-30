@@ -97,6 +97,7 @@ export const AssetModal: FunctionComponent<Props> = props => {
                 <EuiFilePicker
                   initialPromptText={strings.getFilePickerPromptText()}
                   compressed
+                  display="default"
                   multiple
                   onChange={onFileUpload}
                   accept="image/*"

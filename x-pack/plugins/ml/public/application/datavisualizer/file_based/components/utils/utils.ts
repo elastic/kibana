@@ -9,11 +9,13 @@ import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
 import {
+  MAX_FILE_SIZE,
   MAX_FILE_SIZE_BYTES,
   ABSOLUTE_MAX_FILE_SIZE_BYTES,
   FILE_SIZE_DISPLAY_FORMAT,
 } from '../../../../../../common/constants/file_datavisualizer';
-import { getMlConfig } from '../../../../util/dependency_cache';
+import { getUiSettings } from '../../../../util/dependency_cache';
+import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../../../../../common/constants/settings';
 
 const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
@@ -62,13 +64,13 @@ export function readFile(file: File) {
 }
 
 export function getMaxBytes() {
-  const maxFileSize = getMlConfig().file_data_visualizer.max_file_size;
+  const maxFileSize = getUiSettings().get(FILE_DATA_VISUALIZER_MAX_FILE_SIZE, MAX_FILE_SIZE);
   // @ts-ignore
   const maxBytes = numeral(maxFileSize.toUpperCase()).value();
   if (maxBytes < MAX_FILE_SIZE_BYTES) {
     return MAX_FILE_SIZE_BYTES;
   }
-  return maxBytes < ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
+  return maxBytes <= ABSOLUTE_MAX_FILE_SIZE_BYTES ? maxBytes : ABSOLUTE_MAX_FILE_SIZE_BYTES;
 }
 
 export function getMaxBytesFormatted() {
