@@ -26,7 +26,6 @@ import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPat
 import { routes } from '../components/app/Main/route_config';
 import { history } from '../utils/history';
 import { ConfigSchema } from '..';
-import '../style/index.scss';
 import 'react-vis/dist/style.css';
 
 const MainContainer = styled.div`
