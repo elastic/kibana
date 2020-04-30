@@ -23,6 +23,7 @@ import {
   agentConfigFormValidation,
   ConfirmDeployConfigModal,
 } from '../../../components';
+import { useConfigRefresh } from '../../hooks';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -41,6 +42,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     } = useConfig();
     const history = useHistory();
     const hasWriteCapabilites = useCapabilities().write;
+    const refreshConfig = useConfigRefresh();
     const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
     const [agentConfig, setAgentConfig] = useState<AgentConfig>({
       ...originalAgentConfig,
@@ -84,6 +86,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
               values: { name: agentConfig.name },
             })
           );
+          refreshConfig();
           setHasChanges(false);
         } else {
           notifications.toasts.addDanger(
