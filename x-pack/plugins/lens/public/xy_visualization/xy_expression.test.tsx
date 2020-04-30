@@ -601,6 +601,7 @@ describe('xy_expression', () => {
           formatFactory={getFormatSpy}
           timeZone="UTC"
           chartTheme={{}}
+          histogramBarTarget={50}
           executeTriggerActions={executeTriggerActions}
         />
       );
