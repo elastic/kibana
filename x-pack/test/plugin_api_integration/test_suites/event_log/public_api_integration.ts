@@ -19,7 +19,9 @@ export default function({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Event Log public API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/64723
+  // FLAKY: https://github.com/elastic/kibana/issues/64812
+  describe.skip('Event Log public API', () => {
     it('should allow querying for events by Saved Object', async () => {
       const id = uuid.v4();
 
@@ -203,6 +205,7 @@ export default function({ getService }: FtrProviderContext) {
         kibana: {
           saved_objects: [
             {
+              rel: 'primary',
               namespace: 'default',
               type: 'event_log_test',
               id,
