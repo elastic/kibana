@@ -53,6 +53,7 @@ import {
 } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
+import { setupSavedObjects } from './saved_objects';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -133,19 +134,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    // Encrypted attributes
-    // - `secrets` properties will be encrypted
-    // - `config` will be included in AAD
-    // - everything else excluded from AAD
-    plugins.encryptedSavedObjects.registerType({
-      type: 'action',
-      attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['name']),
-    });
-    plugins.encryptedSavedObjects.registerType({
-      type: 'action_task_params',
-      attributesToEncrypt: new Set(['apiKey']),
-    });
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
