@@ -206,8 +206,12 @@ export const AlertsList: React.FunctionComponent = () => {
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
         { defaultMessage: 'Actions' }
       ),
-      render: actions => {
-        return <EuiBadge>{actions.length}</EuiBadge>;
+      render: (count: number, item: AlertTableItem) => {
+        return (
+          <EuiBadge color="hollow" key={item.id}>
+            {count}
+          </EuiBadge>
+        );
       },
       sortable: false,
       'data-test-subj': 'alertsTableCell-actionsText',
@@ -486,7 +490,7 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
   return alerts.map(alert => ({
     ...alert,
-    actionsText: alert.actions,
+    actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));
