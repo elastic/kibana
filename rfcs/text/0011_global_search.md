@@ -177,20 +177,6 @@ server one, as there is no `context` parameter on the `find` signature.
 
 ### Plugin API
 
-#### common types
-
-```ts
-/**
- * Response returned from the {@link GlobalSearchServiceStart | global search service}'s `find` API
- */
-type GlobalSearchResponse<ResultType extends GlobalSearchResult = GlobalSearchResult> = {
-  /**
-   * Current results fetched from the providers.
-   */
-  results: ResultType[];
-};
-```
-
 #### server API
 
 ```ts
@@ -211,6 +197,16 @@ interface GlobalSearchFindOptions {
    */
   aborted$?: Observable<void>;
 }
+
+/**
+ * Response returned from the server-side {@link GlobalSearchServiceStart | global search service}'s `find` API
+ */
+type GlobalSearchResponse = {
+  /**
+   * Current results fetched from the providers.
+   */
+  results: GlobalSearchResult[];
+};
 
 /** @public */
 interface GlobalSearchServiceSetup {
@@ -253,6 +249,16 @@ interface NavigableGlobalSearchResult extends GlobalSearchResult {
   navigate: () => Promise<void>;
 }
 
+/**
+ * Response returned from the client-side {@link GlobalSearchServiceStart | global search service}'s `find` API
+ */
+type GlobalSearchResponse = {
+  /**
+   * Current results fetched from the providers.
+   */
+  results: NavigableGlobalSearchResult[];
+};
+
 /** @public */
 interface GlobalSearchServiceSetup {
   registerResultProvider(provider: GlobalSearchResultProvider);
@@ -263,7 +269,7 @@ interface GlobalSearchServiceStart {
   find(
     term: string,
     options: GlobalSearchFindOptions,
-  ): Observable<GlobalSearchResponse<NavigableGlobalSearchResult>>;
+  ): Observable<GlobalSearchResponse>;
 }
 ```
 
