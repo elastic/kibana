@@ -61,12 +61,16 @@ export const pie: ExpressionFunctionDefinition<
     },
     categoryDisplay: {
       types: ['string'],
-      options: ['default', 'link', 'inside', 'hide'],
+      options: ['default', 'inside', 'hide'],
       help: '',
     },
     legendDisplay: {
       types: ['string'],
-      options: ['default', 'nested', 'hide'],
+      options: ['default', 'show', 'hide'],
+      help: '',
+    },
+    nestedLegend: {
+      types: ['boolean'],
       help: '',
     },
     percentDecimals: {

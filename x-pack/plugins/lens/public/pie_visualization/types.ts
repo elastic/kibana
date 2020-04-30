@@ -11,8 +11,9 @@ export interface SharedLayerState {
   groups: string[];
   metric?: string;
   numberDisplay: 'hidden' | 'percent' | 'value';
-  categoryDisplay: 'default' | 'link' | 'inside' | 'hide';
-  legendDisplay: 'default' | 'nested' | 'hide';
+  categoryDisplay: 'default' | 'inside' | 'hide';
+  legendDisplay: 'default' | 'show' | 'hide';
+  nestedLegend?: boolean;
   percentDecimals?: number;
 }
 

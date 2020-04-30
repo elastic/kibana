@@ -305,8 +305,9 @@ describe('suggestions', () => {
 
                 numberDisplay: 'hidden',
                 categoryDisplay: 'inside',
-                legendDisplay: 'nested',
+                legendDisplay: 'show',
                 percentDecimals: 0,
+                nestedLegend: true,
               },
             ],
           },
@@ -324,8 +325,9 @@ describe('suggestions', () => {
 
                 numberDisplay: 'hidden',
                 categoryDisplay: 'inside',
-                legendDisplay: 'nested',
+                legendDisplay: 'show',
                 percentDecimals: 0,
+                nestedLegend: true,
               },
             ],
           },
@@ -487,8 +489,9 @@ describe('suggestions', () => {
 
                 numberDisplay: 'hidden',
                 categoryDisplay: 'inside',
-                legendDisplay: 'nested',
+                legendDisplay: 'show',
                 percentDecimals: 0,
+                nestedLegend: true,
               },
             ],
           },
@@ -506,8 +509,9 @@ describe('suggestions', () => {
 
                 numberDisplay: 'hidden',
                 categoryDisplay: 'inside',
-                legendDisplay: 'nested',
+                legendDisplay: 'show',
                 percentDecimals: 0,
+                nestedLegend: true,
               },
             ],
           },

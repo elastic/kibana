@@ -54,6 +54,7 @@ export function PieComponent(
     numberDisplay,
     categoryDisplay,
     legendDisplay,
+    nestedLegend,
     percentDecimals,
     hideLabels,
   } = props.args;
@@ -145,8 +146,7 @@ export function PieComponent(
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
-    // Use full height of embeddable unless user wants to display linked labels
-    outerSizeRatio: categoryDisplay === 'link' ? 0.8 : 1,
+    outerSizeRatio: 1,
     specialFirstInnermostSector: false,
     minFontSize: 10,
     maxFontSize: 16,
@@ -163,18 +163,20 @@ export function PieComponent(
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };
-  if (shape !== 'treemap') {
+  if (shape === 'treemap') {
+    if (hideLabels || categoryDisplay === 'hide') {
+      config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
+    }
+  } else {
     config.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
-  }
-  if (categoryDisplay === 'link') {
-    config.linkLabel!.maximumSection = Number.POSITIVE_INFINITY;
-  }
-  if (hideLabels || categoryDisplay === 'hide') {
-    // Force all labels to be linked, then prevent links from showing
-    config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
-  } else if (categoryDisplay === 'inside') {
-    // Prevent links from showing
-    config.linkLabel = { maxCount: 0 };
+
+    if (hideLabels || categoryDisplay === 'hide') {
+      // Force all labels to be linked, then prevent links from showing
+      config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
+    } else if (categoryDisplay === 'inside') {
+      // Prevent links from showing
+      config.linkLabel = { maxCount: 0 };
+    }
   }
   const metricColumn = firstTable.columns.find(c => c.id === metric)!;
   const percentFormatter = props.formatFactory({
@@ -222,10 +224,8 @@ export function PieComponent(
     <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
       <Chart>
         <Settings
-          showLegend={!hideLabels && (legendDisplay === 'nested' || columnGroups.length > 1)}
-          legendMaxDepth={
-            legendDisplay === 'nested' ? undefined : 1 /* Color is based only on first layer */
-          }
+          showLegend={!hideLabels && (legendDisplay !== 'hide' || columnGroups.length > 1)}
+          legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={args => {
             const context = getFilterContext(
               args[0][0] as LayerValue[],

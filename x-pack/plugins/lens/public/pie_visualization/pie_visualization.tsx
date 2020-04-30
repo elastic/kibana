@@ -23,6 +23,7 @@ function newLayerState(layerId: string): LayerState {
     numberDisplay: 'percent',
     categoryDisplay: 'default',
     legendDisplay: 'default',
+    nestedLegend: false,
   };
 }
 
