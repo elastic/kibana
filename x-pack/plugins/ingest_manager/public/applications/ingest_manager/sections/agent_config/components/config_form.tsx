@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiComboBox,
   EuiIconTip,
+  EuiCheckboxGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +31,7 @@ interface ValidationResults {
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .ingest-active-button {
-    color: ${props => props.theme.eui.euiColorPrimary}};
+    color: ${props => props.theme.eui.euiColorPrimary};
   }
 `;
 
@@ -242,6 +243,68 @@ export const AgentConfigForm: React.FunctionComponent<Props> = ({
                 </EuiFormRow>
               </>
             )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText>
+              <h4>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentConfigForm.monitoringLabel"
+                  defaultMessage="Agent monitoring"
+                />
+              </h4>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.ingestManager.agentConfigForm.monitoringDescription"
+                defaultMessage="Collect data about your agents for debugging and tracking performance."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCheckboxGroup
+              options={[
+                {
+                  id: 'logs',
+                  label: i18n.translate(
+                    'xpack.ingestManager.agentConfigForm.monitoringLogsFieldLabel',
+                    { defaultMessage: 'Collect agent logs' }
+                  ),
+                },
+                {
+                  id: 'metrics',
+                  label: i18n.translate(
+                    'xpack.ingestManager.agentConfigForm.monitoringMetricsFieldLabel',
+                    { defaultMessage: 'Collect agent metrics' }
+                  ),
+                },
+              ]}
+              idToSelectedMap={(agentConfig.monitoring_enabled || []).reduce(
+                (acc: { logs: boolean; metrics: boolean }, key) => {
+                  acc[key] = true;
+                  return acc;
+                },
+                { logs: false, metrics: false }
+              )}
+              onChange={id => {
+                if (id !== 'logs' && id !== 'metrics') {
+                  return;
+                }
+
+                const hasLogs =
+                  agentConfig.monitoring_enabled && agentConfig.monitoring_enabled.indexOf(id) >= 0;
+
+                const previousValues = agentConfig.monitoring_enabled || [];
+                updateAgentConfig({
+                  monitoring_enabled: hasLogs
+                    ? previousValues.filter(type => type !== id)
+                    : [...previousValues, id],
+                });
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </StyledEuiAccordion>
