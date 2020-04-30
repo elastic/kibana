@@ -40,6 +40,7 @@ export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLY
     if (!isEnhancedEmbeddable(context.embeddable)) return false;
     const supportedTriggers = context.embeddable.supportedTriggers();
     if (!supportedTriggers || !supportedTriggers.length) return false;
+    if (context.embeddable.getRoot().type !== 'dashboard') return false;
     return supportedTriggers.indexOf('VALUE_CLICK_TRIGGER') > -1;
   }
 

@@ -29,6 +29,11 @@ export class MockEmbeddable extends Embeddable {
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
     return this.triggers;
   }
+  public getRoot() {
+    return {
+      type: 'dashboard',
+    } as Embeddable;
+  }
 }
 
 export const enhanceEmbeddable = <E extends MockEmbeddable>(
