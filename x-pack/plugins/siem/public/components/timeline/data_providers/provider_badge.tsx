@@ -10,9 +10,8 @@ import { isString } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { ProviderContainer } from '../../drag_and_drop/provider_container';
 import { getEmptyString } from '../../empty_value';
-import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboard';
-import { WithHoverActions } from '../../with_hover_actions';
 
 import { EXISTS_OPERATOR, QueryOperator } from './data_provider';
 
@@ -94,26 +93,13 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
 
     const prefix = useMemo(() => (isExcluded ? <span>{i18n.NOT} </span> : null), [isExcluded]);
 
-    const title = useMemo(() => `${field}: "${formattedValue}"`, [field, formattedValue]);
-
-    const hoverContent = useMemo(
-      () => (
-        <WithCopyToClipboard
-          data-test-subj="copy-to-clipboard"
-          text={`${field} : ${typeof val === 'string' ? `"${val}"` : `${val}`}`}
-          titleSummary={i18n.FIELD}
-        />
-      ),
-      [field, val]
-    );
-
-    const badge = useCallback(
-      () => (
+    return (
+      <ProviderContainer>
         <ProviderBadgeStyled
           id={`${providerId}-${field}-${val}`}
           className={classes}
           color="hollow"
-          title={title}
+          title=""
           iconOnClick={deleteFilter}
           iconOnClickAriaLabel={i18n.REMOVE_DATA_PROVIDER}
           iconType="cross"
@@ -135,23 +121,8 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             </span>
           )}
         </ProviderBadgeStyled>
-      ),
-      [
-        providerId,
-        field,
-        val,
-        classes,
-        title,
-        deleteFilter,
-        togglePopover,
-        formattedValue,
-        closeButtonProps,
-        prefix,
-        operator,
-      ]
+      </ProviderContainer>
     );
-
-    return <WithHoverActions hoverContent={hoverContent} render={badge} />;
   }
 );
 
