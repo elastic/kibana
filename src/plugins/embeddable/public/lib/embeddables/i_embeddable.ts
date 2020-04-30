@@ -36,7 +36,7 @@ export interface EmbeddableInput {
   hidePanelTitles?: boolean;
 
   /**
-   * Reserved key for enhancements added by X-Pack plugins.
+   * Reserved key for enhancements added by other plugins.
    */
   enhancements?: unknown;
 
