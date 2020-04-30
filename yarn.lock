@@ -22761,9 +22761,9 @@ vega-typings@*, vega-typings@^0.2.15:
   integrity sha512-feQEi1rzFh6bF1Vihf9cQwD+QuMNlT+eR4UCWQHOhbY7E9tBlvI+CXyoFg1EAMB0UPLkZklCRNJcUqKcwQOqtQ==
 
 vega-util@1, vega-util@^1.7, vega-util@^1.7.0:
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.7.0.tgz#0ca0512bb8dcc6541165c34663d115d0712e0cf1"
-  integrity sha512-IlmYqW0t3UP8AJX4QuOOm5cMPKPOUa8fSTcCvNkfVOR5zvMNFKCVhoZmJSXgcbEhkfboB+ysI2aaWOeW2kKBog==
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.13.1.tgz#3eae51043184c6b873c17b148755c21b01274a0e"
+  integrity sha512-TmvZSMKqhGlS7eAXphqJUhq+NZVYbvXX2ahargTRkVckGWjEUpWhMC7T13vYihrU2Lf/OevKbrruSXKOBxke2w==
 
 vega-view-transforms@^1.2:
   version "1.2.1"
