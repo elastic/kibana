@@ -126,7 +126,7 @@ export class CollectConfigContainer extends React.Component<
 
     if (!this.isMounted) return;
 
-    // handle case when destination dashboard is no longer exist
+    // handle case when destination dashboard no longer exists
     if (savedObject.error?.statusCode === 404) {
       this.setState({
         error: txtDestinationDashboardNotFound(config.dashboardId),
