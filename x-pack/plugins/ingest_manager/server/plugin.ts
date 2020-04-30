@@ -150,6 +150,7 @@ export class IngestManagerPlugin
     const config = await this.config$.pipe(first()).toPromise();
 
     // Register routes
+    registerSetupRoutes(router, config);
     registerAgentConfigRoutes(router);
     registerDatasourceRoutes(router);
     registerOutputRoutes(router);
@@ -162,7 +163,6 @@ export class IngestManagerPlugin
     }
 
     if (config.fleet.enabled) {
-      registerSetupRoutes(router);
       registerAgentRoutes(router);
       registerEnrollmentApiKeyRoutes(router);
       registerInstallScriptRoutes({
