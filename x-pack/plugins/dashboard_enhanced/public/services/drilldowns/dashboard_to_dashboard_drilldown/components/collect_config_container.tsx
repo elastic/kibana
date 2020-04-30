@@ -13,7 +13,7 @@ import { txtDestinationDashboardNotFound } from './i18n';
 import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { UiActionsEnhancedDrilldownActionFactoryContext as DrilldownFactoryContext } from '../../../../../../advanced_ui_actions/public';
 import { Config } from '../types';
-import { IEmbeddable } from '../../../../../../../../src/plugins/embeddable/public';
+import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { Params } from '../drilldown';
 
 const mergeDashboards = (
@@ -36,11 +36,9 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config> {
+interface DashboardDrilldownCollectConfigProps
+  extends CollectConfigProps<Config, DrilldownFactoryContext<EmbeddableContext>> {
   params: Params;
-  context: DrilldownFactoryContext<{
-    embeddable: IEmbeddable;
-  }>;
 }
 
 interface CollectConfigContainerState {
