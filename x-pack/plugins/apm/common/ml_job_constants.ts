@@ -34,8 +34,10 @@ export function encodeForMlApi(value: string) {
   return value.replace(/\s+/g, '_').toLowerCase();
 }
 
-export function getSeverity(score: number) {
-  if (score < 25) {
+export function getSeverity(score?: number) {
+  if (typeof score !== 'number') {
+    return undefined;
+  } else if (score < 25) {
     return severity.warning;
   } else if (score >= 25 || score < 50) {
     return severity.minor;

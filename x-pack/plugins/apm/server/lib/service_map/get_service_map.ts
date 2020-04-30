@@ -171,9 +171,9 @@ async function getAnomaliesData(options: IEnvOptions) {
   return await client.search(params);
 }
 
+export type AnomaliesResponse = PromiseReturnType<typeof getAnomaliesData>;
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
 export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
-
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
