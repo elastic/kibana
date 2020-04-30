@@ -62,4 +62,17 @@ export const myCollector = makeUsageCollector<Usage>({
       };
     }
   },
+  mapping: {
+    flat: {
+      type: 'keyword',
+    },
+    my_str: {
+      type: 'text',
+    },
+    my_objects: {
+      total: {
+        type: 'number',
+      },
+    },
+  },
 });

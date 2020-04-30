@@ -20,10 +20,34 @@
 import * as ts from 'typescript';
 
 export interface Descriptor {
-  [name: string]: {
-    kind: number;
-    type: string;
-  };
+  [name: string]: Descriptor | { kind: number };
+}
+
+export function isObjectDescriptor(value: any) {
+  if (typeof value === 'object') {
+    if (typeof value.type === 'string' && value.type === 'object') {
+      return true;
+    }
+
+    if (typeof value.type === 'undefined') {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function kindToDescriptorName(kind: number) {
+  switch (kind) {
+    case ts.SyntaxKind.StringKeyword:
+      return 'string';
+    case ts.SyntaxKind.BooleanKeyword:
+      return 'boolean';
+    case ts.SyntaxKind.NumberKeyword:
+      return 'number';
+    default:
+      throw new Error(`Unknown kind ${kind}`);
+  }
 }
 
 export function getDescriptor(node: ts.Node, typeChecker: ts.TypeChecker): any {
@@ -47,15 +71,12 @@ export function getDescriptor(node: ts.Node, typeChecker: ts.TypeChecker): any {
 
   switch (node.kind) {
     case ts.SyntaxKind.NumberKeyword:
-      return { type: 'number', kind: node.kind };
     case ts.SyntaxKind.BooleanKeyword:
-      return { type: 'boolean', kind: node.kind };
-    case ts.SyntaxKind.AnyKeyword:
-      return { type: 'any', kind: node.kind };
     case ts.SyntaxKind.StringKeyword:
-      return { type: 'string', kind: node.kind };
+      return { kind: node.kind };
     case ts.SyntaxKind.ArrayType:
+    case ts.SyntaxKind.AnyKeyword:
     default:
-      throw new Error('Unknown type ' + ts.SyntaxKind[node.kind]);
+      throw new Error(`Unknown type ${ts.SyntaxKind[node.kind]}`);
   }
 }

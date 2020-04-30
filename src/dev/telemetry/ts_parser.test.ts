@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { run } from './ts_parser';
+import { parseUsageCollection } from './ts_parser';
 import * as ts from 'typescript';
 import * as path from 'path';
+import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
 
 describe('ts-test', () => {
   it.todo('throws when a function is returned from fetch');
   it.todo('throws when an object is not returned from fetch');
 
-  it('returns value', () => {
+  it('returns value', function() {
     const fixturePath = path.resolve(__dirname, './__fixture__/working_collector.ts');
     const tsConfig = ts.findConfigFile('./', ts.sys.fileExists, 'tsconfig.json');
     if (!tsConfig) {
@@ -37,7 +38,7 @@ describe('ts-test', () => {
     if (!sourceFile) {
       throw Error('sourceFile is undefined!');
     }
-    const results = run(sourceFile, checker);
-    expect(results).toMatchSnapshot();
+    const result = [...parseUsageCollection(sourceFile, checker)];
+    expect(result).toEqual(parsedWorkingCollector);
   });
 });

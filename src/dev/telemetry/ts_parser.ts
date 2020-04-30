@@ -52,17 +52,16 @@ export function isMakeUsageCollectorFunction(
   return false;
 }
 
-interface CollectorDetails {
-  collectorName?: string;
-  fetch?: { typeDescriptor: Descriptor; signature: string };
-  mapping?: any;
+export interface CollectorDetails {
+  collectorName: string;
+  fetch: { typeName: string; typeDescriptor: Descriptor; signature: string };
+  mapping: { value: any };
 }
 
 function extractCollectorDetails(
   collectorNode: ts.CallExpression,
   typeChecker: ts.TypeChecker
 ): CollectorDetails {
-  const collectorDetails: CollectorDetails = { fetch: undefined, mapping: undefined };
   if (collectorNode.arguments.length > 1) {
     throw createFailError(`makeUsageCollector does not accept more than one argument.`);
   }
@@ -76,12 +75,22 @@ function extractCollectorDetails(
     throw createFailError(`usageCollector.type must be defined.`);
   }
   const typePropertyValue = getPropertyValue(typeProperty);
-  if (!typePropertyValue) {
+  if (!typePropertyValue || typeof typePropertyValue !== 'string') {
     throw createFailError(`usageCollector.type must be be a non-empty string literal.`);
   }
+
   const fetchProperty = getProperty(collectorConfig, 'fetch');
   if (!fetchProperty) {
     throw createFailError(`usageCollector.fetch must be defined.`);
+  }
+  const mappingProperty = getProperty(collectorConfig, 'mapping');
+  if (!mappingProperty) {
+    throw createFailError(`usageCollector.mapping must be defined.`);
+  }
+
+  const mappingPropertyValue = getPropertyValue(mappingProperty);
+  if (!mappingPropertyValue || typeof mappingPropertyValue !== 'object') {
+    throw createFailError(`usageCollector.mapping must be be an object.`);
   }
 
   const collectorNodeType = collectorNode.typeArguments;
@@ -92,6 +101,7 @@ function extractCollectorDetails(
   }
 
   const usageTypeNode = collectorNodeType[0];
+  const usageTypeName = usageTypeNode.getText();
   const usageType: Descriptor = getDescriptor(usageTypeNode, typeChecker);
   const snapshot = fetchProperty.getFullText();
   const fnHash = crypto
@@ -99,17 +109,24 @@ function extractCollectorDetails(
     .update(snapshot)
     .digest('hex');
 
-  collectorDetails.fetch = {
-    typeDescriptor: usageType,
-    signature: fnHash,
+  return {
+    collectorName: typePropertyValue,
+    mapping: {
+      value: mappingPropertyValue,
+    },
+    fetch: {
+      typeName: usageTypeName,
+      typeDescriptor: usageType,
+      signature: fnHash,
+    },
   };
-
-  collectorDetails.collectorName = typePropertyValue;
-
-  return collectorDetails;
 }
 
-export function* run(sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker) {
+export type ParsedUsageCollection = [string, CollectorDetails];
+export function* parseUsageCollection(
+  sourceFile: ts.SourceFile,
+  typeChecker: ts.TypeChecker
+): Generator<ParsedUsageCollection> {
   const relativePath = path.relative(process.cwd(), sourceFile.fileName);
   for (const node of traverseNodes(sourceFile)) {
     if (isMakeUsageCollectorFunction(node, sourceFile)) {
