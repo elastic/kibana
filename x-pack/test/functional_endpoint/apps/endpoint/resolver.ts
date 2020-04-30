@@ -51,7 +51,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(tableData.length - 1).to.eql(Nodes.length);
         count++;
       });
-
       for (let i = 0; i < count; i++) {
         await (await testSubjects.find('zoom-in')).click();
       }
@@ -88,7 +87,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'style'
       );
       await (await testSubjects.find('north-button')).click();
-
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -132,7 +130,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'style'
       );
       await (await testSubjects.find('west-button')).click();
-
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -159,7 +156,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-
       for (let i = 0; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
@@ -192,7 +188,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         );
       }
       await (await testSubjects.find('center-button')).click();
-
       const CenterNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -213,9 +208,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-
       await (await testSubjects.find('zoom-in')).click();
-
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -243,12 +236,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'style'
       );
       await (await testSubjects.find('zoom-out')).click();
-
       const NewNodeDataStyle1 = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
       );
-
       for (let i = 1; i < OriginalNodeDataStyle.length; i++) {
         expect(parseFloat(NewNodeDataStyle1[i].left)).to.lessThan(
           parseFloat(OriginalNodeDataStyle[i].left)
