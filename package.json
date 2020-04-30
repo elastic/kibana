@@ -92,6 +92,9 @@
     "**/@types/node": "10.12.27",
     "@elastic/eui/lodash": "npm:@elastic/lodash@3.10.1-kibana4",
     "**/cypress/lodash": "4.17.13",
+    "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
+    "**/grunt/js-yaml": "^3.13.1",
+    "**/load-grunt-config/js-yaml": "^3.13.1",
     "@types/react": "16.3.14"
   },
   "workspaces": {
@@ -177,7 +180,7 @@
     "inert": "^5.1.0",
     "joi": "^13.5.2",
     "jquery": "^3.3.1",
-    "js-yaml": "3.4.1",
+    "js-yaml": "3.13.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
