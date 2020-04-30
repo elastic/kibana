@@ -7,8 +7,11 @@
 import React, { useMemo } from 'react';
 import { memo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { encode, RisonValue } from 'rison-node';
 import { Query, TimeRange } from 'src/plugins/data/public';
+import {
+  encode,
+  RisonValue,
+} from '../../../../../server/routes/handlers/list/lib/node_modules/rison-node';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';

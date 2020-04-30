@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertListState, ImmutableReducer } from '../../types';
+import { ImmutableReducer } from '../../types';
+import { AlertListState } from '../../../../../common/alerts/types';
 import { AppAction } from '../../store/action';
 import { Immutable } from '../../../../../common/types';
 

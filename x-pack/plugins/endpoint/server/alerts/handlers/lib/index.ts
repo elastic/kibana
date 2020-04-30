@@ -7,17 +7,16 @@ import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { esQuery } from '../../../../../../../src/plugins/data/server';
-import { AlertEvent, AlertAPIOrdering } from '../../../../common/types';
-import { AlertConstants } from '../../../../common/alert_constants';
 import {
+  AlertEvent,
+  AlertAPIOrdering,
   AlertSearchQuery,
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
   UndefinedResultPosition,
-} from '../types';
-
-export { Pagination } from './pagination';
+} from '../../../../common/alerts/types';
+import { AlertConstants } from '../../../../common/alert_constants';
 
 function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {

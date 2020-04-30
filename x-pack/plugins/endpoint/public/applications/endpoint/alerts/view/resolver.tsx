@@ -33,6 +33,5 @@ export const AlertDetailResolver = styled(
   width: 100%;
   display: flex;
   flex-grow: 1;
-  /* gross demo hack */
   min-height: calc(100vh - 505px);
 `;

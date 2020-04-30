@@ -7,7 +7,7 @@
 import { Store, createStore, applyMiddleware } from 'redux';
 import { History } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState, AlertingIndexUIQueryParams } from '../../types';
+import { AlertListState, AlertingIndexUIQueryParams } from '../../../../../common/alerts/types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';

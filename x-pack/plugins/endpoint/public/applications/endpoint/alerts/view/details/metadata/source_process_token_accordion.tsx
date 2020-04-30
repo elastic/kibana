@@ -6,7 +6,7 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
-import { Immutable, AlertData } from '../../../../../../../common/types';
+import { Immutable, AlertData } from '../../../../../../../common/alerts/types';
 
 export const SourceProcessTokenAccordion = memo(
   ({ alertData }: { alertData: Immutable<AlertData> }) => {

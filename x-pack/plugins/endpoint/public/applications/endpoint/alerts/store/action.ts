@@ -5,8 +5,8 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { Immutable, AlertDetails } from '../../../../../common/types';
-import { AlertListData } from '../../types';
+import { Immutable } from '../../../../../common/types';
+import { AlertDetails, AlertListData } from '../../../../../common/alerts/types';
 
 interface ServerReturnedAlertsData {
   readonly type: 'serverReturnedAlertsData';

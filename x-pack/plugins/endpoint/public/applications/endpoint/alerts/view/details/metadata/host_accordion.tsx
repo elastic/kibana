@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Immutable, AlertDetails } from '../../../../../../../common/types';
+import { Immutable, AlertDetails } from '../../../../../../../common/alerts/types';
 
 export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDetails> }) => {
   const columns = useMemo(() => {

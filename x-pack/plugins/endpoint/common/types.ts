@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { TypeOf } from '@kbn/config-schema';
-import { alertingIndexGetQuerySchema } from './alerts/schema/alert_index';
-import { indexPatternGetParamsSchema } from './alerts/schema/index_pattern';
 import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
@@ -29,11 +25,6 @@ export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
-
-/**
- * Values for the Alert APIs 'order' and 'direction' parameters.
- */
-export type AlertAPIOrdering = 'asc' | 'desc';
 
 export interface ResolverNodeStats {
   totalEvents: number;
@@ -58,46 +49,6 @@ export interface ResolverNode {
   ancestors?: ResolverNode[];
   pagination: ResolverNodePagination;
   stats?: ResolverNodeStats;
-}
-
-/**
- * Returned by 'api/endpoint/alerts'
- */
-export interface AlertResultList {
-  /**
-   * The alerts restricted by page size.
-   */
-  alerts: AlertData[];
-
-  /**
-   * The total number of alerts on the page.
-   */
-  total: number;
-
-  /**
-   * The size of the requested page.
-   */
-  request_page_size: number;
-
-  /**
-   * The index of the requested page, starting at 0.
-   */
-  request_page_index?: number;
-
-  /**
-   * The offset of the requested page, starting at 0.
-   */
-  result_from_index?: number;
-
-  /**
-   * A cursor-based URL for the next page.
-   */
-  next: string | null;
-
-  /**
-   * A cursor-based URL for the previous page.
-   */
-  prev: string | null;
 }
 
 /**
@@ -271,24 +222,6 @@ export type AlertEvent = Immutable<{
   dll?: DllFields[];
 }>;
 
-interface AlertMetadata {
-  id: string;
-
-  // Alert Details Pagination
-  next: string | null;
-  prev: string | null;
-}
-
-interface AlertState {
-  state: {
-    host_metadata: HostMetadata;
-  };
-}
-
-export type AlertData = AlertEvent & AlertMetadata;
-
-export type AlertDetails = AlertData & AlertState;
-
 /**
  * The status of the host
  */
@@ -336,19 +269,6 @@ export type HostMetadata = Immutable<{
   };
   host: Host;
 }>;
-
-/**
- * Represents `total` response from Elasticsearch after ES 7.0.
- */
-export interface ESTotal {
-  value: number;
-  relation: string;
-}
-
-/**
- * `Hits` array in responses from ES search API.
- */
-export type AlertHits = SearchResponse<AlertEvent>['hits']['hits'];
 
 export interface LegacyEndpointEvent {
   '@timestamp': number;
@@ -427,7 +347,7 @@ export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
  * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
  * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
+export type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
   ? KbnConfigSchemaInputObjectTypeOf<
       T
     > /** `schema.number()` accepts strings, so this type should accept them as well. */
@@ -467,23 +387,6 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
       : Key;
   }[keyof Props]
 >;
-
-/**
- * Query params to pass to the alert API when fetching new data.
- */
-export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
-  TypeOf<typeof alertingIndexGetQuerySchema>
->;
-
-/**
- * Result of the validated query params when handling alert index requests.
- */
-export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
-
-/**
- * Result of the validated params when handling an index pattern request.
- */
-export type IndexPatternGetParamsResult = TypeOf<typeof indexPatternGetParamsSchema>;
 
 /**
  * Endpoint Policy configuration

@@ -11,19 +11,16 @@ import {
   Action,
   Middleware,
 } from 'redux';
-import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
-  AlertData,
-  AlertResultList,
   Immutable,
-  AlertDetails,
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
   HostPolicyResponse,
   HostInfo,
 } from '../../../common/types';
+import { AlertListState } from '../../../common/alerts/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -305,56 +302,6 @@ export interface EndpointAppLocation {
   search: string;
   hash: string;
   key?: string;
-}
-
-interface AlertsSearchBarState {
-  patterns: IIndexPattern[];
-}
-
-export type AlertListData = AlertResultList;
-
-export interface AlertListState {
-  /** Array of alert items. */
-  readonly alerts: Immutable<AlertData[]>;
-
-  /** The total number of alerts on the page. */
-  readonly total: number;
-
-  /** Number of alerts per page. */
-  readonly pageSize: number;
-
-  /** Page number, starting at 0. */
-  readonly pageIndex: number;
-
-  /** Current location object from React Router history. */
-  readonly location?: Immutable<EndpointAppLocation>;
-
-  /** Specific Alert data to be shown in the details view */
-  readonly alertDetails?: Immutable<AlertDetails>;
-
-  /** Search bar state including indexPatterns */
-  readonly searchBar: AlertsSearchBarState;
-}
-
-/**
- * Gotten by parsing the URL from the browser. Used to calculate the new URL when changing views.
- */
-export interface AlertingIndexUIQueryParams {
-  /**
-   * How many items to show in list.
-   */
-  page_size?: string;
-  /**
-   * Which page to show. If `page_index` is 1, show page 2.
-   */
-  page_index?: string;
-  /**
-   * If any value is present, show the alert detail view for the selected alert. Should be an ID for an alert event.
-   */
-  selected_alert?: string;
-  query?: string;
-  date_range?: string;
-  filters?: string;
 }
 
 export interface GetPolicyListResponse extends GetDatasourcesResponse {
