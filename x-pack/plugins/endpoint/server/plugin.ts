@@ -9,10 +9,10 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { registerAlertRoutes } from './routes/handlers/routes';
+import { registerAlertRoutes } from './alerts/routes';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerEndpointRoutes } from './routes/metadata';
-import { IngestIndexPatternRetriever } from './index_pattern';
+import { IngestIndexPatternRetriever } from './alerts/index_pattern';
 import { IngestManagerStartContract } from '../../ingest_manager/server';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { registerPolicyRoutes } from './routes/policy';

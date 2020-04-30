@@ -5,18 +5,19 @@
  */
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
+import { AlertEvent } from '../../../../../common/types';
 import {
-  AlertEvent,
   AlertHits,
   AlertAPIOrdering,
   AlertSearchQuery,
   SearchCursor,
   AlertDetailsRequestParams,
 } from '../../../../../common/alerts/types';
-import { AlertConstants } from '../../../../../common/alert_constants';
+import { AlertConstants } from '../../../../../common/alerts/alert_constants';
 import { EndpointConfigType } from '../../../../config';
-import { searchESForAlerts, Pagination } from '../../lib';
-import { BASE_ALERTS_ROUTE } from '../../routes';
+import { searchESForAlerts } from '../../lib';
+import { Pagination } from '../../lib/pagination';
+import { BASE_ALERTS_ROUTE } from '../../../routes';
 import { RequestHandlerContext } from '../../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../../src/plugins/data/server';
 

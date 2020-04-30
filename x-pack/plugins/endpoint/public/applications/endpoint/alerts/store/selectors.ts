@@ -10,10 +10,7 @@ import {
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
 import { Query, TimeRange, Filter } from 'src/plugins/data/public';
-import {
-  encode,
-  decode,
-} from '../../../../../server/routes/handlers/list/lib/node_modules/rison-node';
+import { encode, decode } from 'rison-node';
 import { CreateStructuredSelector } from '../../types';
 import {
   Immutable,

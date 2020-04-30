@@ -7,18 +7,18 @@ import { decode } from 'rison-node';
 import { SearchResponse } from 'elasticsearch';
 import { KibanaRequest } from 'kibana/server';
 import { RequestHandlerContext } from 'src/core/server';
+import { AlertEvent } from '../../../../../common/types';
 import { Query, Filter, TimeRange } from '../../../../../../../../src/plugins/data/server';
 import {
-  AlertEvent,
   AlertData,
   AlertResultList,
   AlertHits,
   ESTotal,
   AlertingIndexGetQueryResult,
-} from '../../../../../common/types';
-import { AlertConstants } from '../../../../../common/alert_constants';
+  AlertSearchQuery,
+} from '../../../../../common/alerts/types';
+import { AlertConstants } from '../../../../../common/alerts/alert_constants';
 import { EndpointAppContext } from '../../../../types';
-import { AlertSearchQuery } from '../../types';
 import { AlertListPagination } from './pagination';
 
 export const getRequestData = async (

@@ -6,7 +6,8 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { TypeOf } from '@kbn/config-schema';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IIndexPattern, TimeRange, Filter, Query } from 'src/plugins/data/public';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
 import { indexPatternGetParamsSchema } from './schema/index_pattern';
 import { AlertEvent, KbnConfigSchemaInputTypeOf, HostMetadata } from '../types';
