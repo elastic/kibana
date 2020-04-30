@@ -26,11 +26,7 @@ export const track: TrackFn = (type, event, count) => {
 };
 
 export const initTelemetry = (usageCollection: SetupPlugins['usageCollection'], appId: string) => {
-  try {
-    _track = usageCollection?.reportUiStats.bind(null, appId) ?? noop;
-  } catch (error) {
-    _track = noop;
-  }
+  _track = usageCollection?.reportUiStats?.bind(null, appId) ?? noop;
 };
 
 export enum TELEMETRY_EVENT {
