@@ -61,7 +61,7 @@ export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
-const GisMap = lazy(() => import('../connected_components/gis_map/shim'));
+const GisMap = lazy(() => import('../connected_components/gis_map'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
