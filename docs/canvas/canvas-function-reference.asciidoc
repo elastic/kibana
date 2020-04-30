@@ -935,7 +935,7 @@ filters
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render
 ----
-This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
+This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 
@@ -1331,7 +1331,7 @@ Alias: `format`
 [[formatnumber_fn]]
 === `formatnumber`
 
-Formats a number into a formatted number string using Numeral pattern.
+Formats a number into a formatted number string using the Numeral pattern.
 
 *Expression syntax*
 [source,js]
@@ -1650,7 +1650,7 @@ Alias: `value`
 [[mapCenter_fn]]
 === `mapCenter`
 
-Returns an object with the center coordinates and zoom level of the map
+Returns an object with the center coordinates and zoom level of the map.
 
 *Accepts:* `null`
 
@@ -1668,7 +1668,7 @@ Returns an object with the center coordinates and zoom level of the map
 
 |`zoom` ***
 |`number`
-|The zoom level of the map
+|Zoom level of the map
 |===
 
 *Returns:* `mapCenter`
@@ -1730,7 +1730,7 @@ Default: `${font}`
 
 |`openLinksInNewTab`
 |`boolean`
-|A true/false value for opening links in a new tab. Default value is false. Setting to true will open all links in a new tab.
+|A true or false value for opening links in a new tab. The default value is `false`. Setting to `true` opens all links in a new tab.
 
 Default: `false`
 |===
@@ -2309,7 +2309,7 @@ Returns the number of rows. Pairs with <<ply_fn>> to get the count of unique col
 [[savedLens_fn]]
 === `savedLens`
 
-Returns an embeddable for a saved lens object
+Returns an embeddable for a saved Lens visualization object.
 
 *Accepts:* `any`
 
@@ -2319,7 +2319,7 @@ Returns an embeddable for a saved lens object
 
 |`id`
 |`string`
-|The ID of the Saved Lens Object
+|The ID of the saved Lens visualization object
 
 |`timerange`
 |`timerange`
@@ -2327,7 +2327,7 @@ Returns an embeddable for a saved lens object
 
 |`title`
 |`string`
-|The title for the lens emebeddable
+|The title for the Lens visualization object
 |===
 
 *Returns:* `embeddable`
@@ -2337,7 +2337,7 @@ Returns an embeddable for a saved lens object
 [[savedMap_fn]]
 === `savedMap`
 
-Returns an embeddable for a saved map object
+Returns an embeddable for a saved map object.
 
 *Accepts:* `any`
 
@@ -2355,7 +2355,7 @@ Returns an embeddable for a saved map object
 
 |`id`
 |`string`
-|The ID of the Saved Map Object
+|The ID of the saved map object
 
 |`timerange`
 |`timerange`
@@ -2373,7 +2373,7 @@ Returns an embeddable for a saved map object
 [[savedVisualization_fn]]
 === `savedVisualization`
 
-Returns an embeddable for a saved visualization object
+Returns an embeddable for a saved visualization object.
 
 *Accepts:* `any`
 
@@ -2383,15 +2383,15 @@ Returns an embeddable for a saved visualization object
 
 |`colors` †
 |`seriesStyle`
-|Define the color to use for a specific series
+|Defines the color to use for a specific series
 
 |`hideLegend`
 |`boolean`
-|Should the legend be hidden
+|Specifies the option to hide the legend
 
 |`id`
 |`string`
-|The ID of the Saved Visualization Object
+|The ID of the saved visualization object
 
 |`timerange`
 |`timerange`
@@ -2800,7 +2800,7 @@ Default: `"now"`
 [[timerange_fn]]
 === `timerange`
 
-An object that represents a span of time
+An object that represents a span of time.
 
 *Accepts:* `null`
 
