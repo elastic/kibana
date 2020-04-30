@@ -6,8 +6,8 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { Pipeline } from '../../../common/types';
-import { useFormContext } from '../../shared_imports';
+import { Pipeline } from '../../../../../common/types';
+import { useFormContext } from '../../../../shared_imports';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 
 export const PipelineRequestFlyoutProvider = ({ closeFlyout }: { closeFlyout: () => void }) => {

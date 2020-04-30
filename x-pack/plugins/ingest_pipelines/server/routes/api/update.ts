@@ -5,7 +5,6 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { Pipeline } from '../../../common/types';
 import { API_BASE_PATH } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 
@@ -36,9 +35,7 @@ export const registerUpdateRoute = ({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params;
-      const pipeline = req.body as Pipeline;
-
-      const { description, processors, version, on_failure } = pipeline;
+      const { description, processors, version, on_failure } = req.body;
 
       try {
         // Verify pipeline exists; ES will throw 404 if it doesn't
