@@ -50,8 +50,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-        '--xpack.actions.enabled=true',
-        '--xpack.alerting.enabled=true',
         `--xpack.actions.preconfigured=${JSON.stringify([
           {
             id: 'my-slack1',
