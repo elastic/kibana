@@ -19,7 +19,8 @@ interface XYLayerPre77 {
  * Removes the `lens_auto_date` subexpression from a stored expression
  * string. For example: aggConfigs={lens_auto_date aggConfigs="JSON string"}
  */
-const removeLensAutoDate: SavedObjectMigrationFn = (doc, context) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
   const expression: string = doc.attributes?.expression;
   try {
     const ast = fromExpression(expression);
@@ -73,7 +74,8 @@ const removeLensAutoDate: SavedObjectMigrationFn = (doc, context) => {
 /**
  * Adds missing timeField arguments to esaggs in the Lens expression
  */
-const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) => {
   const expression: string = doc.attributes?.expression;
 
   try {
