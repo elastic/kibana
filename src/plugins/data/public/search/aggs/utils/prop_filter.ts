@@ -92,5 +92,3 @@ export function propFilter<P extends string>(prop: P) {
     });
   };
 }
-
-export const filterByName = propFilter('name');
