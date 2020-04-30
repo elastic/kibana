@@ -12,6 +12,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedSerializedAction,
   UiActionsEnhancedSerializedEvent,
+  UiActionsEnhancedDrilldownActionFactoryContext as DrilldownFactoryContext,
 } from '../../../../advanced_ui_actions/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
@@ -31,7 +32,6 @@ import {
   toastDrilldownsCRUDError,
   toastDrilldownsDeleted,
 } from './i18n';
-import { DrilldownFactoryContext } from '../../types';
 
 interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
   placeContext: Context;
