@@ -14,6 +14,7 @@ import { Observable, combineLatest, AsyncSubject } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { Server } from 'hapi';
 import { once } from 'lodash';
+import { SecurityPluginSetup } from '../../security/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
 import { AlertingPlugin } from '../../alerting/server';
@@ -62,6 +63,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
+      security?: SecurityPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
@@ -78,6 +80,10 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       });
     }
 
+    console.log('##########################################3');
+    console.log(plugins.security);
+    console.log(plugins.security?.license.isEnabled());
+    console.log('##########################################3');
     this.legacySetup$.subscribe(__LEGACY => {
       createApmApi().init(core, {
         config$: mergedConfig$,
