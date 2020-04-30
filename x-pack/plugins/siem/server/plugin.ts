@@ -36,8 +36,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON } from '../common/constants';
 
-export { CoreSetup, CoreStart };
-
 export interface SetupPlugins {
   alerting: AlertingSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
