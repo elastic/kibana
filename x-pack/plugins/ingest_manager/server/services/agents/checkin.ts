@@ -11,6 +11,7 @@ import {
   AgentAction,
   AgentSOAttributes,
   AgentEventSOAttributes,
+  AgentMetadata,
 } from '../../types';
 
 import { agentConfigService } from '../agent_config';
@@ -28,7 +29,7 @@ export async function agentCheckin(
   const updateData: {
     last_checkin: string;
     default_api_key?: string;
-    local_metadata?: string;
+    local_metadata?: AgentMetadata;
     current_error_events?: string;
   } = {
     last_checkin: new Date().toISOString(),
