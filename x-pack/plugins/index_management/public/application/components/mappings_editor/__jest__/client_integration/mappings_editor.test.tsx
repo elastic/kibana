@@ -7,9 +7,9 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
 
-const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onChangeHandler);
+const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 describe('Mappings editor: core', () => {
   /**
@@ -47,7 +47,7 @@ describe('Mappings editor: core', () => {
       },
     };
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
     expect(data).toEqual(expectedMappings);
   });
 
@@ -119,7 +119,7 @@ describe('Mappings editor: core', () => {
       // -------------------------------------
       expect(find('fieldsListItem').length).toEqual(0); // Check that we start with an empty  list
 
-      const newField = { name: getRandomString(), type: 'text' };
+      const newField = { name: 'John', type: 'text' };
       await act(async () => {
         await addField(newField.name, newField.type);
       });
@@ -218,6 +218,8 @@ describe('Mappings editor: core', () => {
     /**
      * Note: the "indexSettings" prop will be tested along with the "analyzer" parameter on a text datatype field,
      * as it is the only place where it is consumed by the mappings editor.
+     *
+     * The test that covers it is text_datatype.test.tsx: "analyzer parameter: custom analyzer (from index settings)"
      */
     const defaultMappings: any = {
       dynamic: true,
@@ -262,8 +264,7 @@ describe('Mappings editor: core', () => {
       /**
        * Mapped fields
        */
-      expect(find('fieldsListItem').length).toEqual(Object.keys(defaultMappings.properties).length);
-
+      // Test that root-level mappings "properties" are rendered as root-level "DOM tree items"
       const fields = find('fieldsListItem.fieldName').map(item => item.text());
       expect(fields).toEqual(Object.keys(defaultMappings.properties).sort());
 
@@ -274,6 +275,7 @@ describe('Mappings editor: core', () => {
         await selectTab('templates');
       });
 
+      // Test that dynamic templates JSON is rendered in the templates editor
       const templatesValue = getJsonEditorValue('dynamicTemplatesEditor');
       expect(templatesValue).toEqual(defaultMappings.dynamic_templates);
 
@@ -333,7 +335,7 @@ describe('Mappings editor: core', () => {
         await addField(newField.name, newField.type);
       });
 
-      ({ data } = await getDataForwarded());
+      ({ data } = await getMappingsEditorData());
       expect(data).toEqual(updatedMappings);
 
       /**
@@ -355,7 +357,7 @@ describe('Mappings editor: core', () => {
         component.update();
       });
 
-      ({ data } = await getDataForwarded());
+      ({ data } = await getMappingsEditorData());
       expect(data).toEqual(updatedMappings);
 
       /**
@@ -370,7 +372,7 @@ describe('Mappings editor: core', () => {
         form.toggleEuiSwitch('advancedConfiguration.dynamicMappingsToggle.input');
       });
 
-      ({ data } = await getDataForwarded());
+      ({ data } = await getMappingsEditorData());
 
       // When we disable dynamic mappings, we set it to "false" and remove date and numeric detections
       updatedMappings = {

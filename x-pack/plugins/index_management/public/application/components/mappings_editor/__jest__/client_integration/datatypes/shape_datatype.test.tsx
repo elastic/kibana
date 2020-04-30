@@ -8,12 +8,13 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 
-const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onChangeHandler);
+const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 // Parameters automatically added to the shape datatype when saved (with the default values)
 export const defaultShapeParameters = {
+  type: 'shape',
   coerce: false,
   ignore_malformed: false,
   ignore_z_value: true,
@@ -53,7 +54,7 @@ describe('Mappings editor: shape datatype', () => {
 
     // Open the flyout to edit the field
     await act(async () => {
-      await startEditField('myField');
+      startEditField('myField');
     });
 
     await waitFor('mappingsEditorFieldEdit');
@@ -74,7 +75,7 @@ describe('Mappings editor: shape datatype', () => {
       ...defaultShapeParameters,
     };
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
     expect(data).toEqual(updatedMappings);
   });
 });

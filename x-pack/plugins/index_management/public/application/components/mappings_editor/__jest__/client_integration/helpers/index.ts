@@ -7,7 +7,7 @@ import {
   setup as mappingsEditorSetup,
   MappingsEditorTestBed,
   DomFields,
-  getDataForwardedFactory,
+  getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 
 export {
@@ -18,7 +18,7 @@ export {
 } from '../../../../../../../../../test_utils';
 
 export const componentHelpers = {
-  mappingsEditor: { setup: mappingsEditorSetup, getDataForwardedFactory },
+  mappingsEditor: { setup: mappingsEditorSetup, getMappingsEditorDataFactory },
 };
 
 export { MappingsEditorTestBed, DomFields };

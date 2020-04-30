@@ -7,15 +7,11 @@ import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
 import { defaultTextParameters, defaultShapeParameters } from './datatypes';
-const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onChangeHandler);
+const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 describe('Mappings editor: edit field', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
   let testBed: MappingsEditorTestBed;
 
   afterEach(() => {
@@ -50,21 +46,18 @@ describe('Mappings editor: edit field', () => {
       waitFor,
       actions: { startEditField },
     } = testBed;
-    const fieldPathToEdit = ['user', 'address', 'street'];
-    const fieldName = fieldPathToEdit[fieldPathToEdit.length - 1];
-
     // Open the flyout to edit the field
     await act(async () => {
-      await startEditField(fieldPathToEdit.join('.'));
+      startEditField('user.address.street');
     });
 
     await waitFor('mappingsEditorFieldEdit');
 
     // It should have the correct title
-    expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field '${fieldName}'`);
+    expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field 'street'`);
 
     // It should have the correct field path
-    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual(fieldPathToEdit.join(' > '));
+    expect(find('mappingsEditorFieldEdit.fieldPath').text()).toEqual('user > address > street');
 
     // The advanced settings should be hidden initially
     expect(find('mappingsEditorFieldEdit.advancedSettings').props().style.display).toEqual('none');
@@ -76,13 +69,10 @@ describe('Mappings editor: edit field', () => {
       _source: {},
       properties: {
         myField: {
-          type: 'text',
           ...defaultTextParameters,
         },
       },
     };
-
-    let updatedMappings: any = { ...defaultMappings };
 
     await act(async () => {
       testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
@@ -99,7 +89,7 @@ describe('Mappings editor: edit field', () => {
 
     // Open the flyout, change the field type and save it
     await act(async () => {
-      await startEditField('myField');
+      startEditField('myField');
     });
 
     await waitFor('mappingsEditorFieldEdit');
@@ -107,7 +97,7 @@ describe('Mappings editor: edit field', () => {
     await act(async () => {
       // Change the field type
       find('mappingsEditorFieldEdit.fieldType').simulate('change', [
-        { label: 'Shape', value: 'shape' },
+        { label: 'Shape', value: defaultShapeParameters.type },
       ]);
       component.update();
     });
@@ -121,13 +111,12 @@ describe('Mappings editor: edit field', () => {
       'Error waiting for the details flyout to close'
     );
 
-    ({ data } = await getDataForwarded());
+    const { data } = await getMappingsEditorData();
 
-    updatedMappings = {
-      ...updatedMappings,
+    const updatedMappings = {
+      ...defaultMappings,
       properties: {
         myField: {
-          type: 'shape',
           ...defaultShapeParameters,
         },
       },

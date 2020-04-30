@@ -83,17 +83,11 @@ describe('Mappings editor: mapped fields', () => {
         actions: { expandAllFieldsAndReturnMetadata },
       } = testBed;
 
-      let domTreeMetadata: DomFields = {};
-      await act(async () => {
-        domTreeMetadata = await expandAllFieldsAndReturnMetadata();
-      });
-
-      expect(domTreeMetadata).toEqual(defaultMappings.properties);
-
-      // Change the `value` prop of our <MappingsEditor />
       const newMappings = { properties: { hello: { type: 'text' } } };
+      let domTreeMetadata: DomFields = {};
 
       await act(async () => {
+        // Change the `value` prop of our <MappingsEditor />
         setProps({ value: newMappings });
 
         // Don't ask me why but the 3 following lines are all required

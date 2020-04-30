@@ -8,12 +8,13 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 
-const { setup, getDataForwardedFactory } = componentHelpers.mappingsEditor;
+const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
-const getDataForwarded = getDataForwardedFactory(onChangeHandler);
+const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 // Parameters automatically added to the text datatype when saved (with the default values)
 export const defaultTextParameters = {
+  type: 'text',
   eager_global_ordinals: false,
   fielddata: false,
   index: true,
@@ -86,7 +87,7 @@ describe('Mappings editor: text datatype', () => {
       ...defaultTextParameters,
     };
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
     expect(data).toEqual(updatedMappings);
   });
 
@@ -147,7 +148,7 @@ describe('Mappings editor: text datatype', () => {
       'Error waiting for the details flyout to close'
     );
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
 
     expect(data).toEqual(updatedMappings);
 
@@ -224,7 +225,7 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
     expect(data).toEqual(updatedMappings);
 
     // Re-open the flyout and make sure the select have the correct updated value
@@ -339,7 +340,7 @@ describe('Mappings editor: text datatype', () => {
       'Error waiting for the details flyout to close'
     );
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
 
     updatedMappings = {
       ...updatedMappings,
@@ -442,7 +443,7 @@ describe('Mappings editor: text datatype', () => {
       'Error waiting for the details flyout to close'
     );
 
-    ({ data } = await getDataForwarded());
+    ({ data } = await getMappingsEditorData());
 
     updatedMappings = {
       ...updatedMappings,

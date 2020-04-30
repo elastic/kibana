@@ -34,6 +34,8 @@ jest.mock('@elastic/eui', () => ({
       }}
     />
   ),
+  // Mocking EuiSuperSelect to be able to easily change its value
+  // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
   EuiSuperSelect: (props: any) => (
     <input
       data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
@@ -64,7 +66,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
   const expandField = async (
     field: ReactWrapper
-  ): Promise<{ isExpanded: boolean; testSubjectField: string }> => {
+  ): Promise<{ hasChildren: boolean; testSubjectField: string }> => {
     /**
      * Field list item have 2 test subject assigned to them:
      * data-test-subj="fieldsListItem <uniqueTestSubjId>"
@@ -79,7 +81,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     // No expand button, so this field is not expanded
     if (expandButton.length === 0) {
-      return { isExpanded: false, testSubjectField };
+      return { hasChildren: false, testSubjectField };
     }
 
     const isExpanded = (expandButton.props()['aria-label'] as string).includes('Collapse');
@@ -91,7 +93,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     // Wait for the children FieldList to be in the DOM
     await waitFor(`${testSubjectField}.fieldsList` as TestSubjects);
 
-    return { isExpanded: true, testSubjectField };
+    return { hasChildren: true, testSubjectField };
   };
 
   /**
@@ -109,7 +111,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     ).map(wrapper => wrapper); // convert to Array for our for of loop below
 
     for (const field of fields) {
-      const { isExpanded, testSubjectField } = await expandField(field);
+      const { hasChildren, testSubjectField } = await expandField(field);
 
       // Read the info from the DOM about that field and add it to our domFieldMeta
       const { name, type } = getFieldInfo(testSubjectField);
@@ -117,7 +119,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
         type,
       };
 
-      if (isExpanded) {
+      if (hasChildren) {
         // Update our metadata object
         const childFieldName = getChildFieldsName(type as any)!;
         domTreeMetadata[name][childFieldName] = {};
@@ -271,9 +273,9 @@ export const setup = async (props: any = { onUpdate() {} }): Promise<MappingsEdi
   };
 };
 
-export const getDataForwardedFactory = (onChangeHandler: jest.MockedFunction<any>) => {
+export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunction<any>) => {
   /**
-   * Helper to access the latest data sent to the onUpdate handler back to the consumer of the <MappingsEditor />.
+   * Helper to access the latest data sent to the onChange handler back to the consumer of the <MappingsEditor />.
    * Read the latest call with its argument passed and build the mappings object from it.
    */
   return async () => {
@@ -281,7 +283,7 @@ export const getDataForwardedFactory = (onChangeHandler: jest.MockedFunction<any
 
     if (mockCalls.length === 0) {
       throw new Error(
-        `Can't access data forwarded as the onUpdate() prop handler hasn't been called.`
+        `Can't access data forwarded as the onChange() prop handler hasn't been called.`
       );
     }
 
