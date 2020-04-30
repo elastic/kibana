@@ -172,7 +172,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
             <Fragment>
               <p>
                 {i18n.translate('xpack.ml.overview.anomalyDetection.emptyPromptText', {
-                  defaultMessage: `Machine learning makes it easy to detect anomalies in time series data stored in Elasticsearch. Track one metric from a single machine or hundreds of metrics across thousands of machines. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
+                  defaultMessage: `Anomaly detection enables you to find unusual behavior in time series data. Start automatically spotting the anomalies hiding in your data and resolve issues faster.`,
                 })}
               </p>
             </Fragment>
