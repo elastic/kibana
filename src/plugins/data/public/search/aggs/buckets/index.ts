@@ -24,6 +24,7 @@ export * from './date_range';
 export * from './range';
 export * from './filter';
 export * from './geo_tile';
+export * from './geo_hash';
 export * from './ip_range';
 export * from './lib/cidr_mask';
 export * from './lib/date_range';

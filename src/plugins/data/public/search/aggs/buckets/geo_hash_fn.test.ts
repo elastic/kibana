@@ -18,11 +18,11 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggGeoTile } from './geo_tile_fn';
+import { aggGeoHash } from './geo_hash_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggGeoTile', () => {
-    const fn = functionWrapper(aggGeoTile());
+  describe('aggGeoHash', () => {
+    const fn = functionWrapper(aggGeoHash());
 
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
@@ -35,13 +35,16 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "autoPrecision": undefined,
+              "boundingBox": undefined,
               "field": "geo_field",
+              "isFilteredByCollar": undefined,
               "json": undefined,
               "precision": undefined,
               "useGeocentroid": undefined,
             },
             "schema": undefined,
-            "type": "geotile_grid",
+            "type": "geohash_grid",
           },
         }
       `);
@@ -50,8 +53,14 @@ describe('agg_expression_functions', () => {
     test('includes optional params when they are provided', () => {
       const actual = fn({
         field: 'geo_field',
-        useGeocentroid: false,
+        autoPrecision: false,
         precision: 10,
+        useGeocentroid: true,
+        isFilteredByCollar: false,
+        boundingBox: JSON.stringify({
+          top_left: [-74.1, 40.73],
+          bottom_right: [-71.12, 40.01],
+        }),
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -59,13 +68,25 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "autoPrecision": false,
+            "boundingBox": Object {
+              "bottom_right": Array [
+                -71.12,
+                40.01,
+              ],
+              "top_left": Array [
+                -74.1,
+                40.73,
+              ],
+            },
             "field": "geo_field",
+            "isFilteredByCollar": false,
             "json": undefined,
             "precision": 10,
-            "useGeocentroid": false,
+            "useGeocentroid": true,
           },
           "schema": undefined,
-          "type": "geotile_grid",
+          "type": "geohash_grid",
         }
       `);
     });

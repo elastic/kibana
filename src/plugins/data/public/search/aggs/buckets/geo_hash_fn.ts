@@ -23,59 +23,86 @@ import { ExpressionFunctionDefinition } from '../../../../../expressions/public'
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggFilter';
+const fnName = 'aggGeoHash';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOHASH_GRID>;
 
-type Arguments = Assign<AggArgs, { geo_bounding_box?: string }>;
-
+type Arguments = Assign<AggArgs, { boundingBox?: string }>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
-export const aggFilter = (): FunctionDefinition => ({
+export const aggGeoHash = (): FunctionDefinition => ({
   name: fnName,
-  help: i18n.translate('data.search.aggs.function.buckets.filter.help', {
-    defaultMessage: 'Generates a serialized agg config for a Filter agg',
+  help: i18n.translate('data.search.aggs.function.buckets.geoHash.help', {
+    defaultMessage: 'Generates a serialized agg config for a Geo Hash agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.id.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.filter.enabled.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.schema.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
     field: {
       types: ['string'],
       required: true,
-      help: i18n.translate('data.search.aggs.buckets.filter.field.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.field.help', {
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    geo_bounding_box: {
+    useGeocentroid: {
+      types: ['boolean'],
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoHash.useGeocentroid.help', {
+        defaultMessage: 'Should be used geocentroid for this aggregation or not?',
+      }),
+    },
+    autoPrecision: {
+      types: ['boolean'],
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoHash.autoPrecision.help', {
+        defaultMessage: 'Should be used auto precision for this aggregation or not?',
+      }),
+    },
+    isFilteredByCollar: {
+      types: ['boolean'],
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoHash.isFilteredByCollar.help', {
+        defaultMessage: 'Should be filtered by collar or not?',
+      }),
+    },
+    boundingBox: {
       types: ['string'],
       required: false,
-      help: i18n.translate('data.search.aggs.buckets.filter.geo_bounding_box.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.boundingBox.help', {
         defaultMessage: 'Allowing to filter hits based on a point location using a bounding box.',
+      }),
+    },
+    precision: {
+      types: ['number'],
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoHash.precision.help', {
+        defaultMessage: 'Precision to use for this aggregation.',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.json.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoHash.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
@@ -89,11 +116,11 @@ export const aggFilter = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTER,
+        type: BUCKET_TYPES.GEOHASH_GRID,
         params: {
           ...rest,
+          boundingBox: getParsedValue(args, 'boundingBox'),
           json: getParsedValue(args, 'json'),
-          geo_bounding_box: getParsedValue(args, 'geo_bounding_box'),
         },
       },
     };
