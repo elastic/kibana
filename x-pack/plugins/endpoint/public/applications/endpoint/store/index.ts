@@ -7,7 +7,7 @@
 import { createStore, compose, applyMiddleware, Store } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { appReducer } from './reducer';
-import { alertMiddlewareFactory } from './alerts/middleware';
+import { alertMiddlewareFactory } from '../alerts/store/middleware';
 import { hostMiddlewareFactory } from './hosts';
 import { policyListMiddlewareFactory } from './policy_list';
 import { policyDetailsMiddlewareFactory } from './policy_details';

@@ -9,15 +9,14 @@ import { History } from 'history';
 import { alertListReducer } from './reducer';
 import { AlertListState } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
-import { AppAction } from '../action';
+import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';
 import { DepsStartMock, depsStartMock } from '../../mocks';
-import { AlertResultList, Immutable } from '../../../../../common/types';
-import { isOnAlertPage } from './selectors';
 import { createBrowserHistory } from 'history';
 import { mockAlertResultList } from './mock_alert_result_list';
+import { Immutable } from '../../../../../common/types';
 
-describe('alert list tests', () => {
+describe('alert details tests', () => {
   let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
@@ -46,12 +45,10 @@ describe('alert list tests', () => {
       }
     };
   });
-  describe('when the user navigates to the alert list page', () => {
+  describe('when the user is on the alert list page with a selected alert in the url', () => {
     beforeEach(() => {
-      coreStart.http.get.mockImplementation(async () => {
-        const response: AlertResultList = mockAlertResultList();
-        return response;
-      });
+      const firstResponse: Promise<unknown> = Promise.resolve(mockAlertResultList());
+      coreStart.http.get.mockReturnValue(firstResponse);
       depsStart.data.indexPatterns.getFieldsForWildcard.mockReturnValue(Promise.resolve([]));
 
       // Simulates user navigating to the /alerts page
@@ -60,17 +57,14 @@ describe('alert list tests', () => {
         payload: {
           ...history.location,
           pathname: '/alerts',
+          search: '?selected_alert=q9ncfh4q9ctrmc90umcq4',
         },
       });
     });
 
-    it("should recognize it's on the alert list page", () => {
-      const actual = isOnAlertPage(store.getState());
-      expect(actual).toBe(true);
-    });
-
-    it('should return alertListData', async () => {
-      await selectorIsTrue(state => state.alerts.length === 1);
+    it('should return alert details data', async () => {
+      // wait for alertDetails to be defined
+      await selectorIsTrue(state => state.alertDetails !== undefined);
     });
   });
 });

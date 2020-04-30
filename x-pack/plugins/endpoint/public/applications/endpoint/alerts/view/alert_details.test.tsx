@@ -9,7 +9,7 @@ import { appStoreFactory } from '../../store';
 import { fireEvent } from '@testing-library/react';
 import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
-import { mockAlertDetailsResult } from '../../store/alerts/mock_alert_result_list';
+import { mockAlertDetailsResult } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 
 describe('when the alert details flyout is open', () => {
@@ -19,7 +19,7 @@ describe('when the alert details flyout is open', () => {
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use
-    ({ render, history, store } = alertPageTestRender);
+    ({ render, history, store } = alertPageTestRender());
   });
   describe('when the alerts details flyout is open', () => {
     beforeEach(() => {

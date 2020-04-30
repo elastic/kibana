@@ -28,7 +28,7 @@ import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/types';
-import * as selectors from '../../store/alerts/selectors';
+import * as selectors from '../store/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';

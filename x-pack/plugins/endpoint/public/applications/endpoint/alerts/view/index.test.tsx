@@ -10,7 +10,7 @@ import { appStoreFactory } from '../../store';
 import { fireEvent, act } from '@testing-library/react';
 import { MemoryHistory } from 'history';
 import { AppAction } from '../../types';
-import { mockAlertResultList } from '../../store/alerts/mock_alert_result_list';
+import { mockAlertResultList } from '../store/mock_alert_result_list';
 import { DepsStartMock } from '../../mocks';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
 
@@ -22,7 +22,7 @@ describe('when on the alerting page', () => {
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use
-    ({ render, history, store, depsStart } = alertPageTestRender);
+    ({ render, history, store, depsStart } = alertPageTestRender());
   });
   it('should show a data grid', async () => {
     await render().findByTestId('alertListGrid');
