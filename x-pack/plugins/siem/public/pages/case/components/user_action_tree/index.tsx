@@ -269,7 +269,7 @@ export const UserActionTree = React.memo(
                 showBottomFooter={
                   action.action === 'push-to-service' &&
                   index === caseServices[parsedConnectorId].lastPushIndex &&
-                  index < caseUserActions.length - 1
+                  caseServices[parsedConnectorId].hasDataToPush
                 }
                 username={action.actionBy.username ?? ''}
               />

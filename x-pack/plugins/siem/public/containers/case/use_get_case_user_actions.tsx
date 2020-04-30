@@ -46,6 +46,9 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   fetchCaseUserActions: (caseId: string) => void;
 }
 
+const getExternalService = (value: string): CaseFullExternalService | null =>
+  parseString(`${value}`);
+
 const getPushedInfo = (
   caseUserActions: CaseUserActions[],
   caseConnectorId: string
@@ -53,35 +56,70 @@ const getPushedInfo = (
   caseServices: CaseServices;
   hasDataToPush: boolean;
 } => {
-  const caseServices: CaseServices = caseUserActions.reduce((acc, cua, i) => {
+  const pushActionConnectorIds = caseUserActions.reduce((acc, cua) => {
     if (cua.action !== 'push-to-service') {
       return acc;
     }
-    const possibleExternalService: CaseFullExternalService | null = parseString(`${cua.newValue}`);
-    if (possibleExternalService === null) {
-      return acc;
+    const serviceIsMatching = getExternalService(`${cua.newValue}`);
+    if (serviceIsMatching != null && acc.indexOf(serviceIsMatching.connector_id) === -1) {
+      return [...acc, serviceIsMatching.connector_id];
     }
-    const typedAcc: CaseServices = acc;
-    return typedAcc[possibleExternalService.connector_id] != null
-      ? {
-          ...acc,
-          [possibleExternalService.connector_id]: {
-            ...typedAcc[possibleExternalService.connector_id],
-            ...possibleExternalService,
-            lastPushIndex: i,
-            hasDataToPush: i < caseUserActions.length - 1,
-          },
+    return acc;
+  }, [] as string[]);
+
+  const caseServices: CaseServices = pushActionConnectorIds.reduce((acc, cId) => {
+    const userActionsForPushLessServiceUpdates = caseUserActions
+      .filter(
+        mua =>
+          mua.action !== 'push-to-service' ||
+          (mua.action === 'push-to-service' &&
+            cId === getExternalService(`${mua.newValue}`)?.connector_id)
+      )
+      .filter(aft => !(aft.action === 'update' && aft.actionField[0] === 'connector_id'));
+
+    return {
+      ...acc,
+      ...caseUserActions.reduce((dacc, cua, i) => {
+        if (cua.action !== 'push-to-service') {
+          return dacc;
         }
-      : {
-          ...acc,
-          [possibleExternalService.connector_id]: {
-            ...possibleExternalService,
-            firstPushIndex: i,
-            lastPushIndex: i,
-            hasDataToPush: i < caseUserActions.length - 1,
-          },
-        };
-  }, {});
+        const possibleExternalService: CaseFullExternalService | null = parseString(
+          `${cua.newValue}`
+        );
+        if (possibleExternalService === null || possibleExternalService.connector_id !== cId) {
+          return dacc;
+        }
+        const typedAcc: CaseServices = dacc;
+
+        return typedAcc[possibleExternalService.connector_id] != null
+          ? {
+              ...dacc,
+              [possibleExternalService.connector_id]: {
+                ...typedAcc[possibleExternalService.connector_id],
+                ...possibleExternalService,
+                lastPushIndex: i,
+                hasDataToPush:
+                  userActionsForPushLessServiceUpdates[
+                    userActionsForPushLessServiceUpdates.length - 1
+                  ].action !== 'push-to-service',
+              },
+            }
+          : {
+              ...dacc,
+              [possibleExternalService.connector_id]: {
+                ...possibleExternalService,
+                firstPushIndex: i,
+                lastPushIndex: i,
+                hasDataToPush:
+                  userActionsForPushLessServiceUpdates[
+                    userActionsForPushLessServiceUpdates.length - 1
+                  ].action !== 'push-to-service',
+              },
+            };
+      }, {}),
+    };
+  }, {} as CaseServices);
+
   const hasDataToPush =
     caseServices[caseConnectorId] != null ? caseServices[caseConnectorId].hasDataToPush : true;
   return {
@@ -159,6 +197,6 @@ export const useGetCaseUserActions = (
     if (!isEmpty(caseId)) {
       fetchCaseUserActions(caseId);
     }
-  }, [caseId]);
+  }, [caseId, caseConnectorId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };
