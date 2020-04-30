@@ -36,9 +36,8 @@ export const registerUpdateRoute = ({
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const { name } = req.params;
-      const pipeline = req.body as Pipeline;
 
-      const { description, processors, version, on_failure } = pipeline;
+      const { description, processors, version, on_failure } = req.body;
 
       try {
         // Verify pipeline exists; ES will throw 404 if it doesn't
