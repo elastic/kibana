@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
 import { APM_INDEX_PATTERN_ID } from './create_layer_descriptor';
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   checkVisibility: async () => {
-    const apmIndexPattern = await indexPatternService.get(APM_INDEX_PATTERN_ID);
+    const apmIndexPattern = await getIndexPatternService().get(APM_INDEX_PATTERN_ID);
     return !!apmIndexPattern;
   },
   description: i18n.translate('xpack.maps.observability.desc', {

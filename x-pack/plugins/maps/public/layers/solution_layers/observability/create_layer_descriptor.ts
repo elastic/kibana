@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid/v4';
+import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -37,7 +38,7 @@ import { HeatmapLayer } from '../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 
 // redefining APM constant to avoid making maps app depend on APM plugin
-const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -51,6 +52,43 @@ function createDynamicFillColorDescriptor(field: StylePropertyField) {
       type: COLOR_MAP_TYPE.ORDINAL,
     },
   };
+}
+
+function createLayerLabel(
+  layer: OBSERVABILITY_LAYER_TYPE,
+  metric: OBSERVABILITY_METRIC_TYPE
+): string | null {
+  let layerName;
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
+    layerName = i18n.translate('xpack.maps.observability.apmRumPerformanceLayerName', {
+      defaultMessage: 'Performance',
+    });
+  } else if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC) {
+    layerName = i18n.translate('xpack.maps.observability.apmRumTrafficLayerName', {
+      defaultMessage: 'Traffic',
+    });
+  }
+
+  let metricName;
+  if (metric === OBSERVABILITY_METRIC_TYPE.TRANSACTION_DURATION) {
+    metricName = i18n.translate('xpack.maps.observability.durationMetricName', {
+      defaultMessage: 'Duration',
+    });
+  } else if (metric === OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE) {
+    metricName = i18n.translate('xpack.maps.observability.slaPercentageMetricName', {
+      defaultMessage: '% Duration of SLA',
+    });
+  } else if (metric === OBSERVABILITY_METRIC_TYPE.COUNT) {
+    metricName = i18n.translate('xpack.maps.observability.countMetricName', {
+      defaultMessage: 'Total',
+    });
+  } else if (metric === OBSERVABILITY_METRIC_TYPE.UNIQUE_COUNT) {
+    metricName = i18n.translate('xpack.maps.observability.uniqueCountMetricName', {
+      defaultMessage: 'Unique count',
+    });
+  }
+
+  return `[${layerName}] ${metricName}`;
 }
 
 function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
@@ -120,6 +158,7 @@ export function createLayerDescriptor({
   }
 
   const apmSourceQuery = createAmpSourceQuery(layer);
+  const label = createLayerLabel(layer, metric);
   const metricsDescriptor = createAggDescriptor(metric);
 
   if (display === DISPLAY.CHOROPLETH) {
@@ -130,6 +169,7 @@ export function createLayerDescriptor({
       rightSourceId: joinId,
     });
     return VectorLayer.createDescriptor({
+      label,
       joins: [
         {
           leftField: 'iso2',
@@ -167,6 +207,7 @@ export function createLayerDescriptor({
 
   if (display === DISPLAY.HEATMAP) {
     return HeatmapLayer.createDescriptor({
+      label,
       query: apmSourceQuery,
       sourceDescriptor: geoGridSourceDescriptor,
     });
@@ -182,6 +223,7 @@ export function createLayerDescriptor({
   };
 
   return VectorLayer.createDescriptor({
+    label,
     query: apmSourceQuery,
     sourceDescriptor: geoGridSourceDescriptor,
     style: VectorStyle.createDescriptor({
