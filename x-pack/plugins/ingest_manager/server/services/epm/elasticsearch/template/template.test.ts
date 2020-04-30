@@ -309,3 +309,21 @@ test('tests processing object field with property, reverse order', () => {
   const mappings = generateMappings(processedFields);
   expect(JSON.stringify(mappings)).toEqual(JSON.stringify(objectFieldWithPropertyReversedMapping));
 });
+
+test('tests constant_keyword field type handling', () => {
+  const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  `;
+  const constantKeywordMapping = {
+    properties: {
+      constantKeyword: {
+        type: 'constant_keyword',
+      },
+    },
+  };
+  const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+  const processedFields = processFields(fields);
+  const mappings = generateMappings(processedFields);
+  expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+});
