@@ -182,7 +182,7 @@ export function XYChart({
   const { legend, layers } = args;
 
   const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
-    return (
+    return !(
       !xAccessor ||
       !accessors.length ||
       !data.tables[layerId] ||
@@ -208,7 +208,7 @@ export function XYChart({
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = Object.values(data.tables)[0].columns.find(
+  const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
     ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
@@ -225,7 +225,7 @@ export function XYChart({
   }
 
   const chartHasMoreThanOneSeries =
-    filteredLayers.length > 1 || data.tables[filteredLayers[0].layerId].columns.length > 2;
+    filteredLayers.length > 1 || filteredLayers.some(layer => layer.accessors.length > 2);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
@@ -410,6 +410,7 @@ export function XYChart({
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
             row =>
+              xAccessor && row[xAccessor] &&
               !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
           );
 
