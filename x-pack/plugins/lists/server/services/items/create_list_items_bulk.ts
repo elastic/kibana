@@ -5,9 +5,9 @@
  */
 
 import uuid from 'uuid';
+import { APICaller } from 'kibana/server';
 
 import { transformListItemToElasticQuery } from '../utils';
-import { DataClient } from '../../types';
 import {
   CreateEsBulkTypeSchema,
   IndexEsListItemSchema,
@@ -19,7 +19,7 @@ export interface CreateListItemsBulkOptions {
   listId: string;
   type: Type;
   value: string[];
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -31,7 +31,7 @@ export const createListItemsBulk = async ({
   listId,
   type,
   value,
-  dataClient,
+  callCluster,
   listItemIndex,
   user,
   meta,
@@ -63,7 +63,7 @@ export const createListItemsBulk = async ({
     []
   );
 
-  await dataClient.callAsCurrentUser('bulk', {
+  await callCluster('bulk', {
     body,
     index: listItemIndex,
   });

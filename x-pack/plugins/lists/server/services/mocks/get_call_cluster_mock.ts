@@ -5,14 +5,10 @@
  */
 
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { LIST_INDEX } from './lists_services_mock_constants';
 import { getShardMock } from './get_shard_mock';
-
-interface DataClientReturn {
-  callAsCurrentUser: () => Promise<unknown>;
-  callAsInternalUser: () => Promise<never>;
-}
 
 export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => ({
   _id: 'elastic-id-123',
@@ -24,11 +20,6 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
   result: '',
 });
 
-export const getDataClientMock = (
-  callAsCurrentUserData: unknown = getEmptyCreateDocumentResponseMock()
-): DataClientReturn => ({
-  callAsCurrentUser: jest.fn().mockResolvedValue(callAsCurrentUserData),
-  callAsInternalUser: (): Promise<never> => {
-    throw new Error('This function should not be calling "callAsInternalUser"');
-  },
-});
+export const getCallClusterMock = (
+  callCluster: unknown = getEmptyCreateDocumentResponseMock()
+): APICaller => jest.fn().mockResolvedValue(callCluster);
