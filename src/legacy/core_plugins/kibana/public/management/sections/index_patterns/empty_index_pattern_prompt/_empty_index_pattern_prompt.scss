@@ -7,6 +7,11 @@
   @extend %inp-empty-state-footer;
 }
 
+.inpEmptyIndexPatternPrompt__title {
+  // override EUI specificity
+  width: auto !important; // sass-lint:disable-line no-important
+}
+
 @include euiBreakpoint('xs', 's') {
   .inpEmptyIndexPatternPrompt__illustration > svg {
     width: $euiSize * 12;

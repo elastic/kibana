@@ -80,7 +80,7 @@ export const EmptyIndexPatternPrompt: FunctionComponent<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="xxl" />
       <EuiDescriptionList className="inpEmptyIndexPatternPrompt__footer" type="responsiveColumn">
-        <EuiDescriptionListTitle style={{ width: 'auto' }}>
+        <EuiDescriptionListTitle className="inpEmptyIndexPatternPrompt__title">
           <FormattedMessage
             id="kbn.management.emptyIndexPatternPrompt.learnMore"
             defaultMessage="Want to learn more?"
