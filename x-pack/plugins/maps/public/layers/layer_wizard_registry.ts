@@ -41,7 +41,7 @@ export async function getLayerWizards(): Promise<LayerWizard[]> {
       isVisible: layerWizard.checkVisibility ? await layerWizard.checkVisibility() : true,
     };
   });
-  return await Promise.all(promises).filter(({ isVisible }) => {
+  return (await Promise.all(promises)).filter(({ isVisible }) => {
     return isVisible;
   });
 }
