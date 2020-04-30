@@ -339,7 +339,7 @@ export class EndpointDocGenerator {
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
     }
-    // ancestry will always have at least 2 elements, and the last element will be the process associated with the alert
+    // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
       ancestry[ancestry.length - 1],
       childGenerations,
