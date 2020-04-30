@@ -11,11 +11,11 @@ import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ControlSettings } from './control_settings';
 // @ts-ignore untyped local
 import { RefreshControl } from './refresh_control';
 // @ts-ignore untyped local
 import { FullscreenControl } from './fullscreen_control';
+import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
@@ -26,12 +26,14 @@ export interface Props {
   isWriteable: boolean;
   toggleWriteable: () => void;
   canUserWrite: boolean;
+  commit: (type: string, payload: any) => any;
 }
 
 export const WorkpadHeader: FunctionComponent<Props> = ({
   isWriteable,
   canUserWrite,
   toggleWriteable,
+  commit,
 }) => {
   const keyHandler = (action: string) => {
     if (action === 'EDITING') {
@@ -101,10 +103,10 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
             <ViewMenu />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ShareMenu />
+            <EditMenu commit={commit} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ControlSettings />
+            <ShareMenu />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -122,7 +124,7 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
             )}
             <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
               <EuiButtonIcon
-                iconType={isWriteable ? 'eye' : 'eyeClosed'}
+                iconType={isWriteable ? 'eyeClosed' : 'eye'}
                 onClick={toggleWriteable}
                 size="s"
                 aria-label={getEditToggleToolTipText()}
