@@ -34,6 +34,7 @@ export const CreateAgentConfigFlyout: React.FunctionComponent<Props> = ({ onClos
     description: '',
     namespace: '',
     is_default: undefined,
+    monitoring_enabled: ['logs', 'metrics'],
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);

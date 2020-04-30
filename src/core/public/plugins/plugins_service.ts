@@ -93,9 +93,6 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
-    // Load plugin bundles
-    await this.loadPluginBundles(deps.http.basePath.prepend);
-
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -166,10 +163,5 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     for (const pluginName of this.satupPlugins.reverse()) {
       this.plugins.get(pluginName)!.stop();
     }
-  }
-
-  private loadPluginBundles(addBasePath: (path: string) => string) {
-    // Load all bundles in parallel
-    return Promise.all([...this.plugins.values()].map(plugin => plugin.load(addBasePath)));
   }
 }
