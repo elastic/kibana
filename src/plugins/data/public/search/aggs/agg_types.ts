@@ -111,6 +111,7 @@ import { aggSignificantTerms } from './buckets/significant_terms_fn';
 import { aggIpRange } from './buckets/ip_range_fn';
 import { aggDateRange } from './buckets/date_range_fn';
 import { aggRange } from './buckets/range_fn';
+import { aggGeoTile } from './buckets/geo_tile_fn';
 import { aggTerms } from './buckets/terms_fn';
 
 export const getAggTypesFunctions = () => [
@@ -119,5 +120,6 @@ export const getAggTypesFunctions = () => [
   aggIpRange,
   aggDateRange,
   aggRange,
+  aggGeoTile,
   aggTerms,
 ];

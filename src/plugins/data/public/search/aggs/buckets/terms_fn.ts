@@ -38,7 +38,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggTerms = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.buckets.terms.help', {
-    defaultMessage: 'Generates a serialized agg config for a terms agg',
+    defaultMessage: 'Generates a serialized agg config for a Terms agg',
   }),
   type: 'agg_type',
   args: {

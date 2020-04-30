@@ -22,70 +22,64 @@ import { ExpressionFunctionDefinition } from '../../../../../expressions/public'
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggSignificantTerms';
+const fnName = 'aggGeoTile';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.SIGNIFICANT_TERMS>;
-
-type Arguments = AggArgs;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOTILE_GRID>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
 
-export const aggSignificantTerms = (): FunctionDefinition => ({
+export const aggGeoTile = (): FunctionDefinition => ({
   name: fnName,
-  help: i18n.translate('data.search.aggs.function.buckets.significantTerms.help', {
-    defaultMessage: 'Generates a serialized agg config for a Significant Terms agg',
+  help: i18n.translate('data.search.aggs.function.buckets.geoTile.help', {
+    defaultMessage: 'Generates a serialized agg config for a Geo Tile agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.id.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoTile.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.enabled.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoTile.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.schema.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoTile.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
     field: {
       types: ['string'],
       required: true,
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.field.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoTile.field.help', {
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    size: {
+    useGeocentroid: {
+      types: ['boolean'],
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoTile.useGeocentroid.help', {
+        defaultMessage: 'Should be used geocentroid for this aggregation or not?',
+      }),
+    },
+    precision: {
       types: ['number'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.size.help', {
-        defaultMessage: 'Max number of buckets to retrieve',
-      }),
-    },
-    exclude: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.exclude.help', {
-        defaultMessage: 'Specific bucket values to exclude from results',
-      }),
-    },
-    include: {
-      types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.include.help', {
-        defaultMessage: 'Specific bucket values to include in results',
+      required: false,
+      help: i18n.translate('data.search.aggs.buckets.geoTile.precision.help', {
+        defaultMessage: 'Precision to use for this aggregation.',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.significantTerms.json.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoTile.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
@@ -99,7 +93,7 @@ export const aggSignificantTerms = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.SIGNIFICANT_TERMS,
+        type: BUCKET_TYPES.GEOTILE_GRID,
         params: {
           ...rest,
           json: getParsedValue(args, 'json'),

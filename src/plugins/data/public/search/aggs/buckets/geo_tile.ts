@@ -34,6 +34,13 @@ const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTit
   defaultMessage: 'Geotile',
 });
 
+export interface AggParamsGeoTile {
+  field: string;
+  useGeocentroid?: boolean;
+  precision?: number;
+  json?: string;
+}
+
 export const getGeoTitleBucketAgg = ({ getInternalStartServices }: GeoTitleBucketAggDependencies) =>
   new BucketAggType(
     {

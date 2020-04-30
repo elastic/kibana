@@ -36,7 +36,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggDateRange = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.buckets.dateRange.help', {
-    defaultMessage: 'Generates a serialized agg config for a Range agg',
+    defaultMessage: 'Generates a serialized agg config for a Date Range agg',
   }),
   type: 'agg_type',
   args: {
