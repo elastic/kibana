@@ -15,12 +15,16 @@ import { exportFirstRule } from '../tasks/signal_detection_rules';
 
 import { DETECTIONS } from '../urls/navigation';
 
-const EXPECTED_RULE_FILE_PATH = '../downloads/rules_export.ndjson';
 const EXPECTED_EXPORTED_RULE_FILE_PATH = 'cypress/test_files/expected_rules_export.ndjson';
 
 describe('Export rules', () => {
   before(() => {
     esArchiverLoad('custom_rules');
+    cy.server();
+    cy.route(
+      'POST',
+      '**api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson*'
+    ).as('export');
   });
 
   after(() => {
@@ -33,10 +37,9 @@ describe('Export rules', () => {
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
     exportFirstRule();
-
-    cy.readFile(EXPECTED_RULE_FILE_PATH).then($exportedJson => {
+    cy.wait('@export').then(xhr => {
       cy.readFile(EXPECTED_EXPORTED_RULE_FILE_PATH).then($expectedExportedJson => {
-        cy.wrap($exportedJson).should('eql', $expectedExportedJson);
+        cy.wrap(xhr.responseBody).should('eql', $expectedExportedJson);
       });
     });
   });
