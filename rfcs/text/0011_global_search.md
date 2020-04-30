@@ -663,18 +663,28 @@ So even if the 'parsable absolute url' approach seems fragile, it still felt bet
 The GlobalSearch API could be provided and exposed from a plugin instead of `core`.
 
 Pros:
-- Less `core` API exposure
+- Reduced `core` API exposure.
+- Could leverage other plugins APIs (such as `bfetch` and yet-to-come `KibanaURL` - if not provided by core), which would
+  not be possible from within `core`.
+- The consensus seems to be that this API is not a 'base' or 'core' API, so it probably make sense to have it in a plugin.
+- `core` is by nature only under OSS license. If some or all the features of `GS` needs to be under the ES license, it cannot be in core.
+  If only parts of `GS` should be OSS, we could imagine an OSS plugin for exposing the GS API, and xpack plugin(s) to register the licensed
+  result providers.
 
 Cons:
-- We know our initial consumer of this API is going to use it from/for the chrome header component, and because this component 
-  is in `core`, that would mean creating a bridge of some kind to be able to use the service from core, as plugin APIs
-  are not usable here.
-- The platform team is going to provide the base result providers for SO and application search results, so having the GS
-  service in a plugin would mean creating yet another plugin for these providers instead of having them self contained
-  in core. 
-- We are probably going to be adding internal SO APIs for the SO result provider, as current APIs are not sufficient to
-  search for multiple type of SO at the same time. It would be better if these APIs were kept internal, which would
-  not be possible if the SO provider is in a plugin instead of core.
+- We know that our initial consumer of this API is going to be the `searchbar` header component developed by the `core-ui` team.
+  As the header is currently in `core`, and as plugin APIs are not usable from within `core`, having the GS API in 
+  a plugin would mean additional development of some kind of bridge API to allow a plugin to register to the `chrome` service
+  the component that will be providing results to the search bar. Also, as the `searchbar` would not be able to directly 
+  import / use the GS `NavigableGlobalSearchResult` type (which would be in a plugin, so not importable within core), 
+  there would be a question regarding type compatibility between the `GS` result types, and the actual result types used
+  from within core in the searchbar. Duplicating the type is always an option, even if something that would ideally be avoided.
+  One alternative to that would be to provide expose an API in the chrome service to allow registering a `MountPoint` that 
+  would be used to populate the `searchbar` placeholder in the header. That way, the searchbar implementation could live
+  in a plugin and use the GS API directly.
+- As our current SO `find` API may not be sufficient to answer the SO result provider needs, we might be adding specific
+  SO API(s) for it. If such APIs were to be added, it would be preferable to keep them internal, which
+  is not possible if the SO result provider is outside of `core`.
 
 # Adoption strategy
 
