@@ -29,7 +29,7 @@ import { Loading, Error } from '../../../components';
 import { useGetOneAgent, useGetOneAgentConfig, useLink } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { AgentEventsTable, AgentDetailsActionMenu } from './components';
+import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 const Divider = styled.div`
   width: 0;
@@ -41,15 +41,20 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
-  const { isLoading, isInitialRequest, error, data: agentData, sendRequest } = useGetOneAgent(
-    agentId,
-    {
-      pollIntervalMs: 5000,
-    }
-  );
-  const { isLoading: isAgentConfigLoading, data: agentConfigData } = useGetOneAgentConfig(
-    agentData?.item?.config_id
-  );
+  const {
+    isLoading,
+    isInitialRequest,
+    error,
+    data: agentData,
+    sendRequest: sendAgentRequest,
+  } = useGetOneAgent(agentId, {
+    pollIntervalMs: 5000,
+  });
+  const {
+    isLoading: isAgentConfigLoading,
+    data: agentConfigData,
+    sendRequest: sendAgentConfigRequest,
+  } = useGetOneAgentConfig(agentData?.item?.config_id);
 
   const agentListUrl = useLink(FLEET_AGENTS_PATH);
   const agentActivityTabUrl = useLink(`${FLEET_AGENT_DETAIL_PATH}${agentId}/activity`);
@@ -100,17 +105,17 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.agentConfigLabel', {
+              label: i18n.translate('xpack.ingestManager.agentDetails.configurationLabel', {
                 defaultMessage: 'Configuration',
               }),
-              content: (
+              content: isAgentConfigLoading ? (
+                <Loading size="m" />
+              ) : agentConfigData?.item ? (
                 <EuiLink href={`${agentConfigUrl}${agentData.item.config_id}`}>
-                  {isAgentConfigLoading ? (
-                    <Loading />
-                  ) : (
-                    agentConfigData?.item?.name || agentData.item.config_id
-                  )}
+                  {agentConfigData.item.name || agentData.item.config_id}
                 </EuiLink>
+              ) : (
+                agentData.item.config_id || '-'
               ),
             },
             { isDivider: true },
@@ -160,7 +165,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   }, [agentActivityTabUrl, agentDetailsTabUrl, tabId]);
 
   return (
-    <AgentRefreshContext.Provider value={{ refresh: () => sendRequest() }}>
+    <AgentRefreshContext.Provider
+      value={{
+        refresh: () => {
+          sendAgentRequest();
+          sendAgentConfigRequest();
+        },
+      }}
+    >
       <WithHeaderLayout
         leftColumn={headerLeftContent}
         rightColumn={headerRightContent}
@@ -183,7 +195,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             <Route
               path={`${FLEET_AGENT_DETAIL_PATH}:agentId/details`}
               render={() => {
-                return <div>Details placeholder</div>;
+                return (
+                  <AgentDetailsContent agent={agentData.item} agentConfig={agentConfigData?.item} />
+                );
               }}
             />
             <Route

@@ -5,3 +5,4 @@
  */
 export { AgentEventsTable } from './agent_events_table';
 export { AgentDetailsActionMenu } from './actions_menu';
+export { AgentDetailsContent } from './agent_details';
