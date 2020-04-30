@@ -25,7 +25,10 @@ export class ObservabilityLayerTemplate extends Component<RenderWizardArguments,
   };
 
   _onLayerChange = (layer: OBSERVABILITY_LAYER_TYPE) => {
-    const newState = { layer };
+    const newState: {
+      layer: OBSERVABILITY_LAYER_TYPE;
+      metric?: OBSERVABILITY_METRIC_TYPE | null;
+    } = { layer };
 
     // Select metric when layer change invalidates selected metric.
     const metricOptions = getMetricOptionsForLayer(layer);

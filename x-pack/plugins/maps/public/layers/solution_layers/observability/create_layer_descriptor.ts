@@ -9,6 +9,7 @@ import {
   AggDescriptor,
   ColorDynamicOptions,
   LayerDescriptor,
+  SizeDynamicOptions,
   StylePropertyField,
 } from '../../../../common/descriptor_types';
 import {
@@ -17,6 +18,7 @@ import {
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
+  SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
@@ -25,9 +27,12 @@ import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../styles/vector/vector_style';
+// @ts-ignore
 import { EMSFileSource } from '../../sources/ems_file_source';
+// @ts-ignore
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { VectorLayer } from '../../vector_layer';
+// @ts-ignore
 import { HeatmapLayer } from '../../heatmap_layer';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 
@@ -36,7 +41,7 @@ const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
-function createDynamicFillColorDescriptor(field: StylePropertyField): ColorDynamicOptions {
+function createDynamicFillColorDescriptor(field: StylePropertyField) {
   return {
     type: STYLE_TYPE.DYNAMIC,
     options: {
@@ -74,7 +79,10 @@ function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
 function createAmpSourceQuery(layer: OBSERVABILITY_LAYER_TYPE) {
   // APM transaction documents
   let query;
-  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE || layer === APM_RUM_TRAFFIC) {
+  if (
+    layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE ||
+    layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC
+  ) {
     query = 'processor.event:"transaction"';
   }
 
@@ -103,9 +111,9 @@ export function createLayerDescriptor({
   metric,
   display,
 }: {
-  layer: OBSERVABILITY_LAYER_TYPE;
-  metric: OBSERVABILITY_METRIC_TYPE;
-  display: DISPLAY;
+  layer: OBSERVABILITY_LAYER_TYPE | null;
+  metric: OBSERVABILITY_METRIC_TYPE | null;
+  display: DISPLAY | null;
 }): LayerDescriptor | null {
   if (!layer || !metric || !display) {
     return null;
@@ -126,6 +134,7 @@ export function createLayerDescriptor({
         {
           leftField: 'iso2',
           right: {
+            type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
             indexPatternId: APM_INDEX_PATTERN_ID,
             indexPatternTitle: 'apm-*', // TODO look up from APM_OSS.indexPattern
