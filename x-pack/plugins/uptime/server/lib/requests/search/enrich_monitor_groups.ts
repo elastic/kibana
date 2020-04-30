@@ -6,14 +6,14 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY, STATES } from '../../../../common/constants';
 import {
   Check,
   Histogram,
   MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+} from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (

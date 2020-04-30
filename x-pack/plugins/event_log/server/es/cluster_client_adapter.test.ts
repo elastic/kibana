@@ -226,7 +226,7 @@ describe('queryEventsBySavedObject', () => {
       body: {
         from: 0,
         size: 10,
-        sort: { 'event.start': { order: 'asc' } },
+        sort: { '@timestamp': { order: 'asc' } },
         query: {
           bool: {
             must: [
@@ -236,6 +236,13 @@ describe('queryEventsBySavedObject', () => {
                   query: {
                     bool: {
                       must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
                         {
                           term: {
                             'kibana.saved_objects.type': {
@@ -321,6 +328,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -340,7 +354,7 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
@@ -390,6 +404,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -409,14 +430,14 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
               },
               {
                 range: {
-                  'event.end': {
+                  '@timestamp': {
                     lte: end,
                   },
                 },

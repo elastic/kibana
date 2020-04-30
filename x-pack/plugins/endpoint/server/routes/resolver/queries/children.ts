@@ -7,8 +7,9 @@ import { ResolverQuery } from './base';
 
 export class ChildrenQuery extends ResolverQuery {
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
+    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
     return {
-      body: this.paginateBy('endgame.serial_event_id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
@@ -22,11 +23,19 @@ export class ChildrenQuery extends ResolverQuery {
                 term: { 'event.category': 'process' },
               },
               {
-                // Corner case, we could only have a process_running or process_terminated
-                // so to solve this we'll probably want to either search for all of them and only return one if that's
-                // possible in elastic search or in memory pull out a single event to return
-                // https://github.com/elastic/endpoint-app-team/issues/168
-                term: { 'event.type': 'process_start' },
+                term: { 'event.kind': 'event' },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      term: { 'event.type': 'process_start' },
+                    },
+                    {
+                      term: { 'event.action': 'fork_event' },
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -37,31 +46,22 @@ export class ChildrenQuery extends ResolverQuery {
   }
 
   protected query(entityIDs: string[], index: string) {
+    const paginator = this.paginateBy('event.id', 'process.parent.entity_id');
     return {
-      body: this.paginateBy('event.id', {
+      body: paginator({
         query: {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.parent.entity_id': entityIDs },
-                    },
-                    {
-                      terms: { 'process.parent.entity_id': entityIDs },
-                    },
-                  ],
-                },
+                terms: { 'process.parent.entity_id': entityIDs },
               },
               {
                 term: { 'event.category': 'process' },
               },
               {
-                // Corner case, we could only have a process_running or process_terminated
-                // so to solve this we'll probably want to either search for all of them and only return one if that's
-                // possible in elastic search or in memory pull out a single event to return
-                // https://github.com/elastic/endpoint-app-team/issues/168
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.type': 'start' },
               },
             ],

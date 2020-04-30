@@ -5,7 +5,7 @@
  */
 
 import { getLatestMonitor } from '../get_latest_monitor';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
