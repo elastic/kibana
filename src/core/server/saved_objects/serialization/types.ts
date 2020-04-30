@@ -47,8 +47,8 @@ export interface SavedObjectsRawDocSource {
 /**
  * Saved Object base document
  */
-interface SavedObjectDoc {
-  attributes: any;
+interface SavedObjectDoc<T = unknown> {
+  attributes: T;
   id?: string; // NOTE: SavedObjectDoc is used for uncreated objects where `id` is optional
   type: string;
   namespace?: string;
@@ -69,7 +69,7 @@ interface Referencable {
  *
  * @public
  */
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 /**
  * Describes Saved Object documents that have passed through the migration
@@ -77,4 +77,4 @@ export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
  *
  * @public
  */
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;

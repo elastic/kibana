@@ -6,17 +6,21 @@
 
 import { KibanaRequest } from 'kibana/server';
 
-import { SecurityPluginSetup } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 
-interface GetUserOptions {
-  security: SecurityPluginSetup;
+export interface GetUserOptions {
+  security: SecurityPluginSetup | null | undefined;
   request: KibanaRequest;
 }
 
 export const getUser = ({ security, request }: GetUserOptions): string => {
-  const authenticatedUser = security.authc.getCurrentUser(request);
-  if (authenticatedUser != null) {
-    return authenticatedUser.username;
+  if (security != null) {
+    const authenticatedUser = security.authc.getCurrentUser(request);
+    if (authenticatedUser != null) {
+      return authenticatedUser.username;
+    } else {
+      return 'elastic';
+    }
   } else {
     return 'elastic';
   }
