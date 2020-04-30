@@ -5,11 +5,15 @@
  */
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
-import { EmbeddableContext } from '../../../../../../src/plugins/embeddable/public';
+import { EmbeddableContext, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
 import { DISCOVER_APP_URL_GENERATOR } from '../../../../../../src/plugins/discover/public';
 import { DiscoverEnhancedStartDependencies } from '../../plugin';
+import {
+  VisualizeEmbeddableContract,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from '../../../../../../src/plugins/visualizations/public';
 
 export const ACTION_VIEW_IN_DISCOVER = 'ACTION_VIEW_IN_DISCOVER';
 
@@ -19,6 +23,10 @@ const isOutputWithIndexPatterns = (
   if (!output || typeof output !== 'object') return false;
   return Array.isArray((output as any).indexPatterns);
 };
+
+const isVisualizeEmbeddable = (
+  embeddable: IEmbeddable
+): embeddable is VisualizeEmbeddableContract => embeddable?.type === VISUALIZE_EMBEDDABLE_TYPE;
 
 interface Params {
   start: StartServicesGetter<
@@ -33,7 +41,7 @@ export class ViewInDiscoverAction implements Action<EmbeddableContext> {
 
   public readonly type = ACTION_VIEW_IN_DISCOVER;
 
-  public readonly order = 10;
+  public readonly order = 200;
 
   constructor(private readonly params: Params) {}
 
@@ -45,28 +53,64 @@ export class ViewInDiscoverAction implements Action<EmbeddableContext> {
     return 'discoverApp';
   }
 
-  public async isCompatible() {
+  public async isCompatible({ embeddable }: EmbeddableContext) {
+    if (!isVisualizeEmbeddable(embeddable)) return false;
+    if (!this.getIndexPattern(embeddable)) return false;
     return true;
   }
 
-  public async execute(context: EmbeddableContext) {
-    const { core, plugins } = this.params.start();
+  public async execute({ embeddable }: EmbeddableContext) {
+    if (!isVisualizeEmbeddable(embeddable)) return;
 
-    let indexPatternId = '';
+    const { core } = this.params.start();
+    const url = await this.getUrl(embeddable);
 
-    const output = context.embeddable!.getOutput();
-    if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
-      indexPatternId = output.indexPatterns[0].id;
+    await core.application.navigateToApp('kibana', {
+      path: '#' + url.split('#')[1],
+    });
+  }
+
+  public async getHref({ embeddable }: EmbeddableContext): Promise<string> {
+    if (!isVisualizeEmbeddable(embeddable)) {
+      throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
-    const path = await plugins
+    const { core } = this.params.start();
+    const url = await this.getUrl(embeddable);
+
+    return core.application.getUrlForApp('kibana', {
+      path: '#' + url.split('#')[1],
+    });
+  }
+
+  private async getUrl(embeddable: VisualizeEmbeddableContract): Promise<string> {
+    const { plugins } = this.params.start();
+
+    const { timeRange, query, filters } = embeddable.getInput();
+    const indexPatternId = this.getIndexPattern(embeddable);
+
+    const url = await plugins
       .share!.urlGenerators.getUrlGenerator(DISCOVER_APP_URL_GENERATOR)
       .createUrl({
         indexPatternId,
+        filters,
+        query,
+        timeRange,
       });
 
-    await core.application.navigateToApp('kibana', {
-      path: '#' + path.split('#')[1],
-    });
+    return url;
+  }
+
+  /**
+   * @returns Returns empty string if no index pattern ID found.
+   */
+  private getIndexPattern(embeddable: VisualizeEmbeddableContract): string {
+    const output = embeddable!.getOutput();
+
+    if (isOutputWithIndexPatterns(output) && output.indexPatterns.length > 0) {
+      return output.indexPatterns[0].id;
+    }
+
+    return '';
   }
 }
