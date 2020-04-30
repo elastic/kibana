@@ -150,10 +150,22 @@ export const getCasesColumns = (
         },
       },
   {
-    name: i18n.SERVICENOW_INCIDENT,
+    name: i18n.EXTERNAL_INCIDENT,
     render: (theCase: Case) => {
       if (theCase.id != null) {
         return <ServiceNowColumn theCase={theCase} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
+  {
+    name: i18n.INCIDENT_MANAGEMENT_SYSTEM,
+    render: (theCase: Case) => {
+      if (theCase.externalService != null) {
+        return renderStringField(
+          `${theCase.externalService.connectorName}`,
+          `case-table-column-connector`
+        );
       }
       return getEmptyTagValue();
     },

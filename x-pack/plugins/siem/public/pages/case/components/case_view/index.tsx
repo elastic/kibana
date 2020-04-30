@@ -265,7 +265,7 @@ export const CaseComponent = React.memo<CaseProps>(
         </MyWrapper>
         <WhitePageWrapper>
           <MyWrapper>
-            {pushCallouts != null && pushCallouts}
+            {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && <EuiLoadingContent lines={8} />}

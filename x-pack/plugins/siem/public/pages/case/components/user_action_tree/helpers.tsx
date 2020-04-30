@@ -66,11 +66,13 @@ const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean)
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" data-test-subj="pushed-service-label-title">
       <EuiFlexItem data-test-subj="pushed-label">
-        {firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT}
+        {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
+          pushedVal?.connector_name
+        }`}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="pushed-value" href={pushedVal?.external_url} target="_blank">
-          {pushedVal?.connector_name} {pushedVal?.external_title}
+          {pushedVal?.external_title}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
