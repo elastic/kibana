@@ -150,7 +150,7 @@ export type RelatedEventType =
  * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
  * When this data is inlined with results, there won't be a need for this.
  */
-export const resultIsEnrichedWithRelatedEventInfo = Symbol(
+export const resultsEnrichedWithRelatedEventInfo = Symbol(
   'The result (e.g. a ResolverEvent) is enriched with information and stats about related events'
 );
 /**
@@ -195,7 +195,7 @@ export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
-  [resultIsEnrichedWithRelatedEventInfo]?: RelatedEventData;
+  [resultsEnrichedWithRelatedEventInfo]?: RelatedEventData;
 }
 
 export type Vector2 = readonly [number, number];

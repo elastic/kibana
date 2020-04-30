@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
-import { ResolverState, ResolverAction } from '../types';
+import { ResolverState, ResolverAction, RelatedEventDataEntry } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
 
@@ -77,6 +77,35 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           });
         }
       }
+    }
+    /**
+     * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
+     * When this data is inlined with results, there won't be a need for this.
+     */
+    if (action.type === 'appRequestedRelatedEventData') {
+      const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
+      //An array, but assume it has a length of 1 
+      const idsToFetchRelatedEventsFor = action.payload;
+      if(typeof context !== 'undefined') {
+        const httpGetter = context.services.http.get;
+        async function* getEachRelatedEventsResult(idsToFetch: string[]) {
+          for (const id of idsToFetch){
+            yield await Promise.all([
+              httpGetter(`/api/endpoint/resolver/${id}/events`, {
+                query: {events: 100},
+              }),
+            ]);
+          }
+        }
+        for await (const result of getEachRelatedEventsResult(idsToFetchRelatedEventsFor)){
+          //pack up the results into response
+          
+        }
+      }
+      // return api.dispatch({
+      //   type: 'serverReturnedRelatedEventData',
+      //   payload: response,
+      // });
     }
   };
 };

@@ -8,7 +8,7 @@ import { Reducer } from 'redux';
 import {
   DataState,
   ResolverAction,
-  resultIsEnrichedWithRelatedEventInfo,
+  resultsEnrichedWithRelatedEventInfo,
   RelatedEventDataEntryWithStats,
 } from '../../types';
 
@@ -17,7 +17,7 @@ function initialState(): DataState {
     results: [],
     isLoading: false,
     hasError: false,
-    [resultIsEnrichedWithRelatedEventInfo]: new WeakMap(),
+    [resultsEnrichedWithRelatedEventInfo]: new WeakMap(),
   };
 }
 
@@ -34,7 +34,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
      * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
      * When this data is inlined with results, there won't be a need for this.
      */
-    const statsMap = state[resultIsEnrichedWithRelatedEventInfo];
+    const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     if (statsMap && typeof statsMap?.set === 'function') {
       for (const updatedEvent of action.payload.keys()) {
         const newStatsEntry = action.payload.get(updatedEvent);
@@ -50,7 +50,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
         }
       }
     }
-    return { ...state, [resultIsEnrichedWithRelatedEventInfo]: statsMap };
+    return { ...state, [resultsEnrichedWithRelatedEventInfo]: statsMap };
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,
