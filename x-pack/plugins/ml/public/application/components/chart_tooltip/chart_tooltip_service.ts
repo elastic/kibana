@@ -19,18 +19,11 @@ export interface TooltipHeader {
 
 export type TooltipData = ChartTooltipValue[];
 
-interface TooltipPosition {
-  left: number;
-  top: number;
-}
-
 export interface ChartTooltipState {
   isTooltipVisible: boolean;
   offset: TooltipOffset;
-  targetPosition: ClientRect;
   tooltipData: TooltipData;
   tooltipHeaderFormatter?: TooltipValueFormatter;
-  tooltipPosition: TooltipPosition;
   target: HTMLElement | null;
 }
 
@@ -43,8 +36,6 @@ export const getChartTooltipDefaultState = (): ChartTooltipState => ({
   isTooltipVisible: false,
   tooltipData: ([] as unknown) as TooltipData,
   offset: { x: 0, y: 0 },
-  targetPosition: { left: 0, top: 0 } as ClientRect,
-  tooltipPosition: { left: 0, top: 0 },
   target: null,
 });
 
@@ -57,19 +48,20 @@ export class ChartTooltipService {
 
   public show(
     tooltipData: TooltipData,
-    target?: HTMLElement | null,
+    target: HTMLElement,
     offset: TooltipOffset = { x: 0, y: 0 }
   ) {
-    if (typeof target !== 'undefined' && target !== null) {
-      this.chartTooltip$.next({
-        ...this.chartTooltip$.getValue(),
-        isTooltipVisible: true,
-        offset,
-        targetPosition: target.getBoundingClientRect(),
-        tooltipData,
-        target,
-      });
+    if (!target) {
+      throw new Error('target is required for the tooltip positioning');
     }
+
+    this.chartTooltip$.next({
+      ...this.chartTooltip$.getValue(),
+      isTooltipVisible: true,
+      offset,
+      tooltipData,
+      target,
+    });
   }
 
   public hide() {
