@@ -5,13 +5,14 @@
  */
 
 import _ from 'lodash';
-import React, { Component, lazy, Suspense } from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
+import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
 import { AddLayerPanel } from '../layer_addpanel';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
@@ -25,7 +26,6 @@ import { registerLayerWizards } from '../../layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
-const MBMapContainer = lazy(() => import('../map/mb'));
 export class GisMap extends Component {
   state = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -199,13 +199,11 @@ export class GisMap extends Component {
         data-shared-item
       >
         <EuiFlexItem className="mapMapWrapper">
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <MBMapContainer
-              addFilters={addFilters}
-              geoFields={this.state.geoFields}
-              renderTooltipContent={renderTooltipContent}
-            />
-          </Suspense>
+          <MBMapContainer
+            addFilters={addFilters}
+            geoFields={this.state.geoFields}
+            renderTooltipContent={renderTooltipContent}
+          />
           {!this.props.hideToolbarOverlay && (
             <ToolbarOverlay addFilters={addFilters} geoFields={this.state.geoFields} />
           )}

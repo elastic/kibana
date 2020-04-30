@@ -40,7 +40,6 @@ function mapStateToProps(state = {}) {
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
     hideViewControl: isViewControlHidden(state),
   };
 }
@@ -76,4 +75,4 @@ function mapDispatchToProps(dispatch) {
 const connectedMBMapContainer = connect(mapStateToProps, mapDispatchToProps, null, {
   forwardRef: true,
 })(MBMapContainer);
-export { connectedMBMapContainer as default };
+export { connectedMBMapContainer as MBMapContainer };
