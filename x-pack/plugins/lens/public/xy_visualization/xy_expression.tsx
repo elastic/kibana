@@ -199,7 +199,7 @@ export function XYChart({
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn: KibanaDatatableColumn | undefined = Object.values(data.tables)[0].columns.find(
+  const xAxisColumn = Object.values(data.tables)[0].columns.find(
     ({ id }) => id === layers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
@@ -222,8 +222,32 @@ export function XYChart({
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
   function calculateMinInterval() {
-    // add minInterval only for single row value as it cannot be determined from dataset
-    if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+    // check all the tables to see if all of the rows have the same timestamp
+    // that would mean that chart will draw a single bar
+    const isSingleTimestampInXDomain = () => {
+      const nonEmptyLayers = layers.filter(
+        layer => data.tables[layer.layerId].rows.length && layer.xAccessor
+      );
+
+      if (!nonEmptyLayers.length) {
+        return;
+      }
+
+      const firstRowValue =
+        data.tables[nonEmptyLayers[0].layerId].rows[0][nonEmptyLayers[0].xAccessor!];
+      for (const layer of nonEmptyLayers) {
+        if (
+          layer.xAccessor &&
+          data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    // add minInterval only for single point in domain
+    if (data.dateRange && isSingleTimestampInXDomain()) {
       if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
         return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
 
