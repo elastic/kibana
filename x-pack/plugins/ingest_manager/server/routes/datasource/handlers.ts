@@ -166,7 +166,6 @@ export const deleteDatasourceHandler: RequestHandler<
     const body: DeleteDatasourcesResponse = await datasourceService.delete(
       soClient,
       request.body.datasourceIds,
-      undefined,
       { user }
     );
     return response.ok({

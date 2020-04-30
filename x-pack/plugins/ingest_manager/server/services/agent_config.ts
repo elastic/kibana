@@ -285,7 +285,9 @@ class AgentConfigService {
     }
 
     if (config.datasources && config.datasources.length) {
-      await datasourceService.delete(soClient, config.datasources as string[], false);
+      await datasourceService.delete(soClient, config.datasources as string[], {
+        skipUnassignFromAgentConfigs: true,
+      });
     }
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentConfigUpdatedEvent(soClient, 'deleted', id);
