@@ -50,19 +50,15 @@ should still be generic to answer similar needs from any other consumer, either 
 
 ```ts
 /**
- * Static list of all the possible result types.
- * Ordinal value matters here, as it will be used to sort results of different types.
+ * Static, non exhaustive list of the common search types.
+ * Only present to allow consumers and result providers to have aliases to the most common types.
  */
-enum SEARCH_TYPE {
-  // non-exhaustive
-  applications = 10,
-  dashboard = 20,
-  visualization = 30,
-  search = 40,
+enum GlobalSearchCommonResultTypes {
+  application = 'application,
+  dashboard = 'dashboard',
+  visualization = 'visualization',
+  search = 'search',
 }
-
-/** @public */
-type GlobalSearchResultType = keyof typeof SEARCH_TYPE;
 
 /**
  * Options provided to {@link GlobalSearchResultProvider | result providers} `find` method.
@@ -91,7 +87,7 @@ interface GlobalSearchResult {
   /** the title/label of the result */
   title: string;
   /** the type of result */
-  type: GlobalSearchResultType;
+  type: string;
   /** an optional EUI icon name to associate with the search result */
   icon?: string;
   /** The url to navigate to this result. This can be either an absolute url, or a path relative to the performing request's basePath */
@@ -104,7 +100,7 @@ interface GlobalSearchResult {
 ```
 
 Notes:
-- The `Serializable` type should be implemented and exposed from `core`. A base implementation could be:
+- The `Serializable` type should be implemented and exposed from `core`. A basic implementation could be:
 
 ```ts
 type Serializable = string | number | boolean | PrimitiveArray | PrimitiveRecord;
@@ -531,13 +527,14 @@ could be added at a later time.
 On every emission of an underlying provider, the service will aggregate the new results with the existing list and 
 sort the results following this logic before emitting them:
 
-- Results will be sorted by ascending `type` ordinal value.
-- Results of a same `type` will then be sorted by descending `score` value.
+- Results will be sorted by descending `score` value.
+- Results with the same score will then be sorted by ascending `id` value. This arbitrary sort is only performed to 
+  ensure consistent order when multiple results have the exact same score
 
 This is an equivalent of the following lodash call:
 
 ```ts
-const sorted = _.sortBy(unsorted, [r => SEARCH_TYPE[r.type], 'score'], ['asc', 'desc']);
+const sorted = _.sortBy(unsorted, ['score', 'id'], ['desc', 'asc']);
 ```
 
 For example, given this list of unsorted results:
@@ -557,10 +554,10 @@ the resulting sorted results would be:
 ```ts
 const sorted = [
   { id: 'app-1', type: 'application', score: 100 },
+  { id: 'viz-1', type: 'visualization', score: 100 },
   { id: 'app-1', type: 'application', score: 50 },
   { id: 'dash-1', type: 'dashboard', score: 50 },
   { id: 'dash-2', type: 'dashboard', score: 25 },
-  { id: 'viz-1', type: 'visualization', score: 100 },
 ];
 ```
 
@@ -660,36 +657,6 @@ But this had some caveats:
 - this is really not generic. If another plugin was to alter the basepath in another way, we would have needed to add it another property 
 
 So even if the 'parsable absolute url' approach seems fragile, it still felt better than this alternative.
-
-## We could use plain string instead of an enum for `GlobalSearchResult.type`
-
-The current static enum used for type
-
-```ts
-enum SEARCH_TYPE {
-  // non-exhaustive
-  applications = 10,
-  dashboard = 20,
-  visualization = 30,
-  search = 40,
-}
-
-/** @public */
-type GlobalSearchResultType = keyof typeof SEARCH_TYPE;
-
-interface GlobalSearchResult {
-  // [...]
-  type: GlobalSearchResultType;
-}
-```
-
-has some limitations:
-- It forces the enum to be modified every time a new type is added
-- 3rd party plugins cannot introduce new types
-
-We could change the API to accept plain strings for `GlobalSearchResult.type`. However, atm this enum approach 
-is needed as the ordinal values of the entries is used in results sorting. Changing to plain strings forces to find 
-an alternative sorting logic.
 
 ## The GlobalSearch service could be provided as a plugin instead of a core service
 
