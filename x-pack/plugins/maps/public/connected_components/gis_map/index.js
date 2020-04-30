@@ -43,5 +43,5 @@ function mapDispatchToProps(dispatch) {
 }
 
 const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(UnconnectedGisMap);
-export { connectedGisMap as GisMap };
-export default connectedGisMap;
+export { connectedGisMap as GisMap }; // GisMap is pulled in by name by the Maps-app itself
+export default connectedGisMap; //lazy-loading in the embeddable requires default export

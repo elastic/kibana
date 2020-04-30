@@ -9,7 +9,7 @@ import { Filter } from 'src/plugins/data/public';
 
 import { RenderToolTipContent } from '../../layers/tooltips/tooltip_property';
 
-const GisMap: React.ComponentType<{
+declare const GisMap: React.ComponentType<{
   addFilters: ((filters: Filter[]) => void) | null;
   renderTooltipContent?: RenderToolTipContent;
 }>;
