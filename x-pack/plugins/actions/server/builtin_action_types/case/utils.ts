@@ -27,7 +27,7 @@ import {
   ExecutorSubActionPushParams,
 } from './types';
 
-import * as transformers from './transformers';
+import { transformers, Transformer } from './transformers';
 
 import { SUPPORTED_SOURCE_FIELDS } from './constants';
 
@@ -197,62 +197,59 @@ export const prepareFieldsForTransformation = ({
   mapping,
   defaultPipes = ['informationCreated'],
 }: PrepareFieldsForTransformArgs): PipedField[] => {
-  return (
-    Object.keys(params.externalCase)
-      // This clears undefined values but typescript does not get it
-      .filter(p => mapping.get(p)?.actionType)
-      .filter(p => mapping.get(p)?.actionType !== 'nothing')
-      .map(p => ({
+  return Object.keys(params.externalCase)
+    .filter(p => mapping.get(p)?.actionType != null && mapping.get(p)?.actionType !== 'nothing')
+    .map(p => {
+      const actionType = mapping.get(p)?.actionType ?? 'nothing';
+      return {
         key: p,
         value: params.externalCase[p],
-        actionType: mapping.get(p)?.actionType ?? 'nothing',
-        pipes: [...defaultPipes],
-      }))
-      .map(p => ({
-        ...p,
-        pipes: p.actionType === 'append' ? [...p.pipes, 'append'] : p.pipes,
-      }))
-  );
+        actionType,
+        pipes: actionType === 'append' ? [...defaultPipes, 'append'] : defaultPipes,
+      };
+    });
 };
 
-const t = { ...transformers } as { [index: string]: Function }; // TODO: Find a better solution if exists.
-
-export const transformFields = ({ params, fields, currentIncident }: TransformFieldsArgs) => {
+export const transformFields = ({
+  params,
+  fields,
+  currentIncident,
+}: TransformFieldsArgs): Record<string, string> => {
   return fields.reduce((prev, cur) => {
-    const transform = flow(...cur.pipes.map(p => t[p]));
-    prev[cur.key] = transform({
-      value: cur.value,
-      date: params.updatedAt ?? params.createdAt,
-      user:
-        params.updatedBy != null
-          ? params.updatedBy.fullName
+    const transform = flow<Transformer>(...cur.pipes.map(p => transformers[p]));
+    return {
+      ...prev,
+      [cur.key]: transform({
+        value: cur.value,
+        date: params.updatedAt ?? params.createdAt,
+        user:
+          (params.updatedBy != null
             ? params.updatedBy.fullName
-            : params.updatedBy.username
-          : params.createdBy.fullName
-          ? params.createdBy.fullName
-          : params.createdBy.username,
-      previousValue: currentIncident ? currentIncident[cur.key] : '',
-    }).value;
-    return prev;
-    // This will have to remain `any` until we can extend connectors with generics
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }, {} as any);
+              ? params.updatedBy.fullName
+              : params.updatedBy.username
+            : params.createdBy.fullName
+            ? params.createdBy.fullName
+            : params.createdBy.username) ?? '',
+        previousValue: currentIncident ? currentIncident[cur.key] : '',
+      }).value,
+    };
+  }, {});
 };
 
 export const transformComments = (comments: Comment[], pipes: string[]): Comment[] => {
   return comments.map(c => ({
     ...c,
-    comment: flow(...pipes.map(p => t[p]))({
+    comment: flow<Transformer>(...pipes.map(p => transformers[p]))({
       value: c.comment,
       date: c.updatedAt ?? c.createdAt,
       user:
-        c.updatedBy != null
+        (c.updatedBy != null
           ? c.updatedBy.fullName
             ? c.updatedBy.fullName
             : c.updatedBy.username
           : c.createdBy.fullName
           ? c.createdBy.fullName
-          : c.createdBy.username,
+          : c.createdBy.username) ?? '',
     }).value,
   }));
 };

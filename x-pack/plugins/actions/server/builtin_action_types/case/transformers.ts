@@ -7,37 +7,23 @@
 import { TransformerArgs } from './types';
 import * as i18n from './translations';
 
-export const informationCreated = ({
-  value,
-  date,
-  user,
-  ...rest
-}: TransformerArgs): TransformerArgs => ({
-  value: `${value} ${i18n.FIELD_INFORMATION('create', date, user)}`,
-  ...rest,
-});
+export type Transformer = (args: TransformerArgs) => TransformerArgs;
 
-export const informationUpdated = ({
-  value,
-  date,
-  user,
-  ...rest
-}: TransformerArgs): TransformerArgs => ({
-  value: `${value} ${i18n.FIELD_INFORMATION('update', date, user)}`,
-  ...rest,
-});
-
-export const informationAdded = ({
-  value,
-  date,
-  user,
-  ...rest
-}: TransformerArgs): TransformerArgs => ({
-  value: `${value} ${i18n.FIELD_INFORMATION('add', date, user)}`,
-  ...rest,
-});
-
-export const append = ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
-  value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
-  ...rest,
-});
+export const transformers: Record<string, Transformer> = {
+  informationCreated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
+    value: `${value} ${i18n.FIELD_INFORMATION('create', date, user)}`,
+    ...rest,
+  }),
+  informationUpdated: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
+    value: `${value} ${i18n.FIELD_INFORMATION('update', date, user)}`,
+    ...rest,
+  }),
+  informationAdded: ({ value, date, user, ...rest }: TransformerArgs): TransformerArgs => ({
+    value: `${value} ${i18n.FIELD_INFORMATION('add', date, user)}`,
+    ...rest,
+  }),
+  append: ({ value, previousValue, ...rest }: TransformerArgs): TransformerArgs => ({
+    value: previousValue ? `${previousValue} \r\n${value}` : `${value}`,
+    ...rest,
+  }),
+};

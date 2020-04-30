@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { informationCreated, informationUpdated, informationAdded, append } from './transformers';
+import { transformers } from './transformers';
+
+const { informationCreated, informationUpdated, informationAdded, append } = transformers;
 
 describe('informationCreated', () => {
   test('transforms correctly', () => {
