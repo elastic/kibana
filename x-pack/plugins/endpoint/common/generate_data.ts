@@ -9,9 +9,9 @@ import seedrandom from 'seedrandom';
 import {
   AlertEvent,
   EndpointEvent,
-  HostFields,
+  Host,
   HostMetadata,
-  OSFields,
+  HostOS,
   PolicyData,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
@@ -29,7 +29,7 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -56,11 +56,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -102,7 +102,7 @@ interface HostInfo {
     version: string;
     id: string;
   };
-  host: HostFields;
+  host: Host;
   endpoint: {
     policy: {
       id: string;
@@ -307,7 +307,7 @@ export class EndpointDocGenerator {
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : 'powershell.exe',
+        name: options.processName ? options.processName : randomProcessName(),
       },
     };
   }
@@ -644,4 +644,17 @@ export class EndpointDocGenerator {
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
+}
+
+const fakeProcessNames = [
+  'lsass.exe',
+  'notepad.exe',
+  'mimikatz.exe',
+  'powershell.exe',
+  'iexlorer.exe',
+  'explorer.exe',
+];
+/** Return a random fake process name */
+function randomProcessName(): string {
+  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
 }

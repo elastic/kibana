@@ -18,6 +18,8 @@
  */
 
 import React from 'react';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
