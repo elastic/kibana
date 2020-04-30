@@ -51,7 +51,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
     pageIndex: page.index,
     pageSize: page.size,
     totalItemCount: certificates?.total ?? 0,
-    pageSizeOptions: [5, 10, 15, 20],
+    pageSizeOptions: [10, 25, 50, 100],
     hidePerPageOptions: false,
   };
 
@@ -92,7 +92,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
       field: 'certificate_not_valid_before',
       sortable: true,
       render: (value: string) => {
-        return moment().diff(moment(value), 'days') + labels.DAYS;
+        return moment().diff(moment(value), 'days') + ' ' + labels.DAYS;
       },
     },
     {

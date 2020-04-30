@@ -15,10 +15,12 @@ export enum CERT_STATUS {
   TOO_OLD = 'TOO_OLD',
 }
 
-export const useCertStatus = (expiryDate?: string) => {
+export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   const dss = useSelector(selectDynamicSettings);
 
   const expiryThreshold = dss.settings?.certThresholds?.expiration;
+
+  const ageThreshold = dss.settings?.certThresholds?.age;
 
   const certValidityDate = new Date(expiryDate ?? '');
 
@@ -30,11 +32,17 @@ export const useCertStatus = (expiryDate?: string) => {
 
   const isExpiringSoon = moment(certValidityDate).diff(moment(), 'days') < expiryThreshold!;
 
+  const isTooOld = moment().diff(moment(issueDate), 'days') > ageThreshold!;
+
   const isExpired = moment(certValidityDate) < moment();
 
-  return isExpired
-    ? CERT_STATUS.EXPIRED
-    : isExpiringSoon
+  if (isExpired) {
+    return CERT_STATUS.EXPIRED;
+  }
+
+  return isExpiringSoon
     ? CERT_STATUS.EXPIRING_SOON
+    : isTooOld
+    ? CERT_STATUS.TOO_OLD
     : CERT_STATUS.OK;
 };

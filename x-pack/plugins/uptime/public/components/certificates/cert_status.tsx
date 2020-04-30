@@ -15,9 +15,14 @@ interface Props {
 }
 
 export const CertStatus: React.FC<Props> = ({ cert }) => {
-  const certStatus = useCertStatus(cert?.certificate_not_valid_after);
+  const certStatus = useCertStatus(
+    cert?.certificate_not_valid_after,
+    cert?.certificate_not_valid_before
+  );
 
   const isExpiringSoon = certStatus === CERT_STATUS.EXPIRING_SOON;
+
+  const isTooOld = certStatus === CERT_STATUS.TOO_OLD;
 
   const isExpired = certStatus === CERT_STATUS.EXPIRED;
 
@@ -32,6 +37,14 @@ export const CertStatus: React.FC<Props> = ({ cert }) => {
     return (
       <EuiHealth color="danger">
         <span>{labels.EXPIRED}</span>
+      </EuiHealth>
+    );
+  }
+
+  if (isTooOld) {
+    return (
+      <EuiHealth color="danger">
+        <span>{labels.TOO_OLD}</span>
       </EuiHealth>
     );
   }

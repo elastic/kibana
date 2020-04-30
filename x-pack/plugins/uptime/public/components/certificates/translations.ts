@@ -26,6 +26,10 @@ export const STATUS_COL = i18n.translate('xpack.uptime.certs.list.status', {
   defaultMessage: 'Status',
 });
 
+export const TOO_OLD = i18n.translate('xpack.uptime.certs.list.status.old', {
+  defaultMessage: 'Too old',
+});
+
 export const COMMON_NAME_COL = i18n.translate('xpack.uptime.certs.list.commonName', {
   defaultMessage: 'Common name',
 });
