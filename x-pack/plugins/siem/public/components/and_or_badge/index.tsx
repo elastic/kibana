@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-const RoundedBadge = styled(EuiBadge)`
+const RoundedBadge = (styled(EuiBadge)`
   align-items: center;
   border-radius: 100%;
   display: inline-flex;
@@ -30,7 +30,7 @@ const RoundedBadge = styled(EuiBadge)`
   .euiBadge__text {
     text-overflow: clip;
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 RoundedBadge.displayName = 'RoundedBadge';
 
