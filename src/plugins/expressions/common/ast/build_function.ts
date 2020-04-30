@@ -148,13 +148,20 @@ export function buildExpressionFunction<F extends string>(
    * argument input, so we trust that folks using subexpressions in the
    * builder know what they're doing.
    */
-  initialArgs: { [K in keyof FunctionArgs<F>]: FunctionArgs<F>[K] | ExpressionAstExpressionBuilder }
+  initialArgs: {
+    [K in keyof FunctionArgs<F>]:
+      | FunctionArgs<F>[K]
+      | ExpressionAstExpressionBuilder
+      | ExpressionAstExpressionBuilder[];
+  }
 ): ExpressionAstFunctionBuilder<F> {
   const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
-    if (isExpressionBuilder(value)) {
-      acc[key] = [value.toAst()];
+    if (Array.isArray(value)) {
+      acc[key] = value.map(v => {
+        return isExpressionBuilder(v) ? v.toAst() : v;
+      });
     } else {
-      acc[key] = Array.isArray(value) ? value : [value];
+      acc[key] = isExpressionBuilder(value) ? [value.toAst()] : [value];
     }
     return acc;
   }, initialArgs as ExpressionAstFunction['arguments']);
