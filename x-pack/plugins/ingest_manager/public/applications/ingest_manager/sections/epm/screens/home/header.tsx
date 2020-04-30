@@ -39,7 +39,7 @@ export const HeroCopy = memo(() => {
 export const HeroImage = memo(() => {
   const { toAssets } = useLinks();
   const ImageWrapper = styled.div`
-    margin-bottom: -62px;
+    margin-bottom: -70px;
   `;
 
   return (
