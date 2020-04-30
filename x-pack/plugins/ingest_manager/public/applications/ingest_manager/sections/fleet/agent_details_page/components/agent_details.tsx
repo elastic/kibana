@@ -30,7 +30,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
           title: i18n.translate('xpack.ingestManager.agentDetails.hostNameLabel', {
             defaultMessage: 'Host name',
           }),
-          description: agent.local_metadata.host,
+          description: agent.local_metadata['host.hostname'],
         },
         {
           title: i18n.translate('xpack.ingestManager.agentDetails.hostIdLabel', {
@@ -60,13 +60,13 @@ export const AgentDetailsContent: React.FunctionComponent<{
           title: i18n.translate('xpack.ingestManager.agentDetails.versionLabel', {
             defaultMessage: 'Agent version',
           }),
-          description: agent.local_metadata.version,
+          description: agent.local_metadata['agent.version'],
         },
         {
           title: i18n.translate('xpack.ingestManager.agentDetails.platformLabel', {
             defaultMessage: 'Platform',
           }),
-          description: agent.local_metadata.platform,
+          description: agent.local_metadata['os.platform'],
         },
       ].map(({ title, description }) => {
         return (

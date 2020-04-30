@@ -244,7 +244,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }),
       render: (host: string, agent: Agent) => (
         <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
-          {host}
+          {agent.local_metadata['host.hostname'] || host || ''}
         </ConnectedLink>
       ),
     },
@@ -313,6 +313,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
+      render: (version: string, agent: Agent) =>
+        agent.local_metadata['agent.version'] || version || '',
     },
     {
       field: 'last_checkin',
