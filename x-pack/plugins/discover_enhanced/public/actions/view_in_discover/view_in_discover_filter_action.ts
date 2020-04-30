@@ -6,9 +6,10 @@
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  EmbeddableContext,
   IEmbeddable,
   ViewMode,
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
 } from '../../../../../../src/plugins/embeddable/public';
 import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
 import { CoreStart } from '../../../../../../src/core/public';
@@ -19,7 +20,9 @@ import {
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
 
-export const ACTION_VIEW_IN_DISCOVER_CONTEXT_MENU = 'ACTION_VIEW_IN_DISCOVER_CONTEXT_MENU';
+export const ACTION_VIEW_IN_DISCOVER_FILTER = 'ACTION_VIEW_IN_DISCOVER_FILTER';
+
+export type ActionContext = ValueClickTriggerContext | RangeSelectTriggerContext;
 
 const isOutputWithIndexPatterns = (
   output: unknown
@@ -29,21 +32,21 @@ const isOutputWithIndexPatterns = (
 };
 
 const isVisualizeEmbeddable = (
-  embeddable: IEmbeddable
+  embeddable?: IEmbeddable
 ): embeddable is VisualizeEmbeddableContract => embeddable?.type === VISUALIZE_EMBEDDABLE_TYPE;
 
 interface Params {
   start: StartServicesGetter<
-    Pick<DiscoverEnhancedStartDependencies, 'share'>,
+    Pick<DiscoverEnhancedStartDependencies, 'data' | 'share'>,
     unknown,
     Pick<CoreStart, 'application'>
   >;
 }
 
-export class ViewInDiscoverContextMenuAction implements Action<EmbeddableContext> {
-  public readonly id = ACTION_VIEW_IN_DISCOVER_CONTEXT_MENU;
+export class ViewInDiscoverFilterAction implements Action<ActionContext> {
+  public readonly id = ACTION_VIEW_IN_DISCOVER_FILTER;
 
-  public readonly type = ACTION_VIEW_IN_DISCOVER_CONTEXT_MENU;
+  public readonly type = ACTION_VIEW_IN_DISCOVER_FILTER;
 
   public readonly order = 200;
 
@@ -57,48 +60,56 @@ export class ViewInDiscoverContextMenuAction implements Action<EmbeddableContext
     return 'discoverApp';
   }
 
-  public async isCompatible({ embeddable }: EmbeddableContext) {
+  public async isCompatible({ embeddable }: ActionContext) {
     if (!isVisualizeEmbeddable(embeddable)) return false;
     if (!this.getIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
     return true;
   }
 
-  public async execute({ embeddable }: EmbeddableContext) {
-    if (!isVisualizeEmbeddable(embeddable)) return;
+  public async execute(context: ActionContext) {
+    if (!isVisualizeEmbeddable(context.embeddable)) return;
 
     const { core } = this.params.start();
-    const url = await this.getUrl(embeddable);
+    const url = await this.getUrl(context);
 
     await core.application.navigateToApp('kibana', {
       path: '#' + url.split('#')[1],
     });
   }
 
-  public async getHref({ embeddable }: EmbeddableContext): Promise<string> {
-    if (!isVisualizeEmbeddable(embeddable)) {
+  public async getHref(context: ActionContext): Promise<string> {
+    if (!isVisualizeEmbeddable(context.embeddable)) {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
     const { core } = this.params.start();
-    const url = await this.getUrl(embeddable);
+    const url = await this.getUrl(context);
 
     return core.application.getUrlForApp('kibana', {
       path: '#' + url.split('#')[1],
     });
   }
 
-  private async getUrl(embeddable: VisualizeEmbeddableContract): Promise<string> {
+  private async getUrl({ embeddable, data, timeFieldName }: ActionContext): Promise<string> {
+    if (!isVisualizeEmbeddable(embeddable)) {
+      throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
+    }
+
     const { plugins } = this.params.start();
 
-    const { timeRange, query, filters } = embeddable.getInput();
+    const { createFiltersFromRangeSelectAction } = plugins.data.actions;
+
+    // eslint-disable-next-line prefer-const
+    let { timeRange, query, filters } = embeddable.getInput();
     const indexPatternId = this.getIndexPattern(embeddable);
+    const filtersFromEvent = await createFiltersFromRangeSelectAction(data as any);
 
     const url = await plugins
       .share!.urlGenerators.getUrlGenerator(DISCOVER_APP_URL_GENERATOR)
       .createUrl({
         indexPatternId,
-        filters,
+        filters: [...(filters || []), ...filtersFromEvent],
         query,
         timeRange,
       });

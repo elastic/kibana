@@ -5,3 +5,4 @@
  */
 
 export * from './view_in_discover_context_menu_action';
+export * from './view_in_discover_filter_action';
