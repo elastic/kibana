@@ -23,7 +23,7 @@ import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
 import blues from './blues.png';
-import shadedGeohashGrid from './shadedGeohashGrid.png';
+import shadedGeohashGrid from './shaded_geohash_grid.png';
 import heatmapRaw from './heatmap_raw.png';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import EMS_CATALOGUE from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';

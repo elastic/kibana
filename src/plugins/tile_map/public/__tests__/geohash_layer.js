@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { GeohashLayer } from '../geohash_layer';
 // import heatmapPng from './heatmap.png';
-import scaledCircleMarkersPng from './scaledCircleMarkers.png';
+import scaledCircleMarkersPng from './scaled_circle_markers.png';
 // import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
