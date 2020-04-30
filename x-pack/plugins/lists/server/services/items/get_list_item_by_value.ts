@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { ListItemArraySchema, Type } from '../../../common/schemas';
-import { DataClient } from '../../types';
 
 import { getListItemByValues } from '.';
 
 export interface GetListItemByValueOptions {
   listId: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   type: Type;
   value: string;
@@ -19,13 +20,13 @@ export interface GetListItemByValueOptions {
 
 export const getListItemByValue = async ({
   listId,
-  dataClient,
+  callCluster,
   listItemIndex,
   type,
   value,
 }: GetListItemByValueOptions): Promise<ListItemArraySchema> =>
   getListItemByValues({
-    dataClient,
+    callCluster,
     listId,
     listItemIndex,
     type,
