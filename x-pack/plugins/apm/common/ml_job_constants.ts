@@ -39,9 +39,9 @@ export function getSeverity(score?: number) {
     return undefined;
   } else if (score < 25) {
     return severity.warning;
-  } else if (score >= 25 || score < 50) {
+  } else if (score >= 25 && score < 50) {
     return severity.minor;
-  } else if (score >= 50 || score < 75) {
+  } else if (score >= 50 && score < 75) {
     return severity.major;
   } else if (score >= 75) {
     return severity.critical;
