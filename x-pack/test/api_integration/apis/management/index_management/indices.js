@@ -198,6 +198,8 @@ export default function({ getService }) {
           'ilm', // data enricher
           'isRollupIndex', // data enricher
         ];
+        // We need to sort the keys before comparing then, because race conditions
+        // can cause enrichers to register in non-deterministic order.
         const sortedExpectedKeys = expectedKeys.sort();
         const sortedReceivedKeys = Object.keys(body[0]).sort();
         expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
@@ -226,6 +228,8 @@ export default function({ getService }) {
             'ilm', // data enricher
             'isRollupIndex', // data enricher
           ];
+          // We need to sort the keys before comparing then, because race conditions
+          // can cause enrichers to register in non-deterministic order.
           const sortedExpectedKeys = expectedKeys.sort();
           const sortedReceivedKeys = Object.keys(body[0]).sort();
           expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
