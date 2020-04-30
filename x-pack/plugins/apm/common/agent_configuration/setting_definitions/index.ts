@@ -54,7 +54,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
       const max = setting.max;
 
       return {
-        validation: getBytesRt({ min, max, units }),
+        validation: getBytesRt({ min, max }),
         units,
         min,
         ...setting
@@ -67,7 +67,7 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
       const max = setting.max;
 
       return {
-        validation: getDurationRt({ min, max, units }),
+        validation: getDurationRt({ min, max }),
         units,
         min,
         ...setting

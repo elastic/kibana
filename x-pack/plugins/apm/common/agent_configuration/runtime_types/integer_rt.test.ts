@@ -6,6 +6,7 @@
 
 import { getIntegerRt } from './integer_rt';
 import { isRight } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 
 describe('getIntegerRt', () => {
   describe('with range', () => {
@@ -22,6 +23,17 @@ describe('getIntegerRt', () => {
           });
         }
       );
+    });
+
+    describe('it should return correct error message', () => {
+      ['-1', '-55', '33000'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          const result = integerRt.decode(input);
+          const message = PathReporter.report(result)[0];
+          expect(message).toEqual('Must be between 0 and 32000');
+          expect(isRight(result)).toBeFalsy();
+        });
+      });
     });
 
     describe('it should accept number between 0 and 32000', () => {

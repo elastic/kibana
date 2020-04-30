@@ -6,12 +6,11 @@
 
 import { getBytesRt } from './bytes_rt';
 import { isRight } from 'fp-ts/lib/Either';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 
 describe('bytesRt', () => {
   describe('must accept any amount and unit', () => {
-    const bytesRt = getBytesRt({
-      units: ['b', 'mb', 'kb']
-    });
+    const bytesRt = getBytesRt({});
     describe('it should not accept', () => {
       ['mb', 1, '1', '5gb', '6tb'].map(input => {
         it(`${JSON.stringify(input)}`, () => {
@@ -30,14 +29,24 @@ describe('bytesRt', () => {
   });
   describe('must be at least 0b', () => {
     const bytesRt = getBytesRt({
-      min: '0b',
-      units: ['b', 'mb', 'kb']
+      min: '0b'
     });
 
     describe('it should not accept', () => {
       ['mb', '-1kb', '5gb', '6tb'].map(input => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(bytesRt.decode(input))).toBe(false);
+        });
+      });
+    });
+
+    describe('it should return correct error message', () => {
+      ['-1kb', '5gb', '6tb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          const result = bytesRt.decode(input);
+          const message = PathReporter.report(result)[0];
+          expect(message).toEqual('Must be greater than 0b');
+          expect(isRight(result)).toBeFalsy();
         });
       });
     });
@@ -50,16 +59,25 @@ describe('bytesRt', () => {
       });
     });
   });
-  describe('must be between 500b and 1mb', () => {
+  describe('must be between 500b and 1kb', () => {
     const bytesRt = getBytesRt({
       min: '500b',
-      max: '1kb',
-      units: ['b', 'mb', 'kb']
+      max: '1kb'
     });
     describe('it should not accept', () => {
       ['mb', '-1b', '1b', '499b', '1025b', '2kb', '1mb'].map(input => {
         it(`${JSON.stringify(input)}`, () => {
           expect(isRight(bytesRt.decode(input))).toBe(false);
+        });
+      });
+    });
+    describe('it should return correct error message', () => {
+      ['-1b', '1b', '499b', '1025b', '2kb', '1mb'].map(input => {
+        it(`${JSON.stringify(input)}`, () => {
+          const result = bytesRt.decode(input);
+          const message = PathReporter.report(result)[0];
+          expect(message).toEqual('Must be between 500b and 1kb');
+          expect(isRight(result)).toBeFalsy();
         });
       });
     });

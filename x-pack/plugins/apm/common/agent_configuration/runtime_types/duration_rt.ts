@@ -7,63 +7,40 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import moment, { unitOfTime } from 'moment';
-import { i18n } from '@kbn/i18n';
 import { amountAndUnitToObject, AmountAndUnit } from '../amount_and_unit';
-import { getRangeType } from './get_range_type';
+import { getRangeTypeMessage } from './get_range_type';
 
-function getDuration({ amount, unit }: AmountAndUnit) {
+function toMilliseconds({ amount, unit }: AmountAndUnit) {
   return moment.duration(amount, unit as unitOfTime.Base);
 }
 
-export function getDurationRt({
-  min,
-  max,
-  units
-}: {
-  min?: string;
-  max?: string;
-  units: string[];
-}) {
-  const minAmountAndUnit = min && amountAndUnitToObject(min);
-  const maxAmountAndUnit = max && amountAndUnitToObject(max);
-
-  const message = i18n.translate('xpack.apm.agentConfig.duration.errorText', {
-    defaultMessage: `{rangeType, select,
-      between {Must be between {min} and {max}}
-      gt {Must be greater than {min}}
-      lt {Must be less than {max}}
-      other {Must be an integer}
-    }`,
-    values: {
-      min,
-      max,
-      rangeType: getRangeType(
-        minAmountAndUnit ? minAmountAndUnit.amount : undefined,
-        maxAmountAndUnit ? maxAmountAndUnit.amount : undefined
-      )
+function amountAndUnitToMilliseconds(value?: string) {
+  if (value) {
+    const { amount, unit } = amountAndUnitToObject(value);
+    if (isFinite(amount) && unit) {
+      return toMilliseconds({ amount, unit });
     }
-  });
+  }
+}
+
+export function getDurationRt({ min, max }: { min?: string; max?: string }) {
+  const minAsMilliseconds = amountAndUnitToMilliseconds(min) ?? -Infinity;
+  const maxAsMilliseconds = amountAndUnitToMilliseconds(max) ?? Infinity;
+  const message = getRangeTypeMessage(min, max);
+
   return new t.Type<string, string, unknown>(
     'durationRt',
     t.string.is,
     (input, context) => {
       return either.chain(t.string.validate(input, context), inputAsString => {
-        const { amount, unit } = amountAndUnitToObject(inputAsString);
-        const inputDuration = getDuration({ amount, unit });
+        const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
 
-        const minDuration = minAmountAndUnit
-          ? getDuration(minAmountAndUnit)
-          : inputDuration;
-
-        const maxDuration = maxAmountAndUnit
-          ? getDuration(maxAmountAndUnit)
-          : inputDuration;
-
-        const isValidUnit = units.includes(unit);
         const isValidAmount =
-          inputDuration >= minDuration && inputDuration <= maxDuration;
+          typeof inputAsMilliseconds !== 'undefined' &&
+          inputAsMilliseconds >= minAsMilliseconds &&
+          inputAsMilliseconds <= maxAsMilliseconds;
 
-        return isValidUnit && isValidAmount
+        return isValidAmount
           ? t.success(inputAsString)
           : t.failure(input, context, message);
       });
