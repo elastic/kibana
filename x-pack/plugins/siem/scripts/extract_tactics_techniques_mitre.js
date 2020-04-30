@@ -12,13 +12,7 @@ const fetch = require('node-fetch');
 const { camelCase } = require('lodash');
 const { resolve } = require('path');
 
-const OUTPUT_DIRECTORY = resolve(
-  '../../legacy/plugins/siem',
-  'public',
-  'pages',
-  'detection_engine',
-  'mitre'
-);
+const OUTPUT_DIRECTORY = resolve('public', 'pages', 'detection_engine', 'mitre');
 const MITRE_ENTREPRISE_ATTACK_URL =
   'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
