@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import set from 'set-value';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';

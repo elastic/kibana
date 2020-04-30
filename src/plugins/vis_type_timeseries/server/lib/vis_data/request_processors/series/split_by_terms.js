@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import set from 'set-value';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';

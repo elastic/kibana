@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const { set, get, isEmpty } = require('lodash');
+import set from 'set-value';
+import _ from 'lodash';
 
-const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
+const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
 /* For grouping by the 'Everything', the splitByEverything request processor
@@ -30,11 +31,15 @@ const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 
  *
  */
 function removeEmptyTopLevelAggregation(doc, series) {
-  const filter = get(doc, `aggs.${series.id}.filter`);
+  const filter = _.get(doc, `aggs.${series.id}.filter`);
 
   if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(doc.aggs[series.id].aggs)) {
-    const meta = get(doc, `aggs.${series.id}.meta`);
-    set(doc, `aggs`, doc.aggs[series.id].aggs);
+    const meta = _.get(doc, `aggs.${series.id}.meta`);
+    const aggs = _.get(doc, `aggs.${series.id}.aggs`);
+    if (aggs) {
+      delete doc.aggs[`${series.id}`];
+    }
+    set(doc, `aggs`, aggs);
     set(doc, `aggs.timeseries.meta`, meta);
   }
 

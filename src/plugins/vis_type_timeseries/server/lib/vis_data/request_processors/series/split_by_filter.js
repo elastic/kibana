@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import set from 'set-value';
 import { esQuery } from '../../../../../../data/server';
 
 export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {

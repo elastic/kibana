@@ -20,7 +20,7 @@
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import { set } from 'lodash';
+import set from 'set-value';
 
 export const filter = metric => metric.type === 'positive_rate';
 
