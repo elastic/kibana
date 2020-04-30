@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PackageInfo } from '../../../../core/public';
+import { PackageInfo, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 import { uuidV4 } from '../../../../plugins/kibana_utils/public';
 
@@ -191,10 +191,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
         getSessionId: () => this.sessionId,
         startSession: () => (this.sessionId = uuidV4()),
-        clearSession: () => (this.sessionId = undefined),
+        clearSession: () => (this.sessionId = uuidV4()),
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
-        // TODO: should an intercepror have a destroy method?
+        // TODO: should an interceptor have a destroy method?
         this.searchInterceptor = searchInterceptor;
       },
       __LEGACY: legacySearch,
