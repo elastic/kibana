@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useRef, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal, EuiOverlayMask, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -149,14 +149,26 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
               defaultMessage="Checking amount of affected agents…"
             />
           ) : agentsCount ? (
+            <EuiCallOut
+              color="danger"
+              title={i18n.translate('xpack.deleteAgentConfig.confirmModal.affectedAgentsTitle', {
+                defaultMessage: 'Configuration in use',
+              })}
+            >
+              <FormattedMessage
+                id="xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsMessage"
+                defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent configuration. Unassign these agents before deleting this configuration."
+                values={{
+                  agentsCount,
+                }}
+              />
+            </EuiCallOut>
+          ) : (
             <FormattedMessage
-              id="xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsMessage"
-              defaultMessage="{agentsCount, plural, one {# agent is} other {# agents are}} assigned to this agent configuration. Unassign these agents before deleting this configuration."
-              values={{
-                agentsCount,
-              }}
+              id="xpack.ingestManager.deleteAgentConfig.confirmModal.irreversibleMessage"
+              defaultMessage="This action cannot be undone."
             />
-          ) : null}
+          )}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
