@@ -229,7 +229,7 @@ export class Header extends Component<HeaderProps, State> {
                   aria-controls={navId}
                   ref={this.toggleCollapsibleNavRef}
                 >
-                  <EuiIcon type="menu" size="m" aria-hidden="true" />
+                  <EuiIcon type="menu" size="m" />
                 </EuiHeaderSectionItemButton>
               </EuiHeaderSectionItem>
             ) : (
