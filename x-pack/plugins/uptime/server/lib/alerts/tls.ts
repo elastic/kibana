@@ -15,7 +15,7 @@ import { commonStateTranslations, tlsTranslations } from './translations';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
-const DEFAULT_FROM = 'now-7d';
+const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
 const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 20;
