@@ -8,6 +8,7 @@ import { ApplicationSetup, StartServicesAccessor, HttpSetup } from 'src/core/pub
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigType } from '../config';
 import { PluginStartDependencies } from '../plugin';
+import { accessAgreementApp } from './access_agreement';
 import { loginApp } from './login';
 import { logoutApp } from './logout';
 import { loggedOutApp } from './logged_out';
@@ -46,6 +47,7 @@ export class AuthenticationService {
       ((await http.get('/internal/security/api_key/_enabled')) as { apiKeysEnabled: boolean })
         .apiKeysEnabled;
 
+    accessAgreementApp.create({ application, getStartServices });
     loginApp.create({ application, config, getStartServices, http });
     logoutApp.create({ application, http });
     loggedOutApp.create({ application, getStartServices, http });

@@ -128,6 +128,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
         updated_on: { type: 'keyword' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
+        monitoring_enabled: { type: 'keyword' },
       },
     },
   },

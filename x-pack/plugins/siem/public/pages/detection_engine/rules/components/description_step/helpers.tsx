@@ -37,11 +37,11 @@ const NoteDescriptionContainer = styled(EuiFlexItem)`
 
 export const isNotEmptyArray = (values: string[]) => !isEmpty(values.join(''));
 
-const EuiBadgeWrap = styled(EuiBadge)`
+const EuiBadgeWrap = (styled(EuiBadge)`
   .euiBadge__text {
     white-space: pre-wrap !important;
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 export const buildQueryBarDescription = ({
   field,
