@@ -295,3 +295,27 @@ describe('Comparators create the correct ES queries', () => {
     });
   });
 });
+
+describe('Multiple criteria create the right ES query', () => {
+  beforeEach(() => {
+    services.callCluster.mockReset();
+  });
+  it('works', async () => {
+    await callExecutor(
+      [2, Comparator.GT, 1], // Not relevant
+      [
+        { field: 'foo', comparator: Comparator.EQ, value: 'bar' },
+        { field: 'http.status', comparator: Comparator.LT, value: 400 },
+      ]
+    );
+
+    const query = services.callCluster.mock.calls[0][1]!;
+    expect(query.body).toMatchObject({
+      query: {
+        bool: {
+          must: [{ term: { foo: { value: 'bar' } } }, { range: { 'http.status': { lt: 400 } } }],
+        },
+      },
+    });
+  });
+});
