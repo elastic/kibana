@@ -50,7 +50,7 @@ async function waitForMapDependencies() {
 
     resolve(true);
   });
-  return await whenModulesLoadedPromise;
+  return whenModulesLoadedPromise;
 }
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
