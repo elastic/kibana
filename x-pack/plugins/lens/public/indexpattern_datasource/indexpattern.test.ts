@@ -10,6 +10,7 @@ import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { Ast } from '@kbn/interpreter/common';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -262,20 +263,7 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "aggConfigs": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {
-                          "aggConfigs": Array [
-                            "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
-                          ],
-                        },
-                        "function": "lens_auto_date",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
+                  "[{\\"id\\":\\"col1\\",\\"enabled\\":true,\\"type\\":\\"count\\",\\"schema\\":\\"metric\\",\\"params\\":{}},{\\"id\\":\\"col2\\",\\"enabled\\":true,\\"type\\":\\"date_histogram\\",\\"schema\\":\\"segment\\",\\"params\\":{\\"field\\":\\"timestamp\\",\\"useNormalizedEsInterval\\":true,\\"interval\\":\\"1d\\",\\"drop_partials\\":false,\\"min_doc_count\\":0,\\"extended_bounds\\":{}}}]",
                 ],
                 "includeFormatHints": Array [
                   true,
@@ -288,6 +276,9 @@ describe('IndexPattern Data Source', () => {
                 ],
                 "partialRows": Array [
                   false,
+                ],
+                "timeFields": Array [
+                  "timestamp",
                 ],
               },
               "function": "esaggs",
@@ -306,6 +297,89 @@ describe('IndexPattern Data Source', () => {
           "type": "expression",
         }
       `);
+    });
+
+    it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
+      const queryPersistedState: IndexPatternPersistedState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2', 'col3'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: 'Records',
+                operationType: 'count',
+              },
+              col2: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+              col3: {
+                label: 'Date 2',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'another_datefield',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = stateFromPersistedState(queryPersistedState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
+    });
+
+    it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
+      const queryPersistedState: IndexPatternPersistedState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'Count of records',
+                dataType: 'date',
+                isBucketed: false,
+                sourceField: 'timefield',
+                operationType: 'cardinality',
+              },
+              col2: {
+                label: 'Date',
+                dataType: 'date',
+                isBucketed: true,
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'auto',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const state = stateFromPersistedState(queryPersistedState);
+
+      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
+      expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
   });
 
