@@ -65,6 +65,7 @@ export const font: ExpressionFunctionFont = {
   args: {
     align: {
       default: 'left',
+      required: false,
       help: i18n.translate('expressions.functions.font.args.alignHelpText', {
         defaultMessage: 'The horizontal text alignment.',
       }),
@@ -72,6 +73,8 @@ export const font: ExpressionFunctionFont = {
       types: ['string'],
     },
     color: {
+      default: undefined,
+      required: false,
       help: i18n.translate('expressions.functions.font.args.colorHelpText', {
         defaultMessage: 'The text color.',
       }),
@@ -79,6 +82,7 @@ export const font: ExpressionFunctionFont = {
     },
     family: {
       default: `"${openSans.value}"`,
+      required: false,
       help: i18n.translate('expressions.functions.font.args.familyHelpText', {
         defaultMessage: 'An acceptable {css} web font string',
         values: {
@@ -89,6 +93,7 @@ export const font: ExpressionFunctionFont = {
     },
     italic: {
       default: false,
+      required: false,
       help: i18n.translate('expressions.functions.font.args.italicHelpText', {
         defaultMessage: 'Italicize the text?',
       }),
@@ -97,6 +102,7 @@ export const font: ExpressionFunctionFont = {
     },
     lHeight: {
       default: null,
+      required: false,
       aliases: ['lineHeight'],
       help: i18n.translate('expressions.functions.font.args.lHeightHelpText', {
         defaultMessage: 'The line height in pixels',
@@ -105,6 +111,7 @@ export const font: ExpressionFunctionFont = {
     },
     size: {
       default: 14,
+      required: false,
       help: i18n.translate('expressions.functions.font.args.sizeHelpText', {
         defaultMessage: 'The font size in pixels',
       }),
@@ -112,6 +119,7 @@ export const font: ExpressionFunctionFont = {
     },
     underline: {
       default: false,
+      required: false,
       help: i18n.translate('expressions.functions.font.args.underlineHelpText', {
         defaultMessage: 'Underline the text?',
       }),
@@ -120,6 +128,7 @@ export const font: ExpressionFunctionFont = {
     },
     weight: {
       default: 'normal',
+      required: false,
       help: i18n.translate('expressions.functions.font.args.weightHelpText', {
         defaultMessage: 'The font weight. For example, {list}, or {end}.',
         values: {

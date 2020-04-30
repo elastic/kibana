@@ -27,7 +27,7 @@ type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
-  spec: string;
+  spec?: string;
 }
 
 export type VisParams = Required<Arguments>;
@@ -38,9 +38,17 @@ interface RenderValue {
   visConfig: VisParams;
 }
 
+type ExpressionFunctionVega = ExpressionFunctionDefinition<'vega', Input, Arguments, Output>;
+
+declare module '../../../plugins/expressions/public' {
+  interface ExpressionFunctionDefinitions {
+    vega: ExpressionFunctionVega;
+  }
+}
+
 export const createVegaFn = (
   dependencies: VegaVisualizationDependencies
-): ExpressionFunctionDefinition<'vega', Input, Arguments, Output> => ({
+): ExpressionFunctionVega => ({
   name: 'vega',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -51,17 +59,19 @@ export const createVegaFn = (
     spec: {
       types: ['string'],
       default: '',
+      required: false,
       help: '',
     },
   },
   async fn(input, args) {
+    const spec = args.spec!;
     const vegaRequestHandler = createVegaRequestHandler(dependencies);
 
     const response = await vegaRequestHandler({
       timeRange: get(input, 'timeRange'),
       query: get(input, 'query'),
       filters: get(input, 'filters'),
-      visParams: { spec: args.spec },
+      visParams: { spec },
     });
 
     return {
@@ -71,7 +81,7 @@ export const createVegaFn = (
         visData: response,
         visType: 'vega',
         visConfig: {
-          spec: args.spec,
+          spec,
         },
       },
     };

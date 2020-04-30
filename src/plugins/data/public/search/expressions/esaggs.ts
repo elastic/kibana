@@ -70,11 +70,19 @@ type Output = Promise<KibanaDatatable>;
 
 interface Arguments {
   index: string;
-  metricsAtAllLevels: boolean;
-  partialRows: boolean;
-  includeFormatHints: boolean;
-  aggConfigs: string;
+  metricsAtAllLevels?: boolean;
+  partialRows?: boolean;
+  includeFormatHints?: boolean;
+  aggConfigs?: string;
   timeFields?: string[];
+}
+
+type ExpressionFunctionEsaggs = ExpressionFunctionDefinition<typeof name, Input, Arguments, Output>;
+
+declare module '../../../../../plugins/expressions/public' {
+  interface ExpressionFunctionDefinitions {
+    esaggs: ExpressionFunctionEsaggs;
+  }
 }
 
 const handleCourierRequest = async ({
@@ -234,7 +242,7 @@ const handleCourierRequest = async ({
   return (searchSource as any).tabifiedResponse;
 };
 
-export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Arguments, Output> => ({
+export const esaggs = (): ExpressionFunctionEsaggs => ({
   name,
   type: 'kibana_datatable',
   inputTypes: ['kibana_context', 'null'],
@@ -244,6 +252,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
   args: {
     index: {
       types: ['string'],
+      required: true,
       help: '',
     },
     metricsAtAllLevels: {
@@ -263,7 +272,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     },
     aggConfigs: {
       types: ['string'],
-      default: '""',
+      default: '[]',
       help: '',
     },
     timeFields: {
@@ -277,7 +286,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
 
-    const aggConfigsState = JSON.parse(args.aggConfigs);
+    const aggConfigsState = JSON.parse(args.aggConfigs!);
     const indexPattern = await indexPatterns.get(args.index);
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 

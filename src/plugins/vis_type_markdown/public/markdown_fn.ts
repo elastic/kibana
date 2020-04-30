@@ -61,10 +61,12 @@ export const createMarkdownVisFn = (): ExpressionFunctionMarkdownVis => ({
         defaultMessage: 'Font settings.',
       }),
       default: `{font size=12}`,
+      required: false,
     },
     openLinksInNewTab: {
       types: ['boolean'],
       default: false,
+      required: false,
       help: i18n.translate('visTypeMarkdown.function.openLinksInNewTab.help', {
         defaultMessage: 'Opens links in new tab',
       }),

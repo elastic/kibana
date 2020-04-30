@@ -28,9 +28,9 @@ type Input = KibanaContext | null;
 type Output = Promise<Render<RenderValue>>;
 
 interface Arguments {
-  params: string;
-  uiState: string;
-  savedObjectId: string | null;
+  params?: string;
+  uiState?: string;
+  savedObjectId?: string | null;
 }
 
 type VisParams = Required<Arguments>;
@@ -42,12 +42,15 @@ interface RenderValue {
   uiState: any;
 }
 
-export const createMetricsFn = (): ExpressionFunctionDefinition<
-  'tsvb',
-  Input,
-  Arguments,
-  Output
-> => ({
+type ExpressionFunctionTsvb = ExpressionFunctionDefinition<'tsvb', Input, Arguments, Output>;
+
+declare module '../../../plugins/expressions/public' {
+  interface ExpressionFunctionDefinitions {
+    tsvb: ExpressionFunctionTsvb;
+  }
+}
+
+export const createMetricsFn = (): ExpressionFunctionTsvb => ({
   name: 'tsvb',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -58,22 +61,25 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
     params: {
       types: ['string'],
       default: '"{}"',
+      required: false,
       help: '',
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
+      required: false,
       help: '',
     },
     savedObjectId: {
       types: ['null', 'string'],
       default: null,
+      required: false,
       help: '',
     },
   },
   async fn(input, args) {
-    const params = JSON.parse(args.params);
-    const uiStateParams = JSON.parse(args.uiState);
+    const params = JSON.parse(args.params!);
+    const uiStateParams = JSON.parse(args.uiState!);
     const savedObjectId = args.savedObjectId;
     const { PersistedState } = await import('../../visualizations/public');
     const uiState = new PersistedState(uiStateParams);
