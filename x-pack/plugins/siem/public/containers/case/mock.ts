@@ -32,6 +32,11 @@ export const elasticUser = {
   email: 'leslie.knope@elastic.co',
 };
 
+export const serviceConnectorUser = {
+  fullName: 'Leslie Knope',
+  username: 'lknope',
+};
+
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
@@ -213,7 +218,7 @@ export const pushSnake = {
   external_title: 'external title',
   external_url: 'basicPush.com',
 };
-const basicPushSnake = {
+export const basicPushSnake = {
   ...pushSnake,
   pushed_at: basicUpdatedAt,
   pushed_by: elasticUserSnake,

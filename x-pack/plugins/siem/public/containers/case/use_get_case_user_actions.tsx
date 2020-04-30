@@ -49,7 +49,7 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 const getExternalService = (value: string): CaseFullExternalService | null =>
   parseString(`${value}`);
 
-const getPushedInfo = (
+export const getPushedInfo = (
   caseUserActions: CaseUserActions[],
   caseConnectorId: string
 ): {

@@ -6,11 +6,12 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import {
+  getPushedInfo,
   initialData,
   useGetCaseUserActions,
   UseGetCaseUserActions,
 } from './use_get_case_user_actions';
-import { basicCase, caseUserActions, elasticUser } from './mock';
+import { basicCase, basicPushSnake, caseUserActions, elasticUser, getUserAction } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -50,7 +51,7 @@ describe('useGetCaseUserActions', () => {
     });
   });
 
-  it('retuns proper state on getCaseUserActions', async () => {
+  it('returns proper state on getCaseUserActions', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(() =>
         useGetCaseUserActions(basicCase.id, basicCase.connectorId)
@@ -100,6 +101,161 @@ describe('useGetCaseUserActions', () => {
         isLoading: false,
         isError: true,
         fetchCaseUserActions: result.current.fetchCaseUserActions,
+      });
+    });
+  });
+  describe('getPushedInfo', () => {
+    it('Correctly marks first/last index - hasDataToPush: false', () => {
+      const userActions = [...caseUserActions, getUserAction(['pushed'], 'push-to-service')];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: false,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            hasDataToPush: false,
+          },
+        },
+      });
+    });
+
+    it('Correctly marks first/last index - hasDataToPush: true', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            hasDataToPush: true,
+          },
+        },
+      });
+    });
+
+    it('Does not count connector_id update as a reason to push', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['connector_id'], 'update'),
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: false,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            hasDataToPush: false,
+          },
+        },
+      });
+    });
+    it('Correctly handles multiple push actions', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+        getUserAction(['pushed'], 'push-to-service'),
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: false,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 5,
+            hasDataToPush: false,
+          },
+        },
+      });
+    });
+
+    it('Multiple connector tracking - hasDataToPush: true', () => {
+      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const push456 = {
+        ...basicPushSnake,
+        connector_id: '456',
+        connector_name: 'other connector name',
+        external_id: 'other_external_id',
+      };
+      const pushAction456 = {
+        ...getUserAction(['pushed'], 'push-to-service'),
+        newValue: JSON.stringify(push456),
+      };
+
+      const userActions = [
+        ...caseUserActions,
+        pushAction123,
+        getUserAction(['comment'], 'create'),
+        pushAction456,
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            hasDataToPush: true,
+          },
+          '456': {
+            ...push456,
+            firstPushIndex: 5,
+            lastPushIndex: 5,
+            hasDataToPush: false,
+          },
+        },
+      });
+    });
+
+    it('Multiple connector tracking - hasDataToPush: false', () => {
+      const pushAction123 = getUserAction(['pushed'], 'push-to-service');
+      const push456 = {
+        ...basicPushSnake,
+        connector_id: '456',
+        connector_name: 'other connector name',
+        external_id: 'other_external_id',
+      };
+      const pushAction456 = {
+        ...getUserAction(['pushed'], 'push-to-service'),
+        newValue: JSON.stringify(push456),
+      };
+
+      const userActions = [
+        ...caseUserActions,
+        pushAction123,
+        getUserAction(['comment'], 'create'),
+        pushAction456,
+      ];
+      const result = getPushedInfo(userActions, '456');
+      expect(result).toEqual({
+        hasDataToPush: false,
+        caseServices: {
+          '123': {
+            ...basicPushSnake,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            hasDataToPush: true,
+          },
+          '456': {
+            ...push456,
+            firstPushIndex: 5,
+            lastPushIndex: 5,
+            hasDataToPush: false,
+          },
+        },
       });
     });
   });
