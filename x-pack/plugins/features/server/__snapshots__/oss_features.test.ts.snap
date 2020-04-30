@@ -178,6 +178,7 @@ Array [
       "api": Array [],
       "app": Array [
         "discover",
+        "kibana",
       ],
       "catalogue": Array [
         "discover",
@@ -205,6 +206,7 @@ Array [
     "privilege": Object {
       "app": Array [
         "discover",
+        "kibana",
       ],
       "catalogue": Array [
         "discover",

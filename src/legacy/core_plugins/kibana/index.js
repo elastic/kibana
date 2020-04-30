@@ -61,10 +61,6 @@ export default function(kibana) {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       links: [
-        // TODO get rid of discover references
-        // TODO get rid of visualize references
-        // TODO get rid of dashboards references
-        // TODO get rid of dev_tools references
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {

@@ -58,7 +58,7 @@ export function showLegacyRedirectMessages(
 
   if (urlParams.notFoundMessage) {
     notifications.toasts.addWarning({
-      title: i18n.translate('kibana_utils.history.savedObjectIsMissingNotificationMessage', {
+      title: i18n.translate('management.history.savedObjectIsMissingNotificationMessage', {
         defaultMessage: 'Saved object is missing',
       }),
       text: toMountPoint(<MarkdownSimple>{urlParams.notFoundMessage}</MarkdownSimple>),

@@ -91,7 +91,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
   public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
     core.application.register({
       id: 'dev_tools',
-      title: i18n.translate('kbn.devToolsTitle', {
+      title: i18n.translate('devTools.devToolsTitle', {
         defaultMessage: 'Dev Tools',
       }),
       updater$: this.appStateUpdater,

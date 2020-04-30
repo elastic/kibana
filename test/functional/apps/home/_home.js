@@ -32,7 +32,7 @@ export default function({ getService, getPageObjects }) {
       await globalNav.clickLogo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/home#/')).to.be(true);
+      expect(url.includes('/app/home')).to.be(true);
     });
 
     it('clicking on console on homepage should take you to console app', async () => {
