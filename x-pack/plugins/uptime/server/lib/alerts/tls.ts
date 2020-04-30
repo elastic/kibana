@@ -92,7 +92,7 @@ export const getCertSummary = (
 
 export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
   id: 'xpack.uptime.alerts.tls',
-  name: i18n.translate('xpack/uptime.alerts.tls', {
+  name: i18n.translate('xpack.uptime.alerts.tls', {
     defaultMessage: 'Uptime TLS',
   }),
   validate: {
