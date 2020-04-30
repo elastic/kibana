@@ -151,9 +151,12 @@ export const AgentConfigDeleteProvider: React.FunctionComponent<Props> = ({ chil
           ) : agentsCount ? (
             <EuiCallOut
               color="danger"
-              title={i18n.translate('xpack.deleteAgentConfig.confirmModal.affectedAgentsTitle', {
-                defaultMessage: 'Configuration in use',
-              })}
+              title={i18n.translate(
+                'xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsTitle',
+                {
+                  defaultMessage: 'Configuration in use',
+                }
+              )}
             >
               <FormattedMessage
                 id="xpack.ingestManager.deleteAgentConfig.confirmModal.affectedAgentsMessage"
