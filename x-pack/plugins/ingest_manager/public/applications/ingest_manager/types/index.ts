@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
