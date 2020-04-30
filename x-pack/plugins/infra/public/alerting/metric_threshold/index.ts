@@ -5,13 +5,13 @@
  */
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../../triggers_actions_ui/public/types';
-import { Expressions } from './expression';
-import { validateMetricThreshold } from './validation';
+import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import { Expressions } from './components/expression';
+import { validateMetricThreshold } from './components/validation';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/metric_threshold/types';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/alerting/metric_threshold/types';
 
-export function getAlertType(): AlertTypeModel {
+export function createMetricThresholdAlertType(): AlertTypeModel {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertFlyout.alertName', {
