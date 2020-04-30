@@ -4184,7 +4184,6 @@
     "xpack.apm.alertTypes.errorRate": "エラー率",
     "xpack.apm.alertTypes.transactionDuration": "トランザクション期間",
     "xpack.apm.apmDescription": "アプリケーション内から自動的に詳細なパフォーマンスメトリックやエラーを集めます。",
-    "xpack.apm.apmForESDescription": "Elastic Stack 用の APM",
     "xpack.apm.applyFilter": "{title} フィルターを適用",
     "xpack.apm.applyOptions": "オプションを適用",
     "xpack.apm.breadcrumb.errorsTitle": "エラー",
