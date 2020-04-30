@@ -1680,7 +1680,7 @@ export interface SavedObjectMigrationContext {
 }
 
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
 // @public
 export interface SavedObjectMigrationMap {
@@ -1708,7 +1708,7 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
@@ -1839,6 +1839,8 @@ export interface SavedObjectsCoreFieldMapping {
     };
     // (undocumented)
     index?: boolean;
+    // (undocumented)
+    null_value?: number | boolean | string;
     // (undocumented)
     type: string;
 }
@@ -2309,7 +2311,7 @@ export class SavedObjectTypeRegistry {
     }
 
 // @public
-export type SavedObjectUnsanitizedDoc = SavedObjectDoc & Partial<Referencable>;
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
