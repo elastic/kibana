@@ -35,7 +35,6 @@ import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { AlertType } from '../common/alert_types';
 import { ErrorRateAlertTrigger } from './components/shared/ErrorRateAlertTrigger';
 import { TransactionDurationAlertTrigger } from './components/shared/TransactionDurationAlertTrigger';
-import { createStaticIndexPattern } from './services/rest/index_pattern';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
@@ -120,12 +119,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       validate: () => ({
         errors: []
       })
-    });
-
-    // create static index pattern and store as saved object. Not needed by APM UI but for legacy reasons in Discover, Dashboard etc.
-    createStaticIndexPattern().catch(e => {
-      // eslint-disable-next-line no-console
-      console.log('Error fetching static index pattern', e);
     });
   }
 }
