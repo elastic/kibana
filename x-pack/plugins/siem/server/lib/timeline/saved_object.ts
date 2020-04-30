@@ -112,7 +112,6 @@ export const getAllTimeline = async (
       : ['title', 'description'],
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
-    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.default}`,
   };
   return getAllSavedTimeline(request, options);
 };
