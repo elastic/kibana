@@ -30,6 +30,7 @@ import { MockCapabilitiesService, MockHistory } from './application_service.test
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
+import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -732,27 +733,57 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
+      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      // Create an app and a promise that allows us to control when the app completes mounting
+      const createWaitingApp = (props: Partial<App>): [App, () => void] => {
+        let finishMount: () => void;
+        const mountPromise = new Promise(resolve => (finishMount = resolve));
+        const app = {
+          id: 'some-id',
+          title: 'some-title',
+          mount: async () => {
+            await mountPromise;
+            return () => undefined;
+          },
+          ...props,
+        };
+
+        return [app, finishMount!];
+      };
+
       // Create some dummy applications
       const { register } = service.setup(setupDeps);
-      register(Symbol(), createApp({ id: 'alpha' }));
-      register(Symbol(), createApp({ id: 'beta' }));
-      register(Symbol(), createApp({ id: 'gamma' }));
-      register(Symbol(), createApp({ id: 'delta' }));
+      const [alphaApp, finishAlphaMount] = createWaitingApp({ id: 'alpha' });
+      const [betaApp, finishBetaMount] = createWaitingApp({ id: 'beta' });
+      register(Symbol(), alphaApp);
+      register(Symbol(), betaApp);
 
       const { navigateToApp, getComponent } = await service.start(startDeps);
       const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
       const stop$ = new Subject();
-      const promise = httpLoadingCount$.pipe(bufferCount(8), takeUntil(stop$)).toPromise();
+      const currentLoadingCount$ = new BehaviorSubject(0);
+      httpLoadingCount$.pipe(takeUntil(stop$)).subscribe(currentLoadingCount$);
+      const loadingPromise = httpLoadingCount$.pipe(bufferCount(5), takeUntil(stop$)).toPromise();
       mount(getComponent()!);
 
-      await navigateToApp('alpha');
-      await navigateToApp('beta');
-      await navigateToApp('gamma');
-      await navigateToApp('delta');
+      await act(() => navigateToApp('alpha'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishAlphaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
+      await act(() => navigateToApp('beta'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishBetaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
       stop$.next();
-
-      const loadingCounts = await promise;
-
+      const loadingCounts = await loadingPromise;
       expect(loadingCounts).toMatchInlineSnapshot(`
         Array [
           0,
@@ -760,9 +791,6 @@ describe('#start()', () => {
           0,
           1,
           0,
-          1,
-          0,
-          1,
         ]
       `);
     });

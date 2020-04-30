@@ -77,15 +77,20 @@ export const AppContainer: FunctionComponent<Props> = ({
 
     const mount = async () => {
       setShowSpinner(true);
-      unmountRef.current =
-        (await mounter.mount({
-          appBasePath: mounter.appBasePath,
-          history: createScopedHistory(appPath),
-          element: elementRef.current!,
-          onAppLeave: handler => setAppLeaveHandler(appId, handler),
-        })) || null;
-      setShowSpinner(false);
-      setIsMounting(false);
+      try {
+        unmountRef.current =
+          (await mounter.mount({
+            appBasePath: mounter.appBasePath,
+            history: createScopedHistory(appPath),
+            element: elementRef.current!,
+            onAppLeave: handler => setAppLeaveHandler(appId, handler),
+          })) || null;
+      } catch (e) {
+        // TODO: add error UI
+      } finally {
+        setShowSpinner(false);
+        setIsMounting(false);
+      }
     };
 
     mount();
