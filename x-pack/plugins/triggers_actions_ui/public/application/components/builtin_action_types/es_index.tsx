@@ -162,7 +162,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               return;
             }
             const currentEsFields = await getFields(http!, indices);
-            const timeFields = getTimeFieldOptions(currentEsFields as unknown);
+            const timeFields = getTimeFieldOptions(currentEsFields as any);
 
             setTimeFieldOptions([firstFieldOption, ...timeFields]);
           }}
