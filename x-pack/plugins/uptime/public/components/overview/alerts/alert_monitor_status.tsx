@@ -65,7 +65,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
             setNewFilters(newFilters.filter(item => item !== removeFiler));
           }
         }}
-        setAlertParams={setAlertParams}
       />
 
       <EuiSpacer size="xs" />
