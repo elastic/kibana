@@ -292,8 +292,10 @@ export {
   RecursiveReadonly,
   DEFAULT_APP_CATEGORIES,
   getFlattenedObject,
+  URLMeaningfulParts,
   modifyUrl,
   isRelativeUrl,
+  Freezable,
   deepFreeze,
   assertNever,
 } from '../utils';
