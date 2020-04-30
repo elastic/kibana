@@ -8,10 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { UMServerLibs } from '../lib/lib';
-import {
-  DynamicSettings,
-  DynamicSettingsType,
-} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects';
 

@@ -46,6 +46,7 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
+import { appendAppPath } from './utils';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -81,13 +82,7 @@ const getAppUrl = (mounters: Map<string, Mounter>, appId: string, path: string =
   const appBasePath = mounters.get(appId)?.appRoute
     ? `/${mounters.get(appId)!.appRoute}`
     : `/app/${appId}`;
-
-  // Only preppend slash if not a hash or query path
-  path = path.startsWith('#') || path.startsWith('?') ? path : `/${path}`;
-
-  return `${appBasePath}${path}`
-    .replace(/\/{2,}/g, '/') // Remove duplicate slashes
-    .replace(/\/$/, ''); // Remove trailing slash
+  return appendAppPath(appBasePath, path);
 };
 
 const allApplicationsFilter = '__ALL__';
@@ -290,6 +285,9 @@ export class ApplicationService {
       },
       navigateToApp: async (appId, { path, state }: { path?: string; state?: any } = {}) => {
         if (await this.shouldNavigate(overlays)) {
+          if (path === undefined) {
+            path = applications$.value.get(appId)?.defaultPath;
+          }
           this.appLeaveHandlers.delete(this.currentAppId$.value!);
           this.navigate!(getAppUrl(availableMounters, appId, path), state);
           this.currentAppId$.next(appId);

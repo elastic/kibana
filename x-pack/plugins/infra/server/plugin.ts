@@ -147,7 +147,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting);
+    registerAlertTypes(plugins.alerting, this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

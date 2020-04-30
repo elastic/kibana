@@ -8,101 +8,74 @@ import { canSkipSourceUpdate, updateDueToExtent } from './can_skip_fetch';
 import { DataRequest } from './data_request';
 
 describe('updateDueToExtent', () => {
-  it('should be false when the source is not extent aware', async () => {
-    const sourceMock = {
-      isFilterByMapBounds: () => {
-        return false;
-      },
+  it('should be false when buffers are the same', async () => {
+    const oldBuffer = {
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
     };
-    expect(updateDueToExtent(sourceMock)).toBe(false);
+    const newBuffer = {
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    };
+    expect(updateDueToExtent({ buffer: oldBuffer }, { buffer: newBuffer })).toBe(false);
   });
 
-  describe('source is extent aware', () => {
-    const sourceMock = {
-      isFilterByMapBounds: () => {
-        return true;
-      },
+  it('should be false when the new buffer is contained in the old buffer', async () => {
+    const oldBuffer = {
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
     };
+    const newBuffer = {
+      maxLat: 10,
+      maxLon: 100,
+      minLat: 5,
+      minLon: 95,
+    };
+    expect(updateDueToExtent({ buffer: oldBuffer }, { buffer: newBuffer })).toBe(false);
+  });
 
-    it('should be false when buffers are the same', async () => {
-      const oldBuffer = {
-        maxLat: 12.5,
-        maxLon: 102.5,
-        minLat: 2.5,
-        minLon: 92.5,
-      };
-      const newBuffer = {
-        maxLat: 12.5,
-        maxLon: 102.5,
-        minLat: 2.5,
-        minLon: 92.5,
-      };
-      expect(updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer })).toBe(
-        false
-      );
-    });
+  it('should be true when the new buffer is contained in the old buffer and the past results were truncated', async () => {
+    const oldBuffer = {
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    };
+    const newBuffer = {
+      maxLat: 10,
+      maxLon: 100,
+      minLat: 5,
+      minLon: 95,
+    };
+    expect(
+      updateDueToExtent({ buffer: oldBuffer, areResultsTrimmed: true }, { buffer: newBuffer })
+    ).toBe(true);
+  });
 
-    it('should be false when the new buffer is contained in the old buffer', async () => {
-      const oldBuffer = {
-        maxLat: 12.5,
-        maxLon: 102.5,
-        minLat: 2.5,
-        minLon: 92.5,
-      };
-      const newBuffer = {
-        maxLat: 10,
-        maxLon: 100,
-        minLat: 5,
-        minLon: 95,
-      };
-      expect(updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer })).toBe(
-        false
-      );
-    });
+  it('should be true when meta has no old buffer', async () => {
+    expect(updateDueToExtent()).toBe(true);
+  });
 
-    it('should be true when the new buffer is contained in the old buffer and the past results were truncated', async () => {
-      const oldBuffer = {
-        maxLat: 12.5,
-        maxLon: 102.5,
-        minLat: 2.5,
-        minLon: 92.5,
-      };
-      const newBuffer = {
-        maxLat: 10,
-        maxLon: 100,
-        minLat: 5,
-        minLon: 95,
-      };
-      expect(
-        updateDueToExtent(
-          sourceMock,
-          { buffer: oldBuffer, areResultsTrimmed: true },
-          { buffer: newBuffer }
-        )
-      ).toBe(true);
-    });
-
-    it('should be true when meta has no old buffer', async () => {
-      expect(updateDueToExtent(sourceMock)).toBe(true);
-    });
-
-    it('should be true when the new buffer is not contained in the old buffer', async () => {
-      const oldBuffer = {
-        maxLat: 12.5,
-        maxLon: 102.5,
-        minLat: 2.5,
-        minLon: 92.5,
-      };
-      const newBuffer = {
-        maxLat: 7.5,
-        maxLon: 92.5,
-        minLat: -2.5,
-        minLon: 82.5,
-      };
-      expect(updateDueToExtent(sourceMock, { buffer: oldBuffer }, { buffer: newBuffer })).toBe(
-        true
-      );
-    });
+  it('should be true when the new buffer is not contained in the old buffer', async () => {
+    const oldBuffer = {
+      maxLat: 12.5,
+      maxLon: 102.5,
+      minLat: 2.5,
+      minLon: 92.5,
+    };
+    const newBuffer = {
+      maxLat: 7.5,
+      maxLon: 92.5,
+      minLat: -2.5,
+      minLon: 82.5,
+    };
+    expect(updateDueToExtent({ buffer: oldBuffer }, { buffer: newBuffer })).toBe(true);
   });
 });
 

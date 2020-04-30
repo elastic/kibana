@@ -7,8 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { getLayerWizards } from '../../../layers/layer_wizard_registry';
-import { EuiTitle, EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 
 export function SourceSelect({ updateSourceSelection }) {
@@ -38,17 +37,5 @@ export function SourceSelect({ updateSourceSelection }) {
     );
   });
 
-  return (
-    <Fragment>
-      <EuiTitle size="xs">
-        <h2>
-          <FormattedMessage
-            id="xpack.maps.addLayerPanel.chooseDataSourceTitle"
-            defaultMessage="Choose data source"
-          />
-        </h2>
-      </EuiTitle>
-      {sourceCards}
-    </Fragment>
-  );
+  return <Fragment>{sourceCards}</Fragment>;
 }

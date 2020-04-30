@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
@@ -17,6 +18,7 @@ export {
   DatasourceInput,
   DatasourceInputStream,
   DatasourceConfigRecordEntry,
+  Output,
   DataStream,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
@@ -31,6 +33,8 @@ export {
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -48,6 +52,14 @@ export {
   GetEnrollmentAPIKeysResponse,
   GetEnrollmentAPIKeysRequest,
   GetOneEnrollmentAPIKeyResponse,
+  // API schemas - Outputs
+  GetOutputsResponse,
+  PutOutputRequest,
+  PutOutputResponse,
+  // API schemas - Settings
+  GetSettingsResponse,
+  PutSettingsRequest,
+  PutSettingsResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,

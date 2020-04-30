@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type CreateDatasourceFrom = 'package' | 'config';
+export type CreateDatasourceFrom = 'package' | 'config' | 'edit';
+export type DatasourceFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';

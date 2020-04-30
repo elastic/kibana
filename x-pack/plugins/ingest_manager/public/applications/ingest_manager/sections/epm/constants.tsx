@@ -21,6 +21,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   'ingest-pipeline': 'Ingest Pipeline',
   'index-pattern': 'Index Pattern',
   'index-template': 'Index Template',
+  'component-template': 'Component Template',
   search: 'Saved Search',
   visualization: 'Visualization',
   input: 'Agent input',
