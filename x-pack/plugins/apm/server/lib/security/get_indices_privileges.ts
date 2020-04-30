@@ -27,8 +27,10 @@ export async function getIndicesPrivileges(
       ]
     });
     return response;
-  } catch (err) {
-    logger.warn(`Failed to fetch indices privileges. Error: ${err.message}`);
-    return { has_all_requested: true, index: {} };
+  } catch (error) {
+    if (error.statusCode === 400) {
+      return { has_all_requested: true, index: {} };
+    }
+    throw error;
   }
 }

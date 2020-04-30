@@ -19,14 +19,17 @@ describe('getIndicesPrivileges', () => {
   const logger = ({
     warn: jest.fn()
   } as unknown) as Logger;
-  it('has privileges when an error happens while fetching ', async () => {
+  it('has privileges when an error code 400 happens while fetching ', async () => {
     const setup = ({
       indices,
       client: {
         hasPrivileges: () => {
-          throw new Error(
-            'no handler found for uri [/_security/user/_has_privileges]'
-          );
+          const error = {
+            message:
+              'no handler found for uri [/_security/user/_has_privileges]',
+            statusCode: 400
+          };
+          throw error;
         }
       }
     } as unknown) as Setup;
@@ -35,6 +38,21 @@ describe('getIndicesPrivileges', () => {
       has_all_requested: true,
       index: {}
     });
+  });
+  it('throws any other error other than 400 ', async () => {
+    const setup = ({
+      indices,
+      client: {
+        hasPrivileges: () => {
+          throw new Error('unknow error');
+        }
+      }
+    } as unknown) as Setup;
+    try {
+      await getIndicesPrivileges(setup, logger);
+    } catch (error) {
+      expect(error).toEqual(Error('unknow error'));
+    }
   });
   it("has privileges to read from 'apm-*'", async () => {
     const setup = ({
