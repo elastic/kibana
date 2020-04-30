@@ -121,8 +121,12 @@ export async function deleteKibanaSavedObjectsAssets(
   const deletePromises = installedObjects.map(({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
-      savedObjectsClient.delete(assetType, id);
+      return savedObjectsClient.delete(assetType, id);
     }
   });
-  await Promise.all(deletePromises);
+  try {
+    await Promise.all(deletePromises);
+  } catch (err) {
+    throw new Error('error deleting saved object asset');
+  }
 }

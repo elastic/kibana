@@ -7,7 +7,8 @@ import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { esQuery } from '../../../../../../../src/plugins/data/server';
-import { AlertEvent, Direction, EndpointAppConstants } from '../../../../common/types';
+import { AlertEvent, AlertAPIOrdering } from '../../../../common/types';
+import { AlertConstants } from '../../../../common/alert_constants';
 import {
   AlertSearchQuery,
   AlertSearchRequest,
@@ -18,7 +19,7 @@ import {
 
 export { Pagination } from './pagination';
 
-function reverseSortDirection(order: Direction): Direction {
+function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {
     return 'desc';
   }
@@ -100,13 +101,13 @@ const buildAlertSearchQuery = async (
   query: AlertSearchQuery,
   indexPattern: string
 ): Promise<AlertSearchRequestWrapper> => {
-  let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
+  let totalHitsMin: number = AlertConstants.DEFAULT_TOTAL_HITS;
 
   // Calculate minimum total hits set to indicate there's a next page
   if (query.fromIndex) {
     totalHitsMin = Math.max(
       query.fromIndex + query.pageSize * 2,
-      EndpointAppConstants.DEFAULT_TOTAL_HITS
+      AlertConstants.DEFAULT_TOTAL_HITS
     );
   }
 

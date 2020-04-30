@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
@@ -32,6 +33,8 @@ export {
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents

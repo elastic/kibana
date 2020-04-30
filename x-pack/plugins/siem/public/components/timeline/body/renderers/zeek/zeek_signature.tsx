@@ -19,9 +19,9 @@ import { IS_OPERATOR } from '../../../data_providers/data_provider';
 
 import * as i18n from './translations';
 
-const Badge = styled(EuiBadge)`
+const Badge = (styled(EuiBadge)`
   vertical-align: top;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 
