@@ -101,7 +101,7 @@ export default function({ getService }: FtrProviderContext) {
       const eventId = uuid.v4();
       const event: IEvent = {
         event: { action: 'action1', provider: 'provider4' },
-        kibana: { saved_objects: [{ type: 'event_log_test', id: eventId }] },
+        kibana: { saved_objects: [{ rel: 'primary', type: 'event_log_test', id: eventId }] },
       };
       await logTestEvent(eventId, event);
 

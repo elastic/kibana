@@ -5,7 +5,16 @@
  */
 
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
-import { EuiFieldSearch, EuiSpacer, EuiText, EuiFormRow, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiText,
+  EuiFormRow,
+  EuiButtonEmpty,
+  EuiCheckbox,
+  EuiToolTip,
+  EuiIcon,
+  EuiFieldSearch,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,12 +35,18 @@ import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
 import { ExpressionRow } from './expression_row';
-import { MetricThresholdAlertParams, AlertContextMeta, TimeUnit, MetricExpression } from '../types';
+import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 
 interface Props {
   errors: IErrorObject[];
-  alertParams: MetricThresholdAlertParams;
+  alertParams: {
+    criteria: MetricExpression[];
+    groupBy?: string;
+    filterQuery?: string;
+    sourceId?: string;
+    alertOnNoData?: boolean;
+  };
   alertsContext: AlertsContextValue<AlertContextMeta>;
   setAlertParams(key: string, value: any): void;
   setAlertProperty(key: string, value: any): void;
@@ -251,6 +266,28 @@ export const Expressions: React.FC<Props> = props => {
           />
         </EuiButtonEmpty>
       </div>
+
+      <EuiSpacer size={'m'} />
+      <EuiCheckbox
+        id="metrics-alert-no-data-toggle"
+        label={
+          <>
+            {i18n.translate('xpack.infra.metrics.alertFlyout.alertOnNoData', {
+              defaultMessage: "Alert me if there's no data",
+            })}{' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.noDataHelpText', {
+                defaultMessage:
+                  'Enable this to trigger the action if the metric(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
+              })}
+            >
+              <EuiIcon type="questionInCircle" color="subdued" />
+            </EuiToolTip>
+          </>
+        }
+        checked={alertParams.alertOnNoData}
+        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+      />
 
       <EuiSpacer size={'m'} />
 
