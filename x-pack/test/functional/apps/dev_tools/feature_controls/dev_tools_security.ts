@@ -232,6 +232,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();
       });
@@ -240,6 +241,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();
       });
@@ -248,6 +250,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
         await PageObjects.error.expectNotFound();
       });

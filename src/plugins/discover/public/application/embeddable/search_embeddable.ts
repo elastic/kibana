@@ -346,6 +346,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+    } else if (this.searchScope) {
+      // trigger a digest cycle to make sure non-fetch relevant changes are propagated
+      this.searchScope.$applyAsync();
     }
   }
 }

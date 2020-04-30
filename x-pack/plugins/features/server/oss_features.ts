@@ -21,11 +21,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 100,
       icon: 'discoverApp',
       navLinkId: 'discover',
-      app: ['discover'],
+      app: ['discover', 'kibana'],
       catalogue: ['discover'],
       privileges: {
         all: {
-          app: ['discover'],
+          app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
             all: ['search', 'query', 'index-pattern'],
@@ -34,7 +34,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save', 'saveQuery'],
         },
         read: {
-          app: ['discover'],
+          app: ['discover', 'kibana'],
           catalogue: ['discover'],
           savedObject: {
             all: [],

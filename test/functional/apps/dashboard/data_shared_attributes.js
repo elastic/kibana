@@ -106,8 +106,8 @@ export default function({ getService, getPageObjects }) {
         expect(foundOriginalSharedItemTitle).to.be(true);
       });
     });
-    // TODO this needs to be investigated
-    it.skip('data-shared-item title should update a saved search when using a custom panel title', async () => {
+
+    it('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
       await dashboardPanelActions.setCustomPanelTitle(
         CUSTOM_SEARCH_TITLE,
