@@ -315,7 +315,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         return;
       }
 
-      const displayScore = bucketScore > 1 ? bucketScore : '< 1';
+      const displayScore = bucketScore > 1 ? parseInt(String(bucketScore), 10) : '< 1';
 
       // Display date using same format as Kibana visualizations.
       const formattedDate = formatHumanReadableDateTime(time * 1000);
