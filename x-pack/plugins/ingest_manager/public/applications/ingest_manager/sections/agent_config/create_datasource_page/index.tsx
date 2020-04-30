@@ -27,7 +27,8 @@ import {
   sendGetAgentStatus,
 } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
-import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
+import { ConfirmDeployConfigModal } from '../components';
+import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, DatasourceFormState } from './types';
 import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
@@ -281,7 +282,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
       {formState === 'CONFIRM' && agentConfig && (
-        <ConfirmCreateDatasourceModal
+        <ConfirmDeployConfigModal
           agentCount={agentCount}
           agentConfig={agentConfig}
           onConfirm={onSubmit}
