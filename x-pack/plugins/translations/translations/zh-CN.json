@@ -8313,7 +8313,6 @@
     "xpack.ingestManager.configDetails.configDetailsTitle": "配置“{id}”",
     "xpack.ingestManager.configDetails.configNotFoundErrorTitle": "未找到配置“{id}”",
     "xpack.ingestManager.configDetails.datasourcesTable.actionsColumnTitle": "操作",
-    "xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle": "复制数据源",
     "xpack.ingestManager.configDetails.datasourcesTable.deleteActionTitle": "删除数据源",
     "xpack.ingestManager.configDetails.datasourcesTable.descriptionColumnTitle": "描述",
     "xpack.ingestManager.configDetails.datasourcesTable.editActionTitle": "编辑数据源",
