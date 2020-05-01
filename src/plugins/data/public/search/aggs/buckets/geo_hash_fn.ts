@@ -90,7 +90,7 @@ export const aggGeoHash = (): FunctionDefinition => ({
       types: ['string'],
       required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.boundingBox.help', {
-        defaultMessage: 'Allowing to filter hits based on a point location using a bounding box.',
+        defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
     },
     precision: {
