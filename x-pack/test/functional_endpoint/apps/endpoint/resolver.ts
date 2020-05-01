@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { sleep } from '../../../../plugins/task_manager/server/test_utils';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker', 'endpointAlerts']);
@@ -18,8 +19,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
       const toTime = 'Now';
-      await esArchiver.load('endpoint/alerts/api_feature');
-      await esArchiver.load('endpoint/alerts/host_api_feature');
       await esArchiver.load('endpoint/resolver_tree/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
       await testSubjects.existOrFail('superDatePickerShowDatesButton', { timeout: 20000 });
@@ -28,7 +27,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('alertTypeCellLink');
       await testSubjects.existOrFail('alertDetailFlyout');
       await testSubjects.click('overviewResolverTab');
-      await pageObjects.endpointAlerts.waitForTableToHaveData('resolverEmbeddable');
+      await testSubjects.existOrFail('resolverEmbeddable', { timeout: 20000 });
     });
 
     it('resolver column Process Name exits', async () => {
