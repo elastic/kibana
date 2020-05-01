@@ -94,7 +94,7 @@ def getTestFailures() {
   def messages = []
   messages << "*Test Failures*"
 
-  def list = failures.collect { "• <${failure.url}|${failure.fullDisplayName}>" }.join("\n")
+  def list = failures.collect { "• <${it.url}|${it.fullDisplayName}>" }.join("\n")
   return "*Test Failures*\n${list}"
 }
 
