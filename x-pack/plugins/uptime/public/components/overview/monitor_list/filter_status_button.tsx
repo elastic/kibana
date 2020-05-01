@@ -9,11 +9,12 @@ import React from 'react';
 import { useUrlParams } from '../../../hooks';
 
 export interface FilterStatusButtonProps {
-  content: string;
+  content: string | JSX.Element;
   dataTestSubj: string;
   isDisabled?: boolean;
   value: string;
   withNext: boolean;
+  color?: string;
 }
 
 export const FilterStatusButton = ({
@@ -21,17 +22,24 @@ export const FilterStatusButton = ({
   dataTestSubj,
   isDisabled,
   value,
+  color,
   withNext,
 }: FilterStatusButtonProps) => {
   const [getUrlParams, setUrlParams] = useUrlParams();
   const { statusFilter: urlValue } = getUrlParams();
+
+  const isActive = (value === 'all' && urlValue === '') || urlValue === value;
   return (
     <EuiFilterButton
+      color={(isActive ? color : undefined) as any}
       data-test-subj={dataTestSubj}
-      hasActiveFilters={urlValue === value}
+      hasActiveFilters={isActive}
       isDisabled={isDisabled}
       onClick={() => {
-        const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
+        const nextFilter = {
+          statusFilter: urlValue === value || value === 'all' ? '' : value,
+          pagination: '',
+        };
         setUrlParams(nextFilter);
       }}
       withNext={withNext}

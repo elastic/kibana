@@ -6,22 +6,35 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { EuiFilterGroup, EuiTextColor } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
+import { useGetUrlParams } from '../../../hooks';
 
 export const StatusFilter: React.FC = () => {
+  const { statusFilter } = useGetUrlParams();
+
   return (
     <EuiFilterGroup>
-      <EuiFilterButton hasActiveFilters={true} onClick={() => {}}>
-        All monitors
-      </EuiFilterButton>
       <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-          defaultMessage: 'Up',
+        content={i18n.translate('xpack.uptime.filterBar.filterAllLabel', {
+          defaultMessage: 'All',
         })}
+        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
+        value="all"
+        withNext={true}
+      />
+      <FilterStatusButton
+        content={
+          <EuiTextColor color={statusFilter === 'up' ? 'secondary' : undefined}>
+            {i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
+              defaultMessage: 'Up',
+            })}
+          </EuiTextColor>
+        }
         dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
+        color={'#secondary'}
       />
       <FilterStatusButton
         content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
@@ -30,6 +43,7 @@ export const StatusFilter: React.FC = () => {
         dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
         withNext={false}
+        color={'danger'}
       />
     </EuiFilterGroup>
   );

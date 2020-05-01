@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const Snapshot: React.FC<Props> = ({ height }: Props) => {
-  const { dateRangeStart, dateRangeEnd, statusFilter } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { count, lastRefresh, loading, esKuery } = useSelector(snapshotDataSelector);
 

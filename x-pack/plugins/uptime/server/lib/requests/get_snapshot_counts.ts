@@ -33,7 +33,9 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
   );
 
   // Calculate the total, up, and down counts.
-  return await statusCount(context);
+  const count = await statusCount(context);
+
+  return { total: count.total, up: count.up, down: count.down };
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {

@@ -19,7 +19,6 @@ interface Props {
 
 const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const {
-    statusFilter,
     absoluteDateRangeStart,
     absoluteDateRangeEnd,
     dateRangeStart: dateStart,
