@@ -83,7 +83,7 @@ export const aggGeoHash = (): FunctionDefinition => ({
       types: ['boolean'],
       required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.isFilteredByCollar.help', {
-        defaultMessage: 'Should be filtered by collar or not?',
+        defaultMessage: 'Specifies whether to filter by collar',
       }),
     },
     boundingBox: {
