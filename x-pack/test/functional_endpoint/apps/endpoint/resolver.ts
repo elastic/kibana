@@ -18,16 +18,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
       const toTime = 'Now';
+      await esArchiver.load('endpoint/alerts/api_feature');
+      await esArchiver.load('endpoint/alerts/host_api_feature');
       await esArchiver.load('endpoint/resolver_tree/api_feature');
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/alerts');
-      await retry.try(async function() {
-        await testSubjects.existOrFail('superDatePickerShowDatesButton');
-      });
+      await testSubjects.existOrFail('superDatePickerShowDatesButton', { timeout: 20000 });
       await pageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await testSubjects.existOrFail('alertListPage');
-      await (await testSubjects.find('alertTypeCellLink')).click();
+      await testSubjects.click('alertTypeCellLink');
       await testSubjects.existOrFail('alertDetailFlyout');
-      await (await testSubjects.find('overviewResolverTab')).click();
+      await testSubjects.click('overviewResolverTab');
       await pageObjects.endpointAlerts.waitForTableToHaveData('resolverEmbeddable');
     });
 
@@ -46,13 +46,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'tr'
       );
       await retry.try(async function() {
-        await (await testSubjects.find('zoom-out')).click();
+        await testSubjects.click('zoom-out');
         const Nodes = await testSubjects.findAll('resolverNode');
         expect(tableData.length - 1).to.eql(Nodes.length);
         count++;
       });
       for (let i = 0; i < count; i++) {
-        await (await testSubjects.find('zoom-in')).click();
+        await testSubjects.click('zoom-in');
       }
     });
 
@@ -64,7 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'tr'
       );
       await retry.try(async function() {
-        await (await testSubjects.find('zoom-out')).click();
+        await testSubjects.click('zoom-out');
         const Nodes = await testSubjects.findAll('resolverNode');
         expect(tableData.length - 1).to.eql(Nodes.length);
         for (const value of Nodes) {
@@ -77,7 +77,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(tableData[i + 1][0]).to.eql($[i].split('\n')[1]);
       }
       for (let i = 0; i < count; i++) {
-        await (await testSubjects.find('zoom-in')).click();
+        await testSubjects.click('zoom-in');
       }
     });
 
@@ -86,7 +86,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('north-button')).click();
+      await testSubjects.click('north-button');
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -99,7 +99,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(NewNodeDataStyle[i].left)
         );
       }
-      await (await testSubjects.find('center-button')).click();
+      await testSubjects.click('center-button');
     });
 
     it('resolver Nodes navigation Down', async () => {
@@ -107,7 +107,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('south-button')).click();
+      await testSubjects.click('south-button');
 
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
@@ -121,7 +121,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(NewNodeDataStyle[i].left)
         );
       }
-      await (await testSubjects.find('center-button')).click();
+      await testSubjects.click('center-button');
     });
 
     it('resolver Nodes navigation Right', async () => {
@@ -129,7 +129,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('west-button')).click();
+      await testSubjects.click('west-button');
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -142,7 +142,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(OriginalNodeDataStyle[i].top)
         );
       }
-      await (await testSubjects.find('center-button')).click();
+      await testSubjects.click('center-button');
     });
 
     it('resolver Nodes navigation  Left', async () => {
@@ -150,7 +150,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('east-button')).click();
+      await testSubjects.click('east-button');
 
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
@@ -164,7 +164,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(OriginalNodeDataStyle[i].top)
         );
       }
-      await (await testSubjects.find('center-button')).click();
+      await testSubjects.click('center-button');
     });
 
     it('resolver Nodes navigation Center', async () => {
@@ -172,8 +172,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('east-button')).click();
-      await (await testSubjects.find('south-button')).click();
+      await testSubjects.click('east-button');
+      await testSubjects.click('south-button');
 
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
@@ -208,7 +208,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('zoom-in')).click();
+      await testSubjects.click('zoom-in');
       const NewNodeDataStyle = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -226,7 +226,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(parseFloat(OriginalNodeDataStyle[i].height)).to.lessThan(
           parseFloat(NewNodeDataStyle[i].height)
         );
-        await (await testSubjects.find('zoom-out')).click();
+        await testSubjects.click('zoom-out');
       }
     });
 
@@ -235,7 +235,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'resolverNode',
         'style'
       );
-      await (await testSubjects.find('zoom-out')).click();
+      await testSubjects.click('zoom-out');
       const NewNodeDataStyle1 = await pageObjects.endpointAlerts.parseStyles(
         'resolverNode',
         'style'
@@ -254,11 +254,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           parseFloat(OriginalNodeDataStyle[i].height)
         );
       }
-      await (await testSubjects.find('zoom-in')).click();
+      await testSubjects.click('zoom-in');
     });
 
     after(async () => {
-      await (await testSubjects.find('euiFlyoutCloseButton')).click();
+      await testSubjects.click('euiFlyoutCloseButton');
       await pageObjects.common.sleep(2000);
       await esArchiver.unload('endpoint/resolver_tree/api_feature');
     });
