@@ -22,7 +22,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { timeDuration } from '../../../lib/time_duration';
-import { RefreshControl } from '../refresh_control';
 import { CustomInterval } from './custom_interval';
 
 import { ComponentStrings, UnitStrings } from '../../../../i18n';
@@ -69,7 +68,11 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
   const intervalTitleId = generateId();
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      className="canvasViewMenu__kioskSettings"
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
@@ -97,9 +100,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
                   </EuiToolTip>
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <RefreshControl />
-              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -112,16 +112,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
         <EuiSpacer size="s" />
         <EuiText size="s">
           <ListGroup aria-labelledby={intervalTitleId} className="canvasControlSettings__list">
-            <RefreshItem
-              duration={5000}
-              label={getSecondsText(5)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={15000}
-              label={getSecondsText(15)}
-              descriptionId={intervalTitleId}
-            />
             <RefreshItem
               duration={30000}
               label={getSecondsText(30)}
@@ -138,11 +128,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
               descriptionId={intervalTitleId}
             />
             <RefreshItem
-              duration={900000}
-              label={getMinutesText(15)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
               duration={1800000}
               label={getMinutesText(30)}
               descriptionId={intervalTitleId}
@@ -150,16 +135,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
             <RefreshItem
               duration={3600000}
               label={getHoursText(1)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={7200000}
-              label={getHoursText(2)}
-              descriptionId={intervalTitleId}
-            />
-            <RefreshItem
-              duration={21600000}
-              label={getHoursText(6)}
               descriptionId={intervalTitleId}
             />
             <RefreshItem
@@ -175,7 +150,6 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
           </ListGroup>
         </EuiText>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <CustomInterval onSubmit={value => setRefresh(value)} />
       </EuiFlexItem>
