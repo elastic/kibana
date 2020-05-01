@@ -10,6 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../common/generate_data';
 import { default as eventMapping } from './event_mapping.json';
 import { default as alertMapping } from './alert_mapping.json';
+import { default as policyMapping } from './policy_mapping.json';
 
 main();
 
@@ -42,6 +43,12 @@ async function main() {
       alias: 'mi',
       describe: 'index to store host metadata in',
       default: 'metrics-endpoint-default-1',
+      type: 'string',
+    },
+    policyIndex: {
+      alias: 'pi',
+      describe: 'index to store host policy in',
+      default: 'metrics-endpoint-policy-1',
       type: 'string',
     },
     auth: {
@@ -123,7 +130,7 @@ async function main() {
   if (argv.delete) {
     try {
       await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex],
+        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex, argv.policyIndex],
       });
     } catch (err) {
       if (err instanceof ResponseError && err.statusCode !== 404) {
@@ -165,6 +172,7 @@ async function main() {
 
   await createIndex(client, argv.alertIndex, alertMapping);
   await createIndex(client, argv.eventIndex, eventMapping);
+  await createIndex(client, argv.policyIndex, policyMapping);
   if (argv.setupOnly) {
     process.exit(0);
   }
@@ -183,9 +191,16 @@ async function main() {
     const timestamp = new Date().getTime();
     for (let j = 0; j < numMetadataDocs; j++) {
       generator.updateHostData();
+      generator.updatePolicyId();
       await client.index({
         index: argv.metadataIndex,
         body: generator.generateHostMetadata(
+          timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
+        ),
+      });
+      await client.index({
+        index: argv.policyIndex,
+        body: generator.generatePolicyResponse(
           timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
         ),
       });
