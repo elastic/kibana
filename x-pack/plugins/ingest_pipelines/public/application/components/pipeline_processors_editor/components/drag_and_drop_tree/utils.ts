@@ -6,7 +6,7 @@
 
 import { DraggableLocation, ProcessorSelector } from '../../types';
 
-export const mapDestinationIndexToTreeLocation = (
+export const resolveDestinationLocation = (
   items: ProcessorSelector[],
   isRootLevelSource: boolean,
   destinationIndex: number

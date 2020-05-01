@@ -6,18 +6,11 @@
 import { Reducer, useReducer } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
 
-import { OnFormUpdateArg } from '../../../shared_imports';
-
 import { DeserializeResult } from './data_in';
 import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 
-type StateArg = DeserializeResult;
-
-export interface State extends StateArg {
-  isValid?: boolean;
-  validate: () => Promise<boolean>;
-}
+export type State = DeserializeResult;
 
 type Action =
   | {
@@ -42,10 +35,7 @@ type Action =
   | {
       type: 'moveProcessor';
       payload: { source: DraggableLocation; destination: DraggableLocation };
-    }
-  // Does not quite belong here, but using in reducer for convenience
-  | { type: 'processorForm.update'; payload: OnFormUpdateArg<any> }
-  | { type: 'processorForm.close' };
+    };
 
 const addSelectorRoot = (selector: ProcessorSelector): ProcessorSelector => {
   return ['processors'].concat(selector);
@@ -126,16 +116,8 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     return setValue(processorsSelector, state, processors);
   }
 
-  if (action.type === 'processorForm.update') {
-    return { ...state, ...action.payload };
-  }
-
-  if (action.type === 'processorForm.close') {
-    return { ...state, isValid: undefined, validate: () => Promise.resolve(true) };
-  }
-
   return state;
 };
 
-export const useProcessorsState = (initialState: StateArg) =>
-  useReducer<typeof reducer>(reducer, { ...initialState, validate: () => Promise.resolve(true) });
+export const useProcessorsState = (initialState: State) =>
+  useReducer<typeof reducer>(reducer, { ...initialState });

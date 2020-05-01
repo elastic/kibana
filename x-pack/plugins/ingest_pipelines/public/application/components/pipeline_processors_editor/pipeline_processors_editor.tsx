@@ -9,16 +9,20 @@ import { EuiButton } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
+import { OnFormUpdateArg } from '../../../shared_imports';
+
 import { SettingsFormFlyout, DragAndDropTree, PipelineProcessorEditorItem } from './components';
 import { deserialize } from './data_in';
 import { serialize, SerializeResult } from './data_out';
-import { useProcessorsState } from './reducer';
+import { useProcessorsState } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
 
-export interface OnUpdateHandlerArg {
+interface FormState {
+  validate: OnFormUpdateArg<any>['validate'];
+}
+
+export interface OnUpdateHandlerArg extends FormState {
   getData: () => SerializeResult;
-  validate: () => Promise<boolean>;
-  isValid?: boolean;
 }
 
 export type OnUpdateHandler = (arg: OnUpdateHandlerArg) => void;
@@ -56,20 +60,26 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   const [state, dispatch] = useProcessorsState(dataInResult);
   const { processors } = state;
 
-  useEffect(() => {
-    onUpdate({
-      isValid: state.isValid,
-      validate: state.validate,
-      getData: () => serialize(state),
-    });
-  }, [state, onUpdate]);
+  const [formState, setFormState] = useState<FormState>({
+    validate: () => Promise.resolve(true),
+  });
 
   const onFormUpdate = useCallback(
     arg => {
-      dispatch({ type: 'processorForm.update', payload: arg });
+      setFormState({ validate: arg.validate });
     },
-    [dispatch]
+    [setFormState]
   );
+
+  useEffect(() => {
+    onUpdate({
+      validate: async () => {
+        const formValid = await formState.validate();
+        return formValid && mode.id === 'idle';
+      },
+      getData: () => serialize(state),
+    });
+  }, [state, onUpdate, formState, mode]);
 
   const onSubmit = useCallback(
     processorTypeAndOptions => {
@@ -108,6 +118,16 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     [dispatch, mode]
   );
 
+  const onDragEnd = useCallback(
+    args => {
+      dispatch({
+        type: 'moveProcessor',
+        payload: args,
+      });
+    },
+    [dispatch]
+  );
+
   const dismissFlyout = () => {
     setMode({ id: 'idle' });
   };
@@ -115,14 +135,9 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   return (
     <>
       <DragAndDropTree
-        onDragEnd={args => {
-          dispatch({
-            type: 'moveProcessor',
-            payload: args,
-          });
-        }}
+        onDragEnd={onDragEnd}
         processors={processors}
-        nodeComponent={({ processor, selector }) => (
+        renderItem={({ processor, selector }) => (
           <PipelineProcessorEditorItem
             onClick={type => {
               switch (type) {
@@ -156,7 +171,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
           onClose={() => {
             dismissFlyout();
-            dispatch({ type: 'processorForm.close' });
+            setFormState({ validate: () => Promise.resolve(true) });
           }}
         />
       ) : (

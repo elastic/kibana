@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState, memo } from 'react';
 import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from '../../types';
 
-import { mapDestinationIndexToTreeLocation } from './utils';
+import { resolveDestinationLocation } from './utils';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
 
@@ -21,19 +21,30 @@ interface OnDragEndArgs {
 export interface Props {
   processors: ProcessorInternal[];
   onDragEnd: (args: OnDragEndArgs) => void;
-  nodeComponent: (arg: TreeNodeComponentArgs) => React.ReactNode;
+  renderItem: (arg: TreeNodeComponentArgs) => React.ReactNode;
 }
 
 /** This value comes from the {@link ProcessorInternal} type */
 const ON_FAILURE = 'onFailure';
 
-export const DragAndDropTree: FunctionComponent<Props> = ({
+/**
+ * Takes in array of {@link ProcessorInternal} and renders a drag and drop tree.
+ *
+ * @remark
+ * Because of issues with nesting EuiDroppable (based on react-beautiful-dnd) we render
+ * a flat structure with one droppable. This component is responsible for maintaining the
+ * {@link ProcessorSelector}s back to the nested structure so that it can emit instructions
+ * the reducer will understand.
+ */
+export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   processors,
   onDragEnd,
-  nodeComponent,
+  renderItem,
 }) => {
   let flatTreeIndex = 0;
   const items: Array<[ProcessorSelector, React.ReactElement]> = [];
+
+  const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
 
   const addRenderedItems = (
     _processors: ProcessorInternal[],
@@ -51,11 +62,11 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
           level={level}
           processor={processor}
           selector={nodeSelector}
-          component={nodeComponent}
+          component={renderItem}
         />,
       ]);
 
-      if (processor.onFailure?.length) {
+      if (processor.onFailure?.length && nodeSelector.join('.') !== currentDragSelector) {
         addRenderedItems(processor.onFailure, nodeSelector.concat(ON_FAILURE), level + 1);
       }
     });
@@ -65,7 +76,13 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
 
   return (
     <EuiDragDropContext
-      onDragEnd={({ source, destination, combine }) => {
+      onBeforeCapture={({ draggableId: serializedSelector }) => {
+        setCurrentDragSelector(serializedSelector);
+      }}
+      onDragEnd={arg => {
+        setCurrentDragSelector(undefined);
+
+        const { source, destination, combine } = arg;
         if (source && combine) {
           const [sourceSelector] = items[source.index];
           const destinationSelector = combine.draggableId.split('.');
@@ -89,7 +106,7 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
               index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
               selector: sourceSelector.slice(0, -1),
             },
-            destination: mapDestinationIndexToTreeLocation(
+            destination: resolveDestinationLocation(
               items.map(([selector]) => selector),
               !sourceSelector.slice(0, -1).length,
               destination.index
@@ -104,3 +121,7 @@ export const DragAndDropTree: FunctionComponent<Props> = ({
     </EuiDragDropContext>
   );
 };
+
+export const DragAndDropTree = memo(DragAndDropTreeUI, (prev, current) => {
+  return prev.processors === current.processors && prev.onDragEnd === current.onDragEnd;
+});

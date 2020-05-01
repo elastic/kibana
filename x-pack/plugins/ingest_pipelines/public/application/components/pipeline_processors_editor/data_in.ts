@@ -23,10 +23,10 @@ const getProcessorType = (processor: Processor): string => {
 
 const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInternal => {
   const type = getProcessorType(processor);
-  const options = processor[type];
-  const onFailure = options.on_failure?.length
-    ? convertProcessors(options.on_failure)
-    : (options.on_failure as ProcessorInternal[] | undefined);
+  const { on_failure: originalOnFailure, ...options } = processor[type];
+  const onFailure = originalOnFailure?.length
+    ? convertProcessors(originalOnFailure)
+    : (originalOnFailure as ProcessorInternal[] | undefined);
   return {
     type,
     onFailure,

@@ -32,23 +32,21 @@ export const TreeNode: FunctionComponent<Props> = ({
 }) => {
   const id = selector.join('.');
   return (
-    <>
-      <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle={true}>
-        {provided => (
-          <EuiPanel style={{ marginLeft: 30 * level + 'px' }} paddingSize="s">
-            <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <div {...provided.dragHandleProps}>
-                    <EuiIcon type="grab" />
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
-              </EuiFlexGroup>
+    <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle={true}>
+      {provided => (
+        <EuiPanel style={{ marginLeft: 30 * level + 'px' }} paddingSize="s">
+          <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <div {...provided.dragHandleProps}>
+                  <EuiIcon type="grab" />
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{component({ processor, selector })}</EuiFlexItem>
             </EuiFlexGroup>
-          </EuiPanel>
-        )}
-      </EuiDraggable>
-    </>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
+    </EuiDraggable>
   );
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
@@ -45,7 +45,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
-  const [processorsEditorState, setProcessorsEditorState] = useState<OnUpdateHandlerArg>();
+  const processorStateRef = useRef<OnUpdateHandlerArg>();
 
   const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
     let override: any = {};
@@ -54,9 +54,10 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       return;
     }
 
-    if (processorsEditorState) {
-      if (processorsEditorState.isValid === undefined && (await processorsEditorState.validate())) {
-        override = processorsEditorState.getData();
+    if (processorStateRef.current) {
+      const processorsState = processorStateRef.current;
+      if (await processorsState.validate()) {
+        override = processorsState.getData();
       } else {
         return;
       }
@@ -93,8 +94,8 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
-    arg => setProcessorsEditorState(arg),
-    [setProcessorsEditorState]
+    arg => (processorStateRef.current = arg),
+    []
   );
 
   return (

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { reducer, State } from './reducer';
+import { reducer, State } from './processors_reducer';
 
 const initialState: State = {
   processors: [],
-  validate: () => Promise.resolve(true),
 };
 
 describe('Processors reducer', () => {
