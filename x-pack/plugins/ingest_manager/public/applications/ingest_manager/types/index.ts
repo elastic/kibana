@@ -90,4 +90,5 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';
