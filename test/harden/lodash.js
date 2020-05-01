@@ -76,7 +76,6 @@ test(`_.template('<%= foo %>', { sourceURL: '\\u2028\\u2029\\nglobal.whoops=true
   try {
     template();
   } catch (err) {
-    console.log(err.stack);
     const path = parsePathFromStack(err.stack);
     t.equal(path, 'global.whoops=true');
     t.equal(global.whoops, undefined);
