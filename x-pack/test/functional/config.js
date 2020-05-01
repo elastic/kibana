@@ -53,6 +53,7 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
@@ -174,6 +175,10 @@ export default async function({ readConfigFile }) {
       indexLifecycleManagement: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/index_lifecycle_management',
+      },
+      ingestPipelines: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/ingest_pipelines',
       },
       snapshotRestore: {
         pathname: '/app/kibana',
