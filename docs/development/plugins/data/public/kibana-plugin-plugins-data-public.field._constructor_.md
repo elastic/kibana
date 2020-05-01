@@ -9,15 +9,15 @@ Constructs a new instance of the `Field` class
 <b>Signature:</b>
 
 ```typescript
-constructor({ fieldFormats, toastNotifications }: Deps, indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable?: boolean);
+constructor(indexPattern: IndexPattern, spec: FieldSpec | Field, shortDotsEnable: boolean, { fieldFormats, toastNotifications }: FieldDependencies);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { fieldFormats, toastNotifications } | <code>Deps</code> |  |
 |  indexPattern | <code>IndexPattern</code> |  |
 |  spec | <code>FieldSpec &#124; Field</code> |  |
 |  shortDotsEnable | <code>boolean</code> |  |
+|  { fieldFormats, toastNotifications } | <code>FieldDependencies</code> |  |
 

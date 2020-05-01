@@ -17,20 +17,15 @@
  * under the License.
  */
 import { difference, map } from 'lodash';
-import {
-  IndexPatternFieldList,
-  IndexPattern,
-  IndexPatternField,
-} from '../../../../../../data/public';
+import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 import { DiscoverServices } from '../../../../build_services';
 
 export function getIndexPatternFieldList(
   indexPattern: IndexPattern,
   fieldCounts: Record<string, number>,
-  { fieldFormats, toastNotifications }: DiscoverServices
-): IndexPatternFieldList {
-  if (!indexPattern || !fieldCounts)
-    return new IndexPatternFieldList({ fieldFormats, toastNotifications }, indexPattern, []);
+  { data }: DiscoverServices
+) {
+  if (!indexPattern || !fieldCounts) return data.indexPatterns.createFieldList(indexPattern);
 
   const fieldSpecs = indexPattern.fields.slice(0);
   const fieldNamesInDocs = Object.keys(fieldCounts);
@@ -43,5 +38,5 @@ export function getIndexPatternFieldList(
     } as IndexPatternField);
   });
 
-  return new IndexPatternFieldList({ fieldFormats, toastNotifications }, indexPattern, fieldSpecs);
+  return data.indexPatterns.createFieldList(indexPattern, fieldSpecs);
 }
