@@ -278,7 +278,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         sortDirection={sortDirection}
         sortField={sortField}
         title={title}
-        updateTimeline={updateTimeline}
         totalSearchResultsCount={totalCount}
       />
     ) : (

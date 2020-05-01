@@ -77,6 +77,12 @@ export interface TimelineModel {
   };
   /** Title */
   title: string;
+  /** timelineTypes: default | template */
+  timelineType: TimelineTypesLiteralWithNull;
+  /** an unique id for template timeline */
+  templateTimelineId: string | null;
+  /** null for default timeline, number for template timeline */
+  templateTimelineVersion: number | null;
   /** Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote` */
   noteIds: string[];
   /** Events pinned to this timeline */

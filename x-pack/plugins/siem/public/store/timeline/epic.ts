@@ -29,6 +29,7 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../src/plugins/data/public';
+import { TimelineType } from '../../../common/types/timeline';
 import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
 import { addError } from '../app/actions';
@@ -286,7 +287,7 @@ const timelineInput: TimelineInput = {
   kqlMode: null,
   kqlQuery: null,
   title: null,
-  timelineType: null,
+  timelineType: TimelineType.default,
   templateTimelineVersion: null,
   templateTimelineId: null,
   dateRange: null,

@@ -34,7 +34,9 @@ export const pickSavedTimeline = (
       savedTimeline.templateTimelineVersion = 1;
     } else {
       // update tenplate timeline
-      savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
+      if (savedTimeline.templateTimelineVersion != null) {
+        savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
+      }
     }
   } else {
     savedTimeline.timelineType = TimelineType.default;
