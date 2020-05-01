@@ -158,7 +158,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
             }),
             emphasize: true,
             iconType: 'check',
-            'data-test-subj': 'visualizationSaveAndReturnButton',
             description: i18n.translate(
               'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
@@ -202,7 +201,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                     defaultMessage: 'save',
                   }),
             emphasize: !savedVis.id || !$scope.getOriginatingApp(),
-            'data-test-subj': 'visualizationSaveButton',
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),

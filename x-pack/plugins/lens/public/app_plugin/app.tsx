@@ -283,7 +283,7 @@ export function App({
                             });
                           }
                         },
-                        testId: 'lnsApp_saveButton',
+                        testId: 'lnsApp_saveAndReturnButton',
                         disableButton: !isSaveable,
                       },
                     ]

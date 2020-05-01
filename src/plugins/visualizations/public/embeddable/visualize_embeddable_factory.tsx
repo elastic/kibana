@@ -124,10 +124,6 @@ export class VisualizeEmbeddableFactory
     if (originitingAppParam === 'kibana') {
       originitingAppParam += `:${window.location.hash.split(/[\/\?]/)[1]}`;
     }
-    console.log(
-      'visualize embeddable factory create!',
-      `${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originitingAppParam}`
-    );
     showNewVisModal({
       editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originitingAppParam}`],
     });

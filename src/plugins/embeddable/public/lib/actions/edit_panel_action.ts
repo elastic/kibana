@@ -97,7 +97,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
 
   public async getHref({ embeddable }: EmbeddableContext): Promise<string> {
     let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    if (editUrl) {
+    if (editUrl && this.currentAppId) {
       editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
 
       // TODO: Remove this after https://github.com/elastic/kibana/pull/63443

@@ -300,12 +300,23 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       }
     }
 
-    public async saveVisualization(vizName: string, { saveAsNew = false } = {}) {
+    public async saveVisualization(
+      vizName: string,
+      { saveAsNew = false, redirectToOrigin = false } = {}
+    ) {
       await this.ensureSavePanelOpen();
       await testSubjects.setValue('savedObjectTitle', vizName);
-      if (saveAsNew) {
-        log.debug('Check save as new visualization');
-        await testSubjects.click('saveAsNewCheckbox');
+
+      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
+      if (saveAsNewCheckboxExists) {
+        const state = saveAsNew ? 'uncheck' : 'check';
+        await testSubjects.setCheckbox('saveAsNewCheckbox', state);
+      }
+
+      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
+      if (redirectToOriginCheckboxExists) {
+        const state = redirectToOrigin ? 'uncheck' : 'check';
+        await testSubjects.setCheckbox('returnToOriginModeSwitch', state);
       }
       log.debug('Click Save Visualization button');
 
@@ -320,8 +331,11 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       return message;
     }
 
-    public async saveVisualizationExpectSuccess(vizName: string, { saveAsNew = false } = {}) {
-      const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
+    public async saveVisualizationExpectSuccess(
+      vizName: string,
+      { saveAsNew = false, redirectToOrigin = false } = {}
+    ) {
+      const saveMessage = await this.saveVisualization(vizName, { saveAsNew, redirectToOrigin });
       if (!saveMessage) {
         throw new Error(
           `Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`
@@ -338,6 +352,12 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         'last breadcrumb to have new vis name',
         async () => (await globalNav.getLastBreadcrumb()) === vizName
       );
+    }
+
+    public async saveVisualizationAndReturn() {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
     }
   }
 
