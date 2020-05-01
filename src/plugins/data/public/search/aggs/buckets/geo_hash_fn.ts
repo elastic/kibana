@@ -69,7 +69,7 @@ export const aggGeoHash = (): FunctionDefinition => ({
       types: ['boolean'],
       required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.useGeocentroid.help', {
-        defaultMessage: 'Should be used geocentroid for this aggregation or not?',
+        defaultMessage: 'Specifies whether to use geocentroid for this aggregation',
       }),
     },
     autoPrecision: {
