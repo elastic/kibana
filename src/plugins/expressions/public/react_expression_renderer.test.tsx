@@ -21,7 +21,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { ReactExpressionRenderer } from './react_expression_renderer';
+import { ReactExpressionRenderer, ReactExpressionRendererProps } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
@@ -134,5 +134,40 @@ describe('ExpressionRenderer', () => {
     instance.update();
     expect(instance.find(EuiProgress)).toHaveLength(0);
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
+  });
+
+  it('should fire onEvent prop on every events$ observable emission in loader', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const renderSubject = new Subject();
+    const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+    const eventsSubject = new Subject();
+    const events$ = eventsSubject.asObservable().pipe(share());
+
+    const onEvent = jest.fn();
+    const event = { foo: 'bar' };
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$,
+        data$,
+        loading$,
+        events$,
+        update: jest.fn(),
+      };
+    });
+
+    mount(<ReactExpressionRenderer expression="" onEvent={onEvent} />);
+
+    expect(onEvent).toHaveBeenCalledTimes(0);
+
+    act(() => {
+      eventsSubject.next(event);
+    });
+
+    expect(onEvent).toHaveBeenCalledTimes(1);
+    expect(onEvent.mock.calls[0][0]).toBe(event);
   });
 });

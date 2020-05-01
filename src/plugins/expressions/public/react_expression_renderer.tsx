@@ -36,6 +36,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   expression: string | ExpressionAstExpression;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  onEvent?: (event: any) => void;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -60,6 +61,7 @@ export const ReactExpressionRenderer = ({
   padding,
   renderError,
   expression,
+  onEvent,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -99,6 +101,13 @@ export const ReactExpressionRenderer = ({
           }
         : expressionLoaderOptions.onRenderError,
     });
+    if (onEvent) {
+      subs.push(
+        expressionLoaderRef.current.events$.subscribe(event => {
+          onEvent(event);
+        })
+      );
+    }
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
@@ -123,7 +132,7 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler]);
+  }, [hasCustomRenderErrorHandler, onEvent]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
