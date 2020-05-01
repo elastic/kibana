@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DownNoExpressionSelect component should shallow renders against props 1`] = `
+<AlertExpressionPopover
+  aria-label="Open the popover for down count input"
+  content={
+    <AlertFieldNumber
+      aria-label="Enter number of down counts required to trigger the alert"
+      data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesField"
+      disabled={false}
+      fieldValue={5}
+      setFieldValue={[Function]}
+    />
+  }
+  data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
+  description="matching monitors are down >"
+  id="ping-count"
+  value="5 times"
+/>
+`;
