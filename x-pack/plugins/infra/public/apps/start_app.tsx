@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createBrowserHistory } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
@@ -25,6 +24,7 @@ import { AppRouter } from '../routers';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 import '../index.scss';
+import { NavigationWarningPromptProvider } from '../utils/navigation_warning_prompt';
 
 export const CONTAINER_CLASSNAME = 'infra-container-element';
 
@@ -36,8 +36,8 @@ export async function startApp(
   Router: AppRouter,
   triggersActionsUI: TriggersAndActionsUIPublicPluginSetup
 ) {
-  const { element, appBasePath } = params;
-  const history = createBrowserHistory({ basename: appBasePath });
+  const { element, history } = params;
+
   const InfraPluginRoot: React.FunctionComponent = () => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -49,7 +49,9 @@ export async function startApp(
               <ApolloClientContext.Provider value={libs.apolloClient}>
                 <EuiThemeProvider darkMode={darkMode}>
                   <HistoryContext.Provider value={history}>
-                    <Router history={history} />
+                    <NavigationWarningPromptProvider>
+                      <Router history={history} />
+                    </NavigationWarningPromptProvider>
                   </HistoryContext.Provider>
                 </EuiThemeProvider>
               </ApolloClientContext.Provider>

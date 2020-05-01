@@ -20,15 +20,18 @@ export interface NewAgentAction {
   sent_at?: string;
 }
 
-export type AgentAction = NewAgentAction & {
+export interface AgentAction extends NewAgentAction {
   id: string;
   agent_id: string;
   created_at: string;
-} & SavedObjectAttributes;
+}
 
-export interface AgentActionSOAttributes extends NewAgentAction, SavedObjectAttributes {
+export interface AgentActionSOAttributes extends SavedObjectAttributes {
+  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  sent_at?: string;
   created_at: string;
   agent_id: string;
+  data?: string;
 }
 
 export interface AgentEvent {
@@ -57,6 +60,11 @@ export interface AgentEvent {
 
 export interface AgentEventSOAttributes extends AgentEvent, SavedObjectAttributes {}
 
+type MetadataValue = string | AgentMetadata;
+
+export interface AgentMetadata {
+  [x: string]: MetadataValue;
+}
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -64,23 +72,22 @@ interface AgentBase {
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
+  default_api_key_id?: string;
   config_id?: string;
-  config_revision?: number;
+  config_revision?: number | null;
   config_newest_revision?: number;
   last_checkin?: string;
+  user_provided_metadata: AgentMetadata;
+  local_metadata: AgentMetadata;
 }
 
 export interface Agent extends AgentBase {
   id: string;
   current_error_events: AgentEvent[];
-  user_provided_metadata: Record<string, string>;
-  local_metadata: Record<string, string>;
   access_api_key?: string;
   status?: string;
 }
 
 export interface AgentSOAttributes extends AgentBase, SavedObjectAttributes {
-  user_provided_metadata: string;
-  local_metadata: string;
   current_error_events?: string;
 }

@@ -57,14 +57,14 @@ export const handleCreateIncident = async ({
     comments &&
     Array.isArray(comments) &&
     comments.length > 0 &&
-    mapping.get('comments').actionType !== 'nothing'
+    mapping.get('comments')?.actionType !== 'nothing'
   ) {
     comments = transformComments(comments, params, ['informationAdded']);
     res.comments = [
       ...(await createComments(
         serviceNow,
         res.incidentId,
-        mapping.get('comments').target,
+        mapping.get('comments')!.target,
         comments
       )),
     ];
@@ -103,11 +103,11 @@ export const handleUpdateIncident = async ({
     comments &&
     Array.isArray(comments) &&
     comments.length > 0 &&
-    mapping.get('comments').actionType !== 'nothing'
+    mapping.get('comments')?.actionType !== 'nothing'
   ) {
     comments = transformComments(comments, params, ['informationAdded']);
     res.comments = [
-      ...(await createComments(serviceNow, incidentId, mapping.get('comments').target, comments)),
+      ...(await createComments(serviceNow, incidentId, mapping.get('comments')!.target, comments)),
     ];
   }
 

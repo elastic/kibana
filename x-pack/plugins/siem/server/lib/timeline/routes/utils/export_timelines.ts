@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NoteSavedObject } from '../../../note/types';
-import { PinnedEventSavedObject } from '../../../pinned_event/types';
-import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
-
-import { convertSavedObjectToSavedPinnedEvent } from '../../../pinned_event/saved_object';
-import { convertSavedObjectToSavedNote } from '../../../note/saved_object';
-
 import {
   SavedObjectsClient,
   SavedObjectsFindOptions,
@@ -22,11 +15,20 @@ import {
   ExportTimelineSavedObjectsClient,
   ExportedNotes,
   TimelineSavedObject,
-} from '../../types';
+  ExportTimelineNotFoundError,
+} from '../../../../../common/types/timeline';
+import { NoteSavedObject } from '../../../../../common/types/timeline/note';
+import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
+
 import { transformDataToNdjson } from '../../../../utils/read_stream/create_stream_from_ndjson';
+
+import { convertSavedObjectToSavedPinnedEvent } from '../../../pinned_event/saved_object';
+import { convertSavedObjectToSavedNote } from '../../../note/saved_object';
 import { pinnedEventSavedObjectType } from '../../../pinned_event/saved_object_mappings';
 import { noteSavedObjectType } from '../../../note/saved_object_mappings';
+
 import { timelineSavedObjectType } from '../../saved_object_mappings';
+import { convertSavedObjectToSavedTimeline } from '../../convert_saved_object_to_savedtimeline';
 
 export type TimelineSavedObjectsClient = Pick<
   SavedObjectsClient,
@@ -126,12 +128,23 @@ const getTimelines = async (
     )
   );
 
-  const timelineObjects: TimelineSavedObject[] | undefined =
-    savedObjects != null
-      ? savedObjects.saved_objects.map((savedObject: unknown) => {
-          return convertSavedObjectToSavedTimeline(savedObject);
-        })
-      : [];
+  const timelineObjects: {
+    timelines: TimelineSavedObject[];
+    errors: ExportTimelineNotFoundError[];
+  } = savedObjects.saved_objects.reduce(
+    (acc, savedObject) => {
+      return savedObject.error == null
+        ? {
+            errors: acc.errors,
+            timelines: [...acc.timelines, convertSavedObjectToSavedTimeline(savedObject)],
+          }
+        : { errors: [...acc.errors, savedObject.error], timelines: acc.timelines };
+    },
+    {
+      timelines: [] as TimelineSavedObject[],
+      errors: [] as ExportTimelineNotFoundError[],
+    }
+  );
 
   return timelineObjects;
 };
@@ -139,12 +152,8 @@ const getTimelines = async (
 const getTimelinesFromObjects = async (
   savedObjectsClient: ExportTimelineSavedObjectsClient,
   ids: string[]
-): Promise<ExportedTimelines[]> => {
-  const timelines: TimelineSavedObject[] = await getTimelines(savedObjectsClient, ids);
-  // To Do for feature freeze
-  // if (timelines.length !== request.body.ids.length) {
-  //   //figure out which is missing to tell user
-  // }
+): Promise<Array<ExportedTimelines | ExportTimelineNotFoundError>> => {
+  const { timelines, errors } = await getTimelines(savedObjectsClient, ids);
 
   const [notes, pinnedEventIds] = await Promise.all([
     Promise.all(ids.map(timelineId => getNotesByTimelineId(savedObjectsClient, timelineId))),
@@ -178,7 +187,7 @@ const getTimelinesFromObjects = async (
     return acc;
   }, []);
 
-  return myResponse ?? [];
+  return [...myResponse, ...errors] ?? [];
 };
 
 export const getExportTimelineByObjectIds = async ({

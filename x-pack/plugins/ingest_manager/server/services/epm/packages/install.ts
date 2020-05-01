@@ -98,7 +98,7 @@ export async function installPackage(options: {
   const reinstall = pkgVersion === installedPkg?.attributes.version;
 
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
-  const { internal = false } = registryPackageInfo;
+  const { internal = false, removable = true } = registryPackageInfo;
 
   // delete the previous version's installation's SO kibana assets before installing new ones
   // in case some assets were removed in the new version
@@ -106,7 +106,7 @@ export async function installPackage(options: {
     try {
       await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
     } catch (err) {
-      // some assets may not exist if deleting during a failed update
+      // log these errors, some assets may not exist if deleted during a failed update
     }
   }
 
@@ -170,6 +170,7 @@ export async function installPackage(options: {
     pkgName,
     pkgVersion,
     internal,
+    removable,
     toSaveAssetRefs,
     toSaveESIndexPatterns,
   });
@@ -200,6 +201,7 @@ export async function saveInstallationReferences(options: {
   pkgName: string;
   pkgVersion: string;
   internal: boolean;
+  removable: boolean;
   toSaveAssetRefs: AssetReference[];
   toSaveESIndexPatterns: Record<string, string>;
 }) {
@@ -208,6 +210,7 @@ export async function saveInstallationReferences(options: {
     pkgName,
     pkgVersion,
     internal,
+    removable,
     toSaveAssetRefs,
     toSaveESIndexPatterns,
   } = options;
@@ -220,6 +223,7 @@ export async function saveInstallationReferences(options: {
       name: pkgName,
       version: pkgVersion,
       internal,
+      removable,
     },
     { id: pkgName, overwrite: true }
   );

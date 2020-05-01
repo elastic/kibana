@@ -49,14 +49,14 @@ class ServiceNow {
   }: {
     url: string;
     method?: Method;
-    data?: any;
+    data?: unknown;
   }): Promise<AxiosResponse> {
     const res = await this.axios(url, { method, data });
     this._throwIfNotAlive(res.status, res.headers['content-type']);
     return res;
   }
 
-  private _patch({ url, data }: { url: string; data: any }): Promise<AxiosResponse> {
+  private _patch({ url, data }: { url: string; data: unknown }): Promise<AxiosResponse> {
     return this._request({
       url,
       method: 'patch',

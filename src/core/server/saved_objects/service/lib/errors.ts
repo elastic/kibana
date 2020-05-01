@@ -37,8 +37,6 @@ const CODE_CONFLICT = 'SavedObjectsClient/conflict';
 const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
-// 503 - Unable to automatically create index because of action.auto_create_index setting
-const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
@@ -178,18 +176,6 @@ export class SavedObjectsErrorHelpers {
 
   public static isEsUnavailableError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_ES_UNAVAILABLE;
-  }
-
-  public static createEsAutoCreateIndexError() {
-    const error = Boom.serverUnavailable('Automatic index creation failed');
-    error.output.payload.attributes = error.output.payload.attributes || {};
-    error.output.payload.attributes.code = 'ES_AUTO_CREATE_INDEX_ERROR';
-
-    return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
-  }
-
-  public static isEsAutoCreateIndexError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
   }
 
   public static decorateGeneralError(error: Error, reason?: string) {

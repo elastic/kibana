@@ -35,19 +35,19 @@ import {
 
 import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
-import { PivotPreview } from '../../../../components/pivot_preview';
+import { DataGrid } from '../../../../../shared_imports';
+
+import {
+  getIndexDevConsoleStatement,
+  getPivotPreviewDevConsoleStatement,
+} from '../../../../common/data_grid';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
+import { useIndexData } from '../../../../hooks/use_index_data';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { useToastNotifications } from '../../../../app_dependencies';
-import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
-import { DropDown } from '../aggregation_dropdown';
-import { AggListForm } from '../aggregation_list';
-import { GroupByListForm } from '../group_by_list';
-import { SourceIndexPreview } from '../source_index_preview';
-import { SwitchModal } from './switch_modal';
-
 import {
   getPivotQuery,
   getPreviewRequestBody,
@@ -61,11 +61,17 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
+  TransformPivotConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
+import { DropDown } from '../aggregation_dropdown';
+import { AggListForm } from '../aggregation_list';
+import { GroupByListForm } from '../group_by_list';
+
 import { getPivotDropdownOptions } from './common';
+import { SwitchModal } from './switch_modal';
 
 export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
@@ -296,7 +302,6 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
           return;
       }
     } catch (e) {
-      console.log('Invalid syntax', JSON.stringify(e, null, 2)); // eslint-disable-line no-console
       setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
@@ -592,6 +597,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     valid,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  const indexPreviewProps = useIndexData(indexPattern, pivotQuery);
+  const pivotPreviewProps = usePivotData(indexPattern.title, pivotQuery, aggList, groupByList);
 
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;
@@ -973,13 +981,37 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
-        <SourceIndexPreview indexPattern={searchItems.indexPattern} query={pivotQuery} />
+        <DataGrid
+          {...indexPreviewProps}
+          copyToClipboard={getIndexDevConsoleStatement(pivotQuery, indexPattern.title)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.indexPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformIndexPreview"
+          title={i18n.translate('xpack.transform.indexPreview.indexPatternTitle', {
+            defaultMessage: 'Index {indexPatternTitle}',
+            values: { indexPatternTitle: indexPattern.title },
+          })}
+          toastNotifications={toastNotifications}
+        />
         <EuiHorizontalRule />
-        <PivotPreview
-          aggs={aggList}
-          groupBy={groupByList}
-          indexPatternTitle={searchItems.indexPattern.title}
-          query={pivotQuery}
+        <DataGrid
+          {...pivotPreviewProps}
+          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.pivotPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformPivotPreview"
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
+            defaultMessage: 'Transform pivot preview',
+          })}
+          toastNotifications={toastNotifications}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

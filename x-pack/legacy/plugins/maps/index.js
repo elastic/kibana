@@ -54,10 +54,9 @@ export function maps(kibana) {
           emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
           regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', []),
+          tilemap: _.get(mapConfig, 'tilemap', {}),
         };
       },
-      embeddableFactories: ['plugins/maps/embeddable/map_embeddable_factory'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {

@@ -143,11 +143,15 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
   params: {
     body: t.intersection([
       t.type({ service: serviceRt }),
-      t.partial({ etag: t.string })
+      t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean })
     ])
   },
   handler: async ({ context, request }) => {
-    const { service, etag } = context.params.body;
+    const {
+      service,
+      etag,
+      mark_as_applied_by_agent: markAsAppliedByAgent
+    } = context.params.body;
 
     const setup = await setupRequest(context, request);
     const config = await searchConfigurations({
@@ -166,9 +170,14 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
       `Config was found for ${service.name}/${service.environment}`
     );
 
-    // update `applied_by_agent` field if etags match
+    // update `applied_by_agent` field
+    // when `markAsAppliedByAgent` is true (Jaeger agent doesn't have etags)
+    // or if etags match.
     // this happens in the background and doesn't block the response
-    if (etag === config._source.etag && !config._source.applied_by_agent) {
+    if (
+      (markAsAppliedByAgent || etag === config._source.etag) &&
+      !config._source.applied_by_agent
+    ) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 

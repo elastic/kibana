@@ -138,6 +138,7 @@ export class MonitoringMainController {
     }
 
     this.datePicker = {
+      enableTimeFilter: timefilter.isTimeRangeSelectorEnabled(),
       timeRange: timefilter.getTime(),
       refreshInterval: timefilter.getRefreshInterval(),
       onRefreshChange: ({ isPaused, refreshInterval }, skipSet = false) => {

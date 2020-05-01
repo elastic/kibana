@@ -39,7 +39,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
 
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
-            'You can not patch this configuration since you did not created first with a post'
+            'You can not patch this configuration since you did not created first with a post.'
           );
         }
 

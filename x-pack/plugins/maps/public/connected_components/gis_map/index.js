@@ -6,8 +6,6 @@
 
 import { connect } from 'react-redux';
 import { GisMap } from './view';
-
-import { FLYOUT_STATE } from '../../reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
@@ -22,12 +20,9 @@ import {
 import { getCoreChrome } from '../../kibana_services';
 
 function mapStateToProps(state = {}) {
-  const flyoutDisplay = getFlyoutDisplay(state);
   return {
     areLayersLoaded: areLayersLoaded(state),
-    layerDetailsVisible: flyoutDisplay === FLYOUT_STATE.LAYER_PANEL,
-    addLayerVisible: flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD,
-    noFlyoutVisible: flyoutDisplay === FLYOUT_STATE.NONE,
+    flyoutDisplay: getFlyoutDisplay(state),
     isFullScreen: getIsFullScreen(state),
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),

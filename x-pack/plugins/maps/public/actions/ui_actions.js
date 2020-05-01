@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getFlyoutDisplay } from '../selectors/ui_selectors';
+import { FLYOUT_STATE } from '../reducers/ui';
+import { setSelectedLayer, trackMapSettings } from './map_actions';
+
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
@@ -26,6 +30,17 @@ export function updateFlyout(display) {
   return {
     type: UPDATE_FLYOUT,
     display,
+  };
+}
+export function openMapSettings() {
+  return (dispatch, getState) => {
+    const flyoutDisplay = getFlyoutDisplay(getState());
+    if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+      return;
+    }
+    dispatch(setSelectedLayer(null));
+    dispatch(trackMapSettings());
+    dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
   };
 }
 export function closeSetView() {

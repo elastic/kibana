@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { formatTimestampToDuration } from '../../../../common';
 import { i18n } from '@kbn/i18n';
 import { APM_SYSTEM_ID } from '../../../../common/constants';
@@ -56,7 +57,10 @@ function getColumns(setupMode) {
 
         return (
           <Fragment>
-            <EuiLink href={`#/apm/instances/${apm.uuid}`} data-test-subj={`apmLink-${name}`}>
+            <EuiLink
+              href={getSafeForExternalLink(`#/apm/instances/${apm.uuid}`)}
+              data-test-subj={`apmLink-${name}`}
+            >
               {name}
             </EuiLink>
             {setupModeStatus}

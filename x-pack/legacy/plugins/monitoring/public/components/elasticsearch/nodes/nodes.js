@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { NodeStatusIcon } from '../node';
 import { extractIp } from '../../../lib/extract_ip'; // TODO this is only used for elasticsearch nodes summary / node detail, so it should be moved to components/elasticsearch/nodes/lib
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringSSPTable } from '../../table';
 import { MetricCell, OfflineCell } from './cells';
@@ -75,7 +76,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     render: (value, node) => {
       let nameLink = (
         <EuiLink
-          href={`#/elasticsearch/nodes/${node.resolver}`}
+          href={getSafeForExternalLink(`#/elasticsearch/nodes/${node.resolver}`)}
           data-test-subj={`nodeLink-${node.resolver}`}
         >
           {value}

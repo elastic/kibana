@@ -30,10 +30,10 @@ export type CasesConfigurationType = TypeOf<typeof CasesConfigurationSchema>;
 export type MapEntry = TypeOf<typeof MapEntrySchema>;
 export type Comment = TypeOf<typeof CommentSchema>;
 
-export type Mapping = Map<string, any>;
+export type Mapping = Map<string, Omit<MapEntry, 'source'>>;
 
 export interface Params extends ExecutorParams {
-  incident: Record<string, any>;
+  incident: Record<string, unknown>;
 }
 export interface CreateHandlerArguments {
   serviceNow: ServiceNow;
@@ -66,7 +66,7 @@ export interface AppendFieldArgs {
 }
 
 export interface KeyAny {
-  [index: string]: string;
+  [index: string]: unknown;
 }
 
 export interface AppendInformationFieldArgs {

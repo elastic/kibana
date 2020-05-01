@@ -377,7 +377,8 @@ export const npStart = {
     },
     data: {
       actions: {
-        createFiltersFromEvent: Promise.resolve(['yes']),
+        createFiltersFromValueClickAction: Promise.resolve(['yes']),
+        createFiltersFromRangeSelectAction: sinon.fake(),
       },
       autocomplete: {
         getProvider: sinon.fake(),

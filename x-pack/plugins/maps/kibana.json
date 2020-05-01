@@ -5,12 +5,14 @@
   "configPath": ["xpack", "maps"],
   "requiredPlugins": [
     "inspector",
+    "licensing",
     "home",
     "data",
     "fileUpload",
     "uiActions",
     "navigation",
-    "visualizations"
+    "visualizations",
+    "embeddable"
   ],
   "ui": true
 }
