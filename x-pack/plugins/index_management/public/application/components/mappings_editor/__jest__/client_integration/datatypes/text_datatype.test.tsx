@@ -89,7 +89,7 @@ describe('Mappings editor: text datatype', () => {
 
     ({ data } = await getMappingsEditorData());
     expect(data).toEqual(updatedMappings);
-  });
+  }, 30000);
 
   test('analyzer parameter: default values', async () => {
     const defaultMappings = {
@@ -456,5 +456,5 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  });
+  }, 30000);
 });
