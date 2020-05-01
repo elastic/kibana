@@ -32,8 +32,8 @@ const Container: React.FC<Props & ResponsiveWrapperProps> = ({ height }) => {
   const { loading, data, esKuery, lastRefresh } = useSelector(selectPingHistogram);
 
   useEffect(() => {
-    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, statusFilter, filters: esKuery }));
-  }, [dateStart, dateEnd, monitorId, statusFilter, lastRefresh, esKuery, dispatch]);
+    dispatch(getPingHistogram({ monitorId, dateStart, dateEnd, filters: esKuery }));
+  }, [dateStart, dateEnd, monitorId, lastRefresh, esKuery, dispatch]);
   return (
     <PingHistogramComponent
       data={data}

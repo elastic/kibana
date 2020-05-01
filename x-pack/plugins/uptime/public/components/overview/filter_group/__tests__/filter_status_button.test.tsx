@@ -5,7 +5,10 @@
  */
 
 import React from 'react';
-import { FilterStatusButton, FilterStatusButtonProps } from '../filter_status_button';
+import {
+  FilterStatusButton,
+  FilterStatusButtonProps,
+} from '../../monitor_list/filter_status_button';
 import { shallowWithRouter } from '../../../../lib';
 
 describe('FilterStatusButton', () => {

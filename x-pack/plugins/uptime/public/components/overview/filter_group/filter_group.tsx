@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
-import { FilterStatusButton } from './filter_status_button';
+import { FilterStatusButton } from '../monitor_list/filter_status_button';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 
 interface PresentationalComponentProps {
@@ -106,22 +106,6 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
 
   return (
     <EuiFilterGroup>
-      <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterUpLabel', {
-          defaultMessage: 'Up',
-        })}
-        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
-        value="up"
-        withNext={true}
-      />
-      <FilterStatusButton
-        content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
-          defaultMessage: 'Down',
-        })}
-        dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
-        value="down"
-        withNext={false}
-      />
       {filterPopoverProps.map(item => (
         <FilterPopover key={item.id} {...item} />
       ))}

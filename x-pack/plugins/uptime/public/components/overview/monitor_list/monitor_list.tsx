@@ -31,6 +31,7 @@ import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
+import { MonitorListHeader } from './monitor_list_header';
 
 interface Props extends MonitorListProps {
   lastRefresh: number;
@@ -181,14 +182,7 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
+      <MonitorListHeader />
       <EuiSpacer size="s" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
