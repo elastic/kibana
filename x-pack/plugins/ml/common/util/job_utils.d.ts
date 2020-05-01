@@ -52,3 +52,5 @@ export function getLatestDataOrBucketTimestamp(
 ): number;
 
 export function prefixDatafeedId(datafeedId: string, prefix: string): string;
+
+export function splitIndexPatternNames(indexPatternName: string): string[];

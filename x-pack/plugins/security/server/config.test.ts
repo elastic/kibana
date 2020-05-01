@@ -27,6 +27,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "hint": undefined,
@@ -71,6 +72,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "hint": undefined,
@@ -115,6 +117,7 @@ describe('config schema', () => {
           "providers": Object {
             "basic": Object {
               "basic": Object {
+                "accessAgreement": undefined,
                 "description": undefined,
                 "enabled": true,
                 "hint": undefined,
@@ -897,20 +900,12 @@ describe('createConfig()', () => {
         "sortedProviders": Array [
           Object {
             "name": "saml",
-            "options": Object {
-              "description": undefined,
-              "order": 0,
-              "showInSelector": true,
-            },
+            "order": 0,
             "type": "saml",
           },
           Object {
             "name": "basic",
-            "options": Object {
-              "description": undefined,
-              "order": 1,
-              "showInSelector": true,
-            },
+            "order": 1,
             "type": "basic",
           },
         ],
@@ -1001,47 +996,27 @@ describe('createConfig()', () => {
       Array [
         Object {
           "name": "oidc1",
-          "options": Object {
-            "description": undefined,
-            "order": 0,
-            "showInSelector": true,
-          },
+          "order": 0,
           "type": "oidc",
         },
         Object {
           "name": "saml2",
-          "options": Object {
-            "description": undefined,
-            "order": 1,
-            "showInSelector": true,
-          },
+          "order": 1,
           "type": "saml",
         },
         Object {
           "name": "saml1",
-          "options": Object {
-            "description": undefined,
-            "order": 2,
-            "showInSelector": true,
-          },
+          "order": 2,
           "type": "saml",
         },
         Object {
           "name": "basic1",
-          "options": Object {
-            "description": "Log in with Elasticsearch",
-            "order": 3,
-            "showInSelector": true,
-          },
+          "order": 3,
           "type": "basic",
         },
         Object {
           "name": "oidc2",
-          "options": Object {
-            "description": undefined,
-            "order": 4,
-            "showInSelector": true,
-          },
+          "order": 4,
           "type": "oidc",
         },
       ]
