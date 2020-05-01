@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ACTION_TYPE_ID = '.servicenow';
 export const SUPPORTED_SOURCE_FIELDS = ['title', 'comments', 'description'];
