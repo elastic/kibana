@@ -186,7 +186,7 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
         layerId: 'first',
-        changeType: 'unchanged',
+        changeType: 'extended',
         label: 'Datasource title',
       },
       keptLayerIds: [],
@@ -194,6 +194,34 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestion.title).toEqual('Datasource title');
+  });
+
+  test('suggests only stacked bar chart when xy chart is inactive', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [dateCol('date'), numCol('price')],
+        layerId: 'first',
+        changeType: 'unchanged',
+        label: 'Datasource title',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.title).toEqual('Bar chart');
+    expect(suggestion.state).toEqual(
+      expect.objectContaining({
+        layers: [
+          expect.objectContaining({
+            seriesType: 'bar_stacked',
+            xAccessor: 'date',
+            accessors: ['price'],
+            splitAccessor: undefined,
+          }),
+        ],
+      })
+    );
   });
 
   test('hides reduced suggestions if there is a current state', () => {
@@ -224,7 +252,7 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
-  test('does not hide reduced suggestions if xy visualization is not active', () => {
+  test('hides reduced suggestions if xy visualization is not active', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
         isMultiRow: true,
@@ -236,7 +264,7 @@ describe('xy_suggestions', () => {
     });
 
     expect(rest).toHaveLength(0);
-    expect(suggestion.hide).toBeFalsy();
+    expect(suggestion.hide).toBeTruthy();
   });
 
   test('only makes a seriesType suggestion for unchanged table without split', () => {
@@ -414,6 +442,44 @@ describe('xy_suggestions', () => {
           ...currentState.layers[0],
           xAccessor: 'product',
           splitAccessor: 'category',
+        },
+      ],
+    });
+  });
+
+  test('changes column mappings when suggestion is reorder', () => {
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      preferredSeriesType: 'bar',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          seriesType: 'bar',
+          splitAccessor: 'category',
+          xAccessor: 'product',
+        },
+      ],
+    };
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [strCol('category'), strCol('product'), numCol('price')],
+        layerId: 'first',
+        changeType: 'reorder',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state).toEqual({
+      ...currentState,
+      layers: [
+        {
+          ...currentState.layers[0],
+          xAccessor: 'category',
+          splitAccessor: 'product',
         },
       ],
     });

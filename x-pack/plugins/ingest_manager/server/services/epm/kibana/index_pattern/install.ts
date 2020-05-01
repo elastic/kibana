@@ -47,6 +47,7 @@ const typeMap: TypeMap = {
   date: 'date',
   ip: 'ip',
   boolean: 'boolean',
+  constant_keyword: 'string',
 };
 
 export interface IndexPatternField {
