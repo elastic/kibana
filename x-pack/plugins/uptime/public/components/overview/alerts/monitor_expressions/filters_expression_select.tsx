@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterPopover } from '../../filter_group/filter_popover';
@@ -16,9 +16,14 @@ import { alertFilterLabels } from './translations';
 interface Props {
   newFilters: string[];
   onRemoveFilter: (val: string) => void;
+  setAlertParams: (key: string, value: any) => void;
 }
 
-export const FiltersExpressionsSelect: React.FC<Props> = ({ newFilters, onRemoveFilter }) => {
+export const FiltersExpressionsSelect: React.FC<Props> = ({
+  setAlertParams,
+  newFilters,
+  onRemoveFilter,
+}) => {
   const { tags, ports, schemes, locations } = useSelector(overviewFiltersSelector);
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
@@ -27,6 +32,18 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({ newFilters, onRemove
   }>({ fieldName: '', values: [] });
 
   const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+
+  useEffect(() => {
+    if (updatedFieldValues.fieldName === 'observer.geo.name') {
+      setAlertParams('locations', updatedFieldValues.values);
+    }
+  }, [setAlertParams, updatedFieldValues]);
+
+  useEffect(() => {
+    setAlertParams('locations', []);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedTags = currentFilters.get('tags');
   const selectedPorts = currentFilters.get('url.port');

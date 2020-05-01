@@ -55,3 +55,18 @@ export const alertFilterLabels = {
     defaultMessage: 'any location',
   }),
 };
+
+export const timeExpLabels = {
+  OPEN_TIME_POPOVER: i18n.translate(
+    'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
+    {
+      defaultMessage: 'Open the popover for time range unit select field',
+    }
+  ),
+  SELECT_TIME_RANGE_ARIA: i18n.translate(
+    'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
+    {
+      defaultMessage: 'Selectable field for the time range units alerts should use',
+    }
+  ),
+};

@@ -102,3 +102,19 @@ export const ENTER_NUMBER_OF_TIME_UNITS = i18n.translate(
 export const ADD_FILTER = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter', {
   defaultMessage: `Add filter`,
 });
+
+export const LOCATION = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.location', {
+  defaultMessage: `Location`,
+});
+
+export const TAG = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.tag', {
+  defaultMessage: `TAG`,
+});
+
+export const PORT = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.port', {
+  defaultMessage: `Port`,
+});
+
+export const TYPE = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.type', {
+  defaultMessage: `Type`,
+});

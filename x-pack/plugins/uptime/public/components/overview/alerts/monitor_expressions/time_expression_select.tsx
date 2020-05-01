@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiTitle } from '@elastic/eui
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
+import { timeExpLabels } from './translations';
 
 interface Props {
   setAlertParams: (key: string, value: any) => void;
@@ -45,14 +46,14 @@ const TimeRangeOptions = [
 ];
 
 export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
-  const [numMins, setNumMins] = useState<number>(15);
+  const [numUnits, setNumUnits] = useState<number>(15);
 
   const [timerangeUnitOptions, setTimerangeUnitOptions] = useState<any[]>(TimeRangeOptions);
 
   useEffect(() => {
     const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-    setAlertParams('timerange', { from: `now-${numMins}${timerangeUnit}`, to: 'now' });
-  }, [numMins, timerangeUnitOptions, setAlertParams]);
+    setAlertParams('timerange', { from: `now-${numUnits}${timerangeUnit}`, to: 'now' });
+  }, [numUnits, timerangeUnitOptions, setAlertParams]);
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -64,24 +65,19 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
               aria-label={labels.ENTER_NUMBER_OF_TIME_UNITS}
               data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueField"
               disabled={false}
-              fieldValue={numMins}
-              setFieldValue={setNumMins}
+              fieldValue={numUnits}
+              setFieldValue={setNumUnits}
             />
           }
           data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeValueExpression"
           description="within"
           id="timerange"
-          value={`last ${numMins}`}
+          value={`last ${numUnits}`}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <AlertExpressionPopover
-          aria-label={i18n.translate(
-            'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression.ariaLabel',
-            {
-              defaultMessage: 'Open the popover for time range unit select field',
-            }
-          )}
+          aria-label={timeExpLabels.OPEN_TIME_POPOVER}
           content={
             <>
               <EuiTitle size="xxs">
@@ -93,12 +89,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({ setAlertParams }) => {
                 </h5>
               </EuiTitle>
               <EuiSelectable
-                aria-label={i18n.translate(
-                  'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
-                  {
-                    defaultMessage: 'Selectable field for the time range units alerts should use',
-                  }
-                )}
+                aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
                 data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
                 options={timerangeUnitOptions}
                 onChange={newOptions => {

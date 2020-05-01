@@ -59,6 +59,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       <EuiSpacer size="xs" />
 
       <FiltersExpressionsSelect
+        setAlertParams={setAlertParams}
         newFilters={newFilters}
         onRemoveFilter={removeFiler => {
           if (newFilters.includes(removeFiler)) {

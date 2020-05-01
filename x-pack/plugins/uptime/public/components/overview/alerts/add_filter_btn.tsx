@@ -32,10 +32,10 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
   const items: JSX.Element[] = [];
 
   const allFilters = [
-    { id: 'observer.geo.name', label: 'Location' },
-    { id: 'tags', label: 'Tag' },
-    { id: 'url.port', label: 'Port' },
-    { id: 'monitor.type', label: 'Type' },
+    { id: 'observer.geo.name', label: labels.LOCATION },
+    { id: 'tags', label: labels.TAG },
+    { id: 'url.port', label: labels.PORT },
+    { id: 'monitor.type', label: labels.TYPE },
   ];
 
   allFilters.forEach(filter => {
