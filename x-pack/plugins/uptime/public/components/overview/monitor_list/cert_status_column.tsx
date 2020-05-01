@@ -25,10 +25,6 @@ const Span = styled.span`
 export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
   const certStatus = useCertStatus(cert?.not_after);
 
-  const isExpiringSoon = certStatus === CERT_STATUS.EXPIRING_SOON;
-
-  const isExpired = certStatus === CERT_STATUS.EXPIRED;
-
   const relativeDate = moment(cert?.not_after).fromNow();
 
   const CertStatus = ({ color, text }: { color: string; text: string }) => {
@@ -44,10 +40,10 @@ export const CertStatusColumn: React.FC<Props> = ({ cert }) => {
     );
   };
 
-  if (isExpiringSoon) {
+  if (certStatus === CERT_STATUS.EXPIRING_SOON) {
     return <CertStatus color="warning" text={EXPIRES_SOON} />;
   }
-  if (isExpired) {
+  if (certStatus === CERT_STATUS.EXPIRED) {
     return <CertStatus color="danger" text={EXPIRED} />;
   }
 

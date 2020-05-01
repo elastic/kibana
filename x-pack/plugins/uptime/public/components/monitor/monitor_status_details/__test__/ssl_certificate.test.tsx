@@ -25,11 +25,11 @@ describe('SSL Certificate component', () => {
       not_after: dateInTwoMonths,
     };
 
-    const spy = jest.spyOn(redux, 'useDispatch');
-    spy.mockReturnValue(jest.fn());
+    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
+    useDispatchSpy.mockReturnValue(jest.fn());
 
-    const spy1 = jest.spyOn(redux, 'useSelector');
-    spy1.mockReturnValue({ settings: DYNAMIC_SETTINGS_DEFAULTS });
+    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
+    useSelectorSpy.mockReturnValue({ settings: DYNAMIC_SETTINGS_DEFAULTS });
   });
 
   it('shallow renders', () => {
