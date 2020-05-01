@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { MonitorPageLink } from '../monitor_page_link';
 
 describe('MonitorPageLink component', () => {
