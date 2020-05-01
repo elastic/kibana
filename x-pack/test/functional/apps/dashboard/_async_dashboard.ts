@@ -30,7 +30,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('smoke');
 
     before(async () => {
-      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin', 'superuser']);
+      // await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin', 'superuser']);
+      await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
@@ -51,7 +52,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.removeSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(false);
-      await security.testUser.restoreDefaults();
+      // await security.testUser.restoreDefaults();
     });
 
     it('should launch sample flights data set dashboard', async () => {
