@@ -27,6 +27,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IExpressionLoaderParams, RenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
+import { ExpressionRendererEvent } from './render';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -36,7 +37,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   expression: string | ExpressionAstExpression;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
-  onEvent?: (event: any) => void;
+  onEvent?: (event: ExpressionRendererEvent) => void;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;

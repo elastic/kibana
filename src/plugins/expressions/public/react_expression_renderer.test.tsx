@@ -21,11 +21,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Subject } from 'rxjs';
 import { share } from 'rxjs/operators';
-import { ReactExpressionRenderer, ReactExpressionRendererProps } from './react_expression_renderer';
+import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
 import { RenderErrorHandlerFnType } from './types';
+import { ExpressionRendererEvent } from './render';
 
 jest.mock('./loader', () => {
   return {
@@ -143,11 +144,16 @@ describe('ExpressionRenderer', () => {
     const render$ = renderSubject.asObservable().pipe(share());
     const loadingSubject = new Subject();
     const loading$ = loadingSubject.asObservable().pipe(share());
-    const eventsSubject = new Subject();
+    const eventsSubject = new Subject<ExpressionRendererEvent>();
     const events$ = eventsSubject.asObservable().pipe(share());
 
     const onEvent = jest.fn();
-    const event = { foo: 'bar' };
+    const event: ExpressionRendererEvent = {
+      name: 'foo',
+      data: {
+        bar: 'baz',
+      },
+    };
 
     (ExpressionLoader as jest.Mock).mockImplementation(() => {
       return {
