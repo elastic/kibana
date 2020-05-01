@@ -43,6 +43,9 @@ export const AlertEdit = ({
   const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
+  const setAlert = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key, value } });
+  };
 
   const {
     reloadAlerts,
@@ -55,6 +58,8 @@ export const AlertEdit = ({
 
   const closeFlyout = useCallback(() => {
     setEditFlyoutVisibility(false);
+    setAlert('alert', initialAlert);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setEditFlyoutVisibility]);
 
   if (!editFlyoutVisible) {
