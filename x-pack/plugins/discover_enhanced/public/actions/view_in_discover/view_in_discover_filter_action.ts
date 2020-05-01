@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { keys } from 'lodash';
+import moment from 'moment';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
   IEmbeddable,
@@ -19,6 +21,7 @@ import {
   VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../../../../../../src/plugins/visualizations/public';
+import { esFilters, RangeFilter, TimeRange } from '../../../../../../src/plugins/data/public';
 
 export const ACTION_VIEW_IN_DISCOVER_FILTER = 'ACTION_VIEW_IN_DISCOVER_FILTER';
 
@@ -34,6 +37,32 @@ const isOutputWithIndexPatterns = (
 const isVisualizeEmbeddable = (
   embeddable?: IEmbeddable
 ): embeddable is VisualizeEmbeddableContract => embeddable?.type === VISUALIZE_EMBEDDABLE_TYPE;
+
+const isValueClickTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is ValueClickTriggerContext => context.data && 'data' in context.data;
+
+const isRangeSelectTriggerContext = (
+  context: ValueClickTriggerContext | RangeSelectTriggerContext
+): context is RangeSelectTriggerContext => context.data && 'range' in context.data;
+
+export function convertRangeFilterToTimeRange(filter: RangeFilter) {
+  const key = keys(filter.range)[0];
+  const values = filter.range[key];
+
+  return {
+    from: moment(values.gt || values.gte),
+    to: moment(values.lt || values.lte),
+  };
+}
+
+const convertRangeFilterToTimeRangeString = (filter: RangeFilter): TimeRange => {
+  const { from, to } = convertRangeFilterToTimeRange(filter);
+  return {
+    from: from?.toISOString(),
+    to: to?.toISOString(),
+  };
+};
 
 interface Params {
   start: StartServicesGetter<
@@ -91,19 +120,60 @@ export class ViewInDiscoverFilterAction implements Action<ActionContext> {
     });
   }
 
-  private async getUrl({ embeddable, data, timeFieldName }: ActionContext): Promise<string> {
+  private async getUrl(context: ActionContext): Promise<string> {
+    const { embeddable, timeFieldName } = context;
+
     if (!isVisualizeEmbeddable(embeddable)) {
       throw new Error(`Embeddable not supported for "${this.getDisplayName()}" action.`);
     }
 
     const { plugins } = this.params.start();
-
-    const { createFiltersFromRangeSelectAction } = plugins.data.actions;
+    const {
+      createFiltersFromRangeSelectAction,
+      createFiltersFromValueClickAction,
+    } = plugins.data.actions;
 
     // eslint-disable-next-line prefer-const
     let { timeRange, query, filters } = embeddable.getInput();
     const indexPatternId = this.getIndexPattern(embeddable);
-    const filtersFromEvent = await createFiltersFromRangeSelectAction(data as any);
+    let filtersFromEvent = await (async () => {
+      try {
+        if (isRangeSelectTriggerContext(context))
+          return await createFiltersFromRangeSelectAction(context.data);
+        if (isValueClickTriggerContext(context))
+          return await createFiltersFromValueClickAction(context.data);
+
+        // eslint-disable-next-line no-console
+        console.warn(
+          `
+          DashboardToDashboard drilldown: can't extract filters from action.
+          Is it not supported action?`,
+          context
+        );
+
+        return [];
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `
+          DashboardToDashboard drilldown: error extracting filters from action.
+          Continuing without applying filters from event`,
+          e
+        );
+        return [];
+      }
+    })();
+
+    if (timeFieldName) {
+      const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
+        timeFieldName,
+        filtersFromEvent
+      );
+      filtersFromEvent = restOfFilters;
+      if (timeRangeFilter) {
+        timeRange = convertRangeFilterToTimeRangeString(timeRangeFilter);
+      }
+    }
 
     const url = await plugins
       .share!.urlGenerators.getUrlGenerator(DISCOVER_APP_URL_GENERATOR)
