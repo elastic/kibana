@@ -5,7 +5,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiTitle } from '@elastic/eui';
 import { AlertExpressionPopover } from '../alert_expression_popover';

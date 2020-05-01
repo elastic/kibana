@@ -14,7 +14,7 @@ describe('DownNoExpressionSelect component', () => {
       '"{"bool":{"filter":[{"bool":{"should":[{"match":{"observer.geo.name":"US-West"}}],"minimum_should_match":1}},' +
       '{"bool":{"should":[{"match":{"url.port":443}}],"minimum_should_match":1}}]}}"';
     const component = shallowWithIntl(
-      <DownNoExpressionSelect filters={filters} setAlertParams={setAlertParams} />
+      <DownNoExpressionSelect filters={filters} setAlertParams={jest.fn()} />
     );
     expect(component).toMatchSnapshot();
   });
