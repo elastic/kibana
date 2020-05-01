@@ -71,7 +71,6 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf2_',
         indexPatternName: 'kibana_sample_data_logs',
         startDatafeed: false,
-        estimateModelMemory: true,
       },
       expected: {
         responseCode: 200,
