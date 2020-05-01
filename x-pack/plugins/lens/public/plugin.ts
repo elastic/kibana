@@ -11,10 +11,8 @@ import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/publ
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
-
 import { EditorFrameService } from './editor_frame_service';
 import { IndexPatternDatasource } from './indexpattern_datasource';
-
 import { XyVisualization } from './xy_visualization';
 import { MetricVisualization } from './metric_visualization';
 import { DatatableVisualization } from './datatable_visualization';
@@ -96,6 +94,7 @@ export class LensPlugin {
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
     this.xyVisualization.start(core, startDependencies);
+    this.datatableVisualization.start(core, startDependencies);
   }
 
   stop() {

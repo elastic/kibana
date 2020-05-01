@@ -52,7 +52,7 @@ describe('delete_list', () => {
       body: { query: { term: { list_id: LIST_ID } } },
       index: LIST_ITEM_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
   });
 
   test('Delete calls "delete" second if a list is returned from getList', async () => {
@@ -64,13 +64,13 @@ describe('delete_list', () => {
       id: LIST_ID,
       index: LIST_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toHaveBeenNthCalledWith(2, 'delete', deleteQuery);
+    expect(options.callCluster).toHaveBeenNthCalledWith(2, 'delete', deleteQuery);
   });
 
   test('Delete does not call data client if the list returns null', async () => {
     ((getList as unknown) as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
     await deleteList(options);
-    expect(options.dataClient.callAsCurrentUser).not.toHaveBeenCalled();
+    expect(options.callCluster).not.toHaveBeenCalled();
   });
 });

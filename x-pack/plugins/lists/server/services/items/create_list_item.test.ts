@@ -31,7 +31,7 @@ describe('crete_list_item', () => {
     expect(listItem).toEqual(expected);
   });
 
-  test('It calls "callAsCurrentUser" with body, index, and listIndex', async () => {
+  test('It calls "callCluster" with body, index, and listIndex', async () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
     const body = getIndexESListItemMock();
@@ -40,7 +40,7 @@ describe('crete_list_item', () => {
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
+    expect(options.callCluster).toBeCalledWith('index', expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
