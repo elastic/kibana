@@ -32,6 +32,8 @@ import { ActionConnectorTableItem } from '../../../../../../triggers_actions_ui/
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { CCMapsCombinedActionAttributes } from '../../../../containers/case/configure/types';
+import { connectorsConfiguration } from '../../../../lib/connectors/config';
+
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
 import { Mapping } from '../configure_cases/mapping';
@@ -54,16 +56,7 @@ const FormWrapper = styled.div`
   `}
 `;
 
-const actionTypes: ActionType[] = [
-  {
-    id: '.servicenow',
-    name: 'ServiceNow',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'platinum',
-  },
-];
+const actionTypes: ActionType[] = Object.values(connectorsConfiguration);
 
 interface ConfigureCasesComponentProps {
   userCanCrud: boolean;

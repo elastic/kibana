@@ -5,22 +5,22 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { Id, ListSchema, SearchEsListSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
 
 interface GetListOptions {
   id: Id;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listIndex: string;
 }
 
 export const getList = async ({
   id,
-  dataClient,
+  callCluster,
   listIndex,
 }: GetListOptions): Promise<ListSchema | null> => {
-  const result: SearchResponse<SearchEsListSchema> = await dataClient.callAsCurrentUser('search', {
+  const result: SearchResponse<SearchEsListSchema> = await callCluster('search', {
     body: {
       query: {
         term: {

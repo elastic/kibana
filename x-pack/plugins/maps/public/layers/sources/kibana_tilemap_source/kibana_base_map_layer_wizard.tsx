@@ -12,8 +12,14 @@ import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
 import { TileLayer } from '../../tile_layer';
+// @ts-ignore
+import { getKibanaTileMap } from '../../../meta';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
+  checkVisibility: () => {
+    const tilemap = getKibanaTileMap();
+    return !!tilemap.url;
+  },
   description: i18n.translate('xpack.maps.source.kbnTMSDescription', {
     defaultMessage: 'Tile map service configured in kibana.yml',
   }),
