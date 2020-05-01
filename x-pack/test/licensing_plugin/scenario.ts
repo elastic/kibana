@@ -39,9 +39,6 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.logout();
       await PageObjects.security.login('license_manager_user', 'license_manager_user-password');
-      // core provider plugin lives in legacy, so we need to access an app which loads the legacy platform
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     // make sure a license is present, otherwise the security is not available anymore.

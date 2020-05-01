@@ -83,6 +83,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`navigating to console shows 404`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
@@ -92,6 +93,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`navigating to search profiler shows 404`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,
@@ -100,6 +102,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`navigating to grok debugger shows 404`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
+          basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           useActualUrl: true,

@@ -270,6 +270,7 @@ export class DashboardPlugin
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
+        params.element.classList.add('dshAppContainer');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {
           unmount();

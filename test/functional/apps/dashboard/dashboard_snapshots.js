@@ -64,8 +64,7 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      // TODO this needs to be investigated , not 100% sure if this is the solutioon
-      expect(percentDifference).to.be.lessThan(0.2);
+      expect(percentDifference).to.be.lessThan(0.02);
     });
 
     it('compare area chart snapshot', async () => {
@@ -87,8 +86,7 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      // TODO this needs to be investigated , not 100% sure if this is the solutioon
-      expect(percentDifference).to.be.lessThan(0.2);
+      expect(percentDifference).to.be.lessThan(0.02);
     });
   });
 }

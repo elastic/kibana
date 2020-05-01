@@ -11,6 +11,7 @@ import {
   createDashboardEditUrl,
   DashboardConstants,
 } from '../../../../src/plugins/dashboard/public';
+import { AppNavLinkStatus } from '../../../../src/core/public';
 
 function defaultUrl(defaultAppId: string) {
   const isDashboardId = defaultAppId.startsWith(dashboardAppIdPrefix());
@@ -49,7 +50,7 @@ export const plugin = () => ({
     core.application.register({
       id: 'dashboard_mode',
       title: 'Dashboard mode',
-      navLinkStatus: 3, // TODO should be fetched by enum
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async () => {
         const [coreStart, { kibanaLegacy }] = await core.getStartServices();
         kibanaLegacy.dashboardConfig.turnHideWriteControlsOn();
