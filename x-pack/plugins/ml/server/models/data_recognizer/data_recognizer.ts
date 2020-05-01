@@ -418,7 +418,7 @@ export class DataRecognizer {
 
     this.jobsForModelMemoryEstimation = moduleConfig.jobs.map(job => ({
       job,
-      query: moduleConfig.datafeeds.find(d => d.config.job_id === job.id)?.config.query || null,
+      query: moduleConfig.datafeeds.find(d => d.config.job_id === job.id)?.config.query ?? null,
     }));
 
     this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
