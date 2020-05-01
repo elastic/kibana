@@ -78,7 +78,7 @@ export const createMarkdownVisFn = (): ExpressionFunctionMarkdownVis => ({
         visType: 'markdown',
         visConfig: {
           markdown: args.markdown,
-          openLinksInNewTab: args.openLinksInNewTab,
+          openLinksInNewTab: args.openLinksInNewTab!,
           fontSize: parseInt(args.font!.spec.fontSize || '12', 10),
         },
       },
