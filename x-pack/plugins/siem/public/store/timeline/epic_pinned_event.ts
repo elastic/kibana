@@ -15,6 +15,8 @@ import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/ope
 import { persistTimelinePinnedEventMutation } from '../../containers/timeline/pinned_event/persist.gql_query';
 import { PersistTimelinePinnedEventMutation, PinnedEvent } from '../../graphql/types';
 import { addError } from '../app/actions';
+import { inputsModel } from '../inputs';
+
 import {
   pinEvent,
   endTimelineSaving,
@@ -35,7 +37,8 @@ export const epicPersistPinnedEvent = (
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
-  timeline$: Observable<TimelineById>
+  timeline$: Observable<TimelineById>,
+  allTimelineQuery$: Observable<inputsModel.GlobalQuery>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
@@ -57,11 +60,15 @@ export const epicPersistPinnedEvent = (
       refetchQueries,
     })
   ).pipe(
-    withLatestFrom(timeline$),
-    mergeMap(([result, recentTimeline]) => {
+    withLatestFrom(timeline$, allTimelineQuery$),
+    mergeMap(([result, recentTimeline, allTimelineQuery]) => {
       const savedTimeline = recentTimeline[action.payload.id];
       const response: PinnedEvent = get('data.persistPinnedEventOnTimeline', result);
       const callOutMsg = response && response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
+      if (allTimelineQuery.refetch != null) {
+        (allTimelineQuery.refetch as inputsModel.Refetch)();
+      }
 
       return [
         response != null

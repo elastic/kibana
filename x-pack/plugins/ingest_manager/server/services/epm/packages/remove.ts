@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
+import Boom from 'boom';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
@@ -20,9 +21,9 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw new Error('integration does not exist');
+  if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false)
-    throw new Error(`The ${pkgName} integration is installed by default and cannot be removed`);
+    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
   const installedObjects = installation.installed || [];
 
   // Delete the manager saved object with references to the asset objects
@@ -74,7 +75,21 @@ async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): P
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
     try {
-      await callCluster('indices.deleteTemplate', { name });
+      const callClusterParams: {
+        method: string;
+        path: string;
+        ignore: number[];
+      } = {
+        method: 'DELETE',
+        path: `/_index_template/${name}`,
+        ignore: [404],
+      };
+      // This uses the catch-all endpoint 'transport.request' because there is no
+      // convenience endpoint using the new _index_template API yet.
+      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+      // which does not support v2 templates.
+      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+      await callCluster('transport.request', callClusterParams);
     } catch {
       throw new Error(`error deleting template ${name}`);
     }
@@ -107,8 +122,12 @@ export async function deleteKibanaSavedObjectsAssets(
   const deletePromises = installedObjects.map(({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
-      savedObjectsClient.delete(assetType, id);
+      return savedObjectsClient.delete(assetType, id);
     }
   });
-  await Promise.all(deletePromises);
+  try {
+    await Promise.all(deletePromises);
+  } catch (err) {
+    throw new Error('error deleting saved object asset');
+  }
 }
