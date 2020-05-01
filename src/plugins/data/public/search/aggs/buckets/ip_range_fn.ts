@@ -69,9 +69,10 @@ export const aggIpRange = (): FunctionDefinition => ({
     ipRangeType: {
       types: ['string'],
       required: true,
+      options: ['mask', 'fromTo'],
       help: i18n.translate('data.search.aggs.buckets.ipRange.ipRangeType.help', {
         defaultMessage:
-          'Ip range type to use for this aggregation. Takes one of the following values: mask, fromTo.',
+          'IP range type to use for this aggregation. Takes one of the following values: mask, fromTo.',
       }),
     },
     ranges: {
