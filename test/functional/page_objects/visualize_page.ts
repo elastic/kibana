@@ -309,7 +309,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
       if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'uncheck' : 'check';
+        const state = saveAsNew ? 'check' : 'uncheck';
         await testSubjects.setCheckbox('saveAsNewCheckbox', state);
       }
 
@@ -345,9 +345,9 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
     public async saveVisualizationExpectSuccessAndBreadcrumb(
       vizName: string,
-      { saveAsNew = false } = {}
+      { saveAsNew = false, redirectToOrigin = false } = {}
     ) {
-      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew });
+      await this.saveVisualizationExpectSuccess(vizName, { saveAsNew, redirectToOrigin });
       await retry.waitFor(
         'last breadcrumb to have new vis name',
         async () => (await globalNav.getLastBreadcrumb()) === vizName

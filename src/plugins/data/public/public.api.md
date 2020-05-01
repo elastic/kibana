@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { Action } from 'history';
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
+import { BehaviorSubject } from 'rxjs';
 import { Breadcrumb } from '@elastic/eui';
 import { Component } from 'react';
 import { CoreSetup } from 'src/core/public';

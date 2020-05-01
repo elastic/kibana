@@ -139,7 +139,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
       if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'uncheck' : 'check';
+        const state = saveAsNew ? 'check' : 'uncheck';
         await testSubjects.setCheckbox('saveAsNewCheckbox', state);
       }
 

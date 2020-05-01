@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('pie chart', function() {
+  describe('pie chart fooin it up', function() {
     const vizName1 = 'Visualization PieChart';
     before(async function() {
       log.debug('navigateToApp visualize');
@@ -210,8 +210,10 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should correctly save disabled agg', async () => {
+        console.log('GONNA S A V E  OUR BOI AND EXPECT SUCCESS AND BREADCRUMB');
         await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
+        console.log('NOW GONNA LOAD UP THAT SAVED VIS ALL NICE');
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visChart.waitForRenderingCount();
 

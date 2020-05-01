@@ -423,11 +423,12 @@ export function App({
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             documentInfo={{
               id: lastKnownDoc.id,
-              title: lastKnownDoc.title,
+              title: lastKnownDoc.title || '',
             }}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
+            data-test-subj="lnsApp_saveModalOrigin"
           />
         )}
       </KibanaContextProvider>

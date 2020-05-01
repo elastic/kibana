@@ -253,7 +253,6 @@ export default function({ getService, getPageObjects }) {
 
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
-        await queryBar.switchQueryLanguage('lucene');
         await queryBar.setQuery('weightLbs:>50');
         await queryBar.submitQuery();
 
@@ -315,7 +314,6 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
-        await queryBar.switchQueryLanguage('lucene');
         await queryBar.setQuery('weightLbs<40');
         await queryBar.submitQuery();
         await PageObjects.dashboard.waitForRenderComplete();
