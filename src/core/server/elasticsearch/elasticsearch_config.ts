@@ -133,6 +133,10 @@ const deprecations: ConfigDeprecationProvider = () => [
       log(
         `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
       );
+    } else if (es.username === 'kibana') {
+      log(
+        `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
+      );
     }
     if (es.ssl?.key !== undefined && es.ssl?.certificate === undefined) {
       log(
