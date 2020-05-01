@@ -8,8 +8,14 @@ import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { OverviewPage } from './components/overview/overview_container';
-import { MONITOR_ROUTE, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../common/constants';
+import {
+  CERTIFICATES_ROUTE,
+  MONITOR_ROUTE,
+  OVERVIEW_ROUTE,
+  SETTINGS_ROUTE,
+} from '../common/constants';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
+import { CertificatesPage } from './pages/certificates';
 
 interface RouterProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -25,6 +31,11 @@ export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
     <Route path={SETTINGS_ROUTE}>
       <div data-test-subj="uptimeSettingsPage">
         <SettingsPage />
+      </div>
+    </Route>
+    <Route path={CERTIFICATES_ROUTE}>
+      <div data-test-subj="uptimeCertificatesPage">
+        <CertificatesPage />
       </div>
     </Route>
     <Route path={OVERVIEW_ROUTE}>
