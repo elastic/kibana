@@ -19,7 +19,6 @@ import { GraphPageProvider } from './graph_page';
 import { GrokDebuggerPageProvider } from './grok_debugger_page';
 // @ts-ignore not ts yet
 import { WatcherPageProvider } from './watcher_page';
-// @ts-ignore not ts yet
 import { ReportingPageProvider } from './reporting_page';
 // @ts-ignore not ts yet
 import { AccountSettingProvider } from './accountsetting_page';
