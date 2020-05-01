@@ -9,11 +9,10 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult, ActionType } from '../../../types';
-import { ActionsConnectorsContextValue } from '../../context/actions_connectors_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 describe('connector_add_modal', () => {
-  let deps: ActionsConnectorsContextValue;
+  let deps: any;
 
   beforeAll(async () => {
     const mocks = coreMock.createSetup();
@@ -34,6 +33,7 @@ describe('connector_add_modal', () => {
         },
       },
       actionTypeRegistry: actionTypeRegistry as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
@@ -72,6 +72,8 @@ describe('connector_add_modal', () => {
             http={deps.http}
             actionTypeRegistry={deps.actionTypeRegistry}
             toastNotifications={deps.toastNotifications}
+            docLinks={deps.docLinks}
+            capabilities={deps.capabilities}
           />
         )
       : undefined;

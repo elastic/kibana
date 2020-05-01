@@ -28,7 +28,7 @@ import {
   EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -57,10 +57,12 @@ interface ActionAccordionFormProps {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +83,8 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  capabilities,
+  docLinks,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -667,6 +671,8 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
           http={http}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

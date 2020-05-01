@@ -33,7 +33,13 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    docLinks,
+  } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -412,6 +418,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           capabilities,
           toastNotifications,
           reloadConnectors: loadActions,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout
