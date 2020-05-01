@@ -27,16 +27,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
@@ -72,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(alertType).to.be(`Always Firing`);
 
         const { actionType, actionCount } = await pageObjects.alertDetailsUI.getActionsLabels();
-        expect(actionType).to.be(`Server log`);
+        expect(actionType).to.be(`Slack`);
         expect(actionCount).to.be(`+1`);
       });
 
@@ -168,7 +172,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alert = await alerting.alerts.createAlertWithActions(
           testRunUuid,
           '.index-threshold',
-          params
+          params,
+          [
+            {
+              group: 'threshold met',
+              id: 'my-server-log',
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ]
         );
         // refresh to see alert
         await browser.refresh();
@@ -183,6 +194,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
         const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
         await testSubjects.setValue('alertNameInput', updatedAlertName, {
@@ -257,16 +269,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
@@ -469,16 +485,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
