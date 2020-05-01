@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { addEmbeddableToDashboardUrl, getUrlVars } from './url_helper';
-export { isRisonObject } from './is_rison_object';
+import { RisonObject, RisonValue } from 'rison-node';
+import { isObject } from 'lodash';
+
+export const isRisonObject = (value: RisonValue): value is RisonObject => {
+  return isObject(value);
+};
