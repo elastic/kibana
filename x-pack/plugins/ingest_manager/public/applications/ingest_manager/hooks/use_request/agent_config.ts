@@ -18,8 +18,8 @@ import {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
 } from '../../types';
 
 export const useGetAgentConfigs = (query: HttpFetchQuery = {}) => {
@@ -75,8 +75,8 @@ export const sendUpdateAgentConfig = (
   });
 };
 
-export const sendDeleteAgentConfigs = (body: DeleteAgentConfigsRequest['body']) => {
-  return sendRequest<DeleteAgentConfigsResponse>({
+export const sendDeleteAgentConfig = (body: DeleteAgentConfigRequest['body']) => {
+  return sendRequest<DeleteAgentConfigResponse>({
     path: agentConfigRouteService.getDeletePath(),
     method: 'post',
     body: JSON.stringify(body),
