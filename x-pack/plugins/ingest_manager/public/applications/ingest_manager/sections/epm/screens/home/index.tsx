@@ -14,7 +14,7 @@ import {
 } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
-import { CategorySummaryItem, PackageListItem } from '../../../../types';
+import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
