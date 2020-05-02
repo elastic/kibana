@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('pie chart fooin it up', function() {
+  describe('pie chart', function() {
     const vizName1 = 'Visualization PieChart';
     before(async function() {
       log.debug('navigateToApp visualize');

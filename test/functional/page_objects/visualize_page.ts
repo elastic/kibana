@@ -315,7 +315,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
 
       const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
       if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'uncheck' : 'check';
+        const state = redirectToOrigin ? 'check' : 'uncheck';
         await testSubjects.setCheckbox('returnToOriginModeSwitch', state);
       }
       log.debug('Click Save Visualization button');

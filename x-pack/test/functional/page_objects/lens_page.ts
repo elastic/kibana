@@ -145,7 +145,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
       if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'uncheck' : 'check';
+        const state = redirectToOrigin ? 'check' : 'uncheck';
         await testSubjects.setCheckbox('returnToOriginModeSwitch', state);
       }
 
