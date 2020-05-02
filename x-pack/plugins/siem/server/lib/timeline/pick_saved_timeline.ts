@@ -33,7 +33,7 @@ export const pickSavedTimeline = (
       savedTimeline.templateTimelineId = uuid.v4();
       savedTimeline.templateTimelineVersion = 1;
     } else {
-      // update tenplate timeline
+      // update template timeline
       if (savedTimeline.templateTimelineVersion != null) {
         savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
       }

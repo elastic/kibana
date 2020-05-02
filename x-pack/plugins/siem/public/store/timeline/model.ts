@@ -5,6 +5,9 @@
  */
 
 import { Filter } from '../../../../../../src/plugins/data/public';
+
+import { TimelineTypeLiteralWithNull } from '../../../common/types/timeline';
+
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent, TimelineNonEcsData } from '../../graphql/types';
@@ -78,7 +81,7 @@ export interface TimelineModel {
   /** Title */
   title: string;
   /** timelineTypes: default | template */
-  timelineType: TimelineTypesLiteralWithNull;
+  timelineType: TimelineTypeLiteralWithNull;
   /** an unique id for template timeline */
   templateTimelineId: string | null;
   /** null for default timeline, number for template timeline */
@@ -131,6 +134,9 @@ export type SubsetTimelineModel = Readonly<
     | 'kqlMode'
     | 'kqlQuery'
     | 'title'
+    | 'timelineType'
+    | 'templateTimelineId'
+    | 'templateTimelineVersion'
     | 'loadingEventIds'
     | 'noteIds'
     | 'pinnedEventIds'
