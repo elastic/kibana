@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   describe('Endpoint Alert Resolver', function() {
     this.tags(['ciGroup7']);
@@ -27,6 +28,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.existOrFail('alertDetailFlyout');
       await testSubjects.click('overviewResolverTab');
       await testSubjects.existOrFail('resolverEmbeddable', { timeout: 20000 });
+      await browser.setWindowSize(2400, 1800);
     });
 
     it('resolver column Process Name exits', async () => {
