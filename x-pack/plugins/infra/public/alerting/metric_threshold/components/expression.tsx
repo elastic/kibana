@@ -34,6 +34,8 @@ import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+
 import { ExpressionRow } from './expression_row';
 import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
@@ -45,6 +47,7 @@ interface Props {
     groupBy?: string;
     filterQuery?: string;
     sourceId?: string;
+    filterQueryText?: string;
     alertOnNoData?: boolean;
   };
   alertsContext: AlertsContextValue<AlertContextMeta>;
@@ -111,11 +114,15 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, alertParams.criteria]
   );
 
-  const onFilterQuerySubmit = useCallback(
+  const onFilterChange = useCallback(
     (filter: any) => {
-      setAlertParams('filterQuery', filter);
+      setAlertParams('filterQueryText', filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+      );
     },
-    [setAlertParams]
+    [setAlertParams, derivedIndexPattern]
   );
 
   const onGroupByChange = useCallback(
@@ -180,10 +187,19 @@ export const Expressions: React.FC<Props> = props => {
 
       if (md.currentOptions) {
         if (md.currentOptions.filterQuery) {
-          setAlertParams('filterQuery', md.currentOptions.filterQuery);
+          setAlertParams('filterQueryText', md.currentOptions.filterQuery);
+          setAlertParams(
+            'filterQuery',
+            convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) ||
+              ''
+          );
         } else if (md.currentOptions.groupBy && md.series) {
           const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-          setAlertParams('filterQuery', filter);
+          setAlertParams('filterQueryText', filter);
+          setAlertParams(
+            'filterQuery',
+            convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+          );
         }
 
         setAlertParams('groupBy', md.currentOptions.groupBy);
@@ -200,8 +216,8 @@ export const Expressions: React.FC<Props> = props => {
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterQuerySubmit(e.target.value),
-    [onFilterQuerySubmit]
+    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    [onFilterChange]
   );
 
   return (
@@ -304,13 +320,14 @@ export const Expressions: React.FC<Props> = props => {
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
-            onSubmit={onFilterQuerySubmit}
-            value={alertParams.filterQuery}
+            onChange={onFilterChange}
+            onSubmit={onFilterChange}
+            value={alertParams.filterQueryText}
           />
         )) || (
           <EuiFieldSearch
             onChange={handleFieldSearchChange}
-            value={alertParams.filterQuery}
+            value={alertParams.filterQueryText}
             fullWidth
           />
         )}
