@@ -13,7 +13,7 @@ import { getServiceNodes } from './';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../public/utils/testHelpers';
 import { getServiceNodeMetadata } from '../services/get_service_node_metadata';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
