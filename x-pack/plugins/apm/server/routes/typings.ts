@@ -15,7 +15,8 @@ import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 import { ObservabilityPluginSetup } from '../../../observability/server';
-import { FetchOptions } from '../../../../legacy/plugins/apm/public/services/rest/callApi';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FetchOptions } from '../../public/services/rest/callApi';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -65,9 +66,6 @@ export type APMRequestHandlerContext<
   plugins: {
     observability?: ObservabilityPluginSetup;
   };
-  __LEGACY: {
-    server: APMLegacyServer;
-  };
 };
 
 export type RouteFactoryFn<
@@ -114,7 +112,6 @@ export interface ServerAPI<TRouteState extends RouteState> {
       plugins: {
         observability?: ObservabilityPluginSetup;
       };
-      __LEGACY: { server: Server };
     }
   ) => void;
 }
