@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
@@ -13,79 +12,14 @@ import {
   AlertServicesMock,
   AlertInstanceMock,
 } from '../../../../../alerting/server/mocks';
-
-const executor = createMetricThresholdExecutor('test') as (opts: {
-  params: AlertExecutorOptions['params'];
-  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-}) => Promise<void>;
-
-const services: AlertServicesMock = alertsMock.createAlertServices();
-services.callCluster.mockImplementation((_: string, { body, index }: any) => {
-  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
-  const metric = body.query.bool.filter[1]?.exists.field;
-  if (body.aggs.groupings) {
-    if (body.aggs.groupings.composite.after) {
-      return mocks.compositeEndResponse;
-    }
-    if (metric === 'test.metric.2') {
-      return mocks.alternateCompositeResponse;
-    }
-    return mocks.basicCompositeResponse;
-  }
-  if (metric === 'test.metric.2') {
-    return mocks.alternateMetricResponse;
-  }
-  return mocks.basicMetricResponse;
-});
-services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
-  if (sourceId === 'alternate')
-    return {
-      id: 'alternate',
-      attributes: { metricAlias: 'alternatebeat-*' },
-      type,
-      references: [],
-    };
-  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
-});
+import { InfraSources } from '../../sources';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
   actionQueue: any[];
   state: any;
 }
-const alertInstances = new Map<string, AlertTestInstance>();
-services.alertInstanceFactory.mockImplementation((instanceID: string) => {
-  const alertInstance: AlertTestInstance = {
-    instance: alertsMock.createAlertInstanceFactory(),
-    actionQueue: [],
-    state: {},
-  };
-  alertInstances.set(instanceID, alertInstance);
-  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
-    alertInstance.state = newState;
-    return alertInstance.instance;
-  });
-  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
-    alertInstance.actionQueue.push({ id, action });
-    return alertInstance.instance;
-  });
-  return alertInstance.instance;
-});
 
-function mostRecentAction(id: string) {
-  return alertInstances.get(id)!.actionQueue.pop();
-}
-
-function getState(id: string) {
-  return alertInstances.get(id)!.state;
-}
-
-const baseCriterion = {
-  aggType: 'avg',
-  metric: 'test.metric.1',
-  timeSize: 1,
-  timeUnit: 'm',
-};
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = 'test-*';
@@ -149,21 +83,21 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID)).toBe(undefined);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
+    test('alerts as expected with the outside range comparator', async () => {
+      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
     test('reports expected values to the action context', async () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBe('*');
-      expect(action.valueOf.condition0).toBe(1);
-      expect(action.thresholdOf.condition0).toStrictEqual([0.75]);
-      expect(action.metricOf.condition0).toBe('test.metric.1');
-    });
-    test('fetches the index pattern dynamically', async () => {
-      await execute(Comparator.LT, [17], 'alternate');
-      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-      await execute(Comparator.LT, [1.5], 'alternate');
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+      expect(action.reason).toContain('current value is 1');
+      expect(action.reason).toContain('threshold of 0.75');
+      expect(action.reason).toContain('test.metric.1');
     });
   });
 
@@ -263,12 +197,14 @@ describe('The metric threshold alert type', () => {
       const instanceID = 'test-*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      expect(action.valueOf.condition0).toBe(1);
-      expect(action.valueOf.condition1).toBe(3.5);
-      expect(action.thresholdOf.condition0).toStrictEqual([1.0]);
-      expect(action.thresholdOf.condition1).toStrictEqual([3.0]);
-      expect(action.metricOf.condition0).toBe('test.metric.1');
-      expect(action.metricOf.condition1).toBe('test.metric.2');
+      const reasons = action.reason.split('\n');
+      expect(reasons.length).toBe(2);
+      expect(reasons[0]).toContain('test.metric.1');
+      expect(reasons[1]).toContain('test.metric.2');
+      expect(reasons[0]).toContain('current value is 1');
+      expect(reasons[1]).toContain('current value is 3.5');
+      expect(reasons[0]).toContain('threshold of 1');
+      expect(reasons[1]).toContain('threshold of 3');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -297,4 +233,146 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
+  describe("querying a metric that hasn't reported data", () => {
+    const instanceID = 'test-*';
+    const execute = (alertOnNoData: boolean) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold: 1,
+              metric: 'test.metric.3',
+            },
+          ],
+          alertOnNoData,
+        },
+      });
+    test('sends a No Data alert when configured to do so', async () => {
+      await execute(true);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+    test('does not send a No Data alert when not configured to do so', async () => {
+      await execute(false);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+  });
 });
+
+const createMockStaticConfiguration = (sources: any) => ({
+  enabled: true,
+  query: {
+    partitionSize: 1,
+    partitionFactor: 1,
+  },
+  sources,
+});
+
+const mockLibs: any = {
+  sources: new InfraSources({
+    config: createMockStaticConfiguration({}),
+  }),
+  configuration: createMockStaticConfiguration({}),
+};
+
+const executor = createMetricThresholdExecutor(mockLibs, 'test') as (opts: {
+  params: AlertExecutorOptions['params'];
+  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
+}) => Promise<void>;
+
+const services: AlertServicesMock = alertsMock.createAlertServices();
+services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
+  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const metric = body.query.bool.filter[1]?.exists.field;
+  if (body.aggs.groupings) {
+    if (body.aggs.groupings.composite.after) {
+      return mocks.compositeEndResponse;
+    }
+    if (metric === 'test.metric.2') {
+      return mocks.alternateCompositeResponse;
+    }
+    return mocks.basicCompositeResponse;
+  }
+  if (metric === 'test.metric.2') {
+    return mocks.alternateMetricResponse;
+  }
+  return mocks.basicMetricResponse;
+});
+services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
+  if (sourceId === 'alternate')
+    return {
+      id: 'alternate',
+      attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
+});
+
+services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
+  if (index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
+  const metric = body.query.bool.filter[1]?.exists.field;
+  if (body.aggs.groupings) {
+    if (body.aggs.groupings.composite.after) {
+      return mocks.compositeEndResponse;
+    }
+    if (metric === 'test.metric.2') {
+      return mocks.alternateCompositeResponse;
+    }
+    return mocks.basicCompositeResponse;
+  }
+  if (metric === 'test.metric.2') {
+    return mocks.alternateMetricResponse;
+  } else if (metric === 'test.metric.3') {
+    return mocks.emptyMetricResponse;
+  }
+  return mocks.basicMetricResponse;
+});
+services.savedObjectsClient.get.mockImplementation(async (type: string, sourceId: string) => {
+  if (sourceId === 'alternate')
+    return {
+      id: 'alternate',
+      attributes: { metricAlias: 'alternatebeat-*' },
+      type,
+      references: [],
+    };
+  return { id: 'default', attributes: { metricAlias: 'metricbeat-*' }, type, references: [] };
+});
+
+const alertInstances = new Map<string, AlertTestInstance>();
+services.alertInstanceFactory.mockImplementation((instanceID: string) => {
+  const alertInstance: AlertTestInstance = {
+    instance: alertsMock.createAlertInstanceFactory(),
+    actionQueue: [],
+    state: {},
+  };
+  alertInstances.set(instanceID, alertInstance);
+  alertInstance.instance.replaceState.mockImplementation((newState: any) => {
+    alertInstance.state = newState;
+    return alertInstance.instance;
+  });
+  alertInstance.instance.scheduleActions.mockImplementation((id: string, action: any) => {
+    alertInstance.actionQueue.push({ id, action });
+    return alertInstance.instance;
+  });
+  return alertInstance.instance;
+});
+
+function mostRecentAction(id: string) {
+  return alertInstances.get(id)!.actionQueue.pop();
+}
+
+function getState(id: string) {
+  return alertInstances.get(id)!.state;
+}
+
+const baseCriterion = {
+  aggType: 'avg',
+  metric: 'test.metric.1',
+  timeSize: 1,
+  timeUnit: 'm',
+};

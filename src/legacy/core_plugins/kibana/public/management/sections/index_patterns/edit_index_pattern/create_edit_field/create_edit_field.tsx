@@ -23,6 +23,7 @@ import { FieldEditor } from 'ui/field_editor';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { HttpStart, DocLinksStart } from 'src/core/public';
 import { IndexHeader } from '../index_header';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
 import { ChromeDocTitle, NotificationsStart } from '../../../../../../../../../core/public';
@@ -37,7 +38,8 @@ interface CreateEditFieldProps extends RouteComponentProps {
   services: {
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
-    http: Function;
+    getHttpStart: () => HttpStart;
+    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
   };
 }
 
@@ -68,16 +70,14 @@ export const CreateEditField = withRouter(
 
     const url = `/management/kibana/index_patterns/${indexPattern.id}`;
 
-    if (mode === 'edit') {
-      if (!field) {
-        const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel', {
-          defaultMessage:
-            "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
-          values: { indexPatternTitle: indexPattern.title, fieldName },
-        });
-        services.notifications.toasts.addWarning(message);
-        history.push(url);
-      }
+    if (mode === 'edit' && !field) {
+      const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel', {
+        defaultMessage:
+          "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
+        values: { indexPatternTitle: indexPattern.title, fieldName },
+      });
+      services.notifications.toasts.addWarning(message);
+      history.push(url);
     }
 
     const docFieldName = field?.name || newFieldPlaceholder;
@@ -88,24 +88,29 @@ export const CreateEditField = withRouter(
       history.push(`${url}?_a=(tab:${field?.scripted ? TAB_SCRIPTED_FIELDS : TAB_INDEXED_FIELDS})`);
     };
 
-    return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <IndexHeader indexPattern={indexPattern} defaultIndex={getConfig('defaultIndex')} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FieldEditor
-            indexPattern={indexPattern}
-            field={field}
-            helpers={{
-              getConfig,
-              $http: services.http,
-              fieldFormatEditors,
-              redirectAway,
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    if (field) {
+      return (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <IndexHeader indexPattern={indexPattern} defaultIndex={getConfig('defaultIndex')} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FieldEditor
+              indexPattern={indexPattern}
+              field={field}
+              helpers={{
+                getConfig,
+                getHttpStart: services.getHttpStart,
+                fieldFormatEditors,
+                redirectAway,
+                docLinksScriptedFields: services.docLinksScriptedFields,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    } else {
+      return <></>;
+    }
   }
 );

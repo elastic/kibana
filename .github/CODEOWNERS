@@ -11,13 +11,14 @@
 /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
-/src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
+/src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/vis_type_table/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/vis_type_timelion/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/input_control_vis/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/vis_type_timeseries/ @elastic/kibana-app
 /src/plugins/vis_type_metric/ @elastic/kibana-app
@@ -83,7 +84,7 @@
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
-/x-pack/legacy/plugins/uptime @elastic/uptime
+/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
 
 # Machine Learning
@@ -166,8 +167,6 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/pulse
 
 # Kibana Alerting Services
-/x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
@@ -175,7 +174,6 @@
 /x-pack/test/alerting_api_integration/ @elastic/kibana-alerting-services
 /x-pack/test/plugin_api_integration/plugins/task_manager/ @elastic/kibana-alerting-services
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/kibana-alerting-services
-/x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/kibana-alerting-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/kibana-alerting-services
@@ -206,24 +204,24 @@
 /x-pack/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/ingest_pipelines/  @elastic/es-ui
 
 # Endpoint
-/x-pack/plugins/endpoint/ @elastic/endpoint-app-team
-/x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team
-/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team
-/x-pack/test/functional_endpoint/ @elastic/endpoint-app-team
-/x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team
-/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team
-/x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team
-/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team
+/x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/api_integration/apis/endpoint/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/endpoint_api_integration_no_ingest/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/functional_endpoint/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/functional_endpoint_ingest_failure/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
 
 # SIEM
-/x-pack/legacy/plugins/siem/ @elastic/siem
-/x-pack/plugins/siem/ @elastic/siem
-/x-pack/test/detection_engine_api_integration @elastic/siem
-/x-pack/test/api_integration/apis/siem @elastic/siem
-/x-pack/plugins/case @elastic/siem
+/x-pack/plugins/siem/ @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/detection_engine_api_integration @elastic/siem @elastic/endpoint-app-team
+/x-pack/test/api_integration/apis/siem @elastic/siem @elastic/endpoint-app-team
+/x-pack/plugins/case @elastic/siem @elastic/endpoint-app-team
+/x-pack/plugins/lists @elastic/siem @elastic/endpoint-app-team
 
 # Security Intelligence And Analytics
-/x-pack/legacy/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 /x-pack/plugins/siem/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

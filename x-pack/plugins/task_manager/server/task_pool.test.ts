@@ -9,6 +9,7 @@ import { TaskPool, TaskPoolRunResult } from './task_pool';
 import { mockLogger, resolvable, sleep } from './test_utils';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import moment from 'moment';
 
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
@@ -190,14 +191,16 @@ describe('TaskPool', () => {
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
+    const logger = mockLogger();
     const pool = new TaskPool({
       maxWorkers: 2,
-      logger: mockLogger(),
+      logger,
     });
 
     const expired = resolvable();
     const shouldRun = sinon.spy(() => Promise.resolve());
     const shouldNotRun = sinon.spy(() => Promise.resolve());
+    const now = new Date();
     const result = await pool.run([
       {
         ...mockTask(),
@@ -206,6 +209,16 @@ describe('TaskPool', () => {
           expired.resolve();
           await sleep(10);
           return asOk({ state: {} });
+        },
+        get expiration() {
+          return now;
+        },
+        get startedAt() {
+          // 5 and a half minutes
+          return moment(now)
+            .subtract(5, 'm')
+            .subtract(30, 's')
+            .toDate();
         },
         cancel: shouldRun,
       },
@@ -231,6 +244,10 @@ describe('TaskPool', () => {
 
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Cancelling task TaskType "shooooo" as it expired at ${now.toISOString()} after running for 05m 30s (with timeout set at 5m).`
+    );
   });
 
   test('logs if cancellation errors', async () => {
@@ -285,6 +302,20 @@ describe('TaskPool', () => {
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
       toString: () => `TaskType "shooooo"`,
+      get expiration() {
+        return new Date();
+      },
+      get startedAt() {
+        return new Date();
+      },
+      get definition() {
+        return {
+          type: '',
+          title: '',
+          timeout: '5m',
+          createTaskRunner: jest.fn(),
+        };
+      },
     };
   }
 });

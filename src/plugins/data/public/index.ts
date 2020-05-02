@@ -204,11 +204,13 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
 
 /*
@@ -255,6 +257,7 @@ export {
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   FieldList as IndexPatternFieldList,
+  Field,
 } from './index_patterns';
 
 export {
@@ -285,13 +288,8 @@ export {
 
 import {
   // aggs
-  AggConfigs,
-  aggTypeFilters,
-  aggGroupNamesMap,
   CidrMask,
-  convertDateRangeToString,
-  convertIPRangeToString,
-  intervalOptions, // only used in Discover
+  intervalOptions,
   isDateHistogramBucketAggConfig,
   isNumberType,
   isStringType,
@@ -323,26 +321,22 @@ export { ParsedInterval } from '../common';
 
 export {
   // aggs
+  AggGroupLabels,
+  AggGroupName,
   AggGroupNames,
-  AggParam, // only the type is used externally, only in vis editor
-  AggParamOption, // only the type is used externally
+  AggParam,
+  AggParamOption,
   AggParamType,
-  AggTypeFieldFilters, // TODO convert to interface
-  AggTypeFilters, // TODO convert to interface
   AggConfigOptions,
   BUCKET_TYPES,
-  DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
   IAggConfigs,
-  IAggGroupNames,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  IpRangeKey, // only used in field formatter deserialization, which will live in data
   METRIC_TYPES,
-  OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
-  OptionedValueProp, // only type is used externally
+  OptionedValueProp,
   // search
   ES_SEARCH_STRATEGY,
   SYNC_SEARCH_STRATEGY,
@@ -365,8 +359,6 @@ export {
   SearchResponse,
   SearchError,
   ISearchSource,
-  SearchSource,
-  createSearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
@@ -382,17 +374,12 @@ export {
 // Search namespace
 export const search = {
   aggs: {
-    AggConfigs,
-    aggGroupNamesMap,
-    aggTypeFilters,
     CidrMask,
-    convertDateRangeToString,
-    convertIPRangeToString,
     dateHistogramInterval,
-    intervalOptions, // only used in Discover
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    isDateHistogramBucketAggConfig,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
     isNumberType,
     isStringType,
     isType,

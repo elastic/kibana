@@ -46,7 +46,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     path: UiSharedDeps.distDir,
     filename: '[name].js',
     sourceMapFilename: '[file].map',
-    publicPath: '__REPLACE_WITH_PUBLIC_PATH__',
     devtoolModuleFilenameTemplate: info =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
@@ -55,6 +54,17 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   module: {
     noParse: [MOMENT_SRC],
     rules: [
+      {
+        include: [require.resolve('./entry.js')],
+        use: [
+          {
+            loader: UiSharedDeps.publicPathLoader,
+            options: {
+              key: 'kbn-ui-shared-deps',
+            },
+          },
+        ],
+      },
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],

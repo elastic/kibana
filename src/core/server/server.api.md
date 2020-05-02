@@ -1679,10 +1679,8 @@ export interface SavedObjectMigrationContext {
     log: SavedObjectsMigrationLogger;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
-//
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
 // @public
 export interface SavedObjectMigrationMap {
@@ -1709,8 +1707,8 @@ export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOpti
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+// @public
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
@@ -1842,6 +1840,8 @@ export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     index?: boolean;
     // (undocumented)
+    null_value?: number | boolean | string;
+    // (undocumented)
     type: string;
 }
 
@@ -1877,8 +1877,6 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
-    static createEsAutoCreateIndexError(): DecoratedError;
-    // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -1904,8 +1902,6 @@ export class SavedObjectsErrorHelpers {
     static isBadRequestError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isConflictError(error: Error | DecoratedError): boolean;
-    // (undocumented)
-    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)
@@ -2313,6 +2309,9 @@ export class SavedObjectTypeRegistry {
     isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
+
+// @public
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;

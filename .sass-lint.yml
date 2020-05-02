@@ -2,13 +2,13 @@ files:
   include:
     - 'src/legacy/core_plugins/metrics/**/*.s+(a|c)ss'
     - 'src/legacy/core_plugins/timelion/**/*.s+(a|c)ss'
-    - 'src/legacy/core_plugins/vis_type_vislib/**/*.s+(a|c)ss'
-    - 'src/legacy/core_plugins/vis_type_xy/**/*.s+(a|c)ss'
-    - 'x-pack/legacy/plugins/rollup/**/*.s+(a|c)ss'
+    - 'src/plugins/vis_type_vislib/**/*.s+(a|c)ss'
+    - 'src/plugins/vis_type_xy/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/security/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/canvas/**/*.s+(a|c)ss'
     - 'x-pack/plugins/triggers_actions_ui/**/*.s+(a|c)ss'
     - 'x-pack/plugins/lens/**/*.s+(a|c)ss'
+    - 'x-pack/plugins/cross_cluster_replication/**/*.s+(a|c)ss'
     - 'x-pack/legacy/plugins/maps/**/*.s+(a|c)ss'
     - 'x-pack/plugins/maps/**/*.s+(a|c)ss'
   ignore:

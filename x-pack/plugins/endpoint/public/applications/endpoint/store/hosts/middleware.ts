@@ -4,40 +4,85 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HostResultList } from '../../../../../common/types';
+import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
+import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
-import { pageIndex, pageSize, isOnHostPage, hasSelectedHost, uiQueryParams } from './selectors';
-import { HostListState } from '../../types';
+import { HostPolicyResponse } from '../../../../../common/types';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostListState> = coreStart => {
+export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
     next(action);
     const state = getState();
     if (
-      (action.type === 'userChangedUrl' &&
-        isOnHostPage(state) &&
-        hasSelectedHost(state) !== true) ||
-      action.type === 'userPaginatedHostList'
+      action.type === 'userChangedUrl' &&
+      isOnHostPage(state) &&
+      hasSelectedHost(state) !== true
     ) {
-      const hostPageIndex = pageIndex(state);
-      const hostPageSize = pageSize(state);
-      const response = await coreStart.http.post('/api/endpoint/metadata', {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: hostPageIndex }, { page_size: hostPageSize }],
-        }),
-      });
-      response.request_page_index = hostPageIndex;
-      dispatch({
-        type: 'serverReturnedHostList',
-        payload: response,
-      });
+      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      try {
+        const response = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
+          body: JSON.stringify({
+            paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+          }),
+        });
+        response.request_page_index = Number(pageIndex);
+        dispatch({
+          type: 'serverReturnedHostList',
+          payload: response,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnHostList',
+          payload: error,
+        });
+      }
     }
     if (action.type === 'userChangedUrl' && hasSelectedHost(state) !== false) {
+      // If user navigated directly to a host details page, load the host list
+      if (listData(state).length === 0) {
+        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+        try {
+          const response = await coreStart.http.post('/api/endpoint/metadata', {
+            body: JSON.stringify({
+              paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+            }),
+          });
+          response.request_page_index = Number(pageIndex);
+          dispatch({
+            type: 'serverReturnedHostList',
+            payload: response,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnHostList',
+            payload: error,
+          });
+          return;
+        }
+      }
+
+      // call the host details api
       const { selected_host: selectedHost } = uiQueryParams(state);
       try {
         const response = await coreStart.http.get(`/api/endpoint/metadata/${selectedHost}`);
         dispatch({
           type: 'serverReturnedHostDetails',
           payload: response,
+        });
+        dispatch({
+          type: 'serverReturnedHostPolicyResponse',
+          payload: {
+            policy_response: ({
+              endpoint: {
+                policy: {
+                  applied: {
+                    status: 'success',
+                  },
+                },
+              },
+            } as unknown) as HostPolicyResponse, // Temporary until we get API
+          },
         });
       } catch (error) {
         dispatch({

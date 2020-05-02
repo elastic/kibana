@@ -41,6 +41,7 @@ export default {
   ],
   collectCoverageFrom: [
     'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/{__test__,__snapshots__,__examples__,mocks,tests}/**/*',
     '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
@@ -64,6 +65,7 @@ export default {
       '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '\\.(css|less|scss)$': '<rootDir>/src/dev/jest/mocks/style_mock.js',
     '\\.ace\\.worker.js$': '<rootDir>/src/dev/jest/mocks/ace_worker_module_mock.js',
+    '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
   },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',

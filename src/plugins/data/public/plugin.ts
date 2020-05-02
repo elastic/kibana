@@ -24,13 +24,13 @@ import {
   Plugin,
   PackageInfo,
 } from 'src/core/public';
-import { Storage, IStorageWrapper } from '../../kibana_utils/public';
+import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  GetInternalStartServicesFn,
+  InternalStartServices,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -48,8 +48,6 @@ import {
   setQueryService,
   setSearchService,
   setUiSettings,
-  getFieldFormats,
-  getNotifications,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { esaggs } from './search/expressions';
@@ -104,14 +102,20 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     core: CoreSetup,
     { expressions, uiActions }: DataSetupDependencies
   ): DataPublicPluginSetup {
-    setInjectedMetadata(core.injectedMetadata);
+    const startServices = createStartServicesGetter(core.getStartServices);
+
+    const getInternalStartServices = (): InternalStartServices => {
+      const { core: coreStart, self }: any = startServices();
+      return {
+        fieldFormats: self.fieldFormats,
+        notifications: coreStart.notifications,
+        uiSettings: coreStart.uiSettings,
+        searchService: self.search,
+        injectedMetadata: coreStart.injectedMetadata,
+      };
+    };
 
     expressions.registerFunction(esaggs);
-
-    const getInternalStartServices: GetInternalStartServicesFn = () => ({
-      fieldFormats: getFieldFormats(),
-      notifications: getNotifications(),
-    });
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -135,6 +139,7 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     return {
       autocomplete: this.autocomplete.setup(core),
       search: this.searchService.setup(core, {
+        expressions,
         getInternalStartServices,
         packageInfo: this.packageInfo,
         query: queryService,
@@ -150,17 +155,21 @@ export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPubli
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
 
-    const indexPatterns = new IndexPatternsService(uiSettings, savedObjects.client, http);
+    const indexPatterns = new IndexPatternsService(core, savedObjects.client, http);
     setIndexPatterns(indexPatterns);
 
     const query = this.queryService.start(savedObjects);
     setQueryService(query);
 
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
+    const search = this.searchService.start(core, {
+      indexPatterns,
+      fieldFormats,
+    });
     setSearchService(search);
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER));

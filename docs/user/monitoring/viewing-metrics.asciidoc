@@ -26,14 +26,14 @@ cluster and view them all through the same instance of {kib}.
 
 By default, data is retrieved from the cluster specified in the 
 `elasticsearch.hosts` value in the `kibana.yml` file. If you want to retrieve it
-from a different cluster, set `xpack.monitoring.elasticsearch.hosts`.
+from a different cluster, set `monitoring.ui.elasticsearch.hosts`.
 
 To learn more about typical monitoring architectures, 
 see {ref}/how-monitoring-works.html[How monitoring works] and 
 {ref}/monitoring-production.html[Monitoring in a production environment].
 --
 
-. Verify that `xpack.monitoring.ui.enabled` is set to `true`, which is the
+. Verify that `monitoring.ui.enabled` is set to `true`, which is the
 default value, in the `kibana.yml` file. For more information, see 
 <<monitoring-settings-kb>>.
 
@@ -43,8 +43,8 @@ must provide a user ID and password so {kib} can retrieve the data.
 .. Create a user that has the `monitoring_user` 
 {ref}/built-in-roles.html[built-in role] on the monitoring cluster.
 
-.. Add the `xpack.monitoring.elasticsearch.username` and 
-`xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
+.. Add the `monitoring.ui.elasticsearch.username` and 
+`monitoring.ui.elasticsearch.password` settings in the `kibana.yml` file.
 If these settings are omitted, {kib} uses the `elasticsearch.username` and
 `elasticsearch.password` setting values. For more 
 information, see {kibana-ref}/using-kibana-with-security.html[Configuring security in {kib}].
