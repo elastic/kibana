@@ -129,7 +129,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
                 <EuiExpression
                   aria-label={'ariaLabel'}
                   color={'secondary'}
-                  data-test-subj={''}
+                  data-test-subj={'uptimeCreateStatusAlert.' + item.id}
                   description={description}
                   value={value}
                   onClick={() => setIsOpen({ ...isOpen, [item.id]: !isOpen[item.id] })}

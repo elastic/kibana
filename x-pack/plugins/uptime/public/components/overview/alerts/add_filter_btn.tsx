@@ -42,6 +42,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
     if (getSelectedItems(filter.id)?.length === 0 && !newFilters.includes(filter.id)) {
       items.push(
         <EuiContextMenuItem
+          data-test-subj={'uptimeAlertAddFilter.' + filter.id}
           key={filter.id}
           onClick={() => {
             closePopover();
@@ -56,6 +57,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) =>
 
   const button = (
     <EuiButtonEmpty
+      data-test-subj="uptimeCreateAlertAddFilter"
       disabled={items.length === 0}
       iconType="plusInCircleFilled"
       onClick={onButtonClick}
