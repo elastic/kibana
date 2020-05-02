@@ -9,22 +9,36 @@ A migration function for a [saved object type](./kibana-plugin-core-server.saved
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export declare type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 ```
 
 ## Example
 
 
 ```typescript
-const migrateProperty: SavedObjectMigrationFn = (doc, { log }) => {
-  if(doc.attributes.someProp === null) {
-    log.warn('Skipping migration');
-  } else {
-    doc.attributes.someProp = migrateProperty(doc.attributes.someProp);
-  }
-
-  return doc;
+interface TypeV1Attributes {
+  someKey: string;
+  obsoleteProperty: number;
 }
+
+interface TypeV2Attributes {
+  someKey: string;
+  newProperty: string;
+}
+
+const migrateToV2: SavedObjectMigrationFn<TypeV1Attributes, TypeV2Attributes> = (doc, { log }) => {
+  const { obsoleteProperty, ...otherAttributes } = doc.attributes;
+  // instead of mutating `doc` we make a shallow copy so that we can use separate types for the input
+  // and output attributes. We don't need to make a deep copy, we just need to ensure that obsolete
+  // attributes are not present on the returned doc.
+  return {
+    ...doc,
+    attributes: {
+      ...otherAttributes,
+      newProperty: migrate(obsoleteProperty),
+    },
+  };
+};
 
 ```
 

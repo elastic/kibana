@@ -43,6 +43,14 @@
 }
 .kbnDocViewer__buttons {
   width: 60px;
+
+  // Show all icons if one is focused,
+  // IE doesn't support, but the fallback is just the focused button becomes visible
+  &:focus-within {
+    .kbnDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
 }
 
 .kbnDocViewer__field {
@@ -51,7 +59,12 @@
 
 .kbnDocViewer__actionButton {
   opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
 }
+
 .kbnDocViewer__warning {
   margin-right: $euiSizeS;
 }

@@ -462,16 +462,6 @@ export const npStart = {
           types: aggTypesRegistry.start(),
         },
         __LEGACY: {
-          AggConfig: sinon.fake(),
-          AggType: sinon.fake(),
-          aggTypeFieldFilters: {
-            addFilter: sinon.fake(),
-            filter: sinon.fake(),
-          },
-          FieldParamType: sinon.fake(),
-          MetricAggType: sinon.fake(),
-          parentPipelineAggHelper: sinon.fake(),
-          siblingPipelineAggHelper: sinon.fake(),
           esClient: {
             search: sinon.fake(),
             msearch: sinon.fake(),
