@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import moment, { unitOfTime } from 'moment';
 import { amountAndUnitToObject, AmountAndUnit } from '../amount_and_unit';
-import { getRangeTypeMessage } from './get_range_type';
+import { getRangeTypeMessage } from './get_range_type_message';
 
 function toMilliseconds({ amount, unit }: AmountAndUnit) {
   return moment.duration(amount, unit as unitOfTime.Base);
@@ -36,7 +36,7 @@ export function getDurationRt({ min, max }: { min?: string; max?: string }) {
         const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
 
         const isValidAmount =
-          typeof inputAsMilliseconds !== 'undefined' &&
+          inputAsMilliseconds !== undefined &&
           inputAsMilliseconds >= minAsMilliseconds &&
           inputAsMilliseconds <= maxAsMilliseconds;
 

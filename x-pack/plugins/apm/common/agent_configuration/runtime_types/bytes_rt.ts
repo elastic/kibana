@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { amountAndUnitToObject } from '../amount_and_unit';
-import { getRangeTypeMessage } from './get_range_type';
+import { getRangeTypeMessage } from './get_range_type_message';
 
 function toBytes(amount: number, unit: string) {
   switch (unit) {
@@ -42,7 +42,7 @@ export function getBytesRt({ min, max }: { min?: string; max?: string }) {
         const inputAsBytes = amountAndUnitToBytes(inputAsString);
 
         const isValidAmount =
-          typeof inputAsBytes !== 'undefined' &&
+          inputAsBytes !== undefined &&
           inputAsBytes >= minAsBytes &&
           inputAsBytes <= maxAsBytes;
 
