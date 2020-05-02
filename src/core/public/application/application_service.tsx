@@ -267,18 +267,14 @@ export class ApplicationService {
       shareReplay(1)
     );
 
-    const pipedAppIdObservable = this.currentAppId$.pipe(
-      filter(appId => appId !== undefined),
-      distinctUntilChanged(),
-      takeUntil(this.stop$)
-    );
-    const externalAppIdSubj = new BehaviorSubject<string | undefined>(undefined);
-    pipedAppIdObservable.subscribe(externalAppIdSubj);
-
     return {
       applications$,
       capabilities,
-      currentAppId$: externalAppIdSubj,
+      currentAppId$: this.currentAppId$.pipe(
+        filter(appId => appId !== undefined),
+        distinctUntilChanged(),
+        takeUntil(this.stop$)
+      ),
       registerMountContext: this.mountContext.registerContext,
       getUrlForApp: (
         appId,

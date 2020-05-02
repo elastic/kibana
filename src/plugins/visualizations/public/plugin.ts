@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+} from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
@@ -95,6 +101,7 @@ export interface VisualizationsStartDeps {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
+  application: ApplicationStart;
 }
 
 /**
@@ -118,6 +125,8 @@ export class VisualizationsPlugin
 
   constructor(initializerContext: PluginInitializerContext) {}
 
+  private embeddableFactory: VisualizeEmbeddableFactory = {} as VisualizeEmbeddableFactory;
+
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
     { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
@@ -131,9 +140,11 @@ export class VisualizationsPlugin
     expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
-
-    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
-    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    this.embeddableFactory = new VisualizeEmbeddableFactory(
+      { start },
+      async () => (await core.getStartServices())[0].application
+    );
+    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, this.embeddableFactory);
 
     return {
       ...this.types.setup(),
@@ -191,5 +202,6 @@ export class VisualizationsPlugin
 
   public stop() {
     this.types.stop();
+    this.embeddableFactory.unsubscribeSubscriptions();
   }
 }

@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import rison from 'rison-node';
 import { parse } from 'query-string';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage, removeQueryParam } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
@@ -57,6 +57,10 @@ export async function mountApp(
     returnToOrigin?: boolean,
     newlyCreated?: boolean
   ) => {
+    if (!!originatingApp && !returnToOrigin) {
+      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
+    }
+
     if (!id) {
       routeProps.history.push('/lens');
     } else if (!originatingApp) {
@@ -89,6 +93,11 @@ export async function mountApp(
     trackUiEvent('loaded');
     const urlParams = parse(routeProps.location.search) as Record<string, string>;
     const originatingApp = urlParams.embeddableOriginatingApp;
+    // delete urlParams.embeddableOriginatingApp;
+    // const stringified = stringify(urlParams);
+    // console.log('routeProps', routeProps);
+    // console.log('stringified', stringified);
+    // routeProps.history.replace(stringified);
 
     return (
       <App

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import {
@@ -44,7 +44,7 @@ const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup
 });
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
-  const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  const currentAppId$ = new Subject<string | undefined>();
 
   return {
     currentAppId$,
@@ -56,7 +56,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
 };
 
 const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
-  const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  const currentAppId$ = new Subject<string | undefined>();
 
   return {
     applications$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),

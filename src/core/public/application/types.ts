@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { Capabilities } from './capabilities';
 import { ChromeStart } from '../chrome';
@@ -688,7 +688,7 @@ export interface ApplicationStart {
   /**
    * An observable that emits the current application id and each subsequent id update.
    */
-  currentAppId$: BehaviorSubject<string | undefined>;
+  currentAppId$: Observable<string | undefined>;
 }
 
 /** @internal */

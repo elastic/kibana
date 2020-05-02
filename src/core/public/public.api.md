@@ -5,7 +5,6 @@
 ```ts
 
 import { Action } from 'history';
-import { BehaviorSubject } from 'rxjs';
 import { Breadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -106,7 +105,7 @@ export interface ApplicationSetup {
 // @public (undocumented)
 export interface ApplicationStart {
     capabilities: RecursiveReadonly<Capabilities>;
-    currentAppId$: BehaviorSubject<string | undefined>;
+    currentAppId$: Observable<string | undefined>;
     getUrlForApp(appId: string, options?: {
         path?: string;
         absolute?: boolean;
