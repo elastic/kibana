@@ -47,12 +47,16 @@ export function createBundlesRoute({
   basePublicPath,
   builtCssPath,
   npUiPluginPublicDirs = [],
+  buildHash,
+  isDist = false,
 }: {
   regularBundlesPath: string;
   dllBundlesPath: string;
   basePublicPath: string;
   builtCssPath: string;
   npUiPluginPublicDirs?: NpUiPluginPublicDirs;
+  buildHash: string;
+  isDist?: boolean;
 }) {
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
@@ -82,45 +86,51 @@ export function createBundlesRoute({
 
   return [
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/kbn-ui-shared-deps/`,
-      routePath: '/bundles/kbn-ui-shared-deps/',
+      publicPath: `${basePublicPath}/${buildHash}/bundles/kbn-ui-shared-deps/`,
+      routePath: `/${buildHash}/bundles/kbn-ui-shared-deps/`,
       bundlesPath: UiSharedDeps.distDir,
       fileHashCache,
       replacePublicPath: false,
+      isDist,
     }),
     ...npUiPluginPublicDirs.map(({ id, path }) =>
       buildRouteForBundles({
-        publicPath: `${basePublicPath}/bundles/plugin/${id}/`,
-        routePath: `/bundles/plugin/${id}/`,
+        publicPath: `${basePublicPath}/${buildHash}/bundles/plugin/${id}/`,
+        routePath: `/${buildHash}/bundles/plugin/${id}/`,
         bundlesPath: path,
         fileHashCache,
         replacePublicPath: false,
+        isDist,
       })
     ),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/core/`,
-      routePath: `/bundles/core/`,
+      publicPath: `${basePublicPath}/${buildHash}/bundles/core/`,
+      routePath: `/${buildHash}/bundles/core/`,
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
       replacePublicPath: false,
+      isDist,
     }),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/bundles/`,
-      routePath: '/bundles/',
+      publicPath: `${basePublicPath}/${buildHash}/bundles/`,
+      routePath: `/${buildHash}/bundles/`,
       bundlesPath: regularBundlesPath,
       fileHashCache,
+      isDist,
     }),
     buildRouteForBundles({
-      publicPath: `${basePublicPath}/built_assets/dlls/`,
-      routePath: '/built_assets/dlls/',
+      publicPath: `${basePublicPath}/${buildHash}/built_assets/dlls/`,
+      routePath: `/${buildHash}/built_assets/dlls/`,
       bundlesPath: dllBundlesPath,
       fileHashCache,
+      isDist,
     }),
     buildRouteForBundles({
       publicPath: `${basePublicPath}/`,
-      routePath: '/built_assets/css/',
+      routePath: `/${buildHash}/built_assets/css/`,
       bundlesPath: builtCssPath,
       fileHashCache,
+      isDist,
     }),
   ];
 }
@@ -131,12 +141,14 @@ function buildRouteForBundles({
   bundlesPath,
   fileHashCache,
   replacePublicPath = true,
+  isDist,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: FileHashCache;
   replacePublicPath?: boolean;
+  isDist: boolean;
 }) {
   return {
     method: 'GET',
@@ -159,6 +171,7 @@ function buildRouteForBundles({
               fileHashCache,
               publicPath,
               replacePublicPath,
+              isDist,
             });
           },
         },
