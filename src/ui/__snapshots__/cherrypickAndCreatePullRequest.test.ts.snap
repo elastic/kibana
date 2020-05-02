@@ -63,7 +63,7 @@ Array [
     },
   ],
   Array [
-    "git -c core.editor=true cherry-pick --continue",
+    "git commit --no-edit",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

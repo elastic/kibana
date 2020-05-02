@@ -12,6 +12,7 @@ export interface Config {
   // project config
   branchLabelMapping?: Record<string, string>;
   fork?: boolean;
+  noVerify?: boolean;
   targetBranchChoices?: (string | BranchChoice)[];
   upstream?: string;
 

@@ -354,8 +354,8 @@ function setupExecSpy() {
         return { stdout: ``, stderr: '' };
       }
 
-      // cherrypickContinue
-      if (cmd.includes('cherry-pick --continue')) {
+      // finalizeCherrypick
+      if (cmd.includes('git commit --no-edit')) {
         return { stdout: ``, stderr: '' };
       }
 

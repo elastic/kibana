@@ -29,6 +29,7 @@ export async function getOptionsFromConfigFiles() {
     multiple: false,
     multipleBranches: true, // allow user to pick multiple target branches
     multipleCommits: false, // only let user pick a single commit
+    noVerify: true,
     prTitle: '[{targetBranch}] {commitMessages}',
     sourcePRLabels: [] as string[] | never[],
     targetBranchChoices: getTargetBranchChoicesAsObject(

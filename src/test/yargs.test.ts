@@ -103,12 +103,12 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
-      '--maxNumber',
+      '--max-number',
       '6',
     ]);
 
     expect(output).toMatchInlineSnapshot(`
-      "? Select commit to backport (Use arrow keys)
+      "? Select commit (Use arrow keys)
       ❯ 1. Create \\"conflicting-file.txt\\" in master (f8bb8b70)
         2. Update romeo-and-juliet.txt (91eee967)
         3. Add 👻 (2e63475c)
@@ -129,14 +129,14 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
-      '--maxNumber',
+      '--max-number',
       '6',
-      '--sourceBranch',
+      '--source-branch',
       '7.x',
     ]);
 
     expect(output).toMatchInlineSnapshot(`
-      "? Select commit to backport (Use arrow keys)
+      "? Select commit (Use arrow keys)
       ❯ 1. Change to be forwardported (#181)
         2. Create \\"conflicting-file.txt\\" in master (72f94e76)
         3. Update romeo-and-juliet.txt (91eee967)
@@ -158,10 +158,11 @@ function runBackportAsync(options: string[]) {
 
   return new Promise<string>((resolve) => {
     let data = '';
+
     proc.stdout.on('data', (dataChunk) => {
       data += dataChunk;
       const output = data.toString();
-      if (output.includes('Select commit to backport')) {
+      if (output.includes('Select commit')) {
         // remove ansi codes and whitespace
         resolve(stripAnsi(output).replace(/\s+$/gm, ''));
         proc.kill();

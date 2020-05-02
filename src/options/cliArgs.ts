@@ -10,6 +10,7 @@ export function getOptionsFromCliArgs(
     .parserConfiguration({
       'strip-dashed': true,
       'strip-aliased': true,
+      'boolean-negation': false,
     })
     .usage('$0 [args]')
     .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
@@ -102,6 +103,11 @@ export function getOptionsFromCliArgs(
       description: 'Backport to multiple branches',
       type: 'boolean',
     })
+    .option('noVerify', {
+      default: configOptions.noVerify,
+      description: 'Bypasses the pre-commit and commit-msg hooks',
+      type: 'boolean',
+    })
     .option('path', {
       default: configOptions.path,
       description: 'Only list commits touching files under the specified path',
@@ -155,6 +161,10 @@ export function getOptionsFromCliArgs(
       description: `List commits to backport from another branch than master`,
       type: 'string',
     })
+    .option('verify', {
+      description: `Opposite of no-verify`,
+      type: 'boolean',
+    })
     .option('targetBranches', {
       default: [] as string[],
       description: 'Branch(es) to backport to',
@@ -186,18 +196,21 @@ export function getOptionsFromCliArgs(
     })
     .alias('version', 'v')
     .alias('version', 'V')
-    .help().argv;
+    .help()
+    .epilogue(
+      'For bugs, feature requests or questions: https://github.com/sqren/backport/issues\nOr contact me directly: https://twitter.com/sorenlouv'
+    ).argv;
 
-  // omitting $0 and _
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-  const { $0, _, ...rest } = cliArgs;
+  const { $0, _, verify, ...rest } = cliArgs;
 
   return {
     ...rest,
-    accessToken: cliArgs.accessToken || configOptions.accessToken,
-    targetBranchChoices: configOptions.targetBranchChoices, // not available as cli argument
+    accessToken: cliArgs.accessToken || configOptions.accessToken, // accessToken should not be displayed in yargs help menu
     branchLabelMapping: configOptions.branchLabelMapping, // not available as cli argument
     multipleBranches: cliArgs.multipleBranches || cliArgs.multiple,
     multipleCommits: cliArgs.multipleCommits || cliArgs.multiple,
+    noVerify: verify ?? rest.noVerify, // `verify` is a cli-only flag to flip the default of `no-verify`
+    targetBranchChoices: configOptions.targetBranchChoices, // not available as cli argument
   };
 }

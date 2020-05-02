@@ -46,7 +46,7 @@ export async function promptForCommits({
 
   const res = await prompt<CommitChoice[]>({
     choices: [...choices, new inquirer.Separator()],
-    message: 'Select commit to backport',
+    message: 'Select commit',
     pageSize: 15,
     type: isMultipleChoice ? 'checkbox' : 'list',
   });
@@ -67,7 +67,7 @@ export async function promptForTargetBranches({
   const res = await prompt<string | string[]>({
     pageSize: 15,
     choices: [...targetBranchChoices, new inquirer.Separator()],
-    message: 'Select branch to backport to',
+    message: 'Select branch',
     type: isMultipleChoice ? 'checkbox' : 'list',
   });
 

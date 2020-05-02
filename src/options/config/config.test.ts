@@ -8,7 +8,7 @@ describe('getOptionsFromConfigFiles', () => {
     res = await getOptionsFromConfigFiles();
   });
 
-  it('should return correct config', () => {
+  it('should return default config values', () => {
     expect(res).toEqual({
       accessToken: 'myAccessToken',
       all: false,
@@ -20,6 +20,7 @@ describe('getOptionsFromConfigFiles', () => {
       multiple: false,
       multipleBranches: true,
       multipleCommits: false,
+      noVerify: true,
       prTitle: '[{targetBranch}] {commitMessages}',
       sourcePRLabels: [],
       targetBranchChoices: [

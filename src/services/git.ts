@@ -144,20 +144,21 @@ export async function cherrypick(
   }
 }
 
-export async function cherrypickContinue(options: BackportOptions) {
-  // -c core.editor=true is like "--no-edit": it avoids opening the default editor for editing the commit message
+export async function finalizeCherrypick(options: BackportOptions) {
   try {
-    await exec(`git -c core.editor=true cherry-pick --continue`, {
+    const noVerify = options.noVerify ? ` --no-verify` : '';
+
+    await exec(`git commit --no-edit${noVerify}`, {
       cwd: getRepoPath(options),
     });
   } catch (e) {
-    const isCherrypickError = e.cmd && e.code === 128;
-    if (!isCherrypickError) {
+    const isCommitError = e.stdout?.includes('nothing to commit');
+    if (!isCommitError) {
       throw e;
     }
 
     logger.info(
-      `Cherry pick continue failed. Probably because the cherry pick operation was manually completed`,
+      `git commit failed - probably because the changes were manually committed`,
       e
     );
   }

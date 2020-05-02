@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import ora from 'ora';
 import { BackportOptions } from '../../../options/options';
 import { CommitSelected } from '../../../types/Commit';
@@ -74,6 +75,14 @@ export async function fetchCommitByPullNumber(
     message: res.repository.pullRequest.mergeCommit.message,
     sha,
     pullNumber,
+  });
+
+  // add styles to make it look like a prompt question
+  spinner.stopAndPersist({
+    symbol: chalk.green('?'),
+    text: `${chalk.bold('Select pull request')} ${chalk.cyan(
+      formattedMessage
+    )}`,
   });
 
   const labels = res.repository.pullRequest.labels.nodes.map(

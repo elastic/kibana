@@ -188,6 +188,7 @@ Array [
       "multiple": false,
       "multipleBranches": true,
       "multipleCommits": false,
+      "noVerify": true,
       "path": undefined,
       "prDescription": undefined,
       "prTitle": "[{targetBranch}] {commitMessages}",

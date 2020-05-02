@@ -3,7 +3,7 @@ import * as childProcess from '../services/child-process-promisified';
 import {
   addRemote,
   getUnmergedFiles,
-  cherrypickContinue,
+  finalizeCherrypick,
   deleteRemote,
   createFeatureBranch,
   cherrypick,
@@ -311,19 +311,19 @@ describe('cherrypickContinue', () => {
     repoName: 'kibana',
   } as BackportOptions;
 
-  it('should swallow cherrypick error', async () => {
+  it('should swallow error if changes have already been committed manaully', async () => {
     const err = {
       killed: false,
-      code: 128,
+      code: 1,
       signal: null,
-      cmd: 'git -c core.editor=true cherry-pick --continue',
-      stdout: '',
-      stderr:
-        'error: no cherry-pick or revert in progress\nfatal: cherry-pick failed\n',
+      cmd: 'git commit --no-edit',
+      stdout:
+        'On branch backport/7.x/commit-913afb3b\nnothing to commit, working tree clean\n',
+      stderr: '',
     };
 
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    await expect(await cherrypickContinue(options)).toBe(undefined);
+    await expect(await finalizeCherrypick(options)).toBe(undefined);
   });
 
   it('should re-throw other errors', async () => {
@@ -332,7 +332,7 @@ describe('cherrypickContinue', () => {
     expect.assertions(1);
 
     await expect(
-      cherrypickContinue(options)
+      finalizeCherrypick(options)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"non-cherrypick error"`);
   });
 });

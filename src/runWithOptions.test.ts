@@ -35,6 +35,7 @@ describe('runWithOptions', () => {
       multiple: false,
       multipleBranches: false,
       multipleCommits: false,
+      noVerify: true,
       path: undefined,
       prDescription: 'myPrDescription',
       prTitle: 'myPrTitle {targetBranch} {commitMessages}',

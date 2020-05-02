@@ -13,7 +13,7 @@ import {
   setCommitAuthor,
   getUnmergedFiles,
   addUnstagedFiles,
-  cherrypickContinue,
+  finalizeCherrypick,
   getFilesWithConflicts,
 } from '../services/git';
 import { getShortSha } from '../services/github/commitFormatters';
@@ -143,8 +143,8 @@ async function waitForCherrypick(
     // add unstaged files
     await addUnstagedFiles(options);
 
-    // Run `cherrypick --continue` (similar to `git commit`)
-    await cherrypickContinue(options);
+    // Run `git commit`
+    await finalizeCherrypick(options);
     stagingSpinner.succeed();
   } catch (e) {
     stagingSpinner.fail();
