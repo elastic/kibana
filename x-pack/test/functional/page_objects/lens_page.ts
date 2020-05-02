@@ -140,13 +140,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
       if (saveAsNewCheckboxExists) {
         const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setCheckbox('saveAsNewCheckbox', state);
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
       }
 
       const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
       if (redirectToOriginCheckboxExists) {
         const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setCheckbox('returnToOriginModeSwitch', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');

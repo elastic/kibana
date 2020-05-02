@@ -310,13 +310,15 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
       if (saveAsNewCheckboxExists) {
         const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setCheckbox('saveAsNewCheckbox', state);
+        log.debug('save as new checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
       }
 
       const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
       if (redirectToOriginCheckboxExists) {
         const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setCheckbox('returnToOriginModeSwitch', state);
+        log.debug('redirect to origin checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
       log.debug('Click Save Visualization button');
 
