@@ -138,14 +138,13 @@ export const importTimelinesRoute = (
                           ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
                           : null;
                       const timeline =
-                        templateTimeline?.savedObjectId != null
+                        templateTimeline?.savedObjectId != null || savedObjectId != null
                           ? await getTimeline(
                               frameworkRequest,
                               templateTimeline?.savedObjectId ?? savedObjectId
                             )
                           : null;
                       const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-
                       if (
                         (timeline == null && !isHandlingTemplateTimeline) ||
                         (templateTimeline == null && isHandlingTemplateTimeline)

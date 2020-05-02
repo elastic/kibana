@@ -10,8 +10,6 @@ import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
 import { Dispatch } from 'redux';
 
-import { TimelineType } from '../../../common/types/timeline';
-
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types';
 import {
