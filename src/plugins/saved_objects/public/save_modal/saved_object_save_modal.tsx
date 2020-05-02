@@ -251,6 +251,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         defaultMessage: 'Save',
       }
     );
+
     if (this.props.confirmButtonLabel) {
       confirmLabel = this.props.confirmButtonLabel;
     }

@@ -23,11 +23,15 @@ import { Action } from 'src/plugins/ui_actions/public';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { EMBEDDABLE_ORIGINATING_APP_PARAM, EmbeddableContext } from '../..';
+import { EMBEDDABLE_ORIGINATING_APP_PARAM, IEmbeddable } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
-export class EditPanelAction implements Action<EmbeddableContext> {
+interface ActionContext {
+  embeddable: IEmbeddable;
+}
+
+export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
   public order = 15;
@@ -42,7 +46,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
     );
   }
 
-  public getDisplayName({ embeddable }: EmbeddableContext) {
+  public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(embeddable.type);
@@ -59,7 +63,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
     return 'pencil';
   }
 
-  public async isCompatible({ embeddable }: EmbeddableContext) {
+  public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
       embeddable &&
         embeddable.getOutput().editable &&
@@ -70,7 +74,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute(context: EmbeddableContext) {
+  public async execute(context: ActionContext) {
     const appTarget = this.getAppTarget(context);
 
     if (appTarget) {
@@ -85,9 +89,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
     }
   }
 
-  public getAppTarget({
-    embeddable,
-  }: EmbeddableContext): { app: string; path: string } | undefined {
+  public getAppTarget({ embeddable }: ActionContext): { app: string; path: string } | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
@@ -95,7 +97,7 @@ export class EditPanelAction implements Action<EmbeddableContext> {
     }
   }
 
-  public async getHref({ embeddable }: EmbeddableContext): Promise<string> {
+  public async getHref({ embeddable }: ActionContext): Promise<string> {
     let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     if (editUrl && this.currentAppId) {
       editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;

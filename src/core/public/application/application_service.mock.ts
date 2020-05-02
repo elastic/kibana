@@ -47,7 +47,7 @@ const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
 
   return {
-    currentAppId$,
+    currentAppId$: currentAppId$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
     getUrlForApp: jest.fn(),
@@ -61,7 +61,7 @@ const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart
   return {
     applications$: new BehaviorSubject<Map<string, App | LegacyApp>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
-    currentAppId$,
+    currentAppId$: currentAppId$.asObservable(),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),
     navigateToApp: jest.fn().mockImplementation(appId => currentAppId$.next(appId)),

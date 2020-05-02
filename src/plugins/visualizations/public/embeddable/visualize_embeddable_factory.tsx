@@ -41,8 +41,8 @@ import {
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { VisualizationsStartDeps } from '../plugin';
 import { StartServicesGetter } from '../../../kibana_utils/public';
+import { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -115,11 +115,11 @@ export class VisualizeEmbeddableFactory
     });
   }
 
-  public createFromSavedObject = async (
+  public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> => {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
@@ -130,7 +130,7 @@ export class VisualizeEmbeddableFactory
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
     }
-  };
+  }
 
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
