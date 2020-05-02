@@ -5,17 +5,17 @@
  */
 
 import { CasesConfigurationMapping } from '../../containers/case/configure/types';
-import serviceNowLogo from './logos/servicenow.svg';
-import { Connector } from './types';
 
-const connectors: Record<string, Connector> = {
-  '.servicenow': {
-    actionTypeId: '.servicenow',
-    logo: serviceNowLogo,
-  },
+import { Connector } from './types';
+import { connector as serviceNowConnectorConfig } from './servicenow/config';
+import { connector as jiraConnectorConfig } from './jira/config';
+
+export const connectorsConfiguration: Record<string, Connector> = {
+  '.servicenow': serviceNowConnectorConfig,
+  '.jira': jiraConnectorConfig,
 };
 
-const defaultMapping: CasesConfigurationMapping[] = [
+export const defaultMapping: CasesConfigurationMapping[] = [
   {
     source: 'title',
     target: 'short_description',
@@ -32,5 +32,3 @@ const defaultMapping: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
 ];
-
-export { connectors, defaultMapping };
