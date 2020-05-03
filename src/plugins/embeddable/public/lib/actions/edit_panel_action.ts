@@ -41,9 +41,11 @@ export class EditPanelAction implements Action<ActionContext> {
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart
   ) {
-    this.application.currentAppId$.subscribe(
-      (appId: string | undefined) => (this.currentAppId = appId)
-    );
+    if (this.application?.currentAppId$) {
+      this.application.currentAppId$.subscribe(
+        (appId: string | undefined) => (this.currentAppId = appId)
+      );
+    }
   }
 
   public getDisplayName({ embeddable }: ActionContext) {

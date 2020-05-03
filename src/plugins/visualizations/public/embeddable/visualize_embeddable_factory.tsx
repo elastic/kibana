@@ -97,11 +97,13 @@ export class VisualizeEmbeddableFactory
     getApplicationStart: () => Promise<ApplicationStart>
   ) {
     getApplicationStart().then((applicationStart: ApplicationStart) => {
-      this.appIdSubscription = applicationStart.currentAppId$.subscribe(
-        (newAppId: string | undefined) => {
-          this.currentAppId = newAppId;
-        }
-      );
+      if (applicationStart?.currentAppId$) {
+        this.appIdSubscription = applicationStart.currentAppId$.subscribe(
+          (newAppId: string | undefined) => {
+            this.currentAppId = newAppId;
+          }
+        );
+      }
     });
   }
 
