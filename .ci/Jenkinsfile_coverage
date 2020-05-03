@@ -75,7 +75,9 @@ def uploadWithVault(prefix, x) {
   }
 }
 def downloadPrevious(title) {
-  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     kibanaPipeline.bash('''
     gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
     mv previous.txt downloaded_previous.txt
@@ -116,7 +118,9 @@ def collectVcsInfo(title) {
 }
 
 def uploadPrevious(title) {
-  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
     kibanaPipeline.bash('''
     collectPrevious() {
       PREVIOUS=$(git log --pretty=format:%h -1)
