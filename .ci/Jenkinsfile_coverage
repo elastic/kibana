@@ -8,73 +8,86 @@ kibanaPipeline(timeoutMinutes: 240) {
     withEnv([
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
-      parallel([
-        'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-        'x-pack-intake-agent': {
-          withEnv([
-            'NODE_ENV=test' // Needed for jest tests only
-          ]) {
-            workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
-          }
-        },
-        'kibana-oss-agent'   : workers.functional(
-          'kibana-oss-tests',
-          { kibanaPipeline.buildOss() },
-          ossProks()
-        ),
-        'kibana-xpack-agent' : workers.functional(
-          'kibana-xpack-tests',
-          { kibanaPipeline.buildXpack() },
-          xpackProks()
-        ),
-      ])
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        kibanaPipeline.downloadCoverageArtifacts()
-        def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-        withEnv([
-          "TIME_STAMP=${timestamp}",
-        ]) {
-          collectVcsInfo()
-          def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
-          withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
-            withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
-              withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-                kibanaPipeline.bash("""
-                source src/dev/ci_setup/setup_env.sh
-
-                # bootstrap from x-pack folder
-                cd x-pack
-                yarn kbn bootstrap --prefer-offline
-
-                # Return to project root
-                cd ..
-
-                . src/dev/code_coverage/shell_scripts/extract_archives.sh
-
-                . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
-
-                . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-
-                . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
-
-                . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
-
-                """, "### Bootstrap shell and kibana env, merge and ingest code coverage")
-              }
-            }
-          }
-          kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
-        }
+        handlePrevious()
+//        kibanaCoverage.runTests()
+        runTests()
+        handleInjestion()
+//        kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+        uploadCoverageStaticSite(TIME_STAMP)
       }
     }
     kibanaPipeline.sendMail()
   }
 }
 
-def collectVcsInfo() {
-  kibanaPipeline.bash(
-    '''
+def handleInjestion() {
+  kibanaPipeline.downloadCoverageArtifacts()
+//  kibanaCoverage.injestAndUpload('### Injest && Upload')
+  injestAndUpload('### Injest && Upload')
+//  kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
+  uploadCoverageStaticSite(TIME_STAMP)
+}
 
+def handlePrevious() {
+//  kibanaCoverage.downloadPrevious('### Download OLD Previous')
+//  kibanaCoverage.collectVcsInfo('### Collect NEW VCS Info')
+//  kibanaCoverage.uploadPrevious('### Upload NEW Previous')
+  downloadPrevious('### Download OLD Previous')
+  collectVcsInfo('### Collect NEW VCS Info')
+  uploadPrevious('### Upload NEW Previous')
+}
+
+def uploadCoverageStaticSite(timestamp) {
+  def uploadPrefix = "gs://elastic-bekitzur-kibana-coverage-live/"
+  def uploadPrefixWithTimeStamp = "${uploadPrefix}${timestamp}/"
+
+  uploadBaseWebsiteFiles(uploadPrefix)
+  uploadCoverageHtmls(uploadPrefixWithTimeStamp)
+}
+
+def uploadBaseWebsiteFiles(prefix) {
+  [
+    'src/dev/code_coverage/www/index.html',
+    'src/dev/code_coverage/www/404.html'
+  ].each { x ->
+    uploadWithVault(prefix, x)
+  }
+}
+
+def uploadCoverageHtmls(prefix) {
+  [
+    'target/kibana-coverage/functional-combined',
+    'target/kibana-coverage/jest-combined',
+    'target/kibana-coverage/mocha-combined',
+  ].each { x ->
+    uploadWithVault(prefix, x)
+  }
+}
+
+def uploadWithVault(prefix, x) {
+  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
+
+  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
+    sh """
+        gsutil -m cp -r -a public-read -z js,css,html ${x} '${prefix}'
+      """
+  }
+}
+def downloadPrevious(title) {
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+    kibanaPipeline.bash('''
+    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
+    mv previous.txt downloaded_previous.txt
+    echo "### downloaded_previous.txt"
+    cat downloaded_previous.txt
+    wc -l downloaded_previous.txt && echo "### downloaded_previous.txt wc -l"
+    ''', title)
+  }
+}
+
+def collectVcsInfo(title) {
+  kibanaPipeline.bash('''
     predicate() {
       x=$1
       if [ -n "$x" ]; then
@@ -84,26 +97,101 @@ def collectVcsInfo() {
         exit 1
       fi
     }
-
     CMD="git log --pretty=format"
-
     XS=("${GIT_BRANCH}" \
         "$(${CMD}":%h" -1)" \
         "$(${CMD}":%an" -1)" \
         "$(${CMD}":%s" -1)")
-
     touch VCS_INFO.txt
-
     for X in "${!XS[@]}"; do
     {
       predicate "${XS[X]}"
       echo "${XS[X]}" >> VCS_INFO.txt
     }
     done
-
-    ''', "### Collect VCS Info"
+    echo "### VCS_INFO:"
+    cat VCS_INFO.txt
+    ''', title
   )
 }
+
+def uploadPrevious(title) {
+  withGcpServiceAccount.fromVaultSecret(vaultPath(), 'value') {
+    kibanaPipeline.bash('''
+    collectPrevious() {
+      PREVIOUS=$(git log --pretty=format:%h -1)
+      echo "### PREVIOUS: ${PREVIOUS}"
+      echo $PREVIOUS > previous.txt
+    }
+    collectPrevious
+    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+    ''', title)
+
+  }
+}
+
+def bootMergeAndIngest(buildNum, buildUrl, title) {
+  kibanaPipeline.bash("""
+    source src/dev/ci_setup/setup_env.sh
+    # bootstrap from x-pack folder
+    cd x-pack
+    yarn kbn bootstrap --prefer-offline
+    # Return to project root
+    cd ..
+    . src/dev/code_coverage/shell_scripts/extract_archives.sh
+    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
+    . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
+    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
+    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${buildNum} ${buildUrl}
+  """, title)
+}
+
+def injestWithVault(buildNum, buildUrl, title) {
+  def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
+  withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
+    withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
+      withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
+        bootMergeAndIngest(buildNum, buildUrl, title)
+      }
+    }
+  }
+}
+
+def injestAndUpload(title) {
+  def timestamp = new Date(currentBuild.startTimeInMillis)
+    .format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+
+  withEnv([
+    "TIME_STAMP=${timestamp}",
+  ]) {
+    injestWithVault(BUILD_NUMBER, BUILD_URL, title)
+    uploadCoverageStaticData(TIME_STAMP, '### Upload previous & coverage static assets')
+  }
+}
+
+def runTests() {
+  parallel([
+    'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+    'x-pack-intake-agent': {
+      withEnv([
+        'NODE_ENV=test' // Needed for jest tests only
+      ]) {
+        workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh')()
+      }
+    },
+    'kibana-oss-agent'   : workers.functional(
+      'kibana-oss-tests',
+      { kibanaPipeline.buildOss() },
+      ossProks()
+    ),
+    'kibana-xpack-agent' : workers.functional(
+      'kibana-xpack-tests',
+      { kibanaPipeline.buildXpack() },
+      xpackProks()
+    ),
+  ])
+}
+
 def ossProks() {
   return [
     'oss-ciGroup1' : kibanaPipeline.ossCiGroupProcess(1),
@@ -120,6 +208,7 @@ def ossProks() {
     'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
   ]
 }
+
 def xpackProks() {
   return [
     'xpack-ciGroup1' : kibanaPipeline.xpackCiGroupProcess(1),
@@ -134,3 +223,6 @@ def xpackProks() {
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
   ]
 }
+
+return this
+
