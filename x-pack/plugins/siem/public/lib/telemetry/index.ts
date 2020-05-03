@@ -13,6 +13,8 @@ export { METRIC_TYPE };
 
 type TrackFn = (type: UiStatsMetricType, event: string | string[], count?: number) => void;
 
+const noop = () => {};
+
 let _track: TrackFn;
 
 export const track: TrackFn = (type, event, count) => {
@@ -24,11 +26,7 @@ export const track: TrackFn = (type, event, count) => {
 };
 
 export const initTelemetry = (usageCollection: SetupPlugins['usageCollection'], appId: string) => {
-  try {
-    _track = usageCollection.reportUiStats.bind(null, appId);
-  } catch (error) {
-    // ignore failed setup here, as we'll just have an inert tracker
-  }
+  _track = usageCollection?.reportUiStats?.bind(null, appId) ?? noop;
 };
 
 export enum TELEMETRY_EVENT {
