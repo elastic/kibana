@@ -62,7 +62,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
       [filterBy]
     );
 
-    const { fetchAllTimeline, timelines, totalCount, loading } = useGetAllTimeline();
+    const { fetchAllTimeline, timelines, loading } = useGetAllTimeline();
 
     useEffect(() => {
       fetchAllTimeline({
