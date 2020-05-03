@@ -70,7 +70,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/indexPatterns', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

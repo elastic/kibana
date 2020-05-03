@@ -37,10 +37,15 @@ export class IndexPatternCreationManager {
     this.configs.push(config);
   };
 
-  public getType(key: string | undefined): IndexPatternCreationConfig | null {
+  public getType(key: string | undefined): IndexPatternCreationConfig {
     if (key) {
       const index = this.configs.findIndex(config => config.key === key);
-      return this.configs[index] || null;
+      const config = this.configs[index];
+      if (config) {
+        return config;
+      } else {
+        throw new Error(`Index pattern creation type not found: ${key}`);
+      }
     } else {
       return this.getType('default');
     }

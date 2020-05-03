@@ -61,7 +61,7 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
       core.uiSettings.set('defaultIndex', defaultId);
     } else {
       const canManageIndexPatterns = core.application.capabilities.management.kibana.index_patterns;
-      const redirectTarget = canManageIndexPatterns ? '/management/kibana/index_pattern' : '/home';
+      const redirectTarget = canManageIndexPatterns ? '/management/kibana/indexPatterns' : '/home';
 
       if (timeoutId) {
         clearTimeout(timeoutId);

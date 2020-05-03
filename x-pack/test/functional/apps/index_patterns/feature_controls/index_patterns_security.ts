@@ -187,7 +187,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow navigation to Index Patterns; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/index_patterns', {
+        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/indexPatterns', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

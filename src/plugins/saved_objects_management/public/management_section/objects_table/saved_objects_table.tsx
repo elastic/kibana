@@ -456,7 +456,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
     const { applications } = this.props;
     const newIndexPatternUrl = applications.getUrlForApp('kibana', {
-      path: '#/management/kibana/index_pattern',
+      path: '#/management/kibana/indexPattern',
     });
 
     return (

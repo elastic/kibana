@@ -16,22 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,
   IndexPatternManagementServiceStart,
 } from './service';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IndexPatternManagementSetupDependencies {}
+import { ManagementSetup, ManagementApp } from '../../management/public';
+
+export interface IndexPatternManagementSetupDependencies {
+  management: ManagementSetup;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IndexPatternManagementStartDependencies {}
+export interface IndexPatternManagementStartDependencies {
+  data: DataPublicPluginStart;
+}
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
 
 export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
+
+const title = i18n.translate('indexPatternManagement.appLabel', {
+  defaultMessage: 'Index Patterns',
+});
 
 export class IndexPatternManagementPlugin
   implements
@@ -42,14 +53,40 @@ export class IndexPatternManagementPlugin
       IndexPatternManagementStartDependencies
     > {
   private readonly indexPattern = new IndexPatternManagementService();
+  private managementApp?: ManagementApp;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(
+    core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
+    { management }: IndexPatternManagementSetupDependencies
+  ) {
+    const kibanaSection = management.sections.getSection('kibana');
+    if (!kibanaSection) {
+      throw new Error('`kibana` management section not found.');
+    }
+
+    this.managementApp = kibanaSection.registerApp({
+      id: 'indexPatterns',
+      title,
+      order: 0,
+      mount: async params => {
+        const { mountManagementSection } = await import(
+          './management_app/mount_management_section'
+        );
+
+        return mountManagementSection(core.getStartServices, params);
+        // return mountManagementSection(core.getStartServices, params, component.start);
+      },
+    });
+
     return this.indexPattern.setup({ httpClient: core.http });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
+    if (!core.application.capabilities.management.kibana.index_patterns) {
+      this.managementApp!.disable();
+    }
     return this.indexPattern.start();
   }
 

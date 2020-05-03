@@ -74,9 +74,9 @@ describe('Relationships', () => {
         meta: {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
-          editUrl: '#/management/kibana/index_patterns/1',
+          editUrl: '#/management/kibana/indexPatterns/patterns/1',
           inAppUrl: {
-            path: '/management/kibana/index_patterns/1',
+            path: '/management/kibana/indexPatterns/patterns/1',
             uiCapabilitiesPath: 'management.kibana.index_patterns',
           },
         },
@@ -109,10 +109,10 @@ describe('Relationships', () => {
           id: '1',
           relationship: 'child',
           meta: {
-            editUrl: '/management/kibana/index_patterns/1',
+            editUrl: '/management/kibana/indexPatterns/patterns/1',
             icon: 'indexPatternApp',
             inAppUrl: {
-              path: '/app/kibana#/management/kibana/index_patterns/1',
+              path: '/app/kibana#/management/kibana/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             },
             title: 'My Index Pattern',

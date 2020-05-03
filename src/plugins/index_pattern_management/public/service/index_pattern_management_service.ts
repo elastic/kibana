@@ -20,6 +20,21 @@
 import { HttpSetup } from '../../../../core/public';
 import { IndexPatternCreationManager, IndexPatternCreationConfig } from './creation';
 import { IndexPatternListManager, IndexPatternListConfig } from './list';
+import { FieldFormatEditors } from './field_format_editors';
+
+import {
+  BytesFormatEditor,
+  ColorFormatEditor,
+  DateFormatEditor,
+  DateNanosFormatEditor,
+  DurationFormatEditor,
+  NumberFormatEditor,
+  PercentFormatEditor,
+  StaticLookupFormatEditor,
+  StringFormatEditor,
+  TruncateFormatEditor,
+  UrlFormatEditor,
+} from '../components/field_editor/components/field_format_editor/editors';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
@@ -33,20 +48,38 @@ interface SetupDependencies {
 export class IndexPatternManagementService {
   indexPatternCreationManager: IndexPatternCreationManager;
   indexPatternListConfig: IndexPatternListManager;
+  fieldFormatEditors: FieldFormatEditors;
 
   constructor() {
     this.indexPatternCreationManager = new IndexPatternCreationManager();
     this.indexPatternListConfig = new IndexPatternListManager();
+    this.fieldFormatEditors = new FieldFormatEditors();
   }
 
   public setup({ httpClient }: SetupDependencies) {
     const creationManagerSetup = this.indexPatternCreationManager.setup(httpClient);
     creationManagerSetup.addCreationConfig(IndexPatternCreationConfig);
-    this.indexPatternListConfig.setup().addListConfig(IndexPatternListConfig);
+
+    const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
+    indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
+
+    const fieldFormatEditorsSetup = this.fieldFormatEditors.setup();
+    fieldFormatEditorsSetup.register(BytesFormatEditor);
+    fieldFormatEditorsSetup.register(ColorFormatEditor);
+    fieldFormatEditorsSetup.register(DateFormatEditor);
+    fieldFormatEditorsSetup.register(DateNanosFormatEditor);
+    fieldFormatEditorsSetup.register(DurationFormatEditor);
+    fieldFormatEditorsSetup.register(NumberFormatEditor);
+    fieldFormatEditorsSetup.register(PercentFormatEditor);
+    fieldFormatEditorsSetup.register(StaticLookupFormatEditor);
+    fieldFormatEditorsSetup.register(StringFormatEditor);
+    fieldFormatEditorsSetup.register(TruncateFormatEditor);
+    fieldFormatEditorsSetup.register(UrlFormatEditor);
 
     return {
       creation: creationManagerSetup,
-      list: this.indexPatternListConfig.setup(),
+      list: indexPatternListConfigSetup,
+      fieldFormatEditors: fieldFormatEditorsSetup,
     };
   }
 
@@ -54,6 +87,7 @@ export class IndexPatternManagementService {
     return {
       creation: this.indexPatternCreationManager.start(),
       list: this.indexPatternListConfig.start(),
+      fieldFormatEditors: this.fieldFormatEditors.start(),
     };
   }
 

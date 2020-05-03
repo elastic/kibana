@@ -281,10 +281,11 @@ export default function({ getService }: FtrProviderContext) {
             expect(resp.body.saved_objects[0].meta).to.eql({
               icon: 'indexPatternApp',
               title: 'saved_objects*',
-              editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl:
+                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  '/app/kibana#/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.index_patterns',
               },
             });
