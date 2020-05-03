@@ -70,7 +70,6 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
           type: 'serverReturnedHostDetails',
           payload: response,
         });
-        // FIXME: once we have the API implementation in place, we should call it parallel with the above api call and then dispatch this with the results of the second call
         dispatch({
           type: 'serverReturnedHostPolicyResponse',
           payload: {
