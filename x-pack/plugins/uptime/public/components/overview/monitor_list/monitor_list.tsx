@@ -18,12 +18,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { MonitorPageLink } from './monitor_page_link';
+import { MonitorPageLink } from '../../common/monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
@@ -31,6 +32,8 @@ import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
+import { CERTIFICATES_ROUTE } from '../../../../common/constants';
+import { CertStatusColumn } from './cert_status_column';
 
 interface Props extends MonitorListProps {
   lastRefresh: number;
@@ -145,6 +148,12 @@ export const MonitorListComponent: React.FC<Props> = ({
     },
     {
       align: 'center' as const,
+      field: 'state.tls',
+      name: labels.TLS_COLUMN_LABEL,
+      render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
+    },
+    {
+      align: 'center' as const,
       field: 'histogram.points',
       name: labels.HISTORY_COLUMN_LABEL,
       mobileOptions: {
@@ -181,15 +190,32 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.monitorList.monitoringStatusTitle"
-            defaultMessage="Monitor status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.uptime.monitorList.monitoringStatusTitle"
+                defaultMessage="Monitor status"
+              />
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h5>
+              <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
+                <FormattedMessage
+                  id="xpack.uptime.monitorList.viewCertificateTitle"
+                  defaultMessage="View certificates status"
+                />
+              </Link>
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.message}
