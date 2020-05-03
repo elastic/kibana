@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { Link } from 'react-router-dom';
 import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
@@ -18,6 +19,11 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
+import { OVERVIEW_ROUTE } from '../../common/constants';
+
+const StyleLink = styled(Link)`
+  animation: none !important;
+`;
 
 interface OverviewPageProps {
   autocomplete: DataPublicPluginSetup['autocomplete'];
@@ -53,10 +59,14 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
 
   const linkParameters = stringifyUrlParams(params, true);
 
-  const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
-    defaultMessage: 'Overview',
-    description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-  });
+  const heading = (
+    <StyleLink to={OVERVIEW_ROUTE}>
+      {i18n.translate('xpack.uptime.overviewPage.headerText', {
+        defaultMessage: 'Overview',
+        description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+      })}
+    </StyleLink>
+  );
 
   useBreadcrumbs([]); // No extra breadcrumbs on overview
   return (
