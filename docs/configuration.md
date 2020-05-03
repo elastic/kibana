@@ -154,6 +154,14 @@ Default: `github.com`
 
 CLI: `--git-hostname "github.my-private-company.com"`
 
+Config:
+
+```json
+{
+  "gitHostname": "github.my-private-company.com"
+}
+```
+
 #### `githubApiBaseUrlV3`
 
 Base url for Github's REST (v3) API
@@ -162,6 +170,14 @@ Default: `https://api.github.com`
 
 CLI: `--github-api-base-url-v3 "https://api.github.my-private-company.com"`
 
+Config:
+
+```json
+{
+  "githubApiBaseUrlV3": "https://api.github.my-private-company.com"
+}
+```
+
 #### `githubApiBaseUrlV4`
 
 Base url for Github's GraphQL (v4) API
@@ -169,6 +185,15 @@ Base url for Github's GraphQL (v4) API
 Default: `https://api.github.com/graphql`
 
 CLI: `--github-api-base-url-v4 "https://github-enterprise.acme-inc.com/api"`
+
+
+Config:
+
+```json
+{
+  "githubApiBaseUrlV4": "https://github-enterprise.acme-inc.com/api"
+}
+```
 
 #### `mainline`
 
@@ -253,9 +278,9 @@ Config:
 
 #### `sourcePRLabels`
 
-Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to filter for PRs that were already backported.
+Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to find the PRs that were already backported.
 
-CLI: `--source-labels backport --source-labels apm-team`
+CLI: `--source-labels was-backported
 
 Config:
 
@@ -267,7 +292,7 @@ Config:
 
 #### `targetPRLabels`
 
-Labels that will be added to the target (backport) pull request. This can be useful if you, at a later time, want to filter for backport PRs.
+Labels that will be added to the target (backport) pull request. This can be useful if you, at a later time, want to find the backport PRs.
 
 CLI: `--labels backport --labels apm-team`
 
