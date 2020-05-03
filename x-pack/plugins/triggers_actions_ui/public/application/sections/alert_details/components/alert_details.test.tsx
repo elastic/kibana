@@ -288,8 +288,8 @@ describe('alert_details', () => {
   });
 });
 
-describe('enable button', () => {
-  it('should render an enable button when alert is enabled', () => {
+describe('disable button', () => {
+  it('should render a disable button when alert is enabled', () => {
     const alert = mockAlert({
       enabled: true,
     });
@@ -306,16 +306,16 @@ describe('enable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: true,
+      checked: false,
       disabled: false,
     });
   });
 
-  it('should render an enable button when alert is disabled', () => {
+  it('should render a disable button when alert is disabled', () => {
     const alert = mockAlert({
       enabled: false,
     });
@@ -332,11 +332,11 @@ describe('enable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: false,
+      checked: true,
       disabled: false,
     });
   });
@@ -365,7 +365,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');
@@ -400,7 +400,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');
