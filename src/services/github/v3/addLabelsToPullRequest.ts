@@ -19,12 +19,12 @@ export async function addLabelsToPullRequest(
   logger.info(text);
   const spinner = ora(text).start();
 
-  if (dryRun) {
-    spinner.succeed(`Dry run: ${text}`);
-    return;
-  }
-
   try {
+    if (dryRun) {
+      spinner.succeed(`Dry run: ${text}`);
+      return;
+    }
+
     await apiRequestV3({
       method: 'post',
       url: `${githubApiBaseUrlV3}/repos/${repoOwner}/${repoName}/issues/${pullNumber}/labels`,
@@ -35,9 +35,8 @@ export async function addLabelsToPullRequest(
       },
     });
     spinner.succeed();
-    return;
   } catch (e) {
     spinner.fail();
-    throw e;
+    logger.info(`Could not add labels to PR ${pullNumber}`, e.stack);
   }
 }

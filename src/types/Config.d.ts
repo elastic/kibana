@@ -35,4 +35,5 @@ export interface Config {
 
   // deprecated - kept for backwards compatability
   branches?: (string | BranchChoice)[];
+  labels?: string[];
 }

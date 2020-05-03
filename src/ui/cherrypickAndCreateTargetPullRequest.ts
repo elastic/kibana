@@ -47,8 +47,10 @@ export async function cherrypickAndCreateTargetPullRequest({
 
   const headBranchName = getHeadBranchName(options, featureBranch);
 
+  const spinner = ora().start();
   await pushFeatureBranch({ options, featureBranch, headBranchName });
   await deleteFeatureBranch(options, featureBranch);
+  spinner.stop();
 
   const payload = getPullRequestPayload(options, targetBranch, commits);
   const pullRequest = await createPullRequest(options, payload);

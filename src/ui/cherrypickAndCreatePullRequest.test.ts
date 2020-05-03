@@ -95,6 +95,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           Array [
             "Cherry-picking: myOtherCommitMessage (#2000)",
           ],
+          Array [],
           Array [
             "Pushing branch \\"sqren:backport/6.x/pr-1000_pr-2000\\"",
           ],
@@ -292,6 +293,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
           Array [
             "Finalizing cherrypick",
           ],
+          Array [],
           Array [
             "Pushing branch \\"sqren:backport/6.x/commit-mySha\\"",
           ],

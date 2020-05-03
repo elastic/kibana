@@ -13,7 +13,18 @@ export async function getOptionsFromConfigFiles() {
     getGlobalConfig(),
   ]);
 
-  const { targetBranchChoices, branches, ...combinedConfig } = {
+  const {
+    // backwards-compatability: `branches` was renamed `targetBranchChoices`
+    targetBranchChoices,
+    branches,
+
+    // backwards-compatability: `labels` was renamed `targetPRLabels`
+    targetPRLabels,
+    labels,
+
+    // global and project config combined
+    ...combinedConfig
+  } = {
     ...globalConfig,
     ...projectConfig,
   };
@@ -33,9 +44,12 @@ export async function getOptionsFromConfigFiles() {
     prTitle: '[{targetBranch}] {commitMessages}',
     sourcePRLabels: [] as string[] | never[],
     targetBranchChoices: getTargetBranchChoicesAsObject(
+      // backwards-compatability: `branches` was renamed `targetBranchChoices`
       targetBranchChoices || branches
     ),
-    targetPRLabels: [] as string[],
+
+    // backwards-compatability: `labels` was renamed `targetPRLabels`
+    targetPRLabels: targetPRLabels || labels || ([] as string[]),
 
     // merge defaults with config values
     ...combinedConfig,

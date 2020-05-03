@@ -31,7 +31,7 @@ export async function createPullRequest(
   const spinner = ora(`Creating pull request`).start();
 
   if (dryRun) {
-    spinner.succeed(`Dry run: Creating pull request #1337`);
+    spinner.succeed();
     return { html_url: 'example_url', number: 1337 };
   }
 
@@ -46,7 +46,7 @@ export async function createPullRequest(
       },
     });
 
-    spinner.succeed(`Created pull request #${res.number}`);
+    spinner.succeed();
 
     return {
       html_url: res.html_url,
