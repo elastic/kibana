@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { DownNoExpressionSelect } from '../down_number_select';
 import { TimeExpressionSelect } from '../time_expression_select';
 
 describe('TimeExpressionSelect component', () => {
