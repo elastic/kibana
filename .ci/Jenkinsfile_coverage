@@ -9,10 +9,8 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-//        kibanaCoverage.runTests()
         runTests()
         handleInjestion()
-//        kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
         uploadCoverageStaticSite(TIME_STAMP)
       }
     }
@@ -22,9 +20,8 @@ kibanaPipeline(timeoutMinutes: 240) {
 
 def handleInjestion() {
   kibanaPipeline.downloadCoverageArtifacts()
-//  kibanaCoverage.injestAndUpload('### Injest && Upload')
+  collectVcsInfo("### Collect VCS Info")
   injestAndUpload('### Injest && Upload')
-//  kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
   uploadCoverageStaticSite(TIME_STAMP)
 }
 
@@ -128,7 +125,7 @@ def injestAndUpload(title) {
     "TIME_STAMP=${timestamp}",
   ]) {
     injestWithVault(BUILD_NUMBER, BUILD_URL, title)
-    uploadCoverageStaticData(TIME_STAMP, '### Upload previous & coverage static assets')
+    uploadCoverageStaticData(TIME_STAMP, '### Coverage static assets')
   }
 }
 
