@@ -5,7 +5,7 @@
 - [Global config](#global-config-backportconfigjson)
 - [Project config](#project-config-backportrcjson)
 
-All config options can additionally be provided and/or overriden via CLI options.
+All config options can additionally be overriden via CLI options.
 
 ## Global config (`.backport/config.json`)
 
