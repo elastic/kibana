@@ -9,7 +9,6 @@ kibanaPipeline(timeoutMinutes: 240) {
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
-        handlePrevious()
 //        kibanaCoverage.runTests()
         runTests()
         handleInjestion()
@@ -27,15 +26,6 @@ def handleInjestion() {
   injestAndUpload('### Injest && Upload')
 //  kibanaCoverage.uploadCoverageStaticSite(TIME_STAMP)
   uploadCoverageStaticSite(TIME_STAMP)
-}
-
-def handlePrevious() {
-//  kibanaCoverage.downloadPrevious('### Download OLD Previous')
-//  kibanaCoverage.collectVcsInfo('### Collect NEW VCS Info')
-//  kibanaCoverage.uploadPrevious('### Upload NEW Previous')
-  downloadPrevious('### Download OLD Previous')
-  collectVcsInfo('### Collect NEW VCS Info')
-  uploadPrevious('### Upload NEW Previous')
 }
 
 def uploadCoverageStaticSite(timestamp) {
@@ -74,19 +64,6 @@ def uploadWithVault(prefix, x) {
       """
   }
 }
-def downloadPrevious(title) {
-  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
-
-  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
-    kibanaPipeline.bash('''
-    gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt .
-    mv previous.txt downloaded_previous.txt
-    echo "### downloaded_previous.txt"
-    cat downloaded_previous.txt
-    wc -l downloaded_previous.txt && echo "### downloaded_previous.txt wc -l"
-    ''', title)
-  }
-}
 
 def collectVcsInfo(title) {
   kibanaPipeline.bash('''
@@ -116,24 +93,6 @@ def collectVcsInfo(title) {
     ''', title
   )
 }
-
-def uploadPrevious(title) {
-  def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
-
-  withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
-    kibanaPipeline.bash('''
-    collectPrevious() {
-      PREVIOUS=$(git log --pretty=format:%h -1)
-      echo "### PREVIOUS: ${PREVIOUS}"
-      echo $PREVIOUS > previous.txt
-    }
-    collectPrevious
-    gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
-    ''', title)
-
-  }
-}
-
 def bootMergeAndIngest(buildNum, buildUrl, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
