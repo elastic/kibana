@@ -11,7 +11,6 @@ kibanaPipeline(timeoutMinutes: 240) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
         runTests()
         handleInjestion()
-        uploadCoverageStaticSite(TIME_STAMP)
       }
     }
     kibanaPipeline.sendMail()
@@ -125,7 +124,6 @@ def injestAndUpload(title) {
     "TIME_STAMP=${timestamp}",
   ]) {
     injestWithVault(BUILD_NUMBER, BUILD_URL, title)
-    uploadCoverageStaticData(TIME_STAMP, '### Coverage static assets')
   }
 }
 
