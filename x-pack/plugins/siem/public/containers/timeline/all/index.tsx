@@ -30,14 +30,12 @@ export interface AllTimelinesArgs {
     pageInfo,
     search,
     sort,
-    timelines,
     timelineTypes,
-    totalCount,
   }: AllTimelinesVariables) => void;
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
-  refetch: () => void;
+  refetch: (existingTimelines?: OpenTimelineResult[], existingTotalCount?: number) => void;
 }
 
 export interface AllTimelinesVariables {
@@ -45,9 +43,7 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  timelines: OpenTimelineResult[];
   timelineTypes: TimelineTypeLiteralWithNull;
-  totalCount: number;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -101,27 +97,23 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   });
 
   const fetchAllTimeline = useCallback(
-    async ({
-      onlyUserFavorite,
-      pageInfo,
-      search,
-      sort,
-      timelines,
-      timelineTypes,
-      totalCount,
-    }: AllTimelinesVariables) => {
+    async ({ onlyUserFavorite, pageInfo, search, sort, timelineTypes }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
-      const fetchData = async () => {
+      const fetchData = async (
+        existingTimelines?: OpenTimelineResult[],
+        existingTotalCount?: number
+      ) => {
         try {
           if (apolloClient != null) {
             setAllTimelines({
               ...allTimelines,
-              timelines: timelines ?? allTimelines.timelines,
-              totalCount: totalCount ?? allTimelines.totalCount,
+              timelines: existingTimelines ?? allTimelines.timelines,
+              totalCount: existingTotalCount ?? allTimelines.totalCount,
               loading: true,
             });
+
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
               pageInfo,
@@ -162,6 +154,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                   getOr([], 'getAllTimeline.timeline', response.data)
                 ),
               });
+              // console.log('--done---', allTimelines);
             }
           }
         } catch (error) {
@@ -178,6 +171,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               totalCount: 0,
               timelines: [],
             });
+            // console.log('--error---', allTimelines);
           }
         }
       };

@@ -233,10 +233,8 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
       },
       onlyUserFavorite: onlyFavorites,
       timelineTypes: TimelineType.default,
-      timelines,
-      totalCount: timelineCount,
     });
-  }, [onlyFavorites, pageSize, searchTimelineValue, timelines, timelineCount]);
+  }, [onlyFavorites, pageSize, searchTimelineValue]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>

@@ -139,9 +139,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
+        const existingTimelines = [...timelines];
+        const existingTimelinesCount = totalCount;
         if (timelineIds.includes(timeline.savedObjectId || '')) {
           createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
         }
+
         await apolloClient.mutate<
           DeleteTimelineMutation.Mutation,
           DeleteTimelineMutation.Variables
@@ -150,9 +153,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           fetchPolicy: 'no-cache',
           variables: { id: timelineIds },
         });
-        refetch();
+        refetch(existingTimelines, existingTimelinesCount);
       },
-      [apolloClient, createNewTimeline, refetch, timeline]
+      [apolloClient, createNewTimeline, refetch, timeline, timelines, totalCount]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -240,9 +243,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         search,
         sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
         onlyUserFavorite: onlyFavorites,
-        timelines,
         timelineTypes,
-        totalCount,
       });
     }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
 
@@ -266,7 +267,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         pageIndex={pageIndex}
         pageSize={pageSize}
         query={search}
-        refetch={refetch}
+        refetch={refetch.bind(null, timelines, totalCount)}
         searchResults={timelines}
         setImportDataModalToggle={setImportDataModalToggle}
         selectedItems={selectedItems}
