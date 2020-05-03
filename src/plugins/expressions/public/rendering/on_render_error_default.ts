@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { ExpressionsService } from '../../common';
+import { i18n } from '@kbn/i18n';
+import { RenderErrorHandlerFnType } from '../../common';
+import { StartServicesGetter } from '../../../kibana_utils/public';
 
-/**
- * @deprecated
- *
- * This type if remainder from legacy platform, will be deleted going further.
- */
-export interface ExpressionExecutor {
-  interpreter: ExpressionInterpreter;
-}
+export const onRenderErrorDefault = (start: StartServicesGetter): RenderErrorHandlerFnType => (
+  element,
+  error,
+  handlers
+) => {
+  if (error.name === 'AbortError') {
+    handlers.done();
+    return;
+  }
 
-/**
- * @deprecated
- */
-export interface ExpressionInterpreter {
-  interpretAst: ExpressionsService['run'];
-}
+  start().core.notifications.toasts.addError(error, {
+    title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
+      defaultMessage: 'Error in expression',
+    }),
+    toastMessage: error.message,
+  });
+  handlers.done();
+};

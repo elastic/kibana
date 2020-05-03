@@ -66,7 +66,6 @@ const createStartContract = (): Start => {
   return {
     execute: jest.fn(),
     ExpressionLoader: jest.fn(),
-    ExpressionRenderHandler: jest.fn(),
     fork: jest.fn(),
     getFunction: jest.fn(),
     getFunctions: jest.fn(),
@@ -76,8 +75,8 @@ const createStartContract = (): Start => {
     getTypes: jest.fn(),
     loader: jest.fn(),
     ReactExpressionRenderer: jest.fn(props => <></>),
-    render: jest.fn(),
     run: jest.fn(),
+    createRendering: jest.fn(),
   };
 };
 

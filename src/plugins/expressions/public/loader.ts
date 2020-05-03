@@ -20,24 +20,22 @@
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Adapters } from '../../inspector/public';
-import { IExpressionLoaderParams } from './types';
-import { ExpressionAstExpression } from '../common';
+import { ExpressionAstExpression, IExpressionLoaderParams, ExpressionRendering } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
 
-import { ExpressionRenderHandler } from './render';
 import { getExpressionsService } from './services';
 
 type Data = any;
 
 export class ExpressionLoader {
   data$: Observable<Data>;
-  update$: ExpressionRenderHandler['update$'];
-  render$: ExpressionRenderHandler['render$'];
-  events$: ExpressionRenderHandler['events$'];
+  update$: ExpressionRendering['update$'];
+  render$: ExpressionRendering['render$'];
+  events$: ExpressionRendering['events$'];
   loading$: Observable<void>;
 
   private execution: ExecutionContract | undefined;
-  private renderHandler: ExpressionRenderHandler;
+  private rendering: ExpressionRendering;
   private dataSubject: Subject<Data>;
   private loadingSubject: Subject<boolean>;
   private data: Data;
@@ -60,12 +58,13 @@ export class ExpressionLoader {
       map(() => void 0)
     );
 
-    this.renderHandler = new ExpressionRenderHandler(element, {
+    this.rendering = getExpressionsService().createRendering({
+      element,
       onRenderError: params && params.onRenderError,
     });
-    this.render$ = this.renderHandler.render$;
-    this.update$ = this.renderHandler.update$;
-    this.events$ = this.renderHandler.events$;
+    this.render$ = this.rendering.render$;
+    this.update$ = this.rendering.update$;
+    this.events$ = this.rendering.events$;
 
     this.update$.subscribe(value => {
       if (value) {
@@ -93,7 +92,7 @@ export class ExpressionLoader {
   destroy() {
     this.dataSubject.complete();
     this.loadingSubject.complete();
-    this.renderHandler.destroy();
+    this.rendering.destroy();
     if (this.execution) {
       this.execution.cancel();
     }
@@ -118,7 +117,7 @@ export class ExpressionLoader {
   }
 
   getElement(): HTMLElement {
-    return this.renderHandler.getElement();
+    return this.rendering.getElement();
   }
 
   inspect(): Adapters | undefined {
@@ -159,7 +158,7 @@ export class ExpressionLoader {
   };
 
   private render(data: Data): void {
-    this.renderHandler.render(data, this.params.uiState);
+    this.rendering.render(data, this.params.uiState);
   }
 
   private setParams(params?: IExpressionLoaderParams) {

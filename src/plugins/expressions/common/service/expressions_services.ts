@@ -21,6 +21,13 @@ import { Executor } from '../executor';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
 import { ExecutionContract } from '../execution/execution_contract';
+import {
+  ExpressionRenderingParams,
+  ExpressionRendering,
+  RenderErrorHandlerFnType,
+} from '../expression_renderers/expression_rendering';
+
+export type ExpressionsCreateRenderingParams = Omit<ExpressionRenderingParams, 'renderers'>;
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -28,6 +35,7 @@ import { ExecutionContract } from '../execution/execution_contract';
  */
 export type ExpressionsServiceSetup = Pick<
   ExpressionsService,
+  | 'fork'
   | 'getFunction'
   | 'getFunctions'
   | 'getRenderer'
@@ -38,7 +46,6 @@ export type ExpressionsServiceSetup = Pick<
   | 'registerRenderer'
   | 'registerType'
   | 'run'
-  | 'fork'
 >;
 
 /**
@@ -47,6 +54,9 @@ export type ExpressionsServiceSetup = Pick<
  */
 export type ExpressionsServiceStart = Pick<
   ExpressionsService,
+  | 'createRendering'
+  | 'execute'
+  | 'fork'
   | 'getFunction'
   | 'getFunctions'
   | 'getRenderer'
@@ -54,13 +64,17 @@ export type ExpressionsServiceStart = Pick<
   | 'getType'
   | 'getTypes'
   | 'run'
-  | 'execute'
-  | 'fork'
 >;
 
 export interface ExpressionServiceParams {
   executor?: Executor;
   renderers?: ExpressionRendererRegistry;
+
+  /**
+   * Default renderer used to render error when @type {ExpressionRendering}
+   * fails to render an expression value.
+   */
+  onRenderError?: RenderErrorHandlerFnType;
 }
 
 /**
@@ -86,10 +100,12 @@ export class ExpressionsService {
   public readonly executor: Executor;
   public readonly renderers: ExpressionRendererRegistry;
 
-  constructor({
-    executor = Executor.createWithDefaults(),
-    renderers = new ExpressionRendererRegistry(),
-  }: ExpressionServiceParams = {}) {
+  constructor(private readonly params: ExpressionServiceParams = {}) {
+    const {
+      executor = Executor.createWithDefaults(),
+      renderers = new ExpressionRendererRegistry(),
+    } = params;
+
     this.executor = executor;
     this.renderers = renderers;
   }
@@ -251,9 +267,27 @@ export class ExpressionsService {
   public readonly fork = (): ExpressionsService => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+    const fork = new ExpressionsService({ ...this.params, executor, renderers });
 
     return fork;
+  };
+
+  /**
+   * Create instance of expression rendering. Rendering receives the final
+   * output of expression and expects it to be of type @type {ExpressionValueRender}.
+   * Internally it selects the right expression renderer from the registry,
+   * create renderer handlers and calls `.render()` method of @type {ExpressionRenderDefinition}.
+   */
+  public readonly createRendering = (
+    params: ExpressionsCreateRenderingParams
+  ): ExpressionRendering => {
+    const rendering = new ExpressionRendering({
+      ...params,
+      renderers: this.renderers,
+      onRenderError: params.onRenderError ?? this.params.onRenderError,
+    });
+
+    return rendering;
   };
 
   /**

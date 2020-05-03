@@ -25,7 +25,6 @@ import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
-import { RenderErrorHandlerFnType } from './types';
 
 jest.mock('./loader', () => {
   return {
@@ -95,7 +94,7 @@ describe('ExpressionRenderer', () => {
     const loadingSubject = new Subject();
     const loading$ = loadingSubject.asObservable().pipe(share());
 
-    let onRenderError: RenderErrorHandlerFnType;
+    let onRenderError: any;
     (ExpressionLoader as jest.Mock).mockImplementation((...args) => {
       const params = args[2];
       onRenderError = params.onRenderError;
