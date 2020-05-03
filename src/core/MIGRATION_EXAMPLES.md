@@ -957,7 +957,7 @@ const migration = (doc, log) => {...}
 Would be converted to:
 
 ```typescript
-const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
+const migration: SavedObjectMigrationFn<OldAttributes, MigratedAttributes> = (doc, { log }) => {...}
 ```
 
 ### Remarks
