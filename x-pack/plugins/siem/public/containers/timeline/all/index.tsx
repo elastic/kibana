@@ -134,27 +134,26 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 },
               },
             });
+            const totalCount = response?.data?.getAllTimeline?.totalCount ?? 0;
+            const timelines = response?.data?.getAllTimeline?.timeline ?? [];
             if (!didCancel) {
               dispatch(
                 inputsActions.setQuery({
                   inputId: 'global',
                   id: ALL_TIMELINE_QUERY_ID,
                   loading: false,
-                  refetch: refetch.current ?? noop,
+                  refetch: refetch?.current?.bind(null, timelines, totalCount) ?? noop,
                   inspect: null,
                 })
               );
+
               setAllTimelines({
                 fetchAllTimeline,
                 loading: false,
-                refetch: refetch.current ?? noop,
-                totalCount: getOr(0, 'getAllTimeline.totalCount', response.data),
-                timelines: getAllTimeline(
-                  JSON.stringify(variables),
-                  getOr([], 'getAllTimeline.timeline', response.data)
-                ),
+                refetch: refetch?.current?.bind(null, timelines, totalCount) ?? noop,
+                totalCount,
+                timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
               });
-              // console.log('--done---', allTimelines);
             }
           }
         } catch (error) {
@@ -171,7 +170,6 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               totalCount: 0,
               timelines: [],
             });
-            // console.log('--error---', allTimelines);
           }
         }
       };
@@ -182,7 +180,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
         abortCtrl.abort();
       };
     },
-    [apolloClient, allTimelines]
+    [apolloClient, allTimelines, refetch]
   );
 
   useEffect(() => {

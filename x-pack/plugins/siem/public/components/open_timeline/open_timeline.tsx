@@ -97,9 +97,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
 
     const onRefreshBtnClick = useCallback(() => {
       if (refetch != null) {
-        refetch();
+        refetch(searchResults, totalSearchResultsCount);
       }
-    }, [refetch]);
+    }, [refetch, searchResults, totalSearchResultsCount]);
 
     const handleCloseModal = useCallback(() => {
       if (setImportDataModalToggle != null) {
@@ -111,9 +111,9 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         setImportDataModalToggle(false);
       }
       if (refetch != null) {
-        refetch();
+        refetch(searchResults, totalSearchResultsCount);
       }
-    }, [setImportDataModalToggle, refetch]);
+    }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
 
     return (
       <>
