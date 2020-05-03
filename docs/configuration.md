@@ -280,7 +280,7 @@ Config:
 
 Labels that will be added to the source (original) pull request. This can be useful if you, at a later time, want to find the PRs that were already backported.
 
-CLI: `--source-labels was-backported
+CLI: `--source-labels was-backported`
 
 Config:
 
