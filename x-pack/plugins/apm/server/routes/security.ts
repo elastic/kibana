@@ -12,9 +12,9 @@ export const indicesPrivilegesRoute = createRoute(() => ({
   path: '/api/apm/security/indices_privileges',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return getIndicesPrivileges(
+    return getIndicesPrivileges({
       setup,
-      context.security?.license.isEnabled() ?? false
-    );
+      isSecurityPluginEnabled: context.security?.license.isEnabled() ?? false
+    });
   }
 }));

@@ -6,10 +6,13 @@
 import { Setup } from '../helpers/setup_request';
 import { IndexPrivileges } from '../helpers/es_client';
 
-export async function getIndicesPrivileges(
-  setup: Setup,
-  isSecurityPluginEnabled: boolean
-): Promise<IndexPrivileges> {
+export async function getIndicesPrivileges({
+  setup,
+  isSecurityPluginEnabled
+}: {
+  setup: Setup;
+  isSecurityPluginEnabled: boolean;
+}): Promise<IndexPrivileges> {
   // When security plugin is not enabled, returns that the user has all requested privileges.
   if (!isSecurityPluginEnabled) {
     return { has_all_requested: true, index: {} };

@@ -29,7 +29,10 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    const privileges = await getIndicesPrivileges(setup, false);
+    const privileges = await getIndicesPrivileges({
+      setup,
+      isSecurityPluginEnabled: false
+    });
     expect(privileges).toEqual({
       has_all_requested: true,
       index: {}
@@ -44,9 +47,9 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    await expect(getIndicesPrivileges(setup, true)).rejects.toThrowError(
-      'unknow error'
-    );
+    await expect(
+      getIndicesPrivileges({ setup, isSecurityPluginEnabled: true })
+    ).rejects.toThrowError('unknow error');
   });
   it("has privileges to read from 'apm-*'", async () => {
     const setup = ({
@@ -60,7 +63,10 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    const privileges = await getIndicesPrivileges(setup, true);
+    const privileges = await getIndicesPrivileges({
+      setup,
+      isSecurityPluginEnabled: true
+    });
 
     expect(privileges).toEqual({
       has_all_requested: true,
@@ -85,7 +91,10 @@ describe('getIndicesPrivileges', () => {
       }
     } as unknown) as Setup;
 
-    const privileges = await getIndicesPrivileges(setup, true);
+    const privileges = await getIndicesPrivileges({
+      setup,
+      isSecurityPluginEnabled: true
+    });
 
     expect(privileges).toEqual({
       has_all_requested: false,
@@ -121,7 +130,10 @@ describe('getIndicesPrivileges', () => {
       }
     } as unknown) as Setup;
 
-    const privileges = await getIndicesPrivileges(setup, true);
+    const privileges = await getIndicesPrivileges({
+      setup,
+      isSecurityPluginEnabled: true
+    });
 
     expect(privileges).toEqual({
       has_all_requested: false,
