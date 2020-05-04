@@ -62,13 +62,13 @@ export const ToggleFlyoutTranslations = {
     defaultMessage: 'Open TLS alert flyout',
   }),
   toggleTlsContent: i18n.translate('xpack.uptime.toggleTlsAlertButton.content', {
-    defaultMessage: 'Create TLS alert',
+    defaultMessage: 'TLS alert',
   }),
   toggleMonitorStatusAriaLabel: i18n.translate('xpack.uptime.toggleAlertFlyout.ariaLabel', {
     defaultMessage: 'Open add alert flyout',
   }),
   toggleMonitorStatusContent: i18n.translate('xpack.uptime.toggleAlertButton.content', {
-    defaultMessage: 'Create Monitor Status alert',
+    defaultMessage: 'Monitor Status alert',
   }),
   navigateToAlertingUIAriaLabel: i18n.translate('xpack.uptime.navigateToAlertingUi', {
     defaultMessage: 'Leave Uptime and go to Alerting Management page',
