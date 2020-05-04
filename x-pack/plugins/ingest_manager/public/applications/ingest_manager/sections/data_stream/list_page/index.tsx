@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -17,10 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { EuiContextMenuItem } from '@elastic/eui';
 import { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+import { TableRowActions } from '../../../components/table_row_actions';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -53,6 +55,21 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   </WithHeaderLayout>
 );
 
+const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
+  return (
+    <TableRowActions
+      items={[
+        <EuiContextMenuItem icon="dashboardApp" href="" key="viewDashboard">
+          <FormattedMessage
+            id="xpack.ingestManager.dataStreamList.viewDashboardActionText"
+            defaultMessage="View dashboard"
+          />
+        </EuiContextMenuItem>,
+      ]}
+    />
+  );
+});
+
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const {
     data: { fieldFormats },
@@ -60,7 +77,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
 
   const { pagination, pageSizeOptions } = usePagination();
 
-  // Fetch agent configs
+  // Fetch data streams
   const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
 
   // Some configs retrieved, set up table props
@@ -152,6 +169,16 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
             return `${size}b`;
           }
         },
+      },
+      {
+        name: i18n.translate('xpack.ingestManager.dataStreamList.actionsColumnTitle', {
+          defaultMessage: 'Actions',
+        }),
+        actions: [
+          {
+            render: (datastream: DataStream) => <DataStreamRowActions datastream={datastream} />,
+          },
+        ],
       },
     ];
     return cols;
