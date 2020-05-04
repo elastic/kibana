@@ -17,29 +17,29 @@ describe('tls alert', () => {
       diffSpy = jest.spyOn(moment.prototype, 'diff');
       mockCerts = [
         {
-          certificate_not_valid_after: '2020-07-16T03:15:39.000Z',
-          certificate_not_valid_before: '2019-07-24T03:15:39.000Z',
+          not_after: '2020-07-16T03:15:39.000Z',
+          not_before: '2019-07-24T03:15:39.000Z',
           common_name: 'Common-One',
           monitors: [{ name: 'monitor-one', id: 'monitor1' }],
           sha256: 'abc',
         },
         {
-          certificate_not_valid_after: '2020-07-18T03:15:39.000Z',
-          certificate_not_valid_before: '2019-07-20T03:15:39.000Z',
+          not_after: '2020-07-18T03:15:39.000Z',
+          not_before: '2019-07-20T03:15:39.000Z',
           common_name: 'Common-Two',
           monitors: [{ name: 'monitor-two', id: 'monitor2' }],
           sha256: 'bcd',
         },
         {
-          certificate_not_valid_after: '2020-07-19T03:15:39.000Z',
-          certificate_not_valid_before: '2019-07-22T03:15:39.000Z',
+          not_after: '2020-07-19T03:15:39.000Z',
+          not_before: '2019-07-22T03:15:39.000Z',
           common_name: 'Common-Three',
           monitors: [{ name: 'monitor-three', id: 'monitor3' }],
           sha256: 'cde',
         },
         {
-          certificate_not_valid_after: '2020-07-25T03:15:39.000Z',
-          certificate_not_valid_before: '2019-07-25T03:15:39.000Z',
+          not_after: '2020-07-25T03:15:39.000Z',
+          not_before: '2019-07-25T03:15:39.000Z',
           common_name: 'Common-Four',
           monitors: [{ name: 'monitor-four', id: 'monitor4' }],
           sha256: 'def',

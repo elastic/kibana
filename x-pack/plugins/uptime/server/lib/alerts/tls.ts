@@ -10,7 +10,7 @@ import { UptimeAlertTypeFactory } from './types';
 import { savedObjectsAdapter } from '../saved_objects';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { Cert } from '../../../common/runtime_types';
+import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
@@ -42,7 +42,7 @@ const mapCertsToSummaryString = (
     .map(cert => `${cert.common_name}, ${certLimitMessage(cert)}`)
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
-const getValidAfter = ({ certificate_not_valid_after: date }: Cert) => {
+const getValidAfter = ({ not_after: date }: Cert) => {
   if (!date) return 'Error, missing `certificate_not_valid_after` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
@@ -50,7 +50,7 @@ const getValidAfter = ({ certificate_not_valid_after: date }: Cert) => {
     : tlsTranslations.validAfterExpiringString(date, Math.abs(relativeDate));
 };
 
-const getValidBefore = ({ certificate_not_valid_before: date }: Cert): string => {
+const getValidBefore = ({ not_before: date }: Cert): string => {
   if (!date) return 'Error, missing `certificate_not_valid_before` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
@@ -64,19 +64,13 @@ export const getCertSummary = (
   ageThreshold: number,
   maxSummaryItems: number = 3
 ): TlsAlertState => {
-  certs.sort((a, b) =>
-    sortCerts(a.certificate_not_valid_after ?? '', b.certificate_not_valid_after ?? '')
-  );
+  certs.sort((a, b) => sortCerts(a.not_after ?? '', b.not_after ?? ''));
   const expiring = certs.filter(
-    cert => new Date(cert.certificate_not_valid_after ?? '').valueOf() < expirationThreshold
+    cert => new Date(cert.not_after ?? '').valueOf() < expirationThreshold
   );
 
-  certs.sort((a, b) =>
-    sortCerts(a.certificate_not_valid_before ?? '', b.certificate_not_valid_before ?? '')
-  );
-  const aging = certs.filter(
-    cert => new Date(cert.certificate_not_valid_before ?? '').valueOf() < ageThreshold
-  );
+  certs.sort((a, b) => sortCerts(a.not_before ?? '', b.not_before ?? ''));
+  const aging = certs.filter(cert => new Date(cert.not_before ?? '').valueOf() < ageThreshold);
 
   return {
     count: certs.length,
@@ -113,7 +107,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
     } = options;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
-    const certs = await libs.requests.getCerts({
+    const { certs, total }: CertResult = await libs.requests.getCerts({
       callES: callCluster,
       dynamicSettings,
       from: DEFAULT_FROM,
@@ -124,9 +118,13 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
         DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration}d`,
       notValidBefore: `now-${dynamicSettings.certThresholds?.age ??
         DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age}d`,
+      sortBy: '@timestamp',
+      direction: 'desc',
     });
 
-    if (certs.length) {
+    const foundCerts = total > 0;
+
+    if (foundCerts) {
       const absoluteExpirationThreshold = moment()
         .add(
           dynamicSettings.certThresholds?.expiration ??
@@ -143,12 +141,12 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       const alertInstance = alertInstanceFactory(TLS.id);
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
       alertInstance.replaceState({
-        ...updateState(state, certs.length > 0),
+        ...updateState(state, foundCerts),
         ...summary,
       });
       alertInstance.scheduleActions(TLS.id);
     }
 
-    return updateState(state, certs.length > 0);
+    return updateState(state, foundCerts);
   },
 });
