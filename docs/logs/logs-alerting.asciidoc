@@ -17,6 +17,7 @@ Within the alert flyout you can configure your logs alert:
 [role="screenshot"]
 image::logs/images/alert-flyout.png[Screenshot showing alerts flyout]
 
+[float]
 === Fields and comparators
 
 The comparators available for conditions depend on the chosen field. The combinations available are:
