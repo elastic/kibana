@@ -91,7 +91,7 @@ def ingestWithVault(buildNum, buildUrl, title) {
   }
 }
 
-def ingestAndUpload(timestamp, title) {
+def ingest(timestamp, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
