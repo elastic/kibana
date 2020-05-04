@@ -55,7 +55,7 @@ export async function getIngestSolutions(
         start,
         end,
         size: maxBucketSize,
-        showSystemIndices: false,
+        showSystemIndices: true,
       });
       const response = await callCluster<IndexStatsSearchResponse>('search', params);
       return { [clusterUuid]: handleResponse(response) };

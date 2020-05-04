@@ -10,7 +10,6 @@ import { ESClusterStats } from './get_es_stats';
 import { KibanaStats } from './get_kibana_stats';
 import { ClustersHighLevelStats } from './get_high_level_stats';
 import { coreMock } from 'src/core/server/mocks';
-import { baseIngestSolutionsPayload } from '../../../../../src/plugins/telemetry/server/telemetry_collection/ingest_solutions/__fixtures__';
 
 describe('get_all_stats', () => {
   const start = 0;
@@ -155,7 +154,7 @@ describe('get_all_stats', () => {
               },
               cloud: undefined,
             },
-            ingest_solutions: baseIngestSolutionsPayload,
+            ingest_solutions: {},
           },
         },
       ];

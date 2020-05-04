@@ -18,13 +18,13 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { TECHNOLOGIES } from './constants';
+import { INGEST_SOLUTIONS } from './constants';
 
-type TechnologyDataProviders = typeof TECHNOLOGIES[number]['name'];
+type TechnologyDataProviders = typeof INGEST_SOLUTIONS[number]['name'];
 
 export interface IngestSolutionsPayload {
   data_providers: {
-    [key in TechnologyDataProviders]: {
+    [key in TechnologyDataProviders]?: {
       index_count: number;
       ecs_index_count?: number;
       doc_count?: number;
@@ -43,46 +43,53 @@ export interface IngestSolutionsIndex {
   sizeInBytes?: number;
 }
 
-function buildBaseObject(): IngestSolutionsPayload {
-  return {
-    data_providers: TECHNOLOGIES.reduce(
-      (acc, { name }) => ({ ...acc, [name]: { index_count: 0 } }),
-      {} as IngestSolutionsPayload['data_providers']
-    ),
-  };
-}
-
 export function buildIngestSolutionsPayload(
   indices: IngestSolutionsIndex[]
 ): IngestSolutionsPayload {
-  const basePayload = buildBaseObject();
-
+  const startingDotPatternsUntilTheFirstAsterisk = INGEST_SOLUTIONS.map(({ pattern }) =>
+    pattern.replace(/^\.(.+)\*.*$/g, '.$1')
+  ).filter(Boolean);
   return indices.reduce((acc, { name: indexName, isECS, docCount, sizeInBytes }) => {
-    const matchingTechnology = TECHNOLOGIES.find(({ pattern }) =>
-      new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(indexName)
-    );
+    // Filter out the system indices unless they are required by the patterns
+    if (
+      indexName.startsWith('.') &&
+      !startingDotPatternsUntilTheFirstAsterisk.find(pattern => indexName.startsWith(pattern))
+    ) {
+      return acc;
+    }
+    const matchingTechnology = INGEST_SOLUTIONS.find(({ pattern }) => {
+      if (!pattern.startsWith('.') && indexName.startsWith('.')) {
+        // avoid system indices caught by very fuzzy index patters (i.e.: *log* would catch `.kibana-log-...`)
+        return false;
+      }
+      return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(indexName);
+    });
+
     if (!matchingTechnology) {
       return acc;
     }
     const { name } = matchingTechnology;
+    const dataProviders = acc.data_providers || {};
     return {
       ...acc,
       data_providers: {
-        ...acc.data_providers,
+        ...dataProviders,
         [name]: {
-          ...acc.data_providers[name],
-          index_count: acc.data_providers[name].index_count + 1,
+          ...dataProviders[name],
+          index_count: (dataProviders[name]?.index_count || 0) + 1,
           ...(typeof isECS === 'boolean'
-            ? { ecs_index_count: (acc.data_providers[name].ecs_index_count || 0) + (isECS ? 1 : 0) }
+            ? {
+                ecs_index_count: (dataProviders[name]?.ecs_index_count || 0) + (isECS ? 1 : 0),
+              }
             : {}),
-          ...(docCount ? { doc_count: (acc.data_providers[name].doc_count || 0) + docCount } : {}),
+          ...(docCount ? { doc_count: (dataProviders[name]?.doc_count || 0) + docCount } : {}),
           ...(sizeInBytes
-            ? { size_in_bytes: (acc.data_providers[name].size_in_bytes || 0) + sizeInBytes }
+            ? { size_in_bytes: (dataProviders[name]?.size_in_bytes || 0) + sizeInBytes }
             : {}),
         },
       },
     };
-  }, basePayload);
+  }, {} as IngestSolutionsPayload);
 }
 
 interface IndexStats {
@@ -126,7 +133,7 @@ interface ClusterState {
 }
 
 export async function getIngestSolutions(callCluster: APICaller) {
-  const index = TECHNOLOGIES.map(({ pattern }) => pattern);
+  const index = INGEST_SOLUTIONS.map(({ pattern }) => pattern);
   const [state, indexStats]: [ClusterState, IndexStats] = await Promise.all([
     // GET _cluster/state/metadata/<index>?filter_path=metadata.indices.*.version
     callCluster<ClusterState>('cluster.state', {
@@ -149,9 +156,7 @@ export async function getIngestSolutions(callCluster: APICaller) {
   ]);
 
   const stateIndices = state?.metadata?.indices || {};
-  const indexNames = Object.keys(stateIndices)
-    // Filter out the system indices
-    .filter(name => !name.startsWith('.'));
+  const indexNames = Object.keys(stateIndices);
   const indices = indexNames.map(name => {
     const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
 

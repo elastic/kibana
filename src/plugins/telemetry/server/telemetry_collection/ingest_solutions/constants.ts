@@ -21,7 +21,8 @@ export const INGEST_SOLUTIONS_ID = 'ingest_solutions';
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
-export const TECHNOLOGIES = [
+export const INGEST_SOLUTIONS = [
+  // Observability
   { name: 'apm', pattern: 'apm-*' },
   { name: 'metricbeat', pattern: 'metricbeat-*' },
   { name: 'heartbeat', pattern: 'heartbeat-*' },
@@ -34,7 +35,11 @@ export const TECHNOLOGIES = [
   { name: 'nginx', pattern: 'nginx*' },
   { name: 'apache', pattern: 'apache*' },
   { name: 'logs', pattern: '*logs*' },
+  // Security
   { name: 'auditbeat', pattern: 'auditbeat-*' },
   { name: 'winlogbeat', pattern: 'winlogbeat-*' },
   { name: 'packetbeat', pattern: 'packetbeat-*' },
+  // AppSearch
+  { name: 'app-search', pattern: '.ent-search-*' },
+  { name: 'app-search', pattern: '.app-search-*' },
 ] as const;

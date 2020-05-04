@@ -5,9 +5,6 @@
  */
 
 import { getIngestSolutions } from './get_ingest_solutions';
-import { baseIngestSolutionsPayload } from '../../../../../src/plugins/telemetry/server/telemetry_collection/ingest_solutions/__fixtures__';
-
-const basePayload = baseIngestSolutionsPayload;
 
 function mockCallCluster(docs: any[] = []) {
   return jest.fn().mockImplementation(async (method: string, options) => {
@@ -31,7 +28,7 @@ describe('get_ingest_solutions', () => {
   test('it returns the base document because no docs found', async () => {
     await expect(
       getIngestSolutions(mockCallCluster(), ['cluster-1', 'cluster-2'], Date.now(), Date.now(), 10)
-    ).resolves.toStrictEqual({ 'cluster-1': basePayload, 'cluster-2': basePayload });
+    ).resolves.toStrictEqual({ 'cluster-1': {}, 'cluster-2': {} });
   });
 
   test('it counts 4 "logs.count" providers but 1 logs.total_providers', async () => {
@@ -47,9 +44,7 @@ describe('get_ingest_solutions', () => {
       getIngestSolutions(mockCallCluster(indices), ['cluster-1'], Date.now(), Date.now(), 10)
     ).resolves.toStrictEqual({
       'cluster-1': {
-        ...basePayload,
         data_providers: {
-          ...basePayload.data_providers,
           logs: { index_count: 4, doc_count: 400, size_in_bytes: 40 },
         },
       },

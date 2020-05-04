@@ -176,21 +176,7 @@
       },
       "ingest_solutions": {
         "data_providers": {
-          "apm": { "doc_count": 1, "index_count": 1, "size_in_bytes": 5136 },
-          "metricbeat": { "index_count": 0 },
-          "heartbeat": { "index_count": 0 },
-          "prometheusbeat": { "index_count": 0 },
-          "filebeat": { "index_count": 0 },
-          "functionbeat": { "index_count": 0 },
-          "fluentd": { "index_count": 0 },
-          "telegraf": { "index_count": 0 },
-          "fluentbit": { "index_count": 0 },
-          "nginx": { "index_count": 0 },
-          "apache": { "index_count": 0 },
-          "logs": { "index_count": 0 },
-          "auditbeat": { "index_count": 0 },
-          "winlogbeat": { "index_count": 0 },
-          "packetbeat": { "index_count": 0 }
+          "apm": { "doc_count": 1, "index_count": 1, "size_in_bytes": 5136 }
         }
       },
       "kibana": {
