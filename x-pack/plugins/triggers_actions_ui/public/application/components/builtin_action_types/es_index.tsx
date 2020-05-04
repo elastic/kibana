@@ -88,7 +88,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>([
+    firstFieldOption,
+  ]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   useEffect(() => {
