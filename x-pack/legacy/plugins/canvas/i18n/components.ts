@@ -1005,12 +1005,6 @@ export const ComponentStrings = {
         defaultMessage: 'Refresh elements',
       }),
   },
-  WorkpadHeaderControlSettings: {
-    getButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderControlSettings.buttonLabel', {
-        defaultMessage: 'Options',
-      }),
-  },
   WorkpadHeaderCustomInterval: {
     getButtonLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderCustomInterval.confirmButtonLabel', {
@@ -1319,6 +1313,18 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderViewMenu: {
+    getAutoplayOffMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOffMenuItemLabel', {
+        defaultMessage: 'Turn autoplay off',
+      }),
+    getAutoplayOnMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOnMenuItemLabel', {
+        defaultMessage: 'Turn autoplay on',
+      }),
+    getAutoplaySettingsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplaySettingsMenuItemLabel', {
+        defaultMessage: 'Autoplay settings',
+      }),
     getFullscreenMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.fullscreenMenuLabel', {
         defaultMessage: 'Enter fullscreen mode',
@@ -1330,6 +1336,10 @@ export const ComponentStrings = {
     getRefreshMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshMenuItemLabel', {
         defaultMessage: 'Refresh data',
+      }),
+    getRefreshSettingsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshSettingsMenuItemLabel', {
+        defaultMessage: 'Auto refresh settings',
       }),
     getShowEditModeLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {

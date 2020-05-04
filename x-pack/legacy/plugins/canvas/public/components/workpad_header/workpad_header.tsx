@@ -11,7 +11,6 @@ import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { ComponentStrings } from '../../../i18n';
 import { ToolTipShortcut } from '../tool_tip_shortcut/';
-import { ControlSettings } from './control_settings';
 // @ts-ignore untyped local
 import { RefreshControl } from './refresh_control';
 // @ts-ignore untyped local
@@ -109,9 +108,6 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <ShareMenu />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ControlSettings />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -128,7 +124,7 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
             )}
             <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
               <EuiButtonIcon
-                iconType={isWriteable ? 'eye' : 'eyeClosed'}
+                iconType={isWriteable ? 'eyeClosed' : 'eye'}
                 onClick={toggleWriteable}
                 size="s"
                 aria-label={getEditToggleToolTipText()}
