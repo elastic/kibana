@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import { shallow } from 'enzyme';
-import { APMIndicesPermission } from '../';
+import { APMIndicesPermission } from './';
 
-import * as hooks from '../../../../hooks/useFetcher';
+import * as hooks from '../../../hooks/useFetcher';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument
-} from '../../../../utils/testHelpers';
-import { MockApmPluginContextWrapper } from '../../../../context/ApmPluginContext/MockApmPluginContext';
+} from '../../../utils/testHelpers';
+import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 describe('APMIndicesPermission', () => {
   it('returns empty component when api status is loading', () => {
@@ -34,7 +34,10 @@ describe('APMIndicesPermission', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-*': { read: false }
+        has_all_requested: false,
+        index: {
+          'apm-*': { read: false }
+        }
       }
     });
     const component = render(
@@ -48,41 +51,78 @@ describe('APMIndicesPermission', () => {
       'apm-*'
     ]);
   });
-  it('shows escape hatch button when at least one indice has read privileges', () => {
+
+  it('shows children component when no index is returned', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-*': { read: false },
-        'apm-7.5.1-metric-*': { read: false },
-        'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
+        has_all_requested: false,
+        index: {}
       }
     });
     const component = render(
       <MockApmPluginContextWrapper>
-        <APMIndicesPermission />
+        <APMIndicesPermission>
+          <p>My amazing component</p>
+        </APMIndicesPermission>
       </MockApmPluginContextWrapper>
     );
-    expectTextsInDocument(component, [
-      'Missing permissions to access APM',
-      'apm-7.5.1-error-*',
-      'apm-7.5.1-metric-*',
-      'apm-7.5.1-transaction-*',
-      'Dismiss'
-    ]);
-    expectTextsNotInDocument(component, ['apm-7.5.1-span-*']);
+    expectTextsNotInDocument(component, ['Missing permissions to access APM']);
+    expectTextsInDocument(component, ['My amazing component']);
   });
 
   it('shows children component when indices have read privileges', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
       data: {
-        'apm-7.5.1-error-*': { read: true },
-        'apm-7.5.1-metric-*': { read: true },
-        'apm-7.5.1-transaction-*': { read: true },
-        'apm-7.5.1-span-*': { read: true }
+        has_all_requested: true,
+        index: {}
       }
     });
+    const component = render(
+      <MockApmPluginContextWrapper>
+        <APMIndicesPermission>
+          <p>My amazing component</p>
+        </APMIndicesPermission>
+      </MockApmPluginContextWrapper>
+    );
+    expectTextsNotInDocument(component, ['Missing permissions to access APM']);
+    expectTextsInDocument(component, ['My amazing component']);
+  });
+
+  it('dismesses the warning by clicking on the escape hatch', () => {
+    spyOn(hooks, 'useFetcher').and.returnValue({
+      status: hooks.FETCH_STATUS.SUCCESS,
+      data: {
+        has_all_requested: false,
+        index: {
+          'apm-error-*': { read: false },
+          'apm-trasanction-*': { read: false },
+          'apm-metrics-*': { read: true },
+          'apm-span-*': { read: true }
+        }
+      }
+    });
+    const component = render(
+      <MockApmPluginContextWrapper>
+        <APMIndicesPermission>
+          <p>My amazing component</p>
+        </APMIndicesPermission>
+      </MockApmPluginContextWrapper>
+    );
+    expectTextsInDocument(component, [
+      'Dismiss',
+      'apm-error-*',
+      'apm-trasanction-*'
+    ]);
+    act(() => {
+      fireEvent.click(component.getByText('Dismiss'));
+    });
+    expectTextsInDocument(component, ['My amazing component']);
+  });
+
+  it("shows children component when api doesn't return value", () => {
+    spyOn(hooks, 'useFetcher').and.returnValue({});
     const component = render(
       <MockApmPluginContextWrapper>
         <APMIndicesPermission>
@@ -97,28 +137,6 @@ describe('APMIndicesPermission', () => {
       'apm-7.5.1-transaction-*',
       'apm-7.5.1-span-*'
     ]);
-    expectTextsInDocument(component, ['My amazing component']);
-  });
-
-  it('dismesses the warning by clicking on the escape hatch', () => {
-    spyOn(hooks, 'useFetcher').and.returnValue({
-      status: hooks.FETCH_STATUS.SUCCESS,
-      data: {
-        'apm-7.5.1-error-*': { read: false },
-        'apm-7.5.1-metric-*': { read: false },
-        'apm-7.5.1-transaction-*': { read: false },
-        'apm-7.5.1-span-*': { read: true }
-      }
-    });
-    const component = render(
-      <MockApmPluginContextWrapper>
-        <APMIndicesPermission>
-          <p>My amazing component</p>
-        </APMIndicesPermission>
-      </MockApmPluginContextWrapper>
-    );
-    expectTextsInDocument(component, ['Dismiss']);
-    fireEvent.click(component.getByText('Dismiss'));
     expectTextsInDocument(component, ['My amazing component']);
   });
 });

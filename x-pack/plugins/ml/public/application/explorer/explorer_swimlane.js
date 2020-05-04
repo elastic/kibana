@@ -8,99 +8,73 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
+import PropTypes from 'prop-types';
 import React from 'react';
-import './_explorer.scss';
+
 import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
-import { TooltipValue } from '@elastic/charts';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { numTicksForDateFormat } from '../util/chart_utils';
 import { getSeverityColor } from '../../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
+import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
+import { i18n } from '@kbn/i18n';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
-import {
-  ChartTooltipService,
-  ChartTooltipValue,
-} from '../components/chart_tooltip/chart_tooltip_service';
-import { OverallSwimlaneData } from './explorer_utils';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
   mlHideRangeSelection: 'mlHideRangeSelection',
 };
 
-interface NodeWithData extends Node {
-  __clickData__: {
-    time: number;
-    bucketScore: number;
-    laneLabel: string;
-    swimlaneType: string;
+export class ExplorerSwimlane extends React.Component {
+  static propTypes = {
+    chartWidth: PropTypes.number.isRequired,
+    filterActive: PropTypes.bool,
+    maskAll: PropTypes.bool,
+    TimeBuckets: PropTypes.func.isRequired,
+    swimlaneCellClick: PropTypes.func.isRequired,
+    swimlaneData: PropTypes.shape({
+      laneLabels: PropTypes.array.isRequired,
+    }).isRequired,
+    swimlaneType: PropTypes.string.isRequired,
+    selection: PropTypes.object,
+    swimlaneRenderDoneListener: PropTypes.func.isRequired,
   };
-}
 
-interface SelectedData {
-  bucketScore: number;
-  laneLabels: string[];
-  times: number[];
-}
-
-export interface ExplorerSwimlaneProps {
-  chartWidth: number;
-  filterActive?: boolean;
-  maskAll?: boolean;
-  timeBuckets: InstanceType<typeof TimeBucketsClass>;
-  swimlaneCellClick?: Function;
-  swimlaneData: OverallSwimlaneData;
-  swimlaneType: string;
-  selection?: {
-    lanes: any[];
-    type: string;
-    times: number[];
-  };
-  swimlaneRenderDoneListener?: Function;
-  tooltipService: ChartTooltipService;
-}
-
-export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   // Since this component is mostly rendered using d3 and cellMouseoverActive is only
   // relevant for d3 based interaction, we don't manage this using React's state
   // and intentionally circumvent the component lifecycle when updating it.
   cellMouseoverActive = true;
 
-  dragSelectSubscriber: Subscription | null = null;
-
-  rootNode = React.createRef<HTMLDivElement>();
+  dragSelectSubscriber = null;
 
   componentDidMount() {
     // property for data comparison to be able to filter
     // consecutive click events with the same data.
-    let previousSelectedData: any = null;
+    let previousSelectedData = null;
 
     // Listen for dragSelect events
     this.dragSelectSubscriber = dragSelect$.subscribe(({ action, elements = [] }) => {
-      const element = d3.select(this.rootNode.current!.parentNode!);
+      const element = d3.select(this.rootNode.parentNode);
       const { swimlaneType } = this.props;
 
       if (action === DRAG_SELECT_ACTION.NEW_SELECTION && elements.length > 0) {
         element.classed(SCSS.mlDragselectDragging, false);
-        const firstSelectedCell = (d3.select(elements[0]).node() as NodeWithData).__clickData__;
+        const firstSelectedCell = d3.select(elements[0]).node().__clickData__;
 
         if (
           typeof firstSelectedCell !== 'undefined' &&
           swimlaneType === firstSelectedCell.swimlaneType
         ) {
-          const selectedData: SelectedData = elements.reduce(
+          const selectedData = elements.reduce(
             (d, e) => {
-              const cell = (d3.select(e).node() as NodeWithData).__clickData__;
+              const cell = d3.select(e).node().__clickData__;
               d.bucketScore = Math.max(d.bucketScore, cell.bucketScore);
               d.laneLabels.push(cell.laneLabel);
               d.times.push(cell.time);
@@ -136,7 +110,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       } else if (action === DRAG_SELECT_ACTION.DRAG_START) {
         previousSelectedData = null;
         this.cellMouseoverActive = false;
-        this.props.tooltipService.hide();
+        mlChartTooltipService.hide(true);
       }
     });
 
@@ -151,12 +125,12 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     if (this.dragSelectSubscriber !== null) {
       this.dragSelectSubscriber.unsubscribe();
     }
-    const element = d3.select(this.rootNode.current!);
+    const element = d3.select(this.rootNode);
     element.html('');
   }
 
-  selectCell(cellsToSelect: any[], { laneLabels, bucketScore, times }: SelectedData) {
-    const { selection, swimlaneCellClick = () => {}, swimlaneData, swimlaneType } = this.props;
+  selectCell(cellsToSelect, { laneLabels, bucketScore, times }) {
+    const { selection, swimlaneCellClick, swimlaneData, swimlaneType } = this.props;
 
     let triggerNewSelection = false;
 
@@ -199,7 +173,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     swimlaneCellClick(selectedCells);
   }
 
-  highlightOverall(times: number[]) {
+  highlightOverall(times) {
     const overallSwimlane = d3.select('.ml-swimlane-overall');
     times.forEach(time => {
       const overallCell = overallSwimlane
@@ -209,7 +183,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     });
   }
 
-  highlightSelection(cellsToSelect: Node[], laneLabels: string[], times: number[]) {
+  highlightSelection(cellsToSelect, laneLabels, times) {
     const { swimlaneType } = this.props;
 
     // This selects both overall and viewby swimlane
@@ -230,8 +204,8 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       .classed('sl-cell-inner-masked', false)
       .classed('sl-cell-inner-selected', true);
 
-    const rootParent = d3.select(this.rootNode.current!.parentNode!);
-    rootParent.selectAll('.lane-label').classed('lane-label-masked', function(this: HTMLElement) {
+    const rootParent = d3.select(this.rootNode.parentNode);
+    rootParent.selectAll('.lane-label').classed('lane-label-masked', function() {
       return laneLabels.indexOf(d3.select(this).text()) === -1;
     });
 
@@ -241,7 +215,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }
   }
 
-  maskIrrelevantSwimlanes(maskAll: boolean) {
+  maskIrrelevantSwimlanes(maskAll) {
     if (maskAll === true) {
       // This selects both overall and viewby swimlane
       const allSwimlanes = d3.selectAll('.ml-explorer-swimlane');
@@ -274,7 +248,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
   }
 
   renderSwimlane() {
-    const element = d3.select(this.rootNode.current!.parentNode!);
+    const element = d3.select(this.rootNode.parentNode);
 
     // Consider the setting to support to select a range of cells
     if (!ALLOW_CELL_RANGE_SELECTION) {
@@ -289,7 +263,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       chartWidth,
       filterActive,
       maskAll,
-      timeBuckets,
+      TimeBuckets,
       swimlaneCellClick,
       swimlaneData,
       swimlaneType,
@@ -304,60 +278,11 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       points,
     } = swimlaneData;
 
-    const cellMouseover = (
-      target: HTMLElement,
-      laneLabel: string,
-      bucketScore: number,
-      index: number,
-      time: number
-    ) => {
-      if (bucketScore === undefined || getCellMouseoverActive() === false) {
-        return;
-      }
-
-      const displayScore = bucketScore > 1 ? parseInt(String(bucketScore), 10) : '< 1';
-
-      // Display date using same format as Kibana visualizations.
-      const formattedDate = formatHumanReadableDateTime(time * 1000);
-      const tooltipData: TooltipValue[] = [{ label: formattedDate } as TooltipValue];
-
-      if (swimlaneData.fieldName !== undefined) {
-        tooltipData.push({
-          label: swimlaneData.fieldName,
-          value: laneLabel,
-          // @ts-ignore
-          seriesIdentifier: {
-            key: laneLabel,
-          },
-          valueAccessor: 'fieldName',
-        });
-      }
-      tooltipData.push({
-        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
-          defaultMessage: 'Max anomaly score',
-        }),
-        value: displayScore,
-        color: colorScore(bucketScore),
-        // @ts-ignore
-        seriesIdentifier: {
-          key: laneLabel,
-        },
-        valueAccessor: 'anomaly_score',
-      });
-
-      const offsets = target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 };
-
-      this.props.tooltipService.show(tooltipData, target, {
-        x: target.offsetWidth + offsets.x,
-        y: 6 + offsets.y,
-      });
-    };
-
-    function colorScore(value: number): string {
+    function colorScore(value) {
       return getSeverityColor(value);
     }
 
-    const numBuckets = Math.round((endTime - startTime) / stepSecs);
+    const numBuckets = parseInt((endTime - startTime) / stepSecs);
     const cellHeight = 30;
     const height = (lanes.length + 1) * cellHeight - 10;
     const laneLabelWidth = 170;
@@ -375,13 +300,14 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       .range([0, xAxisWidth]);
 
     // Get the scaled date format to use for x axis tick labels.
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval(`${stepSecs}s`);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
 
-    function cellMouseOverFactory(time: number, i: number) {
+    function cellMouseOverFactory(time, i) {
       // Don't use an arrow function here because we need access to `this`,
       // which is where d3 supplies a reference to the corresponding DOM element.
-      return function(this: HTMLElement, lane: string) {
+      return function(lane) {
         const bucketScore = getBucketScore(lane, time);
         if (bucketScore !== 0) {
           lane = lane === '' ? EMPTY_FIELD_VALUE_LABEL : lane;
@@ -390,9 +316,49 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       };
     }
 
-    const cellMouseleave = () => {
-      this.props.tooltipService.hide();
-    };
+    function cellMouseover(target, laneLabel, bucketScore, index, time) {
+      if (bucketScore === undefined || getCellMouseoverActive() === false) {
+        return;
+      }
+
+      const displayScore = bucketScore > 1 ? parseInt(bucketScore) : '< 1';
+
+      // Display date using same format as Kibana visualizations.
+      const formattedDate = formatHumanReadableDateTime(time * 1000);
+      const tooltipData = [{ label: formattedDate }];
+
+      if (swimlaneData.fieldName !== undefined) {
+        tooltipData.push({
+          label: swimlaneData.fieldName,
+          value: laneLabel,
+          seriesIdentifier: {
+            key: laneLabel,
+          },
+          valueAccessor: 'fieldName',
+        });
+      }
+      tooltipData.push({
+        label: i18n.translate('xpack.ml.explorer.swimlane.maxAnomalyScoreLabel', {
+          defaultMessage: 'Max anomaly score',
+        }),
+        value: displayScore,
+        color: colorScore(displayScore),
+        seriesIdentifier: {
+          key: laneLabel,
+        },
+        valueAccessor: 'anomaly_score',
+      });
+
+      const offsets = target.className === 'sl-cell-inner' ? { x: 6, y: 0 } : { x: 8, y: 1 };
+      mlChartTooltipService.show(tooltipData, target, {
+        x: target.offsetWidth + offsets.x,
+        y: 6 + offsets.y,
+      });
+    }
+
+    function cellMouseleave() {
+      mlChartTooltipService.hide();
+    }
 
     const d3Lanes = swimlanes.selectAll('.lane').data(lanes);
     const d3LanesEnter = d3Lanes
@@ -400,13 +366,11 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       .append('div')
       .classed('lane', true);
 
-    const that = this;
-
     d3LanesEnter
       .append('div')
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
-      .html((label: string) => {
+      .html(label => {
         const showFilterContext = filterActive === true && label === 'Overall';
         if (showFilterContext) {
           return i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
@@ -418,21 +382,20 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         }
       })
       .on('click', () => {
-        if (selection && typeof selection.lanes !== 'undefined' && swimlaneCellClick) {
+        if (selection && typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});
         }
       })
-      .each(function(this: HTMLElement) {
+      .each(function() {
         if (swimlaneData.fieldName !== undefined) {
           d3.select(this)
             .on('mouseover', value => {
-              that.props.tooltipService.show(
+              mlChartTooltipService.show(
                 [
-                  { skipHeader: true } as ChartTooltipValue,
+                  { skipHeader: true },
                   {
-                    label: swimlaneData.fieldName!,
+                    label: swimlaneData.fieldName,
                     value: value === '' ? EMPTY_FIELD_VALUE_LABEL : value,
-                    // @ts-ignore
                     seriesIdentifier: { key: value },
                     valueAccessor: 'fieldName',
                   },
@@ -445,18 +408,15 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
               );
             })
             .on('mouseout', () => {
-              that.props.tooltipService.hide();
+              mlChartTooltipService.hide();
             })
-            .attr(
-              'aria-label',
-              value => `${mlEscape(swimlaneData.fieldName!)}: ${mlEscape(value)}`
-            );
+            .attr('aria-label', value => `${mlEscape(swimlaneData.fieldName)}: ${mlEscape(value)}`);
         }
       });
 
     const cellsContainer = d3LanesEnter.append('div').classed('cells-container', true);
 
-    function getBucketScore(lane: string, time: number): number {
+    function getBucketScore(lane, time) {
       let bucketScore = 0;
       const point = points.find(p => {
         return p.value > 0 && p.laneLabel === lane && p.time === time;
@@ -476,16 +436,16 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
           .append('div')
           .classed('sl-cell', true)
           .style('width', `${cellWidth}px`)
-          .attr('data-lane-label', (label: string) => mlEscape(label))
+          .attr('data-lane-label', label => mlEscape(label))
           .attr('data-time', time)
-          .attr('data-bucket-score', (lane: string) => {
+          .attr('data-bucket-score', lane => {
             return getBucketScore(lane, time);
           })
           // use a factory here to bind the `time` and `i` values
           // of this iteration to the event.
           .on('mouseover', cellMouseOverFactory(time, i))
           .on('mouseleave', cellMouseleave)
-          .each(function(this: NodeWithData, laneLabel: string) {
+          .each(function(laneLabel) {
             this.__clickData__ = {
               bucketScore: getBucketScore(laneLabel, time),
               laneLabel,
@@ -495,7 +455,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
           });
 
         // calls itself with each() to get access to lane (= d3 data)
-        cell.append('div').each(function(this: HTMLElement, lane: string) {
+        cell.append('div').each(function(lane) {
           const el = d3.select(this);
 
           let color = 'none';
@@ -545,10 +505,13 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
 
     // remove overlapping labels
     let overlapCheck = 0;
-    gAxis.selectAll('g.tick').each(function(this: HTMLElement) {
+    gAxis.selectAll('g.tick').each(function() {
       const tick = d3.select(this);
       const xTransform = d3.transform(tick.attr('transform')).translate[0];
-      const tickWidth = (tick.select('text').node() as SVGGraphicsElement).getBBox().width;
+      const tickWidth = tick
+        .select('text')
+        .node()
+        .getBBox().width;
       const xMinOffset = xTransform - tickWidth / 2;
       const xMaxOffset = xTransform + tickWidth / 2;
       // if the tick label overlaps the previous label
@@ -578,9 +541,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
     }
 
-    if (this.props.swimlaneRenderDoneListener) {
-      this.props.swimlaneRenderDoneListener();
-    }
+    this.props.swimlaneRenderDoneListener();
 
     if (
       (swimlaneType !== selectedType ||
@@ -592,7 +553,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       return;
     }
 
-    const cellsToSelect: Node[] = [];
+    const cellsToSelect = [];
     const selectedLanes = _.get(selectionState, 'lanes', []);
     const selectedTimes = _.get(selectionState, 'times', []);
     const selectedTimeExtent = d3.extent(selectedTimes);
@@ -609,9 +570,9 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
           `div[data-lane-label="${mlEscape(selectedLane)}"]`
         );
 
-        laneCells.each(function(this: HTMLElement) {
+        laneCells.each(function() {
           const cell = d3.select(this);
-          const cellTime = parseInt(cell.attr('data-time'), 10);
+          const cellTime = cell.attr('data-time');
           if (cellTime >= selectedTimeExtent[0] && cellTime <= selectedTimeExtent[1]) {
             cellsToSelect.push(cell.node());
           }
@@ -624,7 +585,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     }, 0);
 
     const selectedCellTimes = cellsToSelect.map(e => {
-      return (d3.select(e).node() as NodeWithData).__clickData__.time;
+      return d3.select(e).node().__clickData__.time;
     });
 
     if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
@@ -633,7 +594,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       if (selectedCellTimes.length > 0) {
         this.highlightOverall(selectedCellTimes);
       }
-      this.maskIrrelevantSwimlanes(!!maskAll);
+      this.maskIrrelevantSwimlanes(maskAll);
     } else {
       this.clearSelection();
     }
@@ -643,9 +604,15 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     return true;
   }
 
+  setRef(componentNode) {
+    this.rootNode = componentNode;
+  }
+
   render() {
     const { swimlaneType } = this.props;
 
-    return <div className={`ml-swimlanes ml-swimlane-${swimlaneType}`} ref={this.rootNode} />;
+    return (
+      <div className={`ml-swimlanes ml-swimlane-${swimlaneType}`} ref={this.setRef.bind(this)} />
+    );
   }
 }
