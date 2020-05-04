@@ -28,9 +28,13 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-
-import { META_FIELDS_SETTING } from '../../../../discover/common';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  IFieldType,
+  META_FIELDS_SETTING,
+} from '../../../common';
 import { findByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, FieldList, IFieldList } from '../fields';

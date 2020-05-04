@@ -75,7 +75,7 @@ import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../../discover/common';
+import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../common';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';

@@ -23,12 +23,10 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
 import {
   DEFAULT_COLUMNS_SETTING,
-  META_FIELDS_SETTING,
   SAMPLE_SIZE_SETTING,
   AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
-  DOC_HIGHLIGHT_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   CONTEXT_DEFAULT_SIZE_SETTING,
@@ -46,17 +44,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: 'Columns displayed by default in the Discovery tab',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
-  },
-  [META_FIELDS_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.metaFieldsTitle', {
-      defaultMessage: 'Meta fields',
-    }),
-    value: ['_source', '_id', '_type', '_index', '_score'],
-    description: i18n.translate('discover.advancedSettings.metaFieldsText', {
-      defaultMessage:
-        'Fields that exist outside of _source to merge into our document when displaying it',
-    }),
     schema: schema.arrayOf(schema.string()),
   },
   [SAMPLE_SIZE_SETTING]: {
@@ -116,19 +103,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage:
         'Controls whether a search is executed when Discover first loads. This setting does not ' +
         'have an effect when loading a saved search.',
-    }),
-    category: ['discover'],
-    schema: schema.boolean(),
-  },
-  [DOC_HIGHLIGHT_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.docTableHighlightTitle', {
-      defaultMessage: 'Highlight results',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.docTableHighlightText', {
-      defaultMessage:
-        'Highlight results in Discover and Saved Searches Dashboard. ' +
-        'Highlighting makes requests slow when working on big documents.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
