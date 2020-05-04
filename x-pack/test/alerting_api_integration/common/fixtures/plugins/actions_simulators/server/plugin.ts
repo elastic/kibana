@@ -11,6 +11,7 @@ import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../.
 import { ActionType } from '../../../../../../../plugins/actions/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
+import { initPlugin as initJira } from './jira_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -86,6 +87,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initServiceNow(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
+    initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
   }
 
   public start() {}
