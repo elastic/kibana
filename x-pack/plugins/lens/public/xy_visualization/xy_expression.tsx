@@ -277,7 +277,11 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={(min: number, max: number) => {
+        onBrushEnd={({ x }) => {
+          if (!x) {
+            return;
+          }
+          const [min, max] = x;
           // in the future we want to make it also for histogram
           if (!xAxisColumn || !isTimeViz) {
             return;
