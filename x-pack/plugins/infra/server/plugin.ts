@@ -105,7 +105,7 @@ export class InfraServerPlugin {
         sources,
       }
     );
-    const snapshot = new InfraSnapshot({ sources, framework });
+    const snapshot = new InfraSnapshot();
     const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
     const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
 
@@ -120,6 +120,7 @@ export class InfraServerPlugin {
         sources,
       }),
       logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
+        framework,
         sources,
       }),
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),

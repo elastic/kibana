@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { SavedObjectAttributes } from 'src/core/public';
 import {
   Datasource,
   DatasourcePackage,
@@ -26,7 +24,7 @@ export interface NewAgentConfig {
   monitoring_enabled?: Array<'logs' | 'metrics'>;
 }
 
-export interface AgentConfig extends NewAgentConfig, SavedObjectAttributes {
+export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
   datasources: string[] | Datasource[];

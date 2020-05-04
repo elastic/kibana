@@ -23,6 +23,9 @@ export const metricsExplorerViewSavedObjectType: SavedObjectsType = {
       },
       options: {
         properties: {
+          forceInterval: {
+            type: 'boolean',
+          },
           metrics: {
             type: 'nested',
             properties: {

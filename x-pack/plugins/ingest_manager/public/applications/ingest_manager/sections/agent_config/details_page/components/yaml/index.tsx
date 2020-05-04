@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig } from '../../../../../../../../common/types/models';
+import { AgentConfig } from '../../../../../types';
 import {
   useGetOneAgentConfigFull,
   useGetEnrollmentAPIKeys,

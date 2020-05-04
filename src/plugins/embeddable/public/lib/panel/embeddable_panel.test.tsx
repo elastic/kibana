@@ -45,7 +45,7 @@ import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
 
-const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
+const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -214,13 +214,17 @@ const renderInEditModeAndOpenContextMenu = async (
 };
 
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
-  const action: Action = {
+  const action = {
     id: 'FOO',
     type: 'FOO' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -246,13 +250,17 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 });
 
 test('HelloWorldContainer hides disabled badges', async () => {
-  const action: Action = {
+  const action = {
     id: 'BAR',
     type: 'BAR' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
