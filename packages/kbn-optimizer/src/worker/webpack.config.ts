@@ -130,24 +130,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       },
     ],
 
-    plugins: [
-      new CleanWebpackPlugin(),
-      new DisallowedSyntaxPlugin(),
-      ...(worker.dist
-        ? [
-            new CompressionPlugin({
-              algorithm: 'brotliCompress',
-              filename: '[path].br',
-              test: /\.(js|css)$/,
-            }),
-            new CompressionPlugin({
-              algorithm: 'gzip',
-              filename: '[path].gz',
-              test: /\.(js|css)$/,
-            }),
-          ]
-        : []),
-    ],
+    plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
@@ -336,6 +319,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
       }),
     ],
 

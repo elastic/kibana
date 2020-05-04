@@ -52,7 +52,7 @@ async function tryToOpenFile(filePath: string) {
 
 async function selectCompressedFile(acceptEncodingHeader: string | undefined, path: string) {
   let fd: number | undefined;
-  let fileEncoding: string | undefined;
+  let fileEncoding: 'gzip' | 'br' | undefined;
 
   const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
 
@@ -110,7 +110,7 @@ export async function createDynamicAssetResponse({
   isDist: boolean;
 }) {
   let fd: number | undefined;
-  let fileEncoding: string | undefined;
+  let fileEncoding: 'gzip' | 'br' | undefined;
 
   try {
     const path = resolve(bundlesPath, request.params.path);
