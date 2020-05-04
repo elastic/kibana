@@ -12,11 +12,7 @@
   // sass-lint:disable-block no-important
   background-color: $euiColorEmptyShade !important;
   pointer-events: all;
-
-  display: inline-block;
   position: relative;
-  vertical-align: middle;
-  max-width: 100%;
 
   &:enabled,
   &:enabled:hover,
