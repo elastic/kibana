@@ -5,10 +5,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
 
 import { httpServiceMock } from 'src/core/public/mocks';
-import { mountWithKibanaContext } from '../../test_utils/helpers';
+import { mountWithKibanaContext } from '../../test_utils';
 import { sendTelemetry, SendAppSearchTelemetry } from './';
 
 describe('Shared Telemetry Helpers', () => {

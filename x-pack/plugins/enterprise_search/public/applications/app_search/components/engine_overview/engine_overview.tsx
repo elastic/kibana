@@ -42,35 +42,40 @@ export const EngineOverview: ReactFC<> = () => {
   const [metaEnginesPage, setMetaEnginesPage] = useState(1);
   const [metaEnginesTotal, setMetaEnginesTotal] = useState(0);
 
-  const getEnginesData = ({ type, pageIndex }) => {
-    return http.get('/api/app_search/engines', {
+  const getEnginesData = async ({ type, pageIndex }) => {
+    return await http.get('/api/app_search/engines', {
       query: { type, pageIndex },
     });
   };
   const hasValidData = response => {
-    return response && response.results && response.meta;
+    return (
+      response &&
+      Array.isArray(response.results) &&
+      response.meta &&
+      response.meta.page &&
+      typeof response.meta.page.total_results === 'number'
+    ); // TODO: Move to optional chaining once Prettier has been updated to support it
   };
   const hasNoAccountError = response => {
     return response && response.message === 'no-as-account';
   };
-  const setEnginesData = (params, callbacks) => {
-    getEnginesData(params)
-      .then(response => {
-        if (!hasValidData(response)) {
-          if (hasNoAccountError(response)) {
-            return setHasNoAccount(true);
-          }
-          throw new Error('App Search engines response is missing valid data');
+  const setEnginesData = async (params, callbacks) => {
+    try {
+      const response = await getEnginesData(params);
+      if (!hasValidData(response)) {
+        if (hasNoAccountError(response)) {
+          return setHasNoAccount(true);
         }
+        throw new Error('App Search engines response is missing valid data');
+      }
 
-        callbacks.setResults(response.results);
-        callbacks.setResultsTotal(response.meta.page.total_results);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        // TODO - should we be logging errors to telemetry or elsewhere for debugging?
-        setHasErrorConnecting(true);
-      });
+      callbacks.setResults(response.results);
+      callbacks.setResultsTotal(response.meta.page.total_results);
+      setIsLoading(false);
+    } catch (error) {
+      // TODO - should we be logging errors to telemetry or elsewhere for debugging?
+      setHasErrorConnecting(true);
+    }
   };
 
   useEffect(() => {
