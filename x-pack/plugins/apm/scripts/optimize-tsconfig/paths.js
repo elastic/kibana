@@ -5,7 +5,7 @@
  */
 const path = require('path');
 
-const xpackRoot = path.resolve(__dirname, '../../../../..');
+const xpackRoot = path.resolve(__dirname, '../../../..');
 const kibanaRoot = path.resolve(xpackRoot, '..');
 
 const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
