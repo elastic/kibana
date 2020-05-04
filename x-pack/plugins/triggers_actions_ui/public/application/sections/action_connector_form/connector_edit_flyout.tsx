@@ -49,7 +49,7 @@ export const ConnectorEditFlyout = ({
     reloadConnectors,
     docLinks,
   } = useActionsConnectorsContext();
-  const canSave = hasSaveActionsCapability(capabilities!);
+  const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
     connector: { ...initialConnector, secrets: {} },
@@ -194,7 +194,7 @@ export const ConnectorEditFlyout = ({
               )}
             </EuiText>
             <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
               target="_blank"
             >
               <FormattedMessage

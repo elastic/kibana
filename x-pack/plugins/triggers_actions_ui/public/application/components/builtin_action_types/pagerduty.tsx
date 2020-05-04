@@ -141,7 +141,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
             target="_blank"
           >
             <FormattedMessage

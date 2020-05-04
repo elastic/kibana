@@ -78,7 +78,7 @@ export const ConnectorAddFlyout = ({
     setConnector(initialConnector);
   }, [setAddFlyoutVisibility, initialConnector]);
 
-  const canSave = hasSaveActionsCapability(capabilities!);
+  const canSave = hasSaveActionsCapability(capabilities);
 
   if (!addFlyoutVisible) {
     return null;

@@ -61,7 +61,7 @@ export const ConnectorAddModal = ({
     secrets: {},
   } as ActionConnector;
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const canSave = hasSaveActionsCapability(capabilities!);
+  const canSave = hasSaveActionsCapability(capabilities);
 
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
   const setConnector = (value: any) => {

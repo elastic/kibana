@@ -91,7 +91,7 @@ export const ActionConnectorForm = ({
                   actionType: actionTypeName,
                   docLink: (
                     <EuiLink
-                      href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
+                      href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
                       target="_blank"
                     >
                       <FormattedMessage
