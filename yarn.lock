@@ -19138,10 +19138,8 @@ less-loader@5.0.0:
     loader-utils "^1.1.0"
     pify "^4.0.1"
 
-less@^2.7.3:
+"less@file:../../less.js":
   version "2.7.3"
-  resolved "https://registry.yarnpkg.com/less/-/less-2.7.3.tgz#cc1260f51c900a9ec0d91fb6998139e02507b63b"
-  integrity sha512-KPdIJKWcEAb02TuJtaLrhue0krtRLoRoo7x6BNJIBelO00t/CCdJQUnHW5V34OnHMWzIktSalJxRO+FvytQlCQ==
   optionalDependencies:
     errno "^0.1.1"
     graceful-fs "^4.1.2"
