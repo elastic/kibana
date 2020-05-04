@@ -6,52 +6,41 @@
 
 import { CoreStart, CoreSetup, Plugin } from 'src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { DrilldownService } from './service';
-import {
-  FlyoutCreateDrilldownActionContext,
-  FlyoutEditDrilldownActionContext,
-  OPEN_FLYOUT_ADD_DRILLDOWN,
-  OPEN_FLYOUT_EDIT_DRILLDOWN,
-} from './actions';
+import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
+import { createFlyoutManageDrilldowns } from './components/connected_flyout_manage_drilldowns';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-export interface DrilldownsSetupDependencies {
+export interface SetupDependencies {
   uiActions: UiActionsSetup;
+  advancedUiActions: AdvancedUiActionsSetup;
 }
 
-export interface DrilldownsStartDependencies {
+export interface StartDependencies {
   uiActions: UiActionsStart;
+  advancedUiActions: AdvancedUiActionsStart;
 }
-
-export type DrilldownsSetupContract = Pick<DrilldownService, 'registerDrilldown'>;
 
 // eslint-disable-next-line
-export interface DrilldownsStartContract {}
+export interface SetupContract {}
 
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [OPEN_FLYOUT_ADD_DRILLDOWN]: FlyoutCreateDrilldownActionContext;
-    [OPEN_FLYOUT_EDIT_DRILLDOWN]: FlyoutEditDrilldownActionContext;
-  }
+export interface StartContract {
+  FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
 }
 
 export class DrilldownsPlugin
-  implements
-    Plugin<
-      DrilldownsSetupContract,
-      DrilldownsStartContract,
-      DrilldownsSetupDependencies,
-      DrilldownsStartDependencies
-    > {
-  private readonly service = new DrilldownService();
-
-  public setup(core: CoreSetup, plugins: DrilldownsSetupDependencies): DrilldownsSetupContract {
-    this.service.bootstrap(core, plugins);
-
-    return this.service;
+  implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
+  public setup(core: CoreSetup, plugins: SetupDependencies): SetupContract {
+    return {};
   }
 
-  public start(core: CoreStart, plugins: DrilldownsStartDependencies): DrilldownsStartContract {
-    return {};
+  public start(core: CoreStart, plugins: StartDependencies): StartContract {
+    return {
+      FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
+        advancedUiActions: plugins.advancedUiActions,
+        storage: new Storage(localStorage),
+        notifications: core.notifications,
+      }),
+    };
   }
 
   public stop() {}
