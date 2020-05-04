@@ -50,7 +50,7 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/envoyproxy.svg',
+    euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
     artifacts: {
       dashboards: [],
       application: {
@@ -64,7 +64,7 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/envoyproxy_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/envoyproxy_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

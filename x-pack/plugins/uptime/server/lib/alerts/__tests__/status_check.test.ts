@@ -16,7 +16,7 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 /**
@@ -27,10 +27,10 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
  * so we don't have to mock them all for each test.
  */
 const bootstrapDependencies = (customRequests?: any) => {
-  const route: IRouter = {} as IRouter;
+  const router: IRouter = {} as IRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server: UptimeCoreSetup = { route };
+  const server: UptimeCoreSetup = { router };
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
   return { server, libs };

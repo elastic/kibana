@@ -82,14 +82,14 @@ export const AnalyticsPanel: FC<Props> = ({ jobCreationDisabled }) => {
           title={
             <h2>
               {i18n.translate('xpack.ml.overview.analyticsList.createFirstJobMessage', {
-                defaultMessage: 'Create your first analytics job',
+                defaultMessage: 'Create your first data frame analytics job',
               })}
             </h2>
           }
           body={
             <p>
               {i18n.translate('xpack.ml.overview.analyticsList.emptyPromptText', {
-                defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotate it with the results. The analytics job stores the annotated data, as well as a copy of the source data, in a new index.`,
+                defaultMessage: `Data frame analytics enable you to perform different analyses of your data and annotates it with the results. The job puts the annotated data and a copy of the source data in a new index.`,
               })}
             </p>
           }
