@@ -28,12 +28,7 @@ import {
   waitForSignalsIndexToBeCreated,
   waitForSignalsPanelToBeLoaded,
 } from '../tasks/detections';
-import {
-  esArchiverLoad,
-  esArchiverLoadEmptyKibana,
-  esArchiverUnloadEmptyKibana,
-  esArchiverUnload,
-} from '../tasks/es_archiver';
+import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS } from '../urls/navigation';
@@ -76,15 +71,18 @@ describe('Signal detection rules, prebuilt rules', () => {
 
 describe('Deleting prebuilt rules', () => {
   beforeEach(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+    esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
     waitForSignalsIndexToBeCreated();
     goToManageSignalDetectionRules();
+    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+    loadPrebuiltDetectionRules();
+    waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
   afterEach(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
+    esArchiverUnloadEmptyKibana();
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {
