@@ -218,7 +218,7 @@ export const Page: FC = () => {
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
                 defaultMessage="The fields in your data match known configurations.
-                Create a set of preconfigured jobs and associated dashboards."
+                Create a set of preconfigured jobs."
               />
             </p>
           </EuiText>
