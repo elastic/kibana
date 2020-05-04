@@ -1,7 +1,7 @@
 {
-  "name": "coreProviderPlugin",
+  "name": "core_provider_plugin",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/coreProviderPlugin",
+  "main": "target/test/plugin_functional/plugins/core_provider_plugin",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
