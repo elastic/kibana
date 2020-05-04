@@ -8,7 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -23,6 +23,7 @@ const enabledActionTypes = [
   '.pagerduty',
   '.server-log',
   '.servicenow',
+  '.jira',
   '.slack',
   '.webhook',
   'test.authorization',
@@ -75,7 +76,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'some.non.existent.com',
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
           `--xpack.actions.preconfigured=${JSON.stringify([
             {
@@ -124,7 +124,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions_simulators')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

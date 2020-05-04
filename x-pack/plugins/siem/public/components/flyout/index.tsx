@@ -18,14 +18,14 @@ import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 import { StatefulTimeline } from '../timeline';
 import { TimelineById } from '../../store/timeline/types';
 
-export const Badge = styled(EuiBadge)`
+export const Badge = (styled(EuiBadge)`
   position: absolute;
   padding-left: 4px;
   padding-right: 4px;
   right: 0%;
   top: 0%;
   border-bottom-left-radius: 5px;
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+` as unknown) as typeof EuiBadge;
 
 Badge.displayName = 'Badge';
 

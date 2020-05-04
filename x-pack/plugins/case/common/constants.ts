@@ -27,3 +27,5 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 
 export const ACTION_URL = '/api/action';
 export const ACTION_TYPES_URL = '/api/action/types';
+
+export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira'];
