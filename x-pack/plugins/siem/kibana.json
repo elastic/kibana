@@ -8,18 +8,22 @@
     "alerting",
     "data",
     "embeddable",
-    "esUiShared",
     "features",
     "home",
     "inspector",
-    "kibanaUtils",
     "licensing",
     "maps",
     "triggers_actions_ui",
-    "uiActions",
+    "uiActions"
+  ],
+  "optionalPlugins": [
+    "encryptedSavedObjects",
+    "ml",
+    "newsfeed",
+    "security",
+    "spaces",
     "usageCollection"
   ],
-  "optionalPlugins": ["encryptedSavedObjects", "ml", "newsfeed", "security", "spaces"],
   "server": true,
   "ui": true
 }
