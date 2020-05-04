@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestReadable } from '../mocks/test_readable';
+import { TestReadable } from '../mocks';
 
 import { BufferLines } from './buffer_lines';
 

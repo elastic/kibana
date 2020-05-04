@@ -106,10 +106,6 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
-        if (setHasActionsDisabled) {
-          setHasActionsDisabled(hasActionsDisabled);
-        }
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -129,7 +125,8 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingConnectors(true);
-        setConnectors(await loadConnectors({ http }));
+        const loadedConnectors = await loadConnectors({ http });
+        setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -145,6 +142,27 @@ export const ActionForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const setActionTypesAvalilability = () => {
+      const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+      const hasActionsDisabled = actions.some(
+        action =>
+          !actionTypesIndex![action.actionTypeId].enabled &&
+          !checkActionFormActionTypeEnabled(
+            actionTypesIndex![action.actionTypeId],
+            preconfiguredConnectors
+          ).isEnabled
+      );
+      if (setHasActionsDisabled) {
+        setHasActionsDisabled(hasActionsDisabled);
+      }
+    };
+    if (connectors.length > 0 && actionTypesIndex) {
+      setActionTypesAvalilability();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectors, actionTypesIndex]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',

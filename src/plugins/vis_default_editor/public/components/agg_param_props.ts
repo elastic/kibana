@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { IAggConfig, AggParam, IndexPatternField } from 'src/plugins/data/public';
+import {
+  IAggConfig,
+  AggParam,
+  IndexPatternField,
+  OptionedValueProp,
+} from 'src/plugins/data/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
 import { Schema } from '../schemas';
@@ -45,4 +50,10 @@ export interface AggParamEditorProps<T, P = AggParam> extends AggParamCommonProp
   setValue(value?: T): void;
   setValidity(isValid: boolean): void;
   setTouched(): void;
+}
+
+export interface OptionedParamEditorProps<T = OptionedValueProp> {
+  aggParam: {
+    options: T[];
+  };
 }
