@@ -505,7 +505,7 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
     const policyVersion = this.seededUUIDv4();
     return {
       '@timestamp': ts,
