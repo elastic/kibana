@@ -6,23 +6,11 @@
 
 import React from 'react';
 
-import { SetAppSearchBreadcrumbs } from '../kibana_breadcrumbs';
-import { mountWithKibanaContext } from '../../test_utils/helpers';
+import '../../test_utils/mock_rr_usehistory';
+import { mountWithKibanaContext } from '../../test_utils';
 
-jest.mock('./generate_breadcrumbs', () => ({
-  appSearchBreadcrumbs: jest.fn(),
-}));
-import { appSearchBreadcrumbs } from './generate_breadcrumbs';
-
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    createHref: jest.fn(),
-    push: jest.fn(),
-    location: {
-      pathname: '/current-path',
-    },
-  }),
-}));
+jest.mock('./generate_breadcrumbs', () => ({ appSearchBreadcrumbs: jest.fn() }));
+import { appSearchBreadcrumbs, SetAppSearchBreadcrumbs } from './';
 
 describe('SetAppSearchBreadcrumbs', () => {
   const setBreadcrumbs = jest.fn();
