@@ -57,6 +57,7 @@ def sendFailedBuild(Map params = [:]) {
   blocks << getDividerBlock()
   blocks << config.context
 
+  print "Sending Slack notification..."
   slackSend(
     channel: config.channel,
     username: config.username,
