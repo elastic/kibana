@@ -227,7 +227,7 @@
               "type": "date"
             },
             "local_metadata": {
-              "type": "text"
+              "type": "flattened"
             },
             "shared_id": {
               "type": "keyword"
@@ -239,7 +239,7 @@
               "type": "date"
             },
             "user_provided_metadata": {
-              "type": "text"
+              "type": "flattened"
             },
             "version": {
               "type": "keyword"
