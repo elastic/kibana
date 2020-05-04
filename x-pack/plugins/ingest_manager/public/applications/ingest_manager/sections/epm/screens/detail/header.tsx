@@ -29,7 +29,12 @@ const Text = styled.span`
 type HeaderProps = PackageInfo & { iconType?: IconType };
 
 export function Header(props: HeaderProps) {
-  const { iconType, name, title, version, installedVersion, latestVersion } = props;
+  const { iconType, name, title, version, latestVersion } = props;
+
+  let installedVersion;
+  if ('savedObject' in props) {
+    installedVersion = props.savedObject.attributes.version;
+  }
   const hasWriteCapabilites = useCapabilities().write;
   const { toListView } = useLinks();
   const ADD_DATASOURCE_URI = useLink(`${EPM_PATH}/${name}-${version}/add-datasource`);

@@ -86,6 +86,7 @@ export interface AggregationOptionsByType {
   percentiles: {
     field: string;
     percents?: number[];
+    hdr?: { number_of_significant_value_digits: number };
   };
   extended_stats: {
     field: string;
