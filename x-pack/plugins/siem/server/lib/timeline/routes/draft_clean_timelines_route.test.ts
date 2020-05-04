@@ -69,9 +69,9 @@ describe('draft clean timelines', () => {
       persistNote: mockPersistNote,
     }));
 
-    const draftTimelinesRoute = jest.requireActual('./draft_clean_timelines_route')
-      .draftTimelinesRoute;
-    draftTimelinesRoute(server.router, createMockConfig(), securitySetup);
+    const draftCleanTimelinesRoute = jest.requireActual('./draft_clean_timelines_route')
+      .draftCleanTimelinesRoute;
+    draftCleanTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should create new draft if none is available', async () => {

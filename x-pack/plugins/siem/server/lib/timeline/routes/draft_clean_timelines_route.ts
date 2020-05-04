@@ -13,7 +13,7 @@ import { SetupPlugins } from '../../../plugin';
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 
-export const draftTimelinesRoute = (
+export const draftCleanTimelinesRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
