@@ -6,7 +6,7 @@ Many Kibana apps embed a query bar for real-time search, including
 [float]
 === Search your data
 
-To search the indices that match the current <<index-patterns, index pattern>>
+To search the indices that match the current <<index-patterns, index pattern>>,
 enter your search criteria in the query bar. By default, you'll use
 {kib}'s <<kuery-query, standard query language>> (KQL), which
 features autocomplete and a simple, easy-to-use syntax. If you prefer to use
