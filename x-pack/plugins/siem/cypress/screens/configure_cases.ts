@@ -15,7 +15,7 @@ export const CONNECTOR_NAME = '[data-test-subj="nameInput"]';
 
 export const CONNECTORS_DROPDOWN = '[data-test-subj="dropdown-connectors"]';
 
-export const PASSWORD = '[data-test-subj="passwordFromInput"]';
+export const PASSWORD = '[data-test-subj="connector-servicenow-password-form-input"]';
 
 export const SAVE_BTN = '[data-test-subj="saveNewActionButton"]';
 
@@ -27,4 +27,4 @@ export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
 export const URL = '[data-test-subj="apiUrlFromInput"]';
 
-export const USERNAME = '[data-test-subj="usernameFromInput"]';
+export const USERNAME = '[data-test-subj="connector-servicenow-username-form-input"]';
