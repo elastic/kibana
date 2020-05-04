@@ -165,7 +165,9 @@ async function listConflictingFiles(options: BackportOptions) {
     consoleLog(''); // linebreak
     const res = await confirmPrompt(
       dedent(`
-        ${chalk.reset(`The following files have conflicts:`)}
+        ${chalk.reset(
+          `The following files from ${getRepoPath(options)} have conflicts:`
+        )}
         ${chalk.reset(filesWithConflicts.join('\n'))}
 
         ${chalk.reset.italic(

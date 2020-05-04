@@ -235,7 +235,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       expect(promptSpy.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "The following files have conflicts:
+            "The following files from /myHomeDir/.backport/repositories/elastic/kibana have conflicts:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
         You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
@@ -243,7 +243,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         Press ENTER when the conflicts are resolved",
           ],
           Array [
-            "The following files have conflicts:
+            "The following files from /myHomeDir/.backport/repositories/elastic/kibana have conflicts:
          - /myHomeDir/.backport/repositories/elastic/kibana/conflicting-file.txt
 
         You do not need to \`git add\` or \`git commit\` the files - simply fix the conflicts.
