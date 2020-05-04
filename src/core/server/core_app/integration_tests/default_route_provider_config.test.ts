@@ -49,7 +49,7 @@ describe('default route provider', () => {
 
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
@@ -71,7 +71,7 @@ describe('default route provider', () => {
     const { status, header } = await kbnTestServer.request.get(root, '/');
     expect(status).toEqual(302);
     expect(header).toMatchObject({
-      location: '/hello/app/kibana',
+      location: '/hello/app/home',
     });
   });
 
