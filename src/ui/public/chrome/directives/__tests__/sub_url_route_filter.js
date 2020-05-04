@@ -96,11 +96,13 @@ describe('kbn-chrome subUrlRouteFilter()', () => {
     });
 
     describe('redirectTo route', () => {
-      it('is called on target route', () => {
+      it('returns false', () => {
         test({
           path: '/foo',
-          assert($route) {
-            expect($route.current.$$route.originalPath).to.be('/bar');
+          assert($route, subUrlRouteFilter) {
+            expect($route.current).to.be.ok();
+            expect($route.current.redirectTo).to.be.ok();
+            expect(subUrlRouteFilter()).to.eql(false);
           }
         });
       });
