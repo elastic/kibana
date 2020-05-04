@@ -196,6 +196,9 @@ class DatasourceService {
         outputService.getDefaultOutputId(soClient),
       ]);
       if (pkgInfo) {
+        if (!defaultOutputId) {
+          throw new Error('Default output is not set');
+        }
         return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
       }
     }
