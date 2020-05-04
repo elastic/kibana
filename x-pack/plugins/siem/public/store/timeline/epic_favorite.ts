@@ -26,6 +26,7 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
+import { inputsModel } from '../inputs';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
@@ -34,7 +35,8 @@ export const epicPersistTimelineFavorite = (
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
-  timeline$: Observable<TimelineById>
+  timeline$: Observable<TimelineById>,
+  allTimelineQuery$: Observable<inputsModel.GlobalQuery>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
@@ -50,11 +52,15 @@ export const epicPersistTimelineFavorite = (
       refetchQueries,
     })
   ).pipe(
-    withLatestFrom(timeline$),
-    mergeMap(([result, recentTimelines]) => {
+    withLatestFrom(timeline$, allTimelineQuery$),
+    mergeMap(([result, recentTimelines, allTimelineQuery]) => {
       const savedTimeline = recentTimelines[action.payload.id];
       const response: ResponseFavoriteTimeline = get('data.persistFavorite', result);
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
+
+      if (allTimelineQuery.refetch != null) {
+        (allTimelineQuery.refetch as inputsModel.Refetch)();
+      }
 
       return [
         ...callOutMsg,
