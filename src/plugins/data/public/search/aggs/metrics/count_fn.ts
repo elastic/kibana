@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggCount = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.count.help', {
-    defaultMessage: 'Generates a serialized agg config for a count agg',
+    defaultMessage: 'Generates a serialized agg config for a Count agg',
   }),
   type: 'agg_type',
   args: {

@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggGeoBounds = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.geo_bounds.help', {
-    defaultMessage: 'Generates a serialized agg config for a geo_bounds agg',
+    defaultMessage: 'Generates a serialized agg config for a Geo Bounds agg',
   }),
   type: 'agg_type',
   args: {

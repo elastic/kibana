@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggTopHit = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.top_hit.help', {
-    defaultMessage: 'Generates a serialized agg config for a top_hit agg',
+    defaultMessage: 'Generates a serialized agg config for a Top Hit agg',
   }),
   type: 'agg_type',
   args: {
@@ -65,6 +65,7 @@ export const aggTopHit = (): FunctionDefinition => ({
     aggregate: {
       types: ['string'],
       required: true,
+      options: ['min', 'max', 'sum', 'average', 'concat'],
       help: i18n.translate('data.search.aggs.metrics.top_hit.aggregate.help', {
         defaultMessage: 'Aggregate type',
       }),
@@ -79,13 +80,13 @@ export const aggTopHit = (): FunctionDefinition => ({
     sortOrder: {
       types: ['string'],
       default: 'desc',
+      options: ['desc', 'asc'],
       help: i18n.translate('data.search.aggs.metrics.top_hit.sortOrder.help', {
         defaultMessage: 'Order in which to return the results: asc or desc',
       }),
     },
     sortField: {
       types: ['string'],
-      required: true,
       help: i18n.translate('data.search.aggs.metrics.top_hit.sortField.help', {
         defaultMessage: 'Field to order results by',
       }),

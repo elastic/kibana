@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggStdDeviation = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.std_deviation.help', {
-    defaultMessage: 'Generates a serialized agg config for a std_deviation agg',
+    defaultMessage: 'Generates a serialized agg config for a Standard Deviation agg',
   }),
   type: 'agg_type',
   args: {

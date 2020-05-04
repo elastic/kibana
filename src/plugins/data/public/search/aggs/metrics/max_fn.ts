@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggMax = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.max.help', {
-    defaultMessage: 'Generates a serialized agg config for a max agg',
+    defaultMessage: 'Generates a serialized agg config for a Max agg',
   }),
   type: 'agg_type',
   args: {

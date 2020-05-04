@@ -34,7 +34,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggPercentiles = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.percentiles.help', {
-    defaultMessage: 'Generates a serialized agg config for a percentiles agg',
+    defaultMessage: 'Generates a serialized agg config for a Percentiles agg',
   }),
   type: 'agg_type',
   args: {
@@ -88,7 +88,7 @@ export const aggPercentiles = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: METRIC_TYPES.PERCENTILE_RANKS,
+        type: METRIC_TYPES.PERCENTILES,
         params: {
           ...rest,
           json: getParsedValue(args, 'json'),

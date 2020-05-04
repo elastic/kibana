@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggCardinality = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.cardinality.help', {
-    defaultMessage: 'Generates a serialized agg config for a cardinality agg',
+    defaultMessage: 'Generates a serialized agg config for a Cardinality agg',
   }),
   type: 'agg_type',
   args: {

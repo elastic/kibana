@@ -28,7 +28,6 @@ describe('agg_expression_functions', () => {
       const actual = fn({
         field: 'machine.os.keyword',
         aggregate: 'min',
-        sortField: '_score',
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -41,7 +40,7 @@ describe('agg_expression_functions', () => {
               "field": "machine.os.keyword",
               "json": undefined,
               "size": 1,
-              "sortField": "_score",
+              "sortField": undefined,
               "sortOrder": "desc",
             },
             "schema": undefined,
@@ -85,7 +84,6 @@ describe('agg_expression_functions', () => {
       const actual = fn({
         field: 'machine.os.keyword',
         aggregate: 'min',
-        sortField: '_score',
         json: '{ "foo": true }',
       });
 
@@ -94,7 +92,6 @@ describe('agg_expression_functions', () => {
         fn({
           field: 'machine.os.keyword',
           aggregate: 'min',
-          sortField: '_score',
           json: '/// intentionally malformed json ///',
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);

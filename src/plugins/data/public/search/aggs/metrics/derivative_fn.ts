@@ -34,7 +34,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggDerivative = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.derivative.help', {
-    defaultMessage: 'Generates a serialized agg config for a derivative agg',
+    defaultMessage: 'Generates a serialized agg config for a Derivative agg',
   }),
   type: 'agg_type',
   args: {

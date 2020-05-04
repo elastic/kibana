@@ -34,7 +34,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggCumulativeSum = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.cumulative_sum.help', {
-    defaultMessage: 'Generates a serialized agg config for a cumulative_sum agg',
+    defaultMessage: 'Generates a serialized agg config for a Cumulative Sum agg',
   }),
   type: 'agg_type',
   args: {

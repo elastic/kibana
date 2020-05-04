@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggMedian = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.median.help', {
-    defaultMessage: 'Generates a serialized agg config for a median agg',
+    defaultMessage: 'Generates a serialized agg config for a Median agg',
   }),
   type: 'agg_type',
   args: {

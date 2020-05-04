@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggGeoCentroid = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.geo_centroid.help', {
-    defaultMessage: 'Generates a serialized agg config for a geo_centroid agg',
+    defaultMessage: 'Generates a serialized agg config for a Geo Centroid agg',
   }),
   type: 'agg_type',
   args: {

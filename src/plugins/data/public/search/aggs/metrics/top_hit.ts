@@ -28,7 +28,7 @@ import { BaseAggParams } from '../types';
 export interface AggParamsTopHit extends BaseAggParams {
   field: string;
   aggregate: 'min' | 'max' | 'sum' | 'average' | 'concat';
-  sortField: string;
+  sortField?: string;
   size?: number;
   sortOrder?: 'desc' | 'asc';
 }

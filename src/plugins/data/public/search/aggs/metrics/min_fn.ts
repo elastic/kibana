@@ -32,7 +32,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Agg
 export const aggMin = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.min.help', {
-    defaultMessage: 'Generates a serialized agg config for a min agg',
+    defaultMessage: 'Generates a serialized agg config for a Min agg',
   }),
   type: 'agg_type',
   args: {

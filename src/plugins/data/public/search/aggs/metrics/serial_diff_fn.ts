@@ -34,7 +34,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggSerialDiff = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.serial_diff.help', {
-    defaultMessage: 'Generates a serialized agg config for a serial_diff agg',
+    defaultMessage: 'Generates a serialized agg config for a Serial Differencing agg',
   }),
   type: 'agg_type',
   args: {

@@ -37,7 +37,7 @@ type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arg
 export const aggBucketAvg = (): FunctionDefinition => ({
   name: fnName,
   help: i18n.translate('data.search.aggs.function.metrics.bucket_avg.help', {
-    defaultMessage: 'Generates a serialized agg config for a bucket_avg agg',
+    defaultMessage: 'Generates a serialized agg config for a Avg Bucket agg',
   }),
   type: 'agg_type',
   args: {

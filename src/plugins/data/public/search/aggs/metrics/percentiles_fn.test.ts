@@ -48,7 +48,7 @@ describe('agg_expression_functions', () => {
               ],
             },
             "schema": undefined,
-            "type": "percentile_ranks",
+            "type": "percentiles",
           },
         }
       `);
@@ -75,7 +75,7 @@ describe('agg_expression_functions', () => {
               ],
             },
             "schema": undefined,
-            "type": "percentile_ranks",
+            "type": "percentiles",
           },
         }
       `);
