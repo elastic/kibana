@@ -160,7 +160,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId: string;
+    configId?: string;
   };
 }
 
