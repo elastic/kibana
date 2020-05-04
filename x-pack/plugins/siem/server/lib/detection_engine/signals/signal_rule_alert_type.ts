@@ -11,7 +11,6 @@ import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/c
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
-import { buildEventsSearchQuery } from './build_events_query';
 import { getInputIndex } from './get_input_output_index';
 import {
   searchAfterAndBulkCreate,
@@ -19,7 +18,7 @@ import {
 } from './search_after_bulk_create';
 import { getFilter } from './get_filter';
 import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
-import { getGapBetweenRuns, makeFloatString, parseScheduleDates } from './utils';
+import { getGapBetweenRuns, parseScheduleDates } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
@@ -33,9 +32,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 
-/* eslint-disable complexity*/
-// const allowIps = ['127.0.0.1']; // collection of ip's in our system
-// const blockIps = [['1.1.1.1']];
 export const signalRulesAlertType = ({
   logger,
   version,
@@ -208,10 +204,11 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
-          // if (lists == null) {
-          //   throw new Error('lists plugin unavailable during rule execution');
-          // }
+          if (lists == null) {
+            throw new Error('lists plugin unavailable during rule execution');
+          }
 
+          const listClient = await lists.getListClient(services.callCluster, spaceId);
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,
@@ -224,61 +221,13 @@ export const signalRulesAlertType = ({
             lists: exceptions_list,
           });
 
-          const noReIndex = buildEventsSearchQuery({
-            index: inputIndex,
-            from,
-            to,
-            filter: esFilter,
-            size: searchAfterSize,
-            searchAfterSortId: undefined,
-          });
-
-          logger.debug(buildRuleMessage('[+] Initial search call'));
-          const start = performance.now();
-          // const dataClient = {
-          //   callAsCurrentUser: services.callCluster,
-          //   callAsInternalUser: services.callCluster,
-          // };
-          const noReIndexResult = await services.callCluster('search', noReIndex);
-          // grab the result set and run it through the
-
-          const end = performance.now();
-
-          const signalCount = noReIndexResult.hits.total.value;
-          if (signalCount !== 0) {
-            logger.info(
-              buildRuleMessage(
-                `Found ${signalCount} signals from the indexes of "[${inputIndex.join(', ')}]"`
-              )
-            );
-            const value = noReIndexResult.hits.hits
-              .map((item: { _source: { source?: { ip?: string } } }) => item._source.source?.ip)
-              .filter((item: string) => item != null);
-            let listSignals;
-            if (lists != null) {
-              listSignals = await lists
-                .getListClient(services.callCluster, spaceId)
-                .getListItemByValues({
-                  listId: 'ci-badguys.txt',
-                  type: 'ip',
-                  value: [...new Set<string>(value)],
-                });
-            }
-            // const listSignals = await getListItemByValues({
-            //   dataClient,
-            //   listId: 'ci-badguys.txt',
-            //   listItemIndex: '.items-default', // get this when lists plugin is available....... >:(
-            //   type: 'ip',
-            //   value: [...new Set(value)],
-            // });
-            // console.log({ listSignals });
-          }
-
           result = await searchAfterAndBulkCreate({
-            someResult: noReIndexResult, // possibleSignals
+            listClient,
             ruleParams: params,
             services,
             logger,
+            listValueType: 'ip',
+            buildRuleMessage,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
@@ -296,7 +245,6 @@ export const signalRulesAlertType = ({
             tags,
             throttle,
           });
-          result.searchAfterTimes.push(makeFloatString(end - start));
         }
 
         if (result.success) {
@@ -333,6 +281,11 @@ export const signalRulesAlertType = ({
           }
 
           logger.debug(buildRuleMessage('[+] Signal Rule execution completed.'));
+          logger.debug(
+            buildRuleMessage(
+              `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
+            )
+          );
           if (!hasError) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,

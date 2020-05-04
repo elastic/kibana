@@ -31,9 +31,9 @@ describe('searchAfterAndBulkCreate', () => {
   test('if successful with empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: sampleEmptyDocSearchResults(),
       ruleParams: sampleParams,
       services: mockService,
+      listClient: () => undefined,
       logger: mockLogger,
       id: sampleRuleGuid,
       inputIndexPattern,

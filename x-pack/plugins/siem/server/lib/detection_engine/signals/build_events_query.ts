@@ -83,7 +83,7 @@ export const buildEventsSearchQuery = ({
       ],
     },
   };
-  if (searchAfterSortId) {
+  if (searchAfterSortId != null) {
     return {
       ...searchQuery,
       body: {

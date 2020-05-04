@@ -34,7 +34,10 @@ export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
 };
 
 export type SignalsQueryRestParams = SignalQueryParams;
-
+export interface EventSource {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [field: string]: any;
+}
 export type SearchTypes =
   | string
   | string[]
@@ -46,8 +49,7 @@ export type SearchTypes =
   | object[]
   | undefined;
 
-export interface SignalSource {
-  [key: string]: SearchTypes;
+export interface SignalSource extends EventSource {
   '@timestamp': string;
   signal?: {
     parent: Ancestor;
@@ -100,6 +102,7 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
+export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
 
