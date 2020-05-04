@@ -135,7 +135,7 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, alertParams.criteria]
   );
 
-  const onFilterQuerySubmit = useCallback(
+  const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQuery', filter);
     },
@@ -222,8 +222,8 @@ export const Expressions: React.FC<Props> = props => {
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterQuerySubmit(e.target.value),
-    [onFilterQuerySubmit]
+    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    [onFilterChange]
   );
 
   return (
@@ -293,7 +293,8 @@ export const Expressions: React.FC<Props> = props => {
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
-            onSubmit={onFilterQuerySubmit}
+            onChange={onFilterChange}
+            onSubmit={onFilterChange}
             value={alertParams.filterQuery}
           />
         )) || (
