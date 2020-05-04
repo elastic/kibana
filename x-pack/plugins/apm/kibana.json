@@ -15,7 +15,8 @@
     "usageCollection",
     "taskManager",
     "actions",
-    "alerting"
+    "alerting",
+    "security"
   ],
   "server": true,
   "ui": true,
