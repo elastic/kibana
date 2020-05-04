@@ -13,6 +13,7 @@ import {
   HostMetadata,
   HostOS,
   HostPolicyResponse,
+  HostPolicyResponseActions,
   HostPolicyResponseActionStatus,
   PolicyData,
 } from './types';
@@ -691,7 +692,7 @@ export class EndpointDocGenerator {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
 
-  private randomHostPolicyResponseActions(): string[] {
+  private randomHostPolicyResponseActions(): Array<keyof HostPolicyResponseActions> {
     return this.randomArray(this.randomN(8), () =>
       this.randomChoice([
         'load_config',

@@ -9,7 +9,7 @@ import { EndpointAppContext } from '../../types';
 import { GetPolicyResponseSchema } from '../../../common/schema/policy';
 import { getHostPolicyResponseHandler } from './handlers';
 
-export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy-response`;
+export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
 
 export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(

@@ -11,15 +11,15 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   describe('Endpoint policy api', () => {
-    describe('GET /api/endpoint/policy-response', () => {
-      before(() => esArchiver.load('endpoint/policy'));
+    describe('GET /api/endpoint/policy_response', () => {
+      before(async () => await esArchiver.load('endpoint/policy'));
 
-      after(() => esArchiver.unload('endpoint/policy'));
+      after(async () => await esArchiver.unload('endpoint/policy'));
 
       it('should return one policy response for host', async () => {
         const expectedHostId = '4f3b9858-a96d-49d8-a326-230d7763d767';
         const { body } = await supertest
-          .get(`/api/endpoint/policy-response?hostId=${expectedHostId}`)
+          .get(`/api/endpoint/policy_response?hostId=${expectedHostId}`)
           .send()
           .expect(200);
 
@@ -29,7 +29,7 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should return not found if host has no policy response', async () => {
         const { body } = await supertest
-          .get(`/api/endpoint/policy-response?hostId=bad_host_id`)
+          .get(`/api/endpoint/policy_response?hostId=bad_host_id`)
           .send()
           .expect(404);
 

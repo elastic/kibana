@@ -3,7 +3,7 @@
   "value": {
     "aliases": {
     },
-    "index": "metrics-endpoint-policy-1",
+    "index": "metrics-endpoint.policy-default-1",
     "mappings": {
       "_meta": {
         "version": "1.6.0-dev"

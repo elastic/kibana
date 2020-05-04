@@ -125,7 +125,7 @@ function createSearchResponse(
       hits: hostPolicyResponse
         ? [
             {
-              _index: 'metrics-endpoint-policy-1',
+              _index: 'metrics-endpoint.policy-default-1',
               _id: '8FhM0HEBYyRTvb6lOQnw',
               _score: null,
               _source: hostPolicyResponse,

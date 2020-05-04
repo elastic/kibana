@@ -12,19 +12,8 @@ export function getESQueryPolicyResponseByHostID(hostID: string, index: string) 
   return {
     body: {
       query: {
-        bool: {
-          must: [
-            {
-              match: {
-                'host.id': hostID,
-              },
-            },
-            {
-              match: {
-                'event.kind': 'policy_response',
-              },
-            },
-          ],
+        match: {
+          'host.id': hostID,
         },
       },
       sort: [

@@ -48,7 +48,7 @@ async function main() {
     policyIndex: {
       alias: 'pi',
       describe: 'index to store host policy in',
-      default: 'metrics-endpoint-policy-1',
+      default: 'metrics-endpoint.policy-default-1',
       type: 'string',
     },
     auth: {

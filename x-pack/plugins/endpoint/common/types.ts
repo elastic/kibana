@@ -642,9 +642,6 @@ export interface HostPolicyResponseActions {
   read_kernel_config: HostPolicyResponseActionDetails;
   read_logging_config: HostPolicyResponseActionDetails;
   read_malware_config: HostPolicyResponseActionDetails;
-  // The list of possible Actions will change rapidly, so the below entry will allow
-  // them without us defining them here statically
-  [key: string]: HostPolicyResponseActionDetails;
 }
 
 interface HostPolicyResponseConfigurationStatus {

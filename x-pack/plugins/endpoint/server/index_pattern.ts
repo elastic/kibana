@@ -77,6 +77,6 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
   }
 
   getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string> {
-    return Promise.resolve('metrics-endpoint-policy-*');
+    return Promise.resolve('metrics-endpoint.policy-default-1');
   }
 }
