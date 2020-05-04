@@ -19,7 +19,7 @@ export const StatusFilter: React.FC = () => {
         content={i18n.translate('xpack.uptime.filterBar.filterAllLabel', {
           defaultMessage: 'All',
         })}
-        dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
+        dataTestSubj="xpack.uptime.filterBar.filterStatusAll"
         value="all"
         withNext={true}
       />
