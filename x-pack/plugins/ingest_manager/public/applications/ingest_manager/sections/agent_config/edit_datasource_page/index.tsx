@@ -29,10 +29,8 @@ import {
   sendGetPackageInfoByKey,
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
-import {
-  CreateDatasourcePageLayout,
-  ConfirmCreateDatasourceModal,
-} from '../create_datasource_page/components';
+import { ConfirmDeployConfigModal } from '../components';
+import { CreateDatasourcePageLayout } from '../create_datasource_page/components';
 import {
   DatasourceValidationResults,
   validateDatasource,
@@ -243,7 +241,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       ) : (
         <>
           {formState === 'CONFIRM' && (
-            <ConfirmCreateDatasourceModal
+            <ConfirmDeployConfigModal
               agentCount={agentCount}
               agentConfig={agentConfig}
               onConfirm={onSubmit}

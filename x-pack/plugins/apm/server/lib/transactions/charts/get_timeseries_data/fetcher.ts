@@ -69,7 +69,11 @@ export function timeseriesFetcher({
           aggs: {
             avg: { avg: { field: TRANSACTION_DURATION } },
             pct: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
+              percentiles: {
+                field: TRANSACTION_DURATION,
+                percents: [95, 99],
+                hdr: { number_of_significant_value_digits: 2 }
+              }
             }
           }
         },
