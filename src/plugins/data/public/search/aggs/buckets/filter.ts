@@ -33,7 +33,6 @@ export interface FilterBucketAggDependencies {
 }
 
 export interface AggParamsFilter extends BaseAggParams {
-  field: string;
   geo_bounding_box?: GeoBoundingBox;
 }
 

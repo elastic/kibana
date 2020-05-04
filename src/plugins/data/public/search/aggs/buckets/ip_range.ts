@@ -48,7 +48,7 @@ export interface IpRangeBucketAggDependencies {
 
 export interface AggParamsIpRange extends BaseAggParams {
   field: string;
-  ipRangeType: IP_RANGE_TYPES;
+  ipRangeType?: IP_RANGE_TYPES;
   ranges?: Partial<{
     [IP_RANGE_TYPES.FROM_TO]: RangeIpRangeAggKey[];
     [IP_RANGE_TYPES.MASK]: CidrMaskIpRangeAggKey[];

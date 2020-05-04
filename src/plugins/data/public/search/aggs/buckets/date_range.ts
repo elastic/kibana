@@ -41,7 +41,7 @@ export interface DateRangeBucketAggDependencies {
 }
 
 export interface AggParamsDateRange extends BaseAggParams {
-  field: string;
+  field?: string;
   ranges?: DateRangeKey[];
   time_zone?: string;
 }

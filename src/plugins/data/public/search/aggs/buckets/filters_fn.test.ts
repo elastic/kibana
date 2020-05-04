@@ -18,11 +18,11 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggFilter } from './filter_fn';
+import { aggFilters } from './filters_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggFilter', () => {
-    const fn = functionWrapper(aggFilter());
+  describe('aggFilters', () => {
+    const fn = functionWrapper(aggFilters());
 
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({});
@@ -33,11 +33,11 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
-              "geo_bounding_box": undefined,
+              "filters": undefined,
               "json": undefined,
             },
             "schema": undefined,
-            "type": "filter",
+            "type": "filters",
           },
         }
       `);
@@ -45,9 +45,13 @@ describe('agg_expression_functions', () => {
 
     test('includes optional params when they are provided', () => {
       const actual = fn({
-        geo_bounding_box: JSON.stringify({
-          wkt: 'BBOX (-74.1, -71.12, 40.73, 40.01)',
-        }),
+        filters: JSON.stringify([
+          {
+            query: 'query',
+            language: 'lucene',
+            label: 'test',
+          },
+        ]),
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -55,13 +59,17 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
-            "geo_bounding_box": Object {
-              "wkt": "BBOX (-74.1, -71.12, 40.73, 40.01)",
-            },
+            "filters": Array [
+              Object {
+                "label": "test",
+                "language": "lucene",
+                "query": "query",
+              },
+            ],
             "json": undefined,
           },
           "schema": undefined,
-          "type": "filter",
+          "type": "filters",
         }
       `);
     });

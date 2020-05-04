@@ -61,7 +61,7 @@ export const aggDateRange = (): FunctionDefinition => ({
     },
     field: {
       types: ['string'],
-      required: true,
+      required: false,
       help: i18n.translate('data.search.aggs.buckets.dateRange.field.help', {
         defaultMessage: 'Field to use for this aggregation',
       }),

@@ -107,6 +107,7 @@ export const getAggTypes = ({
 
 /** Buckets: **/
 import { aggFilter } from './buckets/filter_fn';
+import { aggFilters } from './buckets/filters_fn';
 import { aggSignificantTerms } from './buckets/significant_terms_fn';
 import { aggIpRange } from './buckets/ip_range_fn';
 import { aggDateRange } from './buckets/date_range_fn';
@@ -117,6 +118,7 @@ import { aggTerms } from './buckets/terms_fn';
 
 export const getAggTypesFunctions = () => [
   aggFilter,
+  aggFilters,
   aggSignificantTerms,
   aggIpRange,
   aggDateRange,

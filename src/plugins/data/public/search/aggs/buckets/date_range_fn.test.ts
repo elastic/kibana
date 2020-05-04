@@ -25,9 +25,7 @@ describe('agg_expression_functions', () => {
     const fn = functionWrapper(aggDateRange());
 
     test('fills in defaults when only required args are provided', () => {
-      const actual = fn({
-        field: 'date_field',
-      });
+      const actual = fn({});
       expect(actual).toMatchInlineSnapshot(`
         Object {
           "type": "agg_type",
@@ -35,7 +33,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
-              "field": "date_field",
+              "field": undefined,
               "json": undefined,
               "ranges": undefined,
               "time_zone": undefined,
