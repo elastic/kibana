@@ -1258,5 +1258,55 @@ describe('xy_expression', () => {
       // This one series should only have one row, even though 2 are sent
       expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
     });
+
+    test('it should show legend for split series, even with one row', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [{ a: 1, b: 5, c: 'J' }],
+          },
+        },
+      };
+
+      const args: XYArgs = {
+        xTitle: '',
+        yTitle: '',
+        legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+        ],
+      };
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(true);
+    });
   });
 });

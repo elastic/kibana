@@ -45,8 +45,8 @@ export function suggestions({
     }
 
     results.push({
-      title: getTitle({ table, state, keptLayerIds }),
-      score: 0.6,
+      title: getTitle(newShape, { table, state, keptLayerIds }),
+      score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
       state: {
         shape: newShape,
         layers: [
@@ -78,9 +78,11 @@ export function suggestions({
     results.push({
       title:
         state?.shape === 'treemap'
-          ? getTitle({ table, state, keptLayerIds })
+          ? getTitle('treemap', { table, state, keptLayerIds })
           : i18n.translate('xpack.lens.pie.treemapLabel', { defaultMessage: 'Treemap' }),
-      score: 0.5,
+      // Use a higher score when currently active, to prevent chart type switching
+      // on the user unintentionally
+      score: state?.shape === 'treemap' ? 0.7 : 0.5,
       state: {
         shape: 'treemap',
         layers: [
@@ -111,7 +113,16 @@ export function suggestions({
   return results;
 }
 
-export function getTitle({ table, state }: SuggestionRequest<PieVisualizationState>) {
+export function getTitle(
+  newShape: PieVisualizationState['shape'],
+  { table, state }: SuggestionRequest<PieVisualizationState>
+) {
+  if (state && newShape !== state.shape) {
+    return i18n.translate('xpack.lens.pie.suggestionLabel', {
+      defaultMessage: 'As {chartName}',
+      values: { chartName: state ? CHART_NAMES[newShape].label : CHART_NAMES.donut.label },
+    });
+  }
   return table.changeType === 'unchanged'
     ? i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',

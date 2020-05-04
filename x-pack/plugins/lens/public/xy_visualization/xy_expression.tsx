@@ -225,7 +225,9 @@ export function XYChart({
   }
 
   const chartHasMoreThanOneSeries =
-    filteredLayers.length > 1 || filteredLayers.some(layer => layer.accessors.length > 2);
+    filteredLayers.length > 1 ||
+    filteredLayers.some(layer => layer.accessors.length > 1) ||
+    filteredLayers.some(layer => layer.splitAccessor);
   const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;

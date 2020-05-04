@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 // @ts-ignore no types
 import { euiPaletteColorBlindBehindText } from '@elastic/eui/lib/services';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import {
   Chart,
   Datum,
@@ -108,14 +109,8 @@ export function PieComponent(
         return String(d);
       },
       fillLabel:
-        shape === 'treemap' && layerIndex < columnGroups.length - 1
-          ? {
-              ...fillLabel,
-              // For the treemap, hide all text except for the most detailed slice
-              // Otherwise text will overlap and be unreadable
-              valueFormatter: () => '',
-              textColor: 'rgba(0,0,0,0)',
-            }
+        isDarkMode && shape === 'treemap'
+          ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
           : fillLabel,
       shape: {
         fillColor: d => {
@@ -130,6 +125,10 @@ export function PieComponent(
 
           // Look up round-robin color from default palette
           const outputColor = sortedColors[parentIndex % sortedColors.length];
+
+          if (shape === 'treemap' && layerIndex < columnGroups.length - 1) {
+            return 'rgba(0,0,0,0)';
+          }
 
           if (shape === 'treemap') {
             return outputColor;
@@ -227,7 +226,15 @@ export function PieComponent(
     <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
       <Chart>
         <Settings
-          showLegend={!hideLabels && (legendDisplay !== 'hide' || columnGroups.length > 1)}
+          // Legend is hidden in many scenarios
+          // - Tiny preview
+          // - Treemap does not need a legend because it uses category labels
+          // - Single layer pie/donut usually shows text, does not need legend
+          showLegend={
+            !hideLabels &&
+            (legendDisplay === 'show' ||
+              (legendDisplay === 'default' && columnGroups.length > 1 && shape !== 'treemap'))
+          }
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={args => {
             const context = getFilterContext(
