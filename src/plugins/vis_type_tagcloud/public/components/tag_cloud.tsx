@@ -50,18 +50,18 @@ export class TagCloud extends EventEmitter {
   _timeInterval: number;
   _padding: number;
 
-  _orientation: any;
+  _orientation: string;
   _minFontSize: number;
   _maxFontSize: number;
-  _textScale: any;
-  _optionsAsString: any;
+  _textScale: string;
+  _optionsAsString: string | null;
 
   _words: any;
 
-  _colorScale: any;
+  _colorScale: string;
   _setTimeoutId: any;
   _pendingJob: any;
-  _layoutIsUpdating: any;
+  _layoutIsUpdating: boolean | null;
   _allInViewBox: boolean;
   _DOMisUpdating: boolean;
 
@@ -73,7 +73,7 @@ export class TagCloud extends EventEmitter {
 
   STATUS = { COMPLETE: 0, INCOMPLETE: 1 };
 
-  constructor(domNode: HTMLElement, colorScale: any) {
+  constructor(domNode: HTMLElement, colorScale: string) {
     super();
 
     // DOM
@@ -394,7 +394,7 @@ export class TagCloud extends EventEmitter {
    * Returns debug info. For debugging only.
    * @return {*}
    */
-  getDebugInfo() {
+  getDebugInfo(): any {
     const debug: any = {};
     debug.positions = this._completedJob
       ? this._completedJob.words.map((tag: any) => {
@@ -414,24 +414,24 @@ export class TagCloud extends EventEmitter {
     return debug;
   }
 
-  getFill(tag: any) {
+  getFill(tag: any): string {
     return this._colorScale(tag.text);
   }
 }
 
-function seed() {
+function seed(): number {
   return 0.5; // constant seed (not random) to ensure constant layouts for identical data
 }
 
-function getText(word: any) {
+function getText(word: any): string {
   return word.rawText;
 }
 
-function getDisplayText(word: any) {
+function getDisplayText(word: any): string {
   return word.displayText;
 }
 
-function positionWord(xTranslate: any, yTranslate: any, word: any) {
+function positionWord(xTranslate: any, yTranslate: any, word: any): string {
   if (isNaN(word.x) || isNaN(word.y) || isNaN(word.rotate)) {
     // move off-screen
     return `translate(${xTranslate * 3}, ${yTranslate * 3})rotate(0)`;
@@ -444,11 +444,11 @@ function getValue(tag: any) {
   return tag.value;
 }
 
-function getSizeInPixels(tag: any) {
+function getSizeInPixels(tag: any): string {
   return `${tag.size}px`;
 }
 
-function hashWithinRange(str: string, max: any) {
+function hashWithinRange(str: string, max: any): number {
   str = JSON.stringify(str);
   let hash = 0;
   for (const ch of str) {
