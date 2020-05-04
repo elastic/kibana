@@ -8,12 +8,12 @@
  * Attempt to get the current Kibana user's username
  * by querying the DOM
  */
-export const getUserName: () => undefined | string = () => {
+export const getUserName: () => null | string = () => {
   const userMenu = document.getElementById('headerUserMenu');
-  if (!userMenu) return;
+  if (!userMenu) return null;
 
   const avatar = userMenu.querySelector('.euiAvatar');
-  if (!avatar) return;
+  if (!avatar) return null;
 
   const username = avatar.getAttribute('aria-label');
   return username;

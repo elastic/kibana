@@ -4,52 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import '../../../test_utils/mock_shallow_usecontext';
+
+import React, { useContext } from 'react';
+import { shallow } from 'enzyme';
+
+jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
+import { sendTelemetry } from '../../../shared/telemetry';
 
 import { EngineOverviewHeader } from '../engine_overview_header';
-import { mountWithKibanaContext } from '../../../test_utils/helpers';
 
 describe('EngineOverviewHeader', () => {
   describe('when enterpriseSearchUrl is set', () => {
-    let wrapper;
+    let button;
 
-    beforeEach(() => {
-      wrapper = mountWithKibanaContext(<EngineOverviewHeader />, {
-        enterpriseSearchUrl: 'http://localhost:3002',
-      });
+    beforeAll(() => {
+      useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: 'http://localhost:3002' }));
+      const wrapper = shallow(<EngineOverviewHeader />);
+      button = wrapper.find('[data-test-subj="launchButton"]');
     });
 
     describe('the Launch App Search button', () => {
-      const subject = () => wrapper.find('EuiButton[data-test-subj="launchButton"]');
-
       it('should not be disabled', () => {
-        expect(subject().props().isDisabled).toBeFalsy();
+        expect(button.props().isDisabled).toBeFalsy();
       });
 
       it('should use the enterpriseSearchUrl as the base path for its href', () => {
-        expect(subject().props().href).toBe('http://localhost:3002/as');
+        expect(button.props().href).toBe('http://localhost:3002/as');
+      });
+
+      it('should send telemetry when clicked', () => {
+        button.simulate('click');
+        expect(sendTelemetry).toHaveBeenCalled();
       });
     });
   });
 
   describe('when enterpriseSearchUrl is not set', () => {
-    let wrapper;
+    let button;
 
-    beforeEach(() => {
-      wrapper = mountWithKibanaContext(<EngineOverviewHeader />, {
-        enterpriseSearchUrl: undefined,
-      });
+    beforeAll(() => {
+      useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: undefined }));
+      const wrapper = shallow(<EngineOverviewHeader />);
+      button = wrapper.find('[data-test-subj="launchButton"]');
     });
 
     describe('the Launch App Search button', () => {
-      const subject = () => wrapper.find('EuiButton[data-test-subj="launchButton"]');
-
       it('should be disabled', () => {
-        expect(subject().props().isDisabled).toBe(true);
+        expect(button.props().isDisabled).toBe(true);
       });
 
       it('should not have an href', () => {
-        expect(subject().props().href).toBeUndefined();
+        expect(button.props().href).toBeUndefined();
       });
     });
   });

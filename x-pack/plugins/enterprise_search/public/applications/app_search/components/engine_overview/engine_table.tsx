@@ -23,13 +23,18 @@ interface IEngineTableProps {
     onPaginate(pageIndex: number);
   };
 }
+interface IOnChange {
+  page: {
+    index: number;
+  };
+}
 
 export const EngineTable: ReactFC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex = 0, onPaginate },
 }) => {
   const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
-  const engineLinkProps = {
+  const engineLinkProps = name => ({
     href: `${enterpriseSearchUrl}/as/engines/${name}`,
     target: '_blank',
     onClick: () =>
@@ -39,13 +44,13 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         action: 'clicked',
         metric: 'engine_table_link',
       }),
-  };
+  });
 
   const columns = [
     {
       field: 'name',
       name: 'Name',
-      render: name => <EuiLink {...engineLinkProps}>{name}</EuiLink>,
+      render: name => <EuiLink {...engineLinkProps(name)}>{name}</EuiLink>,
       width: '30%',
       truncateText: true,
       mobileOptions: {
@@ -86,7 +91,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       field: 'name',
       name: 'Actions',
       dataType: 'string',
-      render: name => <EuiLink {...engineLinkProps}>Manage</EuiLink>,
+      render: name => <EuiLink {...engineLinkProps(name)}>Manage</EuiLink>,
       align: 'right',
       width: '100px',
     },
@@ -102,7 +107,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
         totalItemCount: totalEngines,
         hidePerPageOptions: true,
       }}
-      onChange={({ page = {} }) => {
+      onChange={({ page }): IOnChange => {
         const { index } = page;
         onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
       }}
