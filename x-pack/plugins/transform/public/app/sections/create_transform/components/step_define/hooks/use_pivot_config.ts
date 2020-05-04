@@ -64,7 +64,7 @@ export const usePivotConfig = (
     }
 
     groupByListWithoutPrevious[item.aggName] = item;
-    setGroupByList({ ...groupByListWithoutPrevious });
+    setGroupByList(groupByListWithoutPrevious);
   };
 
   const deleteGroupBy = (aggName: AggName) => {
@@ -105,7 +105,7 @@ export const usePivotConfig = (
     }
 
     aggListWithoutPrevious[item.aggName] = item;
-    setAggList({ ...aggListWithoutPrevious });
+    setAggList(aggListWithoutPrevious);
   };
 
   const deleteAggregation = (aggName: AggName) => {
