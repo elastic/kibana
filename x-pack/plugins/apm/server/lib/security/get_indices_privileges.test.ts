@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Logger } from 'src/core/server';
 import { Setup } from '../helpers/setup_request';
 import { getIndicesPrivileges } from './get_indices_privileges';
 
@@ -16,10 +15,7 @@ describe('getIndicesPrivileges', () => {
       spanIndices: 'apm-*'
     }
   };
-  const logger = ({
-    warn: jest.fn()
-  } as unknown) as Logger;
-  it('has privileges when an error code 400 happens while fetching ', async () => {
+  it('return that the user has privileges when security plugin is disabled', async () => {
     const setup = ({
       indices,
       client: {
@@ -33,13 +29,13 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    const privileges = await getIndicesPrivileges(setup, logger);
+    const privileges = await getIndicesPrivileges(setup, false);
     expect(privileges).toEqual({
       has_all_requested: true,
       index: {}
     });
   });
-  it('throws any other error other than 400 ', async () => {
+  it('throws when an error happens while fetching indices privileges', async () => {
     const setup = ({
       indices,
       client: {
@@ -48,11 +44,9 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    try {
-      await getIndicesPrivileges(setup, logger);
-    } catch (error) {
-      expect(error).toEqual(Error('unknow error'));
-    }
+    await expect(getIndicesPrivileges(setup, true)).rejects.toThrowError(
+      'unknow error'
+    );
   });
   it("has privileges to read from 'apm-*'", async () => {
     const setup = ({
@@ -66,7 +60,7 @@ describe('getIndicesPrivileges', () => {
         }
       }
     } as unknown) as Setup;
-    const privileges = await getIndicesPrivileges(setup, logger);
+    const privileges = await getIndicesPrivileges(setup, true);
 
     expect(privileges).toEqual({
       has_all_requested: true,
@@ -91,7 +85,7 @@ describe('getIndicesPrivileges', () => {
       }
     } as unknown) as Setup;
 
-    const privileges = await getIndicesPrivileges(setup, logger);
+    const privileges = await getIndicesPrivileges(setup, true);
 
     expect(privileges).toEqual({
       has_all_requested: false,
@@ -127,7 +121,7 @@ describe('getIndicesPrivileges', () => {
       }
     } as unknown) as Setup;
 
-    const privileges = await getIndicesPrivileges(setup, logger);
+    const privileges = await getIndicesPrivileges(setup, true);
 
     expect(privileges).toEqual({
       has_all_requested: false,
