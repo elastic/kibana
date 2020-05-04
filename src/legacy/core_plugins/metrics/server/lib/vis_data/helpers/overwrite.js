@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
-export default function splitByEverything(req, panel) {
-  return next => doc => {
-    panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {
-      if (column.filter) {
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.query_string.query`, column.filter);
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.query_string.analyze_wildcard`, true);
-      } else {
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
-      }
-    });
-    return next(doc);
-  };
-}
+import set from 'set-value';
 
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj, path, val) {
+  set(obj, path, undefined);
+  set(obj, path, val);
+}
