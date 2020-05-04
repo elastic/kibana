@@ -43,8 +43,6 @@ import {
   AggParamsPercentiles,
   AggParamsSerialDiff,
   AggParamsTopHit,
-  AggType,
-  aggTypeFieldFilters,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
