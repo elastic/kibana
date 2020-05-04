@@ -11,7 +11,12 @@ responseMap.set('failure', 'Failed');
 responseMap.set('malware', 'Malware');
 responseMap.set('events', 'Events');
 responseMap.set('download_model', 'Download Model');
+responseMap.set('workflow', 'Workflow');
+responseMap.set('a_custom_future_action', 'A Custom Future Action');
 responseMap.set('ingest_events_config', 'Injest Events Config');
+responseMap.set('configure_elasticsearch_connection', 'Configure Elastic Search Connection');
+responseMap.set('detect_file_open_events', 'Detect File Open Events');
+responseMap.set('download_global_artifacts', 'Download Global Artifacts');
 
 /**
  * Takes in the snake-cased response from the API and

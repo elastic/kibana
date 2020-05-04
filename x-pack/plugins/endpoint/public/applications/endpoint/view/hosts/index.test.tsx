@@ -299,6 +299,31 @@ describe('when on the hosts page', () => {
           (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
         ).toBe('Policy Response');
       });
+      it('should show a configuration section for each protection', async () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse();
+        });
+        const configAccordions = await renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseConfigAccordion'
+        );
+        expect(configAccordions).not.toBeNull();
+        expect(configAccordions.length).toBe(4);
+      });
+      it('should show a actions section for each configuration', async () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse();
+        });
+        const configAccordionTriggers = await renderResult.findByText('Malware');
+        reactTestingLibrary.act(() => {
+          fireEvent.click(configAccordionTriggers);
+        });
+
+        const actionAccordions = await renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseActionAccordion'
+        );
+        expect(actionAccordions).not.toBeNull();
+        expect(actionAccordions.length).toBe(10);
+      });
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint Details');

@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
   HostPolicyResponseActions,
   HostPolicyResponseActionStatus,
@@ -14,8 +15,12 @@ import {
   Immutable,
   ImmutableArray,
 } from '../../../../../../common/types';
-import { formatResponse } from './policyResponseFriendlyNames';
+import { formatResponse } from './policy_response_friendly_names';
 
+/**
+ * Nested accordion in the policy response detailing any concerned
+ * actions the endpoint took to apply the policy configuration.
+ */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   > .euiAccordion__triggerWrapper > .euiAccordion__optionalAction {
     margin-right: ${props => props.theme.eui.ruleMargins.marginMedium};
@@ -61,8 +66,9 @@ const ResponseActions = memo(
           }
           return (
             <EuiAccordion
-              id={action}
-              key={action}
+              id={useMemo(() => htmlIdGenerator()(), [])}
+              key={useMemo(() => htmlIdGenerator()(), [])}
+              data-test-subj="hostDetailsPolicyResponseActionsAccordion"
               buttonContent={
                 <EuiText size="xs">
                   <h4>{formatResponse(action)}</h4>
@@ -87,7 +93,7 @@ const ResponseActions = memo(
 );
 
 /**
- * this is for the policy response shown in the host details after a user modifies a policy
+ * A policy response ise returned by the endpoint and shown in the host details after a user modifies a policy
  */
 export const PolicyResponse = memo(
   ({
@@ -102,17 +108,21 @@ export const PolicyResponse = memo(
         {Object.entries(responseConfig).map(([key, val]) => {
           return (
             <PolicyResponseConfigAccordion
-              id={key}
+              id={useMemo(() => htmlIdGenerator()(), [])}
+              key={useMemo(() => htmlIdGenerator()(), [])}
+              data-test-subj="hostDetailsPolicyResponseConfigAccordion"
               buttonContent={
                 <EuiText size="s">
                   <p>{formatResponse(key)}</p>
                 </EuiText>
               }
-              key={key}
               paddingSize="m"
               extraAction={
                 val.status === 'failure' && (
-                  <EuiNotificationBadge className="policyResponseFailedBadge">
+                  <EuiNotificationBadge
+                    className="policyResponseFailedBadge"
+                    data-test-subj="hostDetailsPolicyResponseFailedBadge"
+                  >
                     2
                   </EuiNotificationBadge>
                 )
