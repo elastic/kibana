@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, flow } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { SavedObjectMigrationFn } from 'src/core/server';
 
@@ -19,7 +19,8 @@ interface XYLayerPre77 {
  * Removes the `lens_auto_date` subexpression from a stored expression
  * string. For example: aggConfigs={lens_auto_date aggConfigs="JSON string"}
  */
-const removeLensAutoDate: SavedObjectMigrationFn = (doc, context) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
   const expression: string = doc.attributes?.expression;
   try {
     const ast = fromExpression(expression);
@@ -73,7 +74,8 @@ const removeLensAutoDate: SavedObjectMigrationFn = (doc, context) => {
 /**
  * Adds missing timeField arguments to esaggs in the Lens expression
  */
-const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) => {
   const expression: string = doc.attributes?.expression;
 
   try {
@@ -131,7 +133,8 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn = (doc, context) => {
   }
 };
 
-export const migrations: Record<string, SavedObjectMigrationFn> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
   '7.7.0': doc => {
     const newDoc = cloneDeep(doc);
     if (newDoc.attributes?.visualizationType === 'lnsXY') {
@@ -153,5 +156,5 @@ export const migrations: Record<string, SavedObjectMigrationFn> = {
   },
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
-  '7.8.0': flow(removeLensAutoDate, addTimeFieldToEsaggs),
+  '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),
 };

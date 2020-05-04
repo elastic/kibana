@@ -7,9 +7,9 @@
 import { PassThrough } from 'stream';
 
 import { SearchResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import { SearchEsListItemSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 
 /**
@@ -20,7 +20,7 @@ export const SIZE = 100;
 
 export interface ExportListItemsToStreamOptions {
   listId: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   stream: PassThrough;
   stringToAppend: string | null | undefined;
@@ -28,7 +28,7 @@ export interface ExportListItemsToStreamOptions {
 
 export const exportListItemsToStream = ({
   listId,
-  dataClient,
+  callCluster,
   stream,
   listItemIndex,
   stringToAppend,
@@ -37,7 +37,7 @@ export const exportListItemsToStream = ({
   // and prevent the async await from bubbling up to the caller
   setTimeout(async () => {
     let searchAfter = await writeNextResponse({
-      dataClient,
+      callCluster,
       listId,
       listItemIndex,
       searchAfter: undefined,
@@ -46,7 +46,7 @@ export const exportListItemsToStream = ({
     });
     while (searchAfter != null) {
       searchAfter = await writeNextResponse({
-        dataClient,
+        callCluster,
         listId,
         listItemIndex,
         searchAfter,
@@ -60,7 +60,7 @@ export const exportListItemsToStream = ({
 
 export interface WriteNextResponseOptions {
   listId: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   stream: PassThrough;
   searchAfter: string[] | undefined;
@@ -69,14 +69,14 @@ export interface WriteNextResponseOptions {
 
 export const writeNextResponse = async ({
   listId,
-  dataClient,
+  callCluster,
   stream,
   listItemIndex,
   searchAfter,
   stringToAppend,
 }: WriteNextResponseOptions): Promise<string[] | undefined> => {
   const response = await getResponse({
-    dataClient,
+    callCluster,
     listId,
     listItemIndex,
     searchAfter,
@@ -100,7 +100,7 @@ export const getSearchAfterFromResponse = <T>({
     : undefined;
 
 export interface GetResponseOptions {
-  dataClient: DataClient;
+  callCluster: APICaller;
   listId: string;
   searchAfter: undefined | string[];
   listItemIndex: string;
@@ -108,13 +108,13 @@ export interface GetResponseOptions {
 }
 
 export const getResponse = async ({
-  dataClient,
+  callCluster,
   searchAfter,
   listId,
   listItemIndex,
   size = SIZE,
 }: GetResponseOptions): Promise<SearchResponse<SearchEsListItemSchema>> => {
-  return dataClient.callAsCurrentUser('search', {
+  return callCluster('search', {
     body: {
       query: {
         term: {

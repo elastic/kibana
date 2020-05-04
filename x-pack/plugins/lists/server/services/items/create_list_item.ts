@@ -6,6 +6,7 @@
 
 import uuid from 'uuid';
 import { CreateDocumentResponse } from 'elasticsearch';
+import { APICaller } from 'kibana/server';
 
 import {
   IdOrUndefined,
@@ -14,7 +15,6 @@ import {
   MetaOrUndefined,
   Type,
 } from '../../../common/schemas';
-import { DataClient } from '../../types';
 import { transformListItemToElasticQuery } from '../utils';
 
 export interface CreateListItemOptions {
@@ -22,7 +22,7 @@ export interface CreateListItemOptions {
   listId: string;
   type: Type;
   value: string;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listItemIndex: string;
   user: string;
   meta: MetaOrUndefined;
@@ -35,7 +35,7 @@ export const createListItem = async ({
   listId,
   type,
   value,
-  dataClient,
+  callCluster,
   listItemIndex,
   user,
   meta,
@@ -58,7 +58,7 @@ export const createListItem = async ({
     ...transformListItemToElasticQuery({ type, value }),
   };
 
-  const response: CreateDocumentResponse = await dataClient.callAsCurrentUser('index', {
+  const response: CreateDocumentResponse = await callCluster('index', {
     body,
     id,
     index: listItemIndex,

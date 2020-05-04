@@ -160,7 +160,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.8.0 auto timestamp', () => {
-    const context = {} as SavedObjectMigrationContext;
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
