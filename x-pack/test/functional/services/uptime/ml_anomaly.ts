@@ -32,7 +32,7 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
 
     async createMLJob() {
       await testSubjects.click('uptimeMLCreateJobBtn');
-      return retry.tryForTime(10000, async () => {
+      return retry.tryForTime(30000, async () => {
         await testSubjects.existOrFail('uptimeMLJobSuccessfullyCreated');
         log.info('Job successfully created');
       });
