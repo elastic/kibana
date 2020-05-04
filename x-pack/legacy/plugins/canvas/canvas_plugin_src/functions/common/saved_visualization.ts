@@ -12,7 +12,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
-import { Filter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
+import { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -31,7 +31,7 @@ const defaultTimeRange = {
 
 export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
-  Filter | null,
+  ExpressionValueFilter | null,
   Arguments,
   Output
 > {
