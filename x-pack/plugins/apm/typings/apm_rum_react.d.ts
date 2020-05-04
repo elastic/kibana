@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 declare module '@elastic/apm-rum-react' {
-  export function indexManagementStore(): any;
   export const ApmRoute: any;
 }
