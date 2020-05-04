@@ -10,6 +10,7 @@ import { IndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState } from './types';
 import { OriginalColumn } from './rename_columns';
+import { dateHistogramOperation } from './operations/definitions';
 
 function getExpressionForLayer(
   indexPattern: IndexPattern,
@@ -68,6 +69,12 @@ function getExpressionForLayer(
       return base;
     });
 
+    const allDateHistogramFields = Object.values(columns)
+      .map(column =>
+        column.operationType === dateHistogramOperation.type ? column.sourceField : null
+      )
+      .filter((field): field is string => Boolean(field));
+
     return {
       type: 'expression',
       chain: [
@@ -79,20 +86,8 @@ function getExpressionForLayer(
             metricsAtAllLevels: [false],
             partialRows: [false],
             includeFormatHints: [true],
-            aggConfigs: [
-              {
-                type: 'expression',
-                chain: [
-                  {
-                    type: 'function',
-                    function: 'lens_auto_date',
-                    arguments: {
-                      aggConfigs: [JSON.stringify(aggs)],
-                    },
-                  },
-                ],
-              },
-            ],
+            timeFields: allDateHistogramFields,
+            aggConfigs: [JSON.stringify(aggs)],
           },
         },
         {

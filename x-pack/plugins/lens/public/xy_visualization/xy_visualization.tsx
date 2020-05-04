@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu } from './xy_config_panel';
-import { Visualization, OperationMetadata } from '../types';
+import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, PersistableState, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { toExpression, toPreviewExpression } from './to_expression';
 import chartBarStackedSVG from '../assets/chart_bar_stacked.svg';
@@ -24,6 +24,18 @@ const defaultSeriesType = 'bar_stacked';
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
+function getVisualizationType(state: State): VisualizationType | 'mixed' {
+  if (!state.layers.length) {
+    return (
+      visualizationTypes.find(t => t.id === state.preferredSeriesType) ?? visualizationTypes[0]
+    );
+  }
+  const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType);
+  const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
+
+  return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
+}
+
 function getDescription(state?: State) {
   if (!state) {
     return {
@@ -34,32 +46,31 @@ function getDescription(state?: State) {
     };
   }
 
+  const visualizationType = getVisualizationType(state);
+
   if (!state.layers.length) {
-    const visualizationType = visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    const preferredType = visualizationType as VisualizationType;
     return {
-      icon: visualizationType.largeIcon || visualizationType.icon,
-      label: visualizationType.label,
+      icon: preferredType.largeIcon || preferredType.icon,
+      label: preferredType.label,
     };
   }
 
-  const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType)!;
-  const seriesTypes = _.unique(state.layers.map(l => l.seriesType));
-
   return {
     icon:
-      seriesTypes.length === 1
-        ? visualizationType.largeIcon || visualizationType.icon
-        : chartMixedSVG,
+      visualizationType === 'mixed'
+        ? chartMixedSVG
+        : visualizationType.largeIcon || visualizationType.icon,
     label:
-      seriesTypes.length === 1
-        ? visualizationType.label
-        : isHorizontalChart(state.layers)
-        ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-            defaultMessage: 'Mixed horizontal bar',
-          })
-        : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
-            defaultMessage: 'Mixed XY',
-          }),
+      visualizationType === 'mixed'
+        ? isHorizontalChart(state.layers)
+          ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
+              defaultMessage: 'Mixed horizontal bar',
+            })
+          : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
+              defaultMessage: 'Mixed XY',
+            })
+        : visualizationType.label,
   };
 }
 
@@ -67,6 +78,10 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   id: 'lnsXY',
 
   visualizationTypes,
+  getVisualizationTypeId(state) {
+    const type = getVisualizationType(state);
+    return type === 'mixed' ? type : type.id;
+  },
 
   getLayerIds(state) {
     return state.layers.map(l => l.layerId);

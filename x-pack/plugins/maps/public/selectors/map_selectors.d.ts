@@ -22,6 +22,8 @@ export function getMapSettings(state: MapStoreState): MapSettings;
 
 export function hasMapSettingsChanges(state: MapStoreState): boolean;
 
+export function isUsingSearch(state: MapStoreState): boolean;
+
 export function getSpatialFiltersLayer(state: MapStoreState): IVectorLayer;
 
 export function getLayerList(state: MapStoreState): ILayer[];
