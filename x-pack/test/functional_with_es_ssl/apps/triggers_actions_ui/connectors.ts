@@ -99,7 +99,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: updatedConnectorName,
           actionType: 'Slack',
-          referencedByCount: '0',
         },
       ]);
     });
