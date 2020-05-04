@@ -26,10 +26,10 @@ describe('connector_add_modal', () => {
       http: mocks.http,
       capabilities: {
         ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
+        siem: {
+          'actions:show': true,
+          'actions:save': true,
+          'actions:delete': true,
         },
       },
       actionTypeRegistry: actionTypeRegistry as any,
@@ -63,21 +63,19 @@ describe('connector_add_modal', () => {
       minimumLicenseRequired: 'basic',
     };
 
-    const wrapper = deps
-      ? mountWithIntl(
-          <ConnectorAddModal
-            addModalVisible={true}
-            setAddModalVisibility={() => {}}
-            actionType={actionType}
-            http={deps.http}
-            actionTypeRegistry={deps.actionTypeRegistry}
-            toastNotifications={deps.toastNotifications}
-            docLinks={deps.docLinks}
-            capabilities={deps.capabilities}
-          />
-        )
-      : undefined;
-    expect(wrapper?.find('EuiModalHeader')).toHaveLength(1);
-    expect(wrapper?.find('[data-test-subj="saveActionButtonModal"]').exists()).toBeTruthy();
+    const wrapper = mountWithIntl(
+      <ConnectorAddModal
+        addModalVisible={true}
+        setAddModalVisibility={() => {}}
+        actionType={actionType}
+        http={deps!.http}
+        actionTypeRegistry={deps!.actionTypeRegistry}
+        toastNotifications={deps!.toastNotifications}
+        docLinks={deps!.docLinks}
+        capabilities={deps!.capabilities}
+      />
+    );
+    expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
+    expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
   });
 });
