@@ -25,7 +25,7 @@ export const FitToData: React.FunctionComponent<Props> = ({ layerList, fitToBoun
       className="mapToolbarOverlay__button"
       onClick={fitToBounds}
       data-test-subj="fitToData"
-      iconType="search"
+      iconType="expand"
       color="text"
       aria-label={i18n.translate('xpack.maps.fitToData.fitButtonLabel', {
         defaultMessage: 'Fit to data bounds',
