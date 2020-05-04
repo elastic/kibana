@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
