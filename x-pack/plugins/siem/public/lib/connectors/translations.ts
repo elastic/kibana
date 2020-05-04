@@ -6,65 +6,76 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SERVICENOW_DESC = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.selectMessageText',
-  {
-    defaultMessage: 'Push or update SIEM case data to a new incident in ServiceNow',
-  }
-);
-
-export const SERVICENOW_TITLE = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow',
-  }
-);
-
-export const SERVICENOW_API_URL_LABEL = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.apiUrlTextFieldLabel',
+export const API_URL_LABEL = i18n.translate(
+  'xpack.siem.case.connectors.common.apiUrlTextFieldLabel',
   {
     defaultMessage: 'URL',
   }
 );
 
-export const SERVICENOW_API_URL_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.requiredApiUrlTextField',
+export const API_URL_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredApiUrlTextField',
   {
     defaultMessage: 'URL is required',
   }
 );
 
-export const SERVICENOW_API_URL_INVALID = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.invalidApiUrlTextField',
+export const API_URL_INVALID = i18n.translate(
+  'xpack.siem.case.connectors.common.invalidApiUrlTextField',
   {
     defaultMessage: 'URL is invalid',
   }
 );
 
-export const SERVICENOW_USERNAME_LABEL = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.usernameTextFieldLabel',
+export const USERNAME_LABEL = i18n.translate(
+  'xpack.siem.case.connectors.common.usernameTextFieldLabel',
   {
     defaultMessage: 'Username',
   }
 );
 
-export const SERVICENOW_USERNAME_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.requiredUsernameTextField',
+export const USERNAME_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredUsernameTextField',
   {
     defaultMessage: 'Username is required',
   }
 );
 
-export const SERVICENOW_PASSWORD_LABEL = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.passwordTextFieldLabel',
+export const PASSWORD_LABEL = i18n.translate(
+  'xpack.siem.case.connectors.common.passwordTextFieldLabel',
   {
     defaultMessage: 'Password',
   }
 );
 
-export const SERVICENOW_PASSWORD_REQUIRED = i18n.translate(
-  'xpack.siem.case.connectors.servicenow.requiredPasswordTextField',
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredPasswordTextField',
   {
     defaultMessage: 'Password is required',
+  }
+);
+
+export const API_TOKEN_LABEL = i18n.translate(
+  'xpack.siem.case.connectors.common.apiTokenTextFieldLabel',
+  {
+    defaultMessage: 'Api token',
+  }
+);
+
+export const API_TOKEN_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredApiTokenTextField',
+  {
+    defaultMessage: 'Api token is required',
+  }
+);
+
+export const EMAIL_LABEL = i18n.translate('xpack.siem.case.connectors.common.emailTextFieldLabel', {
+  defaultMessage: 'Email',
+});
+
+export const EMAIL_REQUIRED = i18n.translate(
+  'xpack.siem.case.connectors.common.requiredEmailTextField',
+  {
+    defaultMessage: 'Email is required',
   }
 );
