@@ -94,6 +94,12 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
     props.onSave({ ...onSaveProps, returnToOrigin: returnToOriginMode });
   };
 
+  const confirmButtonLabel = returnToOriginMode
+    ? i18n.translate('savedObjects.saveModalOrigin.saveAndReturnLabel', {
+        defaultMessage: 'Save and return',
+      })
+    : null;
+
   return (
     <SavedObjectSaveModal
       onSave={onModalSave}
@@ -101,6 +107,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       title={documentInfo.title}
       showCopyOnSave={documentInfo.id ? true : false}
       initialCopyOnSave={Boolean(documentInfo.id) && returnToOriginMode}
+      confirmButtonLabel={confirmButtonLabel}
       objectType={props.objectType}
       options={getReturnToOriginSwitch}
       description={documentInfo.description}
