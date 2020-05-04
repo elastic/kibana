@@ -61,7 +61,7 @@ describe('PanelNotificationsAction', () => {
       const action = new PanelNotificationsAction();
 
       const name = await action.getDisplayNameTooltip(context);
-      expect(name).toBe('1 drilldown');
+      expect(name).toBe('Panel has 1 drilldown');
     });
 
     test('returns "2 drilldowns" if embeddable has two events', async () => {
@@ -69,7 +69,7 @@ describe('PanelNotificationsAction', () => {
       const action = new PanelNotificationsAction();
 
       const name = await action.getDisplayNameTooltip(context);
-      expect(name).toBe('2 drilldowns');
+      expect(name).toBe('Panel has 2 drilldowns');
     });
 
     test('returns "3 drilldowns" if embeddable has three events', async () => {
@@ -77,7 +77,7 @@ describe('PanelNotificationsAction', () => {
       const action = new PanelNotificationsAction();
 
       const name = await action.getDisplayNameTooltip(context);
-      expect(name).toBe('3 drilldowns');
+      expect(name).toBe('Panel has 3 drilldowns');
     });
   });
 

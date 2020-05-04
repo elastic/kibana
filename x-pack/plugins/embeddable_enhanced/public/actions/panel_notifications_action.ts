@@ -12,13 +12,13 @@ import { EnhancedEmbeddableContext, EnhancedEmbeddable } from '../types';
 export const txtOneDrilldown = i18n.translate(
   'xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown',
   {
-    defaultMessage: '1 drilldown',
+    defaultMessage: 'Panel has 1 drilldown',
   }
 );
 
 export const txtManyDrilldowns = (count: number) =>
   i18n.translate('xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns', {
-    defaultMessage: '{count} drilldowns',
+    defaultMessage: 'Panel has {count} drilldowns',
     values: {
       count: String(count),
     },
