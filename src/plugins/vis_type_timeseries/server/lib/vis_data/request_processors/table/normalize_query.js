@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import set from 'set-value';
+import { overwrite } from '../../helpers';
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
 const hasSiblingPipelineAggregation = (aggs = {}) => Object.keys(aggs).length > 1;
 
@@ -41,14 +41,14 @@ export function normalizeQuery() {
           ..._.get(value, 'meta'),
           seriesId,
         };
-        set(normalizedSeries, `${seriesId}`, agg);
-        set(normalizedSeries, `${seriesId}.meta`, meta);
+        overwrite(normalizedSeries, `${seriesId}`, agg);
+        overwrite(normalizedSeries, `${seriesId}.meta`, meta);
       } else {
-        set(normalizedSeries, `${seriesId}`, value);
+        overwrite(normalizedSeries, `${seriesId}`, value);
       }
     });
 
-    set(doc, 'aggs.pivot.aggs', normalizedSeries);
+    overwrite(doc, 'aggs.pivot.aggs', normalizedSeries);
 
     return doc;
   };

@@ -19,16 +19,16 @@
 
 const filter = metric => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import set from 'set-value';
+import { overwrite } from '../../helpers';
 
 export function ratios(req, panel, series) {
   return next => doc => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach(metric => {
-        set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`, {
+        overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`, {
           query_string: { query: metric.numerator || '*', analyze_wildcard: true },
         });
-        set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`, {
+        overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.filter`, {
           query_string: { query: metric.denominator || '*', analyze_wildcard: true },
         });
 
@@ -46,13 +46,21 @@ export function ratios(req, panel, series) {
             metricAgg = {};
           }
           const aggBody = { metric: metricAgg };
-          set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);
-          set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.aggs`, aggBody);
+          overwrite(
+            doc,
+            `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.aggs`,
+            aggBody
+          );
+          overwrite(
+            doc,
+            `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.aggs`,
+            aggBody
+          );
           numeratorPath = `${metric.id}-numerator>metric`;
           denominatorPath = `${metric.id}-denominator>metric`;
         }
 
-        set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}`, {
+        overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}`, {
           bucket_script: {
             buckets_path: {
               numerator: numeratorPath,

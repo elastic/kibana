@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import set from 'set-value';
+import { overwrite } from '../../helpers';
 import _ from 'lodash';
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && _.isEmpty(filter.match_all);
@@ -35,12 +35,8 @@ function removeEmptyTopLevelAggregation(doc, series) {
 
   if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(doc.aggs[series.id].aggs)) {
     const meta = _.get(doc, `aggs.${series.id}.meta`);
-    const aggs = _.get(doc, `aggs.${series.id}.aggs`);
-    if (aggs) {
-      delete doc.aggs[`${series.id}`];
-    }
-    set(doc, `aggs`, aggs);
-    set(doc, `aggs.timeseries.meta`, meta);
+    overwrite(doc, `aggs`, doc.aggs[series.id].aggs);
+    overwrite(doc, `aggs.timeseries.meta`, meta);
   }
 
   return doc;
