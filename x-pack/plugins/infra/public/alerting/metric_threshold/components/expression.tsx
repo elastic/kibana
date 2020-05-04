@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -124,6 +125,8 @@ export const Expressions: React.FC<Props> = props => {
     },
     [setAlertParams, derivedIndexPattern]
   );
+
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 250), [onFilterChange]);
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
@@ -320,7 +323,7 @@ export const Expressions: React.FC<Props> = props => {
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={alertParams.filterQueryText}
           />

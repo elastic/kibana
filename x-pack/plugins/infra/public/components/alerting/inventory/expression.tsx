@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
@@ -133,6 +134,8 @@ export const Expressions: React.FC<Props> = props => {
     },
     [derivedIndexPattern, setAlertParams]
   );
+
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
 
   const emptyError = useMemo(() => {
     return {
@@ -291,7 +294,7 @@ export const Expressions: React.FC<Props> = props => {
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             value={alertParams.filterQueryText}
           />
         )) || (
