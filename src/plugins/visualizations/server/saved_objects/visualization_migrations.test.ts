@@ -1460,4 +1460,62 @@ describe('migration visualization', () => {
       expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
     });
   });
+
+  describe('7.8.0 tsvb split_color_mode', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.8.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const generateDoc = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        type: 'visualization',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(params),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should change a missing split_color_mode to gradient', () => {
+      const params = { type: 'metrics', params: { series: [{}] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is set', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'gradient' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is non-default', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'rainbow' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('rainbow');
+    });
+
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', params: { series: [{}] } };
+      const doc = generateDoc(params);
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toBeUndefined();
+    });
+  });
 });

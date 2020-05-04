@@ -8,7 +8,7 @@ import { set as _set } from 'lodash/fp';
 
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { IRouter } from '../../../../../../../src/core/server';
-import { ConfigType } from '../../..';
+import { ConfigType } from '../../../config';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { getExportTimelineByObjectIds } from './utils/export_timelines';

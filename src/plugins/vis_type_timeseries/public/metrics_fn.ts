@@ -20,7 +20,6 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
-import { PersistedState } from '../../visualizations/public';
 
 // @ts-ignore
 import { metricsRequestHandler } from './request_handler';
@@ -76,6 +75,7 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
     const params = JSON.parse(args.params);
     const uiStateParams = JSON.parse(args.uiState);
     const savedObjectId = args.savedObjectId;
+    const { PersistedState } = await import('../../visualizations/public');
     const uiState = new PersistedState(uiStateParams);
 
     const response = await metricsRequestHandler({

@@ -239,40 +239,31 @@ export class SavedObjectsRepository {
       }
     }
 
-    try {
-      const migrated = this._migrator.migrateDocument({
-        id,
-        type,
-        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-        attributes,
-        migrationVersion,
-        updated_at: time,
-        ...(Array.isArray(references) && { references }),
-      });
+    const migrated = this._migrator.migrateDocument({
+      id,
+      type,
+      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      attributes,
+      migrationVersion,
+      updated_at: time,
+      ...(Array.isArray(references) && { references }),
+    });
 
-      const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
+    const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-      const method = id && overwrite ? 'index' : 'create';
-      const response = await this._writeToCluster(method, {
-        id: raw._id,
-        index: this.getIndexForType(type),
-        refresh,
-        body: raw._source,
-      });
+    const method = id && overwrite ? 'index' : 'create';
+    const response = await this._writeToCluster(method, {
+      id: raw._id,
+      index: this.getIndexForType(type),
+      refresh,
+      body: raw._source,
+    });
 
-      return this._rawToSavedObject<T>({
-        ...raw,
-        ...response,
-      });
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        // See "503s from missing index" above
-        throw SavedObjectsErrorHelpers.createEsAutoCreateIndexError();
-      }
-
-      throw error;
-    }
+    return this._rawToSavedObject<T>({
+      ...raw,
+      ...response,
+    });
   }
 
   /**

@@ -27,6 +27,7 @@ import { Filter, ExistsFilter } from '../../../../../common';
 import { RangeBucketAggDependencies } from '../range';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {
@@ -34,10 +35,11 @@ describe('AggConfig Filters', () => {
 
     beforeEach(() => {
       aggTypesDependencies = {
-        getInternalStartServices: () => ({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-        }),
+        getInternalStartServices: () =>
+          (({
+            fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
+          } as unknown) as InternalStartServices),
       };
     });
 

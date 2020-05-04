@@ -45,7 +45,7 @@ export const deleteIndexRoute = (router: IRouter) => {
         }
 
         const callCluster = clusterClient.callAsCurrentUser;
-        const index = siemClient.signalsIndex;
+        const index = siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(callCluster, index);
 
         if (!indexExists) {

@@ -21,6 +21,7 @@ import moment from 'moment';
 import * as _ from 'lodash';
 import { createIndexPatternsStub, createContextSearchSourceStub } from './_stubs';
 import { fetchContextProvider } from './context';
+import { setServices } from '../../../../kibana_services';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -31,10 +32,21 @@ const ANCHOR_TIMESTAMP_3000 = new Date(MS_PER_DAY * 3000).toJSON();
 describe('context app', function() {
   describe('function fetchPredecessors', function() {
     let fetchPredecessors;
-    let searchSourceStub;
+    let mockSearchSource;
 
     beforeEach(() => {
-      searchSourceStub = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+      mockSearchSource = createContextSearchSourceStub([], '@timestamp', MS_PER_DAY * 8);
+
+      setServices({
+        data: {
+          search: {
+            searchSource: {
+              create: jest.fn().mockImplementation(() => mockSearchSource),
+            },
+          },
+        },
+      });
+
       fetchPredecessors = (
         indexPatternId,
         timeField,
@@ -65,17 +77,13 @@ describe('context app', function() {
       };
     });
 
-    afterEach(() => {
-      searchSourceStub._restore();
-    });
-
     it('should perform exactly one query when enough hits are returned', function() {
-      searchSourceStub._stubHits = [
-        searchSourceStub._createStubHit(MS_PER_DAY * 3000 + 2),
-        searchSourceStub._createStubHit(MS_PER_DAY * 3000 + 1),
-        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
-        searchSourceStub._createStubHit(MS_PER_DAY * 2000),
-        searchSourceStub._createStubHit(MS_PER_DAY * 1000),
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 2),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000 + 1),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 2000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 1000),
       ];
 
       return fetchPredecessors(
@@ -89,18 +97,18 @@ describe('context app', function() {
         3,
         []
       ).then(hits => {
-        expect(searchSourceStub.fetch.calledOnce).toBe(true);
-        expect(hits).toEqual(searchSourceStub._stubHits.slice(0, 3));
+        expect(mockSearchSource.fetch.calledOnce).toBe(true);
+        expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
       });
     });
 
     it('should perform multiple queries with the last being unrestricted when too few hits are returned', function() {
-      searchSourceStub._stubHits = [
-        searchSourceStub._createStubHit(MS_PER_DAY * 3010),
-        searchSourceStub._createStubHit(MS_PER_DAY * 3002),
-        searchSourceStub._createStubHit(MS_PER_DAY * 3000),
-        searchSourceStub._createStubHit(MS_PER_DAY * 2998),
-        searchSourceStub._createStubHit(MS_PER_DAY * 2990),
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 3010),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3002),
+        mockSearchSource._createStubHit(MS_PER_DAY * 3000),
+        mockSearchSource._createStubHit(MS_PER_DAY * 2998),
+        mockSearchSource._createStubHit(MS_PER_DAY * 2990),
       ];
 
       return fetchPredecessors(
@@ -114,7 +122,7 @@ describe('context app', function() {
         6,
         []
       ).then(hits => {
-        const intervals = searchSourceStub.setField.args
+        const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
           .map(([, { query }]) =>
             _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
@@ -129,16 +137,16 @@ describe('context app', function() {
         expect(Object.keys(_.last(intervals))).toEqual(['format', 'gte']);
         expect(intervals.length).toBeGreaterThan(1);
 
-        expect(hits).toEqual(searchSourceStub._stubHits.slice(0, 3));
+        expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
       });
     });
 
     it('should perform multiple queries until the expected hit count is returned', function() {
-      searchSourceStub._stubHits = [
-        searchSourceStub._createStubHit(MS_PER_DAY * 1700),
-        searchSourceStub._createStubHit(MS_PER_DAY * 1200),
-        searchSourceStub._createStubHit(MS_PER_DAY * 1100),
-        searchSourceStub._createStubHit(MS_PER_DAY * 1000),
+      mockSearchSource._stubHits = [
+        mockSearchSource._createStubHit(MS_PER_DAY * 1700),
+        mockSearchSource._createStubHit(MS_PER_DAY * 1200),
+        mockSearchSource._createStubHit(MS_PER_DAY * 1100),
+        mockSearchSource._createStubHit(MS_PER_DAY * 1000),
       ];
 
       return fetchPredecessors(
@@ -152,7 +160,7 @@ describe('context app', function() {
         3,
         []
       ).then(hits => {
-        const intervals = searchSourceStub.setField.args
+        const intervals = mockSearchSource.setField.args
           .filter(([property]) => property === 'query')
           .map(([, { query }]) =>
             _.get(query, ['constant_score', 'filter', 'range', '@timestamp'])
@@ -163,7 +171,7 @@ describe('context app', function() {
         // should have stopped before reaching MS_PER_DAY * 1700
         expect(moment(_.last(intervals).lte).valueOf()).toBeLessThan(MS_PER_DAY * 1700);
         expect(intervals.length).toBeGreaterThan(1);
-        expect(hits).toEqual(searchSourceStub._stubHits.slice(-3));
+        expect(hits).toEqual(mockSearchSource._stubHits.slice(-3));
       });
     });
 
@@ -195,7 +203,7 @@ describe('context app', function() {
         3,
         []
       ).then(() => {
-        const setParentSpy = searchSourceStub.setParent;
+        const setParentSpy = mockSearchSource.setParent;
         expect(setParentSpy.alwaysCalledWith(undefined)).toBe(true);
         expect(setParentSpy.called).toBe(true);
       });
@@ -214,7 +222,7 @@ describe('context app', function() {
         []
       ).then(() => {
         expect(
-          searchSourceStub.setField.calledWith('sort', [{ '@timestamp': 'asc' }, { _doc: 'asc' }])
+          mockSearchSource.setField.calledWith('sort', [{ '@timestamp': 'asc' }, { _doc: 'asc' }])
         ).toBe(true);
       });
     });

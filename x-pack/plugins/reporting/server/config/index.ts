@@ -10,6 +10,7 @@ import { ConfigSchema, ConfigType } from './schema';
 export { createConfig$ } from './create_config';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: { poll: true },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
     unused('capture.browser.chromium.maxScreenshotDimension'),

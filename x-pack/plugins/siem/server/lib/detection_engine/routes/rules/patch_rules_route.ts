@@ -7,10 +7,7 @@
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { patchRules } from '../../rules/patch_rules';
-import {
-  PatchRuleAlertParamsRest,
-  IRuleSavedAttributesSavedObjectAttributes,
-} from '../../rules/types';
+import { PatchRuleAlertParamsRest } from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
 import {
   buildRouteValidation,
@@ -20,8 +17,8 @@ import {
 } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const patchRulesRoute = (router: IRouter) => {
   router.patch(
@@ -83,6 +80,7 @@ export const patchRulesRoute = (router: IRouter) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await patchRules({
           actionsClient,
           alertsClient,
@@ -127,10 +125,7 @@ export const patchRulesRoute = (router: IRouter) => {
             throttle,
             name: rule.name,
           });
-          const ruleStatuses = await savedObjectsClient.find<
-            IRuleSavedAttributesSavedObjectAttributes
-          >({
-            type: ruleStatusSavedObjectType,
+          const ruleStatuses = await ruleStatusClient.find({
             perPage: 1,
             sortField: 'statusDate',
             sortOrder: 'desc',

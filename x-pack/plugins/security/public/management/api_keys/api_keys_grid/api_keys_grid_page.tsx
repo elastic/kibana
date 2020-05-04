@@ -26,7 +26,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
-import _ from 'lodash';
 import { NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
@@ -47,10 +46,10 @@ interface State {
   isLoadingApp: boolean;
   isLoadingTable: boolean;
   isAdmin: boolean;
+  canManage: boolean;
   areApiKeysEnabled: boolean;
   apiKeys: ApiKey[];
   selectedItems: ApiKey[];
-  permissionDenied: boolean;
   error: any;
 }
 
@@ -63,9 +62,9 @@ export class APIKeysGridPage extends Component<Props, State> {
       isLoadingApp: true,
       isLoadingTable: false,
       isAdmin: false,
+      canManage: false,
       areApiKeysEnabled: false,
       apiKeys: [],
-      permissionDenied: false,
       selectedItems: [],
       error: undefined,
     };
@@ -77,18 +76,14 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   public render() {
     const {
-      permissionDenied,
       isLoadingApp,
       isLoadingTable,
       areApiKeysEnabled,
       isAdmin,
+      canManage,
       error,
       apiKeys,
     } = this.state;
-
-    if (permissionDenied) {
-      return <PermissionDenied />;
-    }
 
     if (isLoadingApp) {
       return (
@@ -101,6 +96,10 @@ export class APIKeysGridPage extends Component<Props, State> {
           </SectionLoading>
         </EuiPageContent>
       );
+    }
+
+    if (!canManage) {
+      return <PermissionDenied />;
     }
 
     if (error) {
@@ -495,26 +494,25 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const { isAdmin, areApiKeysEnabled } = await this.props.apiKeysAPIClient.checkPrivileges();
-      this.setState({ isAdmin, areApiKeysEnabled });
+      const {
+        isAdmin,
+        canManage,
+        areApiKeysEnabled,
+      } = await this.props.apiKeysAPIClient.checkPrivileges();
+      this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
-      if (areApiKeysEnabled) {
-        this.initiallyLoadApiKeys();
-      } else {
-        // We're done loading and will just show the "Disabled" error.
+      if (!canManage || !areApiKeysEnabled) {
         this.setState({ isLoadingApp: false });
+      } else {
+        this.initiallyLoadApiKeys();
       }
     } catch (e) {
-      if (_.get(e, 'body.statusCode') === 403) {
-        this.setState({ permissionDenied: true, isLoadingApp: false });
-      } else {
-        this.props.notifications.toasts.addDanger(
-          i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
-            defaultMessage: 'Error checking privileges: {message}',
-            values: { message: _.get(e, 'body.message', '') },
-          })
-        );
-      }
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage', {
+          defaultMessage: 'Error checking privileges: {message}',
+          values: { message: e.body?.message ?? '' },
+        })
+      );
     }
   }
 

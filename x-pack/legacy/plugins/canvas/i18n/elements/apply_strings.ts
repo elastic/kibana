@@ -7,8 +7,6 @@
 import { ElementFactory } from '../../types';
 import { getElementStrings } from './index';
 
-import { TagStrings } from '../../i18n';
-
 /**
  * This function takes a set of Canvas Element specification factories, runs them,
  * replaces relevant strings (if available) and returns a new factory.  We do this
@@ -33,17 +31,6 @@ export const applyElementStrings = (elements: ElementFactory[]) => {
 
       if (displayName) {
         result.displayName = displayName;
-      }
-
-      // Set translated tags
-      if (result.tags) {
-        result.tags = result.tags.map(tag => {
-          if (tag in TagStrings) {
-            return TagStrings[tag]();
-          }
-
-          return tag;
-        });
       }
     }
 

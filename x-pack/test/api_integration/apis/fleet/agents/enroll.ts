@@ -33,13 +33,13 @@ export default function(providerContext: FtrProviderContext) {
         body: { _source: enrollmentApiKeyDoc },
       } = await esClient.get({
         index: '.kibana',
-        id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
       });
       // @ts-ignore
-      enrollmentApiKeyDoc.enrollment_api_keys.api_key_id = apiKey.id;
+      enrollmentApiKeyDoc['fleet-enrollment-api-keys'].api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
-        id: 'enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
         refresh: 'true',
         body: {
           doc: enrollmentApiKeyDoc,

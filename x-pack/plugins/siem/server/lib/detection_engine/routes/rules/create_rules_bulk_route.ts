@@ -92,7 +92,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
             try {
               validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
 
-              const finalIndex = outputIndex ?? siemClient.signalsIndex;
+              const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({

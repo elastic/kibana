@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-interface Timeline {
+export interface Timeline {
   title: string;
+  description: string;
   query: string;
 }

@@ -36,11 +36,11 @@ import { SavedObject } from '../../../../../../../../core/types';
 
 jest.mock('../../../kibana_services', () => ({
   getServices: () => ({
-    history: {
+    history: () => ({
       location: {
         search: '',
       },
-    },
+    }),
     capabilities: {
       visualize: {
         show: true,

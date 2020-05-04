@@ -5,8 +5,7 @@
  */
 
 import * as _ from 'lodash';
-
-const formulaValues = ['=', '+', '-', '@'];
+import { cellHasFormulas } from './cell_has_formula';
 
 interface IFlattened {
   [header: string]: string;
@@ -14,7 +13,7 @@ interface IFlattened {
 
 export const checkIfRowsHaveFormulas = (flattened: IFlattened, fields: string[]) => {
   const pruned = _.pick(flattened, fields);
-  const csvValues = [..._.keys(pruned), ...(_.values(pruned) as string[])];
+  const cells = [..._.keys(pruned), ...(_.values(pruned) as string[])];
 
-  return _.some(csvValues, cell => _.some(formulaValues, char => _.startsWith(cell, char)));
+  return _.some(cells, cell => cellHasFormulas(cell));
 };

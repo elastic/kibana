@@ -5,14 +5,12 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const debug: ElementFactory = () => ({
   name: 'debug',
-  displayName: 'Debug',
-  tags: ['text'],
+  displayName: 'Debug data',
   help: 'Just dumps the configuration of the element',
-  image: header,
+  icon: 'bug',
   expression: `demodata
 | render as=debug`,
 });

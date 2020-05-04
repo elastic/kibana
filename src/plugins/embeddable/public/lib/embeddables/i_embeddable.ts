@@ -55,6 +55,8 @@ export interface EmbeddableInput {
 
 export interface EmbeddableOutput {
   editUrl?: string;
+  editApp?: string;
+  editPath?: string;
   defaultTitle?: string;
   title?: string;
   editable?: boolean;

@@ -12,7 +12,7 @@ pipeline {
   environment {
     BASE_DIR = 'src/github.com/elastic/kibana'
     HOME = "${env.WORKSPACE}"
-    E2E_DIR = 'x-pack/legacy/plugins/apm/e2e'
+    E2E_DIR = 'x-pack/plugins/apm/e2e'
     PIPELINE_LOG_LEVEL = 'DEBUG'
   }
   options {
@@ -38,7 +38,7 @@ pipeline {
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
         script {
           dir("${BASE_DIR}"){
-            def regexps =[ "^x-pack/legacy/plugins/apm/.*" ]
+            def regexps =[ "^x-pack/plugins/apm/.*" ]
             env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
           }
         }

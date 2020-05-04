@@ -97,7 +97,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
-            const value = datasourceInput.config![varName].value;
+            const value = datasourceInput.vars![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -105,8 +105,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                   value={value}
                   onChange={(newValue: any) => {
                     updateDatasourceInput({
-                      config: {
-                        ...datasourceInput.config,
+                      vars: {
+                        ...datasourceInput.vars,
                         [varName]: {
                           type: varType,
                           value: newValue,
@@ -114,7 +114,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                       },
                     });
                   }}
-                  errors={inputVarsValidationResults.config![varName]}
+                  errors={inputVarsValidationResults.vars![varName]}
                   forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
@@ -141,7 +141,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
                     const { name: varName, type: varType } = varDef;
-                    const value = datasourceInput.config![varName].value;
+                    const value = datasourceInput.vars![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -149,8 +149,8 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                           value={value}
                           onChange={(newValue: any) => {
                             updateDatasourceInput({
-                              config: {
-                                ...datasourceInput.config,
+                              vars: {
+                                ...datasourceInput.vars,
                                 [varName]: {
                                   type: varType,
                                   value: newValue,
@@ -158,7 +158,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                               },
                             });
                           }}
-                          errors={inputVarsValidationResults.config![varName]}
+                          errors={inputVarsValidationResults.vars![varName]}
                           forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>
