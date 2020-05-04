@@ -13156,7 +13156,6 @@
     "xpack.siem.case.caseView.actionLabel.pushedNewIncident": "已推送为新事件",
     "xpack.siem.case.caseView.actionLabel.removedField": "移除了",
     "xpack.siem.case.caseView.actionLabel.updateIncident": "更新了事件",
-    "xpack.siem.case.caseView.alreadyPushedToService": "已推送到 Service Now 事件",
     "xpack.siem.case.caseView.backLabel": "返回到案例",
     "xpack.siem.case.caseView.breadcrumb": "创建",
     "xpack.siem.case.caseView.cancel": "取消",

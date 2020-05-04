@@ -13149,7 +13149,6 @@
     "xpack.siem.case.caseView.actionLabel.pushedNewIncident": "新しいインシデントとしてプッシュしました",
     "xpack.siem.case.caseView.actionLabel.removedField": "削除しました",
     "xpack.siem.case.caseView.actionLabel.updateIncident": "インシデントを更新しました",
-    "xpack.siem.case.caseView.alreadyPushedToService": "既に ServiceNow インシデントにプッシュされました",
     "xpack.siem.case.caseView.backLabel": "ケースに戻る",
     "xpack.siem.case.caseView.breadcrumb": "作成",
     "xpack.siem.case.caseView.cancel": "キャンセル",
