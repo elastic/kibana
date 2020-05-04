@@ -58,6 +58,11 @@ export const StepDefineSummary: FC<Props> = ({
     groupByList
   );
 
+  const isModifiedQuery =
+    typeof searchString === 'undefined' &&
+    !isDefaultQuery(pivotQuery) &&
+    !isMatchAllQuery(pivotQuery);
+
   return (
     <div data-test-subj="transformStepDefineSummary">
       <EuiForm>
@@ -79,26 +84,24 @@ export const StepDefineSummary: FC<Props> = ({
                 <span>{searchString}</span>
               </EuiFormRow>
             )}
-            {typeof searchString === 'undefined' &&
-              !isDefaultQuery(pivotQuery) &&
-              !isMatchAllQuery(pivotQuery) && (
-                <EuiFormRow
-                  label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
-                    defaultMessage: 'Query',
-                  })}
+            {isModifiedQuery && (
+              <EuiFormRow
+                label={i18n.translate('xpack.transform.stepDefineSummary.queryCodeBlockLabel', {
+                  defaultMessage: 'Query',
+                })}
+              >
+                <EuiCodeBlock
+                  language="js"
+                  fontSize="s"
+                  paddingSize="s"
+                  color="light"
+                  overflowHeight={300}
+                  isCopyable
                 >
-                  <EuiCodeBlock
-                    language="js"
-                    fontSize="s"
-                    paddingSize="s"
-                    color="light"
-                    overflowHeight={300}
-                    isCopyable
-                  >
-                    {JSON.stringify(pivotQuery, null, 2)}
-                  </EuiCodeBlock>
-                </EuiFormRow>
-              )}
+                  {JSON.stringify(pivotQuery, null, 2)}
+                </EuiCodeBlock>
+              </EuiFormRow>
+            )}
           </Fragment>
         )}
 
