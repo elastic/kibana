@@ -17,7 +17,7 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
 
   echo " -> Running SIEM cyclic dependency test"
   cd "$XPACK_DIR"
-  checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node legacy/plugins/siem/scripts/check_circular_deps
+  checks-reporter-with-killswitch "X-Pack SIEM cyclic dependency test" node plugins/siem/scripts/check_circular_deps
   echo ""
   echo ""
 
@@ -39,7 +39,7 @@ else
   # build runtime for canvas
   echo "NODE_ENV=$NODE_ENV"
   node ./legacy/plugins/canvas/scripts/shareable_runtime
-  node scripts/jest --ci --verbose --coverage
+  node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles --coverage
   # rename file in order to be unique one
   test -f ../target/kibana-coverage/jest/coverage-final.json \
     && mv ../target/kibana-coverage/jest/coverage-final.json \

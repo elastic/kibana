@@ -6,7 +6,6 @@
 import React from 'react';
 import Boom from 'boom';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { mockManagementPlugin } from '../../../../../../src/legacy/core_plugins/management/public/np_ready/mocks';
 import { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
 import { EuiLoadingSpinner, EuiEmptyPrompt } from '@elastic/eui';
@@ -18,11 +17,6 @@ import { ProcessingCopyToSpace } from './processing_copy_to_space';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SpacesManager } from '../../spaces_manager';
 import { ToastsApi } from 'src/core/public';
-
-jest.mock('../../../../../../src/legacy/core_plugins/management/public/legacy', () => ({
-  setup: mockManagementPlugin.createSetupContract(),
-  start: mockManagementPlugin.createStartContract(),
-}));
 
 interface SetupOpts {
   mockSpaces?: Space[];

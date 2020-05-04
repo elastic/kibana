@@ -4,17 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
+import moment from 'moment';
+import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['uptime']);
+  const { uptime: uptimePage } = getPageObjects(['uptime']);
+  const uptime = getService('uptime');
 
-  describe('location', () => {
-    const start = new Date().toISOString();
-    const end = new Date().toISOString();
+  const monitor = () => uptime.monitor;
+
+  describe('Observer location', () => {
+    const start = moment()
+      .subtract('15', 'm')
+      .toISOString();
+    const end = moment().toISOString();
 
     const MONITOR_ID = 'location-testing-id';
+
     beforeEach(async () => {
       /**
        * This mogrify function will strip the documents of their location
@@ -38,11 +45,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'up',
         mogrifyNoLocation
       );
+      await uptime.navigation.goToUptime();
+
+      await uptimePage.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
+    });
+
+    it('renders the location panel and canvas', async () => {
+      await monitor().locationMapIsRendered();
     });
 
     it('renders the location missing popover when monitor has location name, but no geo data', async () => {
-      await pageObjects.uptime.loadDataAndGoToMonitorPage(start, end, MONITOR_ID);
-      await pageObjects.uptime.locationMissingIsDisplayed();
+      await monitor().locationMissingExists();
     });
   });
 };

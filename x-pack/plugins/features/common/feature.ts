@@ -7,6 +7,7 @@
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature } from './sub_feature';
+import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
 
 /**
  * Interface for registering a feature.
@@ -122,8 +123,8 @@ export interface FeatureConfig {
    * @private
    */
   reserved?: {
-    privilege: FeatureKibanaPrivileges;
     description: string;
+    privileges: ReservedKibanaPrivilege[];
   };
 }
 

@@ -35,16 +35,16 @@ export function EPMHomePage() {
         ([
           {
             id: 'all_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.allPackagesTabText', {
-              defaultMessage: 'All packages',
+            name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
+              defaultMessage: 'All integrations',
             }),
             href: ALL_PACKAGES_URI,
             isSelected: tabId !== 'installed',
           },
           {
             id: 'installed_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.installedPackagesTabText', {
-              defaultMessage: 'Installed packages',
+            name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
+              defaultMessage: 'Installed integrations',
             }),
             href: INSTALLED_PACKAGES_URI,
             isSelected: tabId === 'installed',
@@ -67,29 +67,34 @@ export function EPMHomePage() {
 function InstalledPackages() {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
-  const packages =
-    allPackages && allPackages.response && selectedCategory === ''
+
+  const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
+    defaultMessage: 'Installed integrations',
+  });
+
+  const allInstalledPackages =
+    allPackages && allPackages.response
       ? allPackages.response.filter(pkg => pkg.status === 'installed')
       : [];
 
-  const title = i18n.translate('xpack.ingestManager.epmList.installedPackagesTitle', {
-    defaultMessage: 'Installed packages',
-  });
+  const updatablePackages = allInstalledPackages.filter(
+    item => 'savedObject' in item && item.version > item.savedObject.attributes.version
+  );
 
   const categories = [
     {
       id: '',
-      title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
+      title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
       title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
-      count: 0, // TODO: Update with real count when available
+      count: updatablePackages.length,
     },
   ];
 
@@ -106,7 +111,7 @@ function InstalledPackages() {
       isLoading={isLoadingPackages}
       controls={controls}
       title={title}
-      list={packages}
+      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
   );
 }
@@ -120,8 +125,8 @@ function AvailablePackages() {
   const packages =
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
-  const title = i18n.translate('xpack.ingestManager.epmList.allPackagesTitle', {
-    defaultMessage: 'All packages',
+  const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
+    defaultMessage: 'All integrations',
   });
 
   const categories = [
@@ -134,7 +139,6 @@ function AvailablePackages() {
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
-
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories}

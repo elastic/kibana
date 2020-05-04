@@ -117,18 +117,7 @@ const EmbeddableExplorerApp = ({
     {
       title: 'Dynamically adding children to a container',
       id: 'embeddablePanelExamplae',
-      component: (
-        <EmbeddablePanelExample
-          uiActionsApi={uiActionsApi}
-          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
-          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
-          overlays={overlays}
-          uiSettingsClient={uiSettingsClient}
-          savedObject={savedObject}
-          notifications={notifications}
-          inspector={inspector}
-        />
-      ),
+      component: <EmbeddablePanelExample embeddableServices={embeddableApi} />,
     },
   ];
 

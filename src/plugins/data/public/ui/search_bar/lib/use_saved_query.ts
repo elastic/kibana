@@ -29,8 +29,8 @@ interface UseSavedQueriesProps {
   queryService: DataPublicPluginStart['query'];
   setQuery: Function;
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
   savedQueryId?: string;
+  defaultLanguage: string;
 }
 
 interface UseSavedQueriesReturn {
@@ -41,7 +41,7 @@ interface UseSavedQueriesReturn {
 
 export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesReturn => {
   // Handle saved queries
-  const defaultLanguage = props.uiSettings.get('search:queryLanguage');
+  const defaultLanguage = props.defaultLanguage;
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>();
 
   // Effect is used to convert a saved query id into an object

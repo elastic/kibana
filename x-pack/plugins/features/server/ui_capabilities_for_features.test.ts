@@ -135,6 +135,42 @@ describe('populateUICapabilities', () => {
     });
   });
 
+  it(`supports capabilities from reserved privileges`, () => {
+    expect(
+      uiCapabilitiesForFeatures([
+        new Feature({
+          id: 'newFeature',
+          name: 'my new feature',
+          navLinkId: 'newFeatureNavLink',
+          app: ['bar-app'],
+          privileges: null,
+          reserved: {
+            description: '',
+            privileges: [
+              {
+                id: 'rp_1',
+                privilege: createFeaturePrivilege(['capability1', 'capability2']),
+              },
+              {
+                id: 'rp_2',
+                privilege: createFeaturePrivilege(['capability3', 'capability4', 'capability5']),
+              },
+            ],
+          },
+        }),
+      ])
+    ).toEqual({
+      catalogue: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        capability5: true,
+      },
+    });
+  });
+
   it(`supports merging features with sub privileges`, () => {
     expect(
       uiCapabilitiesForFeatures([

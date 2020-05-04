@@ -17,6 +17,7 @@ import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
+import { ResolveMlCapabilities } from '../../common/types/capabilities';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -27,14 +28,22 @@ export type SharedServices = JobServiceProvider &
 export function createSharedServices(
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
-  cloud: CloudSetup
+  cloud: CloudSetup,
+  resolveMlCapabilities: ResolveMlCapabilities
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
 
   return {
     ...getJobServiceProvider(isFullLicense),
     ...getAnomalyDetectorsProvider(isFullLicense),
-    ...getMlSystemProvider(isMinimumLicense, isFullLicense, mlLicense, spaces, cloud),
+    ...getMlSystemProvider(
+      isMinimumLicense,
+      isFullLicense,
+      mlLicense,
+      spaces,
+      cloud,
+      resolveMlCapabilities
+    ),
     ...getModulesProvider(isFullLicense),
     ...getResultsServiceProvider(isFullLicense),
   };

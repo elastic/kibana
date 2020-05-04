@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { wrapInI18nContext } from '../../../kibana_services';
 import { DiscoverSidebar } from './discover_sidebar';
 
 export function createDiscoverSidebarDirective(reactDirective: any) {
-  return reactDirective(wrapInI18nContext(DiscoverSidebar), [
+  return reactDirective(DiscoverSidebar, [
     ['columns', { watchDepth: 'reference' }],
     ['fieldCounts', { watchDepth: 'reference' }],
     ['hits', { watchDepth: 'reference' }],

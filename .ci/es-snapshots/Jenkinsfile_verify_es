@@ -61,7 +61,7 @@ kibanaPipeline(timeoutMinutes: 120) {
 }
 
 def promoteSnapshot(snapshotVersion, snapshotId) {
-  node('linux && immutable') {
+  node(workers.label('s')) {
     esSnapshots.promote(snapshotVersion, snapshotId)
   }
 }

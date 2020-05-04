@@ -24,7 +24,6 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
   describe('inspector', function describeIndexTests() {
-    this.tags('smoke');
     before(async function() {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVerticalBarChart();

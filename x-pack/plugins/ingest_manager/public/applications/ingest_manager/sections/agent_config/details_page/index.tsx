@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
+import React, { Fragment, memo, useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -26,12 +26,12 @@ import { useGetOneAgentConfig } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from './hooks/use_details_uri';
 import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 import { ConfigDatasourcesView } from './components/datasources';
 import { ConfigYamlView } from './components/yaml';
+import { ConfigSettingsView } from './components/settings';
 
 const Divider = styled.div`
   width: 0;
@@ -69,14 +69,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const configDetailsLink = useAgentConfigLink('details', { configId });
   const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
   const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
-
-  // Flyout states
-  const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
-
-  const refreshData = useCallback(() => {
-    refreshAgentConfig();
-    refreshAgentStatus();
-  }, [refreshAgentConfig, refreshAgentStatus]);
 
   const headerLeftContent = useMemo(
     () => (
@@ -196,7 +188,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
     return [
       {
         id: 'datasources',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasouces', {
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasourcesTabText', {
           defaultMessage: 'Data sources',
         }),
         href: configDetailsLink,
@@ -204,15 +196,15 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
       },
       {
         id: 'yaml',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlFile', {
-          defaultMessage: 'YAML File',
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
+          defaultMessage: 'YAML',
         }),
         href: configDetailsYamlLink,
         isSelected: tabId === 'yaml',
       },
       {
         id: 'settings',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settings', {
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
         href: configDetailsSettingsLink,
@@ -269,16 +261,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          {isEditConfigFlyoutOpen ? (
-            <EditConfigFlyout
-              onClose={() => {
-                setIsEditConfigFlyoutOpen(false);
-                refreshData();
-              }}
-              agentConfig={agentConfig}
-            />
-          ) : null}
-
           <Switch>
             <Route
               path={`${DETAILS_ROUTER_PATH}/yaml`}
@@ -289,8 +271,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}/settings`}
               render={() => {
-                // TODO: Settings implementation tracked via: https://github.com/elastic/kibana/issues/57959
-                return <div>Settings placeholder</div>;
+                return <ConfigSettingsView config={agentConfig} />;
               }}
             />
             <Route

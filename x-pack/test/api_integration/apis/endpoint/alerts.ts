@@ -72,7 +72,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('when data is in elasticsearch', () => {
       before(async () => {
         await esArchiver.load('endpoint/alerts/api_feature');
-        await esArchiver.load('endpoint/metadata/api_feature');
+        await esArchiver.load('endpoint/alerts/host_api_feature');
         const res = await es.search({
           index: 'events-endpoint-1',
           body: ES_QUERY_MISSING,
@@ -82,7 +82,7 @@ export default function({ getService }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload('endpoint/alerts/api_feature');
-        await esArchiver.unload('endpoint/metadata/api_feature');
+        await esArchiver.unload('endpoint/alerts/host_api_feature');
       });
 
       it('should not support POST requests', async () => {

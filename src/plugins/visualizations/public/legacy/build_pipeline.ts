@@ -94,8 +94,11 @@ const getSchemas = (
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
-      const bounds = agg.params.timeRange ? timefilter.calculateBounds(agg.params.timeRange) : null;
-      agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
+      const bounds =
+        agg.params.timeRange && agg.fieldIsTimeField()
+          ? timefilter.calculateBounds(agg.params.timeRange)
+          : undefined;
+      agg.buckets.setBounds(bounds);
       agg.buckets.setInterval(agg.params.interval);
     }
 

@@ -102,7 +102,9 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const res = await getPackageInfo({ savedObjectsClient, pkgkey });
+    // TODO: change epm API to /packageName/version so we don't need to do this
+    const [pkgName, pkgVersion] = pkgkey.split('-');
+    const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
     const body: GetInfoResponse = {
       response: res,
       success: true,
@@ -134,6 +136,12 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
@@ -155,6 +163,12 @@ export const deletePackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

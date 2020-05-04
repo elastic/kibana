@@ -5,7 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Ping } from '../../../../../legacy/plugins/uptime/common/graphql/types';
+import { Ping } from '../../../common/runtime_types';
 
 export interface GetLatestMonitorParams {
   /** @member dateRangeStart timestamp bounds */
@@ -26,8 +26,6 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   dateEnd,
   monitorId,
 }) => {
-  // TODO: Write tests for this function
-
   const params = {
     index: dynamicSettings.heartbeatIndices,
     body: {
@@ -46,33 +44,30 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
           ],
         },
       },
-      size: 0,
-      aggs: {
-        by_id: {
-          terms: {
-            field: 'monitor.id',
-            size: 1000,
-          },
-          aggs: {
-            latest: {
-              top_hits: {
-                size: 1,
-                sort: {
-                  '@timestamp': { order: 'desc' },
-                },
-              },
-            },
-          },
-        },
+      size: 1,
+      _source: [
+        'url',
+        'monitor',
+        'observer',
+        '@timestamp',
+        'tls.server.x509.not_after',
+        'tls.server.x509.not_before',
+      ],
+      sort: {
+        '@timestamp': { order: 'desc' },
       },
     },
   };
 
   const result = await callES('search', params);
-  const ping: any = result.aggregations?.by_id.buckets?.[0]?.latest.hits?.hits?.[0] ?? {};
+  const doc = result.hits?.hits?.[0];
+  const docId = doc?._id ?? '';
+  const { tls, ...ping } = doc?._source ?? {};
 
   return {
-    ...ping?._source,
-    timestamp: ping?._source?.['@timestamp'],
+    ...ping,
+    docId,
+    timestamp: ping['@timestamp'],
+    tls: { not_after: tls?.server?.x509?.not_after, not_before: tls?.server?.x509?.not_before },
   };
 };

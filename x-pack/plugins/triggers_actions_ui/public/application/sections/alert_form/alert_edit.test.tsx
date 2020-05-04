@@ -36,7 +36,10 @@ describe('alert_edit', () => {
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
 
-    mockedCoreSetup.http.get.mockResolvedValue({ isSufficientlySecure: true });
+    mockedCoreSetup.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
 
     const alertType = {
       id: 'my-alert-type',

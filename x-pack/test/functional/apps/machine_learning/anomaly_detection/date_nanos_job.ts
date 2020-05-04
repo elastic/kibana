@@ -104,7 +104,7 @@ export default function({ getService }: FtrProviderContext) {
   const testDataList = [
     {
       suiteTitle: 'with count detector and model plot disabled',
-      jobSource: 'event_rate_gen_trend_nanos',
+      jobSource: 'ft_event_rate_gen_trend_nanos',
       jobId: `event_rate_nanos_count_1_${Date.now()}`,
       jobDescription:
         'Create advanced job based on the event rate dataset with a date_nanos time field, 30m bucketspan and count',
@@ -153,7 +153,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '10.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -166,14 +165,20 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('job on data set with date_nanos time field', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/event_rate_nanos');
+      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
+      await ml.testResources.createIndexPatternIfNeeded(
+        'ft_event_rate_gen_trend_nanos',
+        '@timestamp'
+      );
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await esArchiver.loadIfNeeded('ml/event_rate_nanos');
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/event_rate_nanos');
       await ml.api.cleanMlIndices();
     });
 
@@ -416,7 +421,6 @@ export default function({ getService }: FtrProviderContext) {
               job_id: testData.jobId,
               result_type: testData.expected.modelSizeStats.result_type,
               model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              model_bytes_memory_limit: testData.expected.modelSizeStats.model_bytes_memory_limit,
               total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
               total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
               total_partition_field_count:

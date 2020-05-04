@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -162,165 +162,175 @@ export function DiscoverSidebar({
   }
 
   return (
-    <section
-      className="sidebar-list"
-      aria-label={i18n.translate(
-        'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
-        {
-          defaultMessage: 'Index and fields',
-        }
-      )}
-    >
-      <DiscoverIndexPattern
-        selectedIndexPattern={selectedIndexPattern}
-        setIndexPattern={setIndexPattern}
-        indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
-      />
-      <div className="dscSidebar__item">
-        <form>
-          <DiscoverFieldSearch
-            onChange={onChangeFieldSearch}
-            value={fieldFilterState.name}
-            types={fieldTypes}
-          />
-        </form>
-      </div>
-      <div className="sidebar-list">
-        {fields.length > 0 && (
-          <>
-            <EuiTitle size="xxxs" id="selected_fields">
-              <h3>
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
-                  defaultMessage="Selected fields"
-                />
-              </h3>
-            </EuiTitle>
-            <ul
-              className="dscSidebarList dscFieldList--selected"
-              aria-labelledby="selected_fields"
-              data-test-subj={`fieldList-selected`}
-            >
-              {selectedFields.map((field: IndexPatternField, idx: number) => {
-                return (
-                  <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
-                    <DiscoverField
-                      field={field}
-                      indexPattern={selectedIndexPattern}
-                      onAddField={onAddField}
-                      onRemoveField={onRemoveField}
-                      onAddFilter={onAddFilter}
-                      onShowDetails={onShowDetails}
-                      getDetails={getDetailsByField}
-                      showDetails={openFieldMap.get(field.name) || false}
-                      selected={true}
-                      useShortDots={useShortDots}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="euiFlexGroup euiFlexGroup--gutterMedium">
-              <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
+    <I18nProvider>
+      <section
+        className="sidebar-list"
+        aria-label={i18n.translate(
+          'kbn.discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel',
+          {
+            defaultMessage: 'Index and fields',
+          }
+        )}
+      >
+        <DiscoverIndexPattern
+          selectedIndexPattern={selectedIndexPattern}
+          setIndexPattern={setIndexPattern}
+          indexPatternList={sortBy(indexPatternList, o => o.attributes.title)}
+        />
+        <div className="dscSidebar__item">
+          <form>
+            <DiscoverFieldSearch
+              onChange={onChangeFieldSearch}
+              value={fieldFilterState.name}
+              types={fieldTypes}
+            />
+          </form>
+        </div>
+        <div className="sidebar-list">
+          {fields.length > 0 && (
+            <>
+              <EuiTitle size="xxxs" id="selected_fields">
                 <h3>
                   <FormattedMessage
-                    id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
-                    defaultMessage="Available fields"
+                    id="kbn.discover.fieldChooser.filter.selectedFieldsTitle"
+                    defaultMessage="Selected fields"
                   />
                 </h3>
               </EuiTitle>
-              <div className="euiFlexItem euiFlexItem--flexGrowZero">
-                <EuiButtonIcon
-                  className={'visible-xs visible-sm dscFieldChooser__toggle'}
-                  iconType={showFields ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => setShowFields(!showFields)}
-                  aria-label={
-                    showFields
-                      ? i18n.translate(
-                          'kbn.discover.fieldChooser.filter.indexAndFieldsSectionHideAriaLabel',
-                          {
-                            defaultMessage: 'Hide fields',
-                          }
-                        )
-                      : i18n.translate(
-                          'kbn.discover.fieldChooser.filter.indexAndFieldsSectionShowAriaLabel',
-                          {
-                            defaultMessage: 'Show fields',
-                          }
-                        )
-                  }
-                />
-              </div>
-            </div>
-          </>
-        )}
-        {popularFields.length > 0 && (
-          <div>
-            <EuiTitle
-              size="xxxs"
-              className={`dscFieldListHeader ${!showFields ? 'hidden-sm hidden-xs' : ''}`}
-            >
-              <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
-                <FormattedMessage
-                  id="kbn.discover.fieldChooser.filter.popularTitle"
-                  defaultMessage="Popular"
-                />
-              </h4>
-            </EuiTitle>
-            <ul
-              className={`dscFieldList dscFieldList--popular ${
-                !showFields ? 'hidden-sm hidden-xs' : ''
-              }`}
-              aria-labelledby="available_fields available_fields_popular"
-              data-test-subj={`fieldList-popular`}
-            >
-              {popularFields.map((field: IndexPatternField, idx: number) => {
-                return (
-                  <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
-                    <DiscoverField
-                      field={field}
-                      indexPattern={selectedIndexPattern}
-                      onAddField={onAddField}
-                      onRemoveField={onRemoveField}
-                      onAddFilter={onAddFilter}
-                      onShowDetails={onShowDetails}
-                      getDetails={getDetailsByField}
-                      showDetails={openFieldMap.get(field.name) || false}
-                      useShortDots={useShortDots}
+              <ul
+                className="dscSidebarList dscFieldList--selected"
+                aria-labelledby="selected_fields"
+                data-test-subj={`fieldList-selected`}
+              >
+                {selectedFields.map((field: IndexPatternField, idx: number) => {
+                  return (
+                    <li
+                      key={`field${idx}`}
+                      data-attr-field={field.name}
+                      className="dscSidebar__item"
+                    >
+                      <DiscoverField
+                        field={field}
+                        indexPattern={selectedIndexPattern}
+                        onAddField={onAddField}
+                        onRemoveField={onRemoveField}
+                        onAddFilter={onAddFilter}
+                        onShowDetails={onShowDetails}
+                        getDetails={getDetailsByField}
+                        showDetails={openFieldMap.get(field.name) || false}
+                        selected={true}
+                        useShortDots={useShortDots}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="euiFlexGroup euiFlexGroup--gutterMedium">
+                <EuiTitle size="xxxs" id="available_fields" className="euiFlexItem">
+                  <h3>
+                    <FormattedMessage
+                      id="kbn.discover.fieldChooser.filter.availableFieldsTitle"
+                      defaultMessage="Available fields"
                     />
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
+                  </h3>
+                </EuiTitle>
+                <div className="euiFlexItem euiFlexItem--flexGrowZero">
+                  <EuiButtonIcon
+                    className={'visible-xs visible-sm dscFieldChooser__toggle'}
+                    iconType={showFields ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setShowFields(!showFields)}
+                    aria-label={
+                      showFields
+                        ? i18n.translate(
+                            'kbn.discover.fieldChooser.filter.indexAndFieldsSectionHideAriaLabel',
+                            {
+                              defaultMessage: 'Hide fields',
+                            }
+                          )
+                        : i18n.translate(
+                            'kbn.discover.fieldChooser.filter.indexAndFieldsSectionShowAriaLabel',
+                            {
+                              defaultMessage: 'Show fields',
+                            }
+                          )
+                    }
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          {popularFields.length > 0 && (
+            <div>
+              <EuiTitle
+                size="xxxs"
+                className={`dscFieldListHeader ${!showFields ? 'hidden-sm hidden-xs' : ''}`}
+              >
+                <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
+                  <FormattedMessage
+                    id="kbn.discover.fieldChooser.filter.popularTitle"
+                    defaultMessage="Popular"
+                  />
+                </h4>
+              </EuiTitle>
+              <ul
+                className={`dscFieldList dscFieldList--popular ${
+                  !showFields ? 'hidden-sm hidden-xs' : ''
+                }`}
+                aria-labelledby="available_fields available_fields_popular"
+                data-test-subj={`fieldList-popular`}
+              >
+                {popularFields.map((field: IndexPatternField, idx: number) => {
+                  return (
+                    <li
+                      key={`field${idx}`}
+                      data-attr-field={field.name}
+                      className="dscSidebar__item"
+                    >
+                      <DiscoverField
+                        field={field}
+                        indexPattern={selectedIndexPattern}
+                        onAddField={onAddField}
+                        onRemoveField={onRemoveField}
+                        onAddFilter={onAddFilter}
+                        onShowDetails={onShowDetails}
+                        getDetails={getDetailsByField}
+                        showDetails={openFieldMap.get(field.name) || false}
+                        useShortDots={useShortDots}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
 
-        <ul
-          className={`dscFieldList dscFieldList--unpopular ${
-            !showFields ? 'hidden-sm hidden-xs' : ''
-          }`}
-          aria-labelledby="available_fields"
-          data-test-subj={`fieldList-unpopular`}
-        >
-          {unpopularFields.map((field: IndexPatternField, idx: number) => {
-            return (
-              <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
-                <DiscoverField
-                  field={field}
-                  indexPattern={selectedIndexPattern}
-                  onAddField={onAddField}
-                  onRemoveField={onRemoveField}
-                  onAddFilter={onAddFilter}
-                  onShowDetails={onShowDetails}
-                  getDetails={getDetailsByField}
-                  showDetails={openFieldMap.get(field.name) || false}
-                  useShortDots={useShortDots}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </section>
+          <ul
+            className={`dscFieldList dscFieldList--unpopular ${
+              !showFields ? 'hidden-sm hidden-xs' : ''
+            }`}
+            aria-labelledby="available_fields"
+            data-test-subj={`fieldList-unpopular`}
+          >
+            {unpopularFields.map((field: IndexPatternField, idx: number) => {
+              return (
+                <li key={`field${idx}`} data-attr-field={field.name} className="dscSidebar__item">
+                  <DiscoverField
+                    field={field}
+                    indexPattern={selectedIndexPattern}
+                    onAddField={onAddField}
+                    onRemoveField={onRemoveField}
+                    onAddFilter={onAddFilter}
+                    onShowDetails={onShowDetails}
+                    getDetails={getDetailsByField}
+                    showDetails={openFieldMap.get(field.name) || false}
+                    useShortDots={useShortDots}
+                  />
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+    </I18nProvider>
   );
 }

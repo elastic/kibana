@@ -18,8 +18,11 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { XJsonMode } from '../../../../../../../shared_imports';
+
+const xJsonMode = new XJsonMode();
+
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
-import { xJsonMode } from '../../../../../components/custom_hooks';
 
 export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const { setAdvancedEditorRawString, setFormState } = actions;

@@ -14,6 +14,7 @@ const ENROLLMENT_KEY_ID = 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0';
 export default function(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const supertest = getService('supertest');
 
   describe('fleet_enrollment_api_keys_crud', () => {
@@ -45,14 +46,35 @@ export default function(providerContext: FtrProviderContext) {
       });
     });
 
-    describe('GET /fleet/enrollment-api-keys/{id}', async () => {
-      it('should allow to retrieve existing api keys', async () => {
+    describe('DELETE /fleet/enrollment-api-keys/{id}', async () => {
+      let keyId: string;
+      let esApiKeyId: string;
+      before(async () => {
         const { body: apiResponse } = await supertest
-          .delete(`/api/ingest_manager/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .post(`/api/ingest_manager/fleet/enrollment-api-keys`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            config_id: 'policy1',
+          })
+          .expect(200);
+        keyId = apiResponse.item.id;
+        esApiKeyId = apiResponse.item.api_key_id;
+      });
+
+      it('should invalide an existing api keys', async () => {
+        const { body: apiResponse } = await supertest
+          .delete(`/api/ingest_manager/fleet/enrollment-api-keys/${keyId}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
         expect(apiResponse.success).to.eql(true);
+
+        const {
+          body: { api_keys: apiKeys },
+        } = await es.security.getApiKey({ id: esApiKeyId });
+
+        expect(apiKeys).length(1);
+        expect(apiKeys[0].invalidated).eql(true);
       });
     });
 

@@ -30,10 +30,17 @@ import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
 import { IAggConfigs } from '../aggs';
-import { ISearchSource, SearchSource } from '../search_source';
+import { ISearchSource } from '../search_source';
 import { tabifyAggResponse } from '../tabify';
-import { Filter, Query, serializeFieldFormat, TimeRange } from '../../../common';
-import { FilterManager, getTime } from '../../query';
+import {
+  Filter,
+  Query,
+  serializeFieldFormat,
+  TimeRange,
+  IIndexPattern,
+  isRangeFilter,
+} from '../../../common';
+import { FilterManager, calculateBounds, getTime } from '../../query';
 import { getSearchService, getQueryService, getIndexPatterns } from '../../services';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
 import { getRequestInspectorStats, getResponseInspectorStats, serializeAggConfig } from './utils';
@@ -42,6 +49,8 @@ export interface RequestHandlerParams {
   searchSource: ISearchSource;
   aggs: IAggConfigs;
   timeRange?: TimeRange;
+  timeFields?: string[];
+  indexPattern?: IIndexPattern;
   query?: Query;
   filters?: Filter[];
   forceFetch: boolean;
@@ -65,12 +74,15 @@ interface Arguments {
   partialRows: boolean;
   includeFormatHints: boolean;
   aggConfigs: string;
+  timeFields?: string[];
 }
 
 const handleCourierRequest = async ({
   searchSource,
   aggs,
   timeRange,
+  timeFields,
+  indexPattern,
   query,
   filters,
   forceFetch,
@@ -111,9 +123,19 @@ const handleCourierRequest = async ({
     return aggs.onSearchRequestStart(paramSearchSource, options);
   });
 
-  if (timeRange) {
+  // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
+  // pattern if it's available.
+  const defaultTimeField = indexPattern?.getTimeField?.();
+  const defaultTimeFields = defaultTimeField ? [defaultTimeField.name] : [];
+  const allTimeFields = timeFields && timeFields.length > 0 ? timeFields : defaultTimeFields;
+
+  // If a timeRange has been specified and we had at least one timeField available, create range
+  // filters for that those time fields
+  if (timeRange && allTimeFields.length > 0) {
     timeFilterSearchSource.setField('filter', () => {
-      return getTime(searchSource.getField('index'), timeRange);
+      return allTimeFields
+        .map(fieldName => getTime(indexPattern, timeRange, { fieldName }))
+        .filter(isRangeFilter);
     });
   }
 
@@ -181,11 +203,13 @@ const handleCourierRequest = async ({
 
   (searchSource as any).finalResponse = resp;
 
-  const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
+  const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
   const tabifyParams = {
     metricsAtAllLevels,
     partialRows,
-    timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
+    timeRange: parsedTimeRange
+      ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
+      : undefined,
   };
 
   const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
@@ -242,6 +266,11 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
       default: '""',
       help: '',
     },
+    timeFields: {
+      types: ['string'],
+      help: '',
+      multi: true,
+    },
   },
   async fn(input, args, { inspectorAdapters, abortSignal }) {
     const indexPatterns = getIndexPatterns();
@@ -253,16 +282,19 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
 
     // we should move searchSource creation inside courier request handler
-    const searchSource = new SearchSource();
+    const searchSource = searchService.searchSource.create();
+
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
     const response = await handleCourierRequest({
       searchSource,
       aggs,
+      indexPattern,
       timeRange: get(input, 'timeRange', undefined),
       query: get(input, 'query', undefined),
       filters: get(input, 'filters', undefined),
+      timeFields: args.timeFields,
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,

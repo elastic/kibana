@@ -18,8 +18,10 @@ const createLoginState = (options?: Partial<LoginState>) => {
     allowLogin: true,
     layout: 'form',
     requiresSecureConnection: false,
-    showLoginForm: true,
-    selector: { enabled: false, providers: [] },
+    selector: {
+      enabled: false,
+      providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
+    },
     ...options,
   } as LoginState;
 };
@@ -163,7 +165,9 @@ describe('LoginPage', () => {
 
     it('renders as expected when login is not enabled', async () => {
       const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(createLoginState({ showLoginForm: false }));
+      httpMock.get.mockResolvedValue(
+        createLoginState({ selector: { enabled: false, providers: [] } })
+      );
 
       const wrapper = shallow(
         <LoginPage
@@ -239,6 +243,28 @@ describe('LoginPage', () => {
           notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when loginHelp is set', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState({ loginHelp: '**some-help**' }));
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
         />
       );
 

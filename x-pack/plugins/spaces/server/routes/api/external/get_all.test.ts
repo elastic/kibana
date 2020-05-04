@@ -6,7 +6,6 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
@@ -14,9 +13,9 @@ import {
 import { CoreSetup, kibanaResponseFactory, IRouter } from 'src/core/server';
 import {
   loggingServiceMock,
-  elasticsearchServiceMock,
   httpServiceMock,
   httpServerMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
@@ -33,16 +32,16 @@ describe('GET /spaces/space', () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
 
-    const legacyAPI = createLegacyAPI({ spaces });
+    const coreStart = coreMock.createStart();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
     const log = loggingServiceMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
+    const service = new SpacesService(log);
     const spacesService = await service.setup({
       http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
+      getStartServices: async () => [coreStart, {}, {}],
       authorization: securityMock.createSetup().authz,
       getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
       config$: Rx.of(spacesConfig),
@@ -64,7 +63,8 @@ describe('GET /spaces/space', () => {
 
     initGetAllSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
       spacesService,
     });

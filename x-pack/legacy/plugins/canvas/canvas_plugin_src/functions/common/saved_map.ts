@@ -5,8 +5,6 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { Filter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
@@ -15,6 +13,7 @@ import {
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
+import { MapEmbeddableInput } from '../../../../../plugins/maps/public';
 
 interface Arguments {
   id: string;
@@ -24,32 +23,12 @@ interface Arguments {
   timerange: TimeRangeArg | null;
 }
 
-// Map embeddable is missing proper typings, so type is just to document what we
-// are expecting to pass to the embeddable
-export type SavedMapInput = EmbeddableInput & {
-  id: string;
-  isLayerTOCOpen: boolean;
-  timeRange?: TimeRange;
-  refreshConfig: {
-    isPaused: boolean;
-    interval: number;
-  };
-  hideFilterActions: true;
-  filters: DataFilter[];
-  mapCenter?: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  hiddenLayers?: string[];
-};
-
 const defaultTimeRange = {
   from: 'now-15m',
   to: 'now',
 };
 
-type Output = EmbeddableExpression<SavedMapInput>;
+type Output = EmbeddableExpression<MapEmbeddableInput>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
@@ -108,8 +87,8 @@ export function savedMap(): ExpressionFunctionDefinition<
           filters: getQueryFilters(filters),
           timeRange: args.timerange || defaultTimeRange,
           refreshConfig: {
-            isPaused: false,
-            interval: 0,
+            pause: false,
+            value: 0,
           },
 
           mapCenter: center,

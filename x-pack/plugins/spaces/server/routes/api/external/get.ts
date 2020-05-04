@@ -5,12 +5,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService, getSavedObjects } = deps;
+  const { externalRouter, spacesService } = deps;
 
   externalRouter.get(
     {
@@ -23,15 +24,13 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const spaceId = request.params.id;
-
-      const { SavedObjectsClient } = getSavedObjects();
       const spacesClient = await spacesService.scopedClient(request);
 
       try {
         const space = await spacesClient.get(spaceId);
         return response.ok({ body: space });
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();
         }
         return response.customError(wrapError(error));

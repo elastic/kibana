@@ -43,14 +43,35 @@ interface UserChangedSelectedEvent {
 interface AppRequestedResolverData {
   readonly type: 'appRequestedResolverData';
 }
+
 /**
- * When the user switches the active descendent of the Resolver.
+ * When the user switches the "active descendant" of the Resolver.
+ * The "active descendant" (from the point of view of the parent element)
+ * corresponds to the "current" child element. "active" or "current" here meaning
+ * the element that is focused on by the user's interactions with the UI, but
+ * not necessarily "selected" (see UserSelectedResolverNode below)
  */
 interface UserFocusedOnResolverNode {
   readonly type: 'userFocusedOnResolverNode';
   readonly payload: {
     /**
-     * Used to identify the process node that should be brought into view.
+     * Used to identify the process node that the user focused on (in the DOM)
+     */
+    readonly nodeId: string;
+  };
+}
+
+/**
+ * When the user "selects" a node in the Resolver
+ * "Selected" refers to the state of being the element that the
+ * user most recently "picked" (by e.g. pressing a button corresponding
+ * to the element in a list) as opposed to "active" or "current" (see UserFocusedOnResolverNode above).
+ */
+interface UserSelectedResolverNode {
+  readonly type: 'userSelectedResolverNode';
+  readonly payload: {
+    /**
+     * Used to identify the process node that the user selected
      */
     readonly nodeId: string;
   };
@@ -62,4 +83,5 @@ export type ResolverAction =
   | UserBroughtProcessIntoView
   | UserChangedSelectedEvent
   | AppRequestedResolverData
-  | UserFocusedOnResolverNode;
+  | UserFocusedOnResolverNode
+  | UserSelectedResolverNode;

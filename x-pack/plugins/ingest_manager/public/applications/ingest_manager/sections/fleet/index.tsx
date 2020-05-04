@@ -12,6 +12,8 @@ import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { fleetSetupRouteService } from '../../services';
+import { EnrollmentTokenListPage } from './enrollment_token_list_page';
+import { ListLayout } from './components/list_layout';
 
 export const FleetApp: React.FunctionComponent = () => {
   const core = useCore();
@@ -48,7 +50,14 @@ export const FleetApp: React.FunctionComponent = () => {
           <AgentDetailsPage />
         </Route>
         <Route path="/fleet/agents">
-          <AgentListPage />
+          <ListLayout>
+            <AgentListPage />
+          </ListLayout>
+        </Route>
+        <Route path="/fleet/enrollment-tokens">
+          <ListLayout>
+            <EnrollmentTokenListPage />
+          </ListLayout>
         </Route>
       </Switch>
     </Router>

@@ -18,15 +18,20 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from 'src/core/public';
 
-import { useAppDependencies } from '../app_dependencies';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 
 const MAX_SIMPLE_MESSAGE_LENGTH = 140;
 
-export const ToastNotificationText: FC<{ text: any }> = ({ text }) => {
-  const { overlays } = useAppDependencies();
+// Because of the use of `toMountPoint`, `useKibanaContext` doesn't work via `useAppDependencies`.
+// That's why we need to pass in `overlays` as a prop cannot get it via context.
+interface ToastNotificationTextProps {
+  overlays: CoreStart['overlays'];
+  text: any;
+}
 
+export const ToastNotificationText: FC<ToastNotificationTextProps> = ({ overlays, text }) => {
   if (typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
   }

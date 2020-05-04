@@ -15,7 +15,7 @@ import { jobs } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
-import { PrivilegesResponse } from '../../../../common/types/privileges';
+import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import {
   Job,
@@ -151,8 +151,15 @@ export const ml = {
     });
   },
 
-  validateJob({ job }: { job: Job }) {
-    const body = JSON.stringify({ job });
+  validateJob(payload: {
+    job: Job;
+    duration: {
+      start?: number;
+      end?: number;
+    };
+    fields?: any[];
+  }) {
+    const body = JSON.stringify(payload);
     return http<any>({
       path: `${basePath()}/validate/job`,
       method: 'POST',
@@ -293,18 +300,17 @@ export const ml = {
     });
   },
 
-  checkMlPrivileges() {
-    return http<PrivilegesResponse>({
+  checkMlCapabilities() {
+    return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
     });
   },
 
-  checkManageMLPrivileges() {
-    return http<PrivilegesResponse>({
+  checkManageMLCapabilities() {
+    return http<MlCapabilitiesResponse>({
       path: `${basePath()}/ml_capabilities`,
       method: 'GET',
-      query: { ignoreSpaces: true },
     });
   },
 

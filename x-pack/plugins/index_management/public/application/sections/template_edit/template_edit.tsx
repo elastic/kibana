@@ -7,11 +7,13 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+
+import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { decodePath, getTemplateDetailsLink } from '../../services/routing';
 import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
-import { Template } from '../../../../common/types';
+import { getFormatVersionFromQueryparams } from '../../lib/index_templates';
 
 interface MatchParams {
   name: string;
@@ -21,19 +23,26 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   match: {
     params: { name },
   },
+  location,
   history,
 }) => {
   const decodedTemplateName = decodePath(name);
+  const formatVersion =
+    getFormatVersionFromQueryparams(location) ?? DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT;
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName);
+  const { error, data: template, isLoading } = useLoadIndexTemplate(
+    decodedTemplateName,
+    formatVersion
+  );
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('templateEdit');
   }, []);
 
-  const onSave = async (updatedTemplate: Template) => {
+  const onSave = async (updatedTemplate: TemplateDeserialized) => {
     setIsSaving(true);
     setSaveError(null);
 
@@ -46,7 +55,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       return;
     }
 
-    history.push(getTemplateDetailsLink(name));
+    history.push(getTemplateDetailsLink(name, updatedTemplate._kbnMeta.formatVersion));
   };
 
   const clearSaveError = () => {

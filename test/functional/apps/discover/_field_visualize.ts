@@ -49,7 +49,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should visualize a field in area chart', async () => {
-      await PageObjects.discover.clickFieldListItem('phpmemory');
+      await PageObjects.discover.findFieldByName('phpmemory');
       log.debug('visualize a phpmemory field');
       await PageObjects.discover.clickFieldListItemVisualize('phpmemory');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -82,7 +82,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should preserve app filters in visualize', async () => {
       await filterBar.addFilter('bytes', 'is between', '3500', '4000');
-      await PageObjects.discover.clickFieldListItem('geo.src');
+      await PageObjects.discover.findFieldByName('geo.src');
       log.debug('visualize a geo.src field with filter applied');
       await PageObjects.discover.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -118,7 +118,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     it('should preserve query in visualize', async () => {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
-      await PageObjects.discover.clickFieldListItem('geo.dest');
+      await PageObjects.discover.findFieldByName('geo.dest');
       log.debug('visualize a geo.dest field with query applied');
       await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
       await PageObjects.header.waitUntilLoadingHasFinished();
