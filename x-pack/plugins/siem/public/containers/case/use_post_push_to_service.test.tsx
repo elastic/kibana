@@ -55,8 +55,8 @@ describe('usePostPushToService', () => {
         {
           connector_id: samplePush.connectorId,
           connector_name: samplePush.connectorName,
-          external_id: serviceConnector.incidentId,
-          external_title: serviceConnector.number,
+          external_id: serviceConnector.id,
+          external_title: serviceConnector.title,
           external_url: serviceConnector.url,
         },
         abortCtrl.signal

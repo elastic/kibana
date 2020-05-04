@@ -8,10 +8,14 @@ import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { AgentConfigListPage } from './list_page';
 import { AgentConfigDetailsPage } from './details_page';
 import { CreateDatasourcePage } from './create_datasource_page';
+import { EditDatasourcePage } from './edit_datasource_page';
 
 export const AgentConfigApp: React.FunctionComponent = () => (
   <Router>
     <Switch>
+      <Route path="/configs/:configId/edit-datasource/:datasourceId">
+        <EditDatasourcePage />
+      </Route>
       <Route path="/configs/:configId/add-datasource">
         <CreateDatasourcePage />
       </Route>

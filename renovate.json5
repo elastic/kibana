@@ -398,6 +398,8 @@
           '@types/good-squeeze',
           'inert',
           '@types/inert',
+          'accept',
+          '@types/accept',
         ],
       },
       {
@@ -844,6 +846,14 @@
         packageNames: [
           'semver',
           '@types/semver',
+        ],
+      },
+      {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
         ],
       },
       {

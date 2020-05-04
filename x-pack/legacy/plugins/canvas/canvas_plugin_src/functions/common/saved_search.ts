@@ -13,7 +13,7 @@ import {
 } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
-import { Filter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -24,7 +24,7 @@ type Output = EmbeddableExpression<Partial<SearchInput> & { id: SearchInput['id'
 
 export function savedSearch(): ExpressionFunctionDefinition<
   'savedSearch',
-  Filter | null,
+  ExpressionValueFilter | null,
   Arguments,
   Output
 > {
