@@ -101,6 +101,12 @@ describe('state selectors', () => {
         loading: false,
       },
     },
+    certificates: {
+      certs: {
+        data: null,
+        loading: false,
+      },
+    },
   };
 
   it('selects base path from state', () => {
