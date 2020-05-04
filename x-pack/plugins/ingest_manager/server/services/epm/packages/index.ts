@@ -43,7 +43,6 @@ export function createInstallableFrom<T>(
     ? {
         ...from,
         status: InstallationStatus.installed,
-        installedVersion: savedObject.attributes.version,
         savedObject,
       }
     : {
