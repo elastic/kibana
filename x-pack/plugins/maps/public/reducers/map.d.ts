@@ -42,9 +42,14 @@ export type MapContext = {
 
 export type MapSettings = {
   initialLocation: INITIAL_LOCATION;
-  initialLat: number;
-  initialLon: number;
-  initialZoom: number;
+  fixedLocation: {
+    lat: number;
+    lon: number;
+    zoom: number;
+  };
+  browserLocation: {
+    zoom: number;
+  };
   maxZoom: number;
   minZoom: number;
   showSpatialFilters: boolean;

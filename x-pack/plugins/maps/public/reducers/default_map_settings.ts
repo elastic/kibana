@@ -10,9 +10,8 @@ import { MapSettings } from './map';
 export function getDefaultMapSettings(): MapSettings {
   return {
     initialLocation: INITIAL_LOCATION.LAST_SAVED_LOCATION,
-    initialLat: 0,
-    initialLon: 0,
-    initialZoom: 2,
+    fixedLocation: { lat: 0, lon: 0, zoom: 2 },
+    browserLocation: { zoom: 2 },
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
     showSpatialFilters: true,

@@ -12,15 +12,15 @@ export async function getInitialView(
   goto: Goto | null,
   settings: MapSettings
 ): Promise<MapCenterAndZoom | null> {
-  if (settings.initialLocation === INITIAL_LOCATION.LAST_SAVED_LOCATION) {
-    return goto && goto.center ? goto.center : null;
-  } else if (settings.initialLocation === INITIAL_LOCATION.FIXED_LOCATION) {
+  if (settings.initialLocation === INITIAL_LOCATION.FIXED_LOCATION) {
     return {
-      lat: settings.initialLat,
-      lon: settings.initialLon,
-      zoom: settings.initialZoom,
+      lat: settings.fixedLocation.lat,
+      lon: settings.fixedLocation.lon,
+      zoom: settings.fixedLocation.zoom,
     };
-  } else if (settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION) {
+  }
+
+  if (settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION) {
     return await new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         // success callback
@@ -28,7 +28,7 @@ export async function getInitialView(
           resolve({
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
-            zoom: settings.initialZoom,
+            zoom: settings.browserLocation.zoom,
           });
         },
         // error callback
@@ -39,7 +39,7 @@ export async function getInitialView(
         }
       );
     });
-  } else {
-    return null;
   }
+
+  return goto && goto.center ? goto.center : null;
 }

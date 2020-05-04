@@ -28,7 +28,7 @@ import { ValidatedRange } from '../../components/validated_range';
 interface Props {
   center: MapCenter;
   settings: MapSettings;
-  updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
+  updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
   zoom: number;
 }
 
@@ -55,15 +55,30 @@ const initialLocationOptions = [
 
 export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Props) {
   const onZoomChange = (value: Value) => {
-    updateMapSetting('minZoom', Math.max(MIN_ZOOM, parseInt(value[0] as string, 10)));
-    updateMapSetting('maxZoom', Math.min(MAX_ZOOM, parseInt(value[1] as string, 10)));
+    const minZoom = Math.max(MIN_ZOOM, parseInt(value[0] as string, 10));
+    const maxZoom = Math.min(MAX_ZOOM, parseInt(value[1] as string, 10));
+    updateMapSetting('minZoom', minZoom);
+    updateMapSetting('maxZoom', maxZoom);
+
+    // ensure fixed zoom and browser zoom stay within defined min/max
+    if (settings.fixedLocation.zoom < minZoom) {
+      onFixedZoomChange(minZoom);
+    } else if (settings.fixedLocation.zoom > maxZoom) {
+      onFixedZoomChange(maxZoom);
+    }
+
+    if (settings.browserLocation.zoom < minZoom) {
+      onBrowserZoomChange(minZoom);
+    } else if (settings.browserLocation.zoom > maxZoom) {
+      onBrowserZoomChange(maxZoom);
+    }
   };
 
   const onInitialLocationChange = (optionId: string): void => {
     updateMapSetting('initialLocation', optionId);
   };
 
-  const onInitialLatChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onFixedLatChange = (event: ChangeEvent<HTMLInputElement>) => {
     let value = parseFloat(event.target.value);
     if (isNaN(value)) {
       value = 0;
@@ -72,10 +87,10 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
     } else if (value > 90) {
       value = 90;
     }
-    updateMapSetting('initialLat', value);
+    updateMapSetting('fixedLocation', { ...settings.fixedLocation, lat: value });
   };
 
-  const onInitialLonChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onFixedLonChange = (event: ChangeEvent<HTMLInputElement>) => {
     let value = parseFloat(event.target.value);
     if (isNaN(value)) {
       value = 0;
@@ -84,17 +99,23 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
     } else if (value > 180) {
       value = 180;
     }
-    updateMapSetting('initialLon', value);
+    updateMapSetting('fixedLocation', { ...settings.fixedLocation, lon: value });
   };
 
-  const onInitialZoomChange = (value: number) => {
-    updateMapSetting('initialZoom', value);
+  const onFixedZoomChange = (value: number) => {
+    updateMapSetting('fixedLocation', { ...settings.fixedLocation, zoom: value });
+  };
+
+  const onBrowserZoomChange = (value: number) => {
+    updateMapSetting('browserLocation', { zoom: value });
   };
 
   const useCurrentView = () => {
-    updateMapSetting('initialLat', center.lat);
-    updateMapSetting('initialLon', center.lon);
-    updateMapSetting('initialZoom', Math.round(zoom));
+    updateMapSetting('fixedLocation', {
+      lat: center.lat,
+      lon: center.lon,
+      zoom: Math.round(zoom),
+    });
   };
 
   function renderInitialLocationInputs() {
@@ -113,8 +134,16 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           min={settings.minZoom}
           max={settings.maxZoom}
           step={1}
-          value={settings.initialZoom}
-          onChange={onInitialZoomChange}
+          value={
+            settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION
+              ? settings.browserLocation.zoom
+              : settings.fixedLocation.zoom
+          }
+          onChange={
+            settings.initialLocation === INITIAL_LOCATION.BROWSER_LOCATION
+              ? onBrowserZoomChange
+              : onFixedZoomChange
+          }
           showInput
           showRange
           compressed
@@ -134,7 +163,11 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           })}
           display="columnCompressed"
         >
-          <EuiFieldNumber value={settings.initialLat} onChange={onInitialLatChange} compressed />
+          <EuiFieldNumber
+            value={settings.fixedLocation.lat}
+            onChange={onFixedLatChange}
+            compressed
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.maps.mapSettingsPanel.initialLonLabel', {
@@ -142,7 +175,11 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           })}
           display="columnCompressed"
         >
-          <EuiFieldNumber value={settings.initialLon} onChange={onInitialLonChange} compressed />
+          <EuiFieldNumber
+            value={settings.fixedLocation.lon}
+            onChange={onFixedLonChange}
+            compressed
+          />
         </EuiFormRow>
         {zoomFormRow}
         <EuiFlexGroup justifyContent="flexEnd">

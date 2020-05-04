@@ -28,7 +28,7 @@ interface Props {
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
   settings: MapSettings;
-  updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
+  updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
   zoom: number;
 }
 

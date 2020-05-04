@@ -36,7 +36,7 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     keepChanges: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
     },
-    updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => {
+    updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => {
       dispatch(updateMapSetting(settingKey, settingValue));
     },
   };
