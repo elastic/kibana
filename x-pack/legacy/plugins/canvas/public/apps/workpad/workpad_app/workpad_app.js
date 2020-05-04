@@ -43,7 +43,7 @@ export class WorkpadApp extends React.PureComponent {
           <div className="canvasLayout__cols">
             <div className="canvasLayout__stage">
               <div className="canvasLayout__stageHeader">
-                <WorkpadHeader />
+                <WorkpadHeader commit={this.interactivePageLayout || (() => {})} />
               </div>
 
               <div
@@ -66,7 +66,7 @@ export class WorkpadApp extends React.PureComponent {
 
             {isWriteable && (
               <div className="canvasLayout__sidebar hide-for-sharing">
-                <Sidebar commit={this.interactivePageLayout || (() => {})} />
+                <Sidebar />
               </div>
             )}
           </div>

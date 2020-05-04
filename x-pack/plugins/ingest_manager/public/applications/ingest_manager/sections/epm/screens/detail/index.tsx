@@ -32,7 +32,10 @@ export function Detail() {
       const packageInfo = response.data?.response;
       const title = packageInfo?.title;
       const name = packageInfo?.name;
-      const installedVersion = packageInfo?.installedVersion;
+      let installedVersion;
+      if (packageInfo && 'savedObject' in packageInfo) {
+        installedVersion = packageInfo.savedObject.attributes.version;
+      }
       const status: InstallStatus = packageInfo?.status as any;
 
       // track install status state
