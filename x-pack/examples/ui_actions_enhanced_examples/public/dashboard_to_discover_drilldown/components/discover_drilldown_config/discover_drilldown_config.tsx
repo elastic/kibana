@@ -44,6 +44,10 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
           grab this code and get started. It does not provide a complete working functionality but
           serves as a getting started example.
         </p>
+        <p>
+          Implementation of the actual <em>Go to Discover</em> drilldown is tracked in{' '}
+          <a href="https://github.com/elastic/kibana/issues/60227">#60227</a>
+        </p>
       </EuiCallOut>
       <EuiSpacer size="xl" />
       {!!onCustomIndexPatternToggle && (

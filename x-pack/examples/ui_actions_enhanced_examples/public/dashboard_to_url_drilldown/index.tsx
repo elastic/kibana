@@ -44,6 +44,10 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
           grab this code and get started. It does not provide a complete working functionality but
           serves as a getting started example.
         </p>
+        <p>
+          Implementation of the actual <em>Go to URL</em> drilldown is tracked in{' '}
+          <a href="https://github.com/elastic/kibana/issues/55324">#55324</a>
+        </p>
       </EuiCallOut>
       <EuiSpacer size="xl" />
       <EuiFormRow label="Enter target URL" fullWidth>
