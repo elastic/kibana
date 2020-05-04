@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { FC } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Link } from 'react-router-dom';
-import React, { FunctionComponent } from 'react';
 
 interface DetailPageLinkProps {
   /**
@@ -19,7 +19,7 @@ interface DetailPageLinkProps {
   linkParameters: string | undefined;
 }
 
-export const MonitorPageLink: FunctionComponent<DetailPageLinkProps> = ({
+export const MonitorPageLink: FC<DetailPageLinkProps> = ({
   children,
   monitorId,
   linkParameters,
