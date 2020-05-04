@@ -15,7 +15,7 @@ describe('getTargetBranches', () => {
       .mockResolvedValueOnce(['branchA']);
   });
 
-  describe('targetBranchChoices', () => {
+  describe('when `selectedTargetBranches=["7.x"]`', () => {
     let targetBranchChoices: BranchChoice[];
     beforeEach(async () => {
       const options = ({
@@ -66,6 +66,46 @@ describe('getTargetBranches', () => {
         name: '7.x',
         checked: true,
       });
+    });
+  });
+
+  describe('when `selectedTargetBranches=["8.0.0"]`', () => {
+    let targetBranchChoices: BranchChoice[];
+    beforeEach(async () => {
+      const options = ({
+        targetBranches: [],
+        multipleBranches: true,
+        targetBranchChoices: [
+          { name: '7.x' },
+          { name: '7.7' },
+          { name: '7.6' },
+          { name: '7.5' },
+        ] as BranchChoice[],
+        sourceBranch: 'master',
+      } as unknown) as BackportOptions;
+
+      const commits = [
+        {
+          sourceBranch: 'master',
+          selectedTargetBranches: ['8.0.0'],
+          sha: 'my-sha',
+          formattedMessage: '[backport] Bump to 5.1.3 (#62286)',
+          pullNumber: 62286,
+          existingTargetPullRequests: [],
+        },
+      ];
+
+      await getTargetBranches(options, commits);
+      targetBranchChoices = promptSpy.mock.calls[0][0].targetBranchChoices;
+    });
+
+    it('should list the correct branches', async () => {
+      expect(targetBranchChoices).toEqual([
+        { name: '7.x' },
+        { name: '7.7' },
+        { name: '7.6' },
+        { name: '7.5' },
+      ]);
     });
   });
 

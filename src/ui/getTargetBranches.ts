@@ -16,7 +16,7 @@ export function getTargetBranches(
   }
 
   // combine target branches from all commits
-  const targetBranchesFromLabels = flatMap(
+  const selectedTargetBranches = flatMap(
     commits,
     (commit) => commit.selectedTargetBranches
   ).filter(filterEmpty);
@@ -24,7 +24,7 @@ export function getTargetBranches(
   return promptForTargetBranches({
     targetBranchChoices: getTargetBranchChoices(
       options,
-      targetBranchesFromLabels
+      selectedTargetBranches
     ),
     isMultipleChoice: options.multipleBranches,
   });
@@ -32,29 +32,33 @@ export function getTargetBranches(
 
 function getTargetBranchChoices(
   options: BackportOptions,
-  targetBranchesFromLabels: string[]
+  selectedTargetBranches: string[]
 ) {
-  if (!options.targetBranchChoices) {
+  // remove sourceBranch from targetBranchChoices
+  const targetBranchChoices = options.targetBranchChoices?.filter(
+    (choice) => choice.name !== options.sourceBranch
+  );
+
+  if (!targetBranchChoices || isEmpty(targetBranchChoices)) {
     throw new HandledError('Missing target branch choices');
   }
 
-  // no labels were found
-  if (isEmpty(targetBranchesFromLabels)) {
-    return options.targetBranchChoices;
+  // whether the selected target branches exists
+  const hasSelectedTargetBranches = targetBranchChoices.some((c) =>
+    selectedTargetBranches.includes(c.name)
+  );
+
+  // use default target branch selection
+  if (!hasSelectedTargetBranches) {
+    return targetBranchChoices;
   }
 
-  return (
-    options.targetBranchChoices
-      // remove sourceBranch
-      .filter((choice) => choice.name !== options.sourceBranch)
-
-      // automatially select options based on pull request labels
-      .map((choice) => {
-        const isChecked = targetBranchesFromLabels.includes(choice.name);
-        return {
-          ...choice,
-          checked: isChecked,
-        };
-      })
-  );
+  // automatially select target branches based on pull request labels
+  return targetBranchChoices.map((choice) => {
+    const isChecked = selectedTargetBranches.includes(choice.name);
+    return {
+      ...choice,
+      checked: isChecked,
+    };
+  });
 }
