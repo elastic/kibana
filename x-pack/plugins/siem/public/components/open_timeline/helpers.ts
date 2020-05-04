@@ -251,78 +251,9 @@ export const queryTimelineById = <TCache>({
   }
 };
 
-export const epicUpdateTimeline = ({
-  duplicate,
-  id,
-  from,
-  notes,
-  timeline,
-  to,
-  ruleNote,
-}: UpdateTimeline) => {
-  const actions: Array<Action<any>> = [dispatchAddTimeline({ id, timeline })];
-
-  // if (from && to) {
-  //   actions.push(dispatchSetTimelineRangeDatePicker({ from, to }));
-  // }
-
-  // if (
-  //   timeline.kqlQuery != null &&
-  //   timeline.kqlQuery.filterQuery != null &&
-  //   timeline.kqlQuery.filterQuery.kuery != null &&
-  //   timeline.kqlQuery.filterQuery.kuery.expression !== ''
-  // ) {
-  //   actions.push(
-  //     dispatchSetKqlFilterQueryDraft({
-  //       id,
-  //       filterQueryDraft: {
-  //         kind: 'kuery',
-  //         expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-  //       },
-  //     })
-  //   );
-  //   actions.push(
-  //     dispatchApplyKqlFilterQuery({
-  //       id,
-  //       filterQuery: {
-  //         kuery: {
-  //           kind: 'kuery',
-  //           expression: timeline.kqlQuery.filterQuery.kuery.expression || '',
-  //         },
-  //         serializedQuery: timeline.kqlQuery.filterQuery.serializedQuery || '',
-  //       },
-  //     })
-  //   );
-  // }
-
-  // if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-  //   const getNewNoteId = (): string => uuid.v4();
-  //   const newNote = createNote({ newNote: ruleNote, getNewNoteId });
-  //   actions.push(dispatchUpdateNote({ note: newNote }));
-  //   actions.push(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
-  // }
-
-  // if (!duplicate) {
-  //   actions.push(
-  //     dispatchAddNotes({
-  //       notes:
-  //         notes != null
-  //           ? notes.map((note: NoteResult) => ({
-  //               created: note.created != null ? new Date(note.created) : new Date(),
-  //               id: note.noteId,
-  //               lastEdit: note.updated != null ? new Date(note.updated) : new Date(),
-  //               note: note.note || '',
-  //               user: note.updatedBy || 'unknown',
-  //               saveObjectId: note.noteId,
-  //               version: note.version,
-  //             }))
-  //           : [],
-  //     })
-  //   );
-  // }
-
-  return actions;
-};
+export const epicUpdateTimeline = ({ id, timeline }: UpdateTimeline) => [
+  dispatchAddTimeline({ id, timeline }),
+];
 
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
