@@ -86,7 +86,7 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
                           status: 'success',
                           concerned_actions: ['download_model'],
                         },
-                        eventing: {
+                        events: {
                           status: 'failure',
                           concerned_actions: ['ingest_events_config'],
                         },

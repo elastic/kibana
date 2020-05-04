@@ -6,6 +6,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import {
   HostPolicyResponseActions,
   HostPolicyResponseActionStatus,
@@ -13,9 +14,25 @@ import {
   Immutable,
   ImmutableArray,
 } from '../../../../../../common/types';
+import { formatResponse } from './policyResponseFriendlyNames';
 
-const HostPolicyResponse = styled.div`
-margin: {props => props.theme.eui.ruleMargins.marginXLarge};
+const PolicyResponseConfigAccordion = styled(EuiAccordion)`
+  > .euiAccordion__triggerWrapper > .euiAccordion__optionalAction {
+    margin-right: ${props => props.theme.eui.ruleMargins.marginMedium};
+  }
+  &.euiAccordion-isOpen {
+    background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+  }
+  .euiAccordion__childWrapper {
+    background-color: ${props => props.theme.eui.euiColorLightestShade};
+  }
+  .policyResponseFailedBadge {
+    background-color: ${props => props.theme.eui.euiColorDanger};
+    color: ${props => props.theme.eui.euiColorEmptyShade};
+  }
+  :hover:not(.euiAccordion-isOpen) {
+    background-color: ${props => props.theme.eui.euiColorLightestShade};
+  }
 `;
 
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
@@ -36,7 +53,7 @@ const ResponseActions = memo(
     actionStatus: Partial<HostPolicyResponseActions>;
   }) => {
     return (
-      <HostPolicyResponse>
+      <>
         {actions.map(action => {
           const statuses = actionStatus[action];
           if (statuses === undefined) {
@@ -46,20 +63,25 @@ const ResponseActions = memo(
             <EuiAccordion
               id={action}
               key={action}
-              buttonContent={action}
+              buttonContent={
+                <EuiText size="xs">
+                  <h4>{formatResponse(action)}</h4>
+                </EuiText>
+              }
+              paddingSize="s"
               extraAction={
                 <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}>
-                  <p>{statuses.status}</p>
+                  <p>{formatResponse(statuses.status)}</p>
                 </EuiHealth>
               }
             >
-              <div>
+              <EuiText size="xs">
                 <p>{statuses.message}</p>
-              </div>
+              </EuiText>
             </EuiAccordion>
           );
         })}
-      </HostPolicyResponse>
+      </>
     );
   }
 );
@@ -76,20 +98,23 @@ export const PolicyResponse = memo(
     responseActionStatus: Partial<HostPolicyResponseActions>;
   }) => {
     return (
-      <div>
+      <>
         {Object.entries(responseConfig).map(([key, val]) => {
           return (
-            <EuiAccordion
+            <PolicyResponseConfigAccordion
               id={key}
-              className="hostPolicyResponseActionAccordion"
-              buttonContent={key}
+              buttonContent={
+                <EuiText size="s">
+                  <p>{formatResponse(key)}</p>
+                </EuiText>
+              }
               key={key}
+              paddingSize="m"
               extraAction={
                 val.status === 'failure' && (
-                  <>
-                    <span>Failed Processes</span>
-                    <EuiNotificationBadge color="accent">2</EuiNotificationBadge>
-                  </>
+                  <EuiNotificationBadge className="policyResponseFailedBadge">
+                    2
+                  </EuiNotificationBadge>
                 )
               }
             >
@@ -97,10 +122,10 @@ export const PolicyResponse = memo(
                 actions={val.concerned_actions}
                 actionStatus={responseActionStatus}
               />
-            </EuiAccordion>
+            </PolicyResponseConfigAccordion>
           );
         })}
-      </div>
+      </>
     );
   }
 );
