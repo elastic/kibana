@@ -109,7 +109,12 @@ export async function setupFleet(
   });
 
   // save fleet admin user
-  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+  if (!defaultOutputId) {
+    throw new Error('Default output does not exist');
+  }
+
+  await outputService.updateOutput(soClient, defaultOutputId, {
     fleet_enroll_username: FLEET_ENROLL_USERNAME,
     fleet_enroll_password: password,
   });
@@ -145,7 +150,7 @@ async function addPackageToConfig(
     config.namespace
   );
   newDatasource.inputs = await datasourceService.assignPackageStream(
-    { pkgName: packageToInstall.name, pkgVersion: packageToInstall.version },
+    packageInfo,
     newDatasource.inputs
   );
 

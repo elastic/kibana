@@ -20,6 +20,7 @@
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/dev-utils');
 const webpack = require('webpack');
 
@@ -116,6 +117,16 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',
+    }),
+    new CompressionPlugin({
+      algorithm: 'brotliCompress',
+      filename: '[path].br',
+      test: /\.(js|css)$/,
+    }),
+    new CompressionPlugin({
+      algorithm: 'gzip',
+      filename: '[path].gz',
+      test: /\.(js|css)$/,
     }),
   ],
 });

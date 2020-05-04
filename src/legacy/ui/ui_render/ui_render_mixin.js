@@ -96,9 +96,12 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? await uiSettings.get('theme:darkMode')
             : false;
 
+        const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
-        const regularBundlePath = `${basePath}/bundles`;
-        const dllBundlePath = `${basePath}/built_assets/dlls`;
+
+        const regularBundlePath = `${basePath}/${buildHash}/bundles`;
+        const dllBundlePath = `${basePath}/${buildHash}/built_assets/dlls`;
+
         const dllStyleChunks = DllCompiler.getRawDllConfig().chunks.map(
           chunk => `${dllBundlePath}/vendors${chunk}.style.dll.css`
         );
@@ -108,15 +111,15 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         const styleSheetPaths = [
           ...(isCore ? [] : dllStyleChunks),
-          `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+          `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
-                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
+                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
-                `${basePath}/bundles/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
@@ -131,7 +134,7 @@ export function uiRenderMixin(kbnServer, server, config) {
                   )
                   .map(path =>
                     path.localPath.endsWith('.scss')
-                      ? `${basePath}/built_assets/css/${path.publicPath}`
+                      ? `${basePath}/${buildHash}/built_assets/css/${path.publicPath}`
                       : `${basePath}/${path.publicPath}`
                   )
                   .reverse(),
@@ -142,8 +145,9 @@ export function uiRenderMixin(kbnServer, server, config) {
           // load these plugins first, they are "shared" and other bundles access their
           // public/index exports without considering topographic sorting by plugin deps (for now)
           'kibanaUtils',
-          'esUiShared',
           'kibanaReact',
+          'data',
+          'esUiShared',
           ...kbnServer.newPlatform.__internals.uiPlugins.public.keys()
         );
 
