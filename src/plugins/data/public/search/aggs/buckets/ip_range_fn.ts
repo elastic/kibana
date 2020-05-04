@@ -68,7 +68,6 @@ export const aggIpRange = (): FunctionDefinition => ({
     },
     ipRangeType: {
       types: ['string'],
-      required: false,
       options: ['mask', 'fromTo'],
       help: i18n.translate('data.search.aggs.buckets.ipRange.ipRangeType.help', {
         defaultMessage:
@@ -77,7 +76,6 @@ export const aggIpRange = (): FunctionDefinition => ({
     },
     ranges: {
       types: ['string'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.ipRange.ranges.help', {
         defaultMessage: 'Serialized ranges to use for this aggregation.',
       }),

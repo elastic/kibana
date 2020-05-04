@@ -23,63 +23,84 @@ import { ExpressionFunctionDefinition } from '../../../../../expressions/public'
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggDateRange';
+const fnName = 'aggHistogram';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.DATE_RANGE>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.HISTOGRAM>;
 
-type Arguments = Assign<AggArgs, { ranges?: string }>;
+type Arguments = Assign<AggArgs, { extended_bounds?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
-export const aggDateRange = (): FunctionDefinition => ({
+export const aggHistogram = (): FunctionDefinition => ({
   name: fnName,
-  help: i18n.translate('data.search.aggs.function.buckets.dateRange.help', {
-    defaultMessage: 'Generates a serialized agg config for a Date Range agg',
+  help: i18n.translate('data.search.aggs.function.buckets.histogram.help', {
+    defaultMessage: 'Generates a serialized agg config for a Histogram agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.id.help', {
+      help: i18n.translate('data.search.aggs.buckets.histogram.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.dateRange.enabled.help', {
+      help: i18n.translate('data.search.aggs.buckets.histogram.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.schema.help', {
+      help: i18n.translate('data.search.aggs.buckets.histogram.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
     field: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.field.help', {
+      required: true,
+      help: i18n.translate('data.search.aggs.buckets.histogram.field.help', {
         defaultMessage: 'Field to use for this aggregation',
       }),
     },
-    ranges: {
+    interval: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.ranges.help', {
-        defaultMessage: 'Serialized ranges to use for this aggregation.',
+      required: true,
+      help: i18n.translate('data.search.aggs.buckets.histogram.interval.help', {
+        defaultMessage: 'Interval to use for this aggregation',
       }),
     },
-    time_zone: {
+    intervalBase: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.intervalBase.help', {
+        defaultMessage: 'IntervalBase to use for this aggregation',
+      }),
+    },
+    min_doc_count: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.minDocCount.help', {
+        defaultMessage: 'Specifies whether to use min_doc_count for this aggregation',
+      }),
+    },
+    has_extended_bounds: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.hasExtendedBounds.help', {
+        defaultMessage: 'Specifies whether to use has_extended_bounds for this aggregation',
+      }),
+    },
+    extended_bounds: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.timeZone.help', {
-        defaultMessage: 'Time zone to use for this aggregation.',
+      help: i18n.translate('data.search.aggs.buckets.histogram.extendedBounds.help', {
+        defaultMessage:
+          'With extended_bounds setting, you now can "force" the histogram aggregation to start building buckets on a specific min value and also keep on building buckets up to a max value ',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.dateRange.json.help', {
+      help: i18n.translate('data.search.aggs.buckets.histogram.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
@@ -93,11 +114,11 @@ export const aggDateRange = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.DATE_RANGE,
+        type: BUCKET_TYPES.HISTOGRAM,
         params: {
           ...rest,
+          extended_bounds: getParsedValue(args, 'extended_bounds'),
           json: getParsedValue(args, 'json'),
-          ranges: getParsedValue(args, 'ranges'),
         },
       },
     };

@@ -68,7 +68,6 @@ export const aggRange = (): FunctionDefinition => ({
     },
     ranges: {
       types: ['string'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.range.ranges.help', {
         defaultMessage: 'Serialized ranges to use for this aggregation.',
       }),

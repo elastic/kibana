@@ -114,6 +114,8 @@ import { aggDateRange } from './buckets/date_range_fn';
 import { aggRange } from './buckets/range_fn';
 import { aggGeoTile } from './buckets/geo_tile_fn';
 import { aggGeoHash } from './buckets/geo_hash_fn';
+import { aggHistogram } from './buckets/histogram_fn';
+import { aggDateHistogram } from './buckets/date_histogram_fn';
 import { aggTerms } from './buckets/terms_fn';
 
 export const getAggTypesFunctions = () => [
@@ -125,5 +127,7 @@ export const getAggTypesFunctions = () => [
   aggRange,
   aggGeoTile,
   aggGeoHash,
+  aggDateHistogram,
+  aggHistogram,
   aggTerms,
 ];

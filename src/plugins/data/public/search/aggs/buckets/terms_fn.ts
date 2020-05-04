@@ -71,6 +71,7 @@ export const aggTerms = (): FunctionDefinition => ({
     order: {
       types: ['string'],
       required: true,
+      options: ['asc', 'desc'],
       help: i18n.translate('data.search.aggs.buckets.terms.order.help', {
         defaultMessage: 'Order in which to return the results: asc or desc',
       }),

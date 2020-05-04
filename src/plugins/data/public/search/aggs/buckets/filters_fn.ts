@@ -61,7 +61,6 @@ export const aggFilters = (): FunctionDefinition => ({
     },
     filters: {
       types: ['string'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.filters.filters.help', {
         defaultMessage: 'Filters to use for this aggregation',
       }),

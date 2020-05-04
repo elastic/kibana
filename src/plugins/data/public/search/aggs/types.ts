@@ -30,6 +30,8 @@ import {
   AggParamsGeoTile,
   AggParamsGeoHash,
   AggParamsTerms,
+  AggParamsHistogram,
+  AggParamsDateHistogram,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
@@ -96,5 +98,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
   [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
+  [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
+  [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
 }

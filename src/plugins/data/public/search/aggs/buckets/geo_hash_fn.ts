@@ -67,35 +67,30 @@ export const aggGeoHash = (): FunctionDefinition => ({
     },
     useGeocentroid: {
       types: ['boolean'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.useGeocentroid.help', {
         defaultMessage: 'Specifies whether to use geocentroid for this aggregation',
       }),
     },
     autoPrecision: {
       types: ['boolean'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.autoPrecision.help', {
         defaultMessage: 'Specifies whether to use auto precision for this aggregation',
       }),
     },
     isFilteredByCollar: {
       types: ['boolean'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.isFilteredByCollar.help', {
         defaultMessage: 'Specifies whether to filter by collar',
       }),
     },
     boundingBox: {
       types: ['string'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.boundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
     },
     precision: {
       types: ['number'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoHash.precision.help', {
         defaultMessage: 'Precision to use for this aggregation.',
       }),

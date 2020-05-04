@@ -65,14 +65,12 @@ export const aggGeoTile = (): FunctionDefinition => ({
     },
     useGeocentroid: {
       types: ['boolean'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoTile.useGeocentroid.help', {
         defaultMessage: 'Specifies whether to use geocentroid for this aggregation',
       }),
     },
     precision: {
       types: ['number'],
-      required: false,
       help: i18n.translate('data.search.aggs.buckets.geoTile.precision.help', {
         defaultMessage: 'Precision to use for this aggregation.',
       }),
