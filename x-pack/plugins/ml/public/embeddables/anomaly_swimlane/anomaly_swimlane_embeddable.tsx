@@ -87,6 +87,7 @@ export class AnomalySwimlaneEmbeddable extends Embeddable<
   }
 
   public render(node: HTMLElement) {
+    super.render(node);
     this.node = node;
 
     ReactDOM.render(
