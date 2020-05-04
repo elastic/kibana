@@ -4,6 +4,7 @@ def getSkippablePaths() {
     /^docs\//,
     /^rfcs\//,
     /^.ci\/.+\.yml$/,
+    /^.ci\/es-snapshots\//,
     /^\.github\//,
     /\.md$/,
   ]
