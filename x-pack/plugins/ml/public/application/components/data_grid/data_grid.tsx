@@ -196,7 +196,9 @@ function pickProps(props: Props) {
     props.sortingColumns,
     props.status,
     props.tableItems,
-    props.toastNotifications,
     props.visibleColumns,
+    ...(isWithHeader(props)
+      ? [props.copyToClipboard, props.copyToClipboardDescription, props.title]
+      : []),
   ];
 }
