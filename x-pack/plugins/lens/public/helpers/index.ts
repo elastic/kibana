@@ -5,3 +5,4 @@
  */
 
 export { addEmbeddableToDashboardUrl, getUrlVars } from './url_helper';
+export { isRisonObject } from './is_rison_object';
