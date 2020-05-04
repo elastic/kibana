@@ -26,12 +26,12 @@ export const TlsTranslations = {
 
 {expiringConditionalOpen}
 Expiring cert count: {expiringCount}
-Expiring Certificates: {expiringCommonNameAndDate}.
+Expiring Certificates: {expiringCommonNameAndDate}
 {expiringConditionalClose}    
 
 {agingConditionalOpen}
 Aging cert count: {agingCount}
-Aging Certificates: {agingCommonNameAndDate}.
+Aging Certificates: {agingCommonNameAndDate}
 {agingConditionalClose}
 `,
     values: {

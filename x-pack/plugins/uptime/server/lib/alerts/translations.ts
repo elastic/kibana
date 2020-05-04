@@ -117,7 +117,7 @@ export const tlsTranslations = {
   ],
   validAfterExpiredString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.uptime.alerts.tls.validAfterExpiredString', {
-      defaultMessage: `expired on {date} {relativeDate} days ago`,
+      defaultMessage: `expired on {date} {relativeDate} days ago.`,
       values: {
         date,
         relativeDate,
