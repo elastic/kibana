@@ -23,6 +23,7 @@ import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 import { TableRowActions } from '../../../components/table_row_actions';
+import { useKibanaLink } from '../../../hooks/use_kibana_link';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -56,12 +57,13 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
 );
 
 const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
+  const url = datastream.dashboards.length > 0 ? datastream.dashboards[0].id : '';
   return (
     <TableRowActions
       items={[
         <EuiContextMenuItem
           icon="dashboardApp"
-          href=""
+          href={useKibanaLink(`/dashboard/${url}`)}
           key="viewDashboard"
           disabled={!(datastream.dashboards?.length > 0)}
         >
