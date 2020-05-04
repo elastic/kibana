@@ -3,5 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { schema } from '@kbn/config-schema';
 
-export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;
+export const GetPolicyResponseSchema = {
+  query: schema.object({
+    hostId: schema.string(),
+  }),
+};

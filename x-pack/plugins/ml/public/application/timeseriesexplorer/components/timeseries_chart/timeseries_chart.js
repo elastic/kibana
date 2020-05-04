@@ -33,12 +33,13 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
 import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
-import { getTimeBucketsFromCache } from '../../../util/time_buckets';
+import { TimeBuckets } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
+import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 import {
   ANNOTATION_MASK_ID,
   getAnnotationBrush,
@@ -112,7 +113,6 @@ class TimeseriesChartIntl extends Component {
     zoomTo: PropTypes.object,
     zoomFromFocusLoaded: PropTypes.object,
     zoomToFocusLoaded: PropTypes.object,
-    tooltipService: PropTypes.object.isRequired,
   };
 
   rowMouseenterSubscriber = null;
@@ -582,8 +582,6 @@ class TimeseriesChartIntl extends Component {
     const contextYScale = this.contextYScale;
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
 
-    const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
-
     const focusChart = d3.select('.focus-chart');
 
     // Update the plot interval labels.
@@ -693,7 +691,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -721,8 +719,7 @@ class TimeseriesChartIntl extends Component {
       focusChartHeight,
       this.focusXScale,
       showAnnotations,
-      showFocusChartTooltip,
-      hideFocusChartTooltip
+      showFocusChartTooltip
     );
 
     // disable brushing (creation of annotations) when annotations aren't shown
@@ -756,7 +753,7 @@ class TimeseriesChartIntl extends Component {
       .on('mouseover', function(d) {
         showFocusChartTooltip(d, this);
       })
-      .on('mouseout', () => this.props.tooltipService.hide());
+      .on('mouseout', () => mlChartTooltipService.hide());
 
     // Update all dots to new positions.
     dots
@@ -797,7 +794,7 @@ class TimeseriesChartIntl extends Component {
       .on('mouseover', function(d) {
         showFocusChartTooltip(d, this);
       })
-      .on('mouseout', () => this.props.tooltipService.hide());
+      .on('mouseout', () => mlChartTooltipService.hide());
 
     // Update all markers to new positions.
     multiBucketMarkers
@@ -857,7 +854,7 @@ class TimeseriesChartIntl extends Component {
         .on('mouseover', function(d) {
           showFocusChartTooltip(d, this);
         })
-        .on('mouseout', () => this.props.tooltipService.hide());
+        .on('mouseout', () => mlChartTooltipService.hide());
 
       // Update all dots to new positions.
       forecastDots
@@ -1022,7 +1019,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', cxtChartHeight + swlHeight);
 
     // Add x axis.
-    const timeBuckets = getTimeBucketsFromCache();
+    const timeBuckets = new TimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1638,7 +1635,7 @@ class TimeseriesChartIntl extends Component {
       }
     }
 
-    this.props.tooltipService.show(tooltipData, circle, {
+    mlChartTooltipService.show(tooltipData, circle, {
       x: xOffset,
       y: 0,
     });
@@ -1716,7 +1713,7 @@ class TimeseriesChartIntl extends Component {
     d3.select('.focus-chart-markers')
       .selectAll('.anomaly-marker.highlighted')
       .remove();
-    this.props.tooltipService.hide();
+    mlChartTooltipService.hide();
   }
 
   shouldComponentUpdate() {
