@@ -12,12 +12,19 @@ import {
 } from '../../../../../common/runtime_types';
 import { MonitorListComponent } from '../monitor_list';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import * as redux from 'react-redux';
 
 describe('MonitorList component', () => {
   let result: MonitorSummaryResult;
   let localStorageMock: any;
 
   beforeEach(() => {
+    const useDispatchSpy = jest.spyOn(redux, 'useDispatch');
+    useDispatchSpy.mockReturnValue(jest.fn());
+
+    const useSelectorSpy = jest.spyOn(redux, 'useSelector');
+    useSelectorSpy.mockReturnValue(true);
+
     localStorageMock = {
       getItem: jest.fn().mockImplementation(() => '25'),
       setItem: jest.fn(),
