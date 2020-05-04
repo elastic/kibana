@@ -8,7 +8,7 @@ import React from 'react';
 import { StartDependencies as Start } from '../plugin';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { StartServicesGetter } from '../../../../../src/plugins/kibana_utils/public';
-import { PlaceContext, ActionContext, Config, CollectConfigProps } from './types';
+import { ActionContext, Config, CollectConfigProps } from './types';
 import { CollectConfigContainer } from './collect_config_container';
 import { SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
@@ -25,8 +25,7 @@ export interface Params {
   start: StartServicesGetter<Pick<Start, 'data'>>;
 }
 
-export class DashboardToDiscoverDrilldown
-  implements Drilldown<Config, PlaceContext, ActionContext> {
+export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionContext> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = SAMPLE_DASHBOARD_TO_DISCOVER_DRILLDOWN;

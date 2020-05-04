@@ -6,7 +6,7 @@
 
 import { ActionFactoryRegistry } from '../types';
 import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
-import { DrilldownDefinition, DrilldownActionFactoryContext } from '../drilldowns';
+import { DrilldownDefinition } from '../drilldowns';
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
@@ -61,7 +61,6 @@ export class UiActionsServiceEnhancements {
    */
   public readonly registerDrilldown = <
     Config extends object = object,
-    PlaceContext extends object = object,
     ExecutionContext extends object = object
   >({
     id: factoryId,
@@ -73,12 +72,8 @@ export class UiActionsServiceEnhancements {
     euiIcon,
     execute,
     getHref,
-  }: DrilldownDefinition<Config, PlaceContext, ExecutionContext>): void => {
-    const actionFactory: ActionFactoryDefinition<
-      Config,
-      DrilldownActionFactoryContext<PlaceContext>,
-      ExecutionContext
-    > = {
+  }: DrilldownDefinition<Config, ExecutionContext>): void => {
+    const actionFactory: ActionFactoryDefinition<Config, object, ExecutionContext> = {
       id: factoryId,
       order,
       CollectConfig,
@@ -95,11 +90,7 @@ export class UiActionsServiceEnhancements {
         execute: async context => await execute(serializedAction.config, context),
         getHref: getHref ? async context => getHref(serializedAction.config, context) : undefined,
       }),
-    } as ActionFactoryDefinition<
-      Config,
-      DrilldownActionFactoryContext<PlaceContext>,
-      ExecutionContext
-    >;
+    } as ActionFactoryDefinition<Config, object, ExecutionContext>;
 
     this.registerActionFactory(actionFactory);
   };

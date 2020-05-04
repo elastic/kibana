@@ -12,7 +12,6 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedSerializedAction,
   UiActionsEnhancedSerializedEvent,
-  UiActionsEnhancedDrilldownActionFactoryContext as DrilldownFactoryContext,
 } from '../../../../advanced_ui_actions/public';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';

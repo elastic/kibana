@@ -5,7 +5,6 @@
  */
 
 import { ActionFactoryDefinition } from '../dynamic_actions';
-import { DrilldownActionFactoryContext } from './drilldown_action_factory_context';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -27,7 +26,6 @@ import { DrilldownActionFactoryContext } from './drilldown_action_factory_contex
  */
 export interface DrilldownDefinition<
   Config extends object = object,
-  PlaceContext extends object = object,
   ExecutionContext extends object = object
 > {
   /**
@@ -44,11 +42,7 @@ export interface DrilldownDefinition<
   /**
    * Function that returns default config for this drilldown.
    */
-  createConfig: ActionFactoryDefinition<
-    Config,
-    DrilldownActionFactoryContext<PlaceContext>,
-    ExecutionContext
-  >['createConfig'];
+  createConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['createConfig'];
 
   /**
    * `UiComponent` that collections config for this drilldown. You can create
@@ -69,21 +63,13 @@ export interface DrilldownDefinition<
    * export const CollectConfig = uiToReactComponent(ReactCollectConfig);
    * ```
    */
-  CollectConfig: ActionFactoryDefinition<
-    Config,
-    DrilldownActionFactoryContext<PlaceContext>,
-    ExecutionContext
-  >['CollectConfig'];
+  CollectConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['CollectConfig'];
 
   /**
    * A validator function for the config object. Should always return a boolean
    * given any input.
    */
-  isConfigValid: ActionFactoryDefinition<
-    Config,
-    DrilldownActionFactoryContext<PlaceContext>,
-    ExecutionContext
-  >['isConfigValid'];
+  isConfigValid: ActionFactoryDefinition<Config, object, ExecutionContext>['isConfigValid'];
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.

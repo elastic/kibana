@@ -9,7 +9,6 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
 import {
-  EmbeddableContext,
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
@@ -23,8 +22,7 @@ export interface Config {
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 
-export class DashboardHelloWorldDrilldown
-  implements Drilldown<Config, EmbeddableContext, ActionContext> {
+export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 6;

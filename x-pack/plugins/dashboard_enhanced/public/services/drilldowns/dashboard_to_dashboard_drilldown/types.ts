@@ -5,13 +5,11 @@
  */
 
 import {
-  EmbeddableContext,
   ValueClickTriggerContext,
   RangeSelectTriggerContext,
   IEmbeddable,
 } from '../../../../../../../src/plugins/embeddable/public';
 
-export type PlaceContext = EmbeddableContext;
 export type ActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickTriggerContext<T>
   | RangeSelectTriggerContext<T>;

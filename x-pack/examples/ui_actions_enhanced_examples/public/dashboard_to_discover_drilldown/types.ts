@@ -7,11 +7,9 @@
 import {
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
-  EmbeddableContext,
 } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
 
-export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
 
 export interface Config {

@@ -9,7 +9,6 @@ import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@ela
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
 import {
-  EmbeddableContext,
   RangeSelectTriggerContext,
   ValueClickTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
@@ -24,7 +23,6 @@ function isValidUrl(url: string) {
   }
 }
 
-export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
 
 export interface Config {
@@ -36,7 +34,7 @@ export type CollectConfigProps = CollectConfigPropsBase<Config>;
 
 const SAMPLE_DASHBOARD_TO_URL_DRILLDOWN = 'SAMPLE_DASHBOARD_TO_URL_DRILLDOWN';
 
-export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, ActionContext> {
+export class DashboardToUrlDrilldown implements Drilldown<Config, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_TO_URL_DRILLDOWN;
 
   public readonly order = 8;

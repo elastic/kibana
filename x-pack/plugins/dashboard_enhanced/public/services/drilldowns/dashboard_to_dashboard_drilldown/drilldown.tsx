@@ -7,7 +7,7 @@
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
 import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
-import { PlaceContext, ActionContext, Config } from './types';
+import { ActionContext, Config } from './types';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../advanced_ui_actions/public';
@@ -26,7 +26,7 @@ export interface Params {
 }
 
 export class DashboardToDashboardDrilldown
-  implements Drilldown<Config, PlaceContext, ActionContext<VisualizeEmbeddableContract>> {
+  implements Drilldown<Config, ActionContext<VisualizeEmbeddableContract>> {
   constructor(protected readonly params: Params) {}
 
   public readonly id = DASHBOARD_TO_DASHBOARD_DRILLDOWN;
@@ -142,14 +142,13 @@ export class DashboardToDashboardDrilldown
       }
     }
 
-    return this.params
-      .start()
-      .plugins.share.urlGenerators.getUrlGenerator(DASHBOARD_APP_URL_GENERATOR)
-      .createUrl({
-        dashboardId: config.dashboardId,
-        query: config.useCurrentFilters ? query : undefined,
-        timeRange,
-        filters: [...existingFilters, ...filtersFromEvent],
-      });
+    const { plugins } = this.params.start();
+
+    return plugins.share.urlGenerators.getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
+      dashboardId: config.dashboardId,
+      query: config.useCurrentFilters ? query : undefined,
+      timeRange,
+      filters: [...existingFilters, ...filtersFromEvent],
+    });
   };
 }

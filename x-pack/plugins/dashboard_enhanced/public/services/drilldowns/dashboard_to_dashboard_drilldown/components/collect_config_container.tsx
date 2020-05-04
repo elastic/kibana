@@ -11,9 +11,7 @@ import { SimpleSavedObject } from '../../../../../../../../src/core/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
 import { CollectConfigProps } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { UiActionsEnhancedDrilldownActionFactoryContext as DrilldownFactoryContext } from '../../../../../../advanced_ui_actions/public';
 import { Config } from '../types';
-import { EmbeddableContext } from '../../../../../../../../src/plugins/embeddable/public';
 import { Params } from '../drilldown';
 
 const mergeDashboards = (
@@ -36,8 +34,7 @@ const dashboardSavedObjectToMenuItem = (
   label: savedObject.attributes.title,
 });
 
-interface DashboardDrilldownCollectConfigProps
-  extends CollectConfigProps<Config, DrilldownFactoryContext<EmbeddableContext>> {
+interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config> {
   params: Params;
 }
 
@@ -146,7 +143,6 @@ export class CollectConfigContainer extends React.Component<
 
   private readonly debouncedLoadDashboards: (searchString?: string) => void;
   private async loadDashboards(searchString?: string) {
-    const currentDashboardId = this.props.context.placeContext.embeddable?.parent?.id;
     this.setState({ searchString, isLoading: true });
     const savedObjectsClient = this.props.params.start().core.savedObjects.client;
     const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
@@ -161,9 +157,7 @@ export class CollectConfigContainer extends React.Component<
     if (!this.isMounted) return;
     if (searchString !== this.state.searchString) return;
 
-    const dashboardList = savedObjects
-      .map(dashboardSavedObjectToMenuItem)
-      .filter(({ value }) => !currentDashboardId || value !== currentDashboardId);
+    const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
 
     this.setState({ dashboards: dashboardList, isLoading: false });
   }

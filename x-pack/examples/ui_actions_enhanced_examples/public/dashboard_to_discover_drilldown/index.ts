@@ -10,7 +10,6 @@ export {
   Params as DashboardToDiscoverDrilldownParams,
 } from './drilldown';
 export {
-  PlaceContext as DashboardToDiscoverPlaceContext,
   ActionContext as DashboardToDiscoverActionContext,
   Config as DashboardToDiscoverConfig,
 } from './types';
