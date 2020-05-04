@@ -97,7 +97,7 @@ function FormRow({
                 onChange(
                   setting.key,
                   amountAndUnitToString({
-                    amount: parseInt(e.target.value, 10),
+                    amount: e.target.value,
                     unit
                   })
                 )

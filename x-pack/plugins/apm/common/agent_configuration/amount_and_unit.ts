@@ -15,6 +15,9 @@ export function amountAndUnitToObject(value: string): AmountAndUnit {
   return { amount: parseInt(amount, 10), unit };
 }
 
-export function amountAndUnitToString({ amount, unit }: AmountAndUnit) {
+export function amountAndUnitToString({
+  amount,
+  unit
+}: Omit<AmountAndUnit, 'amount'> & { amount: string | number }) {
   return `${amount}${unit}`;
 }
