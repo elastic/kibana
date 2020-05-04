@@ -13,9 +13,7 @@ import {
   ArtifactsSchema,
   TutorialsCategory
 } from '../../../../../src/plugins/home/server';
-
-// duplicated in x-pack/plugins/apm/common/index_pattern_constants.ts
-const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
