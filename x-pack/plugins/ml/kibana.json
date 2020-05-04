@@ -14,7 +14,8 @@
     "licensing",
     "usageCollection",
     "share",
-    "embeddable"
+    "embeddable",
+    "uiActions"
   ],
   "optionalPlugins": [
     "security",

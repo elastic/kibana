@@ -21,10 +21,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import { AnomalySwimlaneEmbeddableInput } from './anomaly_swimlane_embeddable';
 
 export interface AnomalySwimlaneInitializerProps {
   defaultTitle: string;
   influencers: string[];
+  initialInput?: Partial<
+    Pick<AnomalySwimlaneEmbeddableInput, 'jobIds' | 'swimlaneType' | 'viewBy' | 'limit'>
+  >;
   onCreate: (swimlaneProps: {
     panelTitle: string;
     swimlaneType: string;
@@ -44,11 +48,14 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   influencers,
   onCreate,
   onCancel,
+  initialInput,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(SWIMLANE_TYPE.OVERALL);
-  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState();
-  const [limit, setLimit] = useState(5);
+  const [swimlaneType, setSwimlaneType] = useState<SWIMLANE_TYPE>(
+    (initialInput?.swimlaneType ?? SWIMLANE_TYPE.OVERALL) as SWIMLANE_TYPE
+  );
+  const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(initialInput?.viewBy);
+  const [limit, setLimit] = useState(initialInput?.limit ?? 5);
 
   const swimlaneTypeOptions = [
     {
@@ -166,7 +173,12 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel}>
+          <FormattedMessage
+            id="xpack.ml.swimlaneEmbeddable.setupModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
 
         <EuiButton
           isDisabled={!isFormValid}
@@ -178,7 +190,10 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
           })}
           fill
         >
-          Create
+          <FormattedMessage
+            id="xpack.ml.swimlaneEmbeddable.setupModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />
         </EuiButton>
       </EuiModalFooter>
     </div>
