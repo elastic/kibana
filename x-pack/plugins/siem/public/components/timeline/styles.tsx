@@ -241,6 +241,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
+  overflow: hidden;
   width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 
