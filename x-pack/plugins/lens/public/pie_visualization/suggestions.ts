@@ -6,7 +6,7 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, TableSuggestion, VisualizationSuggestion } from '../types';
+import { SuggestionRequest, VisualizationSuggestion } from '../types';
 import { PieVisualizationState } from './types';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
