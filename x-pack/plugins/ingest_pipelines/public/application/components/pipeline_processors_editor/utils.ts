@@ -44,6 +44,7 @@ const dumbCopy = <R>(value: R): R => {
   throw new Error(`Expected (${ARRAY_TYPE}|${OBJECT_TYPE}) but received ${objectType}`);
 };
 
+const WHITELISTED_KEYS_REGEX = /^([0-9]+|onFailure|processors)$/;
 /**
  * Given a path, value and an object (array or object) set
  * the value at the path and copy objects values on the
@@ -69,6 +70,13 @@ export const setValue = <Target = any, Value = any>(
 
   for (let idx = 0; idx < path.length; ++idx) {
     const key = path[idx];
+    if (!WHITELISTED_KEYS_REGEX.test(key)) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `Received non-whitelisted key "${key}". Aborting set value operation; returning original.`
+      );
+      return dumbCopy(source);
+    }
     const atRoot = !current;
 
     if (atRoot) {

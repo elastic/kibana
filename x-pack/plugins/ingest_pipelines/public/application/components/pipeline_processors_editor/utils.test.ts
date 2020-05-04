@@ -7,10 +7,10 @@
 import { getValue, setValue } from './utils';
 
 describe('get and set values', () => {
-  const testObject = Object.freeze([{ a: [{ a: 1 }] }]);
+  const testObject = Object.freeze([{ onFailure: [{ onFailure: 1 }] }]);
   describe('#getValue', () => {
     it('gets a deeply nested value', () => {
-      expect(getValue(['0', 'a', '0', 'a'], testObject)).toBe(1);
+      expect(getValue(['0', 'onFailure', '0', 'onFailure'], testObject)).toBe(1);
     });
 
     it('empty array for path returns "root" value', () => {
@@ -23,14 +23,14 @@ describe('get and set values', () => {
 
   describe('#setValue', () => {
     it('sets a deeply nested value', () => {
-      const result = setValue(['0', 'a', '0', 'a'], testObject, 2);
-      expect(result).toEqual([{ a: [{ a: 2 }] }]);
+      const result = setValue(['0', 'onFailure', '0', 'onFailure'], testObject, 2);
+      expect(result).toEqual([{ onFailure: [{ onFailure: 2 }] }]);
       expect(result).not.toBe(testObject);
     });
 
     it('returns value if no path was provided', () => {
       setValue([], testObject, 2);
-      expect(testObject).toEqual([{ a: [{ a: 1 }] }]);
+      expect(testObject).toEqual([{ onFailure: [{ onFailure: 1 }] }]);
     });
   });
 });

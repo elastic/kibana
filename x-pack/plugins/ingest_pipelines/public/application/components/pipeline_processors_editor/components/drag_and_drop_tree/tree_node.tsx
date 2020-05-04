@@ -32,7 +32,7 @@ export const TreeNode: FunctionComponent<Props> = ({
 }) => {
   const id = selector.join('.');
   return (
-    <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle={true}>
+    <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle>
       {provided => (
         <EuiPanel style={{ marginLeft: 30 * level + 'px' }} paddingSize="s">
           <EuiFlexGroup gutterSize="none" direction="column" alignItems="flexStart">

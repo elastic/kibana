@@ -111,9 +111,10 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     if (idx !== idx) {
       throw new Error(`Expected numeric value, received ${idx}`);
     }
+
     const processors = getValue<ProcessorInternal[]>(processorsSelector, state);
     processors[idx] = processor;
-    return setValue(processorsSelector, state, processors);
+    return setValue(processorsSelector, state, [...processors]);
   }
 
   return state;
