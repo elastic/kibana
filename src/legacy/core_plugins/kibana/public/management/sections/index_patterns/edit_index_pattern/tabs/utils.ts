@@ -96,7 +96,7 @@ export function getTabs(
   tabs.push({
     name: getTitle('indexed', filteredCount, totalCount),
     id: TAB_INDEXED_FIELDS,
-    'data-test-subj': 'tab-indexFields',
+    'data-test-subj': 'tab-indexedFields',
   });
 
   if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {

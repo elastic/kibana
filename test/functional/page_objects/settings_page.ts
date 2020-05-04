@@ -207,7 +207,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async getFieldsTabCount() {
       return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
+        return text.split(' ')[1].replace(/\((.*)\)/, '$1');
       });
     }
 
