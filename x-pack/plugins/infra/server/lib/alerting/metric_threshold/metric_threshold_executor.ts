@@ -254,8 +254,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
           const currentValues = await getMetric(
             services,
             criterion,
-            config.fields.timestamp,
             config.metricAlias,
+            config.fields.timestamp,
             groupBy,
             filterQuery
           );
