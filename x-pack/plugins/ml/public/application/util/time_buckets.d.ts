@@ -6,9 +6,9 @@
 
 import { Moment } from 'moment';
 
-export interface TimeRangeBounds {
-  min?: Moment;
-  max?: Moment;
+declare interface TimeRangeBounds {
+  min: Moment | undefined;
+  max: Moment | undefined;
 }
 
 export declare interface TimeBucketsInterval {
@@ -17,28 +17,11 @@ export declare interface TimeBucketsInterval {
   expression: string;
 }
 
-export interface TimeBucketsConfig {
-  'histogram:maxBars': number;
-  'histogram:barTarget': number;
-  dateFormat: string;
-  'dateFormat:scaled': string[][];
+export class TimeBuckets {
+  setBarTarget: (barTarget: number) => void;
+  setMaxBars: (maxBars: number) => void;
+  setInterval: (interval: string) => void;
+  setBounds: (bounds: TimeRangeBounds) => void;
+  getBounds: () => { min: any; max: any };
+  getInterval: () => TimeBucketsInterval;
 }
-
-export declare class TimeBuckets {
-  constructor(timeBucketsConfig: TimeBucketsConfig);
-  public setBarTarget(barTarget: number): void;
-  public setMaxBars(maxBars: number): void;
-  public setInterval(interval: string): void;
-  public setBounds(bounds: TimeRangeBounds): void;
-  public getBounds(): { min: any; max: any };
-  public getInterval(): TimeBucketsInterval;
-  public getScaledDateFormat(): string;
-}
-
-export declare function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets>;
-
-export declare function getBoundsRoundedToInterval(
-  bounds: TimeRangeBounds,
-  interval: TimeBucketsInterval,
-  inclusiveEnd?: boolean
-): Required<TimeRangeBounds>;
