@@ -37,7 +37,7 @@ export {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler } from './render';
+export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
 export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,

@@ -556,13 +556,35 @@ exports[`MonitorList component renders the monitor list 1`] = `
 <div
   class="euiPanel euiPanel--paddingMedium"
 >
-  <h5
-    class="euiTitle euiTitle--xsmall"
-  >
-    Monitor status
-  </h5>
   <div
-    class="euiSpacer euiSpacer--s"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <h5
+        class="euiTitle euiTitle--xsmall"
+      >
+        Monitor status
+      </h5>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <h5
+        class="euiTitle euiTitle--xsmall"
+      >
+        <a
+          data-test-subj="uptimeCertificatesLink"
+          href="/certificates"
+        >
+          View certificates status
+        </a>
+      </h5>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m"
   />
   <div
     aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."
@@ -640,8 +662,24 @@ exports[`MonitorList component renders the monitor list 1`] = `
               </div>
             </th>
             <th
+              class="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_state.tls_3"
+              role="columnheader"
+              scope="col"
+            >
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  TLS Certificate
+                </span>
+              </div>
+            </th>
+            <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-              data-test-subj="tableHeaderCell_histogram.points_3"
+              data-test-subj="tableHeaderCell_histogram.points_4"
               role="columnheader"
               scope="col"
             >
@@ -657,7 +695,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             </th>
             <td
               class="euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_monitor_id_4"
+              data-test-subj="tableHeaderCell_monitor_id_5"
               role="columnheader"
               scope="col"
               style="width:24px"
@@ -789,6 +827,22 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     data-euiicon-type="popout"
                   />
                 </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                TLS Certificate
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <span>
+                  -
+                </span>
               </div>
             </td>
             <td
@@ -949,6 +1003,22 @@ exports[`MonitorList component renders the monitor list 1`] = `
                     data-euiicon-type="popout"
                   />
                 </button>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+              >
+                TLS Certificate
+              </div>
+              <div
+                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+              >
+                <span>
+                  -
+                </span>
               </div>
             </td>
             <td
