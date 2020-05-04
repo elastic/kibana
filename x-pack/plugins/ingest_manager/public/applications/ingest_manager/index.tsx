@@ -23,6 +23,7 @@ import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp 
 import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { sendSetup } from './hooks/use_request/setup';
+import { FleetStatusProvider } from './hooks/use_fleet_status';
 import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
@@ -142,7 +143,9 @@ const IngestManagerApp = ({
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <PackageInstallProvider notifications={coreStart.notifications}>
-                <IngestManagerRoutes basepath={basepath} />
+                <FleetStatusProvider>
+                  <IngestManagerRoutes basepath={basepath} />
+                </FleetStatusProvider>
               </PackageInstallProvider>
             </EuiThemeProvider>
           </ConfigContext.Provider>
