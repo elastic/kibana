@@ -35,7 +35,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/apm/**/*',
   'x-pack/legacy/plugins/canvas/tasks/**/*',
   'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
   '**/.*',
@@ -58,6 +57,11 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // TODO fix file names in APM to remove these
+  'x-pack/plugins/apm/public/**/*',
+  'x-pack/plugins/apm/scripts/**/*',
+  'x-pack/plugins/apm/e2e/**/*',
 ];
 
 /**

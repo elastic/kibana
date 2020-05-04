@@ -95,8 +95,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                       );
                     },
                   });
-                  uiActionsApi.registerAction(dynamicAction);
-                  uiActionsApi.attachAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
+                  uiActionsApi.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
                   setConfirmationText(
                     `You've successfully added a new action: ${dynamicAction.getDisplayName(
                       {}
