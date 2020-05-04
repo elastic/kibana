@@ -27,7 +27,7 @@ describe('agg_expression_functions', () => {
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'field',
-        interval: 10,
+        interval: '10',
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -39,7 +39,7 @@ describe('agg_expression_functions', () => {
               "extended_bounds": undefined,
               "field": "field",
               "has_extended_bounds": undefined,
-              "interval": 10,
+              "interval": "10",
               "intervalBase": undefined,
               "json": undefined,
               "min_doc_count": undefined,
@@ -54,7 +54,7 @@ describe('agg_expression_functions', () => {
     test('includes optional params when they are provided', () => {
       const actual = fn({
         field: 'field',
-        interval: 10,
+        interval: '10',
         intervalBase: 1,
         min_doc_count: false,
         has_extended_bounds: false,
@@ -75,7 +75,7 @@ describe('agg_expression_functions', () => {
             },
             "field": "field",
             "has_extended_bounds": false,
-            "interval": 10,
+            "interval": "10",
             "intervalBase": 1,
             "json": undefined,
             "min_doc_count": false,
@@ -89,7 +89,7 @@ describe('agg_expression_functions', () => {
     test('correctly parses json string argument', () => {
       const actual = fn({
         field: 'field',
-        interval: 10,
+        interval: '10',
         json: '{ "foo": true }',
       });
 
@@ -98,7 +98,7 @@ describe('agg_expression_functions', () => {
       expect(() => {
         fn({
           field: 'field',
-          interval: 10,
+          interval: '10',
           json: '/// intentionally malformed json ///',
         });
       }).toThrowErrorMatchingInlineSnapshot(`"Unable to parse json argument string"`);

@@ -61,7 +61,7 @@ export const aggFilter = (): FunctionDefinition => ({
     },
     geo_bounding_box: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.geo_bounding_box.help', {
+      help: i18n.translate('data.search.aggs.buckets.filter.geoBoundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
     },

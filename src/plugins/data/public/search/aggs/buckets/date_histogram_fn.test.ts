@@ -46,7 +46,7 @@ describe('agg_expression_functions', () => {
               "useNormalizedEsInterval": undefined,
             },
             "schema": undefined,
-            "type": "histogram",
+            "type": "date_histogram",
           },
         }
       `);
@@ -96,7 +96,7 @@ describe('agg_expression_functions', () => {
             "useNormalizedEsInterval": true,
           },
           "schema": undefined,
-          "type": "histogram",
+          "type": "date_histogram",
         }
       `);
     });
