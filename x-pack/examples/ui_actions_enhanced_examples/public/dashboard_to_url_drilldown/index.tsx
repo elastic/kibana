@@ -15,6 +15,15 @@ import {
 } from '../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../src/plugins/kibana_utils/public';
 
+function isValidUrl(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export type PlaceContext = EmbeddableContext;
 export type ActionContext = RangeSelectTriggerContext | ValueClickTriggerContext;
 
@@ -53,10 +62,15 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
       <EuiFormRow label="Enter target URL" fullWidth>
         <EuiFieldText
           fullWidth
-          placeholder="Enter URL"
           name="url"
+          placeholder="Enter URL"
           value={config.url}
           onChange={event => onConfig({ ...config, url: event.target.value })}
+          onBlur={() => {
+            if (!config.url) return;
+            if (/https?:\/\//.test(config.url)) return;
+            onConfig({ ...config, url: 'https://' + config.url });
+          }}
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
@@ -78,7 +92,8 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
-    return !!config.url && typeof config.url === 'string';
+    if (!config.url) return false;
+    return isValidUrl(config.url);
   };
 
   /**
