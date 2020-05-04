@@ -53,10 +53,9 @@ export function getAggNameConflictToastMessages(
   }
 
   // check all aggs against new aggName
-  for (const aggListName of Object.keys(aggList)) {
+  aggListNameLoop: for (const aggListName of Object.keys(aggList)) {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string | undefined;
-    let shouldBreak = false;
     for (const aggListNamePart of aggListNameSplit) {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
@@ -67,12 +66,8 @@ export function getAggNameConflictToastMessages(
             values: { aggName, aggListName },
           })
         );
-        shouldBreak = true;
-        break;
+        break aggListNameLoop;
       }
-    }
-    if (shouldBreak) {
-      break;
     }
   }
 
@@ -81,10 +76,9 @@ export function getAggNameConflictToastMessages(
   }
 
   // check all group-bys against new aggName
-  for (const groupByListName of Object.keys(groupByList)) {
+  groupByListNameLoop: for (const groupByListName of Object.keys(groupByList)) {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string | undefined;
-    let shouldBreak = false;
     for (const groupByListNamePart of groupByListNameSplit) {
       groupByListNameCheck =
         groupByListNameCheck === undefined
@@ -97,12 +91,8 @@ export function getAggNameConflictToastMessages(
             values: { aggName, groupByListName },
           })
         );
-        shouldBreak = true;
-        break;
+        break groupByListNameLoop;
       }
-    }
-    if (shouldBreak) {
-      break;
     }
   }
 
