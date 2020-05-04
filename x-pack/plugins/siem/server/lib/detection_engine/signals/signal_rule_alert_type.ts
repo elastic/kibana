@@ -138,8 +138,9 @@ export const signalRulesAlertType = ({
             );
           }
 
+          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
           const summaryJobs = await ml
-            .jobServiceProvider(ml.mlClient.callAsInternalUser)
+            .jobServiceProvider(scopedMlCallCluster)
             .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
 
@@ -155,7 +156,6 @@ export const signalRulesAlertType = ({
             await ruleStatusService.error(errorMessage);
           }
 
-          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
           const anomalyResults = await findMlSignals({
             ml,
             callCluster: scopedMlCallCluster,
