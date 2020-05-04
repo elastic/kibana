@@ -175,7 +175,6 @@ describe('alert_details', () => {
     });
 
     it('renders a counter for multiple alert action', () => {
-      const actionCount = random(1, 10);
       const alert = mockAlert({
         actions: [
           {
@@ -184,12 +183,12 @@ describe('alert_details', () => {
             params: {},
             actionTypeId: '.server-log',
           },
-          ...times(actionCount, () => ({
+          {
             group: 'default',
             id: uuid.v4(),
             params: {},
             actionTypeId: '.email',
-          })),
+          },
         ],
       });
       const alertType = {
@@ -238,7 +237,7 @@ describe('alert_details', () => {
       expect(
         details.containsMatchingElement(
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{`+${actionCount}`}</EuiBadge>
+            <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
           </EuiFlexItem>
         )
       ).toBeTruthy();
