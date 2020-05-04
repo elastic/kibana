@@ -22,7 +22,7 @@ JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
 [[autorefresh]]
 === Refresh search results
 As more documents are added to the indices you're searching, the search results
-shown in *Discover* and used to display visualizations get stale. Using the
+shown in *Discover*, and used to display visualizations, get stale. Using the
 time filter, you can
 configure a refresh interval to periodically resubmit your searches to
 retrieve the latest results.
