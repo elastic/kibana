@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
