@@ -18,7 +18,7 @@ describe('exactly', () => {
 
   it("adds an exactly object to 'and'", () => {
     const result = fn(emptyFilter, { column: 'name', value: 'product2' });
-    expect(result.and[0]).toHaveProperty('type', 'exactly');
+    expect(result.and[0]).toHaveProperty('filterType', 'exactly');
   });
 
   describe('args', () => {
