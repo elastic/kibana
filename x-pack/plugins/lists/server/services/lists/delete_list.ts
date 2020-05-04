@@ -4,29 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { APICaller } from 'kibana/server';
+
 import { Id, ListSchema } from '../../../common/schemas';
-import { DataClient } from '../../types';
 
 import { getList } from './get_list';
 
 export interface DeleteListOptions {
   id: Id;
-  dataClient: DataClient;
+  callCluster: APICaller;
   listIndex: string;
   listItemIndex: string;
 }
 
 export const deleteList = async ({
   id,
-  dataClient,
+  callCluster,
   listIndex,
   listItemIndex,
 }: DeleteListOptions): Promise<ListSchema | null> => {
-  const list = await getList({ dataClient, id, listIndex });
+  const list = await getList({ callCluster, id, listIndex });
   if (list == null) {
     return null;
   } else {
-    await dataClient.callAsCurrentUser('deleteByQuery', {
+    await callCluster('deleteByQuery', {
       body: {
         query: {
           term: {
@@ -37,7 +38,7 @@ export const deleteList = async ({
       index: listItemIndex,
     });
 
-    await dataClient.callAsCurrentUser('delete', {
+    await callCluster('delete', {
       id,
       index: listIndex,
     });

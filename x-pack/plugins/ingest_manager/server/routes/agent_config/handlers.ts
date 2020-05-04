@@ -14,7 +14,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
   AgentConfig,
   DefaultPackages,
@@ -22,10 +22,11 @@ import {
 } from '../../types';
 import {
   GetAgentConfigsResponse,
+  GetAgentConfigsResponseItem,
   GetOneAgentConfigResponse,
   CreateAgentConfigResponse,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigResponse,
   GetFullAgentConfigResponse,
 } from '../../../common';
 
@@ -46,9 +47,9 @@ export const getAgentConfigsHandler: RequestHandler<
 
     await bluebird.map(
       items,
-      agentConfig =>
+      (agentConfig: GetAgentConfigsResponseItem) =>
         listAgents(soClient, {
-          showInactive: true,
+          showInactive: false,
           perPage: 0,
           page: 1,
           kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id:${agentConfig.id}`,
@@ -178,13 +179,13 @@ export const updateAgentConfigHandler: RequestHandler<
 export const deleteAgentConfigsHandler: RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof DeleteAgentConfigsRequestSchema.body>
+  TypeOf<typeof DeleteAgentConfigRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const body: DeleteAgentConfigsResponse = await agentConfigService.delete(
+    const body: DeleteAgentConfigResponse = await agentConfigService.delete(
       soClient,
-      request.body.agentConfigIds
+      request.body.agentConfigId
     );
     return response.ok({
       body,

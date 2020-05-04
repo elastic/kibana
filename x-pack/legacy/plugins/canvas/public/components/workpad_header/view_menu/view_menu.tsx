@@ -12,10 +12,16 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL } from '../../../../common/lib/constants';
+import {
+  MAX_ZOOM_LEVEL,
+  MIN_ZOOM_LEVEL,
+  CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+} from '../../../../common/lib/constants';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
+import { AutoRefreshControls } from './auto_refresh_controls';
+import { KioskControls } from './kiosk_controls';
 
 const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
 
@@ -62,10 +68,33 @@ export interface Props {
    * triggers a refresh of the workpad
    */
   doRefresh: () => void;
+  /**
+   * Current auto refresh interval
+   */
+  refreshInterval: number;
+  /**
+   * Sets auto refresh interval
+   */
+  setRefreshInterval: (interval?: number) => void;
+  /**
+   * Is autoplay enabled?
+   */
+  autoplayEnabled: boolean;
+  /**
+   * Current autoplay interval
+   */
+  autoplayInterval: number;
+  /**
+   * Enables autoplay
+   */
+  enableAutoplay: (autoplay: boolean) => void;
+  /**
+   * Sets autoplay interval
+   */
+  setAutoplayInterval: (interval?: number) => void;
 }
 
 export const ViewMenu: FunctionComponent<Props> = ({
-  doRefresh,
   enterFullscreen,
   fitToWindow,
   isWriteable,
@@ -75,7 +104,20 @@ export const ViewMenu: FunctionComponent<Props> = ({
   zoomIn,
   zoomOut,
   zoomScale,
+  doRefresh,
+  refreshInterval,
+  setRefreshInterval,
+  autoplayEnabled,
+  autoplayInterval,
+  enableAutoplay,
+  setAutoplayInterval,
 }) => {
+  const setRefresh = (val: number | undefined) => setRefreshInterval(val);
+
+  const disableInterval = () => {
+    setRefresh(0);
+  };
+
   const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty size="xs" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
       {strings.getViewMenuButtonLabel()}
@@ -121,24 +163,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
 
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
-    title: strings.getViewMenuLabel(),
     items: [
-      {
-        name: strings.getFullscreenMenuItemLabel(),
-        icon: <EuiIcon type="fullScreen" size="m" />,
-        onClick: () => {
-          enterFullscreen();
-          closePopover();
-        },
-      },
-      {
-        name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
-        onClick: () => {
-          toggleWriteable();
-          closePopover();
-        },
-      },
       {
         name: strings.getRefreshMenuItemLabel(),
         icon: 'refresh',
@@ -147,10 +172,67 @@ export const ViewMenu: FunctionComponent<Props> = ({
         },
       },
       {
+        name: strings.getRefreshSettingsMenuItemLabel(),
+        icon: 'empty',
+        panel: {
+          id: 1,
+          title: strings.getRefreshSettingsMenuItemLabel(),
+          content: (
+            <AutoRefreshControls
+              refreshInterval={refreshInterval}
+              setRefresh={val => setRefresh(val)}
+              disableInterval={() => disableInterval()}
+            />
+          ),
+        },
+      },
+      {
+        name: strings.getFullscreenMenuItemLabel(),
+        icon: <EuiIcon type="fullScreen" size="m" />,
+        className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+        onClick: () => {
+          enterFullscreen();
+          closePopover();
+        },
+      },
+      {
+        name: autoplayEnabled
+          ? strings.getAutoplayOffMenuItemLabel()
+          : strings.getAutoplayOnMenuItemLabel(),
+        icon: autoplayEnabled ? 'stop' : 'play',
+        onClick: () => {
+          enableAutoplay(!autoplayEnabled);
+          closePopover();
+        },
+      },
+      {
+        name: strings.getAutoplaySettingsMenuItemLabel(),
+        icon: 'empty',
+        panel: {
+          id: 2,
+          title: strings.getAutoplaySettingsMenuItemLabel(),
+          content: (
+            <KioskControls
+              autoplayInterval={autoplayInterval}
+              onSetInterval={setAutoplayInterval}
+            />
+          ),
+        },
+      },
+      {
+        name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
+        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
+        className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+        onClick: () => {
+          toggleWriteable();
+          closePopover();
+        },
+      },
+      {
         name: strings.getZoomMenuItemLabel(),
         icon: 'magnifyWithPlus',
         panel: {
-          id: 1,
+          id: 3,
           title: strings.getZoomMenuItemLabel(),
           items: getZoomMenuItems(),
         },
@@ -161,7 +243,11 @@ export const ViewMenu: FunctionComponent<Props> = ({
   return (
     <Popover button={viewControl} panelPaddingSize="none" anchorPosition="downLeft">
       {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-        <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={flattenPanelTree(getPanelTree(closePopover))}
+          className="canvasViewMenu"
+        />
       )}
     </Popover>
   );
@@ -169,4 +255,19 @@ export const ViewMenu: FunctionComponent<Props> = ({
 
 ViewMenu.propTypes = {
   isWriteable: PropTypes.bool.isRequired,
+  zoomScale: PropTypes.number.isRequired,
+  fitToWindow: PropTypes.func.isRequired,
+  setZoomScale: PropTypes.func.isRequired,
+  zoomIn: PropTypes.func.isRequired,
+  zoomOut: PropTypes.func.isRequired,
+  resetZoom: PropTypes.func.isRequired,
+  toggleWriteable: PropTypes.func.isRequired,
+  enterFullscreen: PropTypes.func.isRequired,
+  doRefresh: PropTypes.func.isRequired,
+  refreshInterval: PropTypes.number.isRequired,
+  setRefreshInterval: PropTypes.func.isRequired,
+  autoplayEnabled: PropTypes.bool.isRequired,
+  autoplayInterval: PropTypes.number.isRequired,
+  enableAutoplay: PropTypes.func.isRequired,
+  setAutoplayInterval: PropTypes.func.isRequired,
 };
