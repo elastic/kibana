@@ -6,17 +6,14 @@ def getFailedBuildBlocks() {
 
   return messages
     .findAll { !!it } // No blank strings
-    .collect { getMarkdownBlock(it) }
-    // .inject([]) { items, item ->
-    //   items == [] ? [item] : items + [getDividerBlock()] + [item] // Add dividers between sections
-    // }
+    .collect { markdownBlock(it) }
 }
 
-def getDividerBlock() {
+def dividerBlock() {
   return [ type: "divider" ]
 }
 
-def getMarkdownBlock(message) {
+def markdownBlock(message) {
   return [
     type: "section",
     text: [
@@ -26,7 +23,7 @@ def getMarkdownBlock(message) {
   ]
 }
 
-def getContextBlock(message) {
+def contextBlock(message) {
   return [
     type: "context",
     elements: [
@@ -36,36 +33,6 @@ def getContextBlock(message) {
       ]
     ]
   ]
-}
-
-def sendFailedBuild(Map params = [:]) {
-  def displayName = "${env.JOB_NAME} ${env.BUILD_DISPLAY_NAME}"
-
-  def config = [
-    channel: '@brian.seeders',
-    // channel: '#kibana-operations-hang',
-    title: ":broken_heart: *<${env.BUILD_URL}|${displayName}>*",
-    message: ":broken_heart: ${displayName}",
-    color: "danger",
-    icon: ":jenkins:",
-    username: "Kibana Operations",
-    context: getContextBlock("${displayName} · <https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>"),
-  ] + params
-
-  def blocks = [getMarkdownBlock(config.title)]
-  getFailedBuildBlocks().each { blocks << it }
-  blocks << getDividerBlock()
-  blocks << config.context
-
-  print "Sending Slack notification..."
-  slackSend(
-    channel: config.channel,
-    username: config.username,
-    iconEmoji: config.icon,
-    color: config.color,
-    message: config.message,
-    blocks: blocks
-  )
 }
 
 def getFailedSteps() {
@@ -97,6 +64,34 @@ def getTestFailures() {
 
   def list = failures.collect { "• <${it.url}|${it.fullDisplayName}>" }.join("\n")
   return "*Test Failures*\n${list}"
+}
+
+def sendFailedBuild(Map params = [:]) {
+  def displayName = "${env.JOB_NAME} ${env.BUILD_DISPLAY_NAME}"
+
+  def config = [
+    channel: '#kibana-operations',
+    title: ":broken_heart: *<${env.BUILD_URL}|${displayName}>*",
+    message: ":broken_heart: ${displayName}",
+    color: 'danger',
+    icon: ':jenkins:',
+    username: 'Kibana Operations',
+    context: contextBlock("${displayName} · <https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>"),
+  ] + params
+
+  def blocks = [markdownBlock(config.title)]
+  getFailedBuildBlocks().each { blocks << it }
+  blocks << dividerBlock()
+  blocks << config.context
+
+  slackSend(
+    channel: config.channel,
+    username: config.username,
+    iconEmoji: config.icon,
+    color: config.color,
+    message: config.message,
+    blocks: blocks
+  )
 }
 
 def onFailure(Map options = [:], Closure closure) {
