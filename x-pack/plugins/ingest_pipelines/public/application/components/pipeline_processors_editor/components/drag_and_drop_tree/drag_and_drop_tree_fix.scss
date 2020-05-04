@@ -1,0 +1,7 @@
+
+.pipelineProcessorsEditor__dragAndDropTreeFixes {
+  // This relaxes limitations imposed by any parents
+  // that can lead to the bottom area of the droppable zone
+  // being dead (only tested on chrome).
+  overflow: auto;
+}

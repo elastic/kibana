@@ -13,6 +13,8 @@ import { resolveDestinationLocation, mapSelectorToDragLocation } from './utils';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
 
+import './drag_and_drop_tree_fix.scss';
+
 interface OnDragEndArgs {
   source: DraggableLocation;
   destination: DraggableLocation;
@@ -75,46 +77,48 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   addRenderedItems(processors, [], 0);
 
   return (
-    <EuiDragDropContext
-      onBeforeCapture={({ draggableId: serializedSelector }) => {
-        setCurrentDragSelector(serializedSelector);
-      }}
-      onDragEnd={arg => {
-        setCurrentDragSelector(undefined);
+    <div className="pipelineProcessorsEditor__dragAndDropTreeFixes">
+      <EuiDragDropContext
+        onBeforeCapture={({ draggableId: serializedSelector }) => {
+          setCurrentDragSelector(serializedSelector);
+        }}
+        onDragEnd={arg => {
+          setCurrentDragSelector(undefined);
 
-        const { source, destination, combine } = arg;
-        if (source && combine) {
-          const [sourceSelector] = items[source.index];
-          const destinationSelector = combine.draggableId.split('.');
-          onDragEnd({
-            source: {
-              index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
-              selector: sourceSelector.slice(0, -1),
-            },
-            destination: {
-              index: parseInt(destinationSelector[destinationSelector.length - 1], 10),
-              selector: destinationSelector.concat(ON_FAILURE),
-            },
-          });
-          return;
-        }
+          const { source, destination, combine } = arg;
+          if (source && combine) {
+            const [sourceSelector] = items[source.index];
+            const destinationSelector = combine.draggableId.split('.');
+            onDragEnd({
+              source: {
+                index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
+                selector: sourceSelector.slice(0, -1),
+              },
+              destination: {
+                index: parseInt(destinationSelector[destinationSelector.length - 1], 10),
+                selector: destinationSelector.concat(ON_FAILURE),
+              },
+            });
+            return;
+          }
 
-        if (source && destination) {
-          const [sourceSelector] = items[source.index];
-          onDragEnd({
-            source: mapSelectorToDragLocation(sourceSelector),
-            destination: resolveDestinationLocation(
-              items.map(([selector]) => selector),
-              destination.index
-            ),
-          });
-        }
-      }}
-    >
-      <EuiDroppable droppableId="PIPELINE_PROCESSORS_EDITOR" spacing="l" isCombineEnabled>
-        {items.map(([, component]) => component)}
-      </EuiDroppable>
-    </EuiDragDropContext>
+          if (source && destination) {
+            const [sourceSelector] = items[source.index];
+            onDragEnd({
+              source: mapSelectorToDragLocation(sourceSelector),
+              destination: resolveDestinationLocation(
+                items.map(([selector]) => selector),
+                destination.index
+              ),
+            });
+          }
+        }}
+      >
+        <EuiDroppable droppableId="PIPELINE_PROCESSORS_EDITOR" spacing="l" isCombineEnabled>
+          {items.map(([, component]) => component)}
+        </EuiDroppable>
+      </EuiDragDropContext>
+    </div>
   );
 };
 
