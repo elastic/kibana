@@ -14,6 +14,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     ...commonConfig.getAll(),
     testFiles: [require.resolve('./public')],
     kbnTestServer: {
+      ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
         // Required to load new platform plugin provider via `--plugin-path` flag.
