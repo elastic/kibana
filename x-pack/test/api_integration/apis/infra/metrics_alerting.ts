@@ -56,20 +56,6 @@ export default function({ getService }: FtrProviderContext) {
         expect(result.hits).to.be.ok();
         expect(result.aggregations).to.be.ok();
       });
-      it('should not work with a filterQuery in KQL format', () => {
-        const searchBody = getElasticsearchMetricQuery(
-          getSearchParams('avg'),
-          undefined,
-          '"agent.hostname":"foo"'
-        );
-        expect(
-          async () =>
-            await client.search({
-              index,
-              body: searchBody,
-            })
-        ).to.throwError();
-      });
     });
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
