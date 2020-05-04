@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -44,6 +45,7 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
   if (
     indicesPrivileges &&
     !indicesPrivileges.has_all_requested &&
+    !isEmpty(indicesPrivileges.index) &&
     !isPermissionWarningDismissed
   ) {
     const indicesWithoutPermission = Object.keys(

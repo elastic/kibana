@@ -52,6 +52,25 @@ describe('APMIndicesPermission', () => {
     ]);
   });
 
+  it('shows children component when no index is returned', () => {
+    spyOn(hooks, 'useFetcher').and.returnValue({
+      status: hooks.FETCH_STATUS.SUCCESS,
+      data: {
+        has_all_requested: false,
+        index: {}
+      }
+    });
+    const component = render(
+      <MockApmPluginContextWrapper>
+        <APMIndicesPermission>
+          <p>My amazing component</p>
+        </APMIndicesPermission>
+      </MockApmPluginContextWrapper>
+    );
+    expectTextsNotInDocument(component, ['Missing permissions to access APM']);
+    expectTextsInDocument(component, ['My amazing component']);
+  });
+
   it('shows children component when indices have read privileges', () => {
     spyOn(hooks, 'useFetcher').and.returnValue({
       status: hooks.FETCH_STATUS.SUCCESS,
