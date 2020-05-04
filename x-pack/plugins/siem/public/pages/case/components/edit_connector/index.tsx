@@ -57,7 +57,7 @@ export const EditConnector = React.memo(
       setIsEditConnector(true);
     }, []);
 
-    const onCancelConnector = useCallback(async () => {
+    const onCancelConnector = useCallback(() => {
       form.setFieldValue('connector', selectedConnector);
       setIsEditConnector(false);
     }, [form, selectedConnector]);
