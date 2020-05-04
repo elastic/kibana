@@ -17,28 +17,15 @@
  * under the License.
  */
 
-import override from './override';
+import set from 'set-value';
 
-describe('override(target, source)', function() {
-  it('should override the values form source to target', function() {
-    const target = {
-      test: {
-        enable: true,
-        host: ['host-01', 'host-02'],
-        client: {
-          type: 'sql',
-        },
-      },
-    };
-    const source = { test: { client: { type: 'nosql' } } };
-    expect(override(target, source)).toEqual({
-      test: {
-        enable: true,
-        host: ['host-01', 'host-02'],
-        client: {
-          type: 'nosql',
-        },
-      },
-    });
-  });
-});
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj, path, val) {
+  set(obj, path, undefined);
+  set(obj, path, val);
+}
