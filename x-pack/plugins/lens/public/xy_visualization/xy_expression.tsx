@@ -410,7 +410,8 @@ export function XYChart({
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
             row =>
-              xAccessor && row[xAccessor] &&
+              xAccessor &&
+              row[xAccessor] &&
               !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
           );
 
