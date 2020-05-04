@@ -16,7 +16,6 @@ import {
   EuiBetaBadge,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { times, random } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
