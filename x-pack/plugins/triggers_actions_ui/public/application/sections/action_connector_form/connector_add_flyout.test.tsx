@@ -154,6 +154,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout
@@ -201,6 +202,7 @@ describe('connector_add_flyout', () => {
           reloadConnectors: () => {
             return new Promise<void>(() => {});
           },
+          docLinks: deps!.docLinks,
         }}
       >
         <ConnectorAddFlyout
