@@ -18,44 +18,42 @@ Your first step to working with Canvas is to create a workpad.
 
 . Click *Create workpad*.
 
-. To add a *Name* for your workpad, use the editor. For example, `My Canvas Workpad`.
+. To add a *Name* for your workpad, use the editor.
 
 [float]
 === Customize your workpad with images
 
 To customize your workpad to look the way you want, add your own images.
 
-. Click *Add element*, then click *Image*.
+. Click *Add element > Image > Image*.
 +
-The default Elastic logo image appears on your page.
+The default Elastic logo image appears on the page.
 
 . To replace the Elastic logo with your own image, select the image, then use the editor.
-
-. To move the image, click and drag it to your preferred location.
 
 [role="screenshot"]
 image::images/canvas-image-element.png[]
 
-You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
+You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Add element > Manage assets*.
 
 [float]
 === Customize your data with metrics
 
 Customize your data by connecting it to the Sample eCommerce orders data.
 
-. Click *Add element*, then click *Metric*.
+. Click *Add element > Chart > Metric*.
 +
 By default, the *Metric* element is connected to a demo data source, which enables you to experiment with the element before you connect it to your own data source.
 
 . To connect the element to your own data source, make sure that the element is selected, then click *Data*.
 
-.. Click *Change your data source*, then click *Elasticsearch SQL*.
+.. Click *Demo data*, then click *Elasticsearch SQL*.
 
-.. In the *Elasticsearch SQL query* field, enter the following query:
+.. In the *Query* field, enter the following:
 +
 `SELECT sum(taxless_total_price) AS sum_total_price FROM "kibana_sample_data_ecommerce"`
 +
-The query selects the total price field and sets it to the sum_total_price field. These fields are pulled from the kibana_sample_data_ecommerce index that you installed.
+The query selects the total price field, and sets it to the sum_total_price field. All fields are pulled from the kibana_sample_data_ecommerce index that you added.
 
 .. To verify that the data is correct, click *Preview*. If you like what you see, click *Save*.
 +
@@ -65,7 +63,7 @@ At this point, the element displays an error.
 
 .. Click *Display*
 
-.. Under *Number*, select *Value* from the function drop-down list, then select *sum_total_price* from the column drop-down list.
+.. From the *Value* drop-down lists, make sure that *Unique* is selected, then select *sum_total_price*.
 
 .. Change the *Label* to `Total sales`.
 +
@@ -79,7 +77,7 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 
 .. Look for `math "sum_total_price"`, then add `| formatNumber "$0a"`.
 
-.. To update the number, click *Run*.
+.. To update, click *Run*.
 
 [role="screenshot"]
 image::images/canvas-metric-element.png[]
@@ -89,13 +87,13 @@ image::images/canvas-metric-element.png[]
 
 To show what your data can do, add charts, graphs, progress monitors, and more to your workpad.
 
-. Click *Add element*, then click *Area chart*.
+. Click *Add element > Chart > Area*.
 
 . To connect the element to your own data source, make sure that the element is selected, then click *Data*.
 
-.. Click *Change your data source*, then click *Elasticsearch SQL*.
+.. Click *Demo data*, then click *Elasticsearch SQL*.
 
-.. To obtain the taxless total price by date, enter the following into the *Elasticsearch SQL query* field:
+.. To obtain the taxless total price by date, enter the following into the *Query* field:
 +
 `SELECT order_date, taxless_total_price FROM "kibana_sample_data_ecommerce" ORDER BY order_date`
 +
@@ -119,13 +117,11 @@ image::images/canvas-chart-element.png[]
 
 To focus your data on a specific time range, add a time filter to your workpad.
 
-. Click *Add element*, then click *Time filter*.
+. Click *Add element > Filter > Time filter*.
 
-. Specify how to display the data.
+. Click *Display*
 
-.. Click *Display*
-
-.. To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
+. To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
 
 [role="screenshot"]
 image::images/canvas-timefilter-element.png[]
@@ -140,11 +136,7 @@ Your workpad is now complete! From the workpad menu, use the icons to:
 
 * Display your workpad in fullscreen mode
 
-* Control the zoom options
-
 * Share your workpad
-
-* Hide the editing controls
 
 [float]
 === Next steps

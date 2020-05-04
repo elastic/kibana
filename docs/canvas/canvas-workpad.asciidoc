@@ -96,23 +96,27 @@ background-color: #3990e6;
 [[configure-auto-refresh-interval]]
 === Change the auto-refresh interval
 
-Increase or decrease how often the data refreshes on your workpad.
+Change how often the data refreshes on your workpad.
 
-. In the top left corner, click the *Control settings* icon.
+. Click *View > Auto refresh settings*.
 
-. Under *Change auto-refresh interval*, select the interval you want to use.
+. Select the interval you want to use, or *Set a custom interval*.
 +
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
-
-TIP: To manually refresh the data, click the *Refresh data* icon.
++
+To manually refresh the data, click the *Refresh data* icon.
 
 [float]
 [[zoom-in-out]]
 === Use the zoom options
 
-In the upper left corner, click the *Zoom controls* icon, then select one of the options.
+To enlarge a portion of your workpad, use the zoom options.
 
+. Click *View > Zoom*.
+
+. Select the zoom option.
++
 [role="screenshot"]
 image::images/canvas-zoom-controls.png[Zoom controls]
 
