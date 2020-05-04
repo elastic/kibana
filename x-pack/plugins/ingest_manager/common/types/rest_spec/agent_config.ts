@@ -49,16 +49,16 @@ export interface UpdateAgentConfigResponse {
   success: boolean;
 }
 
-export interface DeleteAgentConfigsRequest {
+export interface DeleteAgentConfigRequest {
   body: {
-    agentConfigIds: string[];
+    agentConfigId: string;
   };
 }
 
-export type DeleteAgentConfigsResponse = Array<{
+export interface DeleteAgentConfigResponse {
   id: string;
   success: boolean;
-}>;
+}
 
 export interface GetFullAgentConfigRequest {
   params: {
