@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { appContextService } from '../app_context';
 import { macosInstallTemplate } from './install_templates/macos';
+import { linuxInstallTemplate } from './install_templates/linux';
 
 export function getScript(osType: 'macos' | 'linux', kibanaUrl: string): string {
-  const variables = { kibanaUrl };
+  const variables = { kibanaUrl, kibanaVersion: appContextService.getKibanaVersion() };
 
   switch (osType) {
     case 'macos':
       return macosInstallTemplate(variables);
     case 'linux':
-      return macosInstallTemplate(variables);
+      return linuxInstallTemplate(variables);
     default:
       throw new Error(`${osType} is not supported.`);
   }

@@ -13,7 +13,7 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   try {
     const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
     const isApiKeysEnabled = await appContextService.getSecurity().authc.areAPIKeysEnabled();
-    const isTLSEnabled = appContextService.getServerInfo().protocol === 'https';
+    const isTLSEnabled = appContextService.getCoreSetup().http.getServerInfo().protocol === 'https';
     const isProductionMode = appContextService.getIsProductionMode();
     const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
     const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;

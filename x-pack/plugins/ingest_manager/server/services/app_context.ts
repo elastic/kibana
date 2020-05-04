@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServerInfo } from 'src/core/server';
+import { SavedObjectsServiceStart, CoreSetup } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -18,17 +18,19 @@ class AppContextService {
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
-  private serverInfo: HttpServerInfo | undefined;
   private isProductionMode: boolean = false;
+  private kibanaVersion: string | undefined;
   private cloud?: CloudSetup;
+  private coreSetup?: CoreSetup;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
-    this.serverInfo = appContext.serverInfo;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
+    this.kibanaVersion = appContext.kibanaVersion;
+    this.coreSetup = appContext.coreSetup;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -77,11 +79,18 @@ class AppContextService {
     return this.isProductionMode;
   }
 
-  public getServerInfo() {
-    if (!this.serverInfo) {
-      throw new Error('Server info not set.');
+  public getCoreSetup() {
+    if (!this.coreSetup) {
+      throw new Error('CoreSetup not set.');
     }
-    return this.serverInfo;
+    return this.coreSetup;
+  }
+
+  public getKibanaVersion() {
+    if (!this.kibanaVersion) {
+      throw new Error('Kibana version is not set.');
+    }
+    return this.kibanaVersion;
   }
 }
 

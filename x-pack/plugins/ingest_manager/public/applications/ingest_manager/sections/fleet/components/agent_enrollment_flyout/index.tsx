@@ -8,7 +8,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,7 @@ import {
   EuiSteps,
   EuiText,
   EuiSelect,
+  EuiLink,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -52,19 +52,27 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     ...(selectedTab === 'manual'
       ? [
           {
-            title: i18n.translate(
-              'xpack.ingestManager.agentEnrollment.stepChoosePackagePlatformTitle',
-              {
-                defaultMessage: 'Select a package to download',
-              }
-            ),
-            children: <p> TODO list of packages </p>,
-          },
-          {
-            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadPackageTitle', {
+            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
               defaultMessage: 'Download the Elastic Agent',
             }),
-            children: <p> TODO list of packages </p>,
+            children: (
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentEnrollment.downloadDescription"
+                  defaultMessage="Download the Elastic agent on your host’s machine. You can download the agent binary and it’s verification signature from Elastic’s {downloadLink}."
+                  values={{
+                    downloadLink: (
+                      <EuiLink href="https://ela.st/download-elastic-agent" target="_blank">
+                        <FormattedMessage
+                          id="xpack.ingestManager.agentEnrollment.downloadLink"
+                          defaultMessage="download page"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            ),
           },
         ]
       : []),
@@ -82,7 +90,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             title: i18n.translate('xpack.ingestManager.agentEnrollment.stepRunAgentTitle', {
               defaultMessage: 'Enroll and run the Elastic Agent',
             }),
-            children: <p> TODO list of packages </p>,
+            children: apiKey.data && (
+              <ManualInstructions
+                apiKey={apiKey.data.item}
+                kibanaUrl={`${window.location.origin}${core.http.basePath.get()}`}
+              />
+            ),
           },
         ]
       : [
@@ -108,7 +121,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
                     text: i18n.translate(
                       'xpack.ingestManager.agentEnrollment.platformDarwinLabel',
                       {
-                        defaultMessage: 'Mac',
+                        defaultMessage: 'Macos',
                       }
                     ),
                     value: 'macos',
@@ -158,7 +171,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="l" />
       </EuiFlyoutHeader>
       <div>
         <EuiTabs>

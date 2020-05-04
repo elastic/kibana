@@ -11,7 +11,6 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-  HttpServerInfo,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -70,8 +69,9 @@ export interface IngestManagerAppContext {
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
-  serverInfo?: HttpServerInfo;
+  kibanaVersion: string;
   cloud?: CloudSetup;
+  coreSetup?: CoreSetup;
 }
 
 export type IngestManagerSetupContract = void;
@@ -108,15 +108,17 @@ export class IngestManagerPlugin
   private cloud: CloudSetup | undefined;
 
   private isProductionMode: boolean;
-  private serverInfo: HttpServerInfo | undefined;
+  private kibanaVersion: string;
+  private coreSetup: CoreSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.serverInfo = core.http.getServerInfo();
+    this.coreSetup = core;
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
@@ -179,7 +181,6 @@ export class IngestManagerPlugin
       registerEnrollmentApiKeyRoutes(router);
       registerInstallScriptRoutes({
         router,
-        serverInfo: core.http.getServerInfo(),
         basePath: core.http.basePath,
       });
     }
@@ -197,7 +198,8 @@ export class IngestManagerPlugin
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
-      serverInfo: this.serverInfo,
+      kibanaVersion: this.kibanaVersion,
+      coreSetup: this.coreSetup,
       cloud: this.cloud,
     });
     licenseService.start(this.licensing$);
