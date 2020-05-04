@@ -72,7 +72,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         }
         count++;
       });
-
       for (let i = 0; i < $.length; i++) {
         expect(tableData[i + 1][0]).to.eql($[i].split('\n')[1]);
       }
