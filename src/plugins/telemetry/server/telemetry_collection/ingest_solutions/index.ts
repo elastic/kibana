@@ -17,9 +17,11 @@
  * under the License.
  */
 
+export { INGEST_SOLUTIONS_ID } from './constants';
+
 export {
-  INGEST_SOLUTIONS_ID,
   IngestSolutionsIndex,
   IngestSolutionsPayload,
+  getIngestSolutions,
   buildIngestSolutionsPayload,
 } from './ingest_solutions';

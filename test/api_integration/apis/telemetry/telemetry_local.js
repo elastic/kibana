@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import _ from 'lodash';
+import { baseIngestSolutionsPayload } from '../../../../src/plugins/telemetry/server/telemetry_collection/ingest_solutions/__fixtures__';
 
 /*
  * Create a single-level array with strings for all the paths to values in the
@@ -71,6 +72,8 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
+      // Testing this to make sure Cluster State API doesn't change its response
+      expect(stats.stack_stats.ingest_solutions).to.be.eql(baseIngestSolutionsPayload);
     });
 
     it('should pull local stats and validate fields', async () => {

@@ -28,7 +28,7 @@ import {
   getIngestSolutions,
   INGEST_SOLUTIONS_ID,
   IngestSolutionsPayload,
-} from './ingest_solutions/ingest_solutions';
+} from './ingest_solutions';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the

@@ -18,26 +18,7 @@
  */
 
 import { APICaller } from 'kibana/server';
-
-export const INGEST_SOLUTIONS_ID = 'ingest_solutions';
-
-const TECHNOLOGIES = [
-  { name: 'apm', pattern: 'apm-*' },
-  { name: 'metricbeat', pattern: 'metricbeat-*' },
-  { name: 'heartbeat', pattern: 'heartbeat-*' },
-  { name: 'prometheusbeat', pattern: 'prometheusbeat*' },
-  { name: 'filebeat', pattern: 'filebeat-*' },
-  { name: 'functionbeat', pattern: 'functionbeat-*' },
-  { name: 'fluentd', pattern: 'fluentd*' },
-  { name: 'telegraf', pattern: 'telegraf*' },
-  { name: 'fluentbit', pattern: 'fluentbit*' },
-  { name: 'nginx', pattern: 'nginx*' },
-  { name: 'apache', pattern: 'apache*' },
-  { name: 'logs', pattern: '*logs*' },
-  { name: 'auditbeat', pattern: 'auditbeat-*' },
-  { name: 'winlogbeat', pattern: 'winlogbeat-*' },
-  { name: 'packetbeat', pattern: 'packetbeat-*' },
-] as const;
+import { TECHNOLOGIES } from './constants';
 
 type TechnologyDataProviders = typeof TECHNOLOGIES[number]['name'];
 
@@ -45,6 +26,7 @@ export interface IngestSolutionsPayload {
   data_providers: {
     [key in TechnologyDataProviders]: {
       index_count: number;
+      ecs_index_count?: number;
       doc_count?: number;
       size_in_bytes?: number;
     };
@@ -53,6 +35,10 @@ export interface IngestSolutionsPayload {
 
 export interface IngestSolutionsIndex {
   name: string;
+  isECS?: boolean; // Optional because it can't be obtained via Monitoring.
+
+  // The fields below are optional because we might not be able to obtain them if the user does not
+  // have access to the index.
   docCount?: number;
   sizeInBytes?: number;
 }
@@ -71,7 +57,7 @@ export function buildIngestSolutionsPayload(
 ): IngestSolutionsPayload {
   const basePayload = buildBaseObject();
 
-  return indices.reduce((acc, { name: indexName, docCount, sizeInBytes }) => {
+  return indices.reduce((acc, { name: indexName, isECS, docCount, sizeInBytes }) => {
     const matchingTechnology = TECHNOLOGIES.find(({ pattern }) =>
       new RegExp(`^${pattern.replace(/\*/g, '.*')}$`).test(indexName)
     );
@@ -86,6 +72,9 @@ export function buildIngestSolutionsPayload(
         [name]: {
           ...acc.data_providers[name],
           index_count: acc.data_providers[name].index_count + 1,
+          ...(typeof isECS === 'boolean'
+            ? { ecs_index_count: (acc.data_providers[name].ecs_index_count || 0) + (isECS ? 1 : 0) }
+            : {}),
           ...(docCount ? { doc_count: (acc.data_providers[name].doc_count || 0) + docCount } : {}),
           ...(sizeInBytes
             ? { size_in_bytes: (acc.data_providers[name].size_in_bytes || 0) + sizeInBytes }
@@ -117,6 +106,20 @@ interface ClusterState {
     indices: {
       [indexName: string]: {
         version: number;
+        mappings: {
+          _doc?: {
+            properties: {
+              ecs?: {
+                properties: {
+                  version?: {
+                    type: string;
+                  };
+                };
+              };
+            };
+          };
+          [_type: string]: object | undefined;
+        };
       };
     };
   };
@@ -132,6 +135,8 @@ export async function getIngestSolutions(callCluster: APICaller) {
       filterPath: [
         // The payload is huge and we are only after the name (no other useful stuff so far)
         'metadata.indices.*.version',
+        // Does it have `ecs.version` in the mappings?
+        'metadata.indices.*.mappings._doc.properties.ecs.properties.version.type',
       ],
     }),
     // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
@@ -143,17 +148,23 @@ export async function getIngestSolutions(callCluster: APICaller) {
     }),
   ]);
 
-  const indexNames = Object.keys(state?.metadata?.indices || {});
+  const stateIndices = state?.metadata?.indices || {};
+  const indexNames = Object.keys(stateIndices)
+    // Filter out the system indices
+    .filter(name => !name.startsWith('.'));
   const indices = indexNames.map(name => {
+    const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
+
     const stats = (indexStats?.indices || {})[name];
     if (stats) {
       return {
         name,
+        isECS,
         docCount: stats.total?.docs?.count,
         sizeInBytes: stats.total?.store?.size_in_bytes,
       };
     }
-    return { name };
+    return { name, isECS };
   });
   return buildIngestSolutionsPayload(indices);
 }

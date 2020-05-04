@@ -38,8 +38,9 @@ describe('ingest_solutions', () => {
           { name: 'apm-1234' },
           { name: 'apm-5677' },
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
+          { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: 'my_logs_custom', docCount: 1000, sizeInBytes: 10 },
-          { name: 'my_logs', docCount: 100, sizeInBytes: 10 },
+          { name: 'my_logs', docCount: 100, sizeInBytes: 10, isECS: true },
           { name: 'logs_custom' },
         ])
       ).toStrictEqual({
@@ -48,7 +49,8 @@ describe('ingest_solutions', () => {
           ...baseIngestSolutionsPayload.data_providers,
           apm: { index_count: 2 },
           filebeat: { index_count: 1, doc_count: 100, size_in_bytes: 10 },
-          logs: { index_count: 3, doc_count: 1100, size_in_bytes: 20 },
+          metricbeat: { index_count: 1, ecs_index_count: 0, doc_count: 100, size_in_bytes: 10 },
+          logs: { index_count: 3, ecs_index_count: 1, doc_count: 1100, size_in_bytes: 20 },
         },
       });
     });
@@ -68,13 +70,13 @@ describe('ingest_solutions', () => {
         ...baseIngestSolutionsPayload,
         data_providers: {
           ...baseIngestSolutionsPayload.data_providers,
-          filebeat: { index_count: 1 },
+          filebeat: { index_count: 1, ecs_index_count: 0 },
         },
       });
     });
 
     test('can see the state and the stats', async () => {
-      const callCluster = mockCallCluster(['filebeat-12314'], {
+      const callCluster = mockCallCluster(['filebeat-12314'], true, {
         indices: {
           'filebeat-12314': { total: { docs: { count: 100 }, store: { size_in_bytes: 10 } } },
         },
@@ -83,19 +85,35 @@ describe('ingest_solutions', () => {
         ...baseIngestSolutionsPayload,
         data_providers: {
           ...baseIngestSolutionsPayload.data_providers,
-          filebeat: { index_count: 1, doc_count: 100, size_in_bytes: 10 },
+          filebeat: { index_count: 1, ecs_index_count: 1, doc_count: 100, size_in_bytes: 10 },
         },
       });
     });
   });
 });
 
-function mockCallCluster(stateIndices: string[] = [], indexStats: any = {}) {
+function mockCallCluster(stateIndices: string[] = [], isECS = false, indexStats: any = {}) {
   return jest.fn().mockImplementation(async (method: string, opts: any) => {
     if (method === 'cluster.state') {
       return {
         metadata: {
-          indices: Object.fromEntries(stateIndices.map((index, version) => [index, { version }])),
+          indices: Object.fromEntries(
+            stateIndices.map((index, version) => [
+              index,
+              {
+                version,
+                ...(isECS
+                  ? {
+                      mappings: {
+                        _doc: {
+                          properties: { ecs: { properties: { version: { type: 'keyword' } } } },
+                        },
+                      },
+                    }
+                  : {}),
+              },
+            ])
+          ),
         },
       };
     }
