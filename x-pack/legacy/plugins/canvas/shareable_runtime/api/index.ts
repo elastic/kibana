@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
 import 'whatwg-fetch';
+import 'babel-polyfill';
 
 export * from './shareable';

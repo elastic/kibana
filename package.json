@@ -30,7 +30,8 @@
         "data/optimize",
         "built_assets",
         ".eslintcache",
-        ".node_binaries"
+        ".node_binaries",
+        "src/plugins/*/target"
       ]
     }
   },

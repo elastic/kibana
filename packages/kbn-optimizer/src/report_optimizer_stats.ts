@@ -17,34 +17,30 @@
  * under the License.
  */
 
+import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
 import { CiStatsReporter } from '@kbn/dev-utils';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  logOptimizerState,
-  reportOptimizerStats,
-} from '@kbn/optimizer';
 
-export const BuildKibanaPlatformPluginsTask = {
-  description: 'Building distributable versions of Kibana platform plugins',
-  async run(_, log, build) {
-    const optimizerConfig = OptimizerConfig.create({
-      repoRoot: build.resolvePath(),
-      cache: false,
-      oss: build.isOss(),
-      examples: false,
-      watch: false,
-      dist: true,
-    });
+import { OptimizerUpdate$ } from './run_optimizer';
+import { OptimizerState } from './optimizer';
+import { pipeClosure } from './common';
 
-    const reporter = CiStatsReporter.fromEnv(log);
-    const reportStatsName = build.isOss() ? 'oss distributable' : 'default distributable';
+export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
+  return pipeClosure((update$: OptimizerUpdate$) => {
+    let lastState: OptimizerState | undefined;
+    return update$.pipe(
+      materialize(),
+      mergeMap(async n => {
+        if (n.kind === 'N' && n.value?.state) {
+          lastState = n.value?.state;
+        }
 
-    await runOptimizer(optimizerConfig)
-      .pipe(
-        reportOptimizerStats(reporter, reportStatsName),
-        logOptimizerState(log, optimizerConfig)
-      )
-      .toPromise();
-  },
-};
+        if (n.kind === 'C' && lastState) {
+          await reporter.metric('@kbn/optimizer build time', name, lastState.durSec);
+        }
+
+        return n;
+      }),
+      dematerialize()
+    );
+  });
+}

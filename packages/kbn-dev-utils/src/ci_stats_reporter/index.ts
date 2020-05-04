@@ -17,8 +17,4 @@
  * under the License.
  */
 
-export { OptimizerConfig } from './optimizer';
-export * from './run_optimizer';
-export * from './log_optimizer_state';
-export * from './common/disallowed_syntax_plugin';
-export * from './report_optimizer_stats';
+export * from './ci_stats_reporter';
