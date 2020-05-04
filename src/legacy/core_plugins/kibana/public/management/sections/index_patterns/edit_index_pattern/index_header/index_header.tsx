@@ -92,7 +92,7 @@ export function IndexHeader({
                 <EuiButtonIcon
                   color="text"
                   onClick={setDefault}
-                  iconType="starFilledSpace"
+                  iconType="starFilled"
                   aria-label={setDefaultAriaLabel}
                   data-test-subj="setDefaultIndexPatternButton"
                 />

@@ -33,7 +33,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';

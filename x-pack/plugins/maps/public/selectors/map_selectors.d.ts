@@ -8,6 +8,7 @@ import { AnyAction } from 'redux';
 import { MapCenter } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
+import { IVectorLayer } from '../layers/vector_layer';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 
@@ -20,3 +21,7 @@ export function getQueryableUniqueIndexPatternIds(state: MapStoreState): string[
 export function getMapSettings(state: MapStoreState): MapSettings;
 
 export function hasMapSettingsChanges(state: MapStoreState): boolean;
+
+export function isUsingSearch(state: MapStoreState): boolean;
+
+export function getSpatialFiltersLayer(state: MapStoreState): IVectorLayer;

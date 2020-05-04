@@ -8,12 +8,11 @@ import React, { useState, useEffect } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 // @ts-ignore
 import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
-import { useDebounce } from '../hooks';
-import { useStartDeps } from '../hooks/use_deps';
-import { INDEX_NAME } from '../constants';
+import { useDebounce, useStartDeps } from '../hooks';
+import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
 const DEBOUNCE_SEARCH_MS = 150;
-const HIDDEN_FIELDS = ['agents.actions'];
+const HIDDEN_FIELDS = [`${AGENT_SAVED_OBJECT_TYPE}.actions`];
 
 interface Suggestion {
   label: string;
@@ -93,7 +92,6 @@ function useSuggestions(fieldPrefix: string, search: string) {
       const res = (await data.indexPatterns.getFieldsForWildcard({
         pattern: INDEX_NAME,
       })) as IFieldType[];
-
       if (!data || !data.autocomplete) {
         throw new Error('Missing data plugin');
       }

@@ -408,6 +408,8 @@ export interface IIndexPattern {
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
+    getTimeField?(): IFieldType | undefined;
+    // (undocumented)
     id?: string;
     // (undocumented)
     timeFieldName?: string;
@@ -609,7 +611,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
     // (undocumented)
     setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };

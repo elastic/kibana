@@ -9,8 +9,6 @@ import { coreMock } from '../../../../../../src/core/public/mocks';
 
 const elementSpecs = initializeElements(coreMock.createSetup() as any, {} as any);
 
-import { TagStrings } from '../tags';
-
 describe('ElementStrings', () => {
   const elementStrings = getElementStrings();
   const elementNames = elementSpecs.map(spec => spec().name);
@@ -35,17 +33,6 @@ describe('ElementStrings', () => {
   test('All elements should have a help string defined', () => {
     strings.forEach(value => {
       expect(value).toHaveProperty('help');
-    });
-  });
-
-  test('All elements should have tags that are defined', () => {
-    const tagNames = Object.keys(TagStrings);
-
-    elementSpecs.forEach(spec => {
-      const element = spec();
-      if (element.tags) {
-        element.tags.forEach((tagName: string) => expect(tagNames).toContain(tagName));
-      }
     });
   });
 });

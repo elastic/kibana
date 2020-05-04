@@ -26,6 +26,7 @@ import {
 } from '../../../core/server';
 
 import { dashboardSavedObjectType } from './saved_objects';
+import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
 
@@ -40,6 +41,7 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(dashboardSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     return {};
   }

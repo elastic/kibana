@@ -12,11 +12,10 @@ import { TaskManager } from './task_manager';
 import { createTaskManager } from './create_task_manager';
 import { TaskManagerConfig } from './config';
 import { Middleware } from './lib/middleware';
+import { setupSavedObjects } from './saved_objects';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginLegacyDependencies {}
 export type TaskManagerSetupContract = {
-  registerLegacyAPI: (legacyDependencies: PluginLegacyDependencies) => Promise<TaskManager>;
+  registerLegacyAPI: () => Promise<TaskManager>;
 } & Pick<TaskManager, 'addMiddleware' | 'registerTaskDefinitions'>;
 
 export type TaskManagerStartContract = Pick<
@@ -35,12 +34,18 @@ export class TaskManagerPlugin
     this.currentConfig = {} as TaskManagerConfig;
   }
 
-  public setup(core: CoreSetup, plugins: any): TaskManagerSetupContract {
+  public async setup(core: CoreSetup, plugins: unknown): Promise<TaskManagerSetupContract> {
     const logger = this.initContext.logger.get('taskManager');
-    const config$ = this.initContext.config.create<TaskManagerConfig>();
+    const config = await this.initContext.config
+      .create<TaskManagerConfig>()
+      .pipe(first())
+      .toPromise();
+
+    setupSavedObjects(core.savedObjects, config);
+
     return {
-      registerLegacyAPI: once((__LEGACY: PluginLegacyDependencies) => {
-        config$.subscribe(async config => {
+      registerLegacyAPI: once(() => {
+        (async () => {
           const [{ savedObjects, elasticsearch }] = await core.getStartServices();
           const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
           this.legacyTaskManager$.next(
@@ -53,7 +58,7 @@ export class TaskManagerPlugin
             })
           );
           this.legacyTaskManager$.complete();
-        });
+        })();
         return this.taskManager;
       }),
       addMiddleware: (middleware: Middleware) => {

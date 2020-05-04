@@ -9,8 +9,6 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +20,7 @@ import { CustomFieldPanel } from './custom_field_panel';
 import { euiStyled } from '../../../../../../../observability/public';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
+import { DropdownButton } from '../dropdown_button';
 
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
@@ -121,29 +120,31 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
           .filter(o => o != null)
           // In this map the `o && o.field` is totally unnecessary but Typescript is
           // too stupid to realize that the filter above prevents the next map from being null
-          .map(o => <EuiBadge key={o && o.field}>{o && o.text}</EuiBadge>)
+          .map(o => (
+            <EuiBadge color="hollow" key={o && o.field}>
+              {o && o.text}
+            </EuiBadge>
+          ))
       ) : (
         <FormattedMessage id="xpack.infra.waffle.groupByAllTitle" defaultMessage="All" />
       );
+
     const button = (
-      <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage id="xpack.infra.waffle.groupByButtonLabel" defaultMessage="Group By: " />
+      <DropdownButton label="Group By" onClick={this.handleToggle}>
         {buttonBody}
-      </EuiFilterButton>
+      </DropdownButton>
     );
 
     return (
-      <EuiFilterGroup>
-        <EuiPopover
-          isOpen={this.state.isPopoverOpen}
-          id="groupByPanel"
-          button={button}
-          panelPaddingSize="none"
-          closePopover={this.handleClose}
-        >
-          <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
-        </EuiPopover>
-      </EuiFilterGroup>
+      <EuiPopover
+        isOpen={this.state.isPopoverOpen}
+        id="groupByPanel"
+        button={button}
+        panelPaddingSize="none"
+        closePopover={this.handleClose}
+      >
+        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+      </EuiPopover>
     );
   }
 

@@ -23,4 +23,10 @@ describe('getEsNames()', () => {
     expect(esNames.initialIndex).toEqual(`${base}-event-log-${version}-000001`);
     expect(esNames.indexTemplate).toEqual(`${base}-event-log-${version}-template`);
   });
+
+  test('ilm policy name does not contain dot prefix', () => {
+    const base = '.XYZ';
+    const esNames = getEsNames(base);
+    expect(esNames.ilmPolicy).toEqual('XYZ-event-log-policy');
+  });
 });
