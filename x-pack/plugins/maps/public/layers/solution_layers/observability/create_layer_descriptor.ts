@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
   ColorDynamicOptions,
+  LabelDynamicOptions,
   LayerDescriptor,
   SizeDynamicOptions,
   StylePropertyField,
@@ -144,6 +145,8 @@ function getGeoGridRequestType(display: DISPLAY): RENDER_AS {
   return RENDER_AS.POINT;
 }
 
+function getLabelStyleDescriptor(metric: OBSERVABILITY_METRIC_TYPE): {};
+
 export function createLayerDescriptor({
   layer,
   metric,
@@ -228,25 +231,37 @@ export function createLayerDescriptor({
     origin: FIELD_ORIGIN.SOURCE,
   };
 
+  const styleProperties = {
+    [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(metricStyleField),
+    [VECTOR_STYLES.ICON_SIZE]: {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        field: metricStyleField,
+      },
+    },
+    [VECTOR_STYLES.LINE_COLOR]: {
+      type: STYLE_TYPE.STATIC,
+      options: {
+        color: '#3d3d3d',
+      },
+    },
+  };
+
+  if (metric === OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE) {
+    styleProperties[VECTOR_STYLES.LABEL_TEXT] = {
+      type: STYLE_TYPE.DYNAMIC,
+      options: {
+        ...(defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options as LabelDynamicOptions),
+        field: metricStyleField,
+      },
+    };
+  }
+
   return VectorLayer.createDescriptor({
     label,
     query: apmSourceQuery,
     sourceDescriptor: geoGridSourceDescriptor,
-    style: VectorStyle.createDescriptor({
-      [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(metricStyleField),
-      [VECTOR_STYLES.ICON_SIZE]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
-          field: metricStyleField,
-        },
-      },
-      [VECTOR_STYLES.LINE_COLOR]: {
-        type: STYLE_TYPE.STATIC,
-        options: {
-          color: '#3d3d3d',
-        },
-      },
-    }),
+    style: VectorStyle.createDescriptor(styleProperties),
   });
 }

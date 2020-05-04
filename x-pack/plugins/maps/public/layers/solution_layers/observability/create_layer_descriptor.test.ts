@@ -201,4 +201,136 @@ describe('createLayerDescriptor', () => {
       visible: true,
     });
   });
+
+  test('Should create vector layer descriptor when displayed as clusters', () => {
+    const layerDescriptor = createLayerDescriptor({
+      layer: OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE,
+      metric: OBSERVABILITY_METRIC_TYPE.TRANSACTION_DURATION,
+      display: DISPLAY.CLUSTERS,
+    });
+    expect(layerDescriptor).toEqual({
+      __dataRequests: [],
+      alpha: 0.75,
+      id: '12345',
+      joins: [],
+      label: '[Performance] Duration',
+      maxZoom: 24,
+      minZoom: 0,
+      query: {
+        language: 'kuery',
+        query: 'processor.event:"transaction"',
+      },
+      sourceDescriptor: {
+        geoField: 'client.geo.location',
+        id: '12345',
+        indexPatternId: 'apm_static_index_pattern_id',
+        metrics: [
+          {
+            field: 'transaction.duration.us',
+            type: 'avg',
+          },
+        ],
+        requestType: 'point',
+        resolution: 'MOST_FINE',
+        type: 'ES_GEO_GRID',
+      },
+      style: {
+        isTimeAware: true,
+        properties: {
+          fillColor: {
+            options: {
+              color: 'Yellow to Red',
+              colorCategory: 'palette_0',
+              field: {
+                name: 'avg_of_transaction.duration.us',
+                origin: 'source',
+              },
+              fieldMetaOptions: {
+                isEnabled: true,
+                sigma: 3,
+              },
+              type: 'ORDINAL',
+            },
+            type: 'DYNAMIC',
+          },
+          icon: {
+            options: {
+              value: 'marker',
+            },
+            type: 'STATIC',
+          },
+          iconOrientation: {
+            options: {
+              orientation: 0,
+            },
+            type: 'STATIC',
+          },
+          iconSize: {
+            options: {
+              field: {
+                name: 'avg_of_transaction.duration.us',
+                origin: 'source',
+              },
+              fieldMetaOptions: {
+                isEnabled: true,
+                sigma: 3,
+              },
+              maxSize: 32,
+              minSize: 7,
+            },
+            type: 'DYNAMIC',
+          },
+          labelText: {
+            options: {
+              value: '',
+            },
+            type: 'STATIC',
+          },
+          labelBorderColor: {
+            options: {
+              color: '#FFFFFF',
+            },
+            type: 'STATIC',
+          },
+          labelBorderSize: {
+            options: {
+              size: 'SMALL',
+            },
+          },
+          labelColor: {
+            options: {
+              color: '#000000',
+            },
+            type: 'STATIC',
+          },
+          labelSize: {
+            options: {
+              size: 14,
+            },
+            type: 'STATIC',
+          },
+          lineColor: {
+            options: {
+              color: '#3d3d3d',
+            },
+            type: 'STATIC',
+          },
+          lineWidth: {
+            options: {
+              size: 1,
+            },
+            type: 'STATIC',
+          },
+          symbolizeAs: {
+            options: {
+              value: 'circle',
+            },
+          },
+        },
+        type: 'VECTOR',
+      },
+      type: 'VECTOR',
+      visible: true,
+    });
+  });
 });
