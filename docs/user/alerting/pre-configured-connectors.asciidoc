@@ -5,7 +5,7 @@
 
 You can preconfigure an action connector to have all the information it needs prior to startup
 by adding it to the `kibana.yml` file.
-Sensitive configuration information, such as credentials, can use the {kib} keystore.
+Sensitive configuration information, such as credentials, can use the <<creating-keystore, {kib} keystore>>.
 
 Preconfigured connectors offer the following capabilities:
 
@@ -18,7 +18,8 @@ action are predefined, including the connector name and ID.
 [[preconfigured-connector-example]]
 === Example of a preconfigured connector
 
-The following example shows a valid configuration 2 out-of-the box connector.
+The following example shows a valid configuration 2 out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
+You can find all details about available action types configuration <<action-types, here>>
 
 ```js
   xpack.actions.preconfigured:
@@ -49,7 +50,7 @@ The following example shows a valid configuration 2 out-of-the box connector.
 
 [NOTE]
 ==============================================
-Sensitive properties, such as passwords, can also be stored in the {kib} keystore.
+Sensitive properties, such as passwords, can also be stored in the <<creating-keystore, {kib} keystore>>.
 ==============================================
 
 [float]
