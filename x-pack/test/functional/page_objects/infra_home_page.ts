@@ -16,6 +16,7 @@ export function InfraHomePageProvider({ getService }: FtrProviderContext) {
 
   return {
     async goToTime(time: string) {
+      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
