@@ -403,36 +403,26 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = bulkResponse.items[esRequestIndex];
         const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+          requestedId,
+          rawMigratedDoc: {
+            _source: { type },
+          },
+          esRequestIndex,
+        } = expectedResult.value;
+        const { error, ...rawResponse } = Object.values(
+          bulkResponse.items[esRequestIndex]
+        )[0] as any;
 
-        const {
-          _source: { type, [type]: attributes, references = [], namespaces },
-        } = rawMigratedDoc;
-
-        const id = requestedId || responseId;
         if (error) {
           return {
-            id,
+            id: requestedId,
             type,
-            error: getBulkOperationError(error, type, id),
+            error: getBulkOperationError(error, type, requestedId),
           };
         }
-        return {
-          id,
-          type,
-          ...(namespaces && { namespaces }),
-          updated_at: time,
-          version: encodeVersion(seqNo, primaryTerm),
-          attributes,
-          references,
-        };
+
+        return this._serializer.rawToSavedObject(rawResponse);
       }),
     };
   }

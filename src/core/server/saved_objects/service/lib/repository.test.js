@@ -424,9 +424,17 @@ describe('SavedObjectsRepository', () => {
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
-        items: objects.map(({ type, id }) => ({
+        items: objects.map(({ type, id, attributes, references, migrationVersion }) => ({
           create: {
             _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
+            _source: {
+              [type]: attributes,
+              type,
+              namespace,
+              references,
+              ...mockTimestampFields,
+              migrationVersion: migrationVersion || { [type]: '1.1.1' },
+            },
             ...mockVersionProps,
           },
         })),
@@ -474,7 +482,7 @@ describe('SavedObjectsRepository', () => {
 
     const expectSuccessResult = obj => ({
       ...obj,
-      migrationVersion: undefined,
+      migrationVersion: { [obj.type]: '1.1.1' },
       version: mockVersion,
       ...mockTimestampFields,
     });
@@ -619,13 +627,16 @@ describe('SavedObjectsRepository', () => {
       };
 
       const bulkCreateError = async (obj, esError, expectedError) => {
-        const objects = [obj1, obj, obj2];
-        const response = getMockBulkCreateResponse(objects);
+        let response;
         if (esError) {
+          response = getMockBulkCreateResponse([obj1, obj, obj2]);
           response.items[1].create = { error: esError };
+        } else {
+          response = getMockBulkCreateResponse([obj1, obj2]);
         }
         callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
 
+        const objects = [obj1, obj, obj2];
         const result = await savedObjectsRepository.bulkCreate(objects);
         expectClusterCalls('bulk');
         const objCall = esError ? expectObjArgs(obj) : [];
@@ -781,7 +792,7 @@ describe('SavedObjectsRepository', () => {
           id: 'three',
         };
         const objects = [obj1, obj, obj2];
-        const response = getMockBulkCreateResponse(objects);
+        const response = getMockBulkCreateResponse([obj1, obj2]);
         callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
         const result = await savedObjectsRepository.bulkCreate(objects);
         expect(callAdminCluster).toHaveBeenCalledTimes(1);
@@ -789,6 +800,24 @@ describe('SavedObjectsRepository', () => {
           saved_objects: [expectSuccessResult(obj1), expectError(obj), expectSuccessResult(obj2)],
         });
       });
+    });
+
+    it(`deserializes the raw ES response into a saved object`, async () => {
+      // Test for fix to https://github.com/elastic/kibana/issues/65088 where
+      // we returned raw ID's when an object without an id was created.
+      const response = getMockBulkCreateResponse([obj1, obj2]);
+      callAdminCluster.mockResolvedValueOnce(response); // this._writeToCluster('bulk', ...)
+
+      // Bulk create one object with id unspecified, and one with id specified
+      const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2]);
+
+      // Assert that both raw docs from the ES response are deserialized
+      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, response.items[0].create);
+      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
+
+      // Assert that ID's are deserialized and doesn't include the namespace
+      // and type.
+      expect(result.saved_objects.map(so => so.id)).toEqual([obj1.id, obj2.id]);
     });
   });
 
