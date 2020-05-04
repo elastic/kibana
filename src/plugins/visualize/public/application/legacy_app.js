@@ -160,17 +160,31 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            return data.indexPatterns
-              .ensureDefaultIndexPattern(history)
-              .then(() => savedVisualizations.get($route.current.params))
-              .then(getResolvedResults(deps))
-              .catch(
-                redirectWhenMissing({
-                  history,
-                  mapping: VisualizeConstants.LANDING_PAGE_PATH,
-                  toastNotifications,
-                })
-              );
+            const delay = res =>
+              new Promise(resolve => {
+                setTimeout(() => {
+                  resolve(res);
+                }, 0);
+              });
+
+            return (
+              data.indexPatterns
+                .ensureDefaultIndexPattern(history)
+                .then(() => savedVisualizations.get($route.current.params))
+                .then(getResolvedResults(deps))
+                // force this navigation happen asynchronously,
+                // otherwise Firefox & Safari might not fire hashchange
+                // and history.location won't get latest information about url
+                // causing incorrect state
+                .then(delay)
+                .catch(
+                  redirectWhenMissing({
+                    history,
+                    mapping: VisualizeConstants.LANDING_PAGE_PATH,
+                    toastNotifications,
+                  })
+                )
+            );
           },
         },
       })
