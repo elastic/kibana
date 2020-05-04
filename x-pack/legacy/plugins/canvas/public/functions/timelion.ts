@@ -11,7 +11,7 @@ import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressi
 import { fetch } from '../../common/lib/fetch';
 // @ts-ignore untyped local
 import { buildBoolArray } from '../../server/lib/build_bool_array';
-import { Datatable, Filter } from '../../types';
+import { Datatable, ExpressionValueFilter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
 import { InitializeArguments } from './';
 
@@ -49,7 +49,7 @@ function parseDateMath(
 
 type TimelionFunction = ExpressionFunctionDefinition<
   'timelion',
-  Filter,
+  ExpressionValueFilter,
   Arguments,
   Promise<Datatable>
 >;
@@ -94,11 +94,10 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
       fn: (input, args): Promise<Datatable> => {
         // Timelion requires a time range. Use the time range from the timefilter element in the
         // workpad, if it exists. Otherwise fall back on the function args.
-        const timeFilter = input.and.find(and => and.type === 'time');
+        const timeFilter = input.and.find(and => and.filterType === 'time');
         const range = timeFilter
           ? { min: timeFilter.from, max: timeFilter.to }
           : parseDateMath({ from: args.from, to: args.to }, args.timezone, initialize.timefilter);
-
         const body = {
           extended: {
             es: {
