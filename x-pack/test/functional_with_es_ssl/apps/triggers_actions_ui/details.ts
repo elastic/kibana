@@ -197,6 +197,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
         expect(headingText).to.be(updatedAlertName);
       });
+
+      it('should reset alert when canceling an edit', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
+          params
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await testSubjects.click('cancelSaveEditedAlertButton');
+        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
+
+        await editButton.click();
+
+        const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+        expect(textAfterCancel).to.eql(alert.name);
+      });
     });
 
     describe('View In App', function() {
