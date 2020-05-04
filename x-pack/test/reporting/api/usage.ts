@@ -6,18 +6,20 @@
 
 import expect from '@kbn/expect';
 import * as GenerationUrls from './generation_urls';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI');
+  const usageAPI = getService('usageAPI' as any);
 
   describe('reporting usage', () => {
     before(() => reportingAPI.deleteAllReportingIndexes());
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
-      let usage;
+      let usage: any;
 
       before(async () => {
         usage = await usageAPI.getUsageStats();
