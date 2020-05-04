@@ -10,7 +10,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../../../../plugins/canvas/server/lib/query_es_sql';
 /* eslint-enable */
-import { Filter } from '../../../types';
+import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -22,7 +22,12 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ExpressionFunctionDefinition<
+  'esdocs',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
 
   return {
@@ -69,7 +74,8 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
 
       input.and = input.and.concat([
         {
-          type: 'luceneQueryString',
+          type: 'filter',
+          filterType: 'luceneQueryString',
           query: args.query,
           and: [],
         },
