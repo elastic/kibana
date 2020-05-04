@@ -43,7 +43,7 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
 
   public readonly getDisplayNameTooltip = ({ embeddable }: EnhancedEmbeddableContext) => {
     const count = this.getEventCount(embeddable);
-    return count === 1 ? txtOneDrilldown : txtManyDrilldowns(count);
+    return !count ? '' : count === 1 ? txtOneDrilldown : txtManyDrilldowns(count);
   };
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
