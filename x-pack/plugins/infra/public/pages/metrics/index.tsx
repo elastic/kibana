@@ -28,7 +28,9 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
-import { AlertDropdown } from '../../components/alerting/metrics/alert_dropdown';
+
+import { InventoryAlertDropdown } from '../../components/alerting/inventory/alert_dropdown';
+import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -96,7 +98,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <Route path={'/explorer'} component={AlertDropdown} />
+                    <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                    <Route path={'/inventory'} component={InventoryAlertDropdown} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </AppNavigation>

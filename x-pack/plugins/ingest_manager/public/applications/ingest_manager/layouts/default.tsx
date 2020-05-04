@@ -96,12 +96,28 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
               </EuiTabs>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
-                <FormattedMessage
-                  id="xpack.ingestManager.appNavigation.settingsButton"
-                  defaultMessage="General settings"
-                />
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="s" direction="row">
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    iconType="popout"
+                    href="https://ela.st/ingest-manager-feedback"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.sendFeedbackButton"
+                      defaultMessage="Send Feedback"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.appNavigation.settingsButton"
+                      defaultMessage="Settings"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Nav>
