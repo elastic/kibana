@@ -31,7 +31,7 @@ import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { EmbeddableStart, EmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
-import { setAngularModule, setServices } from './kibana_services';
+import { getHistory, setAngularModule, setServices, setUrlTracker } from './kibana_services';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../../plugins/navigation/public';
 import { ChartsPluginStart } from '../../../../../plugins/charts/public';
 import { buildServices } from './build_services';
@@ -45,7 +45,7 @@ import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 import {
   VisualizationsStart,
   VisualizationsSetup,
-} from '../../../visualizations/public/np_ready/public';
+} from '../../../../../plugins/visualizations/public';
 import { createKbnUrlTracker } from '../../../../../plugins/kibana_utils/public';
 
 export interface DiscoverSetupPlugins {
@@ -92,10 +92,19 @@ export class DiscoverPlugin implements Plugin<void, void> {
   public initializeServices?: () => Promise<{ core: CoreStart; plugins: DiscoverStartPlugins }>;
 
   setup(core: CoreSetup<DiscoverStartPlugins, void>, plugins: DiscoverSetupPlugins) {
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createKbnUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+      setActiveUrl: setTrackedUrl,
+    } = createKbnUrlTracker({
+      // we pass getter here instead of plain `history`,
+      // so history is lazily created (when app is mounted)
+      // this prevents redundant `#` when not in discover app
+      getHistory,
       baseUrl: core.http.basePath.prepend('/app/kibana'),
       defaultSubUrl: '#/discover',
-      storageKey: 'lastUrl:discover',
+      storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
@@ -113,6 +122,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
         },
       ],
     });
+    setUrlTracker({ setTrackedUrl });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -137,6 +147,9 @@ export class DiscoverPlugin implements Plugin<void, void> {
         await this.initializeServices();
         await this.initializeInnerAngular();
 
+        // make sure the index pattern list is up to date
+        const [, { data: dataStart }] = await core.getStartServices();
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./np_ready/application');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
@@ -168,7 +181,7 @@ export class DiscoverPlugin implements Plugin<void, void> {
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins);
+      const services = await buildServices(core, plugins, getHistory);
       setServices(services);
       this.servicesInitialized = true;
 

@@ -5,7 +5,7 @@
  */
 
 import {
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -16,14 +16,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import moment from 'moment';
-import { Component, default as React } from 'react';
+import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
 import { Poller } from '../../common/poller';
-import { JobStatuses, JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG } from '../../constants';
+import { JobStatuses } from '../../constants';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import { ClientConfigType } from '../plugin';
 import {
   ReportDeleteButton,
   ReportDownloadButton,
@@ -53,6 +54,7 @@ export interface Props {
   intl: InjectedIntl;
   apiClient: ReportingAPIClient;
   license$: LicensingPluginSetup['license$'];
+  pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
   toasts: ToastsSetup;
 }
@@ -85,6 +87,12 @@ const jobStatusLabelsMap = new Map<JobStatuses, string>([
     JobStatuses.COMPLETED,
     i18n.translate('xpack.reporting.jobStatuses.completedText', {
       defaultMessage: 'Completed',
+    }),
+  ],
+  [
+    JobStatuses.WARNINGS,
+    i18n.translate('xpack.reporting.jobStatuses.warningText', {
+      defaultMessage: 'Completed with warnings',
     }),
   ],
   [
@@ -161,12 +169,10 @@ class ReportListingUi extends Component<Props, State> {
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.interval,
+      pollFrequencyInMillis: this.props.pollConfig.jobsRefresh.interval,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier:
-        JOB_COMPLETION_NOTIFICATIONS_POLLER_CONFIG.jobCompletionNotifier.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: this.props.pollConfig.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
     this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
@@ -225,6 +231,10 @@ class ReportListingUi extends Component<Props, State> {
           throw error;
         }
       }
+
+      // Since the contents of the table have changed, we must reset the pagination
+      // and re-fetch. Otherwise, the Nth page we are on could be empty of jobs.
+      this.setState(() => ({ page: 0 }), this.fetchJobs);
     };
 
     return (
@@ -406,7 +416,11 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.started_at);
           } else if (
             record.completed_at &&
-            (status === JobStatuses.COMPLETED || status === JobStatuses.FAILED)
+            ([
+              JobStatuses.COMPLETED,
+              JobStatuses.FAILED,
+              JobStatuses.WARNINGS,
+            ] as string[]).includes(status)
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
@@ -476,34 +490,32 @@ class ReportListingUi extends Component<Props, State> {
       onSelectionChange: this.onSelectionChange,
     };
 
-    const search = {
-      toolsRight: this.renderDeleteButton(),
-    };
-
     return (
-      <EuiInMemoryTable
-        itemId="id"
-        items={this.state.jobs}
-        loading={this.state.isLoading}
-        columns={tableColumns}
-        message={
-          this.state.isLoading
-            ? intl.formatMessage({
-                id: 'xpack.reporting.listing.table.loadingReportsDescription',
-                defaultMessage: 'Loading reports',
-              })
-            : intl.formatMessage({
-                id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
-                defaultMessage: 'No reports have been created',
-              })
-        }
-        pagination={pagination}
-        selection={selection}
-        search={search}
-        isSelectable={true}
-        onChange={this.onTableChange}
-        data-test-subj="reportJobListing"
-      />
+      <Fragment>
+        <EuiBasicTable
+          itemId="id"
+          items={this.state.jobs}
+          loading={this.state.isLoading}
+          columns={tableColumns}
+          noItemsMessage={
+            this.state.isLoading
+              ? intl.formatMessage({
+                  id: 'xpack.reporting.listing.table.loadingReportsDescription',
+                  defaultMessage: 'Loading reports',
+                })
+              : intl.formatMessage({
+                  id: 'xpack.reporting.listing.table.noCreatedReportsDescription',
+                  defaultMessage: 'No reports have been created',
+                })
+          }
+          pagination={pagination}
+          selection={selection}
+          isSelectable={true}
+          onChange={this.onTableChange}
+          data-test-subj="reportJobListing"
+        />
+        {this.state.selectedJobs.length > 0 ? this.renderDeleteButton() : null}
+      </Fragment>
     );
   }
 }

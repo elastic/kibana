@@ -130,11 +130,6 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
             saml2: { order: 5, realm: 'saml2', maxRedirectURLSize: '100b' },
           },
         })}`,
-        '--server.xsrf.whitelist',
-        JSON.stringify([
-          '/api/oidc_provider/token_endpoint',
-          '/api/oidc_provider/userinfo_endpoint',
-        ]),
       ],
     },
   };

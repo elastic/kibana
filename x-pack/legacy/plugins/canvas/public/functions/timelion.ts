@@ -6,8 +6,6 @@
 
 import { flatten } from 'lodash';
 import moment from 'moment-timezone';
-import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
 import { TimeRange } from 'src/plugins/data/common';
 import { ExpressionFunctionDefinition, DatatableRow } from 'src/plugins/expressions/public';
 import { fetch } from '../../common/lib/fetch';
@@ -15,6 +13,7 @@ import { fetch } from '../../common/lib/fetch';
 import { buildBoolArray } from '../../server/lib/build_bool_array';
 import { Datatable, Filter } from '../../types';
 import { getFunctionHelp } from '../../i18n';
+import { InitializeArguments } from './';
 
 interface Arguments {
   query: string;
@@ -30,13 +29,17 @@ interface Arguments {
  * @param timeRange time range to parse
  * @param timeZone time zone to do the parsing in
  */
-function parseDateMath(timeRange: TimeRange, timeZone: string) {
+function parseDateMath(
+  timeRange: TimeRange,
+  timeZone: string,
+  timefilter: InitializeArguments['timefilter']
+) {
   // the datemath plugin always parses dates by using the current default moment time zone.
   // to use the configured time zone, we are switching just for the bounds calculation.
   const defaultTimezone = moment().zoneName();
   moment.tz.setDefault(timeZone);
 
-  const parsedRange = npStart.plugins.data.query.timefilter.timefilter.calculateBounds(timeRange);
+  const parsedRange = timefilter.calculateBounds(timeRange);
 
   // reset default moment timezone
   moment.tz.setDefault(defaultTimezone);
@@ -44,96 +47,100 @@ function parseDateMath(timeRange: TimeRange, timeZone: string) {
   return parsedRange;
 }
 
-export function timelion(): ExpressionFunctionDefinition<
+type TimelionFunction = ExpressionFunctionDefinition<
   'timelion',
   Filter,
   Arguments,
   Promise<Datatable>
-> {
-  const { help, args: argHelp } = getFunctionHelp().timelion;
+>;
 
-  return {
-    name: 'timelion',
-    type: 'datatable',
-    inputTypes: ['filter'],
-    help,
-    args: {
-      query: {
-        types: ['string'],
-        aliases: ['_', 'q'],
-        help: argHelp.query,
-        default: '".es(*)"',
-      },
-      interval: {
-        types: ['string'],
-        help: argHelp.interval,
-        default: 'auto',
-      },
-      from: {
-        types: ['string'],
-        help: argHelp.from,
-        default: 'now-1y',
-      },
-      to: {
-        types: ['string'],
-        help: argHelp.to,
-        default: 'now',
-      },
-      timezone: {
-        types: ['string'],
-        help: argHelp.timezone,
-        default: 'UTC',
-      },
-    },
-    fn: (input, args): Promise<Datatable> => {
-      // Timelion requires a time range. Use the time range from the timefilter element in the
-      // workpad, if it exists. Otherwise fall back on the function args.
-      const timeFilter = input.and.find(and => and.type === 'time');
-      const range = timeFilter
-        ? { min: timeFilter.from, max: timeFilter.to }
-        : parseDateMath({ from: args.from, to: args.to }, args.timezone);
+export function timelionFunctionFactory(initialize: InitializeArguments): () => TimelionFunction {
+  return () => {
+    const { help, args: argHelp } = getFunctionHelp().timelion;
 
-      const body = {
-        extended: {
-          es: {
-            filter: {
-              bool: {
-                must: buildBoolArray(input.and),
+    return {
+      name: 'timelion',
+      type: 'datatable',
+      inputTypes: ['filter'],
+      help,
+      args: {
+        query: {
+          types: ['string'],
+          aliases: ['_', 'q'],
+          help: argHelp.query,
+          default: '".es(*)"',
+        },
+        interval: {
+          types: ['string'],
+          help: argHelp.interval,
+          default: 'auto',
+        },
+        from: {
+          types: ['string'],
+          help: argHelp.from,
+          default: 'now-1y',
+        },
+        to: {
+          types: ['string'],
+          help: argHelp.to,
+          default: 'now',
+        },
+        timezone: {
+          types: ['string'],
+          help: argHelp.timezone,
+          default: 'UTC',
+        },
+      },
+      fn: (input, args): Promise<Datatable> => {
+        // Timelion requires a time range. Use the time range from the timefilter element in the
+        // workpad, if it exists. Otherwise fall back on the function args.
+        const timeFilter = input.and.find(and => and.type === 'time');
+        const range = timeFilter
+          ? { min: timeFilter.from, max: timeFilter.to }
+          : parseDateMath({ from: args.from, to: args.to }, args.timezone, initialize.timefilter);
+
+        const body = {
+          extended: {
+            es: {
+              filter: {
+                bool: {
+                  must: buildBoolArray(input.and),
+                },
               },
             },
           },
-        },
-        sheet: [args.query],
-        time: {
-          from: range.min,
-          to: range.max,
-          interval: args.interval,
-          timezone: args.timezone,
-        },
-      };
-
-      return fetch(chrome.addBasePath(`/api/timelion/run`), {
-        method: 'POST',
-        responseType: 'json',
-        data: body,
-      }).then(resp => {
-        const seriesList = resp.data.sheet[0].list;
-        const rows = flatten(
-          seriesList.map((series: { data: any[]; label: string }) =>
-            series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
-          )
-        ) as DatatableRow[];
-
-        return {
-          type: 'datatable',
-          columns: [
-            { name: '@timestamp', type: 'date' },
-            { name: 'value', type: 'number' },
-            { name: 'label', type: 'string' },
-          ],
-          rows,
+          sheet: [args.query],
+          time: {
+            from: range.min,
+            to: range.max,
+            interval: args.interval,
+            timezone: args.timezone,
+          },
         };
-      });
-    },
+
+        return fetch(initialize.prependBasePath(`/api/timelion/run`), {
+          method: 'POST',
+          responseType: 'json',
+          data: body,
+        }).then(resp => {
+          const seriesList = resp.data.sheet[0].list;
+          const rows = flatten(
+            seriesList.map((series: { data: any[]; label: string }) =>
+              series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
+            )
+          ) as DatatableRow[];
+
+          return {
+            type: 'datatable',
+            columns: [
+              { name: '@timestamp', type: 'date' },
+              { name: 'value', type: 'number' },
+              { name: 'label', type: 'string' },
+            ],
+            rows,
+          };
+        });
+      },
+    };
   };
 }

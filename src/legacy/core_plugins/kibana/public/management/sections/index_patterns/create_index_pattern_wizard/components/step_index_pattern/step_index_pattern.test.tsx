@@ -21,7 +21,7 @@ import React from 'react';
 import { StepIndexPattern } from '../step_index_pattern';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { Header } from './components/header';
-import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../../../plugins/index_pattern_management/public';
 import { coreMock } from '../../../../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../../../../../plugins/data/public/mocks';
 import { SavedObjectsFindResponsePublic } from '../../../../../../../../../../core/public';

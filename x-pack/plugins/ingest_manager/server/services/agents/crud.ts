@@ -14,6 +14,7 @@ import {
 } from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
+import { escapeSearchQueryPhrase } from '../saved_object';
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
@@ -30,12 +31,17 @@ export async function listAgents(
 
   if (kuery && kuery !== '') {
     // To ensure users dont need to know about SO data structure...
-    filters.push(kuery.replace(/agents\./g, 'agents.attributes.'));
+    filters.push(
+      kuery.replace(
+        new RegExp(`${AGENT_SAVED_OBJECT_TYPE}\.`, 'g'),
+        `${AGENT_SAVED_OBJECT_TYPE}.attributes.`
+      )
+    );
   }
 
   if (showInactive === false) {
-    const agentActiveCondition = `agents.attributes.active:true AND not agents.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
-    const recentlySeenEphemeralAgent = `agents.attributes.active:true AND agents.attributes.type:${AGENT_TYPE_EPHEMERAL} AND agents.attributes.last_checkin > ${Date.now() -
+    const agentActiveCondition = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND not ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL}`;
+    const recentlySeenEphemeralAgent = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.type:${AGENT_TYPE_EPHEMERAL} AND ${AGENT_SAVED_OBJECT_TYPE}.attributes.last_checkin > ${Date.now() -
       3 * AGENT_POLLING_THRESHOLD_MS}`;
     filters.push(`(${agentActiveCondition}) OR (${recentlySeenEphemeralAgent})`);
   }
@@ -72,13 +78,15 @@ export async function getAgentByAccessAPIKeyId(
   const response = await soClient.find<AgentSOAttributes>({
     type: AGENT_SAVED_OBJECT_TYPE,
     searchFields: ['access_api_key_id'],
-    search: accessAPIKeyId,
+    search: escapeSearchQueryPhrase(accessAPIKeyId),
   });
-
   const [agent] = response.saved_objects.map(savedObjectToAgent);
 
   if (!agent) {
     throw Boom.notFound('Agent not found');
+  }
+  if (agent.access_api_key_id !== accessAPIKeyId) {
+    throw new Error('Agent api key id is not matching');
   }
   if (!agent.active) {
     throw Boom.forbidden('Agent inactive');
@@ -95,7 +103,7 @@ export async function updateAgent(
   }
 ) {
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    user_provided_metadata: JSON.stringify(data.userProvidedMetatada),
+    user_provided_metadata: data.userProvidedMetatada,
   });
 }
 

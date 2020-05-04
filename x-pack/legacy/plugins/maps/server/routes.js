@@ -21,7 +21,7 @@ import {
   GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
-} from '../common/constants';
+} from '../../../../plugins/maps/common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -44,6 +44,7 @@ export function initRoutes(server, licenseUid) {
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,
+      fetchFunction: fetch,
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {

@@ -125,6 +125,7 @@ import { SearchResponse } from 'elasticsearch';
 import { SearchShardsParams } from 'elasticsearch';
 import { SearchTemplateParams } from 'elasticsearch';
 import { ShallowPromise } from '@kbn/utility-types';
+import { ShardsResponse } from 'elasticsearch';
 import { SnapshotCreateParams } from 'elasticsearch';
 import { SnapshotCreateRepositoryParams } from 'elasticsearch';
 import { SnapshotDeleteParams } from 'elasticsearch';
@@ -282,7 +283,7 @@ export interface FieldFormatConfig {
 export const fieldFormats: {
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
     FieldFormat: typeof FieldFormat;
-    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
+    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions").SerializedFieldFormat<object>;
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;
     ColorFormat: typeof ColorFormat;
@@ -328,6 +329,12 @@ export function getDefaultSearchParams(config: SharedGlobalConfig): {
     timeout: string;
     ignoreUnavailable: boolean;
     restTotalHitsAsInt: boolean;
+};
+
+// @internal
+export function getTotalLoaded({ total, failed, successful }: ShardsResponse): {
+    total: number;
+    loaded: number;
 };
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -400,6 +407,8 @@ export interface IIndexPattern {
     }>;
     // (undocumented)
     fields: IFieldType[];
+    // (undocumented)
+    getTimeField?(): IFieldType | undefined;
     // (undocumented)
     id?: string;
     // (undocumented)
@@ -602,7 +611,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
     // (undocumented)
     setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };
@@ -730,12 +739,12 @@ export type TSearchStrategyProvider<T extends TStrategyTypes> = (context: ISearc
 // src/plugins/data/server/index.ts:102:26 - (ae-forgotten-export) The symbol "TruncateFormat" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isFilterable" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:130:27 - (ae-forgotten-export) The symbol "isNestedField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:181:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:182:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/index.ts:188:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:182:1 - (ae-forgotten-export) The symbol "dateHistogramInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:183:1 - (ae-forgotten-export) The symbol "InvalidEsCalendarIntervalError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:184:1 - (ae-forgotten-export) The symbol "InvalidEsIntervalFormatError" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:185:1 - (ae-forgotten-export) The symbol "isValidEsInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:186:1 - (ae-forgotten-export) The symbol "isValidInterval" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/index.ts:189:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:64:14 - (ae-forgotten-export) The symbol "ISearchSetup" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

@@ -60,6 +60,6 @@ export const NewAgentActionSchema = schema.object({
     schema.literal('RESUME'),
     schema.literal('PAUSE'),
   ]),
-  data: schema.maybe(schema.string()),
+  data: schema.maybe(schema.any()),
   sent_at: schema.maybe(schema.string()),
 });

@@ -24,6 +24,7 @@ const bodyValidation = schema.object({
   proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),
   serverName: schema.nullable(schema.string()),
+  hasDeprecatedProxySetting: schema.maybe(schema.boolean()),
 });
 
 const paramsValidation = schema.object({

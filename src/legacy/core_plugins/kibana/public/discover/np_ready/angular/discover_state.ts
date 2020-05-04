@@ -28,7 +28,7 @@ import {
 import { esFilters, Filter, Query } from '../../../../../../../plugins/data/public';
 import { migrateLegacyQuery } from '../../../../../../../plugins/kibana_legacy/public';
 
-interface AppState {
+export interface AppState {
   /**
    * Columns displayed in the table
    */
@@ -129,6 +129,11 @@ export function getState({
   });
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
+
+  if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
+    appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
+  }
+
   let initialAppState = {
     ...defaultAppState,
     ...appStateFromUrl,
@@ -179,9 +184,6 @@ export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newS
   const oldState = stateContainer.getState();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
-    if (mergedState.query) {
-      mergedState.query = migrateLegacyQuery(mergedState.query);
-    }
     stateContainer.set(mergedState);
   }
 }

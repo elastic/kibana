@@ -11,7 +11,7 @@ import {
   RangeFilter,
   mustBeAllOf,
   MustCondition,
-  MustNotCondition,
+  BoolClauseWithAnyCondition,
 } from './query_clauses';
 
 export const TaskWithSchedule: ExistsFilter = {
@@ -54,15 +54,17 @@ export const IdleTaskWithExpiredRunAt: MustCondition<TermFilter | RangeFilter> =
   },
 };
 
-export const InactiveTasks: MustNotCondition<TermFilter | RangeFilter> = {
+// TODO: Fix query clauses to support this
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const InactiveTasks: BoolClauseWithAnyCondition<any> = {
   bool: {
     must_not: [
       {
         bool: {
           should: [{ term: { 'task.status': 'running' } }, { term: { 'task.status': 'claiming' } }],
+          must: { range: { 'task.retryAt': { gt: 'now' } } },
         },
       },
-      { range: { 'task.retryAt': { gt: 'now' } } },
     ],
   },
 };

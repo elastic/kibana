@@ -56,9 +56,9 @@ export type Headers = { [header in KnownHeaders]?: string | string[] | undefined
  * Http response headers to set.
  * @public
  */
-export type ResponseHeaders = { [header in KnownHeaders]?: string | string[] } & {
-  [header: string]: string | string[];
-};
+export type ResponseHeaders =
+  | Record<KnownHeaders, string | string[]>
+  | Record<string, string | string[]>;
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();
 

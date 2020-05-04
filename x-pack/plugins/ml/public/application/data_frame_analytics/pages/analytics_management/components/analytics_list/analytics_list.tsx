@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { getTaskStateBadge } from './columns';
 
 import {
@@ -188,6 +188,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     const filtered = Object.values(matches)
       .filter(m => (m && m.count) >= clauses.length)
       .map(m => m.analytics);
+
+    let pageStart = pageIndex * pageSize;
+    if (pageStart >= filtered.length && filtered.length !== 0) {
+      // if the page start is larger than the number of items due to
+      // filters being applied, calculate a new page start
+      pageStart = Math.floor((filtered.length - 1) / pageSize) * pageSize;
+      setPageIndex(pageStart / pageSize);
+    }
 
     setFilteredAnalytics(filtered);
     setIsLoading(false);

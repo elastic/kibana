@@ -14,6 +14,7 @@ import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
+import { customElementType, workpadType } from './saved_objects';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -29,6 +30,9 @@ export class CanvasPlugin implements Plugin {
   }
 
   public async setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
+    coreSetup.savedObjects.registerType(customElementType);
+    coreSetup.savedObjects.registerType(workpadType);
+
     plugins.features.registerFeature({
       id: 'canvas',
       name: 'Canvas',

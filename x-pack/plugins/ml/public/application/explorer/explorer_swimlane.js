@@ -25,6 +25,7 @@ import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { i18n } from '@kbn/i18n';
+import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -309,6 +310,7 @@ export class ExplorerSwimlane extends React.Component {
       return function(lane) {
         const bucketScore = getBucketScore(lane, time);
         if (bucketScore !== 0) {
+          lane = lane === '' ? EMPTY_FIELD_VALUE_LABEL : lane;
           cellMouseover(this, lane, bucketScore, i, time);
         }
       };
@@ -376,7 +378,7 @@ export class ExplorerSwimlane extends React.Component {
             values: { label: mlEscape(label) },
           });
         } else {
-          return mlEscape(label);
+          return label === '' ? `<i>${EMPTY_FIELD_VALUE_LABEL}</i>` : mlEscape(label);
         }
       })
       .on('click', () => {
@@ -393,7 +395,7 @@ export class ExplorerSwimlane extends React.Component {
                   { skipHeader: true },
                   {
                     label: swimlaneData.fieldName,
-                    value,
+                    value: value === '' ? EMPTY_FIELD_VALUE_LABEL : value,
                     seriesIdentifier: { key: value },
                     valueAccessor: 'fieldName',
                   },

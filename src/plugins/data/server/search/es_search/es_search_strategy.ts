@@ -21,7 +21,7 @@ import { APICaller } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ES_SEARCH_STRATEGY } from '../../../common/search';
 import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { getDefaultSearchParams, ISearchContext } from '..';
+import { getDefaultSearchParams, getTotalLoaded, ISearchContext } from '..';
 
 export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
   context: ISearchContext,
@@ -46,9 +46,7 @@ export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_
 
       // The above query will either complete or timeout and throw an error.
       // There is no progress indication on this api.
-      const { total, failed, successful } = rawResponse._shards;
-      const loaded = failed + successful;
-      return { total, loaded, rawResponse };
+      return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
     },
   };
 };

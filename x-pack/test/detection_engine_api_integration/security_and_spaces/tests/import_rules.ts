@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -40,7 +40,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
       });
@@ -50,7 +49,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.txt')
-          .query()
           .expect(400);
 
         expect(body).to.eql({
@@ -64,7 +62,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -79,7 +76,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(new Array(10001).fill('rule-1')), 'rules.ndjson')
-          .query()
           .expect(500);
 
         expect(body).to.eql({ message: "Can't import more than 10000 rules", status_code: 500 });
@@ -90,7 +86,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
@@ -107,7 +102,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -122,7 +116,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -145,7 +138,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -160,14 +152,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -190,14 +180,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -212,7 +200,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const simpleRule = getSimpleRule('rule-1');
@@ -223,7 +210,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
           .set('kbn-xsrf', 'true')
           .attach('file', ndjson, 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
@@ -243,14 +229,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -273,14 +257,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         expect(body).to.eql({
@@ -310,14 +292,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2', 'rule-3']), 'rules.ndjson')
-          .query()
           .expect(200);
 
         const { body: bodyOfRule1 } = await supertest

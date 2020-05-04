@@ -266,6 +266,14 @@
         ],
       },
       {
+        groupSlug: 'estree',
+        groupName: 'estree related packages',
+        packageNames: [
+          'estree',
+          '@types/estree',
+        ],
+      },
+      {
         groupSlug: 'fancy-log',
         groupName: 'fancy-log related packages',
         packageNames: [
@@ -836,6 +844,14 @@
         packageNames: [
           'semver',
           '@types/semver',
+        ],
+      },
+      {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
         ],
       },
       {

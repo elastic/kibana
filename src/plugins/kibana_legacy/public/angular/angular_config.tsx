@@ -92,9 +92,9 @@ export const configureAppAngularModule = (
 ) => {
   const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
   const packageInfo =
-    'injectedMetadata' in newPlatform
-      ? newPlatform.injectedMetadata.getLegacyMetadata()
-      : newPlatform.env.packageInfo;
+    'env' in newPlatform
+      ? newPlatform.env.packageInfo
+      : newPlatform.injectedMetadata.getLegacyMetadata();
 
   if ('injectedMetadata' in newPlatform) {
     forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {

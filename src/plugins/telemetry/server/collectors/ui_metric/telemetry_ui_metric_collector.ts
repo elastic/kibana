@@ -38,7 +38,7 @@ export function registerUiMetricUsageCollector(
   registerType({
     name: 'ui-metric',
     hidden: false,
-    namespaceAgnostic: true,
+    namespaceType: 'agnostic',
     mappings: {
       properties: {
         count: {

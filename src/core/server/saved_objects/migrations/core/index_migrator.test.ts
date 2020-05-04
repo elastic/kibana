@@ -61,6 +61,7 @@ describe('IndexMigrator', () => {
               foo: '18c78c995965207ed3f6e7fc5c6e55fe',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -70,6 +71,7 @@ describe('IndexMigrator', () => {
             foo: { type: 'long' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {
@@ -178,6 +180,7 @@ describe('IndexMigrator', () => {
               foo: '625b32086eb1d1203564cf85062dd22e',
               migrationVersion: '4a1746014a75ade3a714e1db5763276f',
               namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
               references: '7997cf5a56cc02bdc9c93361bde732b0',
               type: '2f4316de49999235636386fe51dc06c1',
               updated_at: '00da57df13e94e9d98437d13ace4bfe0',
@@ -188,6 +191,7 @@ describe('IndexMigrator', () => {
             foo: { type: 'text' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
             type: { type: 'keyword' },
             updated_at: { type: 'date' },
             references: {

@@ -39,7 +39,7 @@ export interface DependencyCache {
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
-  security: SecurityPluginSetup | null;
+  security: SecurityPluginSetup | undefined | null;
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
 }

@@ -163,6 +163,7 @@ interface Options {
   accept: boolean;
   docs: boolean;
   help: boolean;
+  filter: string;
 }
 
 async function run(
@@ -205,6 +206,7 @@ async function run(
   const extraFlags: string[] = [];
   const opts = (getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
+    string: ['filter'],
     default: {
       project: undefined,
     },
@@ -221,6 +223,8 @@ async function run(
 
     opts.help = true;
   }
+
+  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
 
   if (opts.help) {
     process.stdout.write(
@@ -240,9 +244,13 @@ async function run(
           {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana Core API}
           {dim $} node scripts/check_published_api_changes --accept
 
+          {dim # Only checks the core/public directory}
+          {dim $} node scripts/check_published_api_changes --filter=core/public
+
         Options:
           --accept    {dim Accepts all changes by updating the API Review files and documentation}
           --docs      {dim Updates the Core API documentation}
+          --filter    {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
           --help      {dim Show this message}
       `)
     );
@@ -258,9 +266,11 @@ async function run(
     return false;
   }
 
-  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
-
-  const results = await Promise.all(folders.map(folder => run(folder, { log, opts })));
+  const results = await Promise.all(
+    folders
+      .filter(folder => (opts.filter.length ? folder.match(opts.filter) : true))
+      .map(folder => run(folder, { log, opts }))
+  );
 
   if (results.find(r => r === false) !== undefined) {
     process.exitCode = 1;

@@ -60,7 +60,7 @@ export class CasePlugin {
     );
 
     const caseService = await caseServicePlugin.setup({
-      authentication: plugins.security.authc,
+      authentication: plugins.security != null ? plugins.security.authc : null,
     });
     const caseConfigureService = await caseConfigureServicePlugin.setup();
     const userActionService = await userActionServicePlugin.setup();

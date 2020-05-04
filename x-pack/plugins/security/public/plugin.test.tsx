@@ -37,7 +37,7 @@ describe('Security Plugin', () => {
         )
       ).toEqual({
         __legacyCompat: { logoutUrl: '/some-base-path/logout', tenant: '/some-base-path' },
-        authc: { getCurrentUser: expect.any(Function) },
+        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),
@@ -63,7 +63,7 @@ describe('Security Plugin', () => {
 
       expect(setupManagementServiceMock).toHaveBeenCalledTimes(1);
       expect(setupManagementServiceMock).toHaveBeenCalledWith({
-        authc: { getCurrentUser: expect.any(Function) },
+        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
         license: {
           isEnabled: expect.any(Function),
           getFeatures: expect.any(Function),

@@ -4,15 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface AvailableTotal {
-  available: boolean;
-  total: number;
-}
-
-interface StatusCounts {
-  [statusType: string]: number;
-}
-
 export interface KeyCountBucket {
   key: string;
   doc_count: number;
@@ -20,22 +11,53 @@ export interface KeyCountBucket {
 
 export interface AggregationBuckets {
   buckets: KeyCountBucket[];
-  pdf?: {
-    buckets: KeyCountBucket[];
+}
+
+export interface StatusByAppBucket {
+  key: string;
+  doc_count: number;
+  jobTypes: {
+    buckets: Array<{
+      doc_count: number;
+      key: string;
+      appNames: AggregationBuckets;
+    }>;
   };
 }
 
-/*
- * Mapped Types and Intersection Types
- */
-
-type AggregationKeys = 'jobTypes' | 'layoutTypes' | 'objectTypes' | 'statusTypes';
-export type AggregationResults = { [K in AggregationKeys]: AggregationBuckets } & {
+export interface AggregationResultBuckets {
+  jobTypes: AggregationBuckets;
+  layoutTypes: {
+    doc_count: number;
+    pdf: AggregationBuckets;
+  };
+  objectTypes: {
+    doc_count: number;
+    pdf: AggregationBuckets;
+  };
+  statusTypes: AggregationBuckets;
+  statusByApp: {
+    buckets: StatusByAppBucket[];
+  };
   doc_count: number;
-};
+}
 
-type RangeAggregationKeys = 'all' | 'lastDay' | 'last7Days';
-export type RangeAggregationResults = { [K in RangeAggregationKeys]?: AggregationResults };
+export interface SearchResponse {
+  aggregations: {
+    ranges: {
+      buckets: {
+        all: AggregationResultBuckets;
+        last7Days: AggregationResultBuckets;
+        lastDay: AggregationResultBuckets;
+      };
+    };
+  };
+}
+
+export interface AvailableTotal {
+  available: boolean;
+  total: number;
+}
 
 type BaseJobTypeKeys = 'csv' | 'PNG';
 export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
@@ -51,9 +73,22 @@ export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
   };
 };
 
+interface StatusCounts {
+  [statusType: string]: number;
+}
+
+interface StatusByAppCounts {
+  [statusType: string]: {
+    [jobType: string]: {
+      [appName: string]: number;
+    };
+  };
+}
+
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
+  statuses: StatusByAppCounts;
 };
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';

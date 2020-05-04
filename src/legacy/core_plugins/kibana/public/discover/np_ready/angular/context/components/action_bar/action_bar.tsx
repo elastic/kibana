@@ -18,7 +18,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,
@@ -88,77 +88,83 @@ export function ActionBar({
   };
 
   return (
-    <form onSubmit={onSubmit}>
-      {isSuccessor && <EuiSpacer size="s" />}
-      {isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
-      {isSuccessor && showWarning && <EuiSpacer size="s" />}
-      <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj={`${type}LoadMoreButton`}
-            iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
-            isDisabled={isDisabled}
-            isLoading={isLoading}
-            onClick={() => {
-              const value = newDocCount + defaultStepSize;
-              if (isValid(value)) {
-                setNewDocCount(value);
-                onChangeCount(value);
-              }
-            }}
-            flush="right"
-          >
-            <FormattedMessage id="kbn.context.loadButtonLabel" defaultMessage="Load" />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow>
-            <EuiFieldNumber
-              aria-label={
-                isSuccessor
-                  ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
-                      defaultMessage: 'Number of older documents',
-                    })
-                  : i18n.translate('kbn.context.newerDocumentsAriaLabel', {
-                      defaultMessage: 'Number of newer documents',
-                    })
-              }
-              className="cxtSizePicker"
-              data-test-subj={`${type}CountPicker`}
-              disabled={isDisabled}
-              min={MIN_CONTEXT_SIZE}
-              max={MAX_CONTEXT_SIZE}
-              onChange={ev => {
-                setNewDocCount(ev.target.valueAsNumber);
-              }}
-              onBlur={() => {
-                if (newDocCount !== docCount && isValid(newDocCount)) {
-                  onChangeCount(newDocCount);
+    <I18nProvider>
+      <form onSubmit={onSubmit}>
+        {isSuccessor && <EuiSpacer size="s" />}
+        {isSuccessor && showWarning && (
+          <ActionBarWarning docCount={docCountAvailable} type={type} />
+        )}
+        {isSuccessor && showWarning && <EuiSpacer size="s" />}
+        <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj={`${type}LoadMoreButton`}
+              iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
+              isDisabled={isDisabled}
+              isLoading={isLoading}
+              onClick={() => {
+                const value = newDocCount + defaultStepSize;
+                if (isValid(value)) {
+                  setNewDocCount(value);
+                  onChangeCount(value);
                 }
               }}
-              type="number"
-              value={newDocCount >= 0 ? newDocCount : ''}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow displayOnly>
-            {isSuccessor ? (
-              <FormattedMessage
-                id="kbn.context.olderDocumentsDescription"
-                defaultMessage="older documents"
+              flush="right"
+            >
+              <FormattedMessage id="kbn.context.loadButtonLabel" defaultMessage="Load" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow>
+              <EuiFieldNumber
+                aria-label={
+                  isSuccessor
+                    ? i18n.translate('kbn.context.olderDocumentsAriaLabel', {
+                        defaultMessage: 'Number of older documents',
+                      })
+                    : i18n.translate('kbn.context.newerDocumentsAriaLabel', {
+                        defaultMessage: 'Number of newer documents',
+                      })
+                }
+                className="cxtSizePicker"
+                data-test-subj={`${type}CountPicker`}
+                disabled={isDisabled}
+                min={MIN_CONTEXT_SIZE}
+                max={MAX_CONTEXT_SIZE}
+                onChange={ev => {
+                  setNewDocCount(ev.target.valueAsNumber);
+                }}
+                onBlur={() => {
+                  if (newDocCount !== docCount && isValid(newDocCount)) {
+                    onChangeCount(newDocCount);
+                  }
+                }}
+                type="number"
+                value={newDocCount >= 0 ? newDocCount : ''}
               />
-            ) : (
-              <FormattedMessage
-                id="kbn.context.newerDocumentsDescription"
-                defaultMessage="newer documents"
-              />
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {!isSuccessor && showWarning && <ActionBarWarning docCount={docCountAvailable} type={type} />}
-      {!isSuccessor && <EuiSpacer size="s" />}
-    </form>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow displayOnly>
+              {isSuccessor ? (
+                <FormattedMessage
+                  id="kbn.context.olderDocumentsDescription"
+                  defaultMessage="older documents"
+                />
+              ) : (
+                <FormattedMessage
+                  id="kbn.context.newerDocumentsDescription"
+                  defaultMessage="newer documents"
+                />
+              )}
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {!isSuccessor && showWarning && (
+          <ActionBarWarning docCount={docCountAvailable} type={type} />
+        )}
+        {!isSuccessor && <EuiSpacer size="s" />}
+      </form>
+    </I18nProvider>
   );
 }

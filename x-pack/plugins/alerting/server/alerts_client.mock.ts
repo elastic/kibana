@@ -7,9 +7,10 @@
 import { AlertsClient } from './alerts_client';
 
 type Schema = PublicMethodsOf<AlertsClient>;
+export type AlertsClientMock = jest.Mocked<Schema>;
 
 const createAlertsClientMock = () => {
-  const mocked: jest.Mocked<Schema> = {
+  const mocked: AlertsClientMock = {
     create: jest.fn(),
     get: jest.fn(),
     getAlertState: jest.fn(),
@@ -27,6 +28,8 @@ const createAlertsClientMock = () => {
   return mocked;
 };
 
-export const alertsClientMock = {
+export const alertsClientMock: {
+  create: () => AlertsClientMock;
+} = {
   create: createAlertsClientMock,
 };

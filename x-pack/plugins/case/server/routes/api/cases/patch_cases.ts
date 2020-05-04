@@ -11,19 +11,21 @@ import { identity } from 'fp-ts/lib/function';
 
 import {
   CasesPatchRequestRt,
-  throwErrors,
   CasesResponseRt,
   CasePatchRequest,
+  excess,
+  throwErrors,
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
 import { getCaseToUpdate } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
+import { CASES_URL } from '../../../../common/constants';
 
 export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },
@@ -32,7 +34,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
       try {
         const client = context.core.savedObjects.client;
         const query = pipe(
-          CasesPatchRequestRt.decode(request.body),
+          excess(CasesPatchRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const myCases = await caseService.getCases({
@@ -116,6 +118,7 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
+                version: updatedCase?.version ?? myCase.version,
               });
             });
 

@@ -18,7 +18,7 @@
  */
 
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/console_lang/lib';
+import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';

@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, CoreSetup } from 'kibana/server';
+import { APICaller } from 'kibana/server';
 
 import { of } from 'rxjs';
+import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import {
   ConcreteTaskInstance,
   TaskStatus,
@@ -43,10 +44,11 @@ const defaultMockSavedObjects = [
 
 const defaultMockTaskDocs = [getMockTaskInstance()];
 
-export const getMockEs = (mockCallWithInternal: APICaller = getMockCallWithInternal()) =>
-  (({
-    createClient: () => ({ callAsInternalUser: mockCallWithInternal }),
-  } as unknown) as CoreSetup['elasticsearch']);
+export const getMockEs = async (mockCallWithInternal: APICaller = getMockCallWithInternal()) => {
+  const client = elasticsearchServiceMock.createClusterClient();
+  (client.callAsInternalUser as any) = mockCallWithInternal;
+  return client;
+};
 
 export const getMockCallWithInternal = (hits: unknown[] = defaultMockSavedObjects): APICaller => {
   return ((() => {

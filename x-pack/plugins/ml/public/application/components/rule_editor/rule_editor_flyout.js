@@ -30,7 +30,7 @@ import {
 
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';

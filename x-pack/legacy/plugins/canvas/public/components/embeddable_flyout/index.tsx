@@ -105,6 +105,7 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaPr
           availableEmbeddables={Object.keys(allowedEmbeddables)}
           savedObjects={this.props.kibana.services.savedObjects}
           uiSettings={this.props.kibana.services.uiSettings}
+          getEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
         />,
         this.el
       );

@@ -47,15 +47,14 @@ beforeEach(async () => {
     coreMock.createSetup(),
     coreMock.createStart()
   );
-  api = doStart();
 
   const contactCardFactory = new ContactCardEmbeddableFactory(
-    {},
     uiActions.executeTriggerActions,
     {} as any
   );
   setup.registerEmbeddableFactory(contactCardFactory.type, contactCardFactory);
 
+  api = doStart();
   container = new HelloWorldContainer(
     { id: '123', panels: {} },
     {
@@ -64,6 +63,7 @@ beforeEach(async () => {
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

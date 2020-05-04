@@ -13,12 +13,22 @@ function generateUniqueKey() {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
 
   describe('Connectors', function() {
     before(async () => {
+      await alerting.actions.createAction({
+        name: `slack-${Date.now()}`,
+        actionTypeId: '.slack',
+        config: {},
+        secrets: {
+          webhookUrl: 'https://test',
+        },
+      });
+
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
     });
@@ -28,12 +38,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      await testSubjects.click('.server-log-card');
+      await testSubjects.click('.slack-card');
 
-      const nameInput = await testSubjects.find('nameInput');
-      await nameInput.click();
-      await nameInput.clearValue();
-      await nameInput.type(connectorName);
+      await testSubjects.setValue('nameInput', connectorName);
+
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
       await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
 
@@ -46,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResults).to.eql([
         {
           name: connectorName,
-          actionType: 'Server log',
+          actionType: 'Slack',
           referencedByCount: '0',
         },
       ]);
@@ -58,12 +67,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-      await testSubjects.click('.server-log-card');
+      await testSubjects.click('.slack-card');
 
-      const nameInput = await testSubjects.find('nameInput');
-      await nameInput.click();
-      await nameInput.clearValue();
-      await nameInput.type(connectorName);
+      await testSubjects.setValue('nameInput', connectorName);
+
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
       await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
 
@@ -76,10 +84,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-      const nameInputToUpdate = await testSubjects.find('nameInput');
-      await nameInputToUpdate.click();
-      await nameInputToUpdate.clearValue();
-      await nameInputToUpdate.type(updatedConnectorName);
+      await testSubjects.setValue('nameInput', updatedConnectorName);
+
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
       await find.clickByCssSelector('[data-test-subj="saveEditedActionButton"]:not(disabled)');
 
@@ -92,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(searchResultsAfterEdit).to.eql([
         {
           name: updatedConnectorName,
-          actionType: 'Server log',
+          actionType: 'Slack',
           referencedByCount: '0',
         },
       ]);
@@ -102,12 +109,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        await testSubjects.click('.server-log-card');
+        await testSubjects.click('.slack-card');
 
-        const nameInput = await testSubjects.find('nameInput');
-        await nameInput.click();
-        await nameInput.clearValue();
-        await nameInput.type(connectorName);
+        await testSubjects.setValue('nameInput', connectorName);
+
+        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
         await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
@@ -140,12 +146,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       async function createConnector(connectorName: string) {
         await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
-        await testSubjects.click('.server-log-card');
+        await testSubjects.click('.slack-card');
 
-        const nameInput = await testSubjects.find('nameInput');
-        await nameInput.click();
-        await nameInput.clearValue();
-        await nameInput.type(connectorName);
+        await testSubjects.setValue('nameInput', connectorName);
+
+        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
         await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
         await pageObjects.common.closeToast();
@@ -175,6 +180,31 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsAfterDelete.length).to.eql(0);
+    });
+
+    it('should not be able to delete a preconfigured connector', async () => {
+      const preconfiguredConnectorName = 'Serverlog';
+      await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
+
+      const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResults.length).to.eql(1);
+
+      expect(await testSubjects.exists('deleteConnector')).to.be(false);
+      expect(await testSubjects.exists('preConfiguredTitleMessage')).to.be(true);
+    });
+
+    it('should not be able to edit a preconfigured connector', async () => {
+      const preconfiguredConnectorName = 'xyztest';
+
+      await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
+      expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
     });
   });
 };

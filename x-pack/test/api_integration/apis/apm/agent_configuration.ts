@@ -83,8 +83,8 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
 
       it('can find the created config', async () => {
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
         expect(body._source.settings).to.eql({ transaction_sample_rate: '0.55' });
       });
@@ -92,16 +92,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       it('can update the created config', async () => {
         await updateConfiguration({ service: {}, settings: { transaction_sample_rate: '0.85' } });
 
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
         expect(body._source.settings).to.eql({ transaction_sample_rate: '0.85' });
       });
 
       it('can delete the created config', async () => {
         await deleteConfiguration(newConfig);
-        const { statusCode } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(404);
+        const { status } = await searchConfigurations(searchParams);
+        expect(status).to.equal(404);
       });
     });
 
@@ -166,12 +166,12 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       for (const agentRequest of agentsRequests) {
         it(`${agentRequest.service.name} / ${agentRequest.service.environment}`, async () => {
-          const { statusCode, body } = await searchConfigurations({
+          const { status, body } = await searchConfigurations({
             service: agentRequest.service,
             etag: 'abc',
           });
 
-          expect(statusCode).to.equal(200);
+          expect(status).to.equal(200);
           expect(body._source.settings).to.eql(agentRequest.expectedSettings);
         });
       }
@@ -182,15 +182,21 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
         service: { name: 'myservice', environment: 'development' },
         settings: { transaction_sample_rate: '0.9' },
       };
+      const configProduction = {
+        service: { name: 'myservice', environment: 'production' },
+        settings: { transaction_sample_rate: '0.9' },
+      };
       let etag: string;
 
       before(async () => {
         log.debug('creating agent configuration');
         await createConfiguration(config);
+        await createConfiguration(configProduction);
       });
 
       after(async () => {
         await deleteConfiguration(config);
+        await deleteConfiguration(configProduction);
       });
 
       it(`should have 'applied_by_agent=false' before supplying etag`, async () => {
@@ -210,17 +216,45 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
 
       it(`should have 'applied_by_agent=true' after supplying etag`, async () => {
-        async function getAppliedByAgent() {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'development' },
+          etag,
+        });
+
+        async function hasBeenAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'development' },
-            etag,
           });
 
           return body._source.applied_by_agent;
         }
 
         // wait until `applied_by_agent` has been updated in elasticsearch
-        expect(await waitFor(getAppliedByAgent)).to.be(true);
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
+      });
+      it(`should have 'applied_by_agent=false' before marking as applied`, async () => {
+        const res1 = await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+        });
+
+        expect(res1.body._source.applied_by_agent).to.be(false);
+      });
+      it(`should have 'applied_by_agent=true' when 'mark_as_applied_by_agent' attribute is true`, async () => {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+          mark_as_applied_by_agent: true,
+        });
+
+        async function hasBeenAppliedByAgent() {
+          const { body } = await searchConfigurations({
+            service: { name: 'myservice', environment: 'production' },
+          });
+
+          return body._source.applied_by_agent;
+        }
+
+        // wait until `applied_by_agent` has been updated in elasticsearch
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
       });
     });
   });

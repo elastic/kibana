@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { createBrowserHistory, History } from 'history';
+import { History } from 'history';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -71,9 +71,9 @@ interface GetStateParams {
    */
   storeInSessionStorage?: boolean;
   /**
-   * Browser history used for testing
+   * History instance to use
    */
-  history?: History;
+  history: History;
 }
 
 interface GetStateReturn {
@@ -109,7 +109,7 @@ interface GetStateReturn {
   /**
    * sync state to URL, used for testing
    */
-  flushToUrl: () => void;
+  flushToUrl: (replace?: boolean) => void;
 }
 const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
@@ -126,7 +126,7 @@ export function getState({
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
-    history: history ? history : createBrowserHistory(),
+    history,
   });
 
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
@@ -205,7 +205,7 @@ export function getState({
       }
     },
     // helper function just needed for testing
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: (replace?: boolean) => stateStorage.flush({ replace }),
   };
 }
 

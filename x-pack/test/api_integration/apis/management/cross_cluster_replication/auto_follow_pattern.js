@@ -6,8 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { getRandomString } from './lib';
-import { getAutoFollowIndexPayload } from './fixtures';
+import { REMOTE_CLUSTER_NAME } from './constants';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';
 import { registerHelpers as registerAutoFollowPatternHelpers } from './auto_follow_pattern.helpers';
 
@@ -37,44 +36,60 @@ export default function({ getService }) {
 
     describe('when remote cluster does not exist', () => {
       it('should throw a 404 error when cluster is unknown', async () => {
-        const payload = getAutoFollowIndexPayload();
-        payload.remoteCluster = 'unknown-cluster';
+        const { body } = await createAutoFollowPattern({
+          id: 'pattern0',
+          remoteCluster: 'unknown-cluster',
+          leaderIndexPatterns: ['leader-*'],
+          followIndexPattern: '{{leader_index}}_follower',
+        });
 
-        const { body } = await createAutoFollowPattern(undefined, payload).expect(404);
+        expect(body.statusCode).to.be(404);
         expect(body.attributes.cause[0]).to.contain('no such remote cluster');
       });
     });
 
     describe('when remote cluster exists', () => {
-      before(() => addCluster());
+      before(async () => addCluster());
 
       describe('create()', () => {
         it('should create an auto-follow pattern when cluster is known', async () => {
-          const name = getRandomString();
-          const { body } = await createAutoFollowPattern(name).expect(200);
-          console.log(body);
+          const { body, statusCode } = await createAutoFollowPattern({
+            id: 'pattern1',
+            remoteCluster: REMOTE_CLUSTER_NAME,
+            leaderIndexPatterns: ['leader-*'],
+            followIndexPattern: '{{leader_index}}_follower',
+          });
 
+          expect(statusCode).to.be(200);
           expect(body.acknowledged).to.eql(true);
         });
       });
 
       describe('get()', () => {
         it('should return a 404 when the auto-follow pattern is not found', async () => {
-          const name = getRandomString();
-          const { body } = await getAutoFollowPattern(name).expect(404);
-
+          const { body } = await getAutoFollowPattern('missing-pattern');
+          expect(body.statusCode).to.be(404);
           expect(body.attributes.cause).not.to.be(undefined);
         });
 
         it('should return an auto-follow pattern that was created', async () => {
-          const name = getRandomString();
-          const autoFollowPattern = getAutoFollowIndexPayload();
+          await createAutoFollowPattern({
+            id: 'pattern2',
+            remoteCluster: REMOTE_CLUSTER_NAME,
+            leaderIndexPatterns: ['leader-*'],
+            followIndexPattern: '{{leader_index}}_follower',
+          });
 
-          await createAutoFollowPattern(name, autoFollowPattern);
+          const { body, statusCode } = await getAutoFollowPattern('pattern2');
 
-          const { body } = await getAutoFollowPattern(name).expect(200);
-
-          expect(body).to.eql({ ...autoFollowPattern, name });
+          expect(statusCode).to.be(200);
+          expect(body).to.eql({
+            name: 'pattern2',
+            remoteCluster: REMOTE_CLUSTER_NAME,
+            active: true,
+            leaderIndexPatterns: ['leader-*'],
+            followIndexPattern: '{{leader_index}}_follower',
+          });
         });
       });
     });

@@ -17,6 +17,7 @@ export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
 const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: 'Overview',
   'data-sources': 'Data Sources',
+  settings: 'Settings',
 };
 
 export function SideNavLinks({ name, version, active }: NavLinkProps) {
@@ -36,7 +37,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               : p.theme.eui.euiFontWeightRegular};
         `;
         // don't display Data Sources tab if the package is not installed
-        if (packageInstallStatus !== InstallStatus.installed && panel === 'data-sources')
+        if (packageInstallStatus.status !== InstallStatus.installed && panel === 'data-sources')
           return null;
 
         return (

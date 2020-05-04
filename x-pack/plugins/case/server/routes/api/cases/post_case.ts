@@ -11,14 +11,15 @@ import { identity } from 'fp-ts/lib/function';
 
 import { flattenCaseSavedObject, transformNewCase, wrapError, escapeHatch } from '../utils';
 
-import { CaseRequestRt, throwErrors, CaseResponseRt } from '../../../../common/api';
+import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASES_URL } from '../../../../common/constants';
 
 export function initPostCaseApi({ caseService, router, userActionService }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },
@@ -27,7 +28,7 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
       try {
         const client = context.core.savedObjects.client;
         const query = pipe(
-          CaseRequestRt.decode(request.body),
+          excess(CasePostRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 

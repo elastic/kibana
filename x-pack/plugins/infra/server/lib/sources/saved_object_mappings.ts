@@ -5,7 +5,7 @@
  */
 
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { InfraSavedSourceConfiguration } from './types';
+import { InfraSavedSourceConfiguration } from '../../../common/http_api/source_api';
 
 export const infraSourceConfigurationSavedObjectType = 'infrastructure-ui-source';
 

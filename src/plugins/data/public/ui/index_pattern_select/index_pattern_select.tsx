@@ -27,6 +27,7 @@ import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../co
 import { getTitle } from '../../index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
+  // Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'append' | 'prepend' | 'sortMatchesBy'>,
   Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
   'onChange' | 'placeholder'
 > & {

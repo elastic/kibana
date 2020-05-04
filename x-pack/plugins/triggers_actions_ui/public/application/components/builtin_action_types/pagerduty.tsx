@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -11,13 +11,10 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiLink,
-  EuiContextMenuItem,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiContextMenuPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -25,11 +22,14 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
+import pagerDutySvg from './pagerduty.svg';
+import { AddMessageVariables } from '../add_message_variables';
+import { hasMustacheTokens } from '../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
-    iconClass: 'apps',
+    iconClass: pagerDutySvg,
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
@@ -64,6 +64,7 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       const errors = {
         summary: new Array<string>(),
+        timestamp: new Array<string>(),
       };
       validationResult.errors = errors;
       if (!actionParams.summary?.length) {
@@ -75,6 +76,24 @@ export function getActionType(): ActionTypeModel {
             }
           )
         );
+      }
+      if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
+        if (isNaN(Date.parse(actionParams.timestamp))) {
+          const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
+          errors.timestamp.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
+              {
+                defaultMessage:
+                  'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
+                values: {
+                  nowShortFormat,
+                  nowLongFormat,
+                },
+              }
+            )
+          );
+        }
       }
       return validationResult;
     },
@@ -96,7 +115,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
-            defaultMessage: 'API URL',
+            defaultMessage: 'API URL (optional)',
           }
         )}
       >
@@ -120,7 +139,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-pagerduty.html#configuring-pagerduty"
+            href="https://www.elastic.co/guide/en/kibana/current/pagerduty-action-type.html"
             target="_blank"
           >
             <FormattedMessage
@@ -134,7 +153,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
-            defaultMessage: 'Routing key',
+            defaultMessage: 'Integration key',
           }
         )}
       >
@@ -177,20 +196,20 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   } = actionParams;
   const severityOptions = [
     {
-      value: 'info',
-      text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
-        {
-          defaultMessage: 'Info',
-        }
-      ),
-    },
-    {
       value: 'critical',
       text: i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
         {
           defaultMessage: 'Critical',
+        }
+      ),
+    },
+    {
+      value: 'error',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        {
+          defaultMessage: 'Error',
         }
       ),
     },
@@ -204,11 +223,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
     {
-      value: 'error',
+      value: 'info',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
         {
-          defaultMessage: 'Error',
+          defaultMessage: 'Info',
         }
       ),
     },
@@ -242,66 +261,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
       ),
     },
   ];
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<Record<string, boolean>>({
-    dedupKey: false,
-    summary: false,
-    source: false,
-    timestamp: false,
-    component: false,
-    group: false,
-    class: false,
-  });
-  // TODO: replace this button with a proper Eui component, when it will be ready
-  const getMessageVariables = (paramsProperty: string) =>
-    messageVariables?.map((variable: string) => (
-      <EuiContextMenuItem
-        key={variable}
-        icon="empty"
-        onClick={() => {
-          editAction(
-            paramsProperty,
-            ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
-            index
-          );
-          setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: false });
-        }}
-      >
-        {`{{${variable}}}`}
-      </EuiContextMenuItem>
-    ));
 
-  const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariableTitle',
-    {
-      defaultMessage: 'Add alert variable',
-    }
-  );
-
-  const getAddVariableComponent = (paramsProperty: string, buttonName: string) => {
-    return (
-      <EuiPopover
-        button={
-          <EuiButtonIcon
-            data-test-subj={`${paramsProperty}AddVariableButton`}
-            title={addVariableButtonTitle}
-            onClick={() =>
-              setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: true })
-            }
-            iconType="indexOpen"
-            aria-label={buttonName}
-          />
-        }
-        isOpen={isVariablesPopoverOpen[paramsProperty]}
-        closePopover={() =>
-          setIsVariablesPopoverOpen({ ...isVariablesPopoverOpen, [paramsProperty]: false })
-        }
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenuPanel items={getMessageVariables(paramsProperty)} />
-      </EuiPopover>
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(
+      paramsProperty,
+      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
+      index
     );
   };
+
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -358,15 +326,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'DedupKey (optional)',
               }
             )}
-            labelAppend={getAddVariableComponent(
-              'dedupKey',
-              i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton1',
-                {
-                  defaultMessage: 'Add variable',
+            labelAppend={
+              <AddMessageVariables
+                messageVariables={messageVariables}
+                onSelectEventHandler={(variable: string) =>
+                  onSelectMessageVariable('dedupKey', variable)
                 }
-              )
-            )}
+                paramsProperty="dedupKey"
+              />
+            }
           >
             <EuiFieldText
               fullWidth
@@ -387,32 +355,37 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            error={errors.timestamp}
+            isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
               {
                 defaultMessage: 'Timestamp (optional)',
               }
             )}
-            labelAppend={getAddVariableComponent(
-              'timestamp',
-              i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton2',
-                {
-                  defaultMessage: 'Add variable',
+            labelAppend={
+              <AddMessageVariables
+                messageVariables={messageVariables}
+                onSelectEventHandler={(variable: string) =>
+                  onSelectMessageVariable('timestamp', variable)
                 }
-              )
-            )}
+                paramsProperty="timestamp"
+              />
+            }
           >
             <EuiFieldText
               fullWidth
               name="timestamp"
               data-test-subj="timestampInput"
               value={timestamp || ''}
+              isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 editAction('timestamp', e.target.value, index);
               }}
               onBlur={() => {
-                if (!timestamp) {
+                if (timestamp?.trim()) {
+                  editAction('timestamp', timestamp.trim(), index);
+                } else {
                   editAction('timestamp', '', index);
                 }
               }}
@@ -428,15 +401,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Component (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent(
-          'component',
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton3',
-            {
-              defaultMessage: 'Add variable',
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('component', variable)
             }
-          )
-        )}
+            paramsProperty="component"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -461,15 +434,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Group (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent(
-          'group',
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton4',
-            {
-              defaultMessage: 'Add variable',
-            }
-          )
-        )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('group', variable)}
+            paramsProperty="group"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -494,15 +465,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Source (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent(
-          'source',
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton5',
-            {
-              defaultMessage: 'Add variable',
-            }
-          )
-        )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('source', variable)}
+            paramsProperty="source"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -530,15 +499,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Summary',
           }
         )}
-        labelAppend={getAddVariableComponent(
-          'summary',
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton6',
-            {
-              defaultMessage: 'Add variable',
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('summary', variable)
             }
-          )
-        )}
+            paramsProperty="summary"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -565,15 +534,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Class (optional)',
           }
         )}
-        labelAppend={getAddVariableComponent(
-          'class',
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.addVariablePopoverButton7',
-            {
-              defaultMessage: 'Add variable',
-            }
-          )
-        )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('class', variable)}
+            paramsProperty="class"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -593,3 +560,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     </Fragment>
   );
 };
+
+function getValidTimestampExamples() {
+  const now = moment();
+  return {
+    nowShortFormat: now.format('YYYY-MM-DD'),
+    nowLongFormat: now.format('YYYY-MM-DD h:mm:ss'),
+  };
+}

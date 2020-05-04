@@ -27,10 +27,17 @@ import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
-import { CompilerMsgs, CompilerMsg, maybeMap, Bundle, WorkerConfig, ascending } from '../common';
+import {
+  CompilerMsgs,
+  CompilerMsg,
+  maybeMap,
+  Bundle,
+  WorkerConfig,
+  ascending,
+  parseFilePath,
+} from '../common';
 import { getWebpackConfig } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
-import { parseFilePath } from './parse_path';
 import {
   isExternalModule,
   isNormalModule,

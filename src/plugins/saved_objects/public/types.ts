@@ -24,7 +24,12 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from 'kibana/public';
-import { IIndexPattern, IndexPatternsContract, ISearchSource } from '../../data/public';
+import {
+  DataPublicPluginStart,
+  IIndexPattern,
+  IndexPatternsContract,
+  ISearchSource,
+} from '../../data/public';
 
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
@@ -49,6 +54,7 @@ export interface SavedObject {
   searchSource?: ISearchSource;
   showInRecentlyAccessed: boolean;
   title: string;
+  unresolvedIndexPatternReference?: SavedObjectReference;
 }
 
 export interface SavedObjectSaveOpts {
@@ -65,6 +71,7 @@ export interface SavedObjectCreationOpts {
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: IndexPatternsContract;
+  search: DataPublicPluginStart['search'];
   chrome: ChromeStart;
   overlays: OverlayStart;
 }
@@ -72,7 +79,6 @@ export interface SavedObjectKibanaServices {
 export interface SavedObjectConfig {
   // is only used by visualize
   afterESResp?: (savedObject: SavedObject) => Promise<SavedObject>;
-  clearSavedIndexPattern?: boolean;
   defaults?: any;
   extractReferences?: (opts: {
     attributes: SavedObjectAttributes;

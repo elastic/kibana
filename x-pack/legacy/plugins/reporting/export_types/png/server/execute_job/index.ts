@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchServiceSetup } from 'kibana/server';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import {
-  ESQueueWorkerExecuteFn,
-  ExecuteJobFactory,
-  JobDocOutput,
-  Logger,
-  ServerFacade,
-} from '../../../../types';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -29,22 +22,21 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
   parentLogger: Logger
 ) {
-  const browserDriverFactory = await reporting.getBrowserDriverFactory();
-  const generatePngObservable = generatePngObservableFactory(server, browserDriverFactory);
+  const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
-  return function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+  return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
+    const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders({ server, job, logger })),
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
       map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
-      map(filteredHeaders => getConditionalHeaders({ server, job, filteredHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
       mergeMap(conditionalHeaders => {
-        const urls = getFullUrls({ server, job });
+        const urls = getFullUrls({ config, job });
         const hashUrl = urls[0];
         return generatePngObservable(
           jobLogger,

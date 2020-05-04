@@ -91,6 +91,20 @@ export default function({ getPageObjects, getService }) {
         expect(time.start).to.equal('~ an hour ago');
         expect(time.end).to.equal('now');
       });
+
+      it('should use saved time, if time is missing in global state, but _g is present in the url', async function() {
+        const currentUrl = await browser.getCurrentUrl();
+        const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(filters:!())`;
+        await browser.get(urlWithGlobalTime, false);
+        const time = await PageObjects.timePicker.getTimeConfig();
+        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+      });
     });
 
     // If the user has time stored with a dashboard, it's supposed to override the current time settings

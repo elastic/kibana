@@ -19,7 +19,8 @@ import {
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
-import { BrowserConfig, CaptureConfig } from '../../../../types';
+import { BROWSER_TYPE } from '../../../../common/constants';
+import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger as Logger } from '../../../lib/level_logger';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
@@ -28,7 +29,8 @@ import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
 type binaryPath = string;
-type ViewportConfig = BrowserConfig['viewport'];
+type BrowserConfig = CaptureConfig['browser']['chromium'];
+type ViewportConfig = CaptureConfig['viewport'];
 
 export class HeadlessChromiumDriverFactory {
   private binaryPath: binaryPath;
@@ -37,15 +39,10 @@ export class HeadlessChromiumDriverFactory {
   private userDataDir: string;
   private getChromiumArgs: (viewport: ViewportConfig) => string[];
 
-  constructor(
-    binaryPath: binaryPath,
-    logger: Logger,
-    browserConfig: BrowserConfig,
-    captureConfig: CaptureConfig
-  ) {
+  constructor(binaryPath: binaryPath, logger: Logger, captureConfig: CaptureConfig) {
     this.binaryPath = binaryPath;
-    this.browserConfig = browserConfig;
     this.captureConfig = captureConfig;
+    this.browserConfig = captureConfig.browser.chromium;
 
     this.userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     this.getChromiumArgs = (viewport: ViewportConfig) =>
@@ -57,7 +54,7 @@ export class HeadlessChromiumDriverFactory {
       });
   }
 
-  type = 'chromium';
+  type = BROWSER_TYPE;
 
   test(logger: Logger) {
     const chromiumArgs = args({
@@ -153,7 +150,7 @@ export class HeadlessChromiumDriverFactory {
 
       // HeadlessChromiumDriver: object to "drive" a browser page
       const driver = new HeadlessChromiumDriver(page, {
-        inspect: this.browserConfig.inspect,
+        inspect: !!this.browserConfig.inspect,
         networkPolicy: this.captureConfig.networkPolicy,
       });
 

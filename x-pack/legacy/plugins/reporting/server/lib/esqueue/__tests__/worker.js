@@ -760,6 +760,27 @@ describe('Worker class', function() {
         });
       });
 
+      it('handle warnings in the output by reflecting a warning status', () => {
+        const workerFn = () => {
+          return Promise.resolve({
+            ...payload,
+            warnings: [`Don't run with scissors!`],
+          });
+        };
+        worker = new Worker(mockQueue, 'test', workerFn, defaultWorkerOptions);
+
+        return worker
+          ._performJob({
+            test: true,
+            ...job,
+          })
+          .then(() => {
+            sinon.assert.calledOnce(updateSpy);
+            const doc = updateSpy.firstCall.args[1].body.doc;
+            expect(doc).to.have.property('status', constants.JOB_STATUS_WARNINGS);
+          });
+      });
+
       it('should emit completion event', function(done) {
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 

@@ -514,7 +514,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     needBody: true,
     method: 'POST',
   });
-
+  // Currently the endpoint uses a default size of 100 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
   ml.calendars = ca({
     urls: [
       {
@@ -526,7 +526,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/calendars/',
+        fmt: '/_ml/calendars?size=1000',
       },
     ],
     method: 'GET',
@@ -671,7 +671,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     },
     method: 'DELETE',
   });
-
+  // Currently the endpoint uses a default size of 100 unless a size is supplied. So until paging is supported in the UI, explicitly supply a size of 1000
   ml.filters = ca({
     urls: [
       {
@@ -683,7 +683,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/filters/',
+        fmt: '/_ml/filters?size=1000',
       },
     ],
     method: 'GET',
@@ -740,7 +740,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     urls: [
       {
         fmt:
-          '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
+          '/_ml/find_file_structure?&explain=true&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
         req: {
           charset: {
             type: 'string',
@@ -778,7 +778,7 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
         },
       },
       {
-        fmt: '/_ml/find_file_structure',
+        fmt: '/_ml/find_file_structure?&explain=true',
       },
     ],
     needBody: true,

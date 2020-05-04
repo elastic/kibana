@@ -52,8 +52,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertDetailsSummaryExists();
     },
 
-    async assertSourceIndexPreviewExists(subSelector?: string) {
-      let selector = 'transformSourceIndexPreview';
+    async assertIndexPreviewExists(subSelector?: string) {
+      let selector = 'transformIndexPreview';
       if (subSelector !== undefined) {
         selector = `${selector} ${subSelector}`;
       } else {
@@ -62,8 +62,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async assertSourceIndexPreviewLoaded() {
-      await this.assertSourceIndexPreviewExists('loaded');
+    async assertIndexPreviewLoaded() {
+      await this.assertIndexPreviewExists('loaded');
     },
 
     async assertPivotPreviewExists(subSelector?: string) {
@@ -124,10 +124,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertSourceIndexPreview(columns: number, rows: number) {
+    async assertIndexPreview(columns: number, rows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiDataGrid('transformSourceIndexPreview');
+        const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
 
         expect(rowsData).to.length(
           rows,
@@ -143,8 +143,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertSourceIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformSourceIndexPreview', column, values);
+    async assertIndexPreviewColumnValues(column: number, values: string[]) {
+      await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {

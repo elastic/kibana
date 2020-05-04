@@ -31,6 +31,7 @@ import {
   setStateToKbnUrl,
   getStateFromKbnUrl,
 } from './kbn_url_storage';
+import { ScopedHistory } from '../../../../../core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {
@@ -187,23 +188,54 @@ describe('kbn_url_storage', () => {
       urlControls.update('/', true);
     });
 
-    const getCurrentUrl = () => window.location.href;
+    const getCurrentUrl = () => history.createHref(history.location);
 
     it('should flush async url updates', async () => {
       const pr1 = urlControls.updateAsync(() => '/1', false);
       const pr2 = urlControls.updateAsync(() => '/2', false);
       const pr3 = urlControls.updateAsync(() => '/3', false);
-      expect(getCurrentUrl()).toBe('http://localhost/');
-      expect(urlControls.flush()).toBe('http://localhost/3');
-      expect(getCurrentUrl()).toBe('http://localhost/3');
+      expect(getCurrentUrl()).toBe('/');
+      expect(urlControls.flush()).toBe('/3');
+      expect(getCurrentUrl()).toBe('/3');
       await Promise.all([pr1, pr2, pr3]);
-      expect(getCurrentUrl()).toBe('http://localhost/3');
+      expect(getCurrentUrl()).toBe('/3');
     });
 
     it('flush() should return undefined, if no url updates happened', () => {
       expect(urlControls.flush()).toBeUndefined();
-      urlControls.updateAsync(() => 'http://localhost/1', false);
-      urlControls.updateAsync(() => 'http://localhost/', false);
+      urlControls.updateAsync(() => '/1', false);
+      urlControls.updateAsync(() => '/', false);
+      expect(urlControls.flush()).toBeUndefined();
+    });
+  });
+
+  describe('urlControls - scoped history integration', () => {
+    let history: History;
+    let urlControls: IKbnUrlControls;
+    beforeEach(() => {
+      const parentHistory = createBrowserHistory();
+      parentHistory.replace('/app/kibana/');
+      history = new ScopedHistory(parentHistory, '/app/kibana/');
+      urlControls = createKbnUrlControls(history);
+    });
+
+    const getCurrentUrl = () => history.createHref(history.location);
+
+    it('should flush async url updates', async () => {
+      const pr1 = urlControls.updateAsync(() => '/app/kibana/1', false);
+      const pr2 = urlControls.updateAsync(() => '/app/kibana/2', false);
+      const pr3 = urlControls.updateAsync(() => '/app/kibana/3', false);
+      expect(getCurrentUrl()).toBe('/app/kibana/');
+      expect(urlControls.flush()).toBe('/app/kibana/3');
+      expect(getCurrentUrl()).toBe('/app/kibana/3');
+      await Promise.all([pr1, pr2, pr3]);
+      expect(getCurrentUrl()).toBe('/app/kibana/3');
+    });
+
+    it('flush() should return undefined, if no url updates happened', () => {
+      expect(urlControls.flush()).toBeUndefined();
+      urlControls.updateAsync(() => '/app/kibana/1', false);
+      urlControls.updateAsync(() => '/app/kibana/', false);
       expect(urlControls.flush()).toBeUndefined();
     });
   });

@@ -25,11 +25,20 @@ import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart } from './plugin';
+import { TelemetryPluginStart, TelemetryPluginConfig } from './plugin';
+
+// The following is to be able to access private methods
+/* eslint-disable dot-notation */
+
+export interface TelemetryServiceMockOptions {
+  reportOptInStatusChange?: boolean;
+  config?: Partial<TelemetryPluginConfig>;
+}
 
 export function mockTelemetryService({
   reportOptInStatusChange,
-}: { reportOptInStatusChange?: boolean } = {}) {
+  config: configOverride = {},
+}: TelemetryServiceMockOptions = {}) {
   const config = {
     enabled: true,
     url: 'http://localhost',
@@ -39,14 +48,22 @@ export function mockTelemetryService({
     banner: true,
     allowChangingOptInStatus: true,
     telemetryNotifyUserAboutOptInDefault: true,
+    ...configOverride,
   };
 
-  return new TelemetryService({
+  const telemetryService = new TelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
     reportOptInStatusChange,
   });
+
+  const originalReportOptInStatus = telemetryService['reportOptInStatus'];
+  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation(optInPayload => {
+    return originalReportOptInStatus(optInPayload); // Actually calling the original method
+  });
+
+  return telemetryService;
 }
 
 export function mockTelemetryNotifications({

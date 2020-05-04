@@ -21,7 +21,7 @@ function errorNotify(text, resp) {
   const toastNotifications = getToastNotifications();
   toastNotifications.addError(new MLRequestFailure(err, resp), {
     title: i18n.translate('xpack.ml.messagebarService.errorTitle', {
-      defaultMessage: 'An error has ocurred',
+      defaultMessage: 'An error has occurred',
     }),
   });
 }

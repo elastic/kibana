@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentConfig } from '../../../../../../../../common/types/models';
+import { AgentConfig } from '../../../../../types';
 import {
   useGetOneAgentConfigFull,
   useGetEnrollmentAPIKeys,
@@ -25,14 +25,27 @@ import {
 import { ShellEnrollmentInstructions } from '../../../../../components/enrollment_instructions';
 import { Loading } from '../../../../../components';
 
-const CONFIG_KEYS_ORDER = ['id', 'revision', 'outputs', 'datasources'];
+const CONFIG_KEYS_ORDER = [
+  'id',
+  'name',
+  'revision',
+  'type',
+  'outputs',
+  'datasources',
+  'enabled',
+  'package',
+  'input',
+];
 
 export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   const core = useCore();
 
   const fullConfigRequest = useGetOneAgentConfigFull(config.id);
-  const apiKeysRequest = useGetEnrollmentAPIKeys();
-  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id as string);
+  const apiKeysRequest = useGetEnrollmentAPIKeys({
+    page: 1,
+    perPage: 1000,
+  });
+  const apiKeyRequest = useGetOneEnrollmentAPIKey(apiKeysRequest.data?.list?.[0]?.id);
 
   if (fullConfigRequest.isLoading && !fullConfigRequest.data) {
     return <Loading />;
@@ -41,10 +54,20 @@ export const ConfigYamlView = memo<{ config: AgentConfig }>(({ config }) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={7}>
-        <EuiCodeBlock language="yaml" isCopyable>
+        <EuiCodeBlock language="yaml" isCopyable overflowHeight={500}>
           {dump(fullConfigRequest.data.item, {
             sortKeys: (keyA: string, keyB: string) => {
-              return CONFIG_KEYS_ORDER.indexOf(keyA) - CONFIG_KEYS_ORDER.indexOf(keyB);
+              const indexA = CONFIG_KEYS_ORDER.indexOf(keyA);
+              const indexB = CONFIG_KEYS_ORDER.indexOf(keyB);
+              if (indexA >= 0 && indexB < 0) {
+                return -1;
+              }
+
+              if (indexA < 0 && indexB >= 0) {
+                return 1;
+              }
+
+              return indexA - indexB;
             },
           })}
         </EuiCodeBlock>

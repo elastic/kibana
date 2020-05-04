@@ -11,6 +11,10 @@ export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
   nodeType: ItemTypeRT,
   sourceId: rt.string,
+  timeRange: rt.type({
+    from: rt.number,
+    to: rt.number,
+  }),
 });
 
 export const InfraMetadataFeatureRT = rt.type({

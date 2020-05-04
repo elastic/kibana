@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { useRef, useEffect, useState, useLayoutEffect } from 'react';
-import React from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -28,6 +27,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IExpressionLoaderParams, RenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
+import { ExpressionRendererEvent } from './render';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -37,6 +37,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   expression: string | ExpressionAstExpression;
   renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
+  onEvent?: (event: ExpressionRendererEvent) => void;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -61,6 +62,7 @@ export const ReactExpressionRenderer = ({
   padding,
   renderError,
   expression,
+  onEvent,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -100,6 +102,13 @@ export const ReactExpressionRenderer = ({
           }
         : expressionLoaderOptions.onRenderError,
     });
+    if (onEvent) {
+      subs.push(
+        expressionLoaderRef.current.events$.subscribe(event => {
+          onEvent(event);
+        })
+      );
+    }
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
@@ -124,7 +133,7 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler]);
+  }, [hasCustomRenderErrorHandler, onEvent]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(

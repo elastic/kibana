@@ -6,7 +6,13 @@
 import { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { AlertInstance } from '../../../../alerting/server';
-import { AlertLicense } from '../../alerts/types';
+import {
+  AlertCommonPerClusterMessageLinkToken,
+  AlertCommonPerClusterMessageTimeToken,
+  AlertCommonCluster,
+  AlertCommonPerClusterMessage,
+} from '../../alerts/types';
+import { AlertCommonPerClusterMessageTokenType } from '../../alerts/enums';
 
 const RESOLVED_SUBJECT = i18n.translate(
   'xpack.monitoring.alerts.licenseExpiration.resolvedSubject',
@@ -21,7 +27,7 @@ const NEW_SUBJECT = i18n.translate('xpack.monitoring.alerts.licenseExpiration.ne
 
 export function executeActions(
   instance: AlertInstance,
-  license: AlertLicense,
+  cluster: AlertCommonCluster,
   $expiry: Moment,
   dateFormat: string,
   emailAddress: string,
@@ -31,14 +37,14 @@ export function executeActions(
     instance.scheduleActions('default', {
       subject: RESOLVED_SUBJECT,
       message: `This cluster alert has been resolved: Cluster '${
-        license.clusterName
+        cluster.clusterName
       }' license was going to expire on ${$expiry.format(dateFormat)}.`,
       to: emailAddress,
     });
   } else {
     instance.scheduleActions('default', {
       subject: NEW_SUBJECT,
-      message: `Cluster '${license.clusterName}' license is going to expire on ${$expiry.format(
+      message: `Cluster '${cluster.clusterName}' license is going to expire on ${$expiry.format(
         dateFormat
       )}. Please update your license.`,
       to: emailAddress,
@@ -46,13 +52,37 @@ export function executeActions(
   }
 }
 
-export function getUiMessage(license: AlertLicense, timezone: string, resolved: boolean = false) {
+export function getUiMessage(resolved: boolean = false): AlertCommonPerClusterMessage {
   if (resolved) {
-    return i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage', {
-      defaultMessage: `This cluster's license is active.`,
-    });
+    return {
+      text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.resolvedMessage', {
+        defaultMessage: `This cluster's license is active.`,
+      }),
+    };
   }
-  return i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
-    defaultMessage: `This cluster's license is going to expire in #relative at #absolute.`,
-  });
+  return {
+    text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
+      defaultMessage: `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link`,
+    }),
+    tokens: [
+      {
+        startToken: '#relative',
+        type: AlertCommonPerClusterMessageTokenType.Time,
+        isRelative: true,
+        isAbsolute: false,
+      } as AlertCommonPerClusterMessageTimeToken,
+      {
+        startToken: '#absolute',
+        type: AlertCommonPerClusterMessageTokenType.Time,
+        isAbsolute: true,
+        isRelative: false,
+      } as AlertCommonPerClusterMessageTimeToken,
+      {
+        startToken: '#start_link',
+        endToken: '#end_link',
+        type: AlertCommonPerClusterMessageTokenType.Link,
+        url: 'license',
+      } as AlertCommonPerClusterMessageLinkToken,
+    ],
+  };
 }

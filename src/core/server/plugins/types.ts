@@ -194,6 +194,10 @@ export interface InternalPluginInfo {
    * served
    */
   readonly publicTargetDir: string;
+  /**
+   * Path to the plugin assets directory.
+   */
+  readonly publicAssetsDir: string;
 }
 
 /**
