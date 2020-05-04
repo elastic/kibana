@@ -12,6 +12,7 @@ import {
 
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
+import { initPlugin as initJira } from './jira_simulation';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -21,6 +22,7 @@ export default function(kibana: any) {
     init: (server: Hapi.Server) => {
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
+      initJira(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     },
   });
 }

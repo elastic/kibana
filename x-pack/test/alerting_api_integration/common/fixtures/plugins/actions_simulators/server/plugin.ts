@@ -18,6 +18,7 @@ export enum ExternalServiceSimulator {
   PAGERDUTY = 'pagerduty',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
+  JIRA = 'jira',
   WEBHOOK = 'webhook',
 }
 
@@ -30,6 +31,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
     getExternalServiceSimulatorPath(service)
   );
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   return allPaths;
 }
 

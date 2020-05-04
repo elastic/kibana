@@ -48,11 +48,7 @@ export function initPlugin(router: IRouter, path: string) {
       options: {
         authRequired: false,
       },
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
+      validate: {},
     },
     async function(
       context: RequestHandlerContext,
@@ -67,7 +63,7 @@ export function initPlugin(router: IRouter, path: string) {
 
   router.get(
     {
-      path: `${path}/api/now/v2/table/incident`,
+      path: `${path}/api/now/v2/table/incident/{id}`,
       options: {
         authRequired: false,
       },
