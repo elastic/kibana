@@ -62,7 +62,8 @@ export default function(providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('allow to unenroll using a list of ids', async () => {
+    // Flaky https://github.com/elastic/kibana/issues/64696
+    it.skip('allow to unenroll using a list of ids', async () => {
       const { body } = await supertest
         .post(`/api/ingest_manager/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
