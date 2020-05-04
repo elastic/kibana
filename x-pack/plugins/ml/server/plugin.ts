@@ -7,14 +7,18 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
   Plugin,
   IScopedClusterClient,
+  KibanaRequest,
   Logger,
   PluginInitializerContext,
   ICustomClusterClient,
+  CapabilitiesStart,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { MlCapabilities } from '../common/types/capabilities';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { initMlTelemetry } from './lib/telemetry';
@@ -41,6 +45,9 @@ import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
+import { getPluginPrivileges } from '../common/types/capabilities';
+import { setupCapabilitiesSwitcher } from './lib/capabilities';
+import { registerKibanaSettings } from './lib/register_settings';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -59,6 +66,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
+  private capabilities: CapabilitiesStart | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -67,6 +75,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+    const { user, admin } = getPluginPrivileges();
+
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
@@ -87,34 +97,40 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
           {
             id: 'ml_user',
             privilege: {
+              api: user.api,
               app: [PLUGIN_ID, 'kibana'],
               catalogue: [PLUGIN_ID],
               savedObject: {
                 all: [],
                 read: [],
               },
-              ui: [],
+              ui: user.ui,
             },
           },
           {
             id: 'ml_admin',
             privilege: {
+              api: admin.api,
               app: [PLUGIN_ID, 'kibana'],
               catalogue: [PLUGIN_ID],
               savedObject: {
                 all: [],
                 read: [],
               },
-              ui: [],
+              ui: admin.ui,
             },
           },
         ],
       },
     });
+    registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
     ]);
+
+    // initialize capabilities switcher to add license filter to ml capabilities
+    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
@@ -130,6 +146,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       mlLicense: this.mlLicense,
+    };
+
+    const resolveMlCapabilities = async (request: KibanaRequest) => {
+      if (this.capabilities === null) {
+        return null;
+      }
+      const capabilities = await this.capabilities.resolveCapabilities(request);
+      return capabilities.ml as MlCapabilities;
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -151,17 +175,20 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
+      resolveMlCapabilities,
     });
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
     return {
-      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud),
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),
       mlClient,
     };
   }
 
-  public start(): MlPluginStart {}
+  public start(coreStart: CoreStart): MlPluginStart {
+    this.capabilities = coreStart.capabilities;
+  }
 
   public stop() {
     this.mlLicense.unsubscribe();

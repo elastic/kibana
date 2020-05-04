@@ -7,7 +7,13 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiKeyboardAccessible,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
@@ -21,7 +27,7 @@ import * as selectors from '../store/selectors';
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundRunningProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
@@ -29,7 +35,7 @@ const nodeAssets = {
   },
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundRunningTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
@@ -37,7 +43,7 @@ const nodeAssets = {
   },
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
@@ -45,7 +51,7 @@ const nodeAssets = {
   },
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelBackground: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
@@ -53,8 +59,46 @@ const nodeAssets = {
   },
 };
 
+const ChildEventsButton = React.memo(() => {
+  return (
+    <EuiButton
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }, [])}
+      color="ghost"
+      size="s"
+      iconType="arrowDown"
+      iconSide="right"
+      tabIndex={-1}
+    >
+      {i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+        defaultMessage: 'Events',
+      })}
+    </EuiButton>
+  );
+});
+
+const RelatedAlertsButton = React.memo(() => {
+  return (
+    <EuiButton
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }, [])}
+      color="ghost"
+      size="s"
+      tabIndex={-1}
+    >
+      {i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+        defaultMessage: 'Related Alerts',
+      })}
+    </EuiButton>
+  );
+});
+
 /**
- * A placeholder view for a process node.
+ * An artefact that represents a process node.
  */
 export const ProcessEventDot = styled(
   React.memo(
@@ -184,6 +228,7 @@ export const ProcessEventDot = styled(
         },
         [animationTarget, dispatch, nodeId]
       );
+
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
        * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
@@ -256,13 +301,17 @@ export const ProcessEventDot = styled(
             </svg>
             <div
               style={{
+                display: 'flex',
+                flexFlow: 'column',
                 left: '25%',
                 top: '30%',
                 position: 'absolute',
                 width: '50%',
-                color: 'white',
+                color: NamedColors.full,
                 fontSize: `${scaledTypeSize}px`,
                 lineHeight: '140%',
+                backgroundColor: NamedColors.resolverBackground,
+                padding: '.25rem',
               }}
             >
               <div
@@ -271,33 +320,50 @@ export const ProcessEventDot = styled(
                   textTransform: 'uppercase',
                   letterSpacing: '-0.01px',
                   backgroundColor: NamedColors.resolverBackground,
-                  lineHeight: '1.2',
+                  lineHeight: '1',
                   fontWeight: 'bold',
-                  fontSize: '.5em',
+                  fontSize: '0.8rem',
                   width: '100%',
-                  margin: '0 0 .05em 0',
+                  margin: '0',
                   textAlign: 'left',
                   padding: '0',
+                  color: NamedColors.empty,
                 }}
               >
                 {descriptionText}
               </div>
               <div
+                className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
                 data-test-subject="nodeLabel"
                 id={labelId}
                 style={{
                   backgroundColor: labelBackground,
-                  padding: '.15em 0',
+                  padding: '.15rem 0',
                   textAlign: 'center',
-                  maxWidth: '100%',
+                  maxWidth: '20rem',
+                  minWidth: '12rem',
+                  width: '60%',
                   overflow: 'hidden',
                   whiteSpace: 'nowrap',
                   textOverflow: 'ellipsis',
                   contain: 'content',
+                  margin: '.25rem 0 .35rem 0',
                 }}
               >
-                {eventModel.eventName(event)}
+                <span className="euiButton__content">
+                  <span className="euiButton__text">{eventModel.eventName(event)}</span>
+                </span>
               </div>
+              {magFactorX >= 2 && (
+                <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <RelatedAlertsButton />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ChildEventsButton />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </div>
           </div>
         </EuiKeyboardAccessible>
@@ -317,6 +383,8 @@ export const ProcessEventDot = styled(
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+  min-width: 280px;
+  min-height: 90px;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.

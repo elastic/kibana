@@ -16,6 +16,7 @@ import {
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPostCaseConfigure } from './post_configure';
 import { newConfiguration } from '../../__mocks__/request_responses';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
 describe('POST configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -30,7 +31,7 @@ describe('POST configuration', () => {
 
   it('create configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -61,7 +62,7 @@ describe('POST configuration', () => {
     routeHandler = await createRoute(initPostCaseConfigure, 'post', true);
 
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -90,7 +91,7 @@ describe('POST configuration', () => {
 
   it('throws when missing connector_id', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
         connector_name: 'My connector 2',
@@ -111,7 +112,7 @@ describe('POST configuration', () => {
 
   it('throws when missing connector_name', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
         connector_id: '456',
@@ -132,7 +133,7 @@ describe('POST configuration', () => {
 
   it('throws when missing closure_type', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
         connector_id: '456',
@@ -153,7 +154,7 @@ describe('POST configuration', () => {
 
   it('it deletes the previous configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -172,7 +173,7 @@ describe('POST configuration', () => {
 
   it('it does NOT delete when not found', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -191,7 +192,7 @@ describe('POST configuration', () => {
 
   it('it deletes all configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -214,7 +215,7 @@ describe('POST configuration', () => {
 
   it('returns an error if find throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -232,7 +233,7 @@ describe('POST configuration', () => {
 
   it('returns an error if delete throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: newConfiguration,
     });
@@ -250,7 +251,7 @@ describe('POST configuration', () => {
 
   it('returns an error if post throws an error', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: {
         connector_id: 'throw-error-create',
@@ -272,7 +273,7 @@ describe('POST configuration', () => {
 
   it('handles undefined version correctly', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'post',
       body: { ...newConfiguration, connector_id: 'no-version' },
     });

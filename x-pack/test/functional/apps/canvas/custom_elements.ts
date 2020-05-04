@@ -19,8 +19,7 @@ export default function canvasCustomElementTest({
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62927
-  describe.skip('custom elements', function() {
+  describe('custom elements', function() {
     this.tags('skipFirefox');
 
     before(async () => {
@@ -41,8 +40,11 @@ export default function canvasCustomElementTest({
       // find the first workpad element (a markdown element) and click it to select it
       await testSubjects.click('canvasWorkpadPage > canvasWorkpadPageElementContent', 20000);
 
+      // click "Edit" menu
+      await testSubjects.click('canvasWorkpadEditMenuButton', 20000);
+
       // click the "Save as new element" button
-      await find.clickByCssSelector('[aria-label="Save as new element"]', 20000);
+      await testSubjects.click('canvasWorkpadEditMenu__saveElementButton', 20000);
 
       // fill out the custom element form and submit it
       await PageObjects.canvas.fillOutCustomElementForm(
@@ -57,15 +59,11 @@ export default function canvasCustomElementTest({
     });
 
     it('adds the custom element to the workpad when prompted', async () => {
-      await PageObjects.canvas.openAddElementModal();
-
-      // open the custom elements tab
-      await find.clickByCssSelector('#customElements', 20000);
+      // open the saved elements modal
+      await PageObjects.canvas.openSavedElementsModal();
 
       // ensure the custom element is the one expected and click it to add to the workpad
-      const customElement = await find.byCssSelector(
-        '[aria-labelledby="customElements"] .canvasElementCard__wrapper'
-      );
+      const customElement = await find.byCssSelector('.canvasElementCard__wrapper');
       const elementName = await customElement.findByCssSelector('.euiCard__title');
       expect(await elementName.getVisibleText()).to.contain('My New Element');
       customElement.click();
@@ -95,14 +93,11 @@ export default function canvasCustomElementTest({
     });
 
     it('saves custom element modifications', async () => {
-      await PageObjects.canvas.openAddElementModal();
-
-      // open the custom elements tab
-      await find.clickByCssSelector('#customElements', 20000);
+      // open the saved elements modal
+      await PageObjects.canvas.openSavedElementsModal();
 
       // ensure the correct amount of custom elements exist
-      const container = await find.byCssSelector('[aria-labelledby="customElements"]');
-      const customElements = await container.findAllByCssSelector('.canvasElementCard__wrapper');
+      const customElements = await find.allByCssSelector('.canvasElementCard__wrapper');
       expect(customElements).to.have.length(1);
 
       // hover over the custom element to bring up the edit and delete icons
@@ -110,8 +105,7 @@ export default function canvasCustomElementTest({
       await customElement.moveMouseTo();
 
       // click the edit element button
-      const editBtn = await customElement.findByCssSelector('[aria-label="Edit element"]');
-      await editBtn.click();
+      await testSubjects.click('canvasElementCard__editButton', 20000);
 
       // fill out the custom element form and submit it
       await PageObjects.canvas.fillOutCustomElementForm(
@@ -121,22 +115,21 @@ export default function canvasCustomElementTest({
 
       // ensure the custom element in the modal shows the updated text
       await retry.try(async () => {
-        const elementName = await find.byCssSelector(
-          '[aria-labelledby="customElements"] .canvasElementCard__wrapper .euiCard__title'
-        );
+        const elementName = await find.byCssSelector('.canvasElementCard__wrapper .euiCard__title');
 
         expect(await elementName.getVisibleText()).to.contain('My Edited New Element');
       });
+
+      // Close the modal
+      await PageObjects.canvas.closeSavedElementsModal();
     });
 
     it('deletes custom element when prompted', async () => {
-      // open the custom elements tab
-      await find.clickByCssSelector('#customElements', 20000);
+      // open the saved elements modal
+      await PageObjects.canvas.openSavedElementsModal();
 
       // ensure the correct amount of custom elements exist
-      const customElements = await find.allByCssSelector(
-        '[aria-labelledby="customElements"] .canvasElementCard__wrapper'
-      );
+      const customElements = await find.allByCssSelector('.canvasElementCard__wrapper');
       expect(customElements).to.have.length(1);
 
       // hover over the custom element to bring up the edit and delete icons
@@ -144,22 +137,18 @@ export default function canvasCustomElementTest({
       await customElement.moveMouseTo();
 
       // click the delete element button
-      const editBtn = await customElement.findByCssSelector('[aria-label="Delete element"]');
-      await editBtn.click();
+      await testSubjects.click('canvasElementCard__deleteButton', 20000);
 
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.click('confirmModalConfirmButton', 20000);
 
       // ensure the custom element was deleted
       await retry.try(async () => {
-        const containerAgain = await find.byCssSelector('[aria-labelledby="customElements"]');
-        const customElementsAgain = await containerAgain.findAllByCssSelector(
-          '.canvasElementCard__wrapper'
-        );
+        const customElementsAgain = await find.allByCssSelector('.canvasElementCard__wrapper');
         expect(customElementsAgain).to.have.length(0);
       });
 
       // Close the modal
-      await browser.pressKeys(browser.keys.ESCAPE);
+      await PageObjects.canvas.closeSavedElementsModal();
     });
   });
 }

@@ -141,10 +141,14 @@ export class DashboardPlugin
 
     if (share) {
       share.urlGenerators.registerUrlGenerator(
-        createDirectAccessDashboardLinkGenerator(async () => ({
-          appBasePath: (await startServices)[0].application.getUrlForApp('dashboard'),
-          useHashedUrl: (await startServices)[0].uiSettings.get('state:storeInSessionStorage'),
-        }))
+        createDirectAccessDashboardLinkGenerator(async () => {
+          const [coreStart, , selfStart] = await startServices;
+          return {
+            appBasePath: coreStart.application.getUrlForApp('dashboard'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
+          };
+        })
       );
     }
 
@@ -251,6 +255,8 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
         };
+        // make sure the index pattern list is up to date
+        await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
         const unmount = renderApp(params.element, params.appBasePath, deps);
         return () => {

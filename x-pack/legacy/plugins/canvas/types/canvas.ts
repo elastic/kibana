@@ -56,3 +56,10 @@ export type CanvasTemplate = CanvasWorkpad & {
   help: string;
   tags: string[];
 };
+
+export interface CanvasWorkpadBoundingBox {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}

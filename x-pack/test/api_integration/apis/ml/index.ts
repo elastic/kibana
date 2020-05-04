@@ -31,11 +31,11 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./bucket_span_estimator'));
-    loadTestFile(require.resolve('./calculate_model_memory_limit'));
-    loadTestFile(require.resolve('./categorization_field_examples'));
-    loadTestFile(require.resolve('./get_module'));
-    loadTestFile(require.resolve('./recognize_module'));
-    loadTestFile(require.resolve('./setup_module'));
+    loadTestFile(require.resolve('./modules'));
+    loadTestFile(require.resolve('./anomaly_detectors'));
+    loadTestFile(require.resolve('./data_visualizer'));
+    loadTestFile(require.resolve('./fields_service'));
+    loadTestFile(require.resolve('./job_validation'));
+    loadTestFile(require.resolve('./jobs'));
   });
 }

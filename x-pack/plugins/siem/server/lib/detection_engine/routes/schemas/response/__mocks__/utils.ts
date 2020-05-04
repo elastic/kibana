@@ -4,32 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
 import { RulesSchema } from '../rules_schema';
 import { RulesBulkSchema } from '../rules_bulk_schema';
 import { ErrorSchema } from '../error_schema';
 import { FindRulesSchema } from '../find_rules_schema';
-import { formatErrors } from '../utils';
-import { pipe } from 'fp-ts/lib/pipeable';
-
-interface Message<T> {
-  errors: t.Errors;
-  schema: T | {};
-}
-
-const onLeft = <T>(errors: t.Errors): Message<T> => {
-  return { schema: {}, errors };
-};
-
-const onRight = <T>(schema: T): Message<T> => {
-  return {
-    schema,
-    errors: [],
-  };
-};
-
-export const foldLeftRight = fold(onLeft, onRight);
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
@@ -127,18 +105,3 @@ export const getFindResponseSingle = (): FindRulesSchema => ({
   total: 1,
   data: [getBaseResponsePayload()],
 });
-
-/**
- * Convenience utility to keep the error message handling within tests to be
- * very concise.
- * @param validation The validation to get the errors from
- */
-export const getPaths = <A>(validation: t.Validation<A>): string[] => {
-  return pipe(
-    validation,
-    fold(
-      errors => formatErrors(errors),
-      () => ['no errors']
-    )
-  );
-};

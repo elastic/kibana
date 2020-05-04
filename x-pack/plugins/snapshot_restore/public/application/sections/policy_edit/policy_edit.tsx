@@ -9,8 +9,9 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { SlmPolicyPayload } from '../../../../common/types';
+import { SectionError, Error } from '../../../shared_imports';
 import { TIME_UNITS } from '../../../../common/constants';
-import { SectionError, SectionLoading, PolicyForm, Error } from '../../components';
+import { SectionLoading, PolicyForm } from '../../components';
 import { BASE_PATH } from '../../constants';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';

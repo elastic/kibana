@@ -20,11 +20,12 @@ import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
 import { getCaseToUpdate } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
+import { CASES_URL } from '../../../../common/constants';
 
 export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },

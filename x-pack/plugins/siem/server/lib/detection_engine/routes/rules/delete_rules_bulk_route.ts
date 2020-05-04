@@ -11,14 +11,11 @@ import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
-import {
-  IRuleSavedAttributesSavedObjectAttributes,
-  DeleteRulesRequestParams,
-} from '../../rules/types';
+import { DeleteRulesRequestParams } from '../../rules/types';
 import { deleteRules } from '../../rules/delete_rules';
 import { deleteNotifications } from '../../notifications/delete_notifications';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 type Config = RouteConfig<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
 type Handler = RequestHandler<unknown, unknown, DeleteRulesRequestParams, 'delete' | 'post'>;
@@ -44,6 +41,8 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
       return siemResponse.error({ statusCode: 404 });
     }
 
+    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+
     const rules = await Promise.all(
       request.body.map(async payloadRule => {
         const { id, rule_id: ruleId } = payloadRule;
@@ -61,17 +60,12 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
               ruleAlertId: rule.id,
               savedObjectsClient,
             });
-            const ruleStatuses = await savedObjectsClient.find<
-              IRuleSavedAttributesSavedObjectAttributes
-            >({
-              type: ruleStatusSavedObjectType,
+            const ruleStatuses = await ruleStatusClient.find({
               perPage: 6,
               search: rule.id,
               searchFields: ['alertId'],
             });
-            ruleStatuses.saved_objects.forEach(async obj =>
-              savedObjectsClient.delete(ruleStatusSavedObjectType, obj.id)
-            );
+            ruleStatuses.saved_objects.forEach(async obj => ruleStatusClient.delete(obj.id));
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
           } else {
             return getIdBulkError({ id, ruleId });

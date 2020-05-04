@@ -8,39 +8,27 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { HeatmapLayer } from '../../heatmap_layer';
-import { VectorLayer } from '../../vector_layer';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
-import { VectorStyle } from '../../styles/vector/vector_style';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
-import { COLOR_GRADIENTS } from '../../styles/color_utils';
-import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   SOURCE_TYPES,
   DEFAULT_MAX_BUCKETS_LIMIT,
-  COUNT_PROP_NAME,
-  COLOR_MAP_TYPE,
   RENDER_AS,
   GRID_RESOLUTION,
-  VECTOR_STYLES,
-  FIELD_ORIGIN,
 } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
-import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
-import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
-const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
+export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters and grids',
 });
 
-const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
+export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle', {
   defaultMessage: 'Heat map',
 });
 
@@ -320,87 +308,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
     return true;
   }
 
-  _createHeatmapLayerDescriptor(options) {
-    return HeatmapLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-  }
-
-  _createVectorLayerDescriptor(options) {
-    const descriptor = VectorLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-
-    const defaultDynamicProperties = getDefaultDynamicProperties();
-
-    descriptor.style = VectorStyle.createDescriptor({
-      [VECTOR_STYLES.FILL_COLOR]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: FIELD_ORIGIN.SOURCE,
-          },
-          color: COLOR_GRADIENTS[0].value,
-          type: COLOR_MAP_TYPE.ORDINAL,
-        },
-      },
-      [VECTOR_STYLES.LINE_COLOR]: {
-        type: StaticStyleProperty.type,
-        options: {
-          color: '#FFF',
-        },
-      },
-      [VECTOR_STYLES.LINE_WIDTH]: {
-        type: StaticStyleProperty.type,
-        options: {
-          size: 0,
-        },
-      },
-      [VECTOR_STYLES.ICON_SIZE]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: FIELD_ORIGIN.SOURCE,
-          },
-        },
-      },
-      [VECTOR_STYLES.LABEL_TEXT]: {
-        type: DynamicStyleProperty.type,
-        options: {
-          ...defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT].options,
-          field: {
-            name: COUNT_PROP_NAME,
-            origin: FIELD_ORIGIN.SOURCE,
-          },
-        },
-      },
-    });
-    return descriptor;
-  }
-
-  createDefaultLayer(options) {
-    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
-      return new HeatmapLayer({
-        layerDescriptor: this._createHeatmapLayerDescriptor(options),
-        source: this,
-      });
-    }
-
-    const layerDescriptor = this._createVectorLayerDescriptor(options);
-    const style = new VectorStyle(layerDescriptor.style, this);
-    return new VectorLayer({
-      layerDescriptor,
-      source: this,
-      style,
-    });
-  }
-
   canFormatFeatureProperties() {
     return true;
   }
@@ -422,57 +329,3 @@ registerSource({
   ConstructorFunction: ESGeoGridSource,
   type: SOURCE_TYPES.ES_GEO_GRID,
 });
-
-export const clustersLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.esGridClustersDescription', {
-    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell',
-  }),
-  icon: 'logoElasticsearch',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return (
-      <CreateSourceEditor
-        requestType={RENDER_AS.POINT}
-        onSourceConfigChange={onSourceConfigChange}
-      />
-    );
-  },
-  title: clustersTitle,
-};
-
-export const heatmapLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
-    defaultMessage: 'Geospatial data grouped in grids to show density',
-  }),
-  icon: 'logoElasticsearch',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      if (!sourceConfig) {
-        onPreviewSource(null);
-        return;
-      }
-
-      const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return (
-      <CreateSourceEditor
-        requestType={RENDER_AS.HEATMAP}
-        onSourceConfigChange={onSourceConfigChange}
-      />
-    );
-  },
-  title: heatmapTitle,
-};

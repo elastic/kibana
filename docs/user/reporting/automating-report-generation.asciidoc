@@ -1,32 +1,42 @@
 [role="xpack"]
 [[automating-report-generation]]
 == Automating report generation
-You can automatically generate reports with {watcher}, or by submitting
-HTTP `POST` requests from a script.
+Automatically generate PDF and CSV reports by submitting HTTP `POST` requests using {watcher} or a script.
 
 include::report-intervals.asciidoc[]
 
 [float]
-=== Get the POST URL
+=== Create a POST URL
 
-Generating a report either through {watcher} or a script requires capturing the **POST
-URL**, which is the URL to queue a report for generation.
+Create the POST
+URL that triggers a report to generate.
 
-To get the URL for triggering PDF report generation during a given time period:
+To create the POST URL for PDF reports:
 
-. Load the saved object in *Visualize* or *Dashboard*.
-. To specify a relative or absolute time period, use the time filter.
-. In the {kib} toolbar, click *Share*.
-. Select *PDF Reports*.
-. Click **Copy POST URL**.
+. Go to *Visualize* or *Dashboard*, then open the visualization or dashboard.
++
+To specify a relative or absolute time period, use the time filter.
 
-To get the URL for triggering CSV report generation during a given time period:
+. From the {kib} toolbar, click *Share*, then select *PDF Reports*.
+
+. Click *Copy POST URL*.
++
+[role="screenshot"]
+image::images/report-automate-pdf.png[Generate Visualize and Dashboard reports]
+
+
+To create the POST URL for CSV reports:
 
 . Load the saved search in *Discover*.
-. To specify a relative or absolute time period, use the time filter.
-. In the {kib} toolbar, click *Share*.
-. Select *CSV Reports*.
-. Click **Copy POST URL**.
++
+To specify a relative or absolute time period, use the time filter.
+
+. From the {kib} toolbar, click *Share*, then select *CSV Reports*.
+
+. Click *Copy POST URL*.
++
+[role="screenshot"]
+image::images/report-automate-csv.png[Generate Discover reports]
 
 [float]
 === Use Watcher

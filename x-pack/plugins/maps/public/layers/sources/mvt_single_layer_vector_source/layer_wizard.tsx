@@ -12,30 +12,20 @@ import {
 } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { TiledVectorLayer } from '../../tiled_vector_layer';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {
     defaultMessage: 'Vector source wizard',
   }),
   icon: 'grid',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }: RenderWizardArguments) => {
-    const onSourceConfigChange = ({
-      urlTemplate,
-      layerName,
-      minSourceZoom,
-      maxSourceZoom,
-    }: MVTSingleLayerVectorSourceConfig) => {
-      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor({
-        urlTemplate,
-        layerName,
-        minSourceZoom,
-        maxSourceZoom,
-        type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      });
-      const source = new MVTSingleLayerVectorSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
+  renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
+    const onSourceConfigChange = (sourceConfig: MVTSingleLayerVectorSourceConfig) => {
+      const sourceDescriptor = MVTSingleLayerVectorSource.createDescriptor(sourceConfig);
+      const layerDescriptor = TiledVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      previewLayer(layerDescriptor);
     };
+
     return <MVTSingleLayerVectorSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
   title: sourceTitle,

@@ -14,18 +14,16 @@ import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
 // @ts-ignore: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
-
-import { elementSpecs } from './elements';
+import { initializeElements } from './elements';
 // @ts-ignore Untyped Local
 import { transformSpecs } from './uis/transforms';
 // @ts-ignore Untyped Local
 import { datasourceSpecs } from './uis/datasources';
 // @ts-ignore Untyped Local
 import { modelSpecs } from './uis/models';
+import { initializeViews } from './uis/views';
 // @ts-ignore Untyped Local
-import { viewSpecs } from './uis/views';
-// @ts-ignore Untyped Local
-import { args as argSpecs } from './uis/arguments';
+import { initializeArgs } from './uis/arguments';
 import { tagSpecs } from './uis/tags';
 import { templateSpecs } from './templates';
 
@@ -38,6 +36,9 @@ export interface StartDeps {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
 }
+
+export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;
+export type StartInitializer<T> = (core: CoreStart, plugins: StartDeps) => T;
 
 /** @internal */
 export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -53,11 +54,11 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       );
     });
 
-    plugins.canvas.addElements(elementSpecs);
+    plugins.canvas.addElements(initializeElements(core, plugins));
     plugins.canvas.addDatasourceUIs(datasourceSpecs);
     plugins.canvas.addModelUIs(modelSpecs);
-    plugins.canvas.addViewUIs(viewSpecs);
-    plugins.canvas.addArgumentUIs(argSpecs);
+    plugins.canvas.addViewUIs(initializeViews(core, plugins));
+    plugins.canvas.addArgumentUIs(initializeArgs(core, plugins));
     plugins.canvas.addTagUIs(tagSpecs);
     plugins.canvas.addTemplates(templateSpecs);
     plugins.canvas.addTransformUIs(transformSpecs);

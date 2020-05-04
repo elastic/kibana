@@ -18,6 +18,7 @@ import {
   IContextProvider,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
+  IClusterClient,
 } from '../../../../src/core/server';
 
 import {
@@ -52,6 +53,7 @@ import {
 } from './routes';
 import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
+import { setupSavedObjects } from './saved_objects';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -65,6 +67,7 @@ export interface PluginSetupContract {
 
 export interface PluginStartContract {
   isActionTypeEnabled(id: string): boolean;
+  isActionExecutable(actionId: string, actionTypeId: string): boolean;
   execute(options: ExecuteOptions): Promise<void>;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   preconfiguredActions: PreConfiguredAction[];
@@ -117,7 +120,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     this.preconfiguredActions = [];
   }
 
-  public async setup(core: CoreSetup, plugins: ActionsPluginsSetup): Promise<PluginSetupContract> {
+  public async setup(
+    core: CoreSetup<ActionsPluginsStart>,
+    plugins: ActionsPluginsSetup
+  ): Promise<PluginSetupContract> {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
@@ -128,19 +134,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       );
     }
 
-    // Encrypted attributes
-    // - `secrets` properties will be encrypted
-    // - `config` will be included in AAD
-    // - everything else excluded from AAD
-    plugins.encryptedSavedObjects.registerType({
-      type: 'action',
-      attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['name']),
-    });
-    plugins.encryptedSavedObjects.registerType({
-      type: 'action_task_params',
-      attributesToEncrypt: new Set(['apiKey']),
-    });
+    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
     this.eventLogger = plugins.eventLog.getLogger({
@@ -167,6 +161,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       taskManager: plugins.taskManager,
       actionsConfigUtils,
       licenseState: this.licenseState,
+      preconfiguredActions: this.preconfiguredActions,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -182,7 +177,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      core.getStartServices().then(async ([, startPlugins]: [CoreStart, any, any]) => {
+      core.getStartServices().then(async ([, startPlugins]) => {
         registerActionsUsageCollector(usageCollection, startPlugins.taskManager);
 
         initializeActionsTelemetry(
@@ -268,6 +263,9 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       isActionTypeEnabled: id => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id);
       },
+      isActionExecutable: (actionId: string, actionTypeId: string) => {
+        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
+      },
       // Ability to get an actions client from legacy code
       async getActionsClientWithRequest(request: KibanaRequest) {
         if (isESOUsingEphemeralEncryptionKey === true) {
@@ -294,12 +292,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: savedObjects.getScopedClient(request),
+      getScopedCallCluster(clusterClient: IClusterClient) {
+        return clusterClient.asScoped(request).callAsCurrentUser;
+      },
     });
   }
 
   private createRouteHandlerContext = (
     defaultKibanaIndex: string
-  ): IContextProvider<RequestHandler<any, any, any>, 'actions'> => {
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'actions'> => {
     const { actionTypeRegistry, isESOUsingEphemeralEncryptionKey, preconfiguredActions } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
