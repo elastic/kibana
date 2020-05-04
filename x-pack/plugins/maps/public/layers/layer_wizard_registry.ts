@@ -31,14 +31,20 @@ export type LayerWizard = {
 const registry: LayerWizard[] = [];
 
 export function registerLayerWizard(layerWizard: LayerWizard) {
-  registry.push(layerWizard);
+  registry.push({
+    checkVisibility: async () => {
+      return true;
+    },
+    ...layerWizard,
+  });
 }
 
 export async function getLayerWizards(): Promise<LayerWizard[]> {
   const promises = registry.map(async layerWizard => {
     return {
       ...layerWizard,
-      isVisible: layerWizard.checkVisibility ? await layerWizard.checkVisibility() : true,
+      // @ts-ignore
+      isVisible: await layerWizard.checkVisibility(),
     };
   });
   return (await Promise.all(promises)).filter(({ isVisible }) => {

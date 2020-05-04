@@ -20,7 +20,7 @@ const DISPLAY_OPTIONS = [
   {
     value: DISPLAY.CHOROPLETH,
     text: i18n.translate('xpack.maps.observability.choroplethLabel', {
-      defaultMessage: 'Choropleth',
+      defaultMessage: 'World boundaries',
     }),
   },
   {

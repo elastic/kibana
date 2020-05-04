@@ -16,18 +16,6 @@ export enum OBSERVABILITY_METRIC_TYPE {
   UNIQUE_COUNT = 'UNIQUE_COUNT',
 }
 
-export function getMetricOptionsForLayer(layer: OBSERVABILITY_LAYER_TYPE): EuiSelectOption[] {
-  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
-    return APM_RUM_PERFORMANCE_METRIC_OPTIONS;
-  }
-
-  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC) {
-    return APM_RUM_TRAFFIC_METRIC_OPTIONS;
-  }
-
-  return [];
-}
-
 const APM_RUM_PERFORMANCE_METRIC_OPTIONS = [
   {
     value: OBSERVABILITY_METRIC_TYPE.TRANSACTION_DURATION,
@@ -57,6 +45,18 @@ const APM_RUM_TRAFFIC_METRIC_OPTIONS = [
     }),
   },
 ];
+
+export function getMetricOptionsForLayer(layer: OBSERVABILITY_LAYER_TYPE): EuiSelectOption[] {
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE) {
+    return APM_RUM_PERFORMANCE_METRIC_OPTIONS;
+  }
+
+  if (layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_TRAFFIC) {
+    return APM_RUM_TRAFFIC_METRIC_OPTIONS;
+  }
+
+  return [];
+}
 
 interface Props {
   layer: OBSERVABILITY_LAYER_TYPE | null;

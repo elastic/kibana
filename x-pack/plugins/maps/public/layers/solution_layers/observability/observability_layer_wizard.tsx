@@ -21,7 +21,7 @@ export const ObservabilityLayerWizardConfig: LayerWizard = {
     }
   },
   description: i18n.translate('xpack.maps.observability.desc', {
-    defaultMessage: 'Observability layers',
+    defaultMessage: 'APM layers',
   }),
   icon: 'logoObservability',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {

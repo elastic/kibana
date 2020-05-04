@@ -193,6 +193,12 @@ export function createLayerDescriptor({
           name: joinKey,
           origin: FIELD_ORIGIN.JOIN,
         }),
+        [VECTOR_STYLES.LINE_COLOR]: {
+          type: STYLE_TYPE.STATIC,
+          options: {
+            color: '#3d3d3d',
+          },
+        },
       }),
     });
   }
@@ -233,6 +239,12 @@ export function createLayerDescriptor({
         options: {
           ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
           field: metricStyleField,
+        },
+      },
+      [VECTOR_STYLES.LINE_COLOR]: {
+        type: STYLE_TYPE.STATIC,
+        options: {
+          color: '#3d3d3d',
         },
       },
     }),
