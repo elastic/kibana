@@ -144,6 +144,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     params.body.query.bool.filter.push(validityFilters);
   }
 
+  // console.log(JSON.stringify(params, null, 2));
   const result = await callES('search', params);
 
   const certs = (result?.hits?.hits ?? []).map((hit: any) => {

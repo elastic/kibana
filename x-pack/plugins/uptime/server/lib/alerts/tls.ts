@@ -118,7 +118,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
         DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration}d`,
       notValidBefore: `now-${dynamicSettings.certThresholds?.age ??
         DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age}d`,
-      sortBy: '@timestamp',
+      sortBy: 'common_name',
       direction: 'desc',
     });
 
