@@ -23,6 +23,7 @@ import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp 
 import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { sendSetup } from './hooks/use_request/setup';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
