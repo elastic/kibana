@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
@@ -27,11 +28,13 @@ export {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
+  UpdateDatasourceRequest,
+  UpdateDatasourceResponse,
   // API schemas - Data Streams
   GetDataStreamsResponse,
   // API schemas - Agents
@@ -87,4 +90,5 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';

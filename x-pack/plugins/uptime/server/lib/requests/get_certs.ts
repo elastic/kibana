@@ -5,9 +5,16 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Cert, GetCertsParams } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CertResult, GetCertsParams } from '../../../common/runtime_types';
 
-export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
+enum SortFields {
+  'issuer' = 'tls.server.x509.issuer.common_name',
+  'not_after' = 'tls.server.x509.not_after',
+  'not_before' = 'tls.server.x509.not_before',
+  'common_name' = 'tls.server.x509.subject.common_name',
+}
+
+export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async ({
   callES,
   dynamicSettings,
   index,
@@ -15,19 +22,29 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
   to,
   search,
   size,
+  sortBy,
+  direction,
 }) => {
-  const searchWrapper = `*${search}*`;
+  const sort = SortFields[sortBy as keyof typeof SortFields];
+
   const params: any = {
     index: dynamicSettings.heartbeatIndices,
     body: {
-      from: index,
+      from: index * size,
       size,
+      sort: [
+        {
+          [sort]: {
+            order: direction,
+          },
+        },
+      ],
       query: {
         bool: {
           filter: [
             {
               exists: {
-                field: 'tls',
+                field: 'tls.server',
               },
             },
             {
@@ -48,14 +65,14 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
         'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
         'tls.server.hash.sha256',
-        'tls.certificate_not_valid_before',
-        'tls.certificate_not_valid_after',
+        'tls.server.x509.not_after',
+        'tls.server.x509.not_before',
       ],
       collapse: {
         field: 'tls.server.hash.sha256',
         inner_hits: {
           _source: {
-            includes: ['monitor.id', 'monitor.name'],
+            includes: ['monitor.id', 'monitor.name', 'url.full'],
           },
           collapse: {
             field: 'monitor.id',
@@ -64,72 +81,67 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, Cert[]> = async ({
           sort: [{ 'monitor.id': 'asc' }],
         },
       },
+      aggs: {
+        total: {
+          cardinality: {
+            field: 'tls.server.hash.sha256',
+          },
+        },
+      },
     },
   };
 
   if (search) {
+    params.body.query.bool.minimum_should_match = 1;
     params.body.query.bool.should = [
       {
-        wildcard: {
-          'tls.server.issuer': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'tls.common_name': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'monitor.id': {
-            value: searchWrapper,
-          },
-        },
-      },
-      {
-        wildcard: {
-          'monitor.name': {
-            value: searchWrapper,
-          },
+        multi_match: {
+          query: escape(search),
+          type: 'phrase_prefix',
+          fields: [
+            'monitor.id.text',
+            'monitor.name.text',
+            'url.full.text',
+            'tls.server.x509.subject.common_name.text',
+            'tls.server.x509.issuer.common_name.text',
+          ],
         },
       },
     ];
   }
 
   const result = await callES('search', params);
-  const formatted = (result?.hits?.hits ?? []).map((hit: any) => {
+
+  const certs = (result?.hits?.hits ?? []).map((hit: any) => {
     const {
       _source: {
-        tls: {
-          server: {
-            x509: {
-              issuer: { common_name: issuer },
-              subject: { common_name },
-            },
-            hash: { sha1, sha256 },
-          },
-          certificate_not_valid_after,
-          certificate_not_valid_before,
-        },
+        tls: { server },
       },
     } = hit;
+
+    const notAfter = server?.x509?.not_after;
+    const notBefore = server?.x509?.not_before;
+    const issuer = server?.x509?.issuer?.common_name;
+    const commonName = server?.x509?.subject?.common_name;
+    const sha1 = server?.hash?.sha1;
+    const sha256 = server?.hash?.sha256;
+
     const monitors = hit.inner_hits.monitors.hits.hits.map((monitor: any) => ({
       name: monitor._source?.monitor.name,
       id: monitor._source?.monitor.id,
+      url: monitor._source?.url?.full,
     }));
+
     return {
       monitors,
-      certificate_not_valid_after,
-      certificate_not_valid_before,
       issuer,
       sha1,
       sha256,
-      common_name,
+      not_after: notAfter,
+      not_before: notBefore,
+      common_name: commonName,
     };
   });
-  return formatted;
+  const total = result?.aggregations?.total?.value ?? 0;
+  return { certs, total };
 };

@@ -31,7 +31,7 @@ const taskByIdQuery = (id: string) => ({
 export default function(kibana: any) {
   return new kibana.Plugin({
     name: 'taskManagerHelpers',
-    require: ['elasticsearch', 'task_manager'],
+    require: ['elasticsearch'],
 
     config(Joi: any) {
       return Joi.object({

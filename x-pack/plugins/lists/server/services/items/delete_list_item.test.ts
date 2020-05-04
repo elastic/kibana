@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LIST_ITEM_ID, LIST_ITEM_INDEX, getListItemResponseMock } from '../mocks';
-import { getDeleteListItemOptionsMock } from '../mocks/get_delete_list_item_options_mock';
+import {
+  LIST_ITEM_ID,
+  LIST_ITEM_INDEX,
+  getDeleteListItemOptionsMock,
+  getListItemResponseMock,
+} from '../mocks';
 
 import { getListItem } from './get_list_item';
 import { deleteListItem } from './delete_list_item';
@@ -37,6 +41,7 @@ describe('delete_list_item', () => {
     const deletedListItem = await deleteListItem(options);
     expect(deletedListItem).toEqual(listItem);
   });
+
   test('Delete calls "delete" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
     ((getListItem as unknown) as jest.Mock).mockResolvedValueOnce(listItem);
@@ -46,6 +51,6 @@ describe('delete_list_item', () => {
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('delete', deleteQuery);
+    expect(options.callCluster).toBeCalledWith('delete', deleteQuery);
   });
 });
