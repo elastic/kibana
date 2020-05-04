@@ -21,11 +21,13 @@ import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
 jest.mock('../../util/time_buckets', () => ({
-  TimeBuckets: function() {
-    this.setBounds = jest.fn();
-    this.setInterval = jest.fn();
-    this.getScaledDateFormat = jest.fn();
-  },
+  getTimeBucketsFromCache: jest.fn(() => {
+    return {
+      setBounds: jest.fn(),
+      setInterval: jest.fn(),
+      getScaledDateFormat: jest.fn(),
+    };
+  }),
 }));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {

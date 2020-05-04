@@ -6,7 +6,8 @@
 
 import {
   staticIndexPatternRoute,
-  dynamicIndexPatternRoute
+  dynamicIndexPatternRoute,
+  apmIndexPatternTitleRoute
 } from './index_pattern';
 import {
   errorDistributionRoute,
@@ -73,6 +74,7 @@ const createApmApi = () => {
     // index pattern
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
+    .add(apmIndexPatternTitleRoute)
 
     // Errors
     .add(errorDistributionRoute)
