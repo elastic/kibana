@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelect, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { txtChooseDestinationIndexPattern } from './i18n';
 
 export interface IndexPatternItem {
@@ -38,6 +38,14 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
 }) => {
   return (
     <>
+      <EuiCallOut title="Example warning!" color="warning" iconType="help">
+        <p>
+          This is an example drilldown. It is meant as a starting point for developers, so they can
+          grab this code and get started. It does not provide a complete working functionality but
+          serves as a getting started example.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="xl" />
       {!!onCustomIndexPatternToggle && (
         <>
           <EuiFormRow hasChildLabel={false}>

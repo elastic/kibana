@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiFieldText } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../plugins/advanced_ui_actions/public';
 import {
@@ -38,6 +38,14 @@ export class DashboardToUrlDrilldown implements Drilldown<Config, PlaceContext, 
 
   private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
     <>
+      <EuiCallOut title="Example warning!" color="warning" iconType="help">
+        <p>
+          This is an example drilldown. It is meant as a starting point for developers, so they can
+          grab this code and get started. It does not provide a complete working functionality but
+          serves as a getting started example.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="xl" />
       <EuiFormRow label="Enter target URL" fullWidth>
         <EuiFieldText
           fullWidth
