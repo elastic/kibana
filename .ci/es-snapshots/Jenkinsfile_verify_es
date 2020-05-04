@@ -25,6 +25,7 @@ kibanaPipeline(timeoutMinutes: 120) {
       title: ":broken_heart: *<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
       message: ":broken_heart: [${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
     ) {
+      retryable.enable(2)
       withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
         parallel([
           'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
