@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ChartTooltipService } from './chart_tooltip_service';
-export { MlTooltipComponent } from './chart_tooltip';
+export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ChartTooltipService } from './chart_tooltip_service';
-export { MlTooltipComponent } from './chart_tooltip';
+export { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
+export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './anomaly_swimlane_embeddable';
