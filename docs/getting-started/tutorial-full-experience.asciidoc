@@ -15,7 +15,7 @@ When you complete this tutorial, you'll have a dashboard that looks like this.
 image::images/tutorial-dashboard.png[]
 
 [float]
-[[tutorial-load-dataset]]
+[[load-dataset]]
 === Load sample data
 
 This tutorial requires you to download three data sets:
@@ -90,8 +90,8 @@ of the fields. These characteristics include the searchability of the field
 and whether it's _tokenized_, or broken up into separate words.
 
 NOTE: If security is enabled, you must have the `all` Kibana privilege to run this tutorial.
-You must also have the `create`, `manage` `read`, `write,` and `delete` 
-index privileges. See {ref}/security-privileges.html[Security privileges] 
+You must also have the `create`, `manage` `read`, `write,` and `delete`
+index privileges. See {ref}/security-privileges.html[Security privileges]
 for more information.
 
 In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:

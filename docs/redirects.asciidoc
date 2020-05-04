@@ -18,43 +18,43 @@ See <<monitoring-kibana>>.
 
 include::{asciidoc-dir}/../../shared/settings.asciidoc[]
 
-For more {kib} configuration settings, see <<settings>>.
+For more {kib} configuration settings, refer to <<settings>>.
 
 [role="exclude",id="uptime-security"]
 == Uptime security
 
-This page has moved. Please see the new section in the {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
+This page has moved. Refer to the new section in the {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
 
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<infra-configure-source>>.
+This page has moved. Refer to <<infra-configure-source>>.
 
 [role="exclude",id="logs-read-only-access"]
 == Configure source read-only access
 
-This page has moved. Please see <<xpack-logs-configuring>>.
+This page has moved. Refer to <<xpack-logs-configuring>>.
 
 [role="exclude",id="creating-df-kib"]
 == Creating {transforms}
 
-This page is deleted. Please see
+This page is deleted. Refer to
 {ref}/ecommerce-transforms.html[Transforming the eCommerce sample data].
 
 [role="exclude",id="ml-jobs"]
 == Creating {anomaly-jobs}
 
-This page has moved. Please see {ml-docs}/create-jobs.html[Creating {anomaly-jobs}].
+This page has moved. Refer to {ml-docs}/create-jobs.html[Creating {anomaly-jobs}].
 
 [role="exclude",id="job-tips"]
 == Machine learning job tips
 
-This page has moved. Please see {ml-docs}/create-jobs.html#job-tips[Machine learning job tips].
+This page has moved. Refer to {ml-docs}/create-jobs.html#job-tips[Machine learning job tips].
 
 [role="exclude",id="extend"]
 == Extend your use case
 
-This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
+This page was deleted. Refer to <<xpack-graph>> and <<xpack-ml>>.
 
 [role="exclude",id="xpack-dashboard-only-mode"]
 == Dashboard-only mode
@@ -65,24 +65,69 @@ Use <<kibana-feature-privileges,feature privileges>> instead.
 [role="exclude",id="pdf-layout-modes"]
 == PDF layout modes
 
-This page has moved. Please see <<reporting-getting-started>>.
+This page has moved. Refer to <<reporting-getting-started>>.
 
 [role="exclude",id="xpack-reporting"]
-== Reporting from Kibana
+== Reporting from {kib}
 
-This page has moved. Please see <<reporting-getting-started>>.
+This page has moved. Refer to <<reporting-getting-started>>.
 
 [role="exclude",id="add-sample-data"]
 == Add sample data
 
-This page has moved. Please see <<get-data-in>>.
+This page has moved. Refer to <<get-data-in>>.
 
 [role="exclude",id="tilemap"]
 == Coordinate map
 
-This page has moved. Please see <<maps>>.
+This page has moved. Refer to <<maps>>.
 
 [role="exclude",id="visualize-maps"]
 == Maps
 
-This page has moved. Please see <<maps>>.
+This page has moved. Refer to <<maps>>.
+
+[role="exclude",id="createvis"]
+== Creating a Visualization
+
+This page has moved. Refer to <<visualize>>.
+
+[role="exclude",id="development-visualization-factory"]
+== Visualization Factory
+
+This page was deleted. Refer to <<development-visualize-index>>.
+
+[role="exclude",id="kibana-server-properties"]
+== {kib} Server Properties
+
+This page was deleted. Refer to <<settings>>.
+
+[role="exclude",id="nested-objects"]
+== Nested Objects
+
+This page has moved. Refer to <<limitations>>.
+
+[role="exclude",id="release-notes-5.6.0"]
+== {kib} 5.6.0
+
+This page is from a previous release. Refer to link:https://www.elastic.co/guide/en/kibana/5.6/release-notes-5.6.0.html[{kib} 5.6.0].
+
+[role="exclude",id="release-notes-6.5.0"]
+== {kib} 6.5.0
+
+This page is from a previous release. Refer to link:https://www.elastic.co/guide/en/kibana/6.5/release-notes-6.5.0.html[{kib} 6.5.0].
+
+[role="exclude",id="time-series-visual-builder"]
+== Time Series Visual Builder
+
+This page was deleted. Refer to <<TSVB>>.
+
+[role="exclude",id="time-series-visualizations"]
+== Featured Visualizations
+
+This page was deleted. Refer to <<TSVB>>.
+
+[role="exclude",id="tutorial-load-dataset"]
+== Loading sample data
+
+This page has moved. Refer to <<load-dataset>>.
