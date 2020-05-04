@@ -95,9 +95,9 @@ export async function mountApp(
     <I18nProvider>
       <HashRouter>
         <Switch>
-          <Route exact path="/lens/edit/:id" render={renderEditor} />
-          <Route exact path="/lens" render={renderEditor} />
-          <Route path="/lens" component={NotFound} />
+          <Route exact path="/edit/:id" render={renderEditor} />
+          <Route exact path="/" render={renderEditor} />
+          <Route path="/" component={NotFound} />
         </Switch>
       </HashRouter>
     </I18nProvider>,
