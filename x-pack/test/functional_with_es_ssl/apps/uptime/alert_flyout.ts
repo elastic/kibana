@@ -14,7 +14,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
-    const { alerts } = getService('uptime');
+    let alerts: any;
+
+    before(async () => {
+      alerts = getService('uptime').alerts;
+    });
 
     it('can open alert flyout', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(DEFAULT_DATE_START, DEFAULT_DATE_END);
