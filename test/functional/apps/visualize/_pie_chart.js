@@ -210,10 +210,8 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should correctly save disabled agg', async () => {
-        console.log('GONNA S A V E  OUR BOI AND EXPECT SUCCESS AND BREADCRUMB');
         await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
-        console.log('NOW GONNA LOAD UP THAT SAVED VIS ALL NICE');
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visChart.waitForRenderingCount();
 

@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { ApplicationStart } from 'kibana/public';
 import { Action } from 'src/plugins/ui_actions/public';
+import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
@@ -42,9 +43,9 @@ export class EditPanelAction implements Action<ActionContext> {
     private readonly application: ApplicationStart
   ) {
     if (this.application?.currentAppId$) {
-      this.application.currentAppId$.subscribe(
-        (appId: string | undefined) => (this.currentAppId = appId)
-      );
+      this.application.currentAppId$
+        .pipe(take(1))
+        .subscribe((appId: string | undefined) => (this.currentAppId = appId));
     }
   }
 
