@@ -61,6 +61,7 @@ interface ActionAccordionFormProps {
   messageVariables?: string[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  disableActionType?: (actionType: ActionType) => boolean;
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +82,7 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  disableActionType,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -98,9 +100,9 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (
-          actionTypes ?? (await loadActionTypes({ http }))
-        ).sort((a, b) => a.name.localeCompare(b.name));
+        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http })))
+          .filter(a => !disableActionType || !disableActionType(a))
+          .sort((a, b) => a.name.localeCompare(b.name));
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;

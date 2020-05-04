@@ -108,20 +108,20 @@ export async function getClustersFromRequest(
         cluster.alerts = await fetchStatus(alertsClient, ALERT_TYPES, start, end, req.logger);
       } else {
         const alertsClient = req.getAlertsClient ? req.getAlertsClient() : null;
-        cluster.alerts = await alertsClusterSearch(
-          req,
-          alertsIndex,
-          cluster,
-          checkLicenseForAlerts,
-          {
-            start,
-            end,
-            size: CLUSTER_ALERTS_SEARCH_SIZE,
-          }
-        );
+        // cluster.alerts = await alertsClusterSearch(
+        //   req,
+        //   alertsIndex,
+        //   cluster,
+        //   checkLicenseForAlerts,
+        //   {
+        //     start,
+        //     end,
+        //     size: CLUSTER_ALERTS_SEARCH_SIZE,
+        //   }
+        // );
         cluster.alerts = [
           ...(await fetchStatus(alertsClient, GUARD_RAILS_ALERT_TYPES, start, end, req.logger)),
-          ...cluster.alerts,
+          // ...cluster.alerts,
         ];
       }
     }

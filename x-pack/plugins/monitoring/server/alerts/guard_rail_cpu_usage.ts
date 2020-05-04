@@ -133,6 +133,8 @@ export const getGuardRailCpuUsage = (creationParams: AlertCreationParameters): A
           shouldExecuteActions = true;
         }
 
+        // console.log({ shouldExecuteActions, cpuUsage, threshold, isFiring: alertState.ui.isFiring })
+
         instance.replaceState(alertState);
         if (shouldExecuteActions) {
           executeActions(instance, alertState, stat, cluster, kibanaUrl, config, emailAddress);

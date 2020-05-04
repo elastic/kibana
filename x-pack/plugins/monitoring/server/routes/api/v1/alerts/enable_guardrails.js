@@ -86,6 +86,7 @@ export function createEnableGuardRailsRoute(server) {
 
         const serverLogAction = await actionsClient.create({
           action: {
+            name: 'Write to Kibana log',
             actionTypeId: ALERT_ACTION_TYPE_LOG,
           },
         });

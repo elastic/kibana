@@ -67,11 +67,11 @@ export async function getPreparedAlert(
   const dateFormat: string = await uiSettings.get<string>('dateFormat');
   const timezone: string = await uiSettings.get<string>('dateFormat:tz');
   const emailAddress = await fetchDefaultEmailAddress(uiSettings);
-  if (!emailAddress) {
-    // TODO: we can do more here
-    logger.warn(`Unable to send email for ${alertType} because there is no email configured.`);
-    return null;
-  }
+  // if (!emailAddress) {
+  //   // TODO: we can do more here
+  //   logger.warn(`Unable to send email for ${alertType} because there is no email configured.`);
+  //   return null;
+  // }
 
   return {
     emailAddress,

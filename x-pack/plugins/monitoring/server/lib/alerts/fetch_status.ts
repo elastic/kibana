@@ -4,9 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import moment from 'moment';
+import { AlertAction } from '../../../../alerting/common';
 import { Logger } from '../../../../../../src/core/server';
-import { AlertState } from '../../alerts/types';
+// import { AlertState } from '../../alerts/types';
 import { AlertsClient } from '../../../../alerting/server';
+
+interface Alert {
+  type: string;
+  exists: boolean;
+  enabled: boolean;
+  actions: AlertAction[];
+  states: AlertState[];
+}
+
+interface AlertState {
+  firing: boolean;
+  state: any;
+}
 
 export async function fetchStatus(
   alertsClient: AlertsClient,
@@ -16,47 +30,56 @@ export async function fetchStatus(
   log: Logger
 ): Promise<any[]> {
   const statuses = await Promise.all(
-    alertTypes.map(
-      type =>
-        new Promise(async (resolve, reject) => {
-          // We need to get the id from the alertTypeId
-          const alerts = await alertsClient.find({
-            options: {
-              filter: `alert.attributes.alertTypeId:${type}`,
-            },
-          });
-          if (alerts.total === 0) {
-            return resolve({ type, exists: false });
-          }
+    alertTypes.map(async type => {
+      const result: Alert = {
+        type,
+        exists: false,
+        enabled: false,
+        actions: [],
+        states: [],
+      };
 
-          if (alerts.total !== 1) {
-            log.warn(`Found more than one alert for type ${type} which is unexpected.`);
-          }
+      // We need to get the id from the alertTypeId
+      const alerts = await alertsClient.find({
+        options: {
+          filter: `alert.attributes.alertTypeId:${type}`,
+        },
+      });
+      if (alerts.total === 0) {
+        return result;
+      }
 
-          const id = alerts.data[0].id;
+      if (alerts.total !== 1) {
+        log.warn(`Found more than one alert for type ${type} which is unexpected.`);
+      }
 
-          // Now that we have the id, we can get the state
-          const states = await alertsClient.getAlertState({ id });
-          if (!states || !states.alertTypeState) {
-            // log.warn(`No alert states found for type ${type} which is unexpected.`);
-            return resolve({ type, stateless: true });
-          }
+      result.enabled = true;
 
-          const state = Object.values(states.alertTypeState)[0] as AlertState;
-          if (state) {
-            const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
-            if (state.ui.isFiring || isInBetween) {
-              return resolve({
-                type,
-                firing: true,
-                state,
-              });
-            }
-            return resolve({ type, firing: false, state });
-          }
-          return resolve({ type, firing: false });
-        })
-    )
+      const { id, actions } = alerts.data[0];
+
+      result.actions = actions;
+
+      // Now that we have the id, we can get the state
+      const states = await alertsClient.getAlertState({ id });
+      if (!states || !states.alertInstances) {
+        result.enabled = true;
+        return result;
+      }
+
+      result.states = Object.values(states.alertInstances).map((instance: any) => {
+        const state = instance.state;
+        const isInBetween = moment(state.ui.resolvedMS).isBetween(start, end);
+        if (state.ui.isFiring || isInBetween) {
+          return {
+            firing: true,
+            state,
+          };
+        }
+        return { firing: false, state };
+      });
+
+      return result;
+    })
   );
 
   return statuses;

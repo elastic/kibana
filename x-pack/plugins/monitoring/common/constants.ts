@@ -230,6 +230,17 @@ export const KIBANA_CLUSTER_ALERTS_ENABLED = false;
 export const ALERT_TYPE_PREFIX = 'monitoring_';
 
 /**
+ * Matches the id for the built-in in email action type
+ * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
+ */
+export const ALERT_ACTION_TYPE_EMAIL = '.email';
+/**
+ * Matches the id for the built-in in log action type
+ * See x-pack/plugins/actions/server/builtin_action_types/log.ts
+ */
+export const ALERT_ACTION_TYPE_LOG = '.server-log';
+
+/**
  * This is the alert type id for the license expiration alert
  */
 export const ALERT_TYPE_LICENSE_EXPIRATION = `${ALERT_TYPE_PREFIX}alert_type_license_expiration`;
@@ -250,6 +261,11 @@ export const ALERT_GUARD_RAIL_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
  */
 export const GUARD_RAILS_ALERT_TYPES = [ALERT_GUARD_RAIL_TYPE_CPU_USAGE];
 
+export const GUARD_RAILS_SUPPORTED_ACTION_TYPE_IDS = [
+  ALERT_ACTION_TYPE_EMAIL,
+  ALERT_ACTION_TYPE_LOG,
+];
+
 /**
  * A listing of all alert types
  */
@@ -258,17 +274,6 @@ export const ALERT_TYPES = [
   ALERT_TYPE_CLUSTER_STATE,
   ...GUARD_RAILS_ALERT_TYPES,
 ];
-
-/**
- * Matches the id for the built-in in email action type
- * See x-pack/legacy/plugins/actions/server/builtin_action_types/email.ts
- */
-export const ALERT_ACTION_TYPE_EMAIL = '.email';
-/**
- * Matches the id for the built-in in log action type
- * See x-pack/plugins/actions/server/builtin_action_types/log.ts
- */
-export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 /**
  * The number of alerts that have been migrated
