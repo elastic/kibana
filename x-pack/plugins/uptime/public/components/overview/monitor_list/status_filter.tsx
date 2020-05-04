@@ -34,7 +34,6 @@ export const StatusFilter: React.FC = () => {
         dataTestSubj="xpack.uptime.filterBar.filterStatusUp"
         value="up"
         withNext={true}
-        color={'#secondary'}
       />
       <FilterStatusButton
         content={i18n.translate('xpack.uptime.filterBar.filterDownLabel', {
