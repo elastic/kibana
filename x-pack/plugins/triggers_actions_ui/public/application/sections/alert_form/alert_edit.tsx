@@ -150,6 +150,7 @@ export const AlertEdit = ({
                   size="s"
                   color="danger"
                   iconType="alert"
+                  data-test-subj="hasActionsDisabled"
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
                     { defaultMessage: 'This alert has actions that are disabled' }
