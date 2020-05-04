@@ -43,10 +43,6 @@ export const OverviewDatastreamSection: React.FC = () => {
     size = `${sizeBytes}b`;
   }
 
-  // const installed =
-  //   packagesRequest.data?.response?.filter(p => p.status === InstallationStatus.installed)
-  //     ?.length ?? 0;
-
   return (
     <EuiFlexItem component="section">
       <OverviewPanel>
@@ -83,7 +79,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               <EuiDescriptionListTitle>
                 <FormattedMessage
                   id="xpack.ingestManager.overviewDatastreamNamespacesTitle"
-                  defaultMessage="Name spaces"
+                  defaultMessage="Namespaces"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
