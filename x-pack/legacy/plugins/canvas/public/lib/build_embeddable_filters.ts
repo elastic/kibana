@@ -34,7 +34,8 @@ function getTimeRangeFromFilters(filters: ExpressionValueFilter[]): TimeRange | 
 }
 
 export function getQueryFilters(filters: ExpressionValueFilter[]): DataFilter[] {
-  return buildBoolArray(filters).map(esFilters.buildQueryFilter);
+  const dataFilters = filters.map(filter => ({ ...filter, type: filter.filterType }));
+  return buildBoolArray(dataFilters).map(esFilters.buildQueryFilter);
 }
 
 export function buildEmbeddableFilters(filters: ExpressionValueFilter[]): EmbeddableFilterInput {
