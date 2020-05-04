@@ -20,8 +20,6 @@
 import { Filter, esQuery, TimeRange, Query } from '../../data/public';
 
 // @ts-ignore
-import { VegaParser } from './data_model/vega_parser';
-// @ts-ignore
 import { SearchCache } from './data_model/search_cache';
 // @ts-ignore
 import { TimeCache } from './data_model/time_cache';
@@ -46,7 +44,12 @@ export function createVegaRequestHandler({
   const { timefilter } = data.query.timefilter;
   const timeCache = new TimeCache(timefilter, 3 * 1000);
 
-  return ({ timeRange, filters, query, visParams }: VegaRequestHandlerParams) => {
+  return async function vegaRequestHandler({
+    timeRange,
+    filters,
+    query,
+    visParams,
+  }: VegaRequestHandlerParams) {
     if (!searchCache) {
       searchCache = new SearchCache(getData().search.__LEGACY.esClient, {
         max: 10,
@@ -58,8 +61,10 @@ export function createVegaRequestHandler({
 
     const esQueryConfigs = esQuery.getEsQueryConfig(uiSettings);
     const filtersDsl = esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs);
+    // @ts-ignore
+    const { VegaParser } = await import('./data_model/vega_parser');
     const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
 
-    return vp.parseAsync();
+    return await vp.parseAsync();
   };
 }

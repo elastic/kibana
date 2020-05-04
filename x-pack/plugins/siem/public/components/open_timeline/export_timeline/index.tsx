@@ -9,7 +9,7 @@ import { DeleteTimelines } from '../types';
 
 import { TimelineDownloader } from './export_timeline';
 import { DeleteTimelineModalOverlay } from '../delete_timeline_modal';
-import { exportSelectedTimeline } from '../../../containers/timeline/all/api';
+import { exportSelectedTimeline } from '../../../containers/timeline/api';
 
 export interface ExportTimeline {
   disableExportTimelineDownloader: () => void;
