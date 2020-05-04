@@ -5,30 +5,11 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '../index';
-import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
-
-const ACTION_TYPE_ID = '.email';
-let actionTypeModel: ActionTypeModel;
-
-beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
-  if (getResult !== null) {
-    actionTypeModel = getResult;
-  }
-});
+import EmailActionConnectorFields from './email_connector';
 
 describe('EmailActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
-    expect(actionTypeModel.actionConnectorFields).not.toBeNull();
-    if (!actionTypeModel.actionConnectorFields) {
-      return;
-    }
-    const ConnectorFields = actionTypeModel.actionConnectorFields;
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -42,7 +23,7 @@ describe('EmailActionConnectorFields renders', () => {
       },
     } as EmailActionConnector;
     const wrapper = mountWithIntl(
-      <ConnectorFields
+      <EmailActionConnectorFields
         action={actionConnector}
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}

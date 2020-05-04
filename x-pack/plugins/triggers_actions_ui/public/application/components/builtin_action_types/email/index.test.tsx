@@ -206,39 +206,3 @@ describe('action params validation', () => {
     });
   });
 });
-
-describe('EmailParamsFields renders', () => {
-  test('all params fields is rendered', () => {
-    expect(actionTypeModel.actionParamsFields).not.toBeNull();
-    if (!actionTypeModel.actionParamsFields) {
-      return;
-    }
-    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
-      ActionParamsProps<EmailActionParams>
-    >;
-    const actionParams = {
-      cc: [],
-      bcc: [],
-      to: ['test@test.com'],
-      subject: 'test',
-      message: 'test message',
-    };
-    const wrapper = mountWithIntl(
-      <ParamsFields
-        actionParams={actionParams}
-        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-        editAction={() => {}}
-        index={0}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="toEmailAddressInput"]')
-        .first()
-        .prop('selectedOptions')
-    ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
-  });
-});

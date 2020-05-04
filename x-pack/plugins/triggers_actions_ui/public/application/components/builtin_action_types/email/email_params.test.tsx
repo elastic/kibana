@@ -3,34 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '../index';
-import { ActionTypeModel, ActionParamsProps } from '../../../../types';
-import { EmailActionParams } from '../types';
-
-const ACTION_TYPE_ID = '.email';
-let actionTypeModel: ActionTypeModel;
-
-beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
-  if (getResult !== null) {
-    actionTypeModel = getResult;
-  }
-});
+import EmailParamsFields from './email_params';
 
 describe('EmailParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    expect(actionTypeModel.actionParamsFields).not.toBeNull();
-    if (!actionTypeModel.actionParamsFields) {
-      return;
-    }
-    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
-      ActionParamsProps<EmailActionParams>
-    >;
     const actionParams = {
       cc: [],
       bcc: [],
@@ -39,7 +17,7 @@ describe('EmailParamsFields renders', () => {
       message: 'test message',
     };
     const wrapper = mountWithIntl(
-      <ParamsFields
+      <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
         editAction={() => {}}
