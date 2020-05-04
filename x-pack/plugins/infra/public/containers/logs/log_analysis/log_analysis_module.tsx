@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-
+import { DatasetFilter } from '../../../../common/log_analysis';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -48,10 +48,11 @@ export const useLogAnalysisModule = <JobType extends string>({
       createPromise: async (
         selectedIndices: string[],
         start: number | undefined,
-        end: number | undefined
+        end: number | undefined,
+        datasetFilter: DatasetFilter
       ) => {
         dispatchModuleStatus({ type: 'startedSetup' });
-        const setupResult = await moduleDescriptor.setUpModule(start, end, {
+        const setupResult = await moduleDescriptor.setUpModule(start, end, datasetFilter, {
           indices: selectedIndices,
           sourceId,
           spaceId,
@@ -92,11 +93,16 @@ export const useLogAnalysisModule = <JobType extends string>({
   ]);
 
   const cleanUpAndSetUpModule = useCallback(
-    (selectedIndices: string[], start: number | undefined, end: number | undefined) => {
+    (
+      selectedIndices: string[],
+      start: number | undefined,
+      end: number | undefined,
+      datasetFilter: DatasetFilter
+    ) => {
       dispatchModuleStatus({ type: 'startedSetup' });
       cleanUpModule()
         .then(() => {
-          setUpModule(selectedIndices, start, end);
+          setUpModule(selectedIndices, start, end, datasetFilter);
         })
         .catch(() => {
           dispatchModuleStatus({ type: 'failedSetup' });

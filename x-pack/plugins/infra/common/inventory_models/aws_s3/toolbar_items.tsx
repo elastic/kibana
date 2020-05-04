@@ -11,22 +11,24 @@ import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_
 import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const s3MetricTypes: SnapshotMetricType[] = [
+  's3BucketSize',
+  's3NumberOfObjects',
+  's3TotalRequests',
+  's3DownloadBytes',
+  's3UploadBytes',
+];
+
+export const s3GroupByFields = ['cloud.region'];
+
 export const AwsS3ToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    's3BucketSize',
-    's3NumberOfObjects',
-    's3TotalRequests',
-    's3DownloadBytes',
-    's3UploadBytes',
-  ];
-  const groupByFields = ['cloud.region'];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={s3MetricTypes}
+        groupByFields={s3GroupByFields}
       />
     </>
   );
