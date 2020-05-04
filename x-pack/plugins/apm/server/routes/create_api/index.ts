@@ -30,7 +30,7 @@ export function createApi() {
       factoryFns.push(fn);
       return this as any;
     },
-    init(core, { config$, logger, security }) {
+    init(core, { config$, logger, plugins }) {
       const router = core.http.createRouter();
 
       let config = {} as APMConfig;
@@ -142,7 +142,7 @@ export function createApi() {
                   params: pick(parsedParams, ...Object.keys(params), 'query'),
                   config,
                   logger,
-                  security
+                  plugins
                 }
               });
 

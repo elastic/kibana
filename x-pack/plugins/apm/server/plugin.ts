@@ -113,7 +113,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     createApmApi().init(core, {
       config$: mergedConfig$,
       logger: this.logger!,
-      security: plugins.security
+      plugins: {
+        security: plugins.security
+      }
     });
 
     return {

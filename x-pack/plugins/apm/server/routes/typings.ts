@@ -63,7 +63,9 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
-  security?: SecurityPluginSetup;
+  plugins: {
+    security?: SecurityPluginSetup;
+  };
 };
 
 export type RouteFactoryFn<
@@ -107,7 +109,9 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
-      security?: SecurityPluginSetup;
+      plugins: {
+        security?: SecurityPluginSetup;
+      };
     }
   ) => void;
 }
