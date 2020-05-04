@@ -44,7 +44,7 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { MlTooltipComponent } from '../components/chart_tooltip';
+import { ChartTooltip } from '../components/chart_tooltip';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
@@ -1204,6 +1204,9 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
+              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
+              <ChartTooltip />
+
               <div className="results-container">
                 <EuiTitle className="panel-title">
                   <h2 style={{ display: 'inline' }}>
@@ -1298,21 +1301,16 @@ export class TimeSeriesExplorer extends React.Component {
                   )}
                 </EuiFlexGroup>
                 <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                  <MlTooltipComponent>
-                    {tooltipService => (
-                      <TimeseriesChart
-                        {...chartProps}
-                        bounds={bounds}
-                        detectorIndex={selectedDetectorIndex}
-                        renderFocusChartOnly={renderFocusChartOnly}
-                        selectedJob={selectedJob}
-                        showAnnotations={showAnnotations}
-                        showForecast={showForecast}
-                        showModelBounds={showModelBounds}
-                        tooltipService={tooltipService}
-                      />
-                    )}
-                  </MlTooltipComponent>
+                  <TimeseriesChart
+                    {...chartProps}
+                    bounds={bounds}
+                    detectorIndex={selectedDetectorIndex}
+                    renderFocusChartOnly={renderFocusChartOnly}
+                    selectedJob={selectedJob}
+                    showAnnotations={showAnnotations}
+                    showForecast={showForecast}
+                    showModelBounds={showModelBounds}
+                  />
                 </div>
                 {showAnnotations && focusAnnotationData.length > 0 && (
                   <div>

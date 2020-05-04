@@ -13,7 +13,7 @@ export function formatHumanReadableDate(ts: number) {
   return formatDate(ts, 'MMMM Do YYYY');
 }
 
-export function formatHumanReadableDateTime(ts: number): string {
+export function formatHumanReadableDateTime(ts: number) {
   return formatDate(ts, 'MMMM Do YYYY, HH:mm');
 }
 
