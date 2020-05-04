@@ -4,32 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { PropTypes } from 'prop-types';
+import { EuiBadge } from '@elastic/eui';
 import { tabColor } from '../../../../../common/util/group_color_utils';
+import { i18n } from '@kbn/i18n';
 
-interface JobSelectorBadgeProps {
-  icon?: boolean;
-  id: string;
-  isGroup?: boolean;
-  numJobs?: number;
-  removeId?: Function;
-}
-
-export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
-  icon,
-  id,
-  isGroup = false,
-  numJobs,
-  removeId,
-}) => {
+export function JobSelectorBadge({ icon, id, isGroup = false, numJobs, removeId }) {
   const color = isGroup ? tabColor(id) : 'hollow';
-  let props = { color } as EuiBadgeProps;
+  let props = { color };
   let jobCount;
 
-  if (icon === true && removeId) {
-    // @ts-ignore
+  if (icon === true) {
     props = {
       ...props,
       iconType: 'cross',
@@ -51,4 +37,11 @@ export const JobSelectorBadge: FC<JobSelectorBadgeProps> = ({
       {`${id}${jobCount ? jobCount : ''}`}
     </EuiBadge>
   );
+}
+JobSelectorBadge.propTypes = {
+  icon: PropTypes.bool,
+  id: PropTypes.string.isRequired,
+  isGroup: PropTypes.bool,
+  numJobs: PropTypes.number,
+  removeId: PropTypes.func,
 };
