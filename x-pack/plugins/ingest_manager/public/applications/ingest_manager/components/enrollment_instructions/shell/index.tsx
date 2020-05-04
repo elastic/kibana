@@ -3,90 +3,59 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiCopy,
-  EuiFieldText,
-  EuiPopover,
-} from '@elastic/eui';
-import { EnrollmentAPIKey } from '../../../types';
 
-// No need for i18n as these are platform names
-const PLATFORMS = {
-  macos: 'macOS',
-  windows: 'Windows',
-  linux: 'Linux',
-};
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { EuiCopy, EuiCode, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
   kibanaUrl: string;
   kibanaCASha256?: string;
   apiKey: EnrollmentAPIKey;
+  platform: string;
 }
 
-export const ShellEnrollmentInstructions: React.FunctionComponent<Props> = ({
+export const QuickSetupInstructions: React.FunctionComponent<Props> = ({
   kibanaUrl,
   kibanaCASha256,
   apiKey,
+  platform,
 }) => {
-  // Platform state
-  const [currentPlatform, setCurrentPlatform] = useState<keyof typeof PLATFORMS>('macos');
-  const [isPlatformOptionsOpen, setIsPlatformOptionsOpen] = useState<boolean>(false);
-
   // Build quick installation command
-  // const quickInstallInstructions = `${
-  //   kibanaCASha256 ? `CA_SHA256=${kibanaCASha256} ` : ''
-  // }API_KEY=${
-  //   apiKey.api_key
-  // } sh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${currentPlatform})"`;
+  const quickInstallInstructions = `${
+    kibanaCASha256 ? `CA_SHA256=${kibanaCASha256} \\\n` : ''
+  }API_KEY=${
+    apiKey.api_key
+  } \\\nsh -c "$(curl ${kibanaUrl}/api/ingest_manager/fleet/install/${platform})"`;
 
-  const quickInstallInstructions = `./elastic-agent enroll ${kibanaUrl} ${apiKey.api_key}`;
+  if (platform === 'windows') {
+    return <p>TODO Special case</p>;
+  }
 
   return (
     <>
-      <EuiFieldText
-        readOnly
-        value={quickInstallInstructions}
-        fullWidth
-        prepend={
-          <EuiPopover
-            button={
-              <EuiButtonEmpty
-                size="xs"
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={() => setIsPlatformOptionsOpen(true)}
-              >
-                {PLATFORMS[currentPlatform]}
-              </EuiButtonEmpty>
-            }
-            isOpen={isPlatformOptionsOpen}
-            closePopover={() => setIsPlatformOptionsOpen(false)}
-          >
-            <EuiContextMenuPanel
-              items={Object.entries(PLATFORMS).map(([platform, name]) => (
-                <EuiContextMenuItem
-                  key={platform}
-                  onClick={() => {
-                    setCurrentPlatform(platform as typeof currentPlatform);
-                    setIsPlatformOptionsOpen(false);
-                  }}
-                >
-                  {name}
-                </EuiContextMenuItem>
-              ))}
-            />
-          </EuiPopover>
-        }
-        append={
-          <EuiCopy textToCopy={quickInstallInstructions}>
-            {copy => <EuiButtonEmpty onClick={copy} color="primary" iconType={'copy'} />}
-          </EuiCopy>
-        }
-      />
+      <EuiText>
+        <FormattedMessage
+          id="xpack.ingestManager.quickSetupInstructions.instructionDescription"
+          defaultMessage="Run this command on your host to download and enroll an Elastic Agent with the selected agent configuration. You can use this command to setup agents on more than one host."
+        />
+        <EuiSpacer size="l" />
+        <EuiCode>
+          <pre>{quickInstallInstructions}</pre>
+        </EuiCode>
+        <EuiSpacer size="l" />
+        <EuiCopy textToCopy={quickInstallInstructions}>
+          {copy => (
+            <EuiButton onClick={copy} iconType="copy" fill>
+              <FormattedMessage
+                id="xpack.ingestManager.quickSetupInstructions.copyButton"
+                defaultMessage="Copy quick setup command"
+              />
+            </EuiButton>
+          )}
+        </EuiCopy>
+      </EuiText>
     </>
   );
 };

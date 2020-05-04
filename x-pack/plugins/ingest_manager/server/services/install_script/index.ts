@@ -6,11 +6,13 @@
 
 import { macosInstallTemplate } from './install_templates/macos';
 
-export function getScript(osType: 'macos', kibanaUrl: string): string {
+export function getScript(osType: 'macos' | 'linux', kibanaUrl: string): string {
   const variables = { kibanaUrl };
 
   switch (osType) {
     case 'macos':
+      return macosInstallTemplate(variables);
+    case 'linux':
       return macosInstallTemplate(variables);
     default:
       throw new Error(`${osType} is not supported.`);
