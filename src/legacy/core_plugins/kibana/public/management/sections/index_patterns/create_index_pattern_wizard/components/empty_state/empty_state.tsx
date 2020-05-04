@@ -63,7 +63,7 @@ export const EmptyState = ({
               </EuiLink>
             ),
             getStartedLink: (
-              <EuiLink href={prependBasePath('/app/home#/tutorial_directory/sampleDdata')}>
+              <EuiLink href={prependBasePath('/app/home#/tutorial_directory/sampleData')}>
                 <FormattedMessage
                   id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
                   defaultMessage="get started with some sample data sets."

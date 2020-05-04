@@ -48,7 +48,8 @@ describe('NewVisModal', () => {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
       stage: 'production',
-      aliasUrl: '/aliasUrl',
+      aliasApp: 'otherApp',
+      aliasPath: '#/aliasUrl',
     },
   ];
   const visTypes: TypesStart = {
@@ -118,7 +119,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('app/#/visualize/create?type=vis');
+      expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
 
     it('passes through editor params to the editor URL', () => {
@@ -137,12 +138,14 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis&foo=true&bar=42');
+      expect(window.location.assign).toBeCalledWith(
+        'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
+      );
     });
 
-    it('closes and redirects properly if visualization with aliasUrl and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasPath and addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
+      const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -151,19 +154,19 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42', 'addToDashboard']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
-          application={{} as ApplicationStart}
+          application={({ navigateToApp } as unknown) as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl?addToDashboard');
+      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl?addToDashboard' });
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('closes and redirects properly if visualization with aliasUrl and without addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasApp and without addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
+      const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -172,13 +175,13 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
-          application={{} as ApplicationStart}
+          application={({ navigateToApp } as unknown) as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });

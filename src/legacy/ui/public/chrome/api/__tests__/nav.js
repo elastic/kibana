@@ -112,44 +112,6 @@ describe('chrome nav apis', function() {
     });
   });
 
-  describe('internals.trackPossibleSubUrl()', function() {
-    it('injects the globalState of the current url to all links for the same app', function() {
-      const appUrlStore = new StubBrowserStorage();
-      fakedLinks = [
-        {
-          id: 'discover',
-          baseUrl: `${baseUrl}/app/kibana#discover`,
-          subUrlBase: '/app/kibana#discover',
-          legacy: true,
-        },
-        {
-          id: 'visualize',
-          baseUrl: `${baseUrl}/app/visualize#`,
-          subUrlBase: '/app/visualize#',
-          legacy: true,
-        },
-        {
-          id: 'dashboards',
-          baseUrl: `${baseUrl}/app/kibana#dashboards`,
-          subUrlBase: '/app/kibana#dashboard',
-          legacy: true,
-        },
-      ];
-
-      const { internals } = init({ appUrlStore });
-      internals.trackPossibleSubUrl(`${baseUrl}/app/kibana#dashboard?_g=globalstate`);
-
-      expect(fakedLinks[0].url).to.be(`${baseUrl}/app/kibana#discover?_g=globalstate`);
-      expect(fakedLinks[0].active).to.be(false);
-
-      expect(fakedLinks[1].url).to.be(`${baseUrl}/app/visualize#?_g=globalstate`);
-      expect(fakedLinks[1].active).to.be(false);
-
-      expect(fakedLinks[2].url).to.be(`${baseUrl}/app/kibana#dashboard?_g=globalstate`);
-      expect(fakedLinks[2].active).to.be(true);
-    });
-  });
-
   describe('chrome.trackSubUrlForApp()', function() {
     it('injects a manual app url', function() {
       const appUrlStore = new StubBrowserStorage();

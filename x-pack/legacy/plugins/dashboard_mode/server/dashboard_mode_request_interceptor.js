@@ -52,13 +52,15 @@ export function createDashboardModeRequestInterceptor() {
           url.path.startsWith('/app/kibana') ||
           url.path.startsWith('/app/dashboards')
         ) {
-          console.log('redirecting');
           const basePath = request.server.newPlatform.setup.core.http.basePath.get(request);
           const url = `${basePath}/app/dashboard_mode`;
           // If the user is in "Dashboard only mode" they should only be allowed to see
           // the dashboard app and none others. If the kibana app is requested, this might be a old
           // url we will migrate on the fly.
-          return h.redirect(url).takeover();
+          return h
+            .redirect(url)
+            .permanent()
+            .takeover();
         }
         if (url.path.startsWith('/app/dashboard_mode')) {
           // let through requests to the dashboard_mode app
