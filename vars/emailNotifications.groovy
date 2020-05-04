@@ -4,14 +4,16 @@ def getFailedBuildParts() {
     getTestFailures(),
   ]
 
-  return messages.findAll { !!it } // No blank strings
+  return messages.findAll { !!it }.join("\n\n")
 }
 
 def getHeader() {
+  def pipelinesUrl = "https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}"
+
   return """<p>
-    <div>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
-    <div>Job: ${env.JOB_NAME}</div>
-    <div><a href="https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}">ci.kibana.dev</a></div>
+    <div><strong>Build URL</strong>: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
+    <div><strong>Job</strong>: ${env.JOB_NAME}</div>
+    <div><strong>Pipelines UI</strong><a href="${pipelinesUrl}">${pipelinesUrl}</a></div>
   </p>"""
 }
 
