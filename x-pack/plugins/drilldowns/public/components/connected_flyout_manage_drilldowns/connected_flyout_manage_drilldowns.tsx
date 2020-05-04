@@ -73,7 +73,7 @@ export function createFlyoutManageDrilldowns({
       []
     );
 
-    const factoryContext: DrilldownFactoryContext<unknown> = React.useMemo(
+    const factoryContext: object = React.useMemo(
       () => ({
         placeContext: props.placeContext,
         triggers: selectedTriggers,
@@ -122,7 +122,7 @@ export function createFlyoutManageDrilldowns({
 
       return {
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
-        actionConfig: drilldownToEdit.action.config as object, // TODO: config is unknown, but we know it always extends object
+        actionConfig: drilldownToEdit.action.config as object,
         name: drilldownToEdit.action.name,
       };
     }
