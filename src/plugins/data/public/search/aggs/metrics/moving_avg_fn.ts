@@ -60,21 +60,21 @@ export const aggMovingAvg = (): FunctionDefinition => ({
     metricAgg: {
       types: ['string'],
       default: 'custom',
-      help: i18n.translate('data.search.aggs.metrics.moving_avg.field.help', {
+      help: i18n.translate('data.search.aggs.metrics.moving_avg.metricAgg.help', {
         defaultMessage:
           'Id for finding agg config to use for building parent pipeline aggregations',
       }),
     },
     customMetric: {
       types: ['agg_type'],
-      help: i18n.translate('data.search.aggs.metrics.moving_avg.field.help', {
+      help: i18n.translate('data.search.aggs.metrics.moving_avg.customMetric.help', {
         defaultMessage: 'Agg config to use for building parent pipeline aggregations',
       }),
     },
     window: {
       types: ['number'],
       default: 5,
-      help: i18n.translate('data.search.aggs.metrics.moving_avg.field.help', {
+      help: i18n.translate('data.search.aggs.metrics.moving_avg.window.help', {
         defaultMessage: 'The size of window to "slide" across the histogram.',
       }),
     },
@@ -88,7 +88,7 @@ export const aggMovingAvg = (): FunctionDefinition => ({
     script: {
       types: ['string'],
       default: 'MovingFunctions.unweightedAvg(values)',
-      help: i18n.translate('data.search.aggs.metrics.moving_avg.field.help', {
+      help: i18n.translate('data.search.aggs.metrics.moving_avg.script.help', {
         defaultMessage:
           'Id for finding agg config to use for building parent pipeline aggregations',
       }),
