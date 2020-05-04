@@ -21,7 +21,7 @@ export declare class IndexPattern implements IIndexPattern
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-public.indexpattern.fieldformatmap.md) |  | <code>any</code> |  |
-|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IFieldList</code> |  |
+|  [fields](./kibana-plugin-plugins-data-public.indexpattern.fields.md) |  | <code>IIndexPatternFieldList</code> |  |
 |  [fieldsFetcher](./kibana-plugin-plugins-data-public.indexpattern.fieldsfetcher.md) |  | <code>any</code> |  |
 |  [flattenHit](./kibana-plugin-plugins-data-public.indexpattern.flattenhit.md) |  | <code>any</code> |  |
 |  [formatField](./kibana-plugin-plugins-data-public.indexpattern.formatfield.md) |  | <code>any</code> |  |
