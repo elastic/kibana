@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiTableActionsColumnType, EuiToolTip } from '@elastic/eui';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 
 import {
@@ -59,7 +59,9 @@ export const AnalyticsViewAction = {
   },
 };
 
-export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
+export const getActions = (
+  createAnalyticsForm: CreateAnalyticsFormProps
+): EuiTableActionsColumnType<DataFrameAnalyticsListRow>['actions'] => {
   const canStartStopDataFrameAnalytics: boolean = checkPermission('canStartStopDataFrameAnalytics');
 
   return [
@@ -107,8 +109,13 @@ export const getActions = (createAnalyticsForm: CreateAnalyticsFormProps) => {
       },
     },
     {
-      render: (item: DeepReadonly<DataFrameAnalyticsListRow>) => {
-        return <CloneAction item={item} createAnalyticsForm={createAnalyticsForm} />;
+      render: (item: DataFrameAnalyticsListRow) => {
+        return (
+          <CloneAction
+            item={(item as unknown) as DeepReadonly<DataFrameAnalyticsListRow>}
+            createAnalyticsForm={createAnalyticsForm}
+          />
+        );
       },
     },
   ];

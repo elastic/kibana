@@ -9,11 +9,14 @@ import React, { Fragment, FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  Direction,
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInMemoryTable,
+  EuiSearchBarProps,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -26,7 +29,6 @@ import {
   DataFrameAnalyticsListRow,
   ItemIdToExpandedRowMap,
   DATA_FRAME_TASK_STATE,
-  Query,
   Clause,
   TermClause,
   FieldClause,
@@ -34,13 +36,6 @@ import {
 import { getAnalyticsFactory } from '../../services/analytics_service';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
-import {
-  ProgressBar,
-  mlInMemoryTableFactory,
-  OnTableChangeArg,
-  SortDirection,
-  SORT_DIRECTION,
-} from '../../../../../components/ml_in_memory_table';
 import { AnalyticStatsBarStats, StatsBar } from '../../../../../components/stats_bar';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
@@ -67,8 +62,6 @@ function stringMatch(str: string | undefined, substr: any) {
     (str.toLowerCase().match(substr.toLowerCase()) === null) === false
   );
 }
-
-const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
 interface Props {
   isManagementTable?: boolean;
@@ -100,7 +93,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [pageSize, setPageSize] = useState(10);
 
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
+  const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
@@ -120,7 +113,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     onRefresh: () => getAnalytics(true),
   });
 
-  const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
+  const onQueryChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
     if (error) {
       setSearchError(error.message);
     } else {
@@ -204,30 +197,26 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   // Before the analytics have been loaded for the first time, display the loading indicator only.
   // Otherwise a user would see 'No data frame analytics found' during the initial loading.
   if (!isInitialized) {
-    return <ProgressBar isLoading={isLoading} />;
+    return null;
   }
 
   if (typeof errorMessage !== 'undefined') {
     return (
-      <Fragment>
-        <ProgressBar isLoading={isLoading} />
-        <EuiCallOut
-          title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
-            defaultMessage: 'An error occurred getting the data frame analytics list.',
-          })}
-          color="danger"
-          iconType="alert"
-        >
-          <pre>{JSON.stringify(errorMessage)}</pre>
-        </EuiCallOut>
-      </Fragment>
+      <EuiCallOut
+        title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
+          defaultMessage: 'An error occurred getting the data frame analytics list.',
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <pre>{JSON.stringify(errorMessage)}</pre>
+      </EuiCallOut>
     );
   }
 
   if (analytics.length === 0) {
     return (
       <Fragment>
-        <ProgressBar isLoading={isLoading} />
         <EuiEmptyPrompt
           title={
             <h2>
@@ -285,7 +274,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     hidePerPageOptions: false,
   };
 
-  const search = {
+  const search: EuiSearchBarProps = {
     onChange: onQueryChange,
     box: {
       incremental: true,
@@ -327,10 +316,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     ],
   };
 
-  const onTableChange = ({
+  const onTableChange: EuiInMemoryTable<DataFrameAnalyticsListRow>['onTableChange'] = ({
     page = { index: 0, size: 10 },
-    sort = { field: DataFrameAnalyticsListColumn.id, direction: SORT_DIRECTION.ASC },
-  }: OnTableChangeArg) => {
+    sort = { field: DataFrameAnalyticsListColumn.id, direction: 'asc' },
+  }) => {
     const { index, size } = page;
     setPageIndex(index);
     setPageSize(size);
@@ -365,7 +354,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <div data-test-subj="mlAnalyticsTableContainer">
-        <MlInMemoryTable
+        <EuiInMemoryTable
           allowNeutralSort={false}
           className="mlAnalyticsTable"
           columns={columns}
@@ -376,6 +365,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           items={filterActive ? filteredAnalytics : analytics}
           itemId={DataFrameAnalyticsListColumn.id}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          loading={isLoading}
           onTableChange={onTableChange}
           pagination={pagination}
           sorting={sorting}

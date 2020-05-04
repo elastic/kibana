@@ -14,6 +14,9 @@ import {
   EuiFlexItem,
   EuiProgress,
   EuiScreenReaderOnly,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -122,13 +125,25 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
+type DataFrameAnalyticsTableColumns = [
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableFieldDataColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableComputedColumnType<DataFrameAnalyticsListRow>,
+  EuiTableActionsColumnType<DataFrameAnalyticsListRow>
+];
+
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
   createAnalyticsForm?: CreateAnalyticsFormProps
-) => {
+): DataFrameAnalyticsTableColumns => {
   const actions =
     isManagementTable === true ? [AnalyticsViewAction] : getActions(createAnalyticsForm!);
 
@@ -144,8 +159,7 @@ export const getColumns = (
     // spread to a new array otherwise the component wouldn't re-render
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
-  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
-  const columns: any[] = [
+  const columns: DataFrameAnalyticsTableColumns = [
     {
       name: (
         <EuiScreenReaderOnly>
