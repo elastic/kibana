@@ -7,6 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+// @ts-ignore
 import { ToolbarOverlay } from './toolbar_overlay';
 
 test('Must render zoom tools', async () => {
