@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import Hapi from 'hapi';
 
 interface ServiceNowRequest extends Hapi.Request {
@@ -29,18 +28,13 @@ export function initPlugin(server: Hapi.Server, path: string) {
     path: `${path}/api/now/v2/table/incident/{id}`,
     options: {
       auth: false,
-      validate: {
-        params: Joi.object({
-          id: Joi.string(),
-        }),
-      },
     },
     handler: updateHandler as Hapi.Lifecycle.Method,
   });
 
   server.route({
     method: 'GET',
-    path: `${path}/api/now/v2/table/incident`,
+    path: `${path}/api/now/v2/table/incident/{id}`,
     options: {
       auth: false,
     },
