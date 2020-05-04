@@ -23,7 +23,6 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
     async getActionsLabels() {
       return {
         actionType: await testSubjects.getVisibleText('actionTypeLabel'),
-        actionCount: await testSubjects.getVisibleText('actionCountLabel'),
       };
     },
     async getAlertInstancesList() {

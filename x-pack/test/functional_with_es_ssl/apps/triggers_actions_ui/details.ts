@@ -75,9 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alertType = await pageObjects.alertDetailsUI.getAlertType();
         expect(alertType).to.be(`Always Firing`);
 
-        const { actionType, actionCount } = await pageObjects.alertDetailsUI.getActionsLabels();
+        const { actionType } = await pageObjects.alertDetailsUI.getActionsLabels();
         expect(actionType).to.be(`Slack`);
-        expect(actionCount).to.be(`+1`);
       });
 
       it('should disable the alert', async () => {
