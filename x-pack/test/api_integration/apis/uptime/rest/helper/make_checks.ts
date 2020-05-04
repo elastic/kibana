@@ -9,8 +9,6 @@ import { merge, flattenDeep } from 'lodash';
 import { makePing } from './make_ping';
 import { TlsProps } from './make_tls';
 
-const INDEX_NAME = 'heartbeat-7-generated-test';
-
 interface CheckProps {
   es: any;
   monitorId?: string;

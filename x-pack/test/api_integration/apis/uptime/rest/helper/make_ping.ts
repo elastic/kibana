@@ -8,7 +8,7 @@ import uuid from 'uuid';
 import { merge } from 'lodash';
 import { makeTls, TlsProps } from './make_tls';
 
-const INDEX_NAME = 'heartbeat-8-generated-test';
+const INDEX_NAME = 'heartbeat-7-generated-test';
 
 export const makePing = async (
   es: any,
