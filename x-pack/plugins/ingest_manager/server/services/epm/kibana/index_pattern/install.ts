@@ -373,6 +373,13 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
           await callCluster('transport.request', {
             method: 'PUT',
             path: `/${defaultIndexPatternName}`,
+            body: {
+              mappings: {
+                properties: {
+                  '@timestamp': { type: 'date' },
+                },
+              },
+            },
           });
         } catch (putErr) {
           throw new Error(`${defaultIndexPatternName} could not be created`);
