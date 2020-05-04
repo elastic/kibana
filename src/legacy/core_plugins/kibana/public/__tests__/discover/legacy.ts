@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '../../../../../../plugins/discover/public';
+import { coreMock } from '../../../../../../core/public/mocks';
+const context = coreMock.createPluginInitializerContext();
 
-const context = { env: { packageInfo: {}, mode: { dev: true } } };
-
-export const pluginInstance = plugin(context as PluginInitializerContext);
+export const pluginInstance = plugin(context);
 export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins);
 export const start = pluginInstance.start(npStart.core, npStart.plugins);
