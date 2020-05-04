@@ -4,23 +4,19 @@ Many Kibana apps embed a query bar for real-time search, including
 *Discover*, *Visualize*, and *Dashboard*.
 
 [float]
-=== Query languages
-{kib}'s <<kuery-query, standard query language>> (KQL)
-features autocomplete and a simple, easy-to-use syntax. {kib}'s legacy query
-language, based on the
-Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax],
-is still available from the KQL popup in the query bar. When you enable the
-legacy query language, you can also use the full
-JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
-
-[float]
 === Search your data
 
-You can search the indices that match the current <<index-patterns, index pattern>>
-by entering your search criteria in the query bar.
-The query bar is designed to help you find what you’re looking
-for as quickly as possible. With KQL enabled, you'll get suggestions for
-creating your queries.
+To search the indices that match the current <<index-patterns, index pattern>>
+enter your search criteria in the query bar. By default, you'll use
+{kib}'s <<kuery-query, standard query language>> (KQL), which
+features autocomplete and a simple, easy-to-use syntax. If you prefer to use
+{kib}'s legacy query
+language, based on the
+Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax],
+you can switch to it from the KQL popup in the query bar. When you enable the
+legacy query language, you can use the full
+JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
+
 
 [float]
 [[autorefresh]]
@@ -42,17 +38,15 @@ clicking the *Refresh* button.
 
 Sometimes you want to search through large amounts of data no matter how long
 the search takes.  While this might not happen often, there are times
-long-running queries are required.  Consider a threat hunting scenario
+that long-running queries are required.  Consider a threat hunting scenario
 where you need to search through years of data.
 
 If you run a query, and the run time gets close to the
 timeout, you're presented the option to ignore the timeout.  This enables you to
 run queries with large amounts of data to completion.
 
-The timeout is in place to avoid unintentional load on the cluster.
 By default, a query times out after 30 seconds.
-
-
+The timeout is in place to avoid unintentional load on the cluster.
 
 
 include::kuery.asciidoc[]
