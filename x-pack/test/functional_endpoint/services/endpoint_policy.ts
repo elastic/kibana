@@ -77,6 +77,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           enabled: true,
           output_id: '',
           inputs: [
+            // TODO: should we retrieve the latest Endpoint Package and build the input (policy) from that?
             {
               type: 'endpoint',
               enabled: true,

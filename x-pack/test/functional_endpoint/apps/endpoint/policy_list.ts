@@ -53,6 +53,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         // load/create a policy and then navigate back to the policy view so that the list is refreshed
         policyInfo = await policyTestResources.createPolicy();
         await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
+        await pageObjects.endpoint.waitForTableToHaveData('policyTable');
       });
       after(async () => {
         if (policyInfo) {
@@ -60,9 +61,30 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         }
       });
 
-      it('should show policy on the list');
-      it('should show policy name as link');
-      it('should show agent configuration as link');
+      it('should show policy on the list', async () => {
+        const [, policyRow] = await pageObjects.endpoint.getEndpointAppTableData('policyTable');
+        expect(policyRow).to.eql([
+          'Protect East Coast',
+          '1',
+          'Elastic Endpoint v1.0.0',
+          'Protect the worlds data - but in the East Coast',
+          policyInfo.agentConfig.id,
+        ]);
+      });
+      it('should show policy name as link', async () => {
+        const policyNameLink = await testSubjects.find('policyNameLink');
+        expect(await policyNameLink.getTagName()).to.equal('a');
+        expect(await policyNameLink.getAttribute('href')).to.match(
+          new RegExp(`\/endpoint\/policy\/${policyInfo.datasource.id}$`)
+        );
+      });
+      it('should show agent configuration as link', async () => {
+        const agentConfigLink = await testSubjects.find('agentConfigLink');
+        expect(await agentConfigLink.getTagName()).to.equal('a');
+        expect(await agentConfigLink.getAttribute('href')).to.match(
+          new RegExp(`\/app\/ingestManager\#\/configs\/${policyInfo.datasource.config_id}$`)
+        );
+      });
     });
   });
 }
