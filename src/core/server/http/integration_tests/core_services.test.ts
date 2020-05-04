@@ -22,17 +22,6 @@ import { clusterClientMock } from './core_service.test.mocks';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
 
-jest.mock('elasticsearch', () => {
-  const realES = jest.requireActual('elasticsearch');
-  return {
-    ...realES,
-    // eslint-disable-next-line object-shorthand
-    Client: function() {
-      return { close: jest.fn() };
-    },
-  };
-});
-
 interface User {
   id: string;
   roles?: string[];
