@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../layers/layer';
+import { ILayer } from '../../../layers/layer';
 
 interface Props {
   layerList: ILayer[];
