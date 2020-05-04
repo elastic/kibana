@@ -103,6 +103,8 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
+      '--author',
+      'sqren',
       '--max-number',
       '6',
     ]);
@@ -129,6 +131,8 @@ describe('yargs', () => {
       username,
       '--accessToken',
       accessToken,
+      '--author',
+      'sqren',
       '--max-number',
       '6',
       '--source-branch',
@@ -149,12 +153,16 @@ describe('yargs', () => {
 });
 
 function runBackport(args: string) {
-  const cmd = `node ./dist/index.js ${args}`;
+  const cmd = `./node_modules/.bin/ts-node --transpile-only ./src/index.ts ${args}`;
   return execSync(cmd, execOptions);
 }
 
 function runBackportAsync(options: string[]) {
-  const proc = spawn('node', ['./dist/index.js', ...options]);
+  const proc = spawn('./node_modules/.bin/ts-node', [
+    '--transpile-only',
+    './src/index.ts',
+    ...options,
+  ]);
 
   return new Promise<string>((resolve) => {
     let data = '';
