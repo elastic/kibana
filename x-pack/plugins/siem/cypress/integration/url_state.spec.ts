@@ -77,7 +77,7 @@ describe('url state', () => {
     );
   });
 
-  it('sets the url state when start and end date are set', () => {
+  it.skip('sets the url state when start and end date are set', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateDates();
@@ -177,7 +177,7 @@ describe('url state', () => {
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      "#/link-to/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      "#/link-to/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
     );
   });
 
@@ -190,12 +190,12 @@ describe('url state', () => {
     cy.get(HOSTS).should(
       'have.attr',
       'href',
-      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
+      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
     );
     cy.get(NETWORK).should(
       'have.attr',
       'href',
-      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
+      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
     );
     cy.get(HOSTS_NAMES)
       .first()
@@ -209,21 +209,21 @@ describe('url state', () => {
     cy.get(ANOMALIES_TAB).should(
       'have.attr',
       'href',
-      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
+      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
     );
     cy.get(BREADCRUMBS)
       .eq(1)
       .should(
         'have.attr',
         'href',
-        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
+        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
       );
     cy.get(BREADCRUMBS)
       .eq(2)
       .should(
         'have.attr',
         'href',
-        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))"
+        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1577914409186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1577914409186)))&timeline=(id:'0162c130-78be-11ea-9718-118a926953a4',isOpen:!f)"
       );
   });
 

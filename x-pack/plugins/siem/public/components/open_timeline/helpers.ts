@@ -262,9 +262,9 @@ export const epicUpdateTimeline = ({
 }: UpdateTimeline) => {
   const actions: Array<Action<any>> = [dispatchAddTimeline({ id, timeline })];
 
-  if (from && to) {
-    actions.push(dispatchSetTimelineRangeDatePicker({ from, to }));
-  }
+  // if (from && to) {
+  //   actions.push(dispatchSetTimelineRangeDatePicker({ from, to }));
+  // }
 
   if (
     timeline.kqlQuery != null &&
