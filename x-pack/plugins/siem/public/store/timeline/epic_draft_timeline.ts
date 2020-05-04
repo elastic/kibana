@@ -40,7 +40,11 @@ export const epicDraftTimeline = (
       const callOutMsg = response.code === 403 ? [showCallOutUnauthorizedMsg()] : [];
 
       const { timeline: timelineModel, notes } = formatTimelineResultToModel(
-        response.timeline,
+        {
+          savedObjectId: response.timeline.savedObjectId,
+          version: response.timeline.version,
+          timelineType: response.timeline.timelineType,
+        },
         false
       );
       const { from: settingsFrom, to: settingsTo } = getTimeRangeSettings();
@@ -54,6 +58,7 @@ export const epicDraftTimeline = (
           notes,
           timeline: {
             ...timelineModel,
+            ...savedTimeline,
             show: savedTimeline?.show ?? false,
           },
           to: savedTimeline?.dateRange.end ?? settingsTo,
