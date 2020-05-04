@@ -970,53 +970,57 @@ export class DataRecognizer {
     }
 
     if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
-      const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
+      try {
+        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
 
-      // Checks if all jobs in the module have the same time field configured
-      const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
-        .time_field;
-      const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
-        ({ job }) => job.config.data_description.time_field === firstJobTimeField
-      );
-
-      if (isSameTimeFields && (start === undefined || end === undefined)) {
-        // In case of time range is not provided and the time field is the same
-        // set the fallback range for all jobs
-        // as there may not be a common query, we use a match_all
-        const {
-          start: fallbackStart,
-          end: fallbackEnd,
-        } = await this.getFallbackTimeRange(firstJobTimeField, { match_all: {} });
-        start = fallbackStart;
-        end = fallbackEnd;
-      }
-
-      for (const { job, query } of this.jobsForModelMemoryEstimation) {
-        let earliestMs = start;
-        let latestMs = end;
-        if (earliestMs === undefined || latestMs === undefined) {
-          const timeFieldRange = await this.getFallbackTimeRange(
-            job.config.data_description.time_field,
-            query
-          );
-          earliestMs = timeFieldRange.start;
-          latestMs = timeFieldRange.end;
-        }
-
-        const { modelMemoryLimit } = await calculateModelMemoryLimit(
-          job.config.analysis_config,
-          this.indexPatternName,
-          query,
-          job.config.data_description.time_field,
-          earliestMs,
-          latestMs
+        // Checks if all jobs in the module have the same time field configured
+        const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
+          .time_field;
+        const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
+          ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
 
-        if (!job.config.analysis_limits) {
-          job.config.analysis_limits = {} as AnalysisLimits;
+        if (isSameTimeFields && (start === undefined || end === undefined)) {
+          // In case of time range is not provided and the time field is the same
+          // set the fallback range for all jobs
+          // as there may not be a common query, we use a match_all
+          const {
+            start: fallbackStart,
+            end: fallbackEnd,
+          } = await this.getFallbackTimeRange(firstJobTimeField, { match_all: {} });
+          start = fallbackStart;
+          end = fallbackEnd;
         }
 
-        job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+        for (const { job, query } of this.jobsForModelMemoryEstimation) {
+          let earliestMs = start;
+          let latestMs = end;
+          if (earliestMs === undefined || latestMs === undefined) {
+            const timeFieldRange = await this.getFallbackTimeRange(
+              job.config.data_description.time_field,
+              query
+            );
+            earliestMs = timeFieldRange.start;
+            latestMs = timeFieldRange.end;
+          }
+
+          const { modelMemoryLimit } = await calculateModelMemoryLimit(
+            job.config.analysis_config,
+            this.indexPatternName,
+            query,
+            job.config.data_description.time_field,
+            earliestMs,
+            latestMs
+          );
+
+          if (!job.config.analysis_limits) {
+            job.config.analysis_limits = {} as AnalysisLimits;
+          }
+
+          job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+        }
+      } catch (error) {
+        mlLog.warn(`Data recognizer could not estimate model memory limit ${error}`);
       }
     }
 
