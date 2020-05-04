@@ -47,6 +47,14 @@ If a conflicts occurs your editor of choice will be opened to make it easier for
 
 CLI: `--editor code`
 
+Config:
+
+```json
+{
+  "editor": "code"
+}
+```
+
 ## Project config (`.backportrc.json`)
 
 A `.backportrc.json` config file should be added to the root of each project where `backport` is used. This is useful for sharing configuration options with other project contributors.
