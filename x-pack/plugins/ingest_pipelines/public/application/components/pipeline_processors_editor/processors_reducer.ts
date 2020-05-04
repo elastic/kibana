@@ -73,10 +73,10 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     const idx = parseInt(path[path.length - 1], 10);
     const processors = getValue<ProcessorInternal[]>(processorsSelector, state);
     processors.splice(idx, 1);
-    if (!processors.length) {
+    if (!processors.length && selector.length) {
       return setValue(processorsSelector, state, undefined);
     }
-    return setValue(processorsSelector, state, processors);
+    return setValue(processorsSelector, state, [...processors]);
   }
 
   if (action.type === 'addTopLevelProcessor') {
