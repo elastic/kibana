@@ -27,22 +27,25 @@ import { getFormatService } from '../services';
 import { Label } from './label';
 import { TagCloud } from './tag_cloud';
 import { FeedbackMessage } from './feedback_message';
+import { VisParams } from '../../../visualizations/public';
 
 const MAX_TAG_COUNT = 200;
 
 export function createTagCloudVisualization({ colors }: { colors: any }) {
-  const colorScale = d3.scale.ordinal().range(colors.seedColors);
+  const colorScale: d3.scale.Ordinal<number, string> = d3.scale
+    .ordinal<number, string>()
+    .range(colors.seedColors);
   return class TagCloudVisualization {
-    _containerNode: any;
+    _containerNode: HTMLElement;
     _vis: any;
     _truncated: boolean;
     _tagCloud: TagCloud;
     _visParams: any;
     _renderComplete$: any;
-    _feedbackNode: any;
+    _feedbackNode: HTMLElement;
     _feedbackMessage: any;
     _labelNode: HTMLElement;
-    _label: any;
+    _label: React.RefObject<Label> | null;
 
     constructor(node: any, vis: any) {
       this._containerNode = node;
@@ -88,7 +91,7 @@ export function createTagCloudVisualization({ colors }: { colors: any }) {
       render(<Label ref={this._label} />, this._labelNode);
     }
 
-    async render(data: any, visParams: any) {
+    async render(data: any, visParams: VisParams) {
       this._updateParams(visParams);
       this._updateData(data);
       this._resize();
@@ -103,23 +106,26 @@ export function createTagCloudVisualization({ colors }: { colors: any }) {
         return;
       }
 
-      this._label.current.setState({
-        label: `${data.columns[0].name} - ${data.columns[1].name}`,
-        shouldShowLabel: visParams.showLabel,
-      });
+      if (this._label != null) {
+        this._label.current.setState({
+          label: `${data.columns[0].name} - ${data.columns[1].name}`,
+          shouldShowLabel: visParams.showLabel,
+        });
+      }
+
       this._feedbackMessage.current.setState({
         shouldShowTruncate: this._truncated,
         shouldShowIncomplete: this._tagCloud.getStatus() === this._tagCloud.STATUS.INCOMPLETE,
       });
     }
 
-    destroy() {
+    destroy(): void {
       this._tagCloud.destroy();
       unmountComponentAtNode(this._feedbackNode);
       unmountComponentAtNode(this._labelNode);
     }
 
-    _updateData(data: any) {
+    _updateData(data: any): void {
       if (!data || !data.rows.length) {
         this._tagCloud.setData(data);
         return;
@@ -155,12 +161,12 @@ export function createTagCloudVisualization({ colors }: { colors: any }) {
       this._tagCloud.setData(tags);
     }
 
-    _updateParams(visParams: any) {
+    _updateParams(visParams: any): void {
       this._visParams = visParams;
       this._tagCloud.setOptions(visParams);
     }
 
-    _resize() {
+    _resize(): void {
       this._tagCloud.resize();
     }
   };
