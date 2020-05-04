@@ -6,6 +6,7 @@
 import * as rt from 'io-ts';
 import {
   TIMELINE_DRAFT_URL,
+  TIMELINE_DRAFT_CLEAN_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
@@ -15,7 +16,6 @@ import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { SavedTimeline, TimelineType } from '../../../../../common/types/timeline';
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
-import { draftTimelineSchema } from '../schemas/draft_timelines_schema';
 
 const readable = new stream.Readable();
 export const getExportTimelinesRequest = () =>
@@ -154,11 +154,16 @@ export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
     },
   });
 
-export const getDraftTimelinesRequest = (mockQuery: rt.TypeOf<typeof draftTimelineSchema>) =>
+export const getDraftTimelinesRequest = () =>
   requestMock.create({
     method: 'get',
     path: TIMELINE_DRAFT_URL,
-    query: mockQuery,
+  });
+
+export const cleanDraftTimelinesRequest = () =>
+  requestMock.create({
+    method: 'post',
+    path: TIMELINE_DRAFT_CLEAN_URL,
   });
 
 export const mockTimelinesSavedObjects = () => ({

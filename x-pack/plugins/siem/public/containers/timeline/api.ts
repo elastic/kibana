@@ -7,7 +7,6 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { HttpFetchQuery } from 'kibana/public';
 import { throwErrors } from '../../../../case/common/api';
 import {
   SavedTimeline,
@@ -16,6 +15,7 @@ import {
 } from '../../../common/types/timeline';
 import {
   TIMELINE_URL,
+  TIMELINE_DRAFT_CLEAN_URL,
   TIMELINE_DRAFT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
@@ -120,10 +120,14 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   return response.body!;
 };
 
-export const getDraftTimeline = async (query: HttpFetchQuery): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL, {
-    query,
-  });
+export const getDraftTimeline = async (): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL);
+
+  return decodeTimelineResponse(response);
+};
+
+export const cleanDraftTimeline = async (): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_CLEAN_URL);
 
   return decodeTimelineResponse(response);
 };

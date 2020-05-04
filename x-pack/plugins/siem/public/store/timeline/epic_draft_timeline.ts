@@ -14,7 +14,7 @@ import {
   showCallOutUnauthorizedMsg,
   endTimelineSaving,
 } from './actions';
-import { getDraftTimeline } from '../../containers/timeline/api';
+import { getDraftTimeline, cleanDraftTimeline } from '../../containers/timeline/api';
 import { ActionTimeline, TimelineById } from './types';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { addError } from '../app/actions';
@@ -27,13 +27,12 @@ import { ResponseTimeline } from '../../graphql/types';
 
 export const epicDraftTimeline = (
   action: ActionTimeline,
-  timeline: TimelineById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
   clean: boolean
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
-  from(getDraftTimeline({ clean })).pipe(
+  from(clean ? cleanDraftTimeline() : getDraftTimeline()).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimelines]) => {
       const savedTimeline = recentTimelines[action.payload.id];

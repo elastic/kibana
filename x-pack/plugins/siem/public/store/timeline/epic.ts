@@ -210,9 +210,9 @@ export const createTimelineEpic = <State>(): Epic<
             allTimelineQuery$
           );
         } else if (action.type === getDraftTimeline.type) {
-          return epicDraftTimeline(action, timeline, action$, timeline$, false);
+          return epicDraftTimeline(action, action$, timeline$, false);
         } else if (action.type === createTimeline.type) {
-          return epicDraftTimeline(action, timeline, action$, timeline$, true);
+          return epicDraftTimeline(action, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({
@@ -302,9 +302,7 @@ export const convertTimelineAsInput = (
 ): TimelineInput =>
   Object.keys(timelineInput).reduce<TimelineInput>((acc, key) => {
     if (has(key, timeline)) {
-      if (key === 'timelineType') {
-        return set(key, get(key, timeline), acc);
-      } else if (key === 'kqlQuery') {
+      if (key === 'kqlQuery') {
         return set(`${key}.filterQuery`, get(`${key}.filterQuery`, timeline), acc);
       } else if (key === 'dateRange') {
         return set(`${key}`, { start: timelineTimeRange.from, end: timelineTimeRange.to }, acc);

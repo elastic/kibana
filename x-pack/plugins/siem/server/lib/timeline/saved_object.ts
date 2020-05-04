@@ -120,7 +120,7 @@ export const getDraftTimeline = async (request: FrameworkRequest): Promise<Respo
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft} and siem-ui-timeline.attributes.createdBy: ${request.user?.email}`,
+    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft} and (siem-ui-timeline.attributes.createdBy: ${request.user?.username} or siem-ui-timeline.attributes.createdBy: ${request.user?.email})`,
   };
   return getAllSavedTimeline(request, options);
 };
@@ -253,16 +253,48 @@ export const persistTimeline = async (
   }
 };
 
-export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+const updatePartialSavedTimeline = async (
+  request: FrameworkRequest,
+  timelineId: string,
+  timeline: SavedTimeline
+) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
+  const currentSavedTimeline = await savedObjectsClient.get<SavedTimeline>(
+    timelineSavedObjectType,
+    timelineId
+  );
 
-  const response = await Promise.all(
+  return savedObjectsClient.update(
+    timelineSavedObjectType,
+    timelineId,
+    pickSavedTimeline(
+      null,
+      {
+        ...timeline,
+        dateRange: currentSavedTimeline.attributes.dateRange,
+      },
+      request.user
+    )
+  );
+};
+
+export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+  if (!timelineIds.length) {
+    return Promise.reject(new Error('timelineIds is empty'));
+  }
+
+  await Promise.all(
     timelineIds.map(timelineId =>
       Promise.all([
-        savedObjectsClient.update(timelineSavedObjectType, timelineId, draftTimelineDefaults),
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
+    )
+  );
+
+  const response = await Promise.all(
+    timelineIds.map(timelineId =>
+      updatePartialSavedTimeline(request, timelineId, draftTimelineDefaults)
     )
   );
 

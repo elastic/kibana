@@ -5,7 +5,7 @@
  */
 
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -163,9 +163,9 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
 
-    const columns = useMemo(
-      () =>
-        getTimelinesTableColumns({
+    return (
+      <BasicTable
+        columns={getTimelinesTableColumns({
           actionTimelineToShow,
           deleteTimelines,
           itemIdToExpandedNotesRowMap,
@@ -175,22 +175,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           onSelectionChange,
           onToggleShowNotes,
           showExtendedColumns,
-        }),
-      [
-        actionTimelineToShow,
-        deleteTimelines,
-        itemIdToExpandedNotesRowMap,
-        enableExportTimelineDownloader,
-        onOpenDeleteTimelineModal,
-        onOpenTimeline,
-        onSelectionChange,
-        onToggleShowNotes,
-        showExtendedColumns,
-      ]
-    );
-    return (
-      <BasicTable
-        columns={columns}
+        })}
         compressed
         data-test-subj="timelines-table"
         isExpandable={true}

@@ -11,23 +11,11 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 
-import {
-  mockGetCurrentUser,
-  mockGetTimelineValue,
-  mockGetDraftTimelineValue,
-} from './__mocks__/import_timelines';
+import { mockGetCurrentUser, mockGetDraftTimelineValue } from './__mocks__/import_timelines';
 import {
   getDraftTimelinesRequest,
-  inputTimeline,
-  createTimelineWithoutTimelineId,
   createTimelineWithTimelineId,
-  createDraftTimelineWithoutTimelineId,
-  createDraftTimelineWithTimelineId,
 } from './__mocks__/request_responses';
-import {
-  CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-  CREATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/create_timelines';
 
 describe('draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -38,7 +26,6 @@ describe('draft timelines', () => {
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
-  let mockResetTimeline: jest.Mock;
 
   beforeEach(() => {
     jest.resetModules();
@@ -61,35 +48,27 @@ describe('draft timelines', () => {
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
-    mockResetTimeline = jest.fn();
   });
 
   describe('Manipulate timeline', () => {
     describe('Create a new timeline', () => {
       beforeEach(async () => {
-        jest.doMock('../saved_object', () => {
-          return {
-            getTimeline: mockGetTimeline,
-            getDraftTimeline: mockGetDraftTimeline,
-            resetTimeline: mockResetTimeline,
-            persistTimeline: mockPersistTimeline.mockReturnValue({
-              code: 200,
-              timeline: createTimelineWithTimelineId,
-            }),
-          };
-        });
+        jest.doMock('../saved_object', () => ({
+          getTimeline: mockGetTimeline,
+          getDraftTimeline: mockGetDraftTimeline,
+          persistTimeline: mockPersistTimeline.mockReturnValue({
+            code: 200,
+            timeline: createTimelineWithTimelineId,
+          }),
+        }));
 
-        jest.doMock('../../pinned_event/saved_object', () => {
-          return {
-            persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-          };
-        });
+        jest.doMock('../../pinned_event/saved_object', () => ({
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
+        }));
 
-        jest.doMock('../../note/saved_object', () => {
-          return {
-            persistNote: mockPersistNote,
-          };
-        });
+        jest.doMock('../../note/saved_object', () => ({
+          persistNote: mockPersistNote,
+        }));
 
         const draftTimelinesRoute = jest.requireActual('./draft_timelines_route')
           .draftTimelinesRoute;
@@ -101,7 +80,7 @@ describe('draft timelines', () => {
           timeline: [],
         });
 
-        const response = await server.inject(getDraftTimelinesRequest({ clean: 'false' }), context);
+        const response = await server.inject(getDraftTimelinesRequest(), context);
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -118,29 +97,8 @@ describe('draft timelines', () => {
           timeline: [mockGetDraftTimelineValue],
         });
 
-        const response = await server.inject(getDraftTimelinesRequest({ clean: 'false' }), context);
+        const response = await server.inject(getDraftTimelinesRequest(), context);
         expect(mockPersistTimeline).not.toHaveBeenCalled();
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: mockGetDraftTimelineValue,
-            },
-          },
-        });
-      });
-
-      test('should return clean existing draft if draft available and clean param was sent', async () => {
-        mockGetDraftTimeline.mockResolvedValue({
-          timeline: [mockGetDraftTimelineValue],
-        });
-        mockResetTimeline.mockResolvedValue();
-        mockGetTimeline.mockResolvedValue({ ...mockGetDraftTimelineValue });
-
-        const response = await server.inject(getDraftTimelinesRequest({ clean: 'true' }), context);
-        expect(mockPersistTimeline).not.toHaveBeenCalled();
-        expect(mockResetTimeline).toHaveBeenCalled();
-        expect(mockGetTimeline).toHaveBeenCalled();
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           data: {

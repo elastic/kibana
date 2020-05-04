@@ -260,10 +260,12 @@ export const epicUpdateTimeline = ({
   to,
   ruleNote,
 }: UpdateTimeline) => {
-  const actions: Array<Action<any>> = [
-    dispatchSetTimelineRangeDatePicker({ from, to }),
-    dispatchAddTimeline({ id, timeline }),
-  ];
+  const actions: Array<Action<any>> = [dispatchAddTimeline({ id, timeline })];
+
+  if (from && to) {
+    actions.push(dispatchSetTimelineRangeDatePicker({ from, to }));
+  }
+
   if (
     timeline.kqlQuery != null &&
     timeline.kqlQuery.filterQuery != null &&
