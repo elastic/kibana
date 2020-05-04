@@ -37,8 +37,17 @@ function flatKeys(source) {
 
 export default function({ getService }) {
   const supertest = getService('supertest');
+  const es = getService('es');
 
   describe('/api/telemetry/v2/clusters/_stats', () => {
+    before('create some tracked indices', async () => {
+      return es.indices.create({ index: 'telemetry_tests_logs' });
+    });
+
+    after('cleanup tracked indices', () => {
+      return es.indices.delete({ index: 'telemetry_tests_logs' });
+    });
+
     it('should pull local stats and validate data types', async () => {
       const timeRange = {
         min: '2018-07-23T22:07:00Z',
@@ -71,8 +80,16 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.csp.strict).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
-      // Testing this to make sure Cluster State API doesn't change its response
-      expect(stats.stack_stats.ingest_solutions).to.be.eql({});
+
+      // Testing ingest_solutions this to make sure Cluster State API doesn't change its response
+      expect(stats.stack_stats.ingest_solutions).to.be.an('object');
+      expect(stats.stack_stats.ingest_solutions.data_providers).to.be.an('object');
+      expect(stats.stack_stats.ingest_solutions.data_providers.logs).to.be.an('object');
+      expect(stats.stack_stats.ingest_solutions.data_providers.logs.index_count).to.be(1);
+      expect(stats.stack_stats.ingest_solutions.data_providers.logs.ecs_index_count).to.be(0);
+      expect(
+        stats.stack_stats.ingest_solutions.data_providers.logs.size_in_bytes
+      ).to.be.greaterThan(0);
     });
 
     it('should pull local stats and validate fields', async () => {
