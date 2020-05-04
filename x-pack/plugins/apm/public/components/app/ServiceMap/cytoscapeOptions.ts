@@ -15,9 +15,6 @@ import { defaultIcon, iconForNode } from './icons';
 
 const getBorderColor = (el: cytoscape.NodeSingular) => {
   const nodeSeverity = el.data('severity');
-  if (el.hasClass('primary') || el.selected()) {
-    return theme.euiColorPrimary;
-  }
 
   switch (nodeSeverity) {
     case severity.warning:
@@ -27,7 +24,11 @@ const getBorderColor = (el: cytoscape.NodeSingular) => {
     case severity.critical:
       return theme.euiColorVis9;
     default:
-      return theme.euiColorMediumShade;
+      if (el.hasClass('primary') || el.selected()) {
+        return theme.euiColorPrimary;
+      } else {
+        return theme.euiColorMediumShade;
+      }
   }
 };
 

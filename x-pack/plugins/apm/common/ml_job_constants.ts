@@ -21,9 +21,10 @@ export function getMlJobId(serviceName: string, transactionType?: string) {
 }
 
 export function getMlJobServiceName(jobId: string) {
-  const parts = jobId.split('-');
-  parts.splice(parts.length - 2, 2);
-  return parts.join('-');
+  return jobId
+    .split('-')
+    .slice(0, -2)
+    .join('-');
 }
 
 export function getMlIndex(serviceName: string, transactionType?: string) {

@@ -18,6 +18,7 @@ import { dedupeConnections } from './dedupe_connections';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { addAnomaliesToServicesData } from './ml_helpers';
+import { getMlIndex } from '../../../common/ml_job_constants';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -138,11 +139,11 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
-async function getAnomaliesData(options: IEnvOptions) {
-  const { setup } = options;
-  const { client } = setup;
+function getAnomaliesData(options: IEnvOptions) {
+  const { client } = options.setup;
+
   const params = {
-    index: '.ml-anomalies-*',
+    index: getMlIndex('*'),
     body: {
       size: 0,
       query: {
@@ -168,7 +169,7 @@ async function getAnomaliesData(options: IEnvOptions) {
     }
   };
 
-  return await client.search(params);
+  return client.search(params);
 }
 
 export type AnomaliesResponse = PromiseReturnType<typeof getAnomaliesData>;
@@ -177,16 +178,15 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
+  const [connectionData, servicesData, anomaliesData] = await Promise.all([
     getConnectionData(options),
-    getServicesData(options)
+    getServicesData(options),
+    getAnomaliesData(options)
   ]);
-
-  const anomaliesResponse = await getAnomaliesData(options);
 
   const servicesDataWithAnomalies = addAnomaliesToServicesData(
     servicesData,
-    anomaliesResponse
+    anomaliesData
   );
 
   return dedupeConnections({
