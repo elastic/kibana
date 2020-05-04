@@ -200,22 +200,23 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
             <span>{indexPattern.title}</span>
           </EuiFormRow>
         )}
-        {searchItems?.savedSearch?.id !== undefined && (
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
-              defaultMessage: 'Saved search',
-            })}
-          >
-            <span>{searchItems.savedSearch.title}</span>
-          </EuiFormRow>
-        )}
-        <EuiFormRow fullWidth hasEmptyLabelSpace>
+        <EuiFormRow
+          fullWidth
+          hasEmptyLabelSpace={searchItems?.savedSearch?.id === undefined}
+          label={
+            searchItems?.savedSearch?.id !== undefined
+              ? i18n.translate('xpack.transform.stepDefineForm.savedSearchLabel', {
+                  defaultMessage: 'Saved search',
+                })
+              : ''
+          }
+        >
           <>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              {/* Flex Column #1: Search Bar / Advanced Search Editor */}
-              {searchItems.savedSearch === undefined && (
-                <>
-                  <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                {/* Flex Column #1: Search Bar / Advanced Search Editor */}
+                {searchItems.savedSearch === undefined && (
+                  <>
                     {!disabledQuery && !isAdvancedSourceEditorEnabled && (
                       <SourceSearchBar
                         indexPattern={indexPattern}
@@ -223,21 +224,23 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
                       />
                     )}
                     {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor {...stepDefineForm} />}
-                  </EuiFlexItem>
-                </>
-              )}
+                  </>
+                )}
+                {searchItems?.savedSearch?.id !== undefined && (
+                  <span>{searchItems.savedSearch.title}</span>
+                )}
+              </EuiFlexItem>
 
               {/* Search options: Advanced Editor Switch / Copy to Clipboard / Advanced Editor Apply Button */}
               <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
-                <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="xs" direction="column" justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      {searchItems.savedSearch === undefined && (
-                        <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false}>
+                        {searchItems.savedSearch === undefined && (
                           <AdvancedQueryEditorSwitch {...stepDefineForm} />
-                        </EuiFlexItem>
-                      )}
+                        )}
+                      </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiCopy
                           beforeMessage={copyToClipboardSourceDescription}
