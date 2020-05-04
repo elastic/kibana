@@ -13,7 +13,7 @@ import { SETTINGS_ROUTE } from '../../common/constants';
 import { ToggleAlertFlyoutButton } from '../components/overview/alerts/alerts_containers';
 
 interface PageHeaderProps {
-  headingText: string;
+  headingText: string | JSX.Element;
   extraLinks?: boolean;
   datePicker?: boolean;
 }
