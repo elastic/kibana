@@ -44,7 +44,7 @@ describe('ingest_solutions', () => {
           { name: 'my_logs_custom', docCount: 1000, sizeInBytes: 10 },
           { name: 'my_logs', docCount: 100, sizeInBytes: 10, isECS: true },
           { name: 'logs_custom' },
-          { name: '.ent-search-1234' },
+          { name: '.ent-search-1234', docCount: 0 },
         ])
       ).toStrictEqual({
         data_providers: {
@@ -52,7 +52,7 @@ describe('ingest_solutions', () => {
           filebeat: { index_count: 1, doc_count: 100, size_in_bytes: 10 },
           metricbeat: { index_count: 1, ecs_index_count: 0, doc_count: 100, size_in_bytes: 10 },
           logs: { index_count: 3, ecs_index_count: 1, doc_count: 1100, size_in_bytes: 20 },
-          'app-search': { index_count: 1 },
+          'app-search': { index_count: 1, doc_count: 0 },
         },
       });
     });

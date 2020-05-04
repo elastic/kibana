@@ -86,6 +86,7 @@ export default function({ getService }) {
       expect(stats.stack_stats.ingest_solutions.data_providers).to.be.an('object');
       expect(stats.stack_stats.ingest_solutions.data_providers.logs).to.be.an('object');
       expect(stats.stack_stats.ingest_solutions.data_providers.logs.index_count).to.be(1);
+      expect(stats.stack_stats.ingest_solutions.data_providers.logs.doc_count).to.be(0);
       expect(stats.stack_stats.ingest_solutions.data_providers.logs.ecs_index_count).to.be(0);
       expect(
         stats.stack_stats.ingest_solutions.data_providers.logs.size_in_bytes

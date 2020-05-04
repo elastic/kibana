@@ -82,8 +82,10 @@ export function buildIngestSolutionsPayload(
                 ecs_index_count: (dataProviders[name]?.ecs_index_count || 0) + (isECS ? 1 : 0),
               }
             : {}),
-          ...(docCount ? { doc_count: (dataProviders[name]?.doc_count || 0) + docCount } : {}),
-          ...(sizeInBytes
+          ...(typeof docCount === 'number'
+            ? { doc_count: (dataProviders[name]?.doc_count || 0) + docCount }
+            : {}),
+          ...(typeof sizeInBytes === 'number'
             ? { size_in_bytes: (dataProviders[name]?.size_in_bytes || 0) + sizeInBytes }
             : {}),
         },
