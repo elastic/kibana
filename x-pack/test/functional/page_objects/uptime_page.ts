@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
-  const { alerts, common: commonService, monitor, navigation } = getService('uptime');
+  const { common: commonService, monitor, navigation } = getService('uptime');
   const retry = getService('retry');
 
   return new (class UptimePage {
