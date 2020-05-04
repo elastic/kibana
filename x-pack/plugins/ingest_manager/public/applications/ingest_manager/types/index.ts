@@ -20,6 +20,8 @@ export {
   DatasourceConfigRecordEntry,
   Output,
   DataStream,
+  // API schema - misc setup, status
+  GetFleetStatusResponse,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
