@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { removeSlashes, appendAppPath } from './utils';
+import { removeSlashes, appendAppPath, isLegacyApp, relativeToAbsolute, getOrigin } from './utils';
 
 describe('removeSlashes', () => {
   it('only removes duplicates by default', () => {
@@ -67,5 +67,43 @@ describe('appendAppPath', () => {
       '/app/my-app/some-path#/hash/'
     );
     expect(appendAppPath('/app/my-app', '/some-path#/hash')).toEqual('/app/my-app/some-path#/hash');
+  });
+});
+
+describe('isLegacyApp', () => {
+  it('returns true for legacy apps', () => {
+    expect(
+      isLegacyApp({
+        id: 'legacy',
+        title: 'Legacy App',
+        appUrl: '/some-url',
+        legacy: true,
+      })
+    ).toEqual(true);
+  });
+  it('returns false for non-legacy apps', () => {
+    expect(
+      isLegacyApp({
+        id: 'legacy',
+        title: 'Legacy App',
+        mount: () => () => undefined,
+        legacy: false,
+      })
+    ).toEqual(false);
+  });
+});
+
+describe('getOrigin', () => {
+  it(`returns the current location's origin`, () => {
+    expect(getOrigin()).toEqual(window.location.origin);
+  });
+});
+
+describe('relativeToAbsolute', () => {
+  it('converts a relative path to an absolute url', () => {
+    const origin = getOrigin();
+    expect(relativeToAbsolute('path')).toEqual(`${origin}/path`);
+    expect(relativeToAbsolute('/path#hash')).toEqual(`${origin}/path#hash`);
+    expect(relativeToAbsolute('/path?query=foo')).toEqual(`${origin}/path?query=foo`);
   });
 });

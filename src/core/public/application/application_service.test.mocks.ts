@@ -34,3 +34,9 @@ export const createBrowserHistoryMock = jest.fn().mockReturnValue(MockHistory);
 jest.doMock('history', () => ({
   createBrowserHistory: createBrowserHistoryMock,
 }));
+
+export const MockDelegatedEvents = {
+  on: jest.fn(),
+  off: jest.fn(),
+};
+jest.doMock('delegated-events', () => MockDelegatedEvents);

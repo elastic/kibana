@@ -21,6 +21,7 @@ import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
+import { on, off } from 'delegated-events';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
@@ -46,7 +47,8 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
-import { appendAppPath } from './utils';
+import { appendAppPath, relativeToAbsolute } from './utils';
+import { parseAppUrl } from './parse_app_url';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -92,6 +94,8 @@ interface AppUpdaterWrapper {
   updater: AppUpdater;
 }
 
+type DelegatedClickEventHandler = (event: CustomEvent & { currentTarget: Element }) => void;
+
 /**
  * Service that is responsible for registering new applications.
  * @internal
@@ -109,6 +113,7 @@ export class ApplicationService {
   private history?: History<any>;
   private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: any) => void;
+  private linkClickDelegateHandler?: DelegatedClickEventHandler;
 
   public setup({
     context,
@@ -267,7 +272,7 @@ export class ApplicationService {
       shareReplay(1)
     );
 
-    return {
+    const startContract: InternalApplicationStart = {
       applications$,
       capabilities,
       currentAppId$: this.currentAppId$.pipe(
@@ -307,6 +312,20 @@ export class ApplicationService {
         );
       },
     };
+
+    this.linkClickDelegateHandler = e => {
+      const link = e.currentTarget as HTMLAnchorElement;
+      if (link.href && !link.classList.contains('coreNavigationPrevented')) {
+        const linkedApp = parseAppUrl(link.href, http.basePath, this.apps);
+        if (linkedApp && linkedApp.app !== this.currentAppId$.value) {
+          e.preventDefault();
+          startContract.navigateToApp(linkedApp.app, { path: linkedApp.path });
+        }
+      }
+    };
+    on('click', 'a', this.linkClickDelegateHandler);
+
+    return startContract;
   }
 
   private setAppLeaveHandler = (appId: string, handler: AppLeaveHandler) => {
@@ -350,6 +369,9 @@ export class ApplicationService {
     this.statusUpdaters$.complete();
     this.subscriptions.forEach(sub => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
+    if (this.linkClickDelegateHandler) {
+      off('click', 'a', this.linkClickDelegateHandler);
+    }
   }
 }
 
@@ -376,10 +398,3 @@ const updateStatus = <T extends AppBase>(app: T, statusUpdaters: AppUpdaterWrapp
     ...changes,
   };
 };
-
-function relativeToAbsolute(url: string) {
-  // convert all link urls to absolute urls
-  const a = document.createElement('a');
-  a.setAttribute('href', url);
-  return a.href;
-}

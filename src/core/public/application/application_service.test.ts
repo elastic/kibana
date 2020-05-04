@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import {
+  MockCapabilitiesService,
+  MockHistory,
+  MockDelegatedEvents,
+} from './application_service.test.mocks';
+
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
@@ -26,7 +32,6 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
@@ -52,6 +57,11 @@ const createLegacyApp = (props: Partial<LegacyApp>): LegacyApp => {
 let setupDeps: MockLifecycle<'setup'>;
 let startDeps: MockLifecycle<'start'>;
 let service: ApplicationService;
+
+afterEach(() => {
+  MockDelegatedEvents.on.mockClear();
+  MockDelegatedEvents.off.mockClear();
+});
 
 describe('#setup()', () => {
   beforeEach(() => {
@@ -871,5 +881,23 @@ describe('#stop()', () => {
     service.stop();
     expect(removeListenerSpy).toHaveBeenCalledTimes(1);
     expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
+  });
+
+  it('removes the delegated link listener', async () => {
+    service.setup(setupDeps);
+
+    expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(0);
+
+    await service.start(startDeps);
+
+    expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(1);
+    expect(MockDelegatedEvents.on).toHaveBeenCalledWith('click', 'a', expect.any(Function));
+
+    const handler = MockDelegatedEvents.on.mock.calls[0][2];
+
+    service.stop();
+
+    expect(MockDelegatedEvents.off).toHaveBeenCalledTimes(1);
+    expect(MockDelegatedEvents.off).toHaveBeenCalledWith('click', 'a', handler);
   });
 });
