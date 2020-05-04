@@ -63,12 +63,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         'tr'
       );
       await testSubjects.click('zoom-out');
-      const Nodes = await testSubjects.findAll('resolverNode');
+      const Nodes = await testSubjects.findAll('euiButton__text');
       for (const value of Nodes) {
         $.push(await value._webElement.getText());
       }
       for (let i = 0; i < $.length; i++) {
-        expect(tableData[i + 1][0]).to.eql($[i].split('\n')[1]);
+        expect(tableData[i + 1][0]).to.eql($[i]);
       }
       await testSubjects.click('zoom-in');
     });
