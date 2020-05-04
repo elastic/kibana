@@ -64,7 +64,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetFilters).toBe(true);
       expect(capabilities.canGetDataFrameAnalytics).toBe(true);
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
@@ -81,6 +80,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDatafeed).toBe(false);
       expect(capabilities.canUpdateDatafeed).toBe(false);
       expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
       expect(capabilities.canCreateCalendar).toBe(false);
       expect(capabilities.canDeleteCalendar).toBe(false);
       expect(capabilities.canCreateFilter).toBe(false);
@@ -113,7 +113,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetFilters).toBe(true);
       expect(capabilities.canGetDataFrameAnalytics).toBe(true);
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
@@ -130,6 +129,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDatafeed).toBe(true);
       expect(capabilities.canUpdateDatafeed).toBe(true);
       expect(capabilities.canPreviewDatafeed).toBe(true);
+      expect(capabilities.canGetFilters).toBe(true);
       expect(capabilities.canCreateCalendar).toBe(true);
       expect(capabilities.canDeleteCalendar).toBe(true);
       expect(capabilities.canCreateFilter).toBe(true);
@@ -162,7 +162,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetFilters).toBe(true);
       expect(capabilities.canGetDataFrameAnalytics).toBe(true);
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(false);
@@ -177,6 +176,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
       expect(capabilities.canDeleteDatafeed).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
       expect(capabilities.canUpdateDatafeed).toBe(false);
       expect(capabilities.canPreviewDatafeed).toBe(false);
       expect(capabilities.canCreateCalendar).toBe(false);
@@ -211,7 +211,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetDatafeeds).toBe(true);
       expect(capabilities.canGetCalendars).toBe(true);
       expect(capabilities.canFindFileStructure).toBe(true);
-      expect(capabilities.canGetFilters).toBe(true);
       expect(capabilities.canGetDataFrameAnalytics).toBe(true);
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(false);
@@ -228,6 +227,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDatafeed).toBe(false);
       expect(capabilities.canUpdateDatafeed).toBe(false);
       expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
       expect(capabilities.canCreateCalendar).toBe(false);
       expect(capabilities.canDeleteCalendar).toBe(false);
       expect(capabilities.canCreateFilter).toBe(false);
@@ -260,7 +260,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetDatafeeds).toBe(false);
       expect(capabilities.canGetCalendars).toBe(false);
       expect(capabilities.canFindFileStructure).toBe(false);
-      expect(capabilities.canGetFilters).toBe(false);
       expect(capabilities.canGetDataFrameAnalytics).toBe(false);
       expect(capabilities.canGetAnnotations).toBe(false);
       expect(capabilities.canCreateAnnotation).toBe(false);
@@ -277,6 +276,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDatafeed).toBe(false);
       expect(capabilities.canUpdateDatafeed).toBe(false);
       expect(capabilities.canPreviewDatafeed).toBe(false);
+      expect(capabilities.canGetFilters).toBe(false);
       expect(capabilities.canCreateCalendar).toBe(false);
       expect(capabilities.canDeleteCalendar).toBe(false);
       expect(capabilities.canCreateFilter).toBe(false);
@@ -311,7 +311,6 @@ describe('check_capabilities', () => {
     expect(capabilities.canGetDatafeeds).toBe(false);
     expect(capabilities.canGetCalendars).toBe(false);
     expect(capabilities.canFindFileStructure).toBe(false);
-    expect(capabilities.canGetFilters).toBe(false);
     expect(capabilities.canGetDataFrameAnalytics).toBe(false);
     expect(capabilities.canGetAnnotations).toBe(false);
     expect(capabilities.canCreateAnnotation).toBe(false);
@@ -328,6 +327,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteDatafeed).toBe(false);
     expect(capabilities.canUpdateDatafeed).toBe(false);
     expect(capabilities.canPreviewDatafeed).toBe(false);
+    expect(capabilities.canGetFilters).toBe(false);
     expect(capabilities.canCreateCalendar).toBe(false);
     expect(capabilities.canDeleteCalendar).toBe(false);
     expect(capabilities.canCreateFilter).toBe(false);
