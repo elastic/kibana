@@ -13,7 +13,9 @@
     "home",
     "licensing",
     "usageCollection",
-    "share"
+    "share",
+    "embeddable",
+    "uiActions"
   ],
   "optionalPlugins": [
     "security",
