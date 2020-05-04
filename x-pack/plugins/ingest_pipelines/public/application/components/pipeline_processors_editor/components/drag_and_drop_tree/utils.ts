@@ -6,25 +6,37 @@
 
 import { DraggableLocation, ProcessorSelector } from '../../types';
 
+export const mapSelectorToDragLocation = (selector: ProcessorSelector): DraggableLocation => {
+  const stringIndex = selector[selector.length - 1];
+  if (!stringIndex.match(/^[0-9]+$/)) {
+    throw new Error(`Expected an integer but received "${stringIndex}"`);
+  }
+  return {
+    selector: selector.slice(0, -1),
+    index: parseInt(stringIndex, 10),
+  };
+};
+
 export const resolveDestinationLocation = (
   items: ProcessorSelector[],
-  isRootLevelSource: boolean,
   destinationIndex: number
 ): DraggableLocation => {
-  // TODO: This needs to be vastly improved.
-  const destinationSelector = items[destinationIndex];
-  const destinationProcessorsSelector = destinationSelector.slice(0, -1);
-
+  // Dragged to top, place at root level
   if (destinationIndex === 0) {
     return { selector: [], index: 0 };
   }
 
-  if (destinationIndex === items.length - 1 && isRootLevelSource) {
+  // Dragged to bottom, place at root level
+  if (destinationIndex === items.length - 1) {
     return { selector: [], index: items.length - 1 };
   }
 
-  return {
-    selector: destinationProcessorsSelector,
-    index: parseInt(destinationSelector[destinationSelector.length - 1], 10),
-  };
+  const above: ProcessorSelector = items[destinationIndex - 1];
+  const below: ProcessorSelector = items[destinationIndex]; // This is the processor we are displacing
+
+  if (above.length !== below.length) {
+    return mapSelectorToDragLocation(below);
+  }
+
+  return mapSelectorToDragLocation(items[destinationIndex]);
 };

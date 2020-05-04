@@ -9,7 +9,7 @@ import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from '../../types';
 
-import { resolveDestinationLocation } from './utils';
+import { resolveDestinationLocation, mapSelectorToDragLocation } from './utils';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
 
@@ -102,13 +102,9 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
         if (source && destination) {
           const [sourceSelector] = items[source.index];
           onDragEnd({
-            source: {
-              index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
-              selector: sourceSelector.slice(0, -1),
-            },
+            source: mapSelectorToDragLocation(sourceSelector),
             destination: resolveDestinationLocation(
               items.map(([selector]) => selector),
-              !sourceSelector.slice(0, -1).length,
               destination.index
             ),
           });
