@@ -43,13 +43,17 @@ export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
-function createDynamicFillColorDescriptor(field: StylePropertyField) {
+function createDynamicFillColorDescriptor(
+  layer: OBSERVABILITY_LAYER_TYPE,
+  field: StylePropertyField
+) {
   return {
     type: STYLE_TYPE.DYNAMIC,
     options: {
       ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
       field,
-      color: 'Yellow to Red',
+      color:
+        layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE ? 'Green to Red' : 'Yellow to Red',
       type: COLOR_MAP_TYPE.ORDINAL,
     },
   };
@@ -145,8 +149,6 @@ function getGeoGridRequestType(display: DISPLAY): RENDER_AS {
   return RENDER_AS.POINT;
 }
 
-function getLabelStyleDescriptor(metric: OBSERVABILITY_METRIC_TYPE): {};
-
 export function createLayerDescriptor({
   layer,
   metric,
@@ -192,7 +194,7 @@ export function createLayerDescriptor({
         tooltipProperties: ['name', 'iso2'],
       }),
       style: VectorStyle.createDescriptor({
-        [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor({
+        [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, {
           name: joinKey,
           origin: FIELD_ORIGIN.JOIN,
         }),
@@ -232,7 +234,7 @@ export function createLayerDescriptor({
   };
 
   const styleProperties = {
-    [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(metricStyleField),
+    [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, metricStyleField),
     [VECTOR_STYLES.ICON_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {

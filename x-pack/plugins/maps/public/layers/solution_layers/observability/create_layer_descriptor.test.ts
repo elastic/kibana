@@ -75,7 +75,7 @@ describe('createLayerDescriptor', () => {
         properties: {
           fillColor: {
             options: {
-              color: 'Yellow to Red',
+              color: 'Green to Red',
               colorCategory: 'palette_0',
               field: {
                 name: '__kbnjoin__avg_of_transaction.duration.us__12345',
@@ -239,7 +239,7 @@ describe('createLayerDescriptor', () => {
         properties: {
           fillColor: {
             options: {
-              color: 'Yellow to Red',
+              color: 'Green to Red',
               colorCategory: 'palette_0',
               field: {
                 name: 'avg_of_transaction.duration.us',
