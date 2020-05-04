@@ -33,18 +33,20 @@ import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
  * @public
  */
 
+export const bindSetupCoreAndPlugins = (core: CoreSetup) => {
+  setToasts(core.notifications.toasts);
+  setUiSettings(core.uiSettings);
+  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacySetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  constructor() {}
-
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    setToasts(core.notifications.toasts);
-    setUiSettings(core.uiSettings);
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    bindSetupCoreAndPlugins(core);
 
     return {
       serviceSettings: new ServiceSettings(),

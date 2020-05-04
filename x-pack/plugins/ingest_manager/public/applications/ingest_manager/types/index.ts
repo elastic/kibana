@@ -8,6 +8,7 @@ export {
   entries,
   // Object types
   Agent,
+  AgentMetadata,
   AgentConfig,
   NewAgentConfig,
   AgentEvent,
@@ -89,4 +90,5 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';

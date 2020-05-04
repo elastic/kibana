@@ -204,6 +204,7 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
 }
 

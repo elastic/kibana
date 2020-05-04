@@ -8,13 +8,14 @@ import Boom from 'boom';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../common/constants';
+import {
+  CASE_CONFIGURE_CONNECTORS_URL,
+  SUPPORTED_CONNECTORS,
+} from '../../../../../common/constants';
 
 /*
  * Be aware that this api will only return 20 connectors
  */
-
-const CASE_SERVICE_NOW_ACTION = '.servicenow';
 
 export function initCaseConfigureGetActionConnector({ caseService, router }: RouteDeps) {
   router.get(
@@ -30,8 +31,8 @@ export function initCaseConfigureGetActionConnector({ caseService, router }: Rou
           throw Boom.notFound('Action client have not been found');
         }
 
-        const results = (await actionsClient.getAll()).filter(
-          action => action.actionTypeId === CASE_SERVICE_NOW_ACTION
+        const results = (await actionsClient.getAll()).filter(action =>
+          SUPPORTED_CONNECTORS.includes(action.actionTypeId)
         );
         return response.ok({ body: results });
       } catch (error) {

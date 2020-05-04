@@ -40,7 +40,7 @@ export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger
       } catch (ex) {
         logger.info(`log event error: ${ex}`);
         await context.core.savedObjects.client.create('event_log_test', {}, { id });
-        logger.info(`created saved object`);
+        logger.info(`created saved object ${id}`);
       }
       eventLogger.logEvent(event);
       logger.info(`logged`);
