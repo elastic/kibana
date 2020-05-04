@@ -29,6 +29,7 @@ import { convertDateRangeToString, DateRangeKey } from './lib/date_range';
 
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
@@ -39,11 +40,10 @@ export interface DateRangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsDateRange {
+export interface AggParamsDateRange extends BaseAggParams {
   field: string;
   ranges?: DateRangeKey[];
   time_zone?: string;
-  json?: string;
 }
 
 export const getDateRangeBucketAgg = ({

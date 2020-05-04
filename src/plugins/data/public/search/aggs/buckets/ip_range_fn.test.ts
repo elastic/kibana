@@ -28,7 +28,6 @@ describe('agg_expression_functions', () => {
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'ip_field',
-        ipRangeType: IP_RANGE_TYPES.FROM_TO,
       });
       expect(actual).toMatchInlineSnapshot(`
         Object {
@@ -38,7 +37,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "field": "ip_field",
-              "ipRangeType": "fromTo",
+              "ipRangeType": undefined,
               "json": undefined,
               "ranges": undefined,
             },

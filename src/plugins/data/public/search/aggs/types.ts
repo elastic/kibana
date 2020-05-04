@@ -64,6 +64,11 @@ export interface SearchAggsStart {
 }
 
 /** @internal */
+export interface BaseAggParams {
+  json?: string;
+}
+
+/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;

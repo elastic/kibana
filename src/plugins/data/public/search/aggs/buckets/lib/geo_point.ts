@@ -25,7 +25,7 @@ type GeoPoint =
   | string
   | [number, number];
 
-export interface GeoBox {
+interface GeoBox {
   top: number;
   left: number;
   bottom: number;

@@ -26,7 +26,7 @@ import {
   isStringOrNumberType,
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
-import { AggConfigSerialized, IAggConfigs } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
@@ -63,7 +63,7 @@ export interface TermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsTerms {
+export interface AggParamsTerms extends BaseAggParams {
   field: string;
   order: 'asc' | 'desc';
   orderBy: string;
@@ -76,7 +76,6 @@ export interface AggParamsTerms {
   // advanced
   exclude?: string;
   include?: string;
-  json?: string;
 }
 
 export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDependencies) =>

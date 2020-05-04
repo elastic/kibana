@@ -22,6 +22,7 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
 import { GeoBoundingBox } from './lib/geo_point';
+import { BaseAggParams } from '../types';
 
 const filterTitle = i18n.translate('data.search.aggs.buckets.filterTitle', {
   defaultMessage: 'Filter',
@@ -31,10 +32,9 @@ export interface FilterBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsFilter {
+export interface AggParamsFilter extends BaseAggParams {
   field: string;
   geo_bounding_box?: GeoBoundingBox;
-  json?: string;
 }
 
 export const getFilterBucketAgg = ({ getInternalStartServices }: FilterBucketAggDependencies) =>

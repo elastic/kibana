@@ -31,6 +31,7 @@ import {
 } from './lib/ip_range';
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
@@ -45,14 +46,13 @@ export interface IpRangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsIpRange {
+export interface AggParamsIpRange extends BaseAggParams {
   field: string;
   ipRangeType: IP_RANGE_TYPES;
   ranges?: Partial<{
     [IP_RANGE_TYPES.FROM_TO]: RangeIpRangeAggKey[];
     [IP_RANGE_TYPES.MASK]: CidrMaskIpRangeAggKey[];
   }>;
-  json?: string;
 }
 
 export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketAggDependencies) =>

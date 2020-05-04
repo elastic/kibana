@@ -28,7 +28,7 @@ const fnName = 'aggIpRange';
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.IP_RANGE>;
 
-type Arguments = Assign<AggArgs, { ranges?: string }>;
+type Arguments = Assign<AggArgs, { ranges?: string; ipRangeType?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
@@ -68,7 +68,7 @@ export const aggIpRange = (): FunctionDefinition => ({
     },
     ipRangeType: {
       types: ['string'],
-      required: true,
+      required: false,
       options: ['mask', 'fromTo'],
       help: i18n.translate('data.search.aggs.buckets.ipRange.ipRangeType.help', {
         defaultMessage:

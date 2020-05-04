@@ -23,6 +23,7 @@ import { KBN_FIELD_TYPES } from '../../../../common';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
 import { GeoBoundingBox } from './lib/geo_point';
+import { BaseAggParams } from '../types';
 
 const defaultBoundingBox = {
   top_left: { lat: 1, lon: 1 },
@@ -39,14 +40,13 @@ export interface GeoHashBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export interface AggParamsGeoHash {
+export interface AggParamsGeoHash extends BaseAggParams {
   field: string;
   autoPrecision?: boolean;
   precision?: number;
   useGeocentroid?: boolean;
   isFilteredByCollar?: boolean;
   boundingBox?: GeoBoundingBox;
-  json?: string;
 }
 
 export const getGeoHashBucketAgg = ({ getInternalStartServices }: GeoHashBucketAggDependencies) =>
