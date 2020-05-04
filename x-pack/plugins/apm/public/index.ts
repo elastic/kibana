@@ -4,11 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApmPlugin } from './plugin';
+import {
+  PluginInitializer,
+  PluginInitializerContext
+} from '../../../../src/core/public';
+import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new ApmPlugin();
+export interface ConfigSchema {
+  serviceMapEnabled: boolean;
+  ui: {
+    enabled: boolean;
+  };
 }
-export { ApmPluginSetup, ApmPluginStart } from './types';
+
+export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
+  pluginInitializerContext: PluginInitializerContext<ConfigSchema>
+) => new ApmPlugin(pluginInitializerContext);
+
+export { ApmPluginSetup, ApmPluginStart };
+export { getTraceUrl } from './components/shared/Links/apm/ExternalLinks';
