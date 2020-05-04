@@ -32,11 +32,10 @@ export async function getPackages(
     );
   });
   // get the installed packages
-  const results = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-  });
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
   // filter out any internal packages
-  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(o => !o.attributes.internal);
   const packageList = registryItems
     .map(item =>
       createInstallableFrom(
@@ -46,6 +45,12 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 export async function getPackageKeysByStatus(

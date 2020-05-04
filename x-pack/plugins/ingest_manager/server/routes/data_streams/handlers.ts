@@ -6,6 +6,7 @@
 import { RequestHandler } from 'src/core/server';
 import { DataStream } from '../../types';
 import { GetDataStreamsResponse } from '../../../common';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
@@ -90,6 +91,10 @@ export const getListHandler: RequestHandler = async (context, request, response)
       },
     });
 
+    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
+
+    const packageMetadata: any = {};
+
     const dataStreams: DataStream[] = (indexResults as any[]).map(result => {
       const {
         key: indexName,
@@ -99,12 +104,26 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package: { buckets: packageBuckets },
         last_activity: { value_as_string: lastActivity },
       } = result;
+
+      const pkg = packageBuckets.length ? packageBuckets[0].key : '';
+      const pkgSavedObject = packageSavedObjects.saved_objects.filter(p => p.id === pkg);
+
+      // if
+      // - the datastream is associated with a package
+      // - and the package has been installed through EPM
+      // - and we didn't pick the metadata in an earlier iteration of this map()
+      if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
+        packageMetadata[pkg] = {
+          version: pkgSavedObject[0].attributes?.version,
+        };
+      }
       return {
         index: indexName,
         dataset: datasetBuckets.length ? datasetBuckets[0].key : '',
         namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
         type: typeBuckets.length ? typeBuckets[0].key : '',
-        package: packageBuckets.length ? packageBuckets[0].key : '',
+        package: pkg,
+        packageVersion: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
         last_activity: lastActivity,
         size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
       };
