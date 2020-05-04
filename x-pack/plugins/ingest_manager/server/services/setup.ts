@@ -39,9 +39,9 @@ export async function setupIngestManager(
     agentConfigService.ensureDefaultAgentConfig(soClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
-        const core = appContextService.getCoreSetup();
-        const serverInfo = core.http.getServerInfo();
-        const basePath = core.http.basePath;
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
 
         const defaultKibanaUrl = url.format({
           protocol: serverInfo.protocol,

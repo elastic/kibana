@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  HttpServiceSetup,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -71,7 +72,7 @@ export interface IngestManagerAppContext {
   isProductionMode: boolean;
   kibanaVersion: string;
   cloud?: CloudSetup;
-  coreSetup?: CoreSetup;
+  httpSetup?: HttpServiceSetup;
 }
 
 export type IngestManagerSetupContract = void;
@@ -109,7 +110,7 @@ export class IngestManagerPlugin
 
   private isProductionMode: boolean;
   private kibanaVersion: string;
-  private coreSetup: CoreSetup | undefined;
+  private httpSetup: HttpServiceSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
@@ -118,7 +119,7 @@ export class IngestManagerPlugin
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.coreSetup = core;
+    this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
@@ -199,7 +200,7 @@ export class IngestManagerPlugin
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,
-      coreSetup: this.coreSetup,
+      httpSetup: this.httpSetup,
       cloud: this.cloud,
     });
     licenseService.start(this.licensing$);

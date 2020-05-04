@@ -35,9 +35,9 @@ export const registerRoutes = ({
       response
     ) {
       const soClient = getInternalUserSOClient(request);
-      const core = appContextService.getCoreSetup();
-      const serverInfo = core.http.getServerInfo();
-      const basePath = core.http.basePath;
+      const http = appContextService.getHttpSetup();
+      const serverInfo = http.getServerInfo();
+      const basePath = http.basePath;
       const kibanaUrl =
         (await settingsService.getSettings(soClient)).kibana_url ||
         url.format({

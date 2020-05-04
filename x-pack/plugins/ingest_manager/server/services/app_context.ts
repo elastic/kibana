@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, CoreSetup } from 'src/core/server';
+import { SavedObjectsServiceStart, HttpServiceSetup } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -21,7 +21,7 @@ class AppContextService {
   private isProductionMode: boolean = false;
   private kibanaVersion: string | undefined;
   private cloud?: CloudSetup;
-  private coreSetup?: CoreSetup;
+  private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
@@ -30,7 +30,7 @@ class AppContextService {
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
     this.kibanaVersion = appContext.kibanaVersion;
-    this.coreSetup = appContext.coreSetup;
+    this.httpSetup = appContext.httpSetup;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -79,11 +79,11 @@ class AppContextService {
     return this.isProductionMode;
   }
 
-  public getCoreSetup() {
-    if (!this.coreSetup) {
-      throw new Error('CoreSetup not set.');
+  public getHttpSetup() {
+    if (!this.httpSetup) {
+      throw new Error('HttpServiceSetup not set.');
     }
-    return this.coreSetup;
+    return this.httpSetup;
   }
 
   public getKibanaVersion() {
