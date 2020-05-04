@@ -39,7 +39,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
             },
             "schema": undefined,
-            "type": "std_deviation",
+            "type": "std_dev",
           },
         }
       `);

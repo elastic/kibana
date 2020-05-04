@@ -45,7 +45,7 @@ describe('agg_expression_functions', () => {
               "sortOrder": "desc",
             },
             "schema": undefined,
-            "type": "top_hit",
+            "type": "top_hits",
           },
         }
       `);
@@ -76,7 +76,7 @@ describe('agg_expression_functions', () => {
             "sortOrder": "asc",
           },
           "schema": "whatever",
-          "type": "top_hit",
+          "type": "top_hits",
         }
       `);
     });

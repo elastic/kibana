@@ -22,11 +22,12 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
-export interface AggParamsGeoBounds {
+export interface AggParamsGeoBounds extends BaseAggParams {
   field: string;
-  json?: string;
 }
+
 export interface GeoBoundsMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

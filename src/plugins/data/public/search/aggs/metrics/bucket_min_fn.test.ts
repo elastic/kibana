@@ -41,7 +41,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
             },
             "schema": undefined,
-            "type": "bucket_min",
+            "type": "min_bucket",
           },
           "customMetric": Object {
             "enabled": true,
@@ -52,7 +52,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
             },
             "schema": undefined,
-            "type": "bucket_min",
+            "type": "min_bucket",
           },
           "json": undefined,
         }

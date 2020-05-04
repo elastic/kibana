@@ -22,14 +22,14 @@ import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
-import { AggConfigSerialized } from '../types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
 import { GetInternalStartServicesFn } from '../../../types';
 
-export interface AggParamsBucketMax {
+export interface AggParamsBucketMax extends BaseAggParams {
   customMetric?: AggConfigSerialized;
   customBucket?: AggConfigSerialized;
-  json?: string;
 }
+
 export interface BucketMaxMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }

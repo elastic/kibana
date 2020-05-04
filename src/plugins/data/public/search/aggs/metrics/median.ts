@@ -22,14 +22,14 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const medianTitle = i18n.translate('data.search.aggs.metrics.medianTitle', {
   defaultMessage: 'Median',
 });
 
-export interface AggParamsMedian {
+export interface AggParamsMedian extends BaseAggParams {
   field: string;
-  json?: string;
 }
 
 export interface MedianMetricAggDependencies {

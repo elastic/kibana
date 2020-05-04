@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'median';
 const fnName = 'aggMedian';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MEDIAN>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
 
@@ -85,10 +85,10 @@ export const aggMedian = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: aggName,
+        type: METRIC_TYPES.MEDIAN,
         params: {
           ...rest,
-          json,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

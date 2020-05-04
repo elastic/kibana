@@ -24,11 +24,12 @@ import { METRIC_TYPES } from './metric_agg_types';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
-export interface AggParamsStdDeviation {
+export interface AggParamsStdDeviation extends BaseAggParams {
   field: string;
-  json?: string;
 }
+
 interface ValProp {
   valProp: string[];
   title: string;

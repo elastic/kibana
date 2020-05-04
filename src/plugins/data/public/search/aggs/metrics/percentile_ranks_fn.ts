@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'percentile_ranks';
 const fnName = 'aggPercentileRanks';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILE_RANKS>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
 
@@ -80,23 +80,16 @@ export const aggPercentileRanks = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
-    let json;
-    try {
-      json = args.json ? JSON.parse(args.json) : undefined;
-    } catch (e) {
-      throw new Error('Unable to parse json argument string');
-    }
-
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: aggName,
+        type: METRIC_TYPES.PERCENTILE_RANKS,
         params: {
           ...rest,
-          json,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

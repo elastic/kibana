@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'max';
 const fnName = 'aggMax';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MAX>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
 
@@ -72,23 +72,16 @@ export const aggMax = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
-    let json;
-    try {
-      json = args.json ? JSON.parse(args.json) : undefined;
-    } catch (e) {
-      throw new Error('Unable to parse json argument string');
-    }
-
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: aggName,
+        type: METRIC_TYPES.MAX,
         params: {
           ...rest,
-          json,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

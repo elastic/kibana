@@ -24,7 +24,6 @@ import {
   AggParamsTerms,
   AggParamsAvg,
   AggParamsCardinality,
-  AggParamsCount,
   AggParamsGeoBounds,
   AggParamsGeoCentroid,
   AggParamsMax,
@@ -47,6 +46,7 @@ import {
   AggTypesRegistryStart,
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
+  METRIC_TYPES,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -77,6 +77,11 @@ export interface SearchAggsStart {
 }
 
 /** @internal */
+export interface BaseAggParams {
+  json?: string;
+}
+
+/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;
@@ -96,25 +101,25 @@ export type AggExpressionFunctionArgs<
  */
 export interface AggParamsMapping {
   terms: AggParamsTerms;
-  avg: AggParamsAvg;
-  cardinality: AggParamsCardinality;
-  count: AggParamsCount;
-  geo_bounds: AggParamsGeoBounds;
-  geo_centroid: AggParamsGeoCentroid;
-  max: AggParamsMax;
-  median: AggParamsMedian;
-  min: AggParamsMin;
-  std_deviation: AggParamsStdDeviation;
-  sum: AggParamsSum;
-  bucket_avg: AggParamsBucketAvg;
-  bucket_max: AggParamsBucketMax;
-  bucket_min: AggParamsBucketMin;
-  bucket_sum: AggParamsBucketSum;
-  cumulative_sum: AggParamsCumulativeSum;
-  derivative: AggParamsDerivative;
-  moving_avg: AggParamsMovingAvg;
-  percentile_ranks: AggParamsPercentileRanks;
-  percentiles: AggParamsPercentiles;
-  serial_diff: AggParamsSerialDiff;
-  top_hit: AggParamsTopHit;
+  [METRIC_TYPES.AVG]: AggParamsAvg;
+  [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
+  [METRIC_TYPES.COUNT]: BaseAggParams;
+  [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
+  [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
+  [METRIC_TYPES.MAX]: AggParamsMax;
+  [METRIC_TYPES.MEDIAN]: AggParamsMedian;
+  [METRIC_TYPES.MIN]: AggParamsMin;
+  [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
+  [METRIC_TYPES.SUM]: AggParamsSum;
+  [METRIC_TYPES.AVG_BUCKET]: AggParamsBucketAvg;
+  [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
+  [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
+  [METRIC_TYPES.SUM_BUCKET]: AggParamsBucketSum;
+  [METRIC_TYPES.CUMULATIVE_SUM]: AggParamsCumulativeSum;
+  [METRIC_TYPES.DERIVATIVE]: AggParamsDerivative;
+  [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
+  [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
+  [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
+  [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
 }

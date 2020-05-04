@@ -20,13 +20,13 @@
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
-import { AggExpressionType, AggExpressionFunctionArgs } from '../';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { getParsedValue } from '../utils/get_parsed_value';
 
-const aggName = 'bucket_max';
 const fnName = 'aggBucketMax';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof aggName>;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MAX_BUCKET>;
 type Arguments = Assign<
   AggArgs,
   { customBucket?: AggExpressionType; customMetric?: AggExpressionType }
@@ -82,13 +82,6 @@ export const aggBucketMax = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
-    let json;
-    try {
-      json = args.json ? JSON.parse(args.json) : undefined;
-    } catch (e) {
-      throw new Error('Unable to parse json argument string');
-    }
-
     // Need to spread this object to work around TS bug:
     // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
     const customBucket = args.customBucket?.value ? { ...args.customBucket.value } : undefined;
@@ -100,12 +93,12 @@ export const aggBucketMax = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: aggName,
+        type: METRIC_TYPES.MAX_BUCKET,
         params: {
           ...rest,
           customBucket,
           customMetric,
-          json,
+          json: getParsedValue(args, 'json'),
         },
       },
     };

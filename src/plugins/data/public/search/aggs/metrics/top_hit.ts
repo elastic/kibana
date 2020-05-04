@@ -23,14 +23,14 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
-export interface AggParamsTopHit {
+export interface AggParamsTopHit extends BaseAggParams {
   field: string;
   aggregate: 'min' | 'max' | 'sum' | 'average' | 'concat';
   sortField: string;
   size?: number;
   sortOrder?: 'desc' | 'asc';
-  json?: string;
 }
 
 export interface TopHitMetricAggDependencies {

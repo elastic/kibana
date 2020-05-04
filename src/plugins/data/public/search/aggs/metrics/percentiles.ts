@@ -25,11 +25,11 @@ import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_respons
 import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
-export interface AggParamsPercentiles {
+export interface AggParamsPercentiles extends BaseAggParams {
   field: string;
   percents?: number[];
-  json?: string;
 }
 
 export type IPercentileAggConfig = IResponseAggConfig;
