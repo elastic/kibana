@@ -114,7 +114,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
       // - and we didn't pick the metadata in an earlier iteration of this map()
       if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
         packageMetadata[pkg] = {
-          version: pkgSavedObject[0].attributes?.version,
+          version: pkgSavedObject[0].attributes?.version || '',
+          dashboards:
+            pkgSavedObject[0].attributes?.installed?.filter(o => o.type === 'dashboard') || [],
         };
       }
       return {
@@ -123,9 +125,10 @@ export const getListHandler: RequestHandler = async (context, request, response)
         namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
         type: typeBuckets.length ? typeBuckets[0].key : '',
         package: pkg,
-        packageVersion: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
+        package_version: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
         last_activity: lastActivity,
         size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
+        dashboards: packageMetadata[pkg] ? packageMetadata[pkg].dashboards : [],
       };
     });
 

@@ -20,6 +20,7 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
+import { PackageIcon } from '../../../components/package_icon';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -102,6 +103,23 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
+        render(pkg: DataStream['package'], datastream: DataStream) {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {datastream.package_version && (
+                <EuiFlexItem grow={false}>
+                  <PackageIcon
+                    packageName={pkg}
+                    version={datastream.package_version}
+                    size="m"
+                    tryApi={true}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>{pkg}</EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'last_activity',

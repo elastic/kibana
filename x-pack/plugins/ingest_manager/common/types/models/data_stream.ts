@@ -10,6 +10,7 @@ export interface DataStream {
   namespace: string;
   type: string;
   package: string;
+  package_version: string;
   last_activity: string;
   size_in_bytes: number;
 }
