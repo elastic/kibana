@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { AgentConfig, Datasource } from '../../../../../types';
-import { TableRowActions } from '../../../components/table_row_actions';
+import { TableRowActions } from '../../../../../components/table_row_actions';
 import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
 import { useCapabilities, useLink } from '../../../../../hooks';
 import { useAgentConfigLink } from '../../hooks/use_details_uri';

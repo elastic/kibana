@@ -40,7 +40,7 @@ import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
 import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from '../details_page/hooks/use_details_uri';
-import { TableRowActions } from '../components/table_row_actions';
+import { TableRowActions } from '../../../components/table_row_actions';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
