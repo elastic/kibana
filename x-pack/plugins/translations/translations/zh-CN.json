@@ -15747,7 +15747,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName": "删除",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle": "类型",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle": "名称",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle": "操作",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName": "类型",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle": "连接器",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle": "无权创建连接器",

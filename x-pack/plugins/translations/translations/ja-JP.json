@@ -15739,7 +15739,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName": "削除",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle": "タイプ",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle": "名前",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle": "アクション",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.filters.actionTypeIdName": "タイプ",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.multipleTitle": "コネクター",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle": "コネクターを作成するパーミッションがありません。",
