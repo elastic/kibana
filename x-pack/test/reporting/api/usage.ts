@@ -19,7 +19,7 @@ export default function({ getService }: FtrProviderContext) {
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
-      let usage: any;
+      let usage: any; // FIXME after https://github.com/elastic/kibana/pull/64841 is merged use ReportingUsageType
 
       before(async () => {
         usage = await usageAPI.getUsageStats();
