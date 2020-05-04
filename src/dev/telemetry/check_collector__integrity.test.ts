@@ -86,6 +86,8 @@ describe('checkCompatibleTypeDescriptor', () => {
         'incompatible Type key (Usage.flat): expected (string) got (boolean).',
       ]);
     });
+
+    it.todo('returns diff when missing type descriptor');
   });
 
   describe('Mapping change', () => {
@@ -107,6 +109,8 @@ describe('checkCompatibleTypeDescriptor', () => {
         'incompatible Type key (Usage.flat): expected (boolean) got (string).',
       ]);
     });
+
+    it.todo('returns diff when missing mapping');
   });
 });
 
