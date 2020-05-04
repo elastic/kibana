@@ -588,7 +588,7 @@ export enum HostPolicyResponseActionStatus {
 /**
  * The details of a given action
  */
-interface HostPolicyResponseActionDetails {
+export interface HostPolicyResponseActionDetails {
   status: HostPolicyResponseActionStatus;
   message: string;
 }
@@ -596,7 +596,7 @@ interface HostPolicyResponseActionDetails {
 /**
  * A known list of possible Endpoint actions
  */
-interface HostPolicyResponseActions {
+export interface HostPolicyResponseActions {
   download_model: HostPolicyResponseActionDetails;
   ingest_events_config: HostPolicyResponseActionDetails;
   workflow: HostPolicyResponseActionDetails;
@@ -617,9 +617,6 @@ interface HostPolicyResponseActions {
   read_kernel_config: HostPolicyResponseActionDetails;
   read_logging_config: HostPolicyResponseActionDetails;
   read_malware_config: HostPolicyResponseActionDetails;
-  // The list of possible Actions will change rapidly, so the below entry will allow
-  // them without us defining them here statically
-  [key: string]: HostPolicyResponseActionDetails;
 }
 
 interface HostPolicyResponseConfigurationStatus {
@@ -631,7 +628,7 @@ interface HostPolicyResponseConfigurationStatus {
  * Information about the applying of a policy to a given host
  */
 export interface HostPolicyResponse {
-  '@timestamp': string;
+  '@timestamp': number;
   elastic: {
     agent: {
       id: string;
@@ -640,21 +637,29 @@ export interface HostPolicyResponse {
   ecs: {
     version: string;
   };
+  host: {
+    id: string;
+  };
   event: {
-    created: string;
+    created: number;
     kind: string;
+    id: string;
   };
   agent: {
     version: string;
     id: string;
   };
   endpoint: {
-    artifacts: {};
     policy: {
       applied: {
         version: string;
         id: string;
         status: HostPolicyResponseActionStatus;
+        actions: Partial<HostPolicyResponseActions>;
+        policy: {
+          id: string;
+          version: string;
+        };
         response: {
           configurations: {
             malware: HostPolicyResponseConfigurationStatus;
@@ -662,7 +667,6 @@ export interface HostPolicyResponse {
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
           };
-          actions: Partial<HostPolicyResponseActions>;
         };
       };
     };
