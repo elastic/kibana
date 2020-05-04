@@ -27,7 +27,8 @@ import {
   sendGetAgentStatus,
 } from '../../../hooks';
 import { useLinks as useEPMLinks } from '../../epm/hooks';
-import { CreateDatasourcePageLayout, ConfirmCreateDatasourceModal } from './components';
+import { ConfirmDeployConfigModal } from '../components';
+import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, DatasourceFormState } from './types';
 import { DatasourceValidationResults, validateDatasource, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
@@ -36,7 +37,10 @@ import { StepConfigureDatasource } from './step_configure_datasource';
 import { StepDefineDatasource } from './step_define_datasource';
 
 export const CreateDatasourcePage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const {
+    notifications,
+    chrome: { getIsNavDrawerLocked$ },
+  } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -45,6 +49,15 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   } = useRouteMatch();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   // Agent config and package info states
   const [agentConfig, setAgentConfig] = useState<AgentConfig>();
@@ -269,7 +282,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
       {formState === 'CONFIRM' && agentConfig && (
-        <ConfirmCreateDatasourceModal
+        <ConfirmDeployConfigModal
           agentCount={agentCount}
           agentConfig={agentConfig}
           onConfirm={onSubmit}
@@ -278,7 +291,14 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
-      <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
+      <EuiBottomBar
+        css={{ zIndex: 5 }}
+        className={
+          isNavDrawerLocked
+            ? 'ingestManager__bottomBar-isNavDrawerLocked'
+            : 'ingestManager__bottomBar'
+        }
+      >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty color="ghost" href={cancelUrl}>
