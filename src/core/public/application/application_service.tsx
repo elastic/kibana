@@ -157,9 +157,8 @@ export class ApplicationService {
         handler = app.mount;
       }
       return async params => {
-        const unmount = await handler(params);
         this.currentAppId$.next(app.id);
-        return unmount;
+        return handler(params);
       };
     };
 
