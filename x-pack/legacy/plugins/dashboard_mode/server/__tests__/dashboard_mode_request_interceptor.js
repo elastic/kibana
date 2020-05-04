@@ -54,14 +54,6 @@ function setup() {
 }
 
 describe('DashboardOnlyModeRequestInterceptor', () => {
-  describe('basics', () => {
-    it('throws if it does not get the `dashboardViewerApp`', () => {
-      expect(() => {
-        createDashboardModeRequestInterceptor();
-      }).to.throwError('dashboardViewerApp');
-    });
-  });
-
   describe('request is not for dashboad-only user', () => {
     describe('app route', () => {
       it('lets the route render as normal', async () => {
@@ -124,7 +116,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
         it('renders the dashboardViewerApp instead', async () => {
           const { server } = setup();
           const response = await server.inject({
-            url: '/app/kibana',
+            url: '/app/dashboard_mode',
             credentials: {
               roles: [DASHBOARD_ONLY_MODE_ROLE],
             },
@@ -135,7 +127,7 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
             .and.have.property('result')
             .eql({
               renderApp: true,
-              app: { name: 'dashboardViewerApp' },
+              app: { name: 'dashboard_mode' },
             });
         });
       });
