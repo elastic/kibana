@@ -20,7 +20,6 @@ import {
   MetricsExplorerOptionsMetric,
   MetricsExplorerChartType,
 } from '../hooks/use_metrics_explorer_options';
-import { getMetricId } from './helpers/get_metric_id';
 
 type NumberOrString = string | number;
 
