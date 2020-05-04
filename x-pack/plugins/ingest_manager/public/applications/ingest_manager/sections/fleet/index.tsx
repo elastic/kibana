@@ -46,7 +46,7 @@ export const FleetApp: React.FunctionComponent = () => {
     <Router>
       <Switch>
         <Route path="/fleet" exact={true} render={() => <Redirect to="/fleet/agents" />} />
-        <Route path="/fleet/agents/:agentId">
+        <Route path="/fleet/agents/:agentId/:tabId?">
           <AgentDetailsPage />
         </Route>
         <Route path="/fleet/agents">
