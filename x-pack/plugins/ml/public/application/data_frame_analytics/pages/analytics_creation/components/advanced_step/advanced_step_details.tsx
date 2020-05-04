@@ -53,7 +53,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
         defaultMessage: 'Top classes',
       }),
-      description: `${numTopClasses}` || '',
+      description: `${numTopClasses}`,
     });
   }
 
@@ -61,29 +61,33 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
     jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
   ) {
-    detailsFirstCol.push(
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.numTopFeatureImportanceValues',
-          {
-            defaultMessage: 'Top feature importance values',
-          }
-        ),
-        description: `${numTopFeatureImportanceValues}`,
-      },
-      {
+    detailsFirstCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.numTopFeatureImportanceValues',
+        {
+          defaultMessage: 'Top feature importance values',
+        }
+      ),
+      description: `${numTopFeatureImportanceValues}`,
+    });
+
+    if (lambda !== undefined) {
+      detailsFirstCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.lambdaFields', {
           defaultMessage: 'Lambda',
         }),
-        description: `${lambda || ''}`,
-      },
-      {
+        description: `${lambda}`,
+      });
+    }
+
+    if (eta !== undefined) {
+      detailsFirstCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.eta', {
           defaultMessage: 'ETA',
         }),
-        description: `${eta}` || '""',
-      }
-    );
+        description: `${eta}`,
+      });
+    }
 
     if (predictionFieldName !== '') {
       detailsSecondCol.push({
@@ -107,14 +111,17 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       });
     }
 
-    detailsSecondCol.push(
-      {
+    if (maxTrees !== undefined) {
+      detailsSecondCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxTreesFields', {
           defaultMessage: 'Max trees',
         }),
-        description: `${maxTrees || ''}`,
-      },
-      {
+        description: `${maxTrees || '""'}`,
+      });
+    }
+
+    if (featureBagFraction !== undefined) {
+      detailsSecondCol.push({
         title: i18n.translate(
           'xpack.ml.dataframe.analytics.create.configDetails.featureBagFraction',
           {
@@ -122,37 +129,48 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
           }
         ),
         description: `${featureBagFraction}` || '""',
-      }
-    );
+      });
+    }
 
-    detailsThirdCol.push(
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit',
-          {
-            defaultMessage: 'Model memory limit',
-          }
-        ),
-        description: `${modelMemoryLimit || '""'}`,
-      },
-      {
+    detailsThirdCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit', {
+        defaultMessage: 'Model memory limit',
+      }),
+      description: `${modelMemoryLimit}`,
+    });
+
+    if (gamma !== undefined) {
+      detailsThirdCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.gamma', {
           defaultMessage: 'Gamma',
         }),
-        description: `${gamma}` || '""',
-      },
-      {
+        description: `${gamma || ''}`,
+      });
+    }
+
+    if (randomizeSeed !== undefined) {
+      detailsThirdCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.randomizedSeed', {
           defaultMessage: 'Randomized seed',
         }),
-        description: `${randomizeSeed}` || '""',
-      }
-    );
+        description: `${randomizeSeed || ''}`,
+      });
+    }
   }
 
   if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
-    detailsFirstCol.push(
-      {
+    detailsFirstCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.computeFeatureInfluence',
+        {
+          defaultMessage: 'Compute feature influence',
+        }
+      ),
+      description: computeFeatureInfluence,
+    });
+
+    if (featureInfluenceThreshold !== undefined) {
+      detailsFirstCol.push({
         title: i18n.translate(
           'xpack.ml.dataframe.analytics.create.configDetails.featureInfluenceThreshold',
           {
@@ -160,59 +178,52 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
           }
         ),
         description: `${featureInfluenceThreshold}`,
-      },
-      {
+      });
+    }
+
+    if (nNeighbors !== undefined) {
+      detailsFirstCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
           defaultMessage: 'N neighbors',
         }),
-        description: nNeighbors ? `${nNeighbors}` : '""',
-      },
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.computeFeatureInfluence',
-          {
-            defaultMessage: 'Compute feature influence',
-          }
-        ),
-        description: computeFeatureInfluence,
-      }
-    );
+        description: `${nNeighbors}`,
+      });
+    }
 
-    detailsSecondCol.push(
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit',
-          {
-            defaultMessage: 'Model memory limit',
-          }
-        ),
-        description: `${modelMemoryLimit || '""'}`,
-      },
-      {
+    detailsSecondCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit', {
+        defaultMessage: 'Model memory limit',
+      }),
+      description: `${modelMemoryLimit}`,
+    });
+
+    if (outlierFraction !== undefined) {
+      detailsSecondCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.outlierFraction', {
           defaultMessage: 'Outlier fraction',
         }),
-        description: outlierFraction ? `${outlierFraction}` : '""',
-      }
-    );
+        description: `${outlierFraction}`,
+      });
+    }
 
-    detailsThirdCol.push(
-      {
+    if (method !== undefined) {
+      detailsThirdCol.push({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
           defaultMessage: 'Method',
         }),
-        description: method ? `${method}` : '""',
-      },
-      {
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.standardizationEnabled',
-          {
-            defaultMessage: 'Standardization enabled',
-          }
-        ),
-        description: standardizationEnabled ? `${standardizationEnabled}` : '""',
-      }
-    );
+        description: `${method}`,
+      });
+    }
+
+    detailsThirdCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.standardizationEnabled',
+        {
+          defaultMessage: 'Standardization enabled',
+        }
+      ),
+      description: `${standardizationEnabled}`,
+    });
   }
 
   return (

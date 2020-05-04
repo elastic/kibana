@@ -24,6 +24,21 @@ export enum ANALYSIS_CONFIG_TYPE {
   CLASSIFICATION = 'classification',
 }
 
+export enum ANALYSIS_ADVANCED_FIELDS {
+  FEATURE_INFLUENCE_THRESHOLD = 'feature_influence_threshold',
+  GAMMA = 'gamma',
+  LAMBDA = 'lambda',
+  MAX_TREES = 'max_trees',
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES = 'num_top_feature_importance_values',
+}
+
+export enum OUTLIER_ANALYSYS_METHOD {
+  LOF = 'lof',
+  LDOF = 'ldof',
+  DISTANCE_KTH_NN = 'distance_kth_nn',
+  DISTANCE_KNN = 'distance_knn',
+}
+
 interface OutlierAnalysis {
   [key: string]: {};
   outlier_detection: {};

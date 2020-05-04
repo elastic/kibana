@@ -9,11 +9,12 @@ import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@
 import { i18n } from '@kbn/i18n';
 
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import { ANALYTICS_STEPS } from '../../page';
 
-function redirectToAnalyticsManagementPage() {
-  window.location.href = '#/data_frame_analytics?';
-}
+// function redirectToAnalyticsManagementPage() {
+//   window.location.href = '#/data_frame_analytics?';
+// }
 
 export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
@@ -23,6 +24,7 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
     isJobStarted,
     isModalButtonDisabled,
     isValid,
+    requestMessages,
   } = state;
 
   const [checked, setChecked] = useState<boolean>(false);
@@ -34,14 +36,15 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
     await createAnalyticsJob();
     if (checked) {
       // create and start
-      await startAnalyticsJob();
+      startAnalyticsJob();
     }
     // redirect to list
-    redirectToAnalyticsManagementPage();
+    // redirectToAnalyticsManagementPage();
   };
 
   return (
     <Fragment>
+      <Messages messages={requestMessages} />
       {!isJobCreated && !isJobStarted && (
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>

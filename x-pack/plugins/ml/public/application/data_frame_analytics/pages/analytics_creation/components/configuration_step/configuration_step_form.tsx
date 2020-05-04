@@ -14,11 +14,13 @@ import { useMlContext } from '../../../../../contexts/ml';
 
 import {
   DfAnalyticsExplainResponse,
+  FieldSelectionItem,
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   getJobConfigFromFormState,
@@ -31,6 +33,13 @@ import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { AnalysisFieldsTable } from './analysis_fields_table';
 
+const requiredFieldsErrorText = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
+  {
+    defaultMessage: 'At least one field must be included in the analysis.',
+  }
+);
+
 export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   actions,
   state,
@@ -39,8 +48,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   const mlContext = useMlContext();
   const { currentIndexPattern: indexPattern } = mlContext;
 
-  const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { estimatedModelMemoryLimit, form, isJobCreated } = state;
+  const { initiateWizard, setEstimatedModelMemoryLimit, setFormState } = actions;
+  const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
@@ -55,6 +64,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     maxDistinctValuesError,
     modelMemoryLimit,
     previousJobType,
+    requiredFieldsError,
     trainingPercent,
   } = form;
 
@@ -64,7 +74,10 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
 
   const isStepInvalid =
-    dependentVariableEmpty || jobType === undefined || maxDistinctValuesError !== undefined;
+    dependentVariableEmpty ||
+    jobType === undefined ||
+    maxDistinctValuesError !== undefined ||
+    requiredFieldsError !== undefined;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
@@ -116,6 +129,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    const jobTypeChanged = previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
@@ -125,7 +139,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     }
     // Reset if jobType changes (jobType requires dependent_variable to be set -
     // which won't be the case if switching from outlier detection)
-    if (previousJobType !== jobType) {
+    if (jobTypeChanged) {
       setFormState({
         loadingFieldOptions: true,
       });
@@ -144,25 +158,41 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
-      // If sourceIndex has changed load analysis field options again
-      if (previousJobType !== jobType) {
+      const fieldSelection: FieldSelectionItem[] | undefined = resp.field_selection;
+
+      let hasRequiredFields = false;
+      if (fieldSelection) {
+        for (let i = 0; i < fieldSelection.length; i++) {
+          const field = fieldSelection[i];
+          if (field.is_included === true && field.is_required === false) {
+            hasRequiredFields = true;
+            break;
+          }
+        }
+      }
+
+      // If job type has changed load analysis field options again
+      if (jobTypeChanged) {
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
-          excludesTableItems: resp.field_selection ? resp.field_selection : [],
+          excludesTableItems: fieldSelection ? fieldSelection : [],
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
           maxDistinctValuesError: undefined,
+          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       } else {
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
     } catch (e) {
       let errorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        e.body?.message !== undefined &&
+        e.body &&
+        e.body.message !== undefined &&
         e.body.message.includes('status_exception') &&
         e.body.message.includes('must have at most')
       ) {
@@ -181,6 +211,10 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
       });
     }
   }, 400);
+
+  useEffect(() => {
+    initiateWizard();
+  }, []);
 
   useEffect(() => {
     // TODO: set source Index after validation check or set callout with link back to selection
@@ -212,6 +246,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
 
   return (
     <Fragment>
+      <Messages messages={requestMessages} />
       <JobType type={jobType} setFormState={setFormState} />
       {/* <SourceIndexPreview /> */}
       {isJobTypeWithDepVar && (
@@ -301,6 +336,20 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
+      <EuiFormRow
+        fullWidth
+        isInvalid={requiredFieldsError !== undefined}
+        error={
+          requiredFieldsError !== undefined && [
+            i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+              defaultMessage: 'Invalid. {message}',
+              values: { message: requiredFieldsError },
+            }),
+          ]
+        }
+      >
+        <Fragment />
+      </EuiFormRow>
       <AnalysisFieldsTable
         excludes={excludes}
         tableItems={excludesTableItems}

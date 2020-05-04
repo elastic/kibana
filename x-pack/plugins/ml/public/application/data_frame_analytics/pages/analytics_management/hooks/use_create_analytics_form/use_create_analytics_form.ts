@@ -263,7 +263,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
     }
   };
-
+  // TODO: deprecated
   const openModal = async () => {
     await mlContext.indexPatterns.clearCache();
     resetForm();
@@ -271,8 +271,13 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     dispatch({ type: ACTION.OPEN_MODAL });
   };
 
+  const initiateWizard = async () => {
+    await mlContext.indexPatterns.clearCache();
+    await prepareFormValidation();
+  };
+
   const startAnalyticsJob = async () => {
-    setIsModalButtonDisabled(true);
+    // setIsModalButtonDisabled(true);
     try {
       const response = await ml.dataFrameAnalytics.startDataFrameAnalytics(jobId);
       if (response.acknowledged !== true) {
@@ -288,7 +293,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobStarted(true);
-      setIsModalButtonDisabled(false);
+      // setIsModalButtonDisabled(false);
       refresh();
     } catch (e) {
       addRequestMessage({
@@ -300,7 +305,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
           }
         ),
       });
-      setIsModalButtonDisabled(false);
+      // setIsModalButtonDisabled(false);
     }
   };
 
@@ -341,6 +346,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     closeModal,
     createAnalyticsJob,
     openModal,
+    initiateWizard,
     resetAdvancedEditorMessages,
     setAdvancedEditorRawString,
     setFormState,
