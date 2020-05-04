@@ -44,7 +44,7 @@ export class CustomTimeRangeAction implements ActionByType<typeof CUSTOM_TIME_RA
   private dateFormat?: string;
   private commonlyUsedRanges: CommonlyUsedRange[];
   public readonly id = CUSTOM_TIME_RANGE;
-  public order = 7;
+  public order = 30;
 
   constructor({
     openModal,
