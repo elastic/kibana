@@ -28,6 +28,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/datafeeds',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -57,6 +60,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -83,6 +89,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/datafeeds/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -111,6 +120,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/datafeeds/{datafeedId}/_stats',
       validate: {
         params: datafeedIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDatafeeds'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -145,6 +157,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -181,6 +196,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         body: datafeedConfigSchema,
       },
+      options: {
+        tags: ['access:ml:canUpdateDatafeed'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -215,6 +233,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
         query: deleteDatafeedQuerySchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -255,6 +276,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
         params: datafeedIdSchema,
         body: startDatafeedSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -291,6 +315,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: datafeedIdSchema,
       },
+      options: {
+        tags: ['access:ml:canStartStopDatafeed'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -323,6 +350,9 @@ export function dataFeedRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/datafeeds/{datafeedId}/_preview',
       validate: {
         params: datafeedIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canPreviewDatafeed'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './index.scss';
-
 import { IngestPipelinesPlugin } from './plugin';
 
 export function plugin() {

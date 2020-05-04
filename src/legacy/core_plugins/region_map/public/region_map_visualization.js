@@ -21,30 +21,21 @@ import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { toastNotifications } from 'ui/notify';
-
-import { TileMapTooltipFormatter } from './tooltip_formatter';
 import { truncatedColorMaps } from '../../../../plugins/charts/public';
-
-// TODO: reference to TILE_MAP plugin should be removed
-import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
+import { tooltipFormatter } from './tooltip_formatter';
+import { mapTooltipProvider } from '../../../../plugins/maps_legacy/public';
 
 export function createRegionMapVisualization({
   serviceSettings,
-  $injector,
   uiSettings,
-  notificationService,
+  BaseMapsVisualization,
 }) {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(
-    serviceSettings,
-    notificationService
-  );
-  const tooltipFormatter = new TileMapTooltipFormatter($injector);
-
   return class RegionMapsVisualization extends BaseMapsVisualization {
     constructor(container, vis) {
       super(container, vis);
       this._vis = this.vis;
       this._choroplethLayer = null;
+      this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
 
     async render(esResponse, visParams) {
@@ -89,7 +80,7 @@ export function createRegionMapVisualization({
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
       if (termColumn && valueColumn) {
         this._choroplethLayer.setTooltipFormatter(
-          tooltipFormatter,
+          this._tooltipFormatter,
           metricFieldFormatter,
           termColumn.name,
           valueColumn.name
@@ -123,7 +114,7 @@ export function createRegionMapVisualization({
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._choroplethLayer.setTooltipFormatter(
-        tooltipFormatter,
+        this._tooltipFormatter,
         metricFieldFormatter,
         this._metricLabel
       );

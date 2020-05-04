@@ -30,6 +30,12 @@ export const registerGetRoutes = ({
         return res.ok({ body: deserializePipelines(pipelines) });
       } catch (error) {
         if (isEsError(error)) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we return an empty array and 200 status back to the client
+          if (error.status === 404) {
+            return res.ok({ body: [] });
+          }
+
           return res.customError({
             statusCode: error.statusCode,
             body: error,

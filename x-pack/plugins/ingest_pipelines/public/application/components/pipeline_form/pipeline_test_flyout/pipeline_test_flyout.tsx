@@ -128,7 +128,7 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   }
 
   return (
-    <EuiFlyout maxWidth={480} onClose={closeFlyout}>
+    <EuiFlyout maxWidth={550} onClose={closeFlyout}>
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>

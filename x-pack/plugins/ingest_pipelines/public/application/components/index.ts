@@ -5,5 +5,3 @@
  */
 
 export { PipelineForm } from './pipeline_form';
-
-export { PipelineRequestFlyoutProvider as PipelineRequestFlyout } from './pipeline_request_flyout_provider';

@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 
-import { PipelineRequestFlyout } from '../';
+import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineTestFlyout } from './pipeline_test_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
@@ -106,8 +106,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         isInvalid={form.isSubmitted && !form.isValid}
         error={form.getErrors()}
       >
-        <EuiSpacer size="l" />
-
         {/* Request error */}
         {saveError && <PipelineFormError errorMessage={saveError.message} />}
 
@@ -124,9 +122,9 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
         {/* Form submission */}
         <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
                   color="secondary"
@@ -139,7 +137,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                   {saveButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="primary" onClick={onCancel}>
                   <FormattedMessage
                     id="xpack.ingestPipelines.form.cancelButtonLabel"
