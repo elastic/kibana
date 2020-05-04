@@ -35,6 +35,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "exclude": undefined,
               "field": "machine.os.keyword",
               "include": undefined,
@@ -64,6 +65,7 @@ describe('agg_expression_functions', () => {
           "enabled": false,
           "id": "1",
           "params": Object {
+            "customLabel": undefined,
             "exclude": "ios",
             "field": "machine.os.keyword",
             "include": "win",

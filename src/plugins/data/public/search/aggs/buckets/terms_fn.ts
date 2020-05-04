@@ -89,41 +89,30 @@ export const aggTerms = (): FunctionDefinition => ({
     },
     size: {
       types: ['number'],
-      default: 5,
       help: i18n.translate('data.search.aggs.buckets.terms.size.help', {
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
     missingBucket: {
       types: ['boolean'],
-      default: false,
       help: i18n.translate('data.search.aggs.buckets.terms.missingBucket.help', {
         defaultMessage: 'When set to true, groups together any buckets with missing fields',
       }),
     },
     missingBucketLabel: {
       types: ['string'],
-      default: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel', {
-        defaultMessage: 'Missing',
-        description: `Default label used in charts when documents are missing a field.
-      Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
-      }),
       help: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel.help', {
         defaultMessage: 'Default label used in charts when documents are missing a field.',
       }),
     },
     otherBucket: {
       types: ['boolean'],
-      default: false,
       help: i18n.translate('data.search.aggs.buckets.terms.otherBucket.help', {
         defaultMessage: 'When set to true, groups together any buckets beyond the allowed size',
       }),
     },
     otherBucketLabel: {
       types: ['string'],
-      default: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
-        defaultMessage: 'Other',
-      }),
       help: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel.help', {
         defaultMessage: 'Default label used in charts for documents in the Other bucket',
       }),
@@ -144,6 +133,12 @@ export const aggTerms = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.buckets.terms.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+      }),
+    },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.terms.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
   },

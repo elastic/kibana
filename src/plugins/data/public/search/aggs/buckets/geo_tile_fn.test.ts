@@ -35,6 +35,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "field": "geo_field",
               "json": undefined,
               "precision": undefined,
@@ -59,6 +60,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "field": "geo_field",
             "json": undefined,
             "precision": 10,

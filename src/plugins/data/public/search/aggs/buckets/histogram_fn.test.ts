@@ -36,6 +36,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "extended_bounds": undefined,
               "field": "field",
               "has_extended_bounds": undefined,
@@ -69,6 +70,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "extended_bounds": Object {
               "max": 2,
               "min": 1,

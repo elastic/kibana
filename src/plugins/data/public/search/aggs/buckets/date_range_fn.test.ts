@@ -33,6 +33,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "field": undefined,
               "json": undefined,
               "ranges": undefined,
@@ -60,6 +61,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "field": "date_field",
             "json": undefined,
             "ranges": Array [

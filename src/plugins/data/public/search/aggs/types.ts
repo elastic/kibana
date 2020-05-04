@@ -69,6 +69,7 @@ export interface SearchAggsStart {
 /** @internal */
 export interface BaseAggParams {
   json?: string;
+  customLabel?: string;
 }
 
 /** @internal */

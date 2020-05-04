@@ -33,6 +33,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "geo_bounding_box": undefined,
               "json": undefined,
             },
@@ -55,6 +56,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "geo_bounding_box": Object {
               "wkt": "BBOX (-74.1, -71.12, 40.73, 40.01)",
             },

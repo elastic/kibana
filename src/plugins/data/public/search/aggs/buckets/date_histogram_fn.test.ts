@@ -33,6 +33,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "drop_partials": undefined,
               "extended_bounds": undefined,
               "field": undefined,
@@ -77,6 +78,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "drop_partials": false,
             "extended_bounds": Object {
               "max": 2,

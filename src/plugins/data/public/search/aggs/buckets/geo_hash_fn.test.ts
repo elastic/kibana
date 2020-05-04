@@ -37,6 +37,7 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "autoPrecision": undefined,
               "boundingBox": undefined,
+              "customLabel": undefined,
               "field": "geo_field",
               "isFilteredByCollar": undefined,
               "json": undefined,
@@ -79,6 +80,7 @@ describe('agg_expression_functions', () => {
                 40.73,
               ],
             },
+            "customLabel": undefined,
             "field": "geo_field",
             "isFilteredByCollar": false,
             "json": undefined,

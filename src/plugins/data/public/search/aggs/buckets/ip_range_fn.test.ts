@@ -36,6 +36,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "field": "ip_field",
               "ipRangeType": undefined,
               "json": undefined,
@@ -62,6 +63,7 @@ describe('agg_expression_functions', () => {
           "enabled": true,
           "id": undefined,
           "params": Object {
+            "customLabel": undefined,
             "field": "ip_field",
             "ipRangeType": "mask",
             "json": undefined,
