@@ -100,14 +100,15 @@ def getTestFailures() {
 }
 
 def onFailure(Map options = [:], Closure closure) {
-  try {
+  // try/finally will NOT work here, because the build status will not have been changed to ERROR when the finally{} block executes
+  catchError {
     closure()
-  } finally {
-    def status = buildUtils.getBuildStatus()
-    if (status != "SUCCESS" && status != "UNSTABLE") {
-      catchErrors {
-        sendFailedBuild(options)
-      }
+  }
+
+  def status = buildUtils.getBuildStatus()
+  if (status != "SUCCESS" && status != "UNSTABLE") {
+    catchErrors {
+      sendFailedBuild(options)
     }
   }
 }

@@ -8,11 +8,6 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
     githubPr.withDefaultPrComments {
       catchError {
         retryable.enable()
-        catchError {
-          slackNotifications.onFailure {
-            error "Test Error"
-          }
-        }
         slackNotifications.onFailure {
           parallel([
             'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
