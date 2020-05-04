@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect/expect.js';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { AlertData } from '../../../../plugins/endpoint/common/types';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { AlertData } from '../../../../../plugins/endpoint/common/alerts/types';
 
 /**
  * The number of alert documents in the es archive.
