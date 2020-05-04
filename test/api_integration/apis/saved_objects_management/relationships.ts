@@ -281,7 +281,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/discover#//960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             },
@@ -296,7 +296,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
             },
@@ -321,7 +321,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/discover#//960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             },
@@ -364,7 +364,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/discover#//960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             },
@@ -404,7 +404,7 @@ export default function({ getService }: FtrProviderContext) {
               editUrl:
                 '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/discover#//960372e0-3224-11e8-a572-ffca06da1357',
+                path: '/app/discover#/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
             },
