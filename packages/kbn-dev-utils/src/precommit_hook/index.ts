@@ -17,13 +17,4 @@
  * under the License.
  */
 
-import { run, createFailError } from '@kbn/dev-utils';
-import { registerPrecommitGitHook } from './register_git_hook';
-
-run(async ({ log }) => {
-  try {
-    await registerPrecommitGitHook(log);
-  } catch (error) {
-    throw createFailError(error);
-  }
-});
+export * from './register_git_hooks_cli';

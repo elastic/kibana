@@ -17,5 +17,11 @@
  * under the License.
  */
 
-require('../src/setup_node_env/without_babel_regster');
-require('@kbn/dev-utils').runRegisterGitHooksCli();
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
+
+require('symbol-observable');
+require('./root');
+require('./node_version_validator');
