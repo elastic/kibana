@@ -8,8 +8,7 @@
   "main": "target/test/plugin_api_perf/plugins/task_manager_performance",
   "scripts": {
     "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc",
-    "test:generate": "ts-node --project scripts/cli_tsconfig.json"
+    "build": "rm -rf './target' && tsc"
   },
   "dependencies": {
     "lodash": "^4.17.15",
@@ -18,8 +17,6 @@
     "pretty-ms": "5.0.0"
   },
   "devDependencies": {
-    "@types/stats-lite": "^2.2.0",
-    "@types/pretty-ms": "^5.0.0",
     "typescript": "3.7.2"
   },
   "license": "Apache-2.0"
