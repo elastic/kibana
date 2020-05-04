@@ -54,16 +54,4 @@ describe('create_list_item_schema', () => {
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
     expect(message.schema).toEqual({});
   });
-
-  /*
-  test('it should not allow an extra key to be sent in', () => {
-    const payload: CreateListSchema & { extraKey?: string } = getCreateListSchemaMock();
-    payload.extraKey = 'some new value';
-    const decoded = createListSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "extraKey"']);
-    expect(message.schema).toEqual({});
-  });
-  */
 });
