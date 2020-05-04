@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  createMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../../plugins/maps/common/constants';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';

@@ -117,13 +117,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const resultsField = jobConfig.dest.results_field;
   let requiresKeyword = false;
 
-  const loadData = async ({
-    isTrainingClause,
-    ignoreDefaultQuery = true,
-  }: {
-    isTrainingClause: { query: string; operator: string };
-    ignoreDefaultQuery?: boolean;
-  }) => {
+  const loadData = async ({ isTraining }: { isTraining: boolean | undefined }) => {
     setIsLoading(true);
 
     try {
@@ -134,19 +128,18 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     }
 
     const evalData = await loadEvalData({
-      isTraining: false,
+      isTraining,
       index,
       dependentVariable,
       resultsField,
       predictionFieldName,
       searchQuery,
-      ignoreDefaultQuery,
       jobType: ANALYSIS_CONFIG_TYPE.CLASSIFICATION,
       requiresKeyword,
     });
 
     const docsCountResp = await loadDocsCount({
-      isTraining: false,
+      isTraining,
       searchQuery,
       resultsField,
       destIndex: jobConfig.dest.index,
@@ -225,29 +218,46 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }, [confusionMatrixData]);
 
   useEffect(() => {
-    const hasIsTrainingClause =
-      isResultsSearchBoolQuery(searchQuery) &&
-      searchQuery.bool.must.filter(
-        (clause: any) => clause.match && clause.match[`${resultsField}.is_training`] !== undefined
-      );
-    const isTrainingClause =
-      hasIsTrainingClause &&
-      hasIsTrainingClause[0] &&
-      hasIsTrainingClause[0].match[`${resultsField}.is_training`];
+    let isTraining: boolean | undefined;
+    const query =
+      isResultsSearchBoolQuery(searchQuery) && (searchQuery.bool.should || searchQuery.bool.filter);
 
-    const noTrainingQuery = isTrainingClause === false || isTrainingClause === undefined;
+    if (query !== undefined && query !== false) {
+      for (let i = 0; i < query.length; i++) {
+        const clause = query[i];
 
-    if (noTrainingQuery) {
+        if (clause.match && clause.match[`${resultsField}.is_training`] !== undefined) {
+          isTraining = clause.match[`${resultsField}.is_training`];
+          break;
+        } else if (
+          clause.bool &&
+          (clause.bool.should !== undefined || clause.bool.filter !== undefined)
+        ) {
+          const innerQuery = clause.bool.should || clause.bool.filter;
+          if (innerQuery !== undefined) {
+            for (let j = 0; j < innerQuery.length; j++) {
+              const innerClause = innerQuery[j];
+              if (
+                innerClause.match &&
+                innerClause.match[`${resultsField}.is_training`] !== undefined
+              ) {
+                isTraining = innerClause.match[`${resultsField}.is_training`];
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    if (isTraining === undefined) {
       setDataSubsetTitle(SUBSET_TITLE.ENTIRE);
     } else {
       setDataSubsetTitle(
-        isTrainingClause && isTrainingClause.query === 'true'
-          ? SUBSET_TITLE.TRAINING
-          : SUBSET_TITLE.TESTING
+        isTraining && isTraining === true ? SUBSET_TITLE.TRAINING : SUBSET_TITLE.TESTING
       );
     }
 
-    loadData({ isTrainingClause });
+    loadData({ isTraining });
   }, [JSON.stringify(searchQuery)]);
 
   const renderCellValue = ({

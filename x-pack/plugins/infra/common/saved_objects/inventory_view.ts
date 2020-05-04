@@ -7,7 +7,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleViewState } from '../../public/pages/inventory_view/hooks/use_waffle_view_state';
+import { WaffleViewState } from '../../public/pages/metrics/inventory_view/hooks/use_waffle_view_state';
 
 export const inventoryViewSavedObjectType = 'inventory-view';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

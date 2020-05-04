@@ -74,6 +74,7 @@ export default function({ getService, getPageObjects }) {
           true
         );
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponse');
+        await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
 
       it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {

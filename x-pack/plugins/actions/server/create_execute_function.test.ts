@@ -282,4 +282,65 @@ describe('execute()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
+
+  test('should skip ensure action type if action type is preconfigured and license is valid', async () => {
+    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const getScopedSavedObjectsClient = jest.fn().mockReturnValueOnce(savedObjectsClient);
+    const executeFn = createExecuteFunction({
+      getBasePath,
+      taskManager: mockTaskManager,
+      getScopedSavedObjectsClient,
+      isESOUsingEphemeralEncryptionKey: false,
+      actionTypeRegistry: mockedActionTypeRegistry,
+      preconfiguredActions: [
+        {
+          actionTypeId: 'mock-action',
+          config: {},
+          id: 'my-slack1',
+          name: 'Slack #xyz',
+          secrets: {},
+          isPreconfigured: true,
+        },
+      ],
+    });
+    mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '123',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'mock-action',
+      },
+      references: [],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '234',
+      type: 'action_task_params',
+      attributes: {},
+      references: [],
+    });
+
+    await executeFn({
+      id: '123',
+      params: { baz: false },
+      spaceId: 'default',
+      apiKey: null,
+    });
+    expect(getScopedSavedObjectsClient).toHaveBeenCalledWith({
+      getBasePath: expect.anything(),
+      headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: {
+        href: '/',
+      },
+      raw: {
+        req: {
+          url: '/',
+        },
+      },
+    });
+  });
 });

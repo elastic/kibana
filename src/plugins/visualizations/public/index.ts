@@ -43,6 +43,8 @@ export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export { VisualizeInput } from './embeddable';
 export type ExprVis = ExprVisClass;
 export { SchemaConfig } from './legacy/build_pipeline';
+// @ts-ignore
+export { updateOldState } from './legacy/vis_update_state';
 export { PersistedState } from './persisted_state';
 export {
   VisualizationController,

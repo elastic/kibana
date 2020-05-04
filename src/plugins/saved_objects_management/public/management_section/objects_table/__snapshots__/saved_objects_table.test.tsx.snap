@@ -238,6 +238,7 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   indexPatterns={
     Object {
       "clearCache": [MockFunction],
+      "ensureDefaultIndexPattern": [MockFunction],
       "get": [MockFunction],
       "make": [Function],
     }
@@ -254,6 +255,32 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "openConfirm": [MockFunction],
       "openFlyout": [MockFunction],
       "openModal": [MockFunction],
+    }
+  }
+  search={
+    Object {
+      "__LEGACY": Object {
+        "esClient": Object {
+          "msearch": [MockFunction],
+          "search": [MockFunction],
+        },
+      },
+      "aggs": Object {
+        "calculateAutoTimeExpression": [Function],
+        "createAggConfigs": [MockFunction],
+        "types": Object {
+          "get": [Function],
+          "getAll": [Function],
+          "getBuckets": [Function],
+          "getMetrics": [Function],
+        },
+      },
+      "search": [MockFunction],
+      "searchSource": Object {
+        "create": [MockFunction],
+        "fromJSON": [MockFunction],
+      },
+      "setInterceptor": [MockFunction],
     }
   }
   serviceRegistry={

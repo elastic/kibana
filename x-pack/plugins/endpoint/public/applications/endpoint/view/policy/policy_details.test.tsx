@@ -101,7 +101,7 @@ describe('Policy Details', () => {
         'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"] EuiButtonEmpty'
       );
       expect(history.location.pathname).toEqual('/policy/1');
-      backToListButton.simulate('click');
+      backToListButton.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual('/policy');
     });
     it('should display agent stats', async () => {
@@ -130,7 +130,7 @@ describe('Policy Details', () => {
         'EuiButtonEmpty[data-test-subj="policyDetailsCancelButton"]'
       );
       expect(history.location.pathname).toEqual('/policy/1');
-      cancelbutton.simulate('click');
+      cancelbutton.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual('/policy');
     });
     it('should display save button', async () => {

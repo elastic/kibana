@@ -5,7 +5,7 @@
  */
 
 import { healthRoute } from './health';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -22,7 +22,7 @@ beforeEach(() => {
 
 describe('healthRoute', () => {
   it('registers the route', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -35,7 +35,7 @@ describe('healthRoute', () => {
   });
 
   it('queries the usage api', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -64,7 +64,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates whether Encrypted Saved Objects is using an ephemeral encryption key', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -88,7 +88,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -112,7 +112,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -136,7 +136,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -162,7 +162,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
@@ -188,7 +188,7 @@ describe('healthRoute', () => {
   });
 
   it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     const licenseState = mockLicenseState();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();

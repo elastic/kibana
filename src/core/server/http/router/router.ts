@@ -20,7 +20,7 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
-import { Type } from '@kbn/config-schema';
+import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
@@ -139,7 +139,7 @@ function routeSchemasFromRouteConfig<P, Q, B>(
 
   if (route.validate !== false) {
     Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type || typeof schema === 'function')) {
+      if (!(isConfigSchema(schema) || typeof schema === 'function')) {
         throw new Error(
           `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidationFunction at key: [${key}].`
         );

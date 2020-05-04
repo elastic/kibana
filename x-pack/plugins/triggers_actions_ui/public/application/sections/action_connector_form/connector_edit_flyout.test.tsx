@@ -96,13 +96,13 @@ describe('connector_edit_flyout', () => {
     expect(connectorNameField.first().prop('value')).toBe('action-connector');
   });
 
-  test('if pre-configured connector rendered correct in the edit form', () => {
+  test('if preconfigured connector rendered correct in the edit form', () => {
     const connector = {
       secrets: {},
       id: 'test',
       actionTypeId: 'test-action-type-id',
       actionType: 'test-action-type-name',
-      name: 'pre-configured-connector',
+      name: 'preconfigured-connector',
       isPreconfigured: true,
       referencedByCount: 0,
       config: {},
