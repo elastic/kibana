@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiExpression,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiLink,
-  EuiPopover,
-  EuiSpacer,
-} from '@elastic/eui';
+import { Link } from 'react-router-dom';
+import { EuiExpression, EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { TlsTranslations } from './translations';
+import { SETTINGS_ROUTE } from '../../../../common/constants';
 
 interface SettingsMessageExpressionPopoverProps {
   'aria-label': string;
@@ -33,8 +27,6 @@ const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressionPopove
   id,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const kibana = useKibana();
-  const href = kibana.services?.application?.getUrlForApp('uptime#/settings');
   return (
     <EuiPopover
       id={id}
@@ -59,7 +51,7 @@ const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressionPopove
           settingsPageLink: (
             // this link is wrapped around a span so we can also change the UI state
             // and hide the alert flyout before triggering the navigation to the settings page
-            <EuiLink href={href}>
+            <Link to={SETTINGS_ROUTE} data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings">
               <span
                 onClick={() => {
                   setAlertFlyoutVisible(false);
@@ -72,7 +64,7 @@ const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressionPopove
               >
                 settings page
               </span>
-            </EuiLink>
+            </Link>
           ),
         }}
       />
