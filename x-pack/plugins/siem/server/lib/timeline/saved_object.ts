@@ -120,7 +120,7 @@ export const getDraftTimeline = async (request: FrameworkRequest): Promise<Respo
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft} and (siem-ui-timeline.attributes.createdBy: ${request.user?.username} or siem-ui-timeline.attributes.createdBy: ${request.user?.email})`,
+    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`,
   };
   return getAllSavedTimeline(request, options);
 };
