@@ -150,11 +150,7 @@ export class ScriptedFieldsTable extends Component<
           }/create-field/`}
         />
 
-        <CallOuts
-          deprecatedLangsInUse={deprecatedLangsInUse}
-          // painlessDocLink={documentationLinks.scriptedFields.painless}
-          painlessDocLink={painlessDocLink}
-        />
+        <CallOuts deprecatedLangsInUse={deprecatedLangsInUse} painlessDocLink={painlessDocLink} />
 
         <EuiSpacer size="l" />
 

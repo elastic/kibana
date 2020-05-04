@@ -252,7 +252,6 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         />
         <EuiSpacer size="m" />
         {error}
-
         <ActionButtons
           goToPreviousStep={goToPreviousStep}
           submittable={submittable}

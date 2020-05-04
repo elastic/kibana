@@ -18,8 +18,6 @@
  */
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-// @ts-ignore
-// import { FieldEditor } from 'ui/field_editor';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

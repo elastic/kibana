@@ -25,7 +25,6 @@ import { EuiFlyout, EuiFlyoutBody, EuiTabbedContent } from '@elastic/eui';
 import { ScriptingSyntax } from './scripting_syntax';
 import { TestScript } from './test_script';
 
-// import { IndexPattern } from '../../../../../../../../../../plugins/data/public';
 import { ExecuteScript } from '../../types';
 import { IndexPattern, DataPublicPluginStart } from '../../../../../../data/public';
 

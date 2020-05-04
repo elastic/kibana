@@ -23,7 +23,6 @@ import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-// import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
 

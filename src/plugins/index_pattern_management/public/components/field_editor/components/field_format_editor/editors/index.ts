@@ -28,4 +28,3 @@ export { StaticLookupFormatEditor } from './static_lookup';
 export { StringFormatEditor } from './string';
 export { TruncateFormatEditor } from './truncate';
 export { UrlFormatEditor } from './url';
-// export { DefaultFormatEditor } from './default'; hoping I don't need this

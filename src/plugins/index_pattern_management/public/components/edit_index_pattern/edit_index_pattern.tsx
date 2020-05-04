@@ -47,7 +47,6 @@ import { IndexPatternTableItem } from '../types';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
-  // getIndexPattern: (id: string) => Promise<IndexPattern>;
   indexPatterns: IndexPatternTableItem[];
   config: IUiSettingsClient;
   services: {
@@ -95,17 +94,7 @@ const confirmModalOptionsDelete = {
 };
 
 export const EditIndexPattern = withRouter(
-  ({
-    indexPattern,
-    // getIndexPattern,
-    indexPatterns,
-    config,
-    services,
-    history,
-    location,
-  }: EditIndexPatternProps) => {
-    // console.log('EditIndexPattern render', match.params.id);
-    // todo - load async
+  ({ indexPattern, indexPatterns, config, services, history, location }: EditIndexPatternProps) => {
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.filter(field => field.type === 'conflict')
@@ -157,7 +146,7 @@ export const EditIndexPattern = withRouter(
         }
 
         Promise.resolve(indexPattern.destroy()).then(function() {
-          history.push('/management/kibana/indexPatterns');
+          history.push('');
         });
       }
 

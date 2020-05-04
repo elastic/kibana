@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { SavedObjectsClient, IUiSettingsClient, OverlayStart } from 'src/core/public';
+import { SavedObjectsClientContract, IUiSettingsClient, OverlayStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
@@ -42,7 +42,7 @@ interface CreateIndexPatternWizardProps extends RouteComponentProps {
     indexPatternCreation: IndexPatternManagementStart['creation'];
     es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
     indexPatterns: DataPublicPluginStart['indexPatterns'];
-    savedObjectsClient: SavedObjectsClient;
+    savedObjectsClient: SavedObjectsClientContract;
     uiSettings: IUiSettingsClient;
     openConfirm: OverlayStart['openConfirm'];
   };

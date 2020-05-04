@@ -52,7 +52,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
-      await testSubjects.click('index_patterns');
+      await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 

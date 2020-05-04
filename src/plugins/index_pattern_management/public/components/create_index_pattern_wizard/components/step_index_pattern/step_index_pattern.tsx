@@ -26,7 +26,7 @@ import {
   DataPublicPluginStart,
   IndexPatternAttributes,
 } from '../../../../../../../plugins/data/public';
-import { SavedObjectsClient, IUiSettingsClient } from '../../../../../../../core/public';
+import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -46,7 +46,7 @@ interface StepIndexPatternProps {
   allIndices: MatchedIndex[];
   isIncludingSystemIndices: boolean;
   esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
-  savedObjectsClient: SavedObjectsClient;
+  savedObjectsClient: SavedObjectsClientContract;
   indexPatternCreationType: IndexPatternCreationConfig;
   goToNextStep: (query: string) => void;
   initialQuery?: string;

@@ -53,8 +53,6 @@ const readOnlyBadge = {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: ManagementAppMountParams
-  // indexPatternCreationOptions: IndexPatternCreationOption[],
-  // getIndexPatternTags: (pattern: IIndexPattern, isDefault: boolean) => IndexPatternTag[]
 ) {
   params.setBreadcrumbs(crumb);
   const [
@@ -128,10 +126,6 @@ export async function mountManagementSection(
           <Route path={['/create']}>
             <CreateIndexPatternWizardWithRouter
               services={{
-                /*
-                indexPatternCreationOptions: (indexPatternManagementStart as IndexPatternManagementStart)
-                  .creation.getIndexPatternCreationOptions,
-                  */
                 indexPatternCreation: (indexPatternManagementStart as IndexPatternManagementStart)
                   .creation,
                 es: data.search.__LEGACY.esClient,
@@ -139,7 +133,6 @@ export async function mountManagementSection(
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
                 openConfirm: overlays.openConfirm,
-                indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}
             />
           </Route>

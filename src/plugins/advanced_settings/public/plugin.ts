@@ -40,7 +40,7 @@ export class AdvancedSettingsPlugin
     this.managementApp = kibanaSection.registerApp({
       id: 'settings',
       title,
-      order: 100000,
+      order: 20,
       async mount(params) {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
