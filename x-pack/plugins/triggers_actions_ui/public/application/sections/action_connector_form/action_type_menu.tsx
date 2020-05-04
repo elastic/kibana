@@ -37,7 +37,7 @@ export const ActionTypeMenu = ({
         }
         setActionTypesIndex(index);
         // determine if there are actions disabled by license that that
-        // would be enabled by upgrading to trial
+        // would be enabled by upgrading to gold or trial
         if (setHasActionsUpgradeableByTrial) {
           const hasActionsUpgradeableByTrial = availableActionTypes.some(
             action =>
