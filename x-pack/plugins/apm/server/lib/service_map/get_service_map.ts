@@ -17,6 +17,8 @@ import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { dedupeConnections } from './dedupe_connections';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
+import { addAnomaliesToServicesData } from './ml_helpers';
+import { getMlIndex } from '../../../common/ml_job_constants';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -137,19 +139,58 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
+function getAnomaliesData(options: IEnvOptions) {
+  const { client } = options.setup;
+
+  const params = {
+    index: getMlIndex('*'),
+    body: {
+      size: 0,
+      query: {
+        exists: {
+          field: 'bucket_span'
+        }
+      },
+      aggs: {
+        jobs: {
+          terms: {
+            field: 'job_id',
+            size: 10
+          },
+          aggs: {
+            max_score: {
+              max: {
+                field: 'anomaly_score'
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return client.search(params);
+}
+
+export type AnomaliesResponse = PromiseReturnType<typeof getAnomaliesData>;
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
 export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
-
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
+  const [connectionData, servicesData, anomaliesData] = await Promise.all([
     getConnectionData(options),
-    getServicesData(options)
+    getServicesData(options),
+    getAnomaliesData(options)
   ]);
+
+  const servicesDataWithAnomalies = addAnomaliesToServicesData(
+    servicesData,
+    anomaliesData
+  );
 
   return dedupeConnections({
     ...connectionData,
-    services: servicesData
+    services: servicesDataWithAnomalies
   });
 }

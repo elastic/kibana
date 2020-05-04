@@ -54,7 +54,7 @@ export const ConnectorAddFlyout = ({
     reloadConnectors,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -96,7 +96,7 @@ export const ConnectorAddFlyout = ({
       <ActionTypeMenu
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
-        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+        setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
       />
     );
   } else {
@@ -219,7 +219,7 @@ export const ConnectorAddFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !actionType && hasActionsDisabledByLicense ? (
+          !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
             <Fragment />
