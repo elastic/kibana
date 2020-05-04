@@ -5,23 +5,25 @@ kibanaLibrary.load() // load from the Jenkins instance
 
 kibanaPipeline(timeoutMinutes: 240) {
   catchErrors {
+    def timestamp = new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
     withEnv([
+      "TIME_STAMP=${timestamp}",
       'CODE_COVERAGE=1', // Enables coverage.  Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.
     ]) {
       workers.base(name: 'coverage-worker', size: 'l', ramDisk: false, bootstrapped: false) {
         runTests()
-        handleInjestion()
+        handleIngestion(TIME_STAMP)
       }
     }
     kibanaPipeline.sendMail()
   }
 }
 
-def handleInjestion() {
+def handleIngestion(timestamp) {
   kibanaPipeline.downloadCoverageArtifacts()
   collectVcsInfo("### Collect VCS Info")
-  injestAndUpload('### Injest && Upload')
-  uploadCoverageStaticSite(TIME_STAMP)
+  ingestAndUpload(timestamp, '### Injest && Upload')
+  uploadCoverageStaticSite(timestamp)
 }
 
 def uploadCoverageStaticSite(timestamp) {
@@ -89,6 +91,7 @@ def collectVcsInfo(title) {
     ''', title
   )
 }
+
 def bootMergeAndIngest(buildNum, buildUrl, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
@@ -105,7 +108,7 @@ def bootMergeAndIngest(buildNum, buildUrl, title) {
   """, title)
 }
 
-def injestWithVault(buildNum, buildUrl, title) {
+def ingestWithVault(buildNum, buildUrl, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
@@ -116,14 +119,11 @@ def injestWithVault(buildNum, buildUrl, title) {
   }
 }
 
-def injestAndUpload(title) {
-  def timestamp = new Date(currentBuild.startTimeInMillis)
-    .format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
-
+def ingestAndUpload(timestamp, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    injestWithVault(BUILD_NUMBER, BUILD_URL, title)
+    ingestWithVault(BUILD_NUMBER, BUILD_URL, title)
   }
 }
 
