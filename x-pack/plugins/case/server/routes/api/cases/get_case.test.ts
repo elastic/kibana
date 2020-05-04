@@ -168,4 +168,28 @@ describe('GET case', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.connector_id).toEqual('123');
   });
+  it(`case w/ connector_id - returns the case with connector id when case already has connectorId`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_DETAILS_URL,
+      method: 'get',
+      params: {
+        case_id: 'mock-id-3',
+      },
+      query: {
+        includeComments: false,
+      },
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseConfigureSavedObject: mockCaseConfigure,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+
+    expect(response.status).toEqual(200);
+    expect(response.payload.connector_id).toEqual('123');
+  });
 });

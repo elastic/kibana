@@ -16,6 +16,7 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -83,10 +84,7 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
-        const caseConfigureConnectorId =
-          myCaseConfigure.saved_objects.length > 0
-            ? myCaseConfigure.saved_objects[0].attributes.connector_id
-            : 'none';
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
         // old case may not have new attribute connector_id, so we default to the configured system
         const updateConnectorId =
           myCase.attributes.connector_id == null ? { connector_id: caseConfigureConnectorId } : {};

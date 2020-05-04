@@ -11,7 +11,7 @@ import { errorToToaster, useStateToaster } from '../../components/toasters';
 import { getCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
-import { parseString } from './utils';
+import { convertToCamelCase, parseString } from './utils';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
 
 interface CaseService extends CaseExternalService {
@@ -46,8 +46,8 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
   fetchCaseUserActions: (caseId: string) => void;
 }
 
-const getExternalService = (value: string): CaseFullExternalService | null =>
-  parseString(`${value}`);
+const getExternalService = (value: string): CaseExternalService | null =>
+  convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
 
 export const getPushedInfo = (
   caseUserActions: CaseUserActions[],
@@ -56,68 +56,49 @@ export const getPushedInfo = (
   caseServices: CaseServices;
   hasDataToPush: boolean;
 } => {
-  const pushActionConnectorIds = caseUserActions.reduce((acc, cua) => {
-    if (cua.action !== 'push-to-service') {
-      return acc;
-    }
-    const serviceIsMatching = getExternalService(`${cua.newValue}`);
-    if (serviceIsMatching != null && acc.indexOf(serviceIsMatching.connector_id) === -1) {
-      return [...acc, serviceIsMatching.connector_id];
-    }
-    return acc;
-  }, [] as string[]);
-
-  const caseServices: CaseServices = pushActionConnectorIds.reduce((acc, cId) => {
+  const hasDataToPushForConnector = (connectorId: string) => {
     const userActionsForPushLessServiceUpdates = caseUserActions.filter(
       mua =>
         (mua.action !== 'push-to-service' &&
           !(mua.action === 'update' && mua.actionField[0] === 'connector_id')) ||
         (mua.action === 'push-to-service' &&
-          cId === getExternalService(`${mua.newValue}`)?.connector_id)
+          connectorId === getExternalService(`${mua.newValue}`)?.connectorId)
     );
+    return (
+      userActionsForPushLessServiceUpdates[userActionsForPushLessServiceUpdates.length - 1]
+        .action !== 'push-to-service'
+    );
+  };
+
+  const caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
+    if (cua.action !== 'push-to-service') {
+      return acc;
+    }
+    const externalService = getExternalService(`${cua.newValue}`);
+    if (externalService === null) {
+      return acc;
+    }
 
     return {
       ...acc,
-      ...caseUserActions.reduce((dacc, cua, i) => {
-        if (cua.action !== 'push-to-service') {
-          return dacc;
-        }
-        const possibleExternalService: CaseFullExternalService | null = parseString(
-          `${cua.newValue}`
-        );
-        if (possibleExternalService === null || possibleExternalService.connector_id !== cId) {
-          return dacc;
-        }
-        const typedAcc: CaseServices = dacc;
-
-        return typedAcc[possibleExternalService.connector_id] != null
-          ? {
-              ...dacc,
-              [possibleExternalService.connector_id]: {
-                ...typedAcc[possibleExternalService.connector_id],
-                ...possibleExternalService,
-                lastPushIndex: i,
-                hasDataToPush:
-                  userActionsForPushLessServiceUpdates[
-                    userActionsForPushLessServiceUpdates.length - 1
-                  ].action !== 'push-to-service',
-              },
-            }
-          : {
-              ...dacc,
-              [possibleExternalService.connector_id]: {
-                ...possibleExternalService,
-                firstPushIndex: i,
-                lastPushIndex: i,
-                hasDataToPush:
-                  userActionsForPushLessServiceUpdates[
-                    userActionsForPushLessServiceUpdates.length - 1
-                  ].action !== 'push-to-service',
-              },
-            };
-      }, {}),
+      ...(acc[externalService.connectorId] != null
+        ? {
+            [externalService.connectorId]: {
+              ...acc[externalService.connectorId],
+              ...externalService,
+              lastPushIndex: i,
+            },
+          }
+        : {
+            [externalService.connectorId]: {
+              ...externalService,
+              firstPushIndex: i,
+              lastPushIndex: i,
+              hasDataToPush: hasDataToPushForConnector(externalService.connectorId),
+            },
+          }),
     };
-  }, {} as CaseServices);
+  }, {});
 
   const hasDataToPush =
     caseServices[caseConnectorId] != null ? caseServices[caseConnectorId].hasDataToPush : true;

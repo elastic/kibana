@@ -138,26 +138,32 @@ describe('PATCH cases', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
-    expect(response.payload).toEqual([
-      {
-        closed_at: '2019-11-25T21:54:48.952Z',
-        closed_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        comments: [],
-        connector_id: 'none',
-        created_at: '2019-11-25T21:54:48.952Z',
-        created_by: { email: 'testemail@elastic.co', full_name: 'elastic', username: 'elastic' },
-        description: 'This is a brand new case of a bad meanie defacing data',
-        id: 'mock-no-connector_id',
-        external_service: null,
-        status: 'closed',
-        tags: ['defacement'],
-        title: 'Super Bad Security Issue',
-        totalComment: 0,
-        updated_at: '2019-11-25T21:54:48.952Z',
-        updated_by: { email: 'd00d@awesome.com', full_name: 'Awesome D00d', username: 'awesome' },
-        version: 'WzE3LDFd',
+    expect(response.payload[0].connector_id).toEqual('none');
+  });
+  it(`Patches a case with a connector_id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: '/api/cases',
+      method: 'patch',
+      body: {
+        cases: [
+          {
+            id: 'mock-id-3',
+            status: 'closed',
+            version: 'WzUsMV0=',
+          },
+        ],
       },
-    ]);
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload[0].connector_id).toEqual('123');
   });
   it(`Fails with 409 if version does not match`, async () => {
     const request = httpServerMock.createKibanaRequest({

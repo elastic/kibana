@@ -10,6 +10,7 @@ import { CaseResponseRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { flattenCaseSavedObject, wrapError } from '../utils';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initGetCaseApi({ caseConfigureService, caseService, router }: RouteDeps) {
   router.get(
@@ -37,10 +38,7 @@ export function initGetCaseApi({ caseConfigureService, caseService, router }: Ro
           caseConfigureService.find({ client }),
         ]);
 
-        const caseConfigureConnectorId =
-          myCaseConfigure.saved_objects.length > 0
-            ? myCaseConfigure.saved_objects[0].attributes.connector_id
-            : 'none';
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
 
         if (!includeComments) {
           return response.ok({

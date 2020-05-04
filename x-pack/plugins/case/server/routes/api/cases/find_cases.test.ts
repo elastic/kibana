@@ -38,6 +38,22 @@ describe('FIND all cases', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
   });
+  it(`has proper connector id on cases with configured id`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: `${CASES_URL}/_find`,
+      method: 'get',
+    });
+
+    const theContext = createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.cases[2].connector_id).toEqual('123');
+  });
   it(`adds 'none' connector id to cases without when 3rd party unconfigured`, async () => {
     const request = httpServerMock.createKibanaRequest({
       path: `${CASES_URL}/_find`,

@@ -15,6 +15,7 @@ import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initPostCaseApi({
   caseService,
@@ -40,10 +41,7 @@ export function initPostCaseApi({
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const connectorId =
-          myCaseConfigure.saved_objects.length > 0
-            ? myCaseConfigure.saved_objects[0].attributes.connector_id
-            : 'none';
+        const connectorId = getConnectorId(myCaseConfigure);
         const newCase = await caseService.postNewCase({
           client,
           attributes: transformNewCase({

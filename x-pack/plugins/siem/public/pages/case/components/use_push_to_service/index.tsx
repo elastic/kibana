@@ -164,7 +164,7 @@ export const usePushToService = ({
           <>{pushToServiceButton}</>
         ),
       pushCallouts:
-        errorsMsg.length > 0 || connectors.length === 0 ? (
+        errorsMsg.length > 0 ? (
           <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
         ) : null,
     };
