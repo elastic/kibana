@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 // @ts-ignore no module definition
 import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { ReportingUsageType } from '../../../legacy/plugins/reporting/server/usage/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -14,7 +15,7 @@ function removeWhitespace(str: string) {
 }
 
 interface UsageStats {
-  reporting: any; // FIXME after https://github.com/elastic/kibana/pull/64841 is merged use ReportingUsageType
+  reporting: ReportingUsageType;
 }
 
 export function ReportingAPIProvider({ getService }: FtrProviderContext) {
@@ -103,7 +104,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
-      expect(stats.reporting.last_day.printable_pdf.app[app]).to.be(count);
       expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
     },
 
@@ -112,7 +112,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
-      expect(stats.reporting.last_day.printable_pdf.layout[layout]).to.be(count);
       expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
     },
 
@@ -121,7 +120,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
-      expect(stats.reporting.last_day[jobType].total).to.be(count);
       expect(stats.reporting.last_7_days[jobType].total).to.be(count);
     },
 

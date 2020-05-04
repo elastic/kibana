@@ -15,9 +15,9 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { fontSize, pct, px, units } from '../../../style/variables';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
@@ -29,7 +29,7 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     setIsPermissionWarningDismissed
   ] = useState(false);
 
-  const { data: indicesPrivileges = {}, status } = useFetcher(callApmApi => {
+  const { data: indicesPrivileges, status } = useFetcher(callApmApi => {
     return callApmApi({
       pathname: '/api/apm/security/indices_privileges'
     });
@@ -40,13 +40,17 @@ export const APMIndicesPermission: React.FC = ({ children }) => {
     return null;
   }
 
-  const indicesWithoutPermission = Object.keys(indicesPrivileges).filter(
-    index => !indicesPrivileges[index].read
-  );
-
   // Show permission warning when a user has at least one index without Read privilege,
-  // and he has not manually dismissed the warning
-  if (!isEmpty(indicesWithoutPermission) && !isPermissionWarningDismissed) {
+  // and they have not manually dismissed the warning
+  if (
+    indicesPrivileges &&
+    !indicesPrivileges.has_all_requested &&
+    !isEmpty(indicesPrivileges.index) &&
+    !isPermissionWarningDismissed
+  ) {
+    const indicesWithoutPermission = Object.keys(
+      indicesPrivileges.index
+    ).filter(index => !indicesPrivileges.index[index].read);
     return (
       <PermissionWarning
         indicesWithoutPermission={indicesWithoutPermission}
