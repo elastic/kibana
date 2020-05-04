@@ -5,7 +5,7 @@
  */
 
 import { ServerApiError } from '../../types';
-import { HostResultList, HostInfo } from '../../../../../common/types';
+import { HostResultList, HostInfo, GetHostPolicyResponse } from '../../../../../common/types';
 
 interface ServerReturnedHostList {
   type: 'serverReturnedHostList';
@@ -27,8 +27,14 @@ interface ServerFailedToReturnHostDetails {
   payload: ServerApiError;
 }
 
+interface ServerReturnedHostPolicyResponse {
+  type: 'serverReturnedHostPolicyResponse';
+  payload: GetHostPolicyResponse;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails;
+  | ServerFailedToReturnHostDetails
+  | ServerReturnedHostPolicyResponse;

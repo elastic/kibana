@@ -15,16 +15,7 @@ import { DataRequest } from './data_request';
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
 
-export function updateDueToExtent(
-  source: ISource,
-  prevMeta: DataMeta = {},
-  nextMeta: DataMeta = {}
-) {
-  const extentAware = source.isFilterByMapBounds();
-  if (!extentAware) {
-    return NO_SOURCE_UPDATE_REQUIRED;
-  }
-
+export function updateDueToExtent(prevMeta: DataMeta = {}, nextMeta: DataMeta = {}) {
   const { buffer: previousBuffer } = prevMeta;
   const { buffer: newBuffer } = nextMeta;
 
@@ -134,7 +125,10 @@ export async function canSkipSourceUpdate({
     updateDueToPrecisionChange = !_.isEqual(prevMeta.geogridPrecision, nextMeta.geogridPrecision);
   }
 
-  const updateDueToExtentChange = updateDueToExtent(source, prevMeta, nextMeta);
+  let updateDueToExtentChange = false;
+  if (extentAware) {
+    updateDueToExtentChange = updateDueToExtent(prevMeta, nextMeta);
+  }
 
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
 
