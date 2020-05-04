@@ -113,8 +113,15 @@ export class EmbeddableEnhancedPlugin
 
     const storage = new EmbeddableActionStorage(embeddable as EmbeddableWithDynamicActions);
     const dynamicActions = new DynamicActionManager({
-      isCompatible: async (context: unknown) =>
-        (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId,
+      isCompatible: async (context: unknown) => {
+        if (!(context as EmbeddableContext)?.embeddable) {
+          // eslint-disable-next-line no-console
+          console.warn('For drilldowns to work action context should contain .embeddable field.');
+          return false;
+        }
+
+        return (context as EmbeddableContext).embeddable.runtimeId === embeddable.runtimeId;
+      },
       storage,
       uiActions: this.uiActions!,
     });
