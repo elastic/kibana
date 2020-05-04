@@ -84,6 +84,7 @@
 /x-pack/legacy/plugins/ingest_manager/ @elastic/ingest-management
 /x-pack/plugins/observability/ @elastic/logs-metrics-ui @elastic/apm-ui @elastic/uptime @elastic/ingest-management
 /x-pack/legacy/plugins/monitoring/ @elastic/stack-monitoring-ui
+/x-pack/plugins/monitoring/ @elastic/stack-monitoring-ui
 /x-pack/plugins/uptime @elastic/uptime
 
 # Machine Learning
@@ -203,6 +204,7 @@
 /x-pack/plugins/snapshot_restore/  @elastic/es-ui
 /x-pack/plugins/upgrade_assistant/  @elastic/es-ui
 /x-pack/plugins/watcher/  @elastic/es-ui
+/x-pack/plugins/ingest_pipelines/  @elastic/es-ui
 
 # Endpoint
 /x-pack/plugins/endpoint/ @elastic/endpoint-app-team @elastic/siem

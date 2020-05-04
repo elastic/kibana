@@ -19,7 +19,6 @@
 
 import { IndexPattern } from '../../index_patterns';
 import {
-  AggConfig,
   AggConfigSerialized,
   AggConfigs,
   AggParamsRange,
@@ -30,16 +29,10 @@ import {
   AggParamsGeoTile,
   AggParamsGeoHash,
   AggParamsTerms,
-  AggType,
-  aggTypeFieldFilters,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
-  FieldParamType,
   getCalculateAutoTimeExpression,
-  MetricAggType,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
   BUCKET_TYPES,
 } from './';
 
@@ -51,23 +44,12 @@ export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
+export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface SearchAggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
-}
-
-/** @internal */
-export interface SearchAggsStartLegacy {
-  AggConfig: typeof AggConfig;
-  AggType: typeof AggType;
-  aggTypeFieldFilters: typeof aggTypeFieldFilters;
-  FieldParamType: typeof FieldParamType;
-  MetricAggType: typeof MetricAggType;
-  parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
 /** @internal */
