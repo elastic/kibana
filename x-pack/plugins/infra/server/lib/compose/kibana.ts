@@ -38,6 +38,7 @@ export function compose(core: CoreSetup, config: InfraConfig, plugins: InfraServ
       sources,
     }),
     logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
+      framework,
       sources,
     }),
     metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),

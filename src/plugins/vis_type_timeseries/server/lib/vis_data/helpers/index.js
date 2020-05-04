@@ -28,3 +28,4 @@ export { getSplits } from './get_splits';
 export { getTimerange } from './get_timerange';
 export { mapBucket } from './map_bucket';
 export { parseSettings } from './parse_settings';
+export { overwrite } from './overwrite';
