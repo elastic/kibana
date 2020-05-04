@@ -533,22 +533,26 @@ exports[`MonitorList component renders loading state 1`] = `
 `;
 
 exports[`MonitorList component renders the monitor list 1`] = `
-.c1 {
+.c2 {
   padding-left: 17px;
 }
 
-.c3 {
+.c4 {
   padding-top: 12px;
 }
 
-.c2 {
+.c0 {
+  margin-left: auto;
+}
+
+.c3 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 @media (max-width:574px) {
-  .c0 {
+  .c1 {
     min-width: 230px;
   }
 }
@@ -575,8 +579,8 @@ exports[`MonitorList component renders the monitor list 1`] = `
         class="euiFilterGroup"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
-          data-test-subj="xpack.uptime.filterBar.filterStatusUp"
+          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+          data-test-subj="xpack.uptime.filterBar.filterStatusAll"
           type="button"
         >
           <span
@@ -645,8 +649,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
       class="euiFlexItem"
     >
       <h5
-        class="euiTitle euiTitle--xsmall"
-        style="margin-left:auto"
+        class="euiTitle euiTitle--xsmall c0"
       >
         <a
           data-test-subj="uptimeCertificatesLink"
@@ -800,7 +803,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrow1"
@@ -827,7 +830,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="c1"
+                      class="c2"
                     >
                       <span
                         class="euiToolTipAnchor"
@@ -892,7 +895,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c2"
+                  class="euiLink euiLink--text c3"
                   type="button"
                 >
                    
@@ -976,7 +979,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c0"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrow1"
@@ -1003,7 +1006,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="c1"
+                      class="c2"
                     >
                       <span
                         class="euiToolTipAnchor"
@@ -1068,7 +1071,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c2"
+                  class="euiLink euiLink--text c3"
                   type="button"
                 >
                    
@@ -1190,7 +1193,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c3"
+            class="euiButtonIcon euiButtonIcon--text c4"
             data-test-subj="xpack.uptime.monitorList.prevButton"
             disabled=""
             type="button"
@@ -1207,7 +1210,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c3"
+            class="euiButtonIcon euiButtonIcon--text c4"
             data-test-subj="xpack.uptime.monitorList.nextButton"
             disabled=""
             type="button"
