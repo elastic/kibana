@@ -22,7 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(welcomeEndpointMessage).to.be('Hello World');
     });
 
-    it('Does not display a toast indicating that the ingest manager failed to initialize', async () => {
+    // Flaky https://github.com/elastic/kibana/issues/65042
+    it.skip('Does not display a toast indicating that the ingest manager failed to initialize', async () => {
       await testSubjects.missingOrFail('euiToastHeader');
     });
   });
