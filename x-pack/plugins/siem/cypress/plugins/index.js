@@ -19,7 +19,6 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const wp = require('@cypress/webpack-preprocessor');
-const path = require('path');
 
 module.exports = on => {
   const options = {
@@ -39,14 +38,4 @@ module.exports = on => {
     },
   };
   on('file:preprocessor', wp(options));
-
-  on('before:browser:launch', (browser, options) => {
-    const downloadDirectory = path.join(__dirname, '..', 'downloads');
-
-    if (browser.family === 'chromium') {
-      options.preferences.default.download = { default_directory: downloadDirectory };
-
-      return options;
-    }
-  });
 };
