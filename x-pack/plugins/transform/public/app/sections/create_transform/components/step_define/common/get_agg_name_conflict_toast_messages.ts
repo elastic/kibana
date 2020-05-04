@@ -53,10 +53,11 @@ export function getAggNameConflictToastMessages(
   }
 
   // check all aggs against new aggName
-  Object.keys(aggList).some(aggListName => {
+  for (const aggListName of Object.keys(aggList)) {
     const aggListNameSplit = aggListName.split('.');
     let aggListNameCheck: string;
-    return aggListNameSplit.some(aggListNamePart => {
+    let shouldBreak = false;
+    for (const aggListNamePart of aggListNameSplit) {
       aggListNameCheck =
         aggListNameCheck === undefined ? aggListNamePart : `${aggListNameCheck}.${aggListNamePart}`;
       if (aggListNameCheck === aggName) {
@@ -66,21 +67,25 @@ export function getAggNameConflictToastMessages(
             values: { aggName, aggListName },
           })
         );
-        return true;
+        shouldBreak = true;
+        break;
       }
-      return false;
-    });
-  });
+    }
+    if (shouldBreak) {
+      break;
+    }
+  }
 
   if (conflicts.length > 0) {
     return conflicts;
   }
 
   // check all group-bys against new aggName
-  Object.keys(groupByList).some(groupByListName => {
+  for (const groupByListName of Object.keys(groupByList)) {
     const groupByListNameSplit = groupByListName.split('.');
     let groupByListNameCheck: string;
-    return groupByListNameSplit.some(groupByListNamePart => {
+    const shouldBreak = false;
+    for (const groupByListNamePart of groupByListNameSplit) {
       groupByListNameCheck =
         groupByListNameCheck === undefined
           ? groupByListNamePart
@@ -92,11 +97,14 @@ export function getAggNameConflictToastMessages(
             values: { aggName, groupByListName },
           })
         );
-        return true;
+        shouldBreak = true;
+        break;
       }
-      return false;
-    });
-  });
+    }
+    if (shouldBreak) {
+      break;
+    }
+  }
 
   return conflicts;
 }
