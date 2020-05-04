@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { curry } from 'lodash';
@@ -12,12 +11,7 @@ import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metric
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
-
-const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: value =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
 export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
@@ -71,19 +65,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
           groupBy: schema.maybe(schema.string()),
           filterQuery: schema.maybe(
             schema.string({
-              validate(value) {
-                const errorMessage =
-                  'filterQuery must be a valid Elasticsearch filter expressed in JSON';
-                try {
-                  const parsedValue = JSON.parse(value);
-                  if (!isEmpty(parsedValue.bool)) {
-                    return undefined;
-                  }
-                  return errorMessage;
-                } catch (e) {
-                  return errorMessage;
-                }
-              },
+              validate: validateIsStringElasticsearchJSONFilter,
             })
           ),
           sourceId: schema.string(),
