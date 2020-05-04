@@ -6,7 +6,7 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-import { CustomSelectionTable } from '../custom_selection_table';
+import { CustomSelectionTable } from '../../custom_selection_table';
 import { JobSelectorBadge } from '../job_selector_badge';
 import { TimeRangeBar } from '../timerange_bar';
 

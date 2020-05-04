@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSelectionItem } from '../../../../common/analytics';
 // @ts-ignore could not find declaration file
-import { CustomSelectionTable } from '../../../../../components/job_selector/custom_selection_table';
+import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 
 const columns = [
   {
