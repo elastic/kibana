@@ -26,7 +26,14 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
   state,
 }) => {
   const { closeModal, createAnalyticsJob, startAnalyticsJob } = actions;
-  const { isJobCreated, isJobStarted, isModalButtonDisabled, isValid, cloneJob } = state;
+  const {
+    isJobCreated,
+    isJobStarted,
+    isModalButtonDisabled,
+    isValid,
+    isAdvancedEditorValidJson,
+    cloneJob,
+  } = state;
 
   const headerText = !!cloneJob
     ? i18n.translate('xpack.ml.dataframe.analytics.clone.flyoutHeaderTitle', {
@@ -61,7 +68,7 @@ export const CreateAnalyticsFlyout: FC<CreateAnalyticsFormProps> = ({
         {!isJobCreated && !isJobStarted && (
           <EuiButton
             className="mlAnalyticsCreateFlyout__footerButton"
-            disabled={!isValid || isModalButtonDisabled}
+            disabled={!isValid || !isAdvancedEditorValidJson || isModalButtonDisabled}
             onClick={createAnalyticsJob}
             fill
             data-test-subj="mlAnalyticsCreateJobFlyoutCreateButton"

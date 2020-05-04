@@ -19,8 +19,43 @@
 
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE } from '../../common';
 
-const migrateIndexPattern: SavedObjectMigrationFn = doc => {
+const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = doc => {
+  const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
+
+  if (searchSourceJSON) {
+    let searchSource: any;
+
+    try {
+      searchSource = JSON.parse(searchSourceJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    if (searchSource.query?.match_all) {
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              ...searchSource,
+              query: {
+                query: '',
+                language: DEFAULT_QUERY_LANGUAGE,
+              },
+            }),
+          },
+        },
+      };
+    }
+  }
+
+  return doc;
+};
+
+const migrateIndexPattern: SavedObjectMigrationFn<any, any> = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -62,13 +97,13 @@ const migrateIndexPattern: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const setNewReferences: SavedObjectMigrationFn = (doc, context) => {
+const setNewReferences: SavedObjectMigrationFn<any, any> = (doc, context) => {
   doc.references = doc.references || [];
   // Migrate index pattern
   return migrateIndexPattern(doc, context);
 };
 
-const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
+const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = doc => {
   const sort = get(doc, 'attributes.sort');
   if (!sort) return doc;
 
@@ -87,6 +122,7 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn = doc => {
 };
 
 export const searchSavedObjectTypeMigrations = {
-  '7.0.0': flow<SavedObjectMigrationFn>(setNewReferences),
-  '7.4.0': flow<SavedObjectMigrationFn>(migrateSearchSortToNestedArray),
+  '6.7.2': flow<SavedObjectMigrationFn<any, any>>(migrateMatchAllQuery),
+  '7.0.0': flow<SavedObjectMigrationFn<any, any>>(setNewReferences),
+  '7.4.0': flow<SavedObjectMigrationFn<any, any>>(migrateSearchSortToNestedArray),
 };

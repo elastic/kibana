@@ -33,10 +33,10 @@ export const transformNewCase = ({
   username,
 }: {
   createdDate: string;
-  email?: string;
-  full_name?: string;
+  email?: string | null;
+  full_name?: string | null;
   newCase: CasePostRequest;
-  username: string;
+  username?: string | null;
 }): CaseAttributes => ({
   ...newCase,
   closed_at: null,
@@ -52,9 +52,9 @@ export const transformNewCase = ({
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
-  email?: string;
-  full_name?: string;
-  username: string;
+  email?: string | null;
+  full_name?: string | null;
+  username?: string | null;
 }
 export const transformNewComment = ({
   comment,

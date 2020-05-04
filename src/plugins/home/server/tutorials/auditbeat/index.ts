@@ -63,7 +63,7 @@ processes, users, logins, sockets information, file accesses, and more. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/auditbeat/screenshot.png',
+    previewImagePath: '/plugins/home/assets/auditbeat/screenshot.png',
     onPrem: onPremInstructions(platforms, context),
     elasticCloud: cloudInstructions(platforms),
     onPremElasticCloud: onPremCloudInstructions(platforms),

@@ -4,29 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
+import { NotificationsSetup } from 'src/core/public';
 import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
   JOB_STATUS_COMPLETED,
   JOB_STATUS_FAILED,
+  JOB_STATUS_WARNINGS,
 } from '../../constants';
-
+import { JobId, JobStatusBuckets, JobSummary, SourceJob } from '../../index.d';
 import {
-  JobId,
-  JobSummary,
-  JobStatusBuckets,
-  NotificationsService,
-  SourceJob,
-} from '../../index.d';
-
-import {
-  getSuccessToast,
   getFailureToast,
+  getGeneralErrorToast,
+  getSuccessToast,
   getWarningFormulasToast,
   getWarningMaxSizeToast,
-  getGeneralErrorToast,
 } from '../components';
 import { ReportingAPIClient } from './reporting_api_client';
 
@@ -46,7 +40,7 @@ function summarizeJob(src: SourceJob): JobSummary {
 }
 
 export class ReportingNotifierStreamHandler {
-  constructor(private notifications: NotificationsService, private apiClient: ReportingAPIClient) {}
+  constructor(private notifications: NotificationsSetup, private apiClient: ReportingAPIClient) {}
 
   /*
    * Use Kibana Toast API to show our messages
@@ -112,7 +106,7 @@ export class ReportingNotifierStreamHandler {
             _source: { status: jobStatus },
           } = job;
           if (storedJobs.includes(jobId)) {
-            if (jobStatus === JOB_STATUS_COMPLETED) {
+            if (jobStatus === JOB_STATUS_COMPLETED || jobStatus === JOB_STATUS_WARNINGS) {
               completedJobs.push(summarizeJob(job));
             } else if (jobStatus === JOB_STATUS_FAILED) {
               failedJobs.push(summarizeJob(job));

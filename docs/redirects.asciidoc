@@ -23,7 +23,7 @@ For more {kib} configuration settings, see <<settings>>.
 [role="exclude",id="uptime-security"]
 == Uptime security
 
-This page has moved. Please see the new section in the {uptime-guide}/uptime-security.html[Uptime Monitoring Guide].
+This page has moved. Please see the new section in the {heartbeat-ref}/securing-heartbeat.html[Uptime Monitoring Guide].
 
 [role="exclude",id="infra-read-only-access"]
 == Configure source read-only access

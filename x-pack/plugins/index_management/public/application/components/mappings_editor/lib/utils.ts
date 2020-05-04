@@ -25,6 +25,7 @@ import {
   PARAMETERS_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
+  TYPE_DEFINITION,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -70,6 +71,9 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
     isExpanded: false,
   };
 };
+
+export const getTypeLabelFromType = (type: DataType) =>
+  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
 
 export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
   if (prop !== undefined) {
@@ -122,7 +126,7 @@ const replaceAliasPathByAliasId = (
 };
 
 export const getMainTypeFromSubType = (subType: SubType): MainType =>
-  SUB_TYPE_MAP_TO_MAIN[subType] as MainType;
+  (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
@@ -287,7 +291,9 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
+
       to[name] = field;
+
       if (childFields) {
         field[childFieldsName!] = {};
         return deNormalizePaths(childFields, field[childFieldsName!]);

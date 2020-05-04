@@ -35,7 +35,7 @@ export const transformNewUserAction = ({
   full_name?: string | null;
   newValue?: string | null;
   oldValue?: string | null;
-  username: string;
+  username?: string | null;
 }): CaseUserActionAttributes => ({
   action_field: actionField,
   action,

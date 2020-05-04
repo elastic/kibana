@@ -110,10 +110,12 @@ export function privilegesFactory(
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
           if (feature.reserved) {
-            acc[feature.id] = [
-              actions.version,
-              ...featurePrivilegeBuilder.getActions(feature.reserved!.privilege, feature),
-            ];
+            feature.reserved.privileges.forEach(reservedPrivilege => {
+              acc[reservedPrivilege.id] = [
+                actions.version,
+                ...uniq(featurePrivilegeBuilder.getActions(reservedPrivilege.privilege, feature)),
+              ];
+            });
           }
           return acc;
         }, {}),

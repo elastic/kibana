@@ -29,7 +29,7 @@ export const StepAliases: React.FunctionComponent<StepProps> = ({
 }) => {
   const { content, setContent, error } = useJsonStep({
     prop: 'aliases',
-    defaultValue: template.aliases,
+    defaultValue: template?.template.aliases,
     setDataGetter,
     onStepValidityChange,
   });

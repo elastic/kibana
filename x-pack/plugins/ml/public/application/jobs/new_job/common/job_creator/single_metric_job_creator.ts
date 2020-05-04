@@ -33,6 +33,7 @@ export class SingleMetricJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
+    this._wizardInitialized$.next(true);
   }
 
   // only a single detector exists for this job type

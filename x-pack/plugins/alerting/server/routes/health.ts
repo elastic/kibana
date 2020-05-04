@@ -14,6 +14,7 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../types';
+import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
 interface XPackUsageSecurity {
   security?: {
@@ -26,7 +27,11 @@ interface XPackUsageSecurity {
   };
 }
 
-export function healthRoute(router: IRouter, licenseState: LicenseState) {
+export function healthRoute(
+  router: IRouter,
+  licenseState: LicenseState,
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+) {
   router.get(
     {
       path: '/api/alert/_health',
@@ -34,9 +39,9 @@ export function healthRoute(router: IRouter, licenseState: LicenseState) {
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
+      req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       try {
         const {
@@ -54,6 +59,7 @@ export function healthRoute(router: IRouter, licenseState: LicenseState) {
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
+          hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
         };
 
         return res.ok({

@@ -27,8 +27,8 @@ import {
   Filter,
   IndexPatternsContract,
   IndexPattern,
-  SearchSource,
 } from '../../../../../../../../../plugins/data/public';
+import { getServices } from '../../../../kibana_services';
 
 export type SurrDocType = 'successors' | 'predecessors';
 export interface EsHitRecord {
@@ -115,7 +115,10 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   }
 
   async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
-    return new SearchSource()
+    const { data } = getServices();
+
+    return data.search.searchSource
+      .create()
       .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);

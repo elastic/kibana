@@ -9,20 +9,20 @@ import { ECS_VERSION } from './types';
 import { EventLogService } from './event_log_service';
 import { EsContext } from './es/context';
 import { contextMock } from './es/context.mock';
-import { loggerMock, MockedLogger } from '../../../../src/core/server/logging/logger.mock';
+import { loggingServiceMock } from 'src/core/server/mocks';
 import { delay } from './lib/delay';
 import { EVENT_LOGGED_PREFIX } from './event_logger';
 
 const KIBANA_SERVER_UUID = '424-24-2424';
 
 describe('EventLogger', () => {
-  let systemLogger: MockedLogger;
+  let systemLogger: ReturnType<typeof loggingServiceMock.createLogger>;
   let esContext: EsContext;
   let service: IEventLogService;
   let eventLogger: IEventLogger;
 
   beforeEach(() => {
-    systemLogger = loggerMock.create();
+    systemLogger = loggingServiceMock.createLogger();
     esContext = contextMock.create();
     service = new EventLogService({
       esContext,
@@ -150,10 +150,42 @@ describe('EventLogger', () => {
     message = await waitForLogMessage(systemLogger);
     expect(message).toMatch(/invalid event logged.*action.*undefined.*/);
   });
+
+  test('logs warnings when writing invalid events', async () => {
+    service.registerProviderActions('provider', ['action-a']);
+    eventLogger = service.getLogger({});
+
+    eventLogger.logEvent(({ event: { PROVIDER: 'provider' } } as unknown) as IEvent);
+    let message = await waitForLogMessage(systemLogger);
+    expect(message).toMatch(/invalid event logged.*provider.*undefined.*/);
+
+    const event: IEvent = {
+      event: {
+        provider: 'provider',
+        action: 'action-a',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            rel: 'ZZZ-primary',
+            namespace: 'default',
+            type: 'event_log_test',
+            id: '123',
+          },
+        ],
+      },
+    };
+    eventLogger.logEvent(event);
+    message = await waitForLogMessage(systemLogger);
+    expect(message).toMatch(/invalid rel property.*ZZZ-primary.*/);
+  });
 });
 
 // return the next logged event; throw if not an event
-async function waitForLogEvent(mockLogger: MockedLogger, waitSeconds: number = 1): Promise<IEvent> {
+async function waitForLogEvent(
+  mockLogger: ReturnType<typeof loggingServiceMock.createLogger>,
+  waitSeconds: number = 1
+): Promise<IEvent> {
   const result = await waitForLog(mockLogger, waitSeconds);
   if (typeof result === 'string') throw new Error('expecting an event');
   return result;
@@ -161,7 +193,7 @@ async function waitForLogEvent(mockLogger: MockedLogger, waitSeconds: number = 1
 
 // return the next logged message; throw if it is an event
 async function waitForLogMessage(
-  mockLogger: MockedLogger,
+  mockLogger: ReturnType<typeof loggingServiceMock.createLogger>,
   waitSeconds: number = 1
 ): Promise<string> {
   const result = await waitForLog(mockLogger, waitSeconds);
@@ -171,7 +203,7 @@ async function waitForLogMessage(
 
 // return the next logged message, if it's an event log entry, parse it
 async function waitForLog(
-  mockLogger: MockedLogger,
+  mockLogger: ReturnType<typeof loggingServiceMock.createLogger>,
   waitSeconds: number = 1
 ): Promise<string | IEvent> {
   const intervals = 4;

@@ -43,7 +43,7 @@ export interface UseRequestResponse<D = any, E = Error> {
   isInitialRequest: boolean;
   isLoading: boolean;
   error: E | null;
-  data: D | null;
+  data?: D | null;
   sendRequest: (...args: any[]) => Promise<SendRequestResponse<D, E>>;
 }
 

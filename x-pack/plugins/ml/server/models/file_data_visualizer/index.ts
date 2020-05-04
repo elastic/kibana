@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  fileDataVisualizerProvider,
-  InputOverrides,
-  InputData,
-  AnalysisResult,
-} from './file_data_visualizer';
+export { fileDataVisualizerProvider, InputData } from './file_data_visualizer';
 
-export { importDataProvider, Settings, InjectPipeline, Mappings } from './import_data';
+export { importDataProvider } from './import_data';

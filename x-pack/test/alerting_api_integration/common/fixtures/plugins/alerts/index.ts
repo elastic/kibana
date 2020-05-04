@@ -11,9 +11,10 @@ import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
-    name: 'alerts',
+    require: ['xpack_main', 'elasticsearch'],
+    name: 'alerts-fixture',
     init(server: any) {
+      const clusterClient = server.newPlatform.start.core.elasticsearch.legacy.client;
       server.plugins.xpack_main.registerFeature({
         id: 'alerting',
         name: 'Alerting',
@@ -165,6 +166,22 @@ export default function(kibana: any) {
           } catch (e) {
             callClusterError = e;
           }
+          // Call scoped cluster
+          const callScopedCluster = services.getScopedCallCluster(clusterClient);
+          let callScopedClusterSuccess = false;
+          let callScopedClusterError;
+          try {
+            await callScopedCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callScopedClusterSuccess = true;
+          } catch (e) {
+            callScopedClusterError = e;
+          }
           // Saved objects client
           let savedObjectsClientSuccess = false;
           let savedObjectsClientError;
@@ -185,6 +202,8 @@ export default function(kibana: any) {
               state: {
                 callClusterSuccess,
                 callClusterError,
+                callScopedClusterSuccess,
+                callScopedClusterError,
                 savedObjectsClientSuccess,
                 savedObjectsClientError,
               },
@@ -376,6 +395,22 @@ export default function(kibana: any) {
           } catch (e) {
             callClusterError = e;
           }
+          // Call scoped cluster
+          const callScopedCluster = services.getScopedCallCluster(clusterClient);
+          let callScopedClusterSuccess = false;
+          let callScopedClusterError;
+          try {
+            await callScopedCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callScopedClusterSuccess = true;
+          } catch (e) {
+            callScopedClusterError = e;
+          }
           // Saved objects client
           let savedObjectsClientSuccess = false;
           let savedObjectsClientError;
@@ -396,6 +431,8 @@ export default function(kibana: any) {
               state: {
                 callClusterSuccess,
                 callClusterError,
+                callScopedClusterSuccess,
+                callScopedClusterError,
                 savedObjectsClientSuccess,
                 savedObjectsClientError,
               },

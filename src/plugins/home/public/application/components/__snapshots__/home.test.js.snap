@@ -100,6 +100,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -227,6 +228,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -354,6 +356,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -468,6 +471,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -582,6 +586,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -696,6 +701,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -810,6 +816,7 @@ exports[`home should render home component 1`] = `
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -924,6 +931,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -1038,6 +1046,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage
@@ -1159,6 +1168,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           size="s"
         />
         <EuiButton
+          data-test-subj="allPlugins"
           href="#/home/feature_directory"
         >
           <FormattedMessage

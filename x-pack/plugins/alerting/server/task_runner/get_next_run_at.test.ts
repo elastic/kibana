@@ -7,6 +7,7 @@
 import { getNextRunAt } from './get_next_run_at';
 
 const mockedNow = new Date('2019-06-03T18:55:25.982Z');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date extends global.Date {
   static now() {
     return mockedNow.getTime();

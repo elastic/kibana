@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
@@ -47,6 +48,10 @@ import {
   AdvancedSettingsStart,
 } from '../../../../plugins/advanced_settings/public';
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import {
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+} from '../../../../plugins/index_pattern_management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
@@ -54,7 +59,6 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
-import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
   SavedObjectsManagementPluginSetup,
@@ -64,6 +68,8 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
+import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -81,11 +87,13 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
-  visTypeVega: VisTypeVegaSetup;
   discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 export interface PluginsStart {
@@ -107,6 +115,8 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
+  indexPatternManagement: IndexPatternManagementStart;
 }
 
 export const npSetup = {

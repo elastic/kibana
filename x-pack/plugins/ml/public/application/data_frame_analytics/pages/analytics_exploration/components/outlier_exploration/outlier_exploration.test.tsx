@@ -6,7 +6,6 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 import { MlContext } from '../../../../../contexts/ml';
 import { kibanaContextValueMock } from '../../../../../contexts/ml/__mocks__/kibana_context_value';
 
@@ -22,7 +21,7 @@ describe('Data Frame Analytics: <Exploration />', () => {
   test('Minimal initialization', () => {
     const wrapper = shallow(
       <MlContext.Provider value={kibanaContextValueMock}>
-        <OutlierExploration jobId="the-job-id" jobStatus={DATA_FRAME_TASK_STATE.STOPPED} />
+        <OutlierExploration jobId="the-job-id" />
       </MlContext.Provider>
     );
     // Without the jobConfig being loaded, the component will just return empty.

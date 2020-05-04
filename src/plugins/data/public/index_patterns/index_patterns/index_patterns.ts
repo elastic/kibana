@@ -22,35 +22,42 @@ import {
   SimpleSavedObject,
   IUiSettingsClient,
   HttpStart,
+  CoreStart,
 } from 'src/core/public';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
+import {
+  createEnsureDefaultIndexPattern,
+  EnsureDefaultIndexPattern,
+} from './ensure_default_index_pattern';
 
 const indexPatternCache = createIndexPatternCache();
 
 type IndexPatternCachedFieldType = 'id' | 'title';
 
+export interface IndexPatternSavedObjectAttrs {
+  title: string;
+}
+
 export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
+  ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
-  constructor(
-    config: IUiSettingsClient,
-    savedObjectsClient: SavedObjectsClientContract,
-    http: HttpStart
-  ) {
+  constructor(core: CoreStart, savedObjectsClient: SavedObjectsClientContract, http: HttpStart) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.config = config;
+    this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
+    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
   }
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find<Record<string, any>>({
+      await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
         type: 'index-pattern',
         fields: ['title'],
         perPage: 10000,

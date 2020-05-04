@@ -1,19 +1,24 @@
-[[troubleshooting]] 
-=== Troubleshooting common problems
+[[troubleshooting]]
+== Troubleshoot common problems
+
+++++
+<titleabbrev>Troubleshooting</titleabbrev>
+++++
 
 If you have something to add to this section, please consider creating a pull request with
 your proposed changes at https://github.com/elastic/kibana.
 
-Also check out the https://discuss.elastic.co/c/apm[APM discussion forum].
+Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
 
+[float]
 [[no-apm-data-found]]
-==== No APM data found
+=== No APM data found
 
 This section can help with any of the following:
 
 * Data isn't displaying in the APM app
-* You're seeing a message like "No Services Found",
-* You're seeing errors like "Fielddata is disabled on text fields by default..."
+* You see a message like "No Services Found",
+* You see errors like "Fielddata is disabled on text fields by default..."
 
 There are a number of factors that could be at play here.
 One important thing to double-check first is your index template.
@@ -52,12 +57,13 @@ you can customize the indices that the APM app uses to display data.
 Navigate to *APM* > *Settings* > *Indices*, and change all `apm_oss.*Pattern` values to
 include the new index pattern. For example: `customIndexName-*`.
 
-==== Unknown route
+[float]
+=== Unknown route
 
 The {apm-app-ref}/transactions.html[transaction overview] will only display helpful information
 when the transactions in your services are named correctly.
 If you're seeing "GET unknown route" or "unknown route" in the APM app,
-it could be a sign that something isn't working like it should.
+it could be a sign that something isn't working as it should.
 
 Elastic APM Agents come with built-in support for popular frameworks out-of-the-box.
 This means, among other things, that the Agent will try to automatically name HTTP requests.
@@ -71,7 +77,8 @@ To resolve this, you'll need to head over to the relevant {apm-agents-ref}[Agent
 Specifically, view the Agent's supported technologies page.
 You can also use the Agent's public API to manually set a name for the transaction.
 
-==== Fields are not searchable
+[float]
+=== Fields are not searchable
 
 In Elasticsearch, index templates are used to define settings and mappings that determine how fields should be analyzed.
 The recommended index template file for APM Server is installed by the APM Server packages.
@@ -92,7 +99,7 @@ Selecting the `apm-*` index pattern shows a listing of every field defined in th
 *Ensure a field is searchable*
 There are two things you can do to if you'd like to ensure a field is searchable:
 
-1. Index your additional data as {apm-overview-ref}/metadata.html[labels] instead.
+1. Index your additional data as {apm-overview-ref-v}/metadata.html[labels] instead.
 These are dynamic by default, which means they will be indexed and become searchable and aggregatable.
 
 2. Use the {apm-server-ref}/configuration-template.html[`append_fields`] feature. As an example,

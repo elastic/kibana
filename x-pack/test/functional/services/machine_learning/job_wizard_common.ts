@@ -330,9 +330,11 @@ export function MachineLearningJobWizardCommonProvider(
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
-      await this.assertModelMemoryLimitValue(modelMemoryLimit, {
-        withAdvancedSection: sectionOptions.withAdvancedSection,
+      await retry.tryForTime(15 * 1000, async () => {
+        await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
+        await this.assertModelMemoryLimitValue(modelMemoryLimit, {
+          withAdvancedSection: sectionOptions.withAdvancedSection,
+        });
       });
     },
 

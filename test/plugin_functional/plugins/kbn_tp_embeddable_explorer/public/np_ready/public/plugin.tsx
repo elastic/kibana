@@ -33,7 +33,6 @@ const REACT_ROOT_ID = 'embeddableExplorerRoot';
 
 import { SayHelloAction, createSendMessageAction } from './embeddable_api';
 import { App } from './app';
-import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -70,27 +69,14 @@ export class EmbeddableExplorerPublicPlugin
     const sayHelloAction = new SayHelloAction(alert);
     const sendMessageAction = createSendMessageAction(core.overlays);
 
-    plugins.uiActions.registerAction(helloWorldAction);
     plugins.uiActions.registerAction(sayHelloAction);
     plugins.uiActions.registerAction(sendMessageAction);
 
-    plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
+    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
-      ReactDOM.render(
-        <App
-          getActions={plugins.uiActions.getTriggerCompatibleActions}
-          getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
-          getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
-          notifications={core.notifications}
-          overlays={core.overlays}
-          inspector={plugins.inspector}
-          SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-          I18nContext={core.i18n.Context}
-        />,
-        root
-      );
+      ReactDOM.render(<App embeddableServices={plugins.embeddable} />, root);
     });
   }
 

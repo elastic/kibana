@@ -17,6 +17,10 @@ import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { getDatasetForField } from './get_dataset_for_field';
+import {
+  CallWithRequestParams,
+  InfraDatabaseSearchResponse,
+} from '../../../lib/adapters/framework';
 
 export const populateSeriesWithTSVBData = (
   request: KibanaRequest,
@@ -52,17 +56,21 @@ export const populateSeriesWithTSVBData = (
   }
   const timerange = { min: options.timerange.from, max: options.timerange.to };
 
+  const client = <Hit = {}, Aggregation = undefined>(
+    opts: CallWithRequestParams
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    framework.callWithRequest(requestContext, 'search', opts);
+
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
   const modules = await Promise.all(
     uniq(options.metrics.filter(m => m.field)).map(
-      async m =>
-        await getDatasetForField(framework, requestContext, m.field as string, options.indexPattern)
+      async m => await getDatasetForField(client, m.field as string, options.indexPattern)
     )
   );
+
   const calculatedInterval = await calculateMetricInterval(
-    framework,
-    requestContext,
+    client,
     {
       indexPattern: options.indexPattern,
       timestampField: options.timerange.field,
@@ -72,7 +80,9 @@ export const populateSeriesWithTSVBData = (
   );
 
   if (calculatedInterval) {
-    model.interval = `>=${calculatedInterval}s`;
+    model.interval = options.forceInterval
+      ? options.timerange.interval
+      : `>=${calculatedInterval}s`;
   }
 
   // Get TSVB results using the model, timerange and filters

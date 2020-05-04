@@ -28,6 +28,7 @@ export default async function({ readConfigFile }) {
       require.resolve('./search'),
       require.resolve('./embeddables'),
       require.resolve('./ui_actions'),
+      require.resolve('./state_sync'),
     ],
     services: {
       ...functionalConfig.get('services'),

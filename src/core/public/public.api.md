@@ -36,6 +36,7 @@ export interface AppBase {
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    defaultPath?: string;
     euiIconType?: string;
     icon?: string;
     id: string;
@@ -168,7 +169,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
@@ -290,7 +291,6 @@ export interface ChromeNavLink {
     readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
-    // @deprecated
     readonly url?: string;
 }
 
@@ -592,6 +592,23 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
+// @internal (undocumented)
+export class HttpFetchError extends Error implements IHttpFetchError {
+    constructor(message: string, name: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly req: Request;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly res?: Response;
+    // (undocumented)
+    readonly response?: Response | undefined;
+}
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
@@ -956,6 +973,7 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1195,7 +1213,9 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     constructor(parentHistory: History, basePath: string);
     get action(): Action;
     block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
-    createHref: (location: LocationDescriptorObject<HistoryLocationState>) => string;
+    createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
+        prependBasePath?: boolean | undefined;
+    }) => string;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;

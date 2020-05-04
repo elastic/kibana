@@ -6,11 +6,12 @@
 
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../../types';
 import { sendInstallPackage, sendRemovePackage } from '../../../hooks';
+import { useLinks } from '.';
 import { InstallStatus } from '../../../types';
 
 interface PackagesInstall {
@@ -19,103 +20,148 @@ interface PackagesInstall {
 
 interface PackageInstallItem {
   status: InstallStatus;
+  version: string | null;
 }
 
-type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
+type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  fromUpdate?: boolean;
+};
+type SetPackageInstallStatusProps = Pick<PackageInfo, 'name'> & PackageInstallItem;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
-  const [packages, setPackage] = useState<PackagesInstall>({});
   const { toDetailView } = useLinks();
+  const [packages, setPackage] = useState<PackagesInstall>({});
 
   const setPackageInstallStatus = useCallback(
-    ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
+    ({ name, status, version }: SetPackageInstallStatusProps) => {
+      const packageProps: PackageInstallItem = {
+        status,
+        version,
+      };
       setPackage((prev: PackagesInstall) => ({
         ...prev,
-        [name]: { status },
+        [name]: packageProps,
       }));
     },
     []
   );
 
-  const installPackage = useCallback(
-    async ({ name, version, title }: InstallPackageProps) => {
-      setPackageInstallStatus({ name, status: InstallStatus.installing });
-      const pkgkey = `${name}-${version}`;
-
-      const res = await sendInstallPackage(pkgkey);
-      if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
-        notifications.toasts.addWarning({
-          title: `Failed to install ${title} package`,
-          text:
-            'Something went wrong while trying to install this package. Please try again later.',
-          iconType: 'alert',
-        });
-      } else {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
-        const SuccessMsg = <p>Successfully installed {name}</p>;
-
-        notifications.toasts.addSuccess({
-          title: `Installed ${title} package`,
-          text: toMountPoint(SuccessMsg),
-        });
-
-        // TODO: this should probably live somewhere else and use <Redirect />,
-        // this hook could return the request state and a component could
-        // use that state. the component should be able to unsubscribe to prevent memory leaks
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-          withAppRoot: false,
-        });
-        if (window.location.href.includes(packageUrl)) window.location.hash = dataSourcesUrl;
-      }
-    },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
-  );
-
   const getPackageInstallStatus = useCallback(
-    (pkg: string): InstallStatus => {
-      return packages[pkg].status;
+    (pkg: string): PackageInstallItem => {
+      return packages[pkg];
     },
     [packages]
   );
 
-  const deletePackage = useCallback(
+  const installPackage = useCallback(
+    async ({ name, version, title, fromUpdate = false }: InstallPackageProps) => {
+      const currStatus = getPackageInstallStatus(name);
+      const newStatus = { ...currStatus, name, status: InstallStatus.installing };
+      setPackageInstallStatus(newStatus);
+      const pkgkey = `${name}-${version}`;
+
+      const res = await sendInstallPackage(pkgkey);
+      if (res.error) {
+        if (fromUpdate) {
+          // if there is an error during update, set it back to the previous version
+          // as handling of bad update is not implemented yet
+          setPackageInstallStatus({ ...currStatus, name });
+        } else {
+          setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version });
+        }
+        notifications.toasts.addWarning({
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallErrorTitle"
+              defaultMessage="Failed to install {title} package"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallErrorDescription"
+              defaultMessage="Something went wrong while trying to install this package. Please try again later."
+            />
+          ),
+          iconType: 'alert',
+        });
+      } else {
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
+        if (fromUpdate) {
+          const settingsUrl = toDetailView({
+            name,
+            version,
+            panel: 'settings',
+          });
+          window.location.href = settingsUrl;
+        }
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallSuccessTitle"
+              defaultMessage="Installed {title}"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageInstallSuccessDescription"
+              defaultMessage="Successfully installed {title}"
+              values={{ title }}
+            />
+          ),
+        });
+      }
+    },
+    [getPackageInstallStatus, notifications.toasts, setPackageInstallStatus, toDetailView]
+  );
+
+  const uninstallPackage = useCallback(
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
-      setPackageInstallStatus({ name, status: InstallStatus.uninstalling });
+      setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
       const pkgkey = `${name}-${version}`;
 
       const res = await sendRemovePackage(pkgkey);
       if (res.error) {
-        setPackageInstallStatus({ name, status: InstallStatus.installed });
+        setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({
-          title: `Failed to delete ${title} package`,
-          text: 'Something went wrong while trying to delete this package. Please try again later.',
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallErrorTitle"
+              defaultMessage="Failed to uninstall {title} package"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallErrorDescription"
+              defaultMessage="Something went wrong while trying to uninstall this package. Please try again later."
+            />
+          ),
           iconType: 'alert',
         });
       } else {
-        setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
-
-        const SuccessMsg = <p>Successfully deleted {title}</p>;
+        setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version: null });
 
         notifications.toasts.addSuccess({
-          title: `Deleted ${title} package`,
-          text: toMountPoint(SuccessMsg),
+          title: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallSuccessTitle"
+              defaultMessage="Uninstalled {title}"
+              values={{ title }}
+            />
+          ),
+          text: toMountPoint(
+            <FormattedMessage
+              id="xpack.ingestManager.integrations.packageUninstallSuccessDescription"
+              defaultMessage="Successfully uninstalled {title}"
+              values={{ title }}
+            />
+          ),
         });
-
-        const packageUrl = toDetailView({ name, version });
-        const dataSourcesUrl = toDetailView({
-          name,
-          version,
-          panel: 'data-sources',
-        });
-        if (window.location.href.includes(packageUrl)) window.location.href = dataSourcesUrl;
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toDetailView]
+    [notifications.toasts, setPackageInstallStatus]
   );
 
   return {
@@ -123,7 +169,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     installPackage,
     setPackageInstallStatus,
     getPackageInstallStatus,
-    deletePackage,
+    uninstallPackage,
   };
 }
 
@@ -132,11 +178,11 @@ export const [
   useInstallPackage,
   useSetPackageInstallStatus,
   useGetPackageInstallStatus,
-  useDeletePackage,
+  useUninstallPackage,
 ] = createContainer(
   usePackageInstall,
   value => value.installPackage,
   value => value.setPackageInstallStatus,
   value => value.getPackageInstallStatus,
-  value => value.deletePackage
+  value => value.uninstallPackage
 );

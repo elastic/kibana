@@ -5,13 +5,30 @@
  */
 
 export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
-export { XJsonMode } from '../../es_ui_shared/console_lang/ace/modes/x_json';
 export {
+  XJsonMode,
   collapseLiteralStrings,
   expandLiteralStrings,
-} from '../../../../src/plugins/es_ui_shared/console_lang/lib';
+} from '../../../../src/plugins/es_ui_shared/public';
 
 export {
   UseRequestConfig,
   useRequest,
 } from '../../../../src/plugins/es_ui_shared/public/request/np_ready_request';
+
+export { getErrorMessage } from '../../ml/common/util/errors';
+
+export {
+  getDataGridSchemaFromKibanaFieldType,
+  getFieldsFromKibanaIndexPattern,
+  multiColumnSortFactory,
+  useDataGrid,
+  useRenderCellValue,
+  DataGrid,
+  EsSorting,
+  RenderCellValue,
+  SearchResponse7,
+  UseDataGridReturnType,
+  UseIndexDataReturnType,
+} from '../../ml/public/application/components/data_grid';
+export { INDEX_STATUS } from '../../ml/public/application/data_frame_analytics/common';

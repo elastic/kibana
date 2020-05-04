@@ -9,6 +9,8 @@ import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../../plugins/actions/server';
+import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface CreateExecutionHandlerOptions {
   alertId: string;
@@ -20,6 +22,7 @@ interface CreateExecutionHandlerOptions {
   apiKey: string | null;
   alertType: AlertType;
   logger: Logger;
+  eventLogger: IEventLogger;
 }
 
 interface ExecutionHandlerOptions {
@@ -39,6 +42,7 @@ export function createExecutionHandler({
   spaceId,
   apiKey,
   alertType,
+  eventLogger,
 }: CreateExecutionHandlerOptions) {
   const alertTypeActionGroups = new Set(pluck(alertType.actionGroups, 'id'));
   return async ({ actionGroup, context, state, alertInstanceId }: ExecutionHandlerOptions) => {
@@ -63,19 +67,43 @@ export function createExecutionHandler({
           }),
         };
       });
+
+    const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
+
     for (const action of actions) {
-      if (actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
-        await actionsPlugin.execute({
-          id: action.id,
-          params: action.params,
-          spaceId,
-          apiKey,
-        });
-      } else {
+      if (!actionsPlugin.isActionExecutable(action.id, action.actionTypeId)) {
         logger.warn(
           `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
         );
+        continue;
       }
+
+      // TODO would be nice  to add the action name here, but it's not available
+      const actionLabel = `${action.actionTypeId}:${action.id}`;
+      await actionsPlugin.execute({
+        id: action.id,
+        params: action.params,
+        spaceId,
+        apiKey,
+      });
+
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
+      const event: IEvent = {
+        event: { action: EVENT_LOG_ACTIONS.executeAction },
+        kibana: {
+          alerting: {
+            instance_id: alertInstanceId,
+          },
+          saved_objects: [
+            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
+            { type: 'action', id: action.id, ...namespace },
+          ],
+        },
+      };
+
+      event.message = `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled actionGroup: '${actionGroup}' action: ${actionLabel}`;
+      eventLogger.logEvent(event);
     }
   };
 }

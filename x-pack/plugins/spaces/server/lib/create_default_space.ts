@@ -5,23 +5,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsLegacyService, IClusterClient } from 'src/core/server';
+import { SavedObjectsServiceStart, SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  esClient: IClusterClient;
-  savedObjects: SavedObjectsLegacyService;
+  savedObjects: Pick<SavedObjectsServiceStart, 'createInternalRepository'>;
 }
 
-export async function createDefaultSpace({ esClient, savedObjects }: Deps) {
-  const { getSavedObjectsRepository, SavedObjectsClient } = savedObjects;
+export async function createDefaultSpace({ savedObjects }: Deps) {
+  const { createInternalRepository } = savedObjects;
 
-  const savedObjectsRepository = getSavedObjectsRepository(esClient.callAsInternalUser, ['space']);
+  const savedObjectsRepository = createInternalRepository(['space']);
 
-  const defaultSpaceExists = await doesDefaultSpaceExist(
-    SavedObjectsClient,
-    savedObjectsRepository
-  );
+  const defaultSpaceExists = await doesDefaultSpaceExist(savedObjectsRepository);
 
   if (defaultSpaceExists) {
     return;
@@ -51,19 +48,19 @@ export async function createDefaultSpace({ esClient, savedObjects }: Deps) {
     // Ignore conflict errors.
     // It is possible that another Kibana instance, or another invocation of this function
     // created the default space in the time it took this to complete.
-    if (SavedObjectsClient.errors.isConflictError(error)) {
+    if (SavedObjectsErrorHelpers.isConflictError(error)) {
       return;
     }
     throw error;
   }
 }
 
-async function doesDefaultSpaceExist(SavedObjectsClient: any, savedObjectsRepository: any) {
+async function doesDefaultSpaceExist(savedObjectsRepository: Pick<SavedObjectsRepository, 'get'>) {
   try {
     await savedObjectsRepository.get('space', DEFAULT_SPACE_ID);
     return true;
   } catch (e) {
-    if (SavedObjectsClient.errors.isNotFoundError(e)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return false;
     }
     throw e;

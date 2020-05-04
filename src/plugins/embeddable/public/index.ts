@@ -23,22 +23,24 @@ import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export {
-  Adapters,
   ACTION_ADD_PANEL,
-  AddPanelAction,
   ACTION_APPLY_FILTER,
+  ACTION_EDIT_PANEL,
+  Adapters,
+  AddPanelAction,
   Container,
   ContainerInput,
   ContainerOutput,
   CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
-  ACTION_EDIT_PANEL,
+  defaultEmbeddableFactoryProvider,
   EditPanelAction,
   Embeddable,
   EmbeddableChildPanel,
   EmbeddableChildPanelProps,
   EmbeddableContext,
   EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactoryRenderer,
   EmbeddableInput,
@@ -46,7 +48,8 @@ export {
   EmbeddableOutput,
   EmbeddablePanel,
   EmbeddableRoot,
-  EmbeddableVisTriggerContext,
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
@@ -55,15 +58,26 @@ export {
   OutputSpec,
   PANEL_BADGE_TRIGGER,
   panelBadgeTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
   PanelNotFoundError,
   PanelState,
   PropertySpec,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
+  isRangeSelectTriggerContext,
+  isValueClickTriggerContext,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
-export { EmbeddableSetup, EmbeddableStart } from './plugin';
+export {
+  EmbeddableSetup,
+  EmbeddableStart,
+  EmbeddableSetupDependencies,
+  EmbeddableStartDependencies,
+} from './plugin';

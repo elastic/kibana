@@ -5,27 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConditionalHeaders, ServerFacade } from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { LevelLogger } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
+import { ConditionalHeaders } from '../../../../types';
 import { PAGELOAD_SELECTOR } from '../../constants';
 
 export const openUrl = async (
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   url: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
-  const config = server.config();
-
   try {
     await browser.open(
       url,
       {
         conditionalHeaders,
         waitForSelector: PAGELOAD_SELECTOR,
-        timeout: config.get('xpack.reporting.capture.timeouts.openUrl'),
+        timeout: captureConfig.timeouts.openUrl,
       },
       logger
     );

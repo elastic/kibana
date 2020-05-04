@@ -8,12 +8,14 @@ import { ScopedClusterClient } from 'src/core/server';
 export {
   // Object types
   Agent,
+  AgentMetadata,
   AgentSOAttributes,
   AgentStatus,
   AgentType,
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,
+  AgentActionSOAttributes,
   Datasource,
   NewDatasource,
   FullAgentConfigDatasource,
@@ -21,6 +23,7 @@ export {
   AgentConfig,
   NewAgentConfig,
   AgentConfigStatus,
+  DataStream,
   Output,
   NewOutput,
   OutputType,
@@ -46,6 +49,10 @@ export {
   RegistrySearchResults,
   RegistrySearchResult,
   DefaultPackages,
+  TemplateRef,
+  IndexTemplateMappings,
+  Settings,
+  SettingsSOAttributes,
 } from '../../common';
 
 export type CallESAsCurrentUser = ScopedClusterClient['callAsCurrentUser'];

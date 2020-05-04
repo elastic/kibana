@@ -5,7 +5,14 @@
  */
 
 import { Store } from 'redux';
+import { MapState } from './map';
+import { MapUiState } from './ui';
 
-export type MapStore = Store;
+export interface MapStoreState {
+  ui: MapUiState;
+  map: MapState;
+}
+
+export type MapStore = Store<MapStoreState>;
 
 export function createMapStore(): MapStore;

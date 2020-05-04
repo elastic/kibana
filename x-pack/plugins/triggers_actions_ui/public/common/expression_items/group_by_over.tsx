@@ -146,16 +146,13 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <Fragment>
               <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                  error={errors.termSize}
-                >
+                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
-                    isInvalid={errors.termSize.length > 0 && termSize !== undefined}
-                    value={termSize}
+                    isInvalid={errors.termSize.length > 0}
+                    value={termSize || ''}
                     onChange={e => {
                       const { value } = e.target;
-                      const termSizeVal = value !== '' ? parseFloat(value) : MIN_TERM_SIZE;
+                      const termSizeVal = value !== '' ? parseFloat(value) : undefined;
                       onChangeSelectedTermSize(termSizeVal);
                     }}
                     min={MIN_TERM_SIZE}

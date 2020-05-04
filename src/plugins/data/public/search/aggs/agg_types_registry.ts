@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BucketAggType } from './buckets/_bucket_agg_type';
+import { BucketAggType } from './buckets/bucket_agg_type';
 import { MetricAggType } from './metrics/metric_agg_type';
 
 export type AggTypesRegistrySetup = ReturnType<AggTypesRegistry['setup']>;

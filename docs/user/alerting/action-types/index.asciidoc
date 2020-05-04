@@ -1,0 +1,24 @@
+[role="xpack"]
+[[index-action-type]]
+=== Index action
+
+The index action type will index a document into {es}.
+
+[float]
+[[index-connector-configuration]]
+==== Connector configuration
+
+Index connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Index::     The {es} index to be written to.
+Refresh::   Setting for the {ref}/docs-refresh.html[refresh] policy for the write request.
+Execution time field::  This field will be automatically set to the time the alert condition was detected.
+
+[float]
+[[index-action-configuration]]
+==== Action configuration
+
+Index actions have the following properties:
+
+Document::  The document to index in json format.

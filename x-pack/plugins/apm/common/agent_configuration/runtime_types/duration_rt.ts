@@ -6,28 +6,45 @@
 
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
-import { amountAndUnitToObject } from '../amount_and_unit';
+import moment, { unitOfTime } from 'moment';
+import { amountAndUnitToObject, AmountAndUnit } from '../amount_and_unit';
+import { getRangeTypeMessage } from './get_range_type_message';
 
-export const DURATION_UNITS = ['s', 'm', 'h'];
+function toMilliseconds({ amount, unit }: AmountAndUnit) {
+  return moment.duration(amount, unit as unitOfTime.Base);
+}
 
-export const durationRt = new t.Type<string, string, unknown>(
-  'durationRt',
-  t.string.is,
-  (input, context) => {
-    return either.chain(t.string.validate(input, context), inputAsString => {
-      const { amount, unit } = amountAndUnitToObject(inputAsString);
-      const amountAsInt = parseInt(amount, 10);
-      const isValidUnit = DURATION_UNITS.includes(unit);
-      const isValid = amountAsInt > 0 && isValidUnit;
+function amountAndUnitToMilliseconds(value?: string) {
+  if (value) {
+    const { amount, unit } = amountAndUnitToObject(value);
+    if (isFinite(amount) && unit) {
+      return toMilliseconds({ amount, unit });
+    }
+  }
+}
 
-      return isValid
-        ? t.success(inputAsString)
-        : t.failure(
-            input,
-            context,
-            `Must have numeric amount and a valid unit (${DURATION_UNITS})`
-          );
-    });
-  },
-  t.identity
-);
+export function getDurationRt({ min, max }: { min?: string; max?: string }) {
+  const minAsMilliseconds = amountAndUnitToMilliseconds(min) ?? -Infinity;
+  const maxAsMilliseconds = amountAndUnitToMilliseconds(max) ?? Infinity;
+  const message = getRangeTypeMessage(min, max);
+
+  return new t.Type<string, string, unknown>(
+    'durationRt',
+    t.string.is,
+    (input, context) => {
+      return either.chain(t.string.validate(input, context), inputAsString => {
+        const inputAsMilliseconds = amountAndUnitToMilliseconds(inputAsString);
+
+        const isValidAmount =
+          inputAsMilliseconds !== undefined &&
+          inputAsMilliseconds >= minAsMilliseconds &&
+          inputAsMilliseconds <= maxAsMilliseconds;
+
+        return isValidAmount
+          ? t.success(inputAsString)
+          : t.failure(input, context, message);
+      });
+    },
+    t.identity
+  );
+}

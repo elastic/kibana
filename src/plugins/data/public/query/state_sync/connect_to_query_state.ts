@@ -91,7 +91,10 @@ export const connectToQueryState = <S extends QueryState>(
     } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
       if (
         !initialState.filters ||
-        !compareFilters(initialState.filters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)
+        !compareFilters(initialState.filters, filterManager.getGlobalFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
       ) {
         initialState.filters = filterManager.getGlobalFilters();
         initialDirty = true;
@@ -99,7 +102,10 @@ export const connectToQueryState = <S extends QueryState>(
     } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
         !initialState.filters ||
-        !compareFilters(initialState.filters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)
+        !compareFilters(initialState.filters, filterManager.getAppFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
       ) {
         initialState.filters = filterManager.getAppFilters();
         initialDirty = true;
@@ -173,11 +179,21 @@ export const connectToQueryState = <S extends QueryState>(
             filterManager.setFilters(_.cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
-          if (!compareFilters(filters, filterManager.getAppFilters(), COMPARE_ALL_OPTIONS)) {
+          if (
+            !compareFilters(filters, filterManager.getAppFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
             filterManager.setAppFilters(_.cloneDeep(filters));
           }
         } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
-          if (!compareFilters(filters, filterManager.getGlobalFilters(), COMPARE_ALL_OPTIONS)) {
+          if (
+            !compareFilters(filters, filterManager.getGlobalFilters(), {
+              ...COMPARE_ALL_OPTIONS,
+              state: false,
+            })
+          ) {
             filterManager.setGlobalFilters(_.cloneDeep(filters));
           }
         }

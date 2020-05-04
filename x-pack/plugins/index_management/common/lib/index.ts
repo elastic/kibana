@@ -5,6 +5,8 @@
  */
 export {
   deserializeTemplateList,
-  deserializeTemplate,
-  serializeTemplate,
+  deserializeV1Template,
+  serializeV1Template,
 } from './template_serialization';
+
+export { getTemplateParameter } from './utils';

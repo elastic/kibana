@@ -19,7 +19,6 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import { SearchSource } from '../../../../../../../../../plugins/data/public';
 
 export function createIndexPatternsStub() {
   return {
@@ -46,17 +45,15 @@ export function createSearchSourceStub(hits, timeField) {
     }),
   };
 
-  searchSourceStub.setParent = sinon
-    .stub(SearchSource.prototype, 'setParent')
-    .returns(searchSourceStub);
-  searchSourceStub.setField = sinon
-    .stub(SearchSource.prototype, 'setField')
-    .returns(searchSourceStub);
-  searchSourceStub.getField = sinon.stub(SearchSource.prototype, 'getField').callsFake(key => {
+  searchSourceStub.setParent = sinon.spy(() => searchSourceStub);
+  searchSourceStub.setField = sinon.spy(() => searchSourceStub);
+
+  searchSourceStub.getField = sinon.spy(key => {
     const previousSetCall = searchSourceStub.setField.withArgs(key).lastCall;
     return previousSetCall ? previousSetCall.args[1] : null;
   });
-  searchSourceStub.fetch = sinon.stub(SearchSource.prototype, 'fetch').callsFake(() =>
+
+  searchSourceStub.fetch = sinon.spy(() =>
     Promise.resolve({
       hits: {
         hits: searchSourceStub._stubHits,
@@ -64,13 +61,6 @@ export function createSearchSourceStub(hits, timeField) {
       },
     })
   );
-
-  searchSourceStub._restore = () => {
-    searchSourceStub.setParent.restore();
-    searchSourceStub.setField.restore();
-    searchSourceStub.getField.restore();
-    searchSourceStub.fetch.restore();
-  };
 
   return searchSourceStub;
 }
@@ -81,8 +71,7 @@ export function createSearchSourceStub(hits, timeField) {
 export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
   const searchSourceStub = createSearchSourceStub(hits, timeField);
 
-  searchSourceStub.fetch.restore();
-  searchSourceStub.fetch = sinon.stub(SearchSource.prototype, 'fetch').callsFake(() => {
+  searchSourceStub.fetch = sinon.spy(() => {
     const timeField = searchSourceStub._stubTimeField;
     const lastQuery = searchSourceStub.setField.withArgs('query').lastCall.args[1];
     const timeRange = lastQuery.query.constant_score.filter.range[timeField];
@@ -99,6 +88,7 @@ export function createContextSearchSourceStub(hits, timeField = '@timestamp') {
           moment(hit[timeField]).isSameOrBefore(timeRange.lte)
       )
       .sort(sortFunction);
+
     return Promise.resolve({
       hits: {
         hits: filteredHits,

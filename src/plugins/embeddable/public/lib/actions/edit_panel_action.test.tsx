@@ -18,14 +18,14 @@
  */
 
 import { EditPanelAction } from './edit_panel_action';
-import { EmbeddableFactory, Embeddable, EmbeddableInput } from '../embeddables';
+import { Embeddable, EmbeddableInput } from '../embeddables';
 import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
-import { EmbeddableStart } from '../../plugin';
+import { embeddablePluginMock } from '../../mocks';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-const getFactory = ((id: string) =>
-  embeddableFactories.get(id)) as EmbeddableStart['getEmbeddableFactory'];
+const { doStart } = embeddablePluginMock.createInstance();
+const start = doStart();
+const getFactory = start.getEmbeddableFactory;
 
 class EditableEmbeddable extends Embeddable {
   public readonly type = 'EDITABLE_EMBEDDABLE';
@@ -41,7 +41,7 @@ class EditableEmbeddable extends Embeddable {
 }
 
 test('is compatible when edit url is available, in edit mode and editable', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, {} as any);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true),
@@ -50,13 +50,13 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
 });
 
 test('getHref returns the edit urls', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, {} as any);
   expect(action.getHref).toBeDefined();
 
   if (action.getHref) {
     const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
     expect(
-      action.getHref({
+      await action.getHref({
         embeddable,
       })
     ).toBe(embeddable.getOutput().editUrl);
@@ -64,7 +64,7 @@ test('getHref returns the edit urls', async () => {
 });
 
 test('is not compatible when edit url is not available', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, {} as any);
   const embeddable = new ContactCardEmbeddable(
     {
       id: '123',
@@ -83,9 +83,7 @@ test('is not compatible when edit url is not available', async () => {
 });
 
 test('is not visible when edit url is available but in view mode', async () => {
-  embeddableFactories.clear();
-  const action = new EditPanelAction((type =>
-    embeddableFactories.get(type)) as EmbeddableStart['getEmbeddableFactory']);
+  const action = new EditPanelAction(getFactory, {} as any);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(
@@ -100,9 +98,7 @@ test('is not visible when edit url is available but in view mode', async () => {
 });
 
 test('is not compatible when edit url is available, in edit mode, but not editable', async () => {
-  embeddableFactories.clear();
-  const action = new EditPanelAction((type =>
-    embeddableFactories.get(type)) as EmbeddableStart['getEmbeddableFactory']);
+  const action = new EditPanelAction(getFactory, {} as any);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(

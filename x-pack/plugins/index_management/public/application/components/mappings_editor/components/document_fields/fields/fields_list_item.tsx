@@ -16,11 +16,13 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields } from '../../../types';
+import { getTypeLabelFromType } from '../../../lib';
 import {
   TYPE_DEFINITION,
   CHILD_FIELD_INDENT_SIZE,
   LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
 } from '../../../constants';
+
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
@@ -252,7 +254,11 @@ function FieldListItemComponent(
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
+            <EuiFlexItem
+              grow={false}
+              className="mappingsEditor__fieldsListItem__name"
+              data-test-subj="fieldName"
+            >
               {source.name}
             </EuiFlexItem>
 
@@ -265,7 +271,7 @@ function FieldListItemComponent(
                         dataType: TYPE_DEFINITION[source.type].label,
                       },
                     })
-                  : TYPE_DEFINITION[source.type].label}
+                  : getTypeLabelFromType(source.type)}
               </EuiBadge>
             </EuiFlexItem>
 

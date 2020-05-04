@@ -17,12 +17,14 @@ import {
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
+import './of.scss';
 
 interface OfExpressionProps {
   aggType: string;
   aggField?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedAggField: (selectedAggType?: string) => void;
   fields: Record<string, any>;
   customAggTypesOptions?: {
@@ -108,7 +110,7 @@ export const OfExpression = ({
           />
         </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}

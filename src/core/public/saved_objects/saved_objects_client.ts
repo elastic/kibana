@@ -28,12 +28,6 @@ import {
   SavedObjectsMigrationVersion,
 } from '../../server';
 
-// TODO: Migrate to an error modal powered by the NP?
-import {
-  isAutoCreateIndexError,
-  showAutoCreateIndexErrorPage,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
@@ -222,15 +216,7 @@ export class SavedObjectsClient {
       }),
     });
 
-    return createRequest
-      .then(resp => this.createSavedObject(resp))
-      .catch((error: object) => {
-        if (isAutoCreateIndexError(error)) {
-          showAutoCreateIndexErrorPage();
-        }
-
-        throw error;
-      });
+    return createRequest.then(resp => this.createSavedObject(resp));
   };
 
   /**
