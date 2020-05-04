@@ -29,14 +29,17 @@ import {
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
+import {
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
+} from '../../../../../src/plugins/embeddable/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { LensMultiTable, FormatFactory } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
+import { getExecuteTriggerActions } from '../services';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { getExecuteTriggerActions } from './services';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -218,8 +221,32 @@ export function XYChart({
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
   function calculateMinInterval() {
-    // add minInterval only for single row value as it cannot be determined from dataset
-    if (data.dateRange && layers.every(layer => data.tables[layer.layerId].rows.length <= 1)) {
+    // check all the tables to see if all of the rows have the same timestamp
+    // that would mean that chart will draw a single bar
+    const isSingleTimestampInXDomain = () => {
+      const nonEmptyLayers = layers.filter(
+        layer => data.tables[layer.layerId].rows.length && layer.xAccessor
+      );
+
+      if (!nonEmptyLayers.length) {
+        return;
+      }
+
+      const firstRowValue =
+        data.tables[nonEmptyLayers[0].layerId].rows[0][nonEmptyLayers[0].xAccessor!];
+      for (const layer of nonEmptyLayers) {
+        if (
+          layer.xAccessor &&
+          data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
+        ) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    // add minInterval only for single point in domain
+    if (data.dateRange && isSingleTimestampInXDomain()) {
       if (xAxisColumn?.meta?.aggConfigParams?.interval !== 'auto')
         return parseInterval(xAxisColumn?.meta?.aggConfigParams?.interval)?.asMilliseconds();
 
@@ -231,14 +258,16 @@ export function XYChart({
     return undefined;
   }
 
-  const xDomain =
-    data.dateRange && layers.every(l => l.xScaleType === 'time')
-      ? {
-          min: data.dateRange.fromDate.getTime(),
-          max: data.dateRange.toDate.getTime(),
-          minInterval: calculateMinInterval(),
-        }
-      : undefined;
+  const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
+
+  const xDomain = isTimeViz
+    ? {
+        min: data.dateRange?.fromDate.getTime(),
+        max: data.dateRange?.toDate.getTime(),
+        minInterval: calculateMinInterval(),
+      }
+    : undefined;
+
   return (
     <Chart>
       <Settings
@@ -248,6 +277,31 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
+        onBrushEnd={(min: number, max: number) => {
+          // in the future we want to make it also for histogram
+          if (!xAxisColumn || !isTimeViz) {
+            return;
+          }
+
+          const firstLayerWithData =
+            layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
+          const table = data.tables[firstLayerWithData.layerId];
+
+          const xAxisColumnIndex = table.columns.findIndex(
+            el => el.id === firstLayerWithData.xAccessor
+          );
+          const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
+
+          const context: RangeSelectTriggerContext = {
+            data: {
+              range: [min, max],
+              table,
+              column: xAxisColumnIndex,
+            },
+            timeFieldName,
+          };
+          executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
+        }}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
           const xySeries = series as XYChartSeriesIdentifier;
@@ -284,10 +338,8 @@ export function XYChart({
             });
           }
 
-          const xAxisFieldName: string | undefined = table.columns.find(
-            col => col.id === layer.xAccessor
-          )?.meta?.aggConfigParams?.field;
-
+          const xAxisFieldName = table.columns.find(el => el.id === layer.xAccessor)?.meta
+            ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
           const context: ValueClickTriggerContext = {
@@ -301,7 +353,6 @@ export function XYChart({
             },
             timeFieldName,
           };
-
           executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
         }}
       />

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, SetupPlugins } from '../../plugin';
+import { CoreSetup } from '../../../../../../src/core/server';
+import { SetupPlugins } from '../../plugin';
 
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';

@@ -27,16 +27,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
@@ -72,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(alertType).to.be(`Always Firing`);
 
         const { actionType, actionCount } = await pageObjects.alertDetailsUI.getActionsLabels();
-        expect(actionType).to.be(`Server log`);
+        expect(actionType).to.be(`Slack`);
         expect(actionCount).to.be(`+1`);
       });
 
@@ -168,6 +172,60 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const alert = await alerting.alerts.createAlertWithActions(
           testRunUuid,
           '.index-threshold',
+          params,
+          [
+            {
+              group: 'threshold met',
+              id: 'my-server-log',
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ]
+        );
+        // refresh to see alert
+        await browser.refresh();
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
+        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+          clearWithKeyboard: true,
+        });
+
+        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+
+        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
+        expect(headingText).to.be(updatedAlertName);
+      });
+
+      it('should reset alert when canceling an edit', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const params = {
+          aggType: 'count',
+          termSize: 5,
+          thresholdComparator: '>',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          groupBy: 'all',
+          threshold: [1000, 5000],
+          index: ['.kibana_1'],
+          timeField: 'alert',
+        };
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          '.index-threshold',
           params
         );
         // refresh to see alert
@@ -189,13 +247,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedAlertButton"]:not(disabled)');
+        await testSubjects.click('cancelSaveEditedAlertButton');
+        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedAlertButton"]');
 
-        const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql(`Updated '${updatedAlertName}'`);
+        await editButton.click();
 
-        const headingText = await pageObjects.alertDetailsUI.getHeadingText();
-        expect(headingText).to.be(updatedAlertName);
+        const nameInputAfterCancel = await testSubjects.find('alertNameInput');
+        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+        expect(textAfterCancel).to.eql(alert.name);
       });
     });
 
@@ -257,16 +316,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
@@ -469,16 +532,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const actions = await Promise.all([
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${0}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${0}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
           alerting.actions.createAction({
-            name: `server-log-${testRunUuid}-${1}`,
-            actionTypeId: '.server-log',
+            name: `slack-${testRunUuid}-${1}`,
+            actionTypeId: '.slack',
             config: {},
-            secrets: {},
+            secrets: {
+              webhookUrl: 'https://test',
+            },
           }),
         ]);
 
