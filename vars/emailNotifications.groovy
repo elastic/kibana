@@ -1,0 +1,93 @@
+def getFailedBuildParts() {
+  def messages = [
+    getFailedSteps(),
+    getTestFailures(),
+  ]
+
+  return messages.findAll { !!it } // No blank strings
+}
+
+def getHeader() {
+  return """<p>
+    <div>Build URL: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
+    <div>Job: ${env.JOB_NAME}</div>
+    <div><a href="https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}">ci.kibana.dev</a></div>
+  </p>"""
+}
+
+def getFailedSteps() {
+  try {
+    def steps = jenkinsApi.getFailedSteps()?.findAll { step ->
+      step.displayName != 'Check out from version control'
+    }
+
+    if (steps?.size() > 0) {
+      def list = steps.collect { """<li><a href="${it.logs}">${it.displayName}</a></li>""" }.join("\n")
+      return "<p><strong>Failed Steps</strong></p><ul>${list}</ul>"
+    }
+  } catch (ex) {
+    buildUtils.printStacktrace(ex)
+    print "Error retrieving failed pipeline steps for message, will skip this section"
+  }
+
+  return ""
+}
+
+def getTestFailures() {
+  def failures = testUtils.getFailures()
+  if (!failures) {
+    return ""
+  }
+
+
+  def list = failures.collect { """<li><a href="${it.url}">${it.fullDisplayName}</a></li>""" }.join("\n")
+  return "<p><strong>Test Failures</strong></p>\n<ul>${list}</lu>"
+}
+
+def getDefaultJenkinsTemplate() {
+  return '${SCRIPT,template="groovy-html.template"}'
+}
+
+def sendFailedBuild(Map params = [:]) {
+  catchErrors {
+    def subject = "${env.JOB_NAME} - Build ${env.BUILD_DISPLAY_NAME} - ${buildUtils.getBuildStatus()}"
+    def body = [
+      getHeader(),
+      params.extra ?: '',
+      getFailedBuildParts(),
+    ]
+      .findAll { !!it }
+      .join("\n\n")
+
+    def config = [
+      // to: 'build-kibana@elastic.co',
+      to: 'brian.seeders@elastic.co',
+      subject: subject,
+      body: body,
+      mimeType: 'text/html',
+    ] + params
+
+    emailext(
+      to: config.to,
+      subject: config.subject,
+      body: config.body,
+      mimeType: config.mimeType,
+    )
+  }
+}
+
+def onFailure(Map options = [:], Closure closure) {
+  // try/finally will NOT work here, because the build status will not have been changed to ERROR when the finally{} block executes
+  catchError {
+    closure()
+  }
+
+  def status = buildUtils.getBuildStatus()
+  if (status != "SUCCESS" && status != "UNSTABLE") {
+    catchErrors {
+      sendFailedBuild(options)
+    }
+  }
+}
+
+return this
