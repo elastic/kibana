@@ -5,10 +5,10 @@
  */
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../type_registry';
-import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionParamsProps } from '../../../types';
-import { EmailActionParams, EmailActionConnector } from './types';
+import { TypeRegistry } from '../../../type_registry';
+import { registerBuiltInActionTypes } from '../index';
+import { ActionTypeModel, ActionParamsProps } from '../../../../types';
+import { EmailActionParams, EmailActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -204,47 +204,6 @@ describe('action params validation', () => {
         subject: [],
       },
     });
-  });
-});
-
-describe('EmailActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
-    expect(actionTypeModel.actionConnectorFields).not.toBeNull();
-    if (!actionTypeModel.actionConnectorFields) {
-      return;
-    }
-    const ConnectorFields = actionTypeModel.actionConnectorFields;
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
-      config: {
-        from: 'test@test.com',
-      },
-    } as EmailActionConnector;
-    const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="emailFromInput"]')
-        .first()
-        .prop('value')
-    ).toBe('test@test.com');
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
   });
 });
 
