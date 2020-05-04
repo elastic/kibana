@@ -15697,7 +15697,6 @@
     "xpack.transform.transformsWizard.cloneTransformTitle": "クローン変換",
     "xpack.transform.transformsWizard.createTransformTitle": "変換の作成",
     "xpack.transform.transformsWizard.stepCreateTitle": "作成",
-    "xpack.transform.transformsWizard.stepDefineTitle": "ピボットの定義",
     "xpack.transform.transformsWizard.stepDetailsTitle": "ジョブの詳細",
     "xpack.transform.transformsWizard.transformDocsLinkText": "変換ドキュメント",
     "xpack.transform.wizard.nextStepButton": "次へ",

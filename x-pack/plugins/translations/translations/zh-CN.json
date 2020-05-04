@@ -15701,7 +15701,6 @@
     "xpack.transform.transformsWizard.cloneTransformTitle": "克隆转换",
     "xpack.transform.transformsWizard.createTransformTitle": "创建转换",
     "xpack.transform.transformsWizard.stepCreateTitle": "创建",
-    "xpack.transform.transformsWizard.stepDefineTitle": "定义透视",
     "xpack.transform.transformsWizard.stepDetailsTitle": "作业详情",
     "xpack.transform.transformsWizard.transformDocsLinkText": "转换文档",
     "xpack.transform.wizard.nextStepButton": "下一个",

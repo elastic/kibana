@@ -302,7 +302,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo(props => {
           </>
         </EuiFormRow>
       </EuiForm>
-      <EuiHorizontalRule margin="xl" />
+      <EuiHorizontalRule margin="m" />
       <EuiForm>
         <EuiFlexGroup justifyContent="spaceBetween">
           {/* Flex Column #1: Pivot Config Form / Advanced Pivot Config Editor */}
