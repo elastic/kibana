@@ -68,7 +68,7 @@ export const ToggleFlyoutTranslations = {
     defaultMessage: 'Open add alert flyout',
   }),
   toggleMonitorStatusContent: i18n.translate('xpack.uptime.toggleAlertButton.content', {
-    defaultMessage: 'Monitor Status alert',
+    defaultMessage: 'Monitor status alert',
   }),
   navigateToAlertingUIAriaLabel: i18n.translate('xpack.uptime.navigateToAlertingUi', {
     defaultMessage: 'Leave Uptime and go to Alerting Management page',
