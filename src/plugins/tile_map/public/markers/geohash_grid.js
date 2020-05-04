@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import L from 'leaflet';
 import { ScaledCirclesMarkers } from './scaled_circles';
 
 export class GeohashGridMarkers extends ScaledCirclesMarkers {

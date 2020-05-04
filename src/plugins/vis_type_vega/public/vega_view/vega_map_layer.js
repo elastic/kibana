@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import L from 'leaflet';
 import 'leaflet-vega';
 import { KibanaMapLayer } from '../../../maps_legacy/public';
 

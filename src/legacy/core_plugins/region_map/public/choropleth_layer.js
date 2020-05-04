@@ -18,7 +18,6 @@
  */
 
 import $ from 'jquery';
-import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';

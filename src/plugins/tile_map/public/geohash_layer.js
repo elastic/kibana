@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import L from 'leaflet';
 import { min, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaMapLayer, MapTypes } from '../../maps_legacy/public';

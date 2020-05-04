@@ -19,9 +19,6 @@
 
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
-import L from 'leaflet';
-import 'leaflet-draw';
-import { ResponsivePopup } from 'leaflet-responsive-popup';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
@@ -230,7 +227,7 @@ export class KibanaMap extends EventEmitter {
       }
 
       if (!this._popup) {
-        this._popup = new ResponsivePopup({ autoPan: false });
+        this._popup = new L.ResponsivePopup({ autoPan: false });
         this._popup.setLatLng(event.position);
         this._popup.setContent(event.content);
         this._leafletMap.openPopup(this._popup);

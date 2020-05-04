@@ -17,11 +17,9 @@
  * under the License.
  */
 
-import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
-import 'leaflet.heat';
 
 /**
  * Map overlay: canvas layer with leaflet.heat plugin
