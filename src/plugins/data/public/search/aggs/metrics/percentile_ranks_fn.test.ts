@@ -37,7 +37,7 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "field": "machine.os.keyword",
               "json": undefined,
-              "values": Array [],
+              "values": undefined,
             },
             "schema": undefined,
             "type": "percentile_ranks",

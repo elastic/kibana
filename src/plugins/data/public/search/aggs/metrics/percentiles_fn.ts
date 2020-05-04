@@ -67,7 +67,6 @@ export const aggPercentiles = (): FunctionDefinition => ({
     percents: {
       types: ['number'],
       multi: true,
-      default: [1, 5, 25, 50, 75, 95, 99],
       help: i18n.translate('data.search.aggs.metrics.percentiles.percents.help', {
         defaultMessage: 'Range of percentiles ranks',
       }),
@@ -76,6 +75,12 @@ export const aggPercentiles = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.percentiles.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+      }),
+    },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.percentiles.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
   },

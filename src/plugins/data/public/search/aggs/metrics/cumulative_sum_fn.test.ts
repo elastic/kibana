@@ -38,7 +38,7 @@ describe('agg_expression_functions', () => {
               "buckets_path": "the_sum",
               "customMetric": undefined,
               "json": undefined,
-              "metricAgg": "custom",
+              "metricAgg": undefined,
             },
             "schema": undefined,
             "type": "cumulative_sum",
@@ -87,13 +87,13 @@ describe('agg_expression_functions', () => {
               "buckets_path": "the_sum",
               "customMetric": undefined,
               "json": undefined,
-              "metricAgg": "custom",
+              "metricAgg": undefined,
             },
             "schema": undefined,
             "type": "cumulative_sum",
           },
           "json": undefined,
-          "metricAgg": "custom",
+          "metricAgg": undefined,
         }
       `);
     });

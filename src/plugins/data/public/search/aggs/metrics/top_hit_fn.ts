@@ -72,14 +72,12 @@ export const aggTopHit = (): FunctionDefinition => ({
     },
     size: {
       types: ['number'],
-      default: 1,
       help: i18n.translate('data.search.aggs.metrics.top_hit.size.help', {
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
     sortOrder: {
       types: ['string'],
-      default: 'desc',
       options: ['desc', 'asc'],
       help: i18n.translate('data.search.aggs.metrics.top_hit.sortOrder.help', {
         defaultMessage: 'Order in which to return the results: asc or desc',
@@ -95,6 +93,12 @@ export const aggTopHit = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.top_hit.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+      }),
+    },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.top_hit.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
   },

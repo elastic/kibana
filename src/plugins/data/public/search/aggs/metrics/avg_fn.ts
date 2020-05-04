@@ -68,6 +68,12 @@ export const aggAvg = (): FunctionDefinition => ({
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.avg.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;

@@ -59,7 +59,6 @@ export const aggSerialDiff = (): FunctionDefinition => ({
     },
     metricAgg: {
       types: ['string'],
-      default: 'custom',
       help: i18n.translate('data.search.aggs.metrics.serial_diff.metricAgg.help', {
         defaultMessage:
           'Id for finding agg config to use for building parent pipeline aggregations',
@@ -82,6 +81,12 @@ export const aggSerialDiff = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.serial_diff.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
+      }),
+    },
+    customLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.serial_diff.customLabel.help', {
+        defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
   },
