@@ -16,14 +16,14 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
       <h3>
         <FormattedMessage
           defaultMessage="Label Template"
-          id="common.ui.fieldEditor.labelTemplateHeader"
+          id="indexPatternManagement.labelTemplateHeader"
           values={Object {}}
         />
       </h3>
       <p>
         <FormattedMessage
           defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
-          id="common.ui.fieldEditor.labelTemplateLabel"
+          id="indexPatternManagement.labelTemplateLabel"
           values={
             Object {
               "doubleCurlyBraces": <EuiCode>
@@ -38,10 +38,10 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
           <EuiCode>
             value
           </EuiCode>
-           — 
+           —
           <FormattedMessage
             defaultMessage="The fields value"
-            id="common.ui.fieldEditor.labelTemplate.valueLabel"
+            id="indexPatternManagement.labelTemplate.valueLabel"
             values={Object {}}
           />
         </li>
@@ -49,10 +49,10 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
           <EuiCode>
             url
           </EuiCode>
-           — 
+           —
           <FormattedMessage
             defaultMessage="The formatted URL"
-            id="common.ui.fieldEditor.labelTemplate.urlLabel"
+            id="indexPatternManagement.labelTemplate.urlLabel"
             values={Object {}}
           />
         </li>
@@ -60,7 +60,7 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
       <h4>
         <FormattedMessage
           defaultMessage="Examples"
-          id="common.ui.fieldEditor.labelTemplate.examplesHeader"
+          id="indexPatternManagement.labelTemplate.examplesHeader"
           values={Object {}}
         />
       </h4>

@@ -97,7 +97,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
             field: 'regex',
             name: (
               <FormattedMessage
-                id="common.ui.fieldEditor.color.patternLabel"
+                id="indexPatternManagement.color.patternLabel"
                 defaultMessage="Pattern (regular expression)"
               />
             ),
@@ -121,7 +121,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
             field: 'range',
             name: (
               <FormattedMessage
-                id="common.ui.fieldEditor.color.rangeLabel"
+                id="indexPatternManagement.color.rangeLabel"
                 defaultMessage="Range (min:max)"
               />
             ),
@@ -145,7 +145,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         field: 'text',
         name: (
           <FormattedMessage
-            id="common.ui.fieldEditor.color.textColorLabel"
+            id="indexPatternManagement.color.textColorLabel"
             defaultMessage="Text color"
           />
         ),
@@ -169,7 +169,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         field: 'background',
         name: (
           <FormattedMessage
-            id="common.ui.fieldEditor.color.backgroundLabel"
+            id="indexPatternManagement.color.backgroundLabel"
             defaultMessage="Background color"
           />
         ),
@@ -192,7 +192,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
       {
         name: (
           <FormattedMessage
-            id="common.ui.fieldEditor.color.exampleLabel"
+            id="indexPatternManagement.color.exampleLabel"
             defaultMessage="Example"
           />
         ),
@@ -211,15 +211,15 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
       },
       {
         field: 'actions',
-        name: i18n.translate('common.ui.fieldEditor.color.actions', {
+        name: i18n.translate('indexPatternManagement.color.actions', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            name: i18n.translate('common.ui.fieldEditor.color.deleteAria', {
+            name: i18n.translate('indexPatternManagement.color.deleteAria', {
               defaultMessage: 'Delete',
             }),
-            description: i18n.translate('common.ui.fieldEditor.color.deleteTitle', {
+            description: i18n.translate('indexPatternManagement.color.deleteTitle', {
               defaultMessage: 'Delete color format',
             }),
             onClick: (item: IndexedColor) => {
@@ -240,7 +240,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
         <EuiSpacer size="m" />
         <EuiButton iconType="plusInCircle" size="s" onClick={this.addColor}>
           <FormattedMessage
-            id="common.ui.fieldEditor.color.addColorButton"
+            id="indexPatternManagement.color.addColorButton"
             defaultMessage="Add color"
           />
         </EuiButton>

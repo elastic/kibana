@@ -27,7 +27,7 @@ export const Header = () => (
     <EuiTitle size="s">
       <h3>
         <FormattedMessage
-          id="kbn.management.editIndexPattern.sourceHeader"
+          id="indexPatternManagement.editIndexPattern.sourceHeader"
           defaultMessage="Source filters"
         />
       </h3>
@@ -35,7 +35,7 @@ export const Header = () => (
     <EuiText>
       <p>
         <FormattedMessage
-          id="kbn.management.editIndexPattern.sourceLabel"
+          id="indexPatternManagement.editIndexPattern.sourceLabel"
           defaultMessage="Source filters can be used to exclude one or more fields when fetching the document source. This happens when
           viewing a document in the Discover app, or with a table displaying results from a saved search in the Dashboard app. Each row is
           built using the source of a single document, and if you have documents with large or unimportant fields you may benefit from
@@ -44,7 +44,7 @@ export const Header = () => (
       </p>
       <p>
         <FormattedMessage
-          id="kbn.management.editIndexPattern.source.noteLabel"
+          id="indexPatternManagement.editIndexPattern.source.noteLabel"
           defaultMessage="Note that multi-fields will incorrectly appear as matches in the table below. These filters only actually apply
           to fields in the original source document, so matching multi-fields are not actually being filtered."
         />

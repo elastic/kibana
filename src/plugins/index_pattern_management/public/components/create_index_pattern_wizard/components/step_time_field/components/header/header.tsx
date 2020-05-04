@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
-          id="kbn.management.createIndexPattern.stepTimeHeader"
+          id="indexPatternManagement.createIndexPattern.stepTimeHeader"
           defaultMessage="Step 2 of 2: Configure settings"
         />
       </h2>
@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ indexPattern, indexPatternName }
     <EuiSpacer size="m" />
     <EuiText color="subdued">
       <FormattedMessage
-        id="kbn.management.createIndexPattern.stepTimeLabel"
+        id="indexPatternManagement.createIndexPattern.stepTimeLabel"
         defaultMessage="You've defined {indexPattern} as your {indexPatternName}. Now you can specify some settings before we create it."
         values={{
           indexPattern: <strong>{indexPattern}</strong>,

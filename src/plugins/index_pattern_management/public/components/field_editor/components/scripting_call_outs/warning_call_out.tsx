@@ -38,7 +38,7 @@ export const ScriptingWarningCallOut = ({
       <EuiCallOut
         title={
           <FormattedMessage
-            id="common.ui.fieldEditor.warningCallOutHeader"
+            id="indexPatternManagement.warningCallOutHeader"
             defaultMessage="Proceed with caution"
           />
         }
@@ -47,13 +47,13 @@ export const ScriptingWarningCallOut = ({
       >
         <p>
           <FormattedMessage
-            id="common.ui.fieldEditor.warningCallOutLabel.callOutDetail"
+            id="indexPatternManagement.warningCallOutLabel.callOutDetail"
             defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
             values={{
               scripFields: (
                 <EuiLink target="_blank" href={docLinksScriptedFields.scriptFields}>
                   <FormattedMessage
-                    id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink"
+                    id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
                     defaultMessage="script fields"
                   />
                   &nbsp;
@@ -63,7 +63,7 @@ export const ScriptingWarningCallOut = ({
               scriptsInAggregation: (
                 <EuiLink target="_blank" href={docLinksScriptedFields.scriptAggs}>
                   <FormattedMessage
-                    id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
+                    id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"
                   />
                   &nbsp;
@@ -75,7 +75,7 @@ export const ScriptingWarningCallOut = ({
         </p>
         <p>
           <FormattedMessage
-            id="common.ui.fieldEditor.warningCallOut.descriptionLabel"
+            id="indexPatternManagement.warningCallOut.descriptionLabel"
             defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and
             if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions
             will be thrown all over the place!"

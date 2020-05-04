@@ -37,7 +37,7 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
       <EuiText grow={false}>
         <h2>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.title"
+            id="indexPatternManagement.indexPatternPrompt.title"
             defaultMessage="About index patterns"
           />
         </h2>
@@ -47,7 +47,7 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
       <EuiText textAlign="left">
         <p>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.subtitle"
+            id="indexPatternManagement.indexPatternPrompt.subtitle"
             defaultMessage="Index patterns allow you to bucket disparate data sources together so their shared fields may be queried in
           Kibana."
           />
@@ -57,7 +57,7 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
       <EuiText textAlign="left">
         <h3>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.examplesTitle"
+            id="indexPatternManagement.indexPatternPrompt.examplesTitle"
             defaultMessage="Examples of index patterns"
           />
         </h3>
@@ -66,38 +66,38 @@ export const CreateIndexPatternPrompt = ({ onClose }: { onClose: () => void }) =
       <EuiDescriptionList className="indexPatternListPrompt__descList">
         <EuiDescriptionListTitle>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleOneTitle"
+            id="indexPatternManagement.indexPatternPrompt.exampleOneTitle"
             defaultMessage="Single data source"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleOne"
+            id="indexPatternManagement.indexPatternPrompt.exampleOne"
             defaultMessage="Index a single data source named log-west-001 so you can build charts or query its contents fast."
           />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleTwoTitle"
+            id="indexPatternManagement.indexPatternPrompt.exampleTwoTitle"
             defaultMessage="Multiple data sources"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleTwo"
+            id="indexPatternManagement.indexPatternPrompt.exampleTwo"
             defaultMessage="Group all incoming data sources starting with log-west* so you can query against all your west coast server
             logs."
           />
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleThreeTitle"
+            id="indexPatternManagement.indexPatternPrompt.exampleThreeTitle"
             defaultMessage="Custom groupings"
           />
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
           <FormattedMessage
-            id="kbn.management.indexPatternPrompt.exampleThree"
+            id="indexPatternManagement.indexPatternPrompt.exampleThree"
             defaultMessage="Specifically group your archived, monthly, roll-up metrics of those logs into a separate index pattern so
             you can aggregate historical trends to compare."
           />

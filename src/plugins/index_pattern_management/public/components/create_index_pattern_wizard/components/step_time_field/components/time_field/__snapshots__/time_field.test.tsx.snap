@@ -13,14 +13,14 @@ exports[`TimeField should render a loading state 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
             defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
         </p>
@@ -38,7 +38,7 @@ exports[`TimeField should render a loading state 1`] = `
           <span>
             <FormattedMessage
               defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
               values={Object {}}
             />
           </span>
@@ -84,14 +84,14 @@ exports[`TimeField should render a selected time field 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
             defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
         </p>
@@ -109,7 +109,7 @@ exports[`TimeField should render a selected time field 1`] = `
           <span>
             <FormattedMessage
               defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
               values={Object {}}
             />
           </span>
@@ -123,7 +123,7 @@ exports[`TimeField should render a selected time field 1`] = `
           >
             <FormattedMessage
               defaultMessage="Refresh"
-              id="kbn.management.createIndexPattern.stepTime.refreshButton"
+              id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
           </ForwardRef>
@@ -165,14 +165,14 @@ exports[`TimeField should render normally 1`] = `
         <p>
           <FormattedMessage
             defaultMessage="The Time Filter will use this field to filter your data by time."
-            id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
             values={Object {}}
           />
         </p>
         <p>
           <FormattedMessage
             defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
-            id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
             values={Object {}}
           />
         </p>
@@ -190,7 +190,7 @@ exports[`TimeField should render normally 1`] = `
           <span>
             <FormattedMessage
               defaultMessage="Time Filter field name"
-              id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+              id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
               values={Object {}}
             />
           </span>
@@ -204,7 +204,7 @@ exports[`TimeField should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Refresh"
-              id="kbn.management.createIndexPattern.stepTime.refreshButton"
+              id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
               values={Object {}}
             />
           </ForwardRef>
@@ -239,7 +239,7 @@ exports[`TimeField should render something if hiding time field 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="The indices which match this index pattern don't contain any time fields."
-        id="kbn.management.createIndexPattern.stepTime.field.noTimeFieldsLabel"
+        id="indexPatternManagement.createIndexPattern.stepTime.field.noTimeFieldsLabel"
         values={Object {}}
       />
     </p>

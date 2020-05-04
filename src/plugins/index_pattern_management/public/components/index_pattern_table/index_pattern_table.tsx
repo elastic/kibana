@@ -87,7 +87,7 @@ const search = {
   },
 };
 
-const ariaRegion = i18n.translate('kbn.management.editIndexPatternLiveRegionAriaLabel', {
+const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRegionAriaLabel', {
   defaultMessage: 'Index patterns',
 });
 
@@ -116,7 +116,7 @@ export const IndexPatternTable = ({
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>
       <FormattedMessage
-        id="kbn.management.indexPatternTable.createBtn"
+        id="indexPatternManagement.indexPatternTable.createBtn"
         defaultMessage="Create index pattern"
       />
     </CreateButton>
@@ -139,7 +139,7 @@ export const IndexPatternTable = ({
               <EuiText>
                 <h2>
                   <FormattedMessage
-                    id="kbn.management.indexPatternTable.title"
+                    id="indexPatternManagement.indexPatternTable.title"
                     defaultMessage="Index patterns"
                   />
                 </h2>

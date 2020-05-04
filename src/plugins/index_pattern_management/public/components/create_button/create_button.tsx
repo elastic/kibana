@@ -139,7 +139,7 @@ export class CreateButton extends Component<Props, State> {
     return (
       <EuiBadge color={euiColorAccent}>
         <FormattedMessage
-          id="kbn.management.indexPatternList.createButton.betaLabel"
+          id="indexPatternManagement.indexPatternList.createButton.betaLabel"
           defaultMessage="Beta"
         />
       </EuiBadge>

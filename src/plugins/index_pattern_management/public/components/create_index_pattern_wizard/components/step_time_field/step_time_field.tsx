@@ -34,8 +34,8 @@ import { Header } from './components/header';
 import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
-import { IndexPatternCreationConfig } from '../../../../../../../../../../plugins/index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../../../../../../../plugins/data/public';
+import { IndexPatternCreationConfig } from '../../../..';
+import { DataPublicPluginStart } from '../../../../../../data/public';
 
 interface StepTimeFieldProps {
   indexPattern: string;
@@ -157,7 +157,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     // `createIndexPattern` throws "Conflict" when index pattern ID already exists.
     return message === 'Conflict' ? (
       <FormattedMessage
-        id="kbn.management.createIndexPattern.stepTime.patterAlreadyExists"
+        id="indexPatternManagement.createIndexPattern.stepTime.patterAlreadyExists"
         defaultMessage="Custom index pattern ID already exists."
       />
     ) : (
@@ -187,7 +187,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
             <EuiFlexItem grow={false}>
               <EuiText>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.stepTime.creatingLabel"
+                  id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
                   defaultMessage="Creating index pattern…"
                 />
               </EuiText>
@@ -218,7 +218,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         <EuiCallOut
           title={
             <FormattedMessage
-              id="kbn.management.createIndexPattern.stepTime.error"
+              id="indexPatternManagement.createIndexPattern.stepTime.error"
               defaultMessage="Error"
             />
           }

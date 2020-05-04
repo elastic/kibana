@@ -8,7 +8,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Proceed with caution"
-        id="common.ui.fieldEditor.warningCallOutHeader"
+        id="indexPatternManagement.warningCallOutHeader"
         values={Object {}}
       />
     }
@@ -16,7 +16,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="Please familiarize yourself with {scripFields} and with {scriptsInAggregation} before using scripted fields."
-        id="common.ui.fieldEditor.warningCallOutLabel.callOutDetail"
+        id="indexPatternManagement.warningCallOutLabel.callOutDetail"
         values={
           Object {
             "scripFields": <ForwardRef
@@ -24,10 +24,10 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="script fields"
-                id="common.ui.fieldEditor.warningCallOutLabel.scripFieldsLink"
+                id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
                 values={Object {}}
               />
-               
+
               <EuiIcon
                 type="link"
               />
@@ -37,10 +37,10 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="scripts in aggregations"
-                id="common.ui.fieldEditor.warningCallOutLabel.scriptsInAggregationLink"
+                id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
                 values={Object {}}
               />
-               
+
               <EuiIcon
                 type="link"
               />
@@ -52,7 +52,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause Kibana to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
-        id="common.ui.fieldEditor.warningCallOut.descriptionLabel"
+        id="indexPatternManagement.warningCallOut.descriptionLabel"
         values={Object {}}
       />
     </p>

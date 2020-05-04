@@ -21,7 +21,7 @@ exports[`LoadingIndices should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Looking for matching indices…"
-          id="kbn.management.createIndexPattern.step.loadingHeader"
+          id="indexPatternManagement.createIndexPattern.step.loadingHeader"
           values={Object {}}
         />
       </EuiTextColor>
@@ -39,7 +39,7 @@ exports[`LoadingIndices should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Just a sec…"
-          id="kbn.management.createIndexPattern.step.loadingLabel"
+          id="indexPatternManagement.createIndexPattern.step.loadingLabel"
           values={Object {}}
         />
       </EuiTextColor>

@@ -146,7 +146,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
       <Fragment>
         <EuiFormRow
           label={
-            <FormattedMessage id="common.ui.fieldEditor.url.widthLabel" defaultMessage="Width" />
+            <FormattedMessage id="indexPatternManagement.url.widthLabel" defaultMessage="Width" />
           }
         >
           <EuiFieldNumber
@@ -159,7 +159,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         </EuiFormRow>
         <EuiFormRow
           label={
-            <FormattedMessage id="common.ui.fieldEditor.url.heightLabel" defaultMessage="Height" />
+            <FormattedMessage id="indexPatternManagement.url.heightLabel" defaultMessage="Height" />
           }
         >
           <EuiFieldNumber
@@ -190,7 +190,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         />
         <EuiFormRow
           label={
-            <FormattedMessage id="common.ui.fieldEditor.url.typeLabel" defaultMessage="Type" />
+            <FormattedMessage id="indexPatternManagement.url.typeLabel" defaultMessage="Type" />
           }
         >
           <EuiSelect
@@ -212,7 +212,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiFormRow
             label={
               <FormattedMessage
-                id="common.ui.fieldEditor.url.openTabLabel"
+                id="indexPatternManagement.url.openTabLabel"
                 defaultMessage="Open in a new tab"
               />
             }
@@ -220,9 +220,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             <EuiSwitch
               label={
                 formatParams.openLinkInCurrentTab ? (
-                  <FormattedMessage id="common.ui.fieldEditor.url.offLabel" defaultMessage="Off" />
+                  <FormattedMessage id="indexPatternManagement.url.offLabel" defaultMessage="Off" />
                 ) : (
-                  <FormattedMessage id="common.ui.fieldEditor.url.onLabel" defaultMessage="On" />
+                  <FormattedMessage id="indexPatternManagement.url.onLabel" defaultMessage="On" />
                 )
               }
               checked={!formatParams.openLinkInCurrentTab}
@@ -236,14 +236,14 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.url.urlTemplateLabel"
+              id="indexPatternManagement.url.urlTemplateLabel"
               defaultMessage="URL template"
             />
           }
           helpText={
             <EuiLink onClick={this.showUrlTemplateHelp}>
               <FormattedMessage
-                id="common.ui.fieldEditor.url.template.helpLinkText"
+                id="indexPatternManagement.url.template.helpLinkText"
                 defaultMessage="URL template help"
               />
             </EuiLink>
@@ -263,14 +263,14 @@ export class UrlFormatEditor extends DefaultFormatEditor<
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.url.labelTemplateLabel"
+              id="indexPatternManagement.url.labelTemplateLabel"
               defaultMessage="Label template"
             />
           }
           helpText={
             <EuiLink onClick={this.showLabelTemplateHelp}>
               <FormattedMessage
-                id="common.ui.fieldEditor.url.labelTemplateHelpText"
+                id="indexPatternManagement.url.labelTemplateHelpText"
                 defaultMessage="Label template help"
               />
             </EuiLink>

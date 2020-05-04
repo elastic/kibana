@@ -46,11 +46,11 @@ export class Table extends PureComponent<TableProps> {
     const columns: Array<EuiBasicTableColumn<ScriptedFieldItem>> = [
       {
         field: 'displayName',
-        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.nameHeader', {
+        name: i18n.translate('indexPatternManagement.editIndexPattern.scripted.table.nameHeader', {
           defaultMessage: 'Name',
         }),
         description: i18n.translate(
-          'kbn.management.editIndexPattern.scripted.table.nameDescription',
+          'indexPatternManagement.editIndexPattern.scripted.table.nameDescription',
           { defaultMessage: 'Name of the field' }
         ),
         dataType: 'string',
@@ -59,11 +59,11 @@ export class Table extends PureComponent<TableProps> {
       },
       {
         field: 'lang',
-        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.langHeader', {
+        name: i18n.translate('indexPatternManagement.editIndexPattern.scripted.table.langHeader', {
           defaultMessage: 'Lang',
         }),
         description: i18n.translate(
-          'kbn.management.editIndexPattern.scripted.table.langDescription',
+          'indexPatternManagement.editIndexPattern.scripted.table.langDescription',
           { defaultMessage: 'Language used for the field' }
         ),
         dataType: 'string',
@@ -72,11 +72,14 @@ export class Table extends PureComponent<TableProps> {
       },
       {
         field: 'script',
-        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.scriptHeader', {
-          defaultMessage: 'Script',
-        }),
+        name: i18n.translate(
+          'indexPatternManagement.editIndexPattern.scripted.table.scriptHeader',
+          {
+            defaultMessage: 'Script',
+          }
+        ),
         description: i18n.translate(
-          'kbn.management.editIndexPattern.scripted.table.scriptDescription',
+          'indexPatternManagement.editIndexPattern.scripted.table.scriptDescription',
           { defaultMessage: 'Script for the field' }
         ),
         dataType: 'string',
@@ -84,11 +87,14 @@ export class Table extends PureComponent<TableProps> {
       },
       {
         field: 'name',
-        name: i18n.translate('kbn.management.editIndexPattern.scripted.table.formatHeader', {
-          defaultMessage: 'Format',
-        }),
+        name: i18n.translate(
+          'indexPatternManagement.editIndexPattern.scripted.table.formatHeader',
+          {
+            defaultMessage: 'Format',
+          }
+        ),
         description: i18n.translate(
-          'kbn.management.editIndexPattern.scripted.table.formatDescription',
+          'indexPatternManagement.editIndexPattern.scripted.table.formatDescription',
           { defaultMessage: 'Format used for the field' }
         ),
         render: this.renderFormatCell,
@@ -99,11 +105,14 @@ export class Table extends PureComponent<TableProps> {
         actions: [
           {
             type: 'icon',
-            name: i18n.translate('kbn.management.editIndexPattern.scripted.table.editHeader', {
-              defaultMessage: 'Edit',
-            }),
+            name: i18n.translate(
+              'indexPatternManagement.editIndexPattern.scripted.table.editHeader',
+              {
+                defaultMessage: 'Edit',
+              }
+            ),
             description: i18n.translate(
-              'kbn.management.editIndexPattern.scripted.table.editDescription',
+              'indexPatternManagement.editIndexPattern.scripted.table.editDescription',
               { defaultMessage: 'Edit this field' }
             ),
             icon: 'pencil',
@@ -111,11 +120,14 @@ export class Table extends PureComponent<TableProps> {
           },
           {
             type: 'icon',
-            name: i18n.translate('kbn.management.editIndexPattern.scripted.table.deleteHeader', {
-              defaultMessage: 'Delete',
-            }),
+            name: i18n.translate(
+              'indexPatternManagement.editIndexPattern.scripted.table.deleteHeader',
+              {
+                defaultMessage: 'Delete',
+              }
+            ),
             description: i18n.translate(
-              'kbn.management.editIndexPattern.scripted.table.deleteDescription',
+              'indexPatternManagement.editIndexPattern.scripted.table.deleteDescription',
               { defaultMessage: 'Delete this field' }
             ),
             icon: 'trash',

@@ -40,7 +40,7 @@ export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
 
 export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 
-const title = i18n.translate('indexPatternManagement.appLabel', {
+const title = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
   defaultMessage: 'Index Patterns',
 });
 

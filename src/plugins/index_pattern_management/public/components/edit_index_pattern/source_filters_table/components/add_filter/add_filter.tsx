@@ -27,10 +27,13 @@ interface AddFilterProps {
   onAddFilter: (filter: string) => void;
 }
 
-const sourcePlaceholder = i18n.translate('kbn.management.editIndexPattern.sourcePlaceholder', {
-  defaultMessage:
-    "source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
-});
+const sourcePlaceholder = i18n.translate(
+  'indexPatternManagement.editIndexPattern.sourcePlaceholder',
+  {
+    defaultMessage:
+      "source filter, accepts wildcards (e.g., `user*` to filter fields starting with 'user')",
+  }
+);
 
 export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
   const [filter, setFilter] = useState<string>('');
@@ -53,7 +56,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
       <EuiFlexItem>
         <EuiButton isDisabled={filter.length === 0} onClick={onAddButtonClick}>
           <FormattedMessage
-            id="kbn.management.editIndexPattern.source.addButtonLabel"
+            id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
             defaultMessage="Add"
           />
         </EuiButton>

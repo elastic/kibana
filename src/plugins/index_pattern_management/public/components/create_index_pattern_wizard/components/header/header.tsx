@@ -52,7 +52,7 @@ export const Header = ({
     <EuiTitle>
       <h1>
         <FormattedMessage
-          id="kbn.management.createIndexPatternHeader"
+          id="indexPatternManagement.createIndexPatternHeader"
           defaultMessage="Create {indexPatternName}"
           values={{
             indexPatternName,
@@ -62,7 +62,7 @@ export const Header = ({
           <Fragment>
             {' '}
             <EuiBetaBadge
-              label={i18n.translate('kbn.management.createIndexPattern.betaLabel', {
+              label={i18n.translate('indexPatternManagement.createIndexPattern.betaLabel', {
                 defaultMessage: 'Beta',
               })}
             />
@@ -76,7 +76,7 @@ export const Header = ({
           <p>
             <EuiTextColor color="subdued">
               <FormattedMessage
-                id="kbn.management.createIndexPatternLabel"
+                id="indexPatternManagement.createIndexPatternLabel"
                 defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
               />
             </EuiTextColor>
@@ -88,7 +88,7 @@ export const Header = ({
           <EuiSwitch
             label={
               <FormattedMessage
-                id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
                 defaultMessage="Include system indices"
               />
             }

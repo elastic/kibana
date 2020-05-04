@@ -52,7 +52,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     title={
       <FormattedMessage
         defaultMessage="Error"
-        id="kbn.management.createIndexPattern.stepTime.error"
+        id="indexPatternManagement.createIndexPattern.stepTime.error"
         values={Object {}}
       />
     }
@@ -60,7 +60,7 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     <p>
       <FormattedMessage
         defaultMessage="Custom index pattern ID already exists."
-        id="kbn.management.createIndexPattern.stepTime.patterAlreadyExists"
+        id="indexPatternManagement.createIndexPattern.stepTime.patterAlreadyExists"
         values={Object {}}
       />
     </p>
@@ -92,7 +92,7 @@ exports[`StepTimeField should render a loading state when creating the index pat
       <EuiText>
         <FormattedMessage
           defaultMessage="Creating index pattern…"
-          id="kbn.management.createIndexPattern.stepTime.creatingLabel"
+          id="indexPatternManagement.createIndexPattern.stepTime.creatingLabel"
           values={Object {}}
         />
       </EuiText>
@@ -269,7 +269,7 @@ exports[`StepTimeField should render any error message 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Error"
-        id="kbn.management.createIndexPattern.stepTime.error"
+        id="indexPatternManagement.createIndexPattern.stepTime.error"
         values={Object {}}
       />
     }

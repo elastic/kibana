@@ -44,12 +44,12 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
     >
       {isVisible ? (
         <FormattedMessage
-          id="kbn.management.createIndexPattern.stepTime.options.hideButton"
+          id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
           defaultMessage="Hide advanced options"
         />
       ) : (
         <FormattedMessage
-          id="kbn.management.createIndexPattern.stepTime.options.showButton"
+          id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
           defaultMessage="Show advanced options"
         />
       )}
@@ -60,13 +60,13 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         <EuiFormRow
           label={
             <FormattedMessage
-              id="kbn.management.createIndexPattern.stepTime.options.patternHeader"
+              id="indexPatternManagement.createIndexPattern.stepTime.options.patternHeader"
               defaultMessage="Custom index pattern ID"
             />
           }
           helpText={
             <FormattedMessage
-              id="kbn.management.createIndexPattern.stepTime.options.patternLabel"
+              id="indexPatternManagement.createIndexPattern.stepTime.options.patternLabel"
               defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
             enter a custom one."
             />
@@ -78,7 +78,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             value={indexPatternId}
             onChange={onChangeIndexPatternId}
             placeholder={i18n.translate(
-              'kbn.management.createIndexPattern.stepTime.options.patternPlaceholder',
+              'indexPatternManagement.createIndexPattern.stepTime.options.patternPlaceholder',
               {
                 defaultMessage: 'custom-index-pattern-id',
               }

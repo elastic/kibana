@@ -8,7 +8,7 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
   >
     <FormattedMessage
       defaultMessage="Show advanced options"
-      id="kbn.management.createIndexPattern.stepTime.options.showButton"
+      id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
       values={Object {}}
     />
   </EuiButtonEmpty>
@@ -26,7 +26,7 @@ exports[`AdvancedOptions should render normally 1`] = `
   >
     <FormattedMessage
       defaultMessage="Hide advanced options"
-      id="kbn.management.createIndexPattern.stepTime.options.hideButton"
+      id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
       values={Object {}}
     />
   </EuiButtonEmpty>
@@ -43,14 +43,14 @@ exports[`AdvancedOptions should render normally 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one."
-          id="kbn.management.createIndexPattern.stepTime.options.patternLabel"
+          id="indexPatternManagement.createIndexPattern.stepTime.options.patternLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Custom index pattern ID"
-          id="kbn.management.createIndexPattern.stepTime.options.patternHeader"
+          id="indexPatternManagement.createIndexPattern.stepTime.options.patternHeader"
           values={Object {}}
         />
       }

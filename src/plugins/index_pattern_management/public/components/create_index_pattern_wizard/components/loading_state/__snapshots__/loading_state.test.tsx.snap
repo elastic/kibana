@@ -22,7 +22,7 @@ exports[`LoadingState should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Checking for Elasticsearch data"
-          id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+          id="indexPatternManagement.createIndexPattern.loadingState.checkingLabel"
           values={Object {}}
         />
       </h2>

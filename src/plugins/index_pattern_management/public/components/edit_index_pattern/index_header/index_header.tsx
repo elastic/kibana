@@ -37,27 +37,33 @@ interface IndexHeaderProps {
   deleteIndexPattern?: () => void;
 }
 
-const setDefaultAriaLabel = i18n.translate('kbn.management.editIndexPattern.setDefaultAria', {
-  defaultMessage: 'Set as default index.',
-});
+const setDefaultAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.setDefaultAria',
+  {
+    defaultMessage: 'Set as default index.',
+  }
+);
 
-const setDefaultTooltip = i18n.translate('kbn.management.editIndexPattern.setDefaultTooltip', {
-  defaultMessage: 'Set as default index.',
-});
+const setDefaultTooltip = i18n.translate(
+  'indexPatternManagement.editIndexPattern.setDefaultTooltip',
+  {
+    defaultMessage: 'Set as default index.',
+  }
+);
 
-const refreshAriaLabel = i18n.translate('kbn.management.editIndexPattern.refreshAria', {
+const refreshAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.refreshAria', {
   defaultMessage: 'Reload field list.',
 });
 
-const refreshTooltip = i18n.translate('kbn.management.editIndexPattern.refreshTooltip', {
+const refreshTooltip = i18n.translate('indexPatternManagement.editIndexPattern.refreshTooltip', {
   defaultMessage: 'Refresh field list.',
 });
 
-const removeAriaLabel = i18n.translate('kbn.management.editIndexPattern.removeAria', {
+const removeAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.removeAria', {
   defaultMessage: 'Remove index pattern.',
 });
 
-const removeTooltip = i18n.translate('kbn.management.editIndexPattern.removeTooltip', {
+const removeTooltip = i18n.translate('indexPatternManagement.editIndexPattern.removeTooltip', {
   defaultMessage: 'Remove index pattern.',
 });
 

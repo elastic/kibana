@@ -48,7 +48,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.truncate.lengthLabel"
+              id="indexPatternManagement.truncate.lengthLabel"
               defaultMessage="Field length"
             />
           }

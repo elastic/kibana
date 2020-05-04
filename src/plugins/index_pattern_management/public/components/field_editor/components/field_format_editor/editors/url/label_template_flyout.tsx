@@ -35,13 +35,13 @@ const items: LabelTemplateExampleItem[] = [
   {
     input: 1234,
     urlTemplate: 'http://company.net/profiles?user_id={{value}}',
-    labelTemplate: i18n.translate('common.ui.fieldEditor.labelTemplate.example.idLabel', {
+    labelTemplate: i18n.translate('indexPatternManagement.labelTemplate.example.idLabel', {
       defaultMessage: 'User #{value}',
       values: { value: '{{value}}' },
     }),
     output:
       '<a href="http://company.net/profiles?user_id=1234">' +
-      i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.idLabel', {
+      i18n.translate('indexPatternManagement.labelTemplate.example.output.idLabel', {
         defaultMessage: 'User',
       }) +
       ' #1234</a>',
@@ -49,12 +49,12 @@ const items: LabelTemplateExampleItem[] = [
   {
     input: '/assets/main.css',
     urlTemplate: 'http://site.com{{rawValue}}',
-    labelTemplate: i18n.translate('common.ui.fieldEditor.labelTemplate.example.pathLabel', {
+    labelTemplate: i18n.translate('indexPatternManagement.labelTemplate.example.pathLabel', {
       defaultMessage: 'View Asset',
     }),
     output:
       '<a href="http://site.com/assets/main.css">' +
-      i18n.translate('common.ui.fieldEditor.labelTemplate.example.output.pathLabel', {
+      i18n.translate('indexPatternManagement.labelTemplate.example.output.pathLabel', {
         defaultMessage: 'View Asset',
       }) +
       '</a>',
@@ -68,13 +68,13 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
         <EuiText>
           <h3>
             <FormattedMessage
-              id="common.ui.fieldEditor.labelTemplateHeader"
+              id="indexPatternManagement.labelTemplateHeader"
               defaultMessage="Label Template"
             />
           </h3>
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.labelTemplateLabel"
+              id="indexPatternManagement.labelTemplateLabel"
               defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version
               of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses
               double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
@@ -85,21 +85,21 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
             <li>
               <EuiCode>value</EuiCode> &mdash;&nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.labelTemplate.valueLabel"
+                id="indexPatternManagement.labelTemplate.valueLabel"
                 defaultMessage="The fields value"
               />
             </li>
             <li>
               <EuiCode>url</EuiCode> &mdash;&nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.labelTemplate.urlLabel"
+                id="indexPatternManagement.labelTemplate.urlLabel"
                 defaultMessage="The formatted URL"
               />
             </li>
           </ul>
           <h4>
             <FormattedMessage
-              id="common.ui.fieldEditor.labelTemplate.examplesHeader"
+              id="indexPatternManagement.labelTemplate.examplesHeader"
               defaultMessage="Examples"
             />
           </h4>
@@ -108,26 +108,26 @@ export const LabelTemplateFlyout = ({ isVisible = false, onClose = () => {} }) =
             columns={[
               {
                 field: 'input',
-                name: i18n.translate('common.ui.fieldEditor.labelTemplate.inputHeader', {
+                name: i18n.translate('indexPatternManagement.labelTemplate.inputHeader', {
                   defaultMessage: 'Input',
                 }),
                 width: '160px',
               },
               {
                 field: 'urlTemplate',
-                name: i18n.translate('common.ui.fieldEditor.labelTemplate.urlHeader', {
+                name: i18n.translate('indexPatternManagement.labelTemplate.urlHeader', {
                   defaultMessage: 'URL Template',
                 }),
               },
               {
                 field: 'labelTemplate',
-                name: i18n.translate('common.ui.fieldEditor.labelTemplate.labelHeader', {
+                name: i18n.translate('indexPatternManagement.labelTemplate.labelHeader', {
                   defaultMessage: 'Label Template',
                 }),
               },
               {
                 field: 'output',
-                name: i18n.translate('common.ui.fieldEditor.labelTemplate.outputHeader', {
+                name: i18n.translate('indexPatternManagement.labelTemplate.outputHeader', {
                   defaultMessage: 'Output',
                 }),
                 render: (value: LabelTemplateExampleItem['output']) => {

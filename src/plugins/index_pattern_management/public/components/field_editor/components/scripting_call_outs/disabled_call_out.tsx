@@ -29,7 +29,7 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="common.ui.fieldEditor.disabledCallOutHeader"
+            id="indexPatternManagement.disabledCallOutHeader"
             defaultMessage="Scripting disabled"
             description="Showing the status that scripting is disabled in Elasticsearch. Not an update message, that it JUST got disabled."
           />
@@ -39,7 +39,7 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
       >
         <p>
           <FormattedMessage
-            id="common.ui.fieldEditor.disabledCallOutLabel"
+            id="indexPatternManagement.disabledCallOutLabel"
             defaultMessage="All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one
             language in order to use scripted fields in Kibana."
           />

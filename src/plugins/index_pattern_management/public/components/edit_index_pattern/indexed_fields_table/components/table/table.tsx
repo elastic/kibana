@@ -23,112 +23,125 @@ import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+// import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.additionalInfoAriaLabel',
+  'indexPatternManagement.editIndexPattern.fields.table.additionalInfoAriaLabel',
   { defaultMessage: 'Additional field information' }
 );
 
 const primaryTimeAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.primaryTimeAriaLabel',
+  'indexPatternManagement.editIndexPattern.fields.table.primaryTimeAriaLabel',
   { defaultMessage: 'Primary time field' }
 );
 
 const primaryTimeTooltip = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.primaryTimeTooltip',
+  'indexPatternManagement.editIndexPattern.fields.table.primaryTimeTooltip',
   { defaultMessage: 'This field represents the time that events occurred.' }
 );
 
 const multiTypeAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.multiTypeAria',
+  'indexPatternManagement.editIndexPattern.fields.table.multiTypeAria',
   {
     defaultMessage: 'Multiple type field',
   }
 );
 
 const multiTypeTooltip = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.multiTypeTooltip',
+  'indexPatternManagement.editIndexPattern.fields.table.multiTypeTooltip',
   {
     defaultMessage:
       'The type of this field changes across indices. It is unavailable for many analysis functions.',
   }
 );
 
-const nameHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.nameHeader', {
-  defaultMessage: 'Name',
-});
+const nameHeader = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.nameHeader',
+  {
+    defaultMessage: 'Name',
+  }
+);
 
-const typeHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.typeHeader', {
-  defaultMessage: 'Type',
-});
+const typeHeader = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.typeHeader',
+  {
+    defaultMessage: 'Type',
+  }
+);
 
-const formatHeader = i18n.translate('kbn.management.editIndexPattern.fields.table.formatHeader', {
-  defaultMessage: 'Format',
-});
+const formatHeader = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.formatHeader',
+  {
+    defaultMessage: 'Format',
+  }
+);
 
 const searchableHeader = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.searchableHeader',
+  'indexPatternManagement.editIndexPattern.fields.table.searchableHeader',
   {
     defaultMessage: 'Searchable',
   }
 );
 
 const searchableDescription = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.searchableDescription',
+  'indexPatternManagement.editIndexPattern.fields.table.searchableDescription',
   { defaultMessage: 'These fields can be used in the filter bar' }
 );
 
 const isSearchableAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.isSearchableAria',
+  'indexPatternManagement.editIndexPattern.fields.table.isSearchableAria',
   {
     defaultMessage: 'Is searchable',
   }
 );
 
 const aggregatableLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.aggregatableLabel',
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableLabel',
   {
     defaultMessage: 'Aggregatable',
   }
 );
 
 const aggregatableDescription = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.aggregatableDescription',
+  'indexPatternManagement.editIndexPattern.fields.table.aggregatableDescription',
   { defaultMessage: 'These fields can be used in visualization aggregations' }
 );
 
 const isAggregatableAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.isAggregatableAria',
+  'indexPatternManagement.editIndexPattern.fields.table.isAggregatableAria',
   {
     defaultMessage: 'Is aggregatable',
   }
 );
 
-const excludedLabel = i18n.translate('kbn.management.editIndexPattern.fields.table.excludedLabel', {
-  defaultMessage: 'Excluded',
-});
+const excludedLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.excludedLabel',
+  {
+    defaultMessage: 'Excluded',
+  }
+);
 
 const excludedDescription = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.excludedDescription',
+  'indexPatternManagement.editIndexPattern.fields.table.excludedDescription',
   { defaultMessage: 'Fields that are excluded from _source when it is fetched' }
 );
 
 const isExcludedAriaLabel = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.isExcludedAria',
+  'indexPatternManagement.editIndexPattern.fields.table.isExcludedAria',
   {
     defaultMessage: 'Is excluded',
   }
 );
 
-const editLabel = i18n.translate('kbn.management.editIndexPattern.fields.table.editLabel', {
+const editLabel = i18n.translate('indexPatternManagement.editIndexPattern.fields.table.editLabel', {
   defaultMessage: 'Edit',
 });
 
 const editDescription = i18n.translate(
-  'kbn.management.editIndexPattern.fields.table.editDescription',
+  'indexPatternManagement.editIndexPattern.fields.table.editDescription',
   { defaultMessage: 'Edit' }
 );
 

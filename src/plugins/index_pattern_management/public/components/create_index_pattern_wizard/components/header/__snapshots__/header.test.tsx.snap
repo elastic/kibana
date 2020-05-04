@@ -6,14 +6,14 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
-        id="kbn.management.createIndexPatternHeader"
+        id="indexPatternManagement.createIndexPatternHeader"
         values={
           Object {
             "indexPatternName": "test index pattern",
           }
         }
       />
-       
+
       <EuiBetaBadge
         label="Beta"
       />
@@ -35,7 +35,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
+              id="indexPatternManagement.createIndexPatternLabel"
               values={Object {}}
             />
           </EuiTextColor>
@@ -61,7 +61,7 @@ exports[`Header should render normally 1`] = `
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
-        id="kbn.management.createIndexPatternHeader"
+        id="indexPatternManagement.createIndexPatternHeader"
         values={
           Object {
             "indexPatternName": "test index pattern",
@@ -86,7 +86,7 @@ exports[`Header should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
+              id="indexPatternManagement.createIndexPatternLabel"
               values={Object {}}
             />
           </EuiTextColor>
@@ -106,7 +106,7 @@ exports[`Header should render without including system indices 1`] = `
     <h1>
       <FormattedMessage
         defaultMessage="Create {indexPatternName}"
-        id="kbn.management.createIndexPatternHeader"
+        id="indexPatternManagement.createIndexPatternHeader"
         values={
           Object {
             "indexPatternName": "test index pattern",
@@ -131,7 +131,7 @@ exports[`Header should render without including system indices 1`] = `
           >
             <FormattedMessage
               defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
-              id="kbn.management.createIndexPatternLabel"
+              id="indexPatternManagement.createIndexPatternLabel"
               values={Object {}}
             />
           </EuiTextColor>

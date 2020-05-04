@@ -41,7 +41,7 @@ export const convertSampleInput = (
       };
     });
   } catch (e) {
-    error = i18n.translate('common.ui.fieldEditor.defaultErrorMessage', {
+    error = i18n.translate('indexPatternManagement.defaultErrorMessage', {
       defaultMessage: 'An error occurred while trying to use this format configuration: {message}',
       values: { message: e.message },
     });

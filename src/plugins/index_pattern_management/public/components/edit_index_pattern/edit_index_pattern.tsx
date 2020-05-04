@@ -59,37 +59,37 @@ export interface EditIndexPatternProps extends RouteComponentProps {
 }
 
 const mappingAPILink = i18n.translate(
-  'kbn.management.editIndexPattern.timeFilterLabel.mappingAPILink',
+  'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
   {
     defaultMessage: 'Mapping API',
   }
 );
 
 const mappingConflictHeader = i18n.translate(
-  'kbn.management.editIndexPattern.mappingConflictHeader',
+  'indexPatternManagement.editIndexPattern.mappingConflictHeader',
   {
     defaultMessage: 'Mapping conflict',
   }
 );
 
-const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
+const confirmMessage = i18n.translate('indexPatternManagement.editIndexPattern.refreshLabel', {
   defaultMessage: 'This action resets the popularity counter of each field.',
 });
 
 const confirmModalOptionsRefresh = {
-  confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', {
+  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.refreshButton', {
     defaultMessage: 'Refresh',
   }),
-  title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', {
+  title: i18n.translate('indexPatternManagement.editIndexPattern.refreshHeader', {
     defaultMessage: 'Refresh field list?',
   }),
 };
 
 const confirmModalOptionsDelete = {
-  confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', {
+  confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
   }),
-  title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', {
+  title: i18n.translate('indexPatternManagement.editIndexPattern.deleteHeader', {
     defaultMessage: 'Delete index pattern?',
   }),
 };
@@ -168,13 +168,16 @@ export const EditIndexPattern = withRouter(
       });
     };
 
-    const timeFilterHeader = i18n.translate('kbn.management.editIndexPattern.timeFilterHeader', {
-      defaultMessage: "Time Filter field name: '{timeFieldName}'",
-      values: { timeFieldName: indexPattern.timeFieldName },
-    });
+    const timeFilterHeader = i18n.translate(
+      'indexPatternManagement.editIndexPattern.timeFilterHeader',
+      {
+        defaultMessage: "Time Filter field name: '{timeFieldName}'",
+        values: { timeFieldName: indexPattern.timeFieldName },
+      }
+    );
 
     const mappingConflictLabel = i18n.translate(
-      'kbn.management.editIndexPattern.mappingConflictLabel',
+      'indexPatternManagement.editIndexPattern.mappingConflictLabel',
       {
         defaultMessage:
           '{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern. You may still be able to use these conflict fields in parts of Kibana, but they will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
@@ -182,7 +185,7 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    const headingAriaLabel = i18n.translate('kbn.management.editIndexPattern.detailsAria', {
+    const headingAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.detailsAria', {
       defaultMessage: 'Index pattern details',
     });
 
@@ -221,7 +224,7 @@ export const EditIndexPattern = withRouter(
               <EuiText>
                 <p>
                   <FormattedMessage
-                    id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+                    id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
                     defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
                     values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
                   />{' '}

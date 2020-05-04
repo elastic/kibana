@@ -58,7 +58,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.string.transformLabel"
+              id="indexPatternManagement.string.transformLabel"
               defaultMessage="Transform"
             />
           }

@@ -29,7 +29,7 @@ exports[`Table editing should update the matches dynamically as input value is c
   <em>
     <FormattedMessage
       defaultMessage="The source filter doesn't match any known fields."
-      id="kbn.management.editIndexPattern.source.table.notMatchedLabel"
+      id="indexPatternManagement.editIndexPattern.source.table.notMatchedLabel"
       values={Object {}}
     />
   </em>

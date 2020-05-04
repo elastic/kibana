@@ -56,17 +56,17 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
   let title = '';
   switch (type) {
     case 'indexed':
-      title = i18n.translate('kbn.management.editIndexPattern.tabs.fieldsHeader', {
+      title = i18n.translate('indexPatternManagement.editIndexPattern.tabs.fieldsHeader', {
         defaultMessage: 'Fields',
       });
       break;
     case 'scripted':
-      title = i18n.translate('kbn.management.editIndexPattern.tabs.scriptedHeader', {
+      title = i18n.translate('indexPatternManagement.editIndexPattern.tabs.scriptedHeader', {
         defaultMessage: 'Scripted fields',
       });
       break;
     case 'sourceFilters':
-      title = i18n.translate('kbn.management.editIndexPattern.tabs.sourceHeader', {
+      title = i18n.translate('indexPatternManagement.editIndexPattern.tabs.sourceHeader', {
         defaultMessage: 'Source filters',
       });
       break;
@@ -117,13 +117,19 @@ export function getPath(field: IndexPatternField) {
   return `${field.indexPattern?.id}/field/${field.name}`;
 }
 
-const allTypesDropDown = i18n.translate('kbn.management.editIndexPattern.fields.allTypesDropDown', {
-  defaultMessage: 'All field types',
-});
+const allTypesDropDown = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.allTypesDropDown',
+  {
+    defaultMessage: 'All field types',
+  }
+);
 
-const allLangsDropDown = i18n.translate('kbn.management.editIndexPattern.fields.allLangsDropDown', {
-  defaultMessage: 'All languages',
-});
+const allLangsDropDown = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.allLangsDropDown',
+  {
+    defaultMessage: 'All languages',
+  }
+);
 
 export function convertToEuiSelectOption(options: string[], type: string) {
   const euiOptions =

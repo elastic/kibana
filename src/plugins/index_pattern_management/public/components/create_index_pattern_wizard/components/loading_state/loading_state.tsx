@@ -29,7 +29,7 @@ export const LoadingState = () => (
       <EuiTitle size="s">
         <h2 style={{ textAlign: 'center' }}>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+            id="indexPatternManagement.createIndexPattern.loadingState.checkingLabel"
             defaultMessage="Checking for Elasticsearch data"
           />
         </h2>

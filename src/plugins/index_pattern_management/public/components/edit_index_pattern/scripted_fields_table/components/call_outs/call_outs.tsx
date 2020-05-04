@@ -37,7 +37,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
       <EuiCallOut
         title={
           <FormattedMessage
-            id="kbn.management.editIndexPattern.scripted.deprecationLangHeader"
+            id="indexPatternManagement.editIndexPattern.scripted.deprecationLangHeader"
             defaultMessage="Deprecation languages in use"
           />
         }
@@ -46,7 +46,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
       >
         <p>
           <FormattedMessage
-            id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
+            id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
             defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be
             removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
             values={{
@@ -54,7 +54,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
               link: (
                 <EuiLink href={painlessDocLink}>
                   <FormattedMessage
-                    id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
+                    id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
                     defaultMessage="Painless"
                   />
                 </EuiLink>

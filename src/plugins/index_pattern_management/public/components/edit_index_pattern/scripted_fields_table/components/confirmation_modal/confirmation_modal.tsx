@@ -35,16 +35,19 @@ export const DeleteScritpedFieldConfirmationModal = ({
   hideDeleteConfirmationModal,
   deleteField,
 }: DeleteScritpedFieldConfirmationModalProps) => {
-  const title = i18n.translate('kbn.management.editIndexPattern.scripted.deleteFieldLabel', {
-    defaultMessage: "Delete scripted field '{fieldName}'?",
-    values: { fieldName: field.name },
-  });
+  const title = i18n.translate(
+    'indexPatternManagement.editIndexPattern.scripted.deleteFieldLabel',
+    {
+      defaultMessage: "Delete scripted field '{fieldName}'?",
+      values: { fieldName: field.name },
+    }
+  );
   const cancelButtonText = i18n.translate(
-    'kbn.management.editIndexPattern.scripted.deleteField.cancelButton',
+    'indexPatternManagement.editIndexPattern.scripted.deleteField.cancelButton',
     { defaultMessage: 'Cancel' }
   );
   const confirmButtonText = i18n.translate(
-    'kbn.management.editIndexPattern.scripted.deleteField.deleteButton',
+    'indexPatternManagement.editIndexPattern.scripted.deleteField.deleteButton',
     { defaultMessage: 'Delete' }
   );
 

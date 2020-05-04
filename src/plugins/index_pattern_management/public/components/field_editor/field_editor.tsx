@@ -66,10 +66,7 @@ import {
 } from './components/scripting_call_outs';
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
-
 import { FieldFormatEditor } from './components/field_format_editor';
-
-import { DefaultFormatEditor } from './components/field_format_editor/editors/default';
 import { IndexPatternManagementStart } from '../../plugin';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
@@ -94,7 +91,7 @@ const getFieldTypeFormatsList = (
     {
       id: '',
       defaultFieldFormat,
-      title: i18n.translate('common.ui.fieldEditor.defaultFormatDropDown', {
+      title: i18n.translate('indexPatternManagement.defaultFormatDropDown', {
         defaultMessage: '- Default -',
       }),
     },
@@ -180,11 +177,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   }
 
   async init() {
-    const { http } = this.props.helpers;
+    const { http, toasts } = this.props.helpers;
     const { field } = this.state;
     const { indexPattern } = this.props;
 
-    const enabledLangs = await getEnabledScriptingLanguages(http);
+    const enabledLangs = await getEnabledScriptingLanguages(http, toasts);
     const scriptingLangs = intersection(
       enabledLangs,
       union(this.supportedLangs, this.deprecatedLangs)
@@ -291,21 +288,21 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return isCreating ? (
       <EuiFormRow
-        label={i18n.translate('common.ui.fieldEditor.nameLabel', { defaultMessage: 'Name' })}
+        label={i18n.translate('indexPatternManagement.nameLabel', { defaultMessage: 'Name' })}
         helpText={
           this.isDuplicateName() ? (
             <span>
               <EuiIcon type="alert" color="warning" size="s" />
               &nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
+                id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
                 defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with
               the same name means you won't be able to query both fields at the same time."
                 values={{
                   mappingConflict: (
                     <strong>
                       <FormattedMessage
-                        id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
+                        id="indexPatternManagement.mappingConflictLabel.mappingConflictLabel"
                         defaultMessage="Mapping Conflict:"
                       />
                     </strong>
@@ -319,7 +316,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         isInvalid={isInvalid}
         error={
           isInvalid
-            ? i18n.translate('common.ui.fieldEditor.nameErrorMessage', {
+            ? i18n.translate('indexPatternManagement.nameErrorMessage', {
                 defaultMessage: 'Name is required',
               })
             : null
@@ -327,7 +324,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       >
         <EuiFieldText
           value={field.name || ''}
-          placeholder={i18n.translate('common.ui.fieldEditor.namePlaceholder', {
+          placeholder={i18n.translate('indexPatternManagement.namePlaceholder', {
             defaultMessage: 'New scripted field',
           })}
           data-test-subj="editorFieldName"
@@ -345,7 +342,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return field.scripted ? (
       <EuiFormRow
-        label={i18n.translate('common.ui.fieldEditor.languageLabel', {
+        label={i18n.translate('indexPatternManagement.languageLabel', {
           defaultMessage: 'Language',
         })}
         helpText={
@@ -355,13 +352,13 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               &nbsp;
               <strong>
                 <FormattedMessage
-                  id="common.ui.fieldEditor.warningHeader"
+                  id="indexPatternManagement.warningHeader"
                   defaultMessage="Deprecation Warning:"
                 />
               </strong>
               &nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.warningLabel.warningDetail"
+                id="indexPatternManagement.warningLabel.warningDetail"
                 defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch.
               We recommend using {painlessLink} for new scripted fields."
                 values={{
@@ -372,7 +369,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                       href={this.props.helpers.docLinksScriptedFields.painless}
                     >
                       <FormattedMessage
-                        id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
+                        id="indexPatternManagement.warningLabel.painlessLinkLabel"
                         defaultMessage="Painless"
                       />
                     </EuiLink>
@@ -402,7 +399,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return (
       <EuiFormRow
-        label={i18n.translate('common.ui.fieldEditor.typeLabel', { defaultMessage: 'Type' })}
+        label={i18n.translate('indexPatternManagement.typeLabel', { defaultMessage: 'Type' })}
       >
         <EuiSelect
           value={field.type}
@@ -432,12 +429,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const columns = [
       {
         field: 'type',
-        name: i18n.translate('common.ui.fieldEditor.typeLabel', { defaultMessage: 'Type' }),
+        name: i18n.translate('indexPatternManagement.typeLabel', { defaultMessage: 'Type' }),
         width: '100px',
       },
       {
         field: 'indices',
-        name: i18n.translate('common.ui.fieldEditor.indexNameLabel', {
+        name: i18n.translate('indexPatternManagement.indexNameLabel', {
           defaultMessage: 'Index names',
         }),
       },
@@ -456,14 +453,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           iconType="alert"
           title={
             <FormattedMessage
-              id="common.ui.fieldEditor.fieldTypeConflict"
+              id="indexPatternManagement.fieldTypeConflict"
               defaultMessage="Field type conflict"
             />
           }
           size="s"
         >
           <FormattedMessage
-            id="common.ui.fieldEditor.multiTypeLabelDesc"
+            id="indexPatternManagement.multiTypeLabelDesc"
             defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions.
           The indices per type are as follows:"
           />
@@ -482,14 +479,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     const label = defaultFormat ? (
       <FormattedMessage
-        id="common.ui.fieldEditor.defaultFormatHeader"
+        id="indexPatternManagement.defaultFormatHeader"
         defaultMessage="Format (Default: {defaultFormat})"
         values={{
           defaultFormat: <EuiCode>{defaultFormat}</EuiCode>,
         }}
       />
     ) : (
-      <FormattedMessage id="common.ui.fieldEditor.formatHeader" defaultMessage="Format" />
+      <FormattedMessage id="indexPatternManagement.formatHeader" defaultMessage="Format" />
     );
 
     return (
@@ -498,7 +495,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           label={label}
           helpText={
             <FormattedMessage
-              id="common.ui.fieldEditor.formatLabel"
+              id="indexPatternManagement.formatLabel"
               defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be
               completely changed and prevent highlighting in Discover from working."
             />
@@ -535,7 +532,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return (
       <EuiFormRow
-        label={i18n.translate('common.ui.fieldEditor.popularityLabel', {
+        label={i18n.translate('indexPatternManagement.popularityLabel', {
           defaultMessage: 'Popularity',
           description:
             '"Popularity" refers to Kibana\'s measurement how popular a field is (i.e. how commonly it is used).',
@@ -565,13 +562,13 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const errorMsg = hasScriptError ? (
       <span data-test-subj="invalidScriptError">
         <FormattedMessage
-          id="common.ui.fieldEditor.scriptInvalidErrorMessage"
+          id="indexPatternManagement.scriptInvalidErrorMessage"
           defaultMessage="Script is invalid. View script preview for details"
         />
       </span>
     ) : (
       <FormattedMessage
-        id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+        id="indexPatternManagement.scriptRequiredErrorMessage"
         defaultMessage="Script is required"
       />
     );
@@ -580,7 +577,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       <Fragment>
         <EuiFormRow
           fullWidth
-          label={i18n.translate('common.ui.fieldEditor.scriptLabel', { defaultMessage: 'Script' })}
+          label={i18n.translate('indexPatternManagement.scriptLabel', { defaultMessage: 'Script' })}
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
@@ -598,7 +595,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           <Fragment>
             <EuiText>
               <FormattedMessage
-                id="common.ui.fieldEditor.script.accessWithLabel"
+                id="indexPatternManagement.script.accessWithLabel"
                 defaultMessage="Access fields with {code}."
                 values={{ code: <code>{`doc['some_field'].value`}</code> }}
               />
@@ -606,7 +603,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             <br />
             <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
               <FormattedMessage
-                id="common.ui.fieldEditor.script.getHelpLabel"
+                id="indexPatternManagement.script.getHelpLabel"
                 defaultMessage="Get help with the syntax and preview the results of your script."
               />
             </EuiLink>
@@ -634,7 +631,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return this.state.showDeleteModal ? (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={i18n.translate('common.ui.fieldEditor.deleteFieldHeader', {
+          title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
             defaultMessage: "Delete field '{fieldName}'",
             values: { fieldName: field.name },
           })}
@@ -643,10 +640,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.hideDeleteModal();
             this.deleteField();
           }}
-          cancelButtonText={i18n.translate('common.ui.fieldEditor.deleteField.cancelButton', {
+          cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
             defaultMessage: 'Cancel',
           })}
-          confirmButtonText={i18n.translate('common.ui.fieldEditor.deleteField.deleteButton', {
+          confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
             defaultMessage: 'Delete',
           })}
           buttonColor="danger"
@@ -654,7 +651,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         >
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.deleteFieldLabel"
+              id="indexPatternManagement.deleteFieldLabel"
               defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
               values={{
                 separator: (
@@ -700,12 +697,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             >
               {isCreating ? (
                 <FormattedMessage
-                  id="common.ui.fieldEditor.actions.createButton"
+                  id="indexPatternManagement.actions.createButton"
                   defaultMessage="Create field"
                 />
               ) : (
                 <FormattedMessage
-                  id="common.ui.fieldEditor.actions.saveButton"
+                  id="indexPatternManagement.actions.saveButton"
                   defaultMessage="Save field"
                 />
               )}
@@ -714,7 +711,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">
               <FormattedMessage
-                id="common.ui.fieldEditor.actions.cancelButton"
+                id="indexPatternManagement.actions.cancelButton"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -725,7 +722,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty color="danger" onClick={this.showDeleteModal}>
                     <FormattedMessage
-                      id="common.ui.fieldEditor.actions.deleteButton"
+                      id="indexPatternManagement.actions.deleteButton"
                       defaultMessage="Delete"
                     />
                   </EuiButtonEmpty>
@@ -777,7 +774,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     if (remove) {
       remove.then(() => {
-        const message = i18n.translate('common.ui.fieldEditor.deleteField.deletedHeader', {
+        const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
           defaultMessage: "Deleted '{fieldName}'",
           values: { fieldName: field.name },
         });
@@ -832,7 +829,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     return indexPattern.save().then(() => {
-      const message = i18n.translate('common.ui.fieldEditor.deleteField.savedHeader', {
+      const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
         defaultMessage: "Saved '{fieldName}'",
         values: { fieldName: field.name },
       });
@@ -866,12 +863,12 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           <h3>
             {isCreating ? (
               <FormattedMessage
-                id="common.ui.fieldEditor.createHeader"
+                id="indexPatternManagement.createHeader"
                 defaultMessage="Create scripted field"
               />
             ) : (
               <FormattedMessage
-                id="common.ui.fieldEditor.editHeader"
+                id="indexPatternManagement.editHeader"
                 defaultMessage="Edit {fieldName}"
                 values={{ fieldName: field.name }}
               />

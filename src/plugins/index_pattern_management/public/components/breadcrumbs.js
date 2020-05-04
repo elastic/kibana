@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 export function getListBreadcrumbs() {
   return [
     {
-      text: i18n.translate('kbn.management.indexPatterns.listBreadcrumb', {
+      text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
         defaultMessage: 'Index patterns',
       }),
       href: '#/management/kibana/indexPatterns',
@@ -34,7 +34,7 @@ export function getCreateBreadcrumbs() {
   return [
     ...getListBreadcrumbs(),
     {
-      text: i18n.translate('kbn.management.indexPatterns.createBreadcrumb', {
+      text: i18n.translate('indexPatternManagement.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern',
       }),
       href: '#/management/kibana/indexPattern',
@@ -69,7 +69,7 @@ export function getCreateFieldBreadcrumbs($route) {
   return [
     ...getEditBreadcrumbs($route),
     {
-      text: i18n.translate('kbn.management.indexPatterns.createFieldBreadcrumb', {
+      text: i18n.translate('indexPatternManagement.indexPatterns.createFieldBreadcrumb', {
         defaultMessage: 'Create field',
       }),
     },

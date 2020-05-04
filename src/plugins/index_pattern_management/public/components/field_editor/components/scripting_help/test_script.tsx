@@ -141,7 +141,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     if (previewData.error) {
       return (
         <EuiCallOut
-          title={i18n.translate('common.ui.fieldEditor.testScript.errorMessage', {
+          title={i18n.translate('indexPatternManagement.testScript.errorMessage', {
             defaultMessage: `There's an error in your script`,
           })}
           color="danger"
@@ -163,7 +163,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
         <EuiTitle size="xs">
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.testScript.resultsLabel"
+              id="indexPatternManagement.testScript.resultsLabel"
               defaultMessage="First 10 results"
             />
           </p>
@@ -217,13 +217,13 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     return (
       <Fragment>
         <EuiFormRow
-          label={i18n.translate('common.ui.fieldEditor.testScript.fieldsLabel', {
+          label={i18n.translate('indexPatternManagement.testScript.fieldsLabel', {
             defaultMessage: 'Additional fields',
           })}
           fullWidth
         >
           <EuiComboBox
-            placeholder={i18n.translate('common.ui.fieldEditor.testScript.fieldsPlaceholder', {
+            placeholder={i18n.translate('indexPatternManagement.testScript.fieldsPlaceholder', {
               defaultMessage: 'Select...',
             })}
             options={fields}
@@ -250,7 +250,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
                 data-test-subj="runScriptButton"
               >
                 <FormattedMessage
-                  id="common.ui.fieldEditor.testScript.submitButtonLabel"
+                  id="indexPatternManagement.testScript.submitButtonLabel"
                   defaultMessage="Run script"
                 />
               </EuiButton>
@@ -269,13 +269,13 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
         <EuiText>
           <h3>
             <FormattedMessage
-              id="common.ui.fieldEditor.testScript.resultsTitle"
+              id="indexPatternManagement.testScript.resultsTitle"
               defaultMessage="Preview results"
             />
           </h3>
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.testScript.instructions"
+              id="indexPatternManagement.testScript.instructions"
               defaultMessage="Run your script to preview the first 10 results. You can also select some additional
               fields to include in your results to gain more context or add a query to filter on
               specific documents."

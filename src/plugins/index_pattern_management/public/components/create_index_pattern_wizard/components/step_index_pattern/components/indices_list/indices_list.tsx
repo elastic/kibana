@@ -107,7 +107,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
         onClick={this.openPerPageControl}
       >
         <FormattedMessage
-          id="kbn.management.createIndexPattern.step.pagingLabel"
+          id="indexPatternManagement.createIndexPattern.step.pagingLabel"
           defaultMessage="Rows per page: {perPage}"
           values={{ perPage }}
         />

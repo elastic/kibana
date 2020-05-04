@@ -61,7 +61,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
             <EuiFlexItem grow={false}>
               <span>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.stepTime.fieldHeader"
+                  id="indexPatternManagement.createIndexPattern.stepTime.fieldHeader"
                   defaultMessage="Time Filter field name"
                 />
               </span>
@@ -72,7 +72,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
               ) : (
                 <EuiLink className="timeFieldRefreshButton" onClick={fetchTimeFields}>
                   <FormattedMessage
-                    id="kbn.management.createIndexPattern.stepTime.refreshButton"
+                    id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
                     defaultMessage="Refresh"
                   />
                 </EuiLink>
@@ -84,13 +84,13 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           <div>
             <p>
               <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.fieldLabel"
+                id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
                 defaultMessage="The Time Filter will use this field to filter your data by time."
               />
             </p>
             <p>
               <FormattedMessage
-                id="kbn.management.createIndexPattern.stepTime.fieldWarningLabel"
+                id="indexPatternManagement.createIndexPattern.stepTime.fieldWarningLabel"
                 defaultMessage="You can choose not to have a time field, but you will not be able to narrow down your data by a time range."
               />
             </p>
@@ -104,7 +104,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
             options={[
               {
                 text: i18n.translate(
-                  'kbn.management.createIndexPattern.stepTime.field.loadingDropDown',
+                  'indexPatternManagement.createIndexPattern.stepTime.field.loadingDropDown',
                   {
                     defaultMessage: 'Loading…',
                   }
@@ -130,7 +130,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
       <EuiText>
         <p>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.stepTime.field.noTimeFieldsLabel"
+            id="indexPatternManagement.createIndexPattern.stepTime.field.noTimeFieldsLabel"
             defaultMessage="The indices which match this index pattern don't contain any time fields."
           />
         </p>

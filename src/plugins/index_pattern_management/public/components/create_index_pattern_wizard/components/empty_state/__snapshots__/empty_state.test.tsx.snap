@@ -7,7 +7,7 @@ exports[`EmptyState should render normally 1`] = `
     title={
       <FormattedMessage
         defaultMessage="Couldn't find any Elasticsearch data"
-        id="kbn.management.createIndexPattern.emptyStateHeader"
+        id="indexPatternManagement.createIndexPattern.emptyStateHeader"
         values={Object {}}
       />
     }
@@ -15,7 +15,7 @@ exports[`EmptyState should render normally 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="{needToIndex} {learnHowLink} or {getStartedLink}"
-        id="kbn.management.createIndexPattern.emptyStateLabel.emptyStateDetail"
+        id="indexPatternManagement.createIndexPattern.emptyStateLabel.emptyStateDetail"
         values={
           Object {
             "getStartedLink": <ForwardRef
@@ -23,7 +23,7 @@ exports[`EmptyState should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="get started with some sample data sets."
-                id="kbn.management.createIndexPattern.emptyStateLabel.getStartedLink"
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.getStartedLink"
                 values={Object {}}
               />
             </ForwardRef>,
@@ -32,7 +32,7 @@ exports[`EmptyState should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="Learn how"
-                id="kbn.management.createIndexPattern.emptyStateLabel.learnHowLink"
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.learnHowLink"
                 values={Object {}}
               />
             </ForwardRef>,
@@ -41,7 +41,7 @@ exports[`EmptyState should render normally 1`] = `
             >
               <FormattedMessage
                 defaultMessage="You'll need to index some data into Elasticsearch before you can create an index pattern."
-                id="kbn.management.createIndexPattern.emptyStateLabel.needToIndexLabel"
+                id="indexPatternManagement.createIndexPattern.emptyStateLabel.needToIndexLabel"
                 values={Object {}}
               />
             </EuiTextColor>,
@@ -57,7 +57,7 @@ exports[`EmptyState should render normally 1`] = `
     >
       <FormattedMessage
         defaultMessage="Check for new data"
-        id="kbn.management.createIndexPattern.emptyState.checkDataButton"
+        id="indexPatternManagement.createIndexPattern.emptyState.checkDataButton"
         values={Object {}}
       />
     </EuiButton>

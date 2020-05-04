@@ -34,39 +34,51 @@ import { SourceFiltersTableFilter } from '../../types';
 
 import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
-const filterHeader = i18n.translate('kbn.management.editIndexPattern.source.table.filterHeader', {
-  defaultMessage: 'Filter',
-});
+const filterHeader = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.filterHeader',
+  {
+    defaultMessage: 'Filter',
+  }
+);
 
 const filterDescription = i18n.translate(
-  'kbn.management.editIndexPattern.source.table.filterDescription',
+  'indexPatternManagement.editIndexPattern.source.table.filterDescription',
   { defaultMessage: 'Filter name' }
 );
 
-const matchesHeader = i18n.translate('kbn.management.editIndexPattern.source.table.matchesHeader', {
-  defaultMessage: 'Matches',
-});
+const matchesHeader = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.matchesHeader',
+  {
+    defaultMessage: 'Matches',
+  }
+);
 
 const matchesDescription = i18n.translate(
-  'kbn.management.editIndexPattern.source.table.matchesDescription',
+  'indexPatternManagement.editIndexPattern.source.table.matchesDescription',
   { defaultMessage: 'Language used for the field' }
 );
 
-const editAria = i18n.translate('kbn.management.editIndexPattern.source.table.editAria', {
+const editAria = i18n.translate('indexPatternManagement.editIndexPattern.source.table.editAria', {
   defaultMessage: 'Edit',
 });
 
-const saveAria = i18n.translate('kbn.management.editIndexPattern.source.table.saveAria', {
+const saveAria = i18n.translate('indexPatternManagement.editIndexPattern.source.table.saveAria', {
   defaultMessage: 'Save',
 });
 
-const deleteAria = i18n.translate('kbn.management.editIndexPattern.source.table.deleteAria', {
-  defaultMessage: 'Delete',
-});
+const deleteAria = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.deleteAria',
+  {
+    defaultMessage: 'Delete',
+  }
+);
 
-const cancelAria = i18n.translate('kbn.management.editIndexPattern.source.table.cancelAria', {
-  defaultMessage: 'Cancel',
-});
+const cancelAria = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.cancelAria',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
 
 export interface TableProps {
   indexPattern: IIndexPattern;
@@ -161,7 +173,7 @@ export class Table extends Component<TableProps, TableState> {
           return (
             <em>
               <FormattedMessage
-                id="kbn.management.editIndexPattern.source.table.notMatchedLabel"
+                id="indexPatternManagement.editIndexPattern.source.table.notMatchedLabel"
                 defaultMessage="The source filter doesn't match any known fields."
               />
             </em>

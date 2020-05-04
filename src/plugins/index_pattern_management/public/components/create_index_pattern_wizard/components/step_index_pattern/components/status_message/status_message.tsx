@@ -55,7 +55,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
+            id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
             defaultMessage="Your index pattern can match any of your {strongIndices}, below."
             values={{ strongIndices: <strong>{allIndicesLength} indices</strong> }}
           />
@@ -65,7 +65,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.status.noSystemIndicesWithPromptLabel"
+            id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesWithPromptLabel"
             defaultMessage="No Elasticsearch indices match your pattern. To view the matching system indices, toggle the switch in
             the upper right."
           />
@@ -75,7 +75,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.status.noSystemIndicesLabel"
+            id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
             defaultMessage="No Elasticsearch indices match your pattern."
           />
         </span>
@@ -88,13 +88,13 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         &nbsp;
         <FormattedMessage
-          id="kbn.management.createIndexPattern.step.status.successLabel.successDetail"
+          id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
           defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
           values={{
             strongSuccess: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.step.status.successLabel.strongSuccessLabel"
+                  id="indexPatternManagement.createIndexPattern.step.status.successLabel.strongSuccessLabel"
                   defaultMessage="Success!"
                 />
               </strong>
@@ -102,7 +102,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.step.status.successLabel.strongIndicesLabel"
+                  id="indexPatternManagement.createIndexPattern.step.status.successLabel.strongIndicesLabel"
                   defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                   values={{ indicesLength: exactMatchedIndices.length }}
                 />
@@ -118,7 +118,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="kbn.management.createIndexPattern.step.status.partialMatchLabel.partialMatchDetail"
+          id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.partialMatchDetail"
           defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
           {matchedIndicesLength, plural, one {looks} other {look}} similar."
           values={{
@@ -126,7 +126,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.step.status.partialMatchLabel.strongIndicesLabel"
+                  id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.strongIndicesLabel"
                   defaultMessage="{matchedIndicesLength, plural, one {# index} other {# indices}}"
                   values={{ matchedIndicesLength: partialMatchedIndices.length }}
                 />
@@ -142,14 +142,14 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="kbn.management.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
+          id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
           defaultMessage="The index pattern you've entered doesn't match any indices.
           You can match {indicesLength, plural, one {your} other {any of your}} {strongIndices}, below."
           values={{
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="kbn.management.createIndexPattern.step.status.notMatchLabel.allIndicesLabel"
+                  id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.allIndicesLabel"
                   defaultMessage="{indicesLength, plural, one {# index} other {# indices}}"
                   values={{ indicesLength: allIndicesLength }}
                 />

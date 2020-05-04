@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
     <EuiTitle size="s">
       <h2>
         <FormattedMessage
-          id="kbn.management.createIndexPattern.stepHeader"
+          id="indexPatternManagement.createIndexPattern.stepHeader"
           defaultMessage="Step 1 of 2: Define index pattern"
         />
       </h2>
@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
           <EuiFormRow
             label={
               <FormattedMessage
-                id="kbn.management.createIndexPattern.step.indexPatternLabel"
+                id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
                 defaultMessage="Index pattern"
               />
             }
@@ -79,14 +79,14 @@ export const Header: React.FC<HeaderProps> = ({
               <div>
                 <p>
                   <FormattedMessage
-                    id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                    id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
                     defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
                     values={{ asterisk: <strong>*</strong> }}
                   />
                 </p>
                 <p>
                   <FormattedMessage
-                    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                    id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
                     defaultMessage="You can't use spaces or the characters {characterList}."
                     values={{ characterList: <strong>{characterList}</strong> }}
                   />
@@ -97,7 +97,7 @@ export const Header: React.FC<HeaderProps> = ({
             <EuiFieldText
               name="indexPattern"
               placeholder={i18n.translate(
-                'kbn.management.createIndexPattern.step.indexPatternPlaceholder',
+                'indexPatternManagement.createIndexPattern.step.indexPatternPlaceholder',
                 {
                   defaultMessage: 'index-name-*',
                 }
@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
           data-test-subj="createIndexPatternGoToStep2Button"
         >
           <FormattedMessage
-            id="kbn.management.createIndexPattern.step.nextStepButton"
+            id="indexPatternManagement.createIndexPattern.step.nextStepButton"
             defaultMessage="Next step"
           />
         </EuiButton>

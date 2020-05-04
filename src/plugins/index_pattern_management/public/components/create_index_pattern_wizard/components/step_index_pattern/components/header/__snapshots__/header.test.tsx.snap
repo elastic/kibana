@@ -8,7 +8,7 @@ exports[`Header should mark the input as invalid 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Step 1 of 2: Define index pattern"
-        id="kbn.management.createIndexPattern.stepHeader"
+        id="indexPatternManagement.createIndexPattern.stepHeader"
         values={Object {}}
       />
     </h2>
@@ -42,7 +42,7 @@ exports[`Header should mark the input as invalid 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
                   values={
                     Object {
                       "asterisk": <strong>
@@ -55,7 +55,7 @@ exports[`Header should mark the input as invalid 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
                   values={
                     Object {
                       "characterList": <strong>
@@ -71,7 +71,7 @@ exports[`Header should mark the input as invalid 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern"
-              id="kbn.management.createIndexPattern.step.indexPatternLabel"
+              id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
           }
@@ -99,7 +99,7 @@ exports[`Header should mark the input as invalid 1`] = `
       >
         <FormattedMessage
           defaultMessage="Next step"
-          id="kbn.management.createIndexPattern.step.nextStepButton"
+          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
           values={Object {}}
         />
       </EuiButton>
@@ -116,7 +116,7 @@ exports[`Header should render normally 1`] = `
     <h2>
       <FormattedMessage
         defaultMessage="Step 1 of 2: Define index pattern"
-        id="kbn.management.createIndexPattern.stepHeader"
+        id="indexPatternManagement.createIndexPattern.stepHeader"
         values={Object {}}
       />
     </h2>
@@ -146,7 +146,7 @@ exports[`Header should render normally 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can use a {asterisk} as a wildcard in your index pattern."
-                  id="kbn.management.createIndexPattern.step.indexPattern.allowLabel"
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.allowLabel"
                   values={
                     Object {
                       "asterisk": <strong>
@@ -159,7 +159,7 @@ exports[`Header should render normally 1`] = `
               <p>
                 <FormattedMessage
                   defaultMessage="You can't use spaces or the characters {characterList}."
-                  id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+                  id="indexPatternManagement.createIndexPattern.step.indexPattern.disallowLabel"
                   values={
                     Object {
                       "characterList": <strong>
@@ -175,7 +175,7 @@ exports[`Header should render normally 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Index pattern"
-              id="kbn.management.createIndexPattern.step.indexPatternLabel"
+              id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
               values={Object {}}
             />
           }
@@ -203,7 +203,7 @@ exports[`Header should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Next step"
-          id="kbn.management.createIndexPattern.step.nextStepButton"
+          id="indexPatternManagement.createIndexPattern.step.nextStepButton"
           values={Object {}}
         />
       </EuiButton>

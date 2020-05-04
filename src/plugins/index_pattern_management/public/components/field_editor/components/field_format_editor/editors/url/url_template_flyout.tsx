@@ -31,13 +31,13 @@ export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => 
         <EuiText>
           <h3>
             <FormattedMessage
-              id="common.ui.fieldEditor.urlTemplateHeader"
+              id="indexPatternManagement.urlTemplateHeader"
               defaultMessage="Url Template"
             />
           </h3>
           <p>
             <FormattedMessage
-              id="common.ui.fieldEditor.urlTemplateLabel.fieldDetail"
+              id="indexPatternManagement.urlTemplateLabel.fieldDetail"
               defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as
               a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
               The following values can be accessed:"
@@ -46,7 +46,7 @@ export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => 
                 strongUrlTemplate: (
                   <strong>
                     <FormattedMessage
-                      id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
+                      id="indexPatternManagement.urlTemplateLabel.strongUrlTemplateLabel"
                       defaultMessage="Url Template"
                     />
                   </strong>
@@ -58,21 +58,21 @@ export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => 
             <li>
               <EuiCode>value</EuiCode> &mdash;&nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.urlTemplate.valueLabel"
+                id="indexPatternManagement.urlTemplate.valueLabel"
                 defaultMessage="The URI-escaped value"
               />
             </li>
             <li>
               <EuiCode>rawValue</EuiCode> &mdash;&nbsp;
               <FormattedMessage
-                id="common.ui.fieldEditor.urlTemplate.rawValueLabel"
+                id="indexPatternManagement.urlTemplate.rawValueLabel"
                 defaultMessage="The unescaped value"
               />
             </li>
           </ul>
           <h4>
             <FormattedMessage
-              id="common.ui.fieldEditor.urlTemplate.examplesHeader"
+              id="indexPatternManagement.urlTemplate.examplesHeader"
               defaultMessage="Examples"
             />
           </h4>
@@ -97,20 +97,20 @@ export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => 
             columns={[
               {
                 field: 'input',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.inputHeader', {
+                name: i18n.translate('indexPatternManagement.urlTemplate.inputHeader', {
                   defaultMessage: 'Input',
                 }),
                 width: '160px',
               },
               {
                 field: 'template',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.templateHeader', {
+                name: i18n.translate('indexPatternManagement.urlTemplate.templateHeader', {
                   defaultMessage: 'Template',
                 }),
               },
               {
                 field: 'output',
-                name: i18n.translate('common.ui.fieldEditor.urlTemplate.outputHeader', {
+                name: i18n.translate('indexPatternManagement.urlTemplate.outputHeader', {
                   defaultMessage: 'Output',
                 }),
               },

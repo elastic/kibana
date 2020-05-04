@@ -12,7 +12,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     label={
       <FormattedMessage
         defaultMessage="Input format"
-        id="common.ui.fieldEditor.duration.inputFormatLabel"
+        id="indexPatternManagement.duration.inputFormatLabel"
         values={Object {}}
       />
     }
@@ -42,7 +42,7 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     label={
       <FormattedMessage
         defaultMessage="Output format"
-        id="common.ui.fieldEditor.duration.outputFormatLabel"
+        id="indexPatternManagement.duration.outputFormatLabel"
         values={Object {}}
       />
     }
@@ -124,7 +124,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Input format"
-        id="common.ui.fieldEditor.duration.inputFormatLabel"
+        id="indexPatternManagement.duration.inputFormatLabel"
         values={Object {}}
       />
     }
@@ -154,7 +154,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Output format"
-        id="common.ui.fieldEditor.duration.outputFormatLabel"
+        id="indexPatternManagement.duration.outputFormatLabel"
         values={Object {}}
       />
     }
@@ -189,7 +189,7 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     label={
       <FormattedMessage
         defaultMessage="Decimal places"
-        id="common.ui.fieldEditor.duration.decimalPlacesLabel"
+        id="indexPatternManagement.duration.decimalPlacesLabel"
         values={Object {}}
       />
     }

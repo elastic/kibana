@@ -49,12 +49,15 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   };
 }
 
-const filterAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
-  defaultMessage: 'Filter',
-});
+const filterAriaLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.filterAria',
+  {
+    defaultMessage: 'Filter',
+  }
+);
 
 const filterPlaceholder = i18n.translate(
-  'kbn.management.editIndexPattern.fields.filterPlaceholder',
+  'indexPatternManagement.editIndexPattern.fields.filterPlaceholder',
   {
     defaultMessage: 'Filter',
   }

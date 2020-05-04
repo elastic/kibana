@@ -35,16 +35,16 @@ import {
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
 
-const appTitle = i18n.translate('indexPatternManagement.appLabel', {
-  defaultMessage: 'Index pattern management',
+const appTitle = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
+  defaultMessage: 'Index Patterns',
 });
 const crumb = [{ text: appTitle }];
 
 const readOnlyBadge = {
-  text: i18n.translate('kbn.management.indexPatterns.badge.readOnly.text', {
+  text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
     defaultMessage: 'Read only',
   }),
-  tooltip: i18n.translate('kbn.management.indexPatterns.badge.readOnly.tooltip', {
+  tooltip: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save index patterns',
   }),
   iconType: 'glasses',

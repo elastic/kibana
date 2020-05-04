@@ -6,7 +6,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     <h3>
       <FormattedMessage
         defaultMessage="Create scripted field"
-        id="common.ui.fieldEditor.createHeader"
+        id="indexPatternManagement.createHeader"
         values={Object {}}
       />
     </h3>
@@ -127,14 +127,14 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
-          id="common.ui.fieldEditor.formatLabel"
+          id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Format"
-          id="common.ui.fieldEditor.formatHeader"
+          id="indexPatternManagement.formatHeader"
           values={Object {}}
         />
       }
@@ -168,7 +168,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       error={
         <FormattedMessage
           defaultMessage="Script is required"
-          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          id="indexPatternManagement.scriptRequiredErrorMessage"
           values={Object {}}
         />
       }
@@ -188,7 +188,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       <eui-text>
         <FormattedMessage
           defaultMessage="Access fields with {code}."
-          id="common.ui.fieldEditor.script.accessWithLabel"
+          id="indexPatternManagement.script.accessWithLabel"
           values={
             Object {
               "code": <code>
@@ -205,7 +205,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       >
         <FormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
-          id="common.ui.fieldEditor.script.getHelpLabel"
+          id="indexPatternManagement.script.getHelpLabel"
           values={Object {}}
         />
       </eui-link>
@@ -224,7 +224,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create field"
-              id="common.ui.fieldEditor.actions.createButton"
+              id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
           </eui-button>
@@ -238,7 +238,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           >
             <FormattedMessage
               defaultMessage="Cancel"
-              id="common.ui.fieldEditor.actions.cancelButton"
+              id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
           </eui-button-empty>
@@ -258,7 +258,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     <h3>
       <FormattedMessage
         defaultMessage="Edit {fieldName}"
-        id="common.ui.fieldEditor.editHeader"
+        id="indexPatternManagement.editHeader"
         values={
           Object {
             "fieldName": "test",
@@ -379,14 +379,14 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
-          id="common.ui.fieldEditor.formatLabel"
+          id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Format"
-          id="common.ui.fieldEditor.formatHeader"
+          id="indexPatternManagement.formatHeader"
           values={Object {}}
         />
       }
@@ -435,7 +435,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       <eui-text>
         <FormattedMessage
           defaultMessage="Access fields with {code}."
-          id="common.ui.fieldEditor.script.accessWithLabel"
+          id="indexPatternManagement.script.accessWithLabel"
           values={
             Object {
               "code": <code>
@@ -452,7 +452,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       >
         <FormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
-          id="common.ui.fieldEditor.script.getHelpLabel"
+          id="indexPatternManagement.script.getHelpLabel"
           values={Object {}}
         />
       </eui-link>
@@ -471,7 +471,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           >
             <FormattedMessage
               defaultMessage="Save field"
-              id="common.ui.fieldEditor.actions.saveButton"
+              id="indexPatternManagement.actions.saveButton"
               values={Object {}}
             />
           </eui-button>
@@ -485,7 +485,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           >
             <FormattedMessage
               defaultMessage="Cancel"
-              id="common.ui.fieldEditor.actions.cancelButton"
+              id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
           </eui-button-empty>
@@ -503,7 +503,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Delete"
-                  id="common.ui.fieldEditor.actions.deleteButton"
+                  id="indexPatternManagement.actions.deleteButton"
                   values={Object {}}
                 />
               </eui-button-empty>
@@ -525,7 +525,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     <h3>
       <FormattedMessage
         defaultMessage="Create scripted field"
-        id="common.ui.fieldEditor.createHeader"
+        id="indexPatternManagement.createHeader"
         values={Object {}}
       />
     </h3>
@@ -602,10 +602,10 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             size="s"
             type="alert"
           />
-           
+
           <FormattedMessage
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
-            id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
+            id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
             values={
               Object {
                 "fieldName": <eui-code>
@@ -614,7 +614,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
                 "mappingConflict": <strong>
                   <FormattedMessage
                     defaultMessage="Mapping Conflict:"
-                    id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
+                    id="indexPatternManagement.mappingConflictLabel.mappingConflictLabel"
                     values={Object {}}
                   />
                 </strong>,
@@ -690,14 +690,14 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
-          id="common.ui.fieldEditor.formatLabel"
+          id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Format"
-          id="common.ui.fieldEditor.formatHeader"
+          id="indexPatternManagement.formatHeader"
           values={Object {}}
         />
       }
@@ -731,7 +731,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       error={
         <FormattedMessage
           defaultMessage="Script is required"
-          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          id="indexPatternManagement.scriptRequiredErrorMessage"
           values={Object {}}
         />
       }
@@ -751,7 +751,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       <eui-text>
         <FormattedMessage
           defaultMessage="Access fields with {code}."
-          id="common.ui.fieldEditor.script.accessWithLabel"
+          id="indexPatternManagement.script.accessWithLabel"
           values={
             Object {
               "code": <code>
@@ -768,7 +768,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       >
         <FormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
-          id="common.ui.fieldEditor.script.getHelpLabel"
+          id="indexPatternManagement.script.getHelpLabel"
           values={Object {}}
         />
       </eui-link>
@@ -787,7 +787,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           >
             <FormattedMessage
               defaultMessage="Create field"
-              id="common.ui.fieldEditor.actions.createButton"
+              id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
           </eui-button>
@@ -801,7 +801,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           >
             <FormattedMessage
               defaultMessage="Cancel"
-              id="common.ui.fieldEditor.actions.cancelButton"
+              id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
           </eui-button-empty>
@@ -821,7 +821,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     <h3>
       <FormattedMessage
         defaultMessage="Edit {fieldName}"
-        id="common.ui.fieldEditor.editHeader"
+        id="indexPatternManagement.editHeader"
         values={
           Object {
             "fieldName": "test",
@@ -902,18 +902,18 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             size="s"
             type="alert"
           />
-           
+
           <strong>
             <FormattedMessage
               defaultMessage="Deprecation Warning:"
-              id="common.ui.fieldEditor.warningHeader"
+              id="indexPatternManagement.warningHeader"
               values={Object {}}
             />
           </strong>
-           
+
           <FormattedMessage
             defaultMessage="{language} is deprecated and support will be removed in the next major version of Kibana and Elasticsearch. We recommend using {painlessLink} for new scripted fields."
-            id="common.ui.fieldEditor.warningLabel.warningDetail"
+            id="indexPatternManagement.warningLabel.warningDetail"
             values={
               Object {
                 "language": <eui-code>
@@ -925,7 +925,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 >
                   <FormattedMessage
                     defaultMessage="Painless"
-                    id="common.ui.fieldEditor.warningLabel.painlessLinkLabel"
+                    id="indexPatternManagement.warningLabel.painlessLinkLabel"
                     values={Object {}}
                   />
                 </eui-link>,
@@ -1032,14 +1032,14 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
-          id="common.ui.fieldEditor.formatLabel"
+          id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Format"
-          id="common.ui.fieldEditor.formatHeader"
+          id="indexPatternManagement.formatHeader"
           values={Object {}}
         />
       }
@@ -1088,7 +1088,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       <eui-text>
         <FormattedMessage
           defaultMessage="Access fields with {code}."
-          id="common.ui.fieldEditor.script.accessWithLabel"
+          id="indexPatternManagement.script.accessWithLabel"
           values={
             Object {
               "code": <code>
@@ -1105,7 +1105,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       >
         <FormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
-          id="common.ui.fieldEditor.script.getHelpLabel"
+          id="indexPatternManagement.script.getHelpLabel"
           values={Object {}}
         />
       </eui-link>
@@ -1124,7 +1124,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           >
             <FormattedMessage
               defaultMessage="Save field"
-              id="common.ui.fieldEditor.actions.saveButton"
+              id="indexPatternManagement.actions.saveButton"
               values={Object {}}
             />
           </eui-button>
@@ -1138,7 +1138,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           >
             <FormattedMessage
               defaultMessage="Cancel"
-              id="common.ui.fieldEditor.actions.cancelButton"
+              id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
           </eui-button-empty>
@@ -1156,7 +1156,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Delete"
-                  id="common.ui.fieldEditor.actions.deleteButton"
+                  id="indexPatternManagement.actions.deleteButton"
                   values={Object {}}
                 />
               </eui-button-empty>
@@ -1178,7 +1178,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     <h3>
       <FormattedMessage
         defaultMessage="Create scripted field"
-        id="common.ui.fieldEditor.createHeader"
+        id="indexPatternManagement.createHeader"
         values={Object {}}
       />
     </h3>
@@ -1255,10 +1255,10 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             size="s"
             type="alert"
           />
-           
+
           <FormattedMessage
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
-            id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictDetail"
+            id="indexPatternManagement.mappingConflictLabel.mappingConflictDetail"
             values={
               Object {
                 "fieldName": <eui-code>
@@ -1267,7 +1267,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
                 "mappingConflict": <strong>
                   <FormattedMessage
                     defaultMessage="Mapping Conflict:"
-                    id="common.ui.fieldEditor.mappingConflictLabel.mappingConflictLabel"
+                    id="indexPatternManagement.mappingConflictLabel.mappingConflictLabel"
                     values={Object {}}
                   />
                 </strong>,
@@ -1350,14 +1350,14 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         title={
           <FormattedMessage
             defaultMessage="Field type conflict"
-            id="common.ui.fieldEditor.fieldTypeConflict"
+            id="indexPatternManagement.fieldTypeConflict"
             values={Object {}}
           />
         }
       >
         <FormattedMessage
           defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
-          id="common.ui.fieldEditor.multiTypeLabelDesc"
+          id="indexPatternManagement.multiTypeLabelDesc"
           values={Object {}}
         />
       </eui-call-out>
@@ -1399,14 +1399,14 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
-          id="common.ui.fieldEditor.formatLabel"
+          id="indexPatternManagement.formatLabel"
           values={Object {}}
         />
       }
       label={
         <FormattedMessage
           defaultMessage="Format"
-          id="common.ui.fieldEditor.formatHeader"
+          id="indexPatternManagement.formatHeader"
           values={Object {}}
         />
       }
@@ -1440,7 +1440,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       error={
         <FormattedMessage
           defaultMessage="Script is required"
-          id="common.ui.fieldEditor.scriptRequiredErrorMessage"
+          id="indexPatternManagement.scriptRequiredErrorMessage"
           values={Object {}}
         />
       }
@@ -1460,7 +1460,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       <eui-text>
         <FormattedMessage
           defaultMessage="Access fields with {code}."
-          id="common.ui.fieldEditor.script.accessWithLabel"
+          id="indexPatternManagement.script.accessWithLabel"
           values={
             Object {
               "code": <code>
@@ -1477,7 +1477,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       >
         <FormattedMessage
           defaultMessage="Get help with the syntax and preview the results of your script."
-          id="common.ui.fieldEditor.script.getHelpLabel"
+          id="indexPatternManagement.script.getHelpLabel"
           values={Object {}}
         />
       </eui-link>
@@ -1496,7 +1496,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           >
             <FormattedMessage
               defaultMessage="Create field"
-              id="common.ui.fieldEditor.actions.createButton"
+              id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
           </eui-button>
@@ -1510,7 +1510,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           >
             <FormattedMessage
               defaultMessage="Cancel"
-              id="common.ui.fieldEditor.actions.cancelButton"
+              id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
           </eui-button-empty>

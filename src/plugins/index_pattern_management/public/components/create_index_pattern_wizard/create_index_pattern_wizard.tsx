@@ -121,14 +121,14 @@ export class CreateIndexPatternWizard extends Component<
 
     const indicesFailMsg = (
       <FormattedMessage
-        id="kbn.management.createIndexPattern.loadIndicesFailMsg"
+        id="indexPatternManagement.createIndexPattern.loadIndicesFailMsg"
         defaultMessage="Failed to load indices"
       />
     );
 
     const clustersFailMsg = (
       <FormattedMessage
-        id="kbn.management.createIndexPattern.loadClustersFailMsg"
+        id="indexPatternManagement.createIndexPattern.loadClustersFailMsg"
         defaultMessage="Failed to load remote clusters"
       />
     );
@@ -170,15 +170,21 @@ export class CreateIndexPatternWizard extends Component<
 
     const createdId = await emptyPattern.create();
     if (!createdId) {
-      const confirmMessage = i18n.translate('kbn.management.indexPattern.titleExistsLabel', {
-        values: { title: emptyPattern.title },
-        defaultMessage: "An index pattern with the title '{title}' already exists.",
-      });
+      const confirmMessage = i18n.translate(
+        'indexPatternManagement.indexPattern.titleExistsLabel',
+        {
+          values: { title: emptyPattern.title },
+          defaultMessage: "An index pattern with the title '{title}' already exists.",
+        }
+      );
 
       const isConfirmed = await services.openConfirm(confirmMessage, {
-        confirmButtonText: i18n.translate('kbn.management.indexPattern.goToPatternButtonLabel', {
-          defaultMessage: 'Go to existing pattern',
-        }),
+        confirmButtonText: i18n.translate(
+          'indexPatternManagement.indexPattern.goToPatternButtonLabel',
+          {
+            defaultMessage: 'Go to existing pattern',
+          }
+        ),
       });
 
       if (isConfirmed) {

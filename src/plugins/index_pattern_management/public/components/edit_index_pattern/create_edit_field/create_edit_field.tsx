@@ -52,7 +52,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
 }
 
 const newFieldPlaceholder = i18n.translate(
-  'kbn.management.editIndexPattern.scripted.newFieldPlaceholder',
+  'indexPatternManagement.editIndexPattern.scripted.newFieldPlaceholder',
   {
     defaultMessage: 'New Scripted Field',
   }
@@ -78,11 +78,14 @@ export const CreateEditField = withRouter(
     const url = `/patterns/${indexPattern.id}`;
 
     if (mode === 'edit' && !field) {
-      const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel', {
-        defaultMessage:
-          "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
-        values: { indexPatternTitle: indexPattern.title, fieldName },
-      });
+      const message = i18n.translate(
+        'indexPatternManagement.editIndexPattern.scripted.noFieldLabel',
+        {
+          defaultMessage:
+            "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
+          values: { indexPatternTitle: indexPattern.title, fieldName },
+        }
+      );
       services.toasts.addWarning(message);
       history.push(url);
     }

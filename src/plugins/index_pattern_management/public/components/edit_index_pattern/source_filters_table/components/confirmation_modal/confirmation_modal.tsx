@@ -41,7 +41,7 @@ export const DeleteFilterConfirmationModal = ({
       <EuiConfirmModal
         title={
           <FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteSourceFilterLabel"
+            id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
             defaultMessage="Delete source filter '{value}'?"
             values={{
               value: filterToDeleteValue,
@@ -52,14 +52,14 @@ export const DeleteFilterConfirmationModal = ({
         onConfirm={onDeleteFilter}
         cancelButtonText={
           <FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteFilter.cancelButtonLabel"
+            id="indexPatternManagement.editIndexPattern.source.deleteFilter.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         }
         buttonColor="danger"
         confirmButtonText={
           <FormattedMessage
-            id="kbn.management.editIndexPattern.source.deleteFilter.deleteButtonLabel"
+            id="indexPatternManagement.editIndexPattern.source.deleteFilter.deleteButtonLabel"
             defaultMessage="Delete"
           />
         }

@@ -16,14 +16,14 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
       <h3>
         <FormattedMessage
           defaultMessage="Url Template"
-          id="common.ui.fieldEditor.urlTemplateHeader"
+          id="indexPatternManagement.urlTemplateHeader"
           values={Object {}}
         />
       </h3>
       <p>
         <FormattedMessage
           defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
-          id="common.ui.fieldEditor.urlTemplateLabel.fieldDetail"
+          id="indexPatternManagement.urlTemplateLabel.fieldDetail"
           values={
             Object {
               "doubleCurlyBraces": <EuiCode>
@@ -32,7 +32,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
               "strongUrlTemplate": <strong>
                 <FormattedMessage
                   defaultMessage="Url Template"
-                  id="common.ui.fieldEditor.urlTemplateLabel.strongUrlTemplateLabel"
+                  id="indexPatternManagement.urlTemplateLabel.strongUrlTemplateLabel"
                   values={Object {}}
                 />
               </strong>,
@@ -45,10 +45,10 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
           <EuiCode>
             value
           </EuiCode>
-           — 
+           —
           <FormattedMessage
             defaultMessage="The URI-escaped value"
-            id="common.ui.fieldEditor.urlTemplate.valueLabel"
+            id="indexPatternManagement.urlTemplate.valueLabel"
             values={Object {}}
           />
         </li>
@@ -56,10 +56,10 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
           <EuiCode>
             rawValue
           </EuiCode>
-           — 
+           —
           <FormattedMessage
             defaultMessage="The unescaped value"
-            id="common.ui.fieldEditor.urlTemplate.rawValueLabel"
+            id="indexPatternManagement.urlTemplate.rawValueLabel"
             values={Object {}}
           />
         </li>
@@ -67,7 +67,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
       <h4>
         <FormattedMessage
           defaultMessage="Examples"
-          id="common.ui.fieldEditor.urlTemplate.examplesHeader"
+          id="indexPatternManagement.urlTemplate.examplesHeader"
           values={Object {}}
         />
       </h4>

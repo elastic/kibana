@@ -19,7 +19,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.typeLabel"
+        id="indexPatternManagement.url.typeLabel"
         values={Object {}}
       />
     }
@@ -58,7 +58,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpLinkText"
+          id="indexPatternManagement.url.template.helpLinkText"
           values={Object {}}
         />
       </ForwardRef>
@@ -67,7 +67,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        id="indexPatternManagement.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -91,7 +91,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="Label template help"
-          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          id="indexPatternManagement.url.labelTemplateHelpText"
           values={Object {}}
         />
       </ForwardRef>
@@ -100,7 +100,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        id="indexPatternManagement.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -138,7 +138,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.typeLabel"
+        id="indexPatternManagement.url.typeLabel"
         values={Object {}}
       />
     }
@@ -177,7 +177,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpLinkText"
+          id="indexPatternManagement.url.template.helpLinkText"
           values={Object {}}
         />
       </ForwardRef>
@@ -186,7 +186,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        id="indexPatternManagement.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -210,7 +210,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Label template help"
-          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          id="indexPatternManagement.url.labelTemplateHelpText"
           values={Object {}}
         />
       </ForwardRef>
@@ -219,7 +219,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        id="indexPatternManagement.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -257,7 +257,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.typeLabel"
+        id="indexPatternManagement.url.typeLabel"
         values={Object {}}
       />
     }
@@ -296,7 +296,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpLinkText"
+          id="indexPatternManagement.url.template.helpLinkText"
           values={Object {}}
         />
       </ForwardRef>
@@ -305,7 +305,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        id="indexPatternManagement.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -329,7 +329,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="Label template help"
-          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          id="indexPatternManagement.url.labelTemplateHelpText"
           values={Object {}}
         />
       </ForwardRef>
@@ -338,7 +338,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        id="indexPatternManagement.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -376,7 +376,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Type"
-        id="common.ui.fieldEditor.url.typeLabel"
+        id="indexPatternManagement.url.typeLabel"
         values={Object {}}
       />
     }
@@ -416,7 +416,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpLinkText"
+          id="indexPatternManagement.url.template.helpLinkText"
           values={Object {}}
         />
       </ForwardRef>
@@ -425,7 +425,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     label={
       <FormattedMessage
         defaultMessage="URL template"
-        id="common.ui.fieldEditor.url.urlTemplateLabel"
+        id="indexPatternManagement.url.urlTemplateLabel"
         values={Object {}}
       />
     }
@@ -449,7 +449,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       >
         <FormattedMessage
           defaultMessage="Label template help"
-          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          id="indexPatternManagement.url.labelTemplateHelpText"
           values={Object {}}
         />
       </ForwardRef>
@@ -458,7 +458,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Label template"
-        id="common.ui.fieldEditor.url.labelTemplateLabel"
+        id="indexPatternManagement.url.labelTemplateLabel"
         values={Object {}}
       />
     }
@@ -479,7 +479,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Width"
-        id="common.ui.fieldEditor.url.widthLabel"
+        id="indexPatternManagement.url.widthLabel"
         values={Object {}}
       />
     }
@@ -500,7 +500,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     label={
       <FormattedMessage
         defaultMessage="Height"
-        id="common.ui.fieldEditor.url.heightLabel"
+        id="indexPatternManagement.url.heightLabel"
         values={Object {}}
       />
     }

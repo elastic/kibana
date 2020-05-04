@@ -84,7 +84,10 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
       {
         field: 'key',
         name: (
-          <FormattedMessage id="common.ui.fieldEditor.staticLookup.keyLabel" defaultMessage="Key" />
+          <FormattedMessage
+            id="indexPatternManagement.staticLookup.keyLabel"
+            defaultMessage="Key"
+          />
         ),
         render: (value: number, item: StaticLookupItem) => {
           return (
@@ -106,7 +109,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         field: 'value',
         name: (
           <FormattedMessage
-            id="common.ui.fieldEditor.staticLookup.valueLabel"
+            id="indexPatternManagement.staticLookup.valueLabel"
             defaultMessage="Value"
           />
         ),
@@ -128,15 +131,15 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
       },
       {
         field: 'actions',
-        name: i18n.translate('common.ui.fieldEditor.staticLookup.actions', {
+        name: i18n.translate('indexPatternManagement.staticLookup.actions', {
           defaultMessage: 'actions',
         }),
         actions: [
           {
-            name: i18n.translate('common.ui.fieldEditor.staticLookup.deleteAria', {
+            name: i18n.translate('indexPatternManagement.staticLookup.deleteAria', {
               defaultMessage: 'Delete',
             }),
-            description: i18n.translate('common.ui.fieldEditor.staticLookup.deleteTitle', {
+            description: i18n.translate('indexPatternManagement.staticLookup.deleteTitle', {
               defaultMessage: 'Delete entry',
             }),
             onClick: (item: StaticLookupItem) => {
@@ -158,7 +161,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         <EuiSpacer size="m" />
         <EuiButton iconType="plusInCircle" size="s" onClick={this.addLookup}>
           <FormattedMessage
-            id="common.ui.fieldEditor.staticLookup.addEntryButton"
+            id="indexPatternManagement.staticLookup.addEntryButton"
             defaultMessage="Add entry"
           />
         </EuiButton>
@@ -166,7 +169,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         <EuiFormRow
           label={
             <FormattedMessage
-              id="common.ui.fieldEditor.staticLookup.unknownKeyLabel"
+              id="indexPatternManagement.staticLookup.unknownKeyLabel"
               defaultMessage="Value for unknown key"
             />
           }
@@ -174,7 +177,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
           <EuiFieldText
             value={formatParams.unknownKeyValue || ''}
             placeholder={i18n.translate(
-              'common.ui.fieldEditor.staticLookup.leaveBlankPlaceholder',
+              'indexPatternManagement.staticLookup.leaveBlankPlaceholder',
               {
                 defaultMessage: 'Leave blank to keep value as-is',
               }
