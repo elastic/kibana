@@ -85,7 +85,16 @@ const getResolvedResults = deps => {
 export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
-  app.factory('history', () => createHashHistory());
+  app.factory('history', () => {
+    return {
+      ...createHashHistory(),
+      get location() {
+        // every time location is accessed make sure we get
+        // a new one
+        return createHashHistory().location;
+      },
+    };
+  });
   app.factory('kbnUrlStateStorage', history =>
     createKbnUrlStateStorage({
       history,
@@ -160,12 +169,12 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            const delay = res =>
-              new Promise(resolve => {
-                setTimeout(() => {
-                  resolve(res);
-                }, 0);
-              });
+            // const delay = res =>
+            //   new Promise(resolve => {
+            //     setTimeout(() => {
+            //       resolve(res);
+            //     }, 0);
+            //   });
 
             return (
               data.indexPatterns
@@ -176,7 +185,7 @@ export function initVisualizeApp(app, deps) {
                 // otherwise Firefox & Safari might not fire hashchange
                 // and history.location won't get latest information about url
                 // causing incorrect state
-                .then(delay)
+                // .then(delay)
                 .catch(
                   redirectWhenMissing({
                     history,
