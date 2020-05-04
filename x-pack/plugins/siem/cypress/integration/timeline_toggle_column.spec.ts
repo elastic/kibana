@@ -47,7 +47,7 @@ describe('toggle column in timeline', () => {
     cy.get(ID_TOGGLE_FIELD).should('not.be.checked');
   });
 
-  it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
+  it.skip('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
     expandFirstTimelineEventDetails();
     uncheckTimestampToggleField();
 

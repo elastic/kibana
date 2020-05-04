@@ -77,7 +77,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets the url state when start and end date are set', () => {
+  it('sets the url state when start and end date are set', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
     updateDates();
