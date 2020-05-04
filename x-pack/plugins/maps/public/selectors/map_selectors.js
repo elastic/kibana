@@ -256,9 +256,9 @@ export const getFittableLayers = createSelector(getLayerList, layerList => {
     //These are the only layer-types that implement bounding-box retrieval reliably
     //This will _not_ work if Maps will allow register custom layer types
     const isFittable =
-      layer.constructor.type === LAYER_TYPE.VECTOR ||
-      layer.constructor.type === LAYER_TYPE.BLENDED_VECTOR ||
-      layer.constructor.type === LAYER_TYPE.HEATMAP;
+      layer.getType() === LAYER_TYPE.VECTOR ||
+      layer.getType() === LAYER_TYPE.BLENDED_VECTOR ||
+      layer.getType() === LAYER_TYPE.HEATMAP;
 
     return isFittable && layer.isVisible();
   });

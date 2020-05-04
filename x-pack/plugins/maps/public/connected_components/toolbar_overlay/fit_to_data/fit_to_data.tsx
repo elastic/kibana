@@ -15,30 +15,24 @@ interface Props {
   fitToBounds: () => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface State {}
-
-// eslint-disable-next-line react/prefer-stateless-function
-export class FitToData extends Component<Props, State> {
-  render() {
-    if (this.props.layerList.length === 0) {
-      return null;
-    }
-
-    return (
-      <EuiButtonIcon
-        className="mapToolbarOverlay__button"
-        onClick={this.props.fitToBounds}
-        data-test-subj="fitToData"
-        iconType="search"
-        color="text"
-        aria-label={i18n.translate('xpack.maps.fitToData.fitButtonLabel', {
-          defaultMessage: 'Fit to data bounds',
-        })}
-        title={i18n.translate('xpack.maps.fitToData.fitAriaLabel', {
-          defaultMessage: 'Fit to data bounds',
-        })}
-      />
-    );
+export const FitToData: React.FunctionComponent<Props> = ({ layerList, fitToBounds }: Props) => {
+  if (layerList.length === 0) {
+    return null;
   }
-}
+
+  return (
+    <EuiButtonIcon
+      className="mapToolbarOverlay__button"
+      onClick={fitToBounds}
+      data-test-subj="fitToData"
+      iconType="search"
+      color="text"
+      aria-label={i18n.translate('xpack.maps.fitToData.fitButtonLabel', {
+        defaultMessage: 'Fit to data bounds',
+      })}
+      title={i18n.translate('xpack.maps.fitToData.fitAriaLabel', {
+        defaultMessage: 'Fit to data bounds',
+      })}
+    />
+  );
+};

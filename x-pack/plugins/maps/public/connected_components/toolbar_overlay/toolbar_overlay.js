@@ -37,11 +37,11 @@ export class ToolbarOverlay extends React.Component {
           <SetViewControl />
         </EuiFlexItem>
 
-        {this._renderToolsControl()}
-
         <EuiFlexItem>
           <FitToData />
         </EuiFlexItem>
+
+        {this._renderToolsControl()}
       </EuiFlexGroup>
     );
   }
