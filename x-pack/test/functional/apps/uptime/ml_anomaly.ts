@@ -19,6 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
     const monitorId = '0000-intermittent';
 
     before(async () => {
+      await esArchiver.loadIfNeeded(archive);
       if (!(await uptime.navigation.checkIfOnMonitorPage(monitorId))) {
         await uptime.navigation.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       }
@@ -26,7 +27,6 @@ export default ({ getService }: FtrProviderContext) => {
         log.info('Jon already exists so lets delete it to start fresh.');
         await uptime.ml.deleteMLJob();
       }
-      esArchiver.loadIfNeeded(archive);
     });
 
     it('can open ml flyout', async () => {
