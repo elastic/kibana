@@ -6,7 +6,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
 import { CoreStart } from '../../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
 import {
@@ -30,6 +29,8 @@ const embeddablesRegistry: {
 } = {};
 
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
+  const I18nContext = core.i18n.Context;
+
   return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
     return (
       <div
@@ -44,6 +45,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
             getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
             notifications={core.notifications}
             overlays={core.overlays}
+            application={core.application}
             inspector={plugins.inspector}
             SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
           />

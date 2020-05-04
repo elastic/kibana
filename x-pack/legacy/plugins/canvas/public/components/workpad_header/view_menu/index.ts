@@ -9,21 +9,27 @@ import { compose, withHandlers } from 'recompose';
 import { Dispatch } from 'redux';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { zoomHandlerCreators } from '../../../lib/app_handler_creators';
-// @ts-ignore Untyped local
-import { notify } from '../../../lib/notify';
 import { State, CanvasWorkpadBoundingBox } from '../../../../types';
 // @ts-ignore Untyped local
 import { fetchAllRenderables } from '../../../state/actions/elements';
 // @ts-ignore Untyped local
 import { setZoomScale, setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
 // @ts-ignore Untyped local
-import { setWriteable } from '../../../state/actions/workpad';
+import {
+  setWriteable,
+  setRefreshInterval,
+  enableAutoplay,
+  setAutoplayInterval,
+  // @ts-ignore Untyped local
+} from '../../../state/actions/workpad';
 import { getZoomScale, canUserWrite } from '../../../state/selectors/app';
 import {
   getWorkpadBoundingBox,
   getWorkpadWidth,
   getWorkpadHeight,
   isWriteable,
+  getRefreshInterval,
+  getAutoplay,
 } from '../../../state/selectors/workpad';
 import { ViewMenu as Component, Props as ComponentProps } from './view_menu';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
@@ -42,24 +48,35 @@ interface DispatchProps {
   setFullscreen: (showFullscreen: boolean) => void;
 }
 
-const mapStateToProps = (state: State) => ({
-  zoomScale: getZoomScale(state),
-  boundingBox: getWorkpadBoundingBox(state),
-  workpadWidth: getWorkpadWidth(state),
-  workpadHeight: getWorkpadHeight(state),
-  isWriteable: isWriteable(state) && canUserWrite(state),
-});
+const mapStateToProps = (state: State) => {
+  const { enabled, interval } = getAutoplay(state);
+
+  return {
+    zoomScale: getZoomScale(state),
+    boundingBox: getWorkpadBoundingBox(state),
+    workpadWidth: getWorkpadWidth(state),
+    workpadHeight: getWorkpadHeight(state),
+    isWriteable: isWriteable(state) && canUserWrite(state),
+    refreshInterval: getRefreshInterval(state),
+    autoplayEnabled: enabled,
+    autoplayInterval: interval,
+  };
+};
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   setZoomScale: (scale: number) => dispatch(setZoomScale(scale)),
   setWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
   setFullscreen: (value: boolean) => {
     dispatch(setFullscreen(value));
+
     if (value) {
       dispatch(selectToplevelNodes([]));
     }
   },
   doRefresh: () => dispatch(fetchAllRenderables()),
+  setRefreshInterval: (interval: number) => dispatch(setRefreshInterval(interval)),
+  enableAutoplay: (autoplay: number) => dispatch(enableAutoplay(autoplay)),
+  setAutoplayInterval: (interval: number) => dispatch(setAutoplayInterval(interval)),
 });
 
 const mergeProps = (
@@ -68,13 +85,15 @@ const mergeProps = (
   ownProps: ComponentProps
 ): ComponentProps => {
   const { boundingBox, workpadWidth, workpadHeight, ...remainingStateProps } = stateProps;
+
   return {
     ...remainingStateProps,
     ...dispatchProps,
     ...ownProps,
     toggleWriteable: () => dispatchProps.setWriteable(!stateProps.isWriteable),
     enterFullscreen: () => dispatchProps.setFullscreen(true),
-    fitToWindow: () => getFitZoomScale(boundingBox, workpadWidth, workpadHeight),
+    fitToWindow: () =>
+      dispatchProps.setZoomScale(getFitZoomScale(boundingBox, workpadWidth, workpadHeight)),
   };
 };
 

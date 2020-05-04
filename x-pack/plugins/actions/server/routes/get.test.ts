@@ -9,6 +9,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { actionsClientMock } from '../actions_client.mock';
 
 jest.mock('../lib/verify_api_access.ts', () => ({
   verifyApiAccess: jest.fn(),
@@ -41,10 +42,11 @@ describe('getActionRoute', () => {
       actionTypeId: '2',
       name: 'action name',
       config: {},
+      isPreconfigured: false,
     };
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce(getResult),
-    };
+
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce(getResult);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -60,6 +62,7 @@ describe('getActionRoute', () => {
           "actionTypeId": "2",
           "config": Object {},
           "id": "1",
+          "isPreconfigured": false,
           "name": "action name",
         },
       }
@@ -81,17 +84,17 @@ describe('getActionRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce({
-        id: '1',
-        actionTypeId: '2',
-        name: 'action name',
-        config: {},
-      }),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce({
+      id: '1',
+      actionTypeId: '2',
+      name: 'action name',
+      config: {},
+      isPreconfigured: false,
+    });
 
     const [context, req, res] = mockHandlerArguments(
-      actionsClient,
+      { actionsClient },
       {
         params: { id: '1' },
       },
@@ -115,17 +118,17 @@ describe('getActionRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    const actionsClient = {
-      get: jest.fn().mockResolvedValueOnce({
-        id: '1',
-        actionTypeId: '2',
-        name: 'action name',
-        config: {},
-      }),
-    };
+    const actionsClient = actionsClientMock.create();
+    actionsClient.get.mockResolvedValueOnce({
+      id: '1',
+      actionTypeId: '2',
+      name: 'action name',
+      config: {},
+      isPreconfigured: false,
+    });
 
     const [context, req, res] = mockHandlerArguments(
-      actionsClient,
+      { actionsClient },
       {
         params: { id: '1' },
       },

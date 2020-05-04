@@ -4,6 +4,16 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "optionalPlugins": ["home", "indexManagement", "indexPatternManagement", "usageCollection"],
-  "requiredPlugins": ["management", "data"]
+  "requiredPlugins": [
+    "indexPatternManagement",
+    "management",
+    "licensing"
+  ],
+  "optionalPlugins": [
+    "home",
+    "indexManagement",
+    "usageCollection",
+    "visTypeTimeseries"
+  ],
+  "configPath": ["xpack", "rollup"]
 }

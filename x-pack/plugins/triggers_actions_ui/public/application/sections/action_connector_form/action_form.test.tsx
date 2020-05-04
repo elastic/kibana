@@ -73,6 +73,21 @@ describe('action_form', () => {
     actionParamsFields: null,
   };
 
+  const preconfiguredOnly = {
+    id: 'preconfigured',
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateConnector: (): ValidationResult => {
+      return { errors: {} };
+    },
+    validateParams: (): ValidationResult => {
+      const validationResult = { errors: {} };
+      return validationResult;
+    },
+    actionConnectorFields: null,
+    actionParamsFields: null,
+  };
+
   describe('action_form in alert', () => {
     let wrapper: ReactWrapper<any>;
 
@@ -95,6 +110,22 @@ describe('action_form', () => {
           config: {},
           isPreconfigured: true,
         },
+        {
+          secrets: {},
+          id: 'test3',
+          actionTypeId: preconfiguredOnly.id,
+          name: 'Preconfigured Only',
+          config: {},
+          isPreconfigured: true,
+        },
+        {
+          secrets: {},
+          id: 'test4',
+          actionTypeId: preconfiguredOnly.id,
+          name: 'Regular connector',
+          config: {},
+          isPreconfigured: false,
+        },
       ]);
       const mockes = coreMock.createSetup();
       deps = {
@@ -106,6 +137,7 @@ describe('action_form', () => {
         actionType,
         disabledByConfigActionType,
         disabledByLicenseActionType,
+        preconfiguredOnly,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
@@ -167,6 +199,14 @@ describe('action_form', () => {
               minimumLicenseRequired: 'basic',
             },
             {
+              id: 'preconfigured',
+              name: 'Preconfigured only',
+              enabled: true,
+              enabledInConfig: false,
+              enabledInLicense: true,
+              minimumLicenseRequired: 'basic',
+            },
+            {
               id: 'disabled-by-config',
               name: 'Disabled by config',
               enabled: false,
@@ -207,21 +247,27 @@ describe('action_form', () => {
       ).toBeFalsy();
     });
 
-    it(`doesn't render action types disabled by config`, async () => {
+    it('does not render action types disabled by config', async () => {
       await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="disabled-by-config-ActionTypeSelectOption"]`
+        '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });
 
-    it(`renders available connectors for the selected action type`, async () => {
+    it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
+      await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      expect(actionOption.exists()).toBeTruthy();
+    });
+
+    it('renders available connectors for the selected action type', async () => {
       await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
-      const combobox = wrapper.find(`[data-test-subj="selectActionConnector"]`);
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -238,10 +284,37 @@ describe('action_form', () => {
       `);
     });
 
+    it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
+      await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      actionOption.first().simulate('click');
+      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
+      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "test3",
+          "key": "test3",
+          "label": "Preconfigured Only (preconfigured)",
+        },
+      ]
+      `);
+    });
+
+    it('does not render "Add new" button for preconfigured only action type', async () => {
+      await setup();
+      const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
+      actionOption.first().simulate('click');
+      const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
+      const addNewConnectorButton = preconfigPannel.find(
+        '[data-test-subj="addNewActionConnectorButton-preconfigured"]'
+      );
+      expect(addNewConnectorButton.exists()).toBeFalsy();
+    });
+
     it('renders action types disabled by license', async () => {
       await setup();
       const actionOption = wrapper.find(
-        `[data-test-subj="disabled-by-license-ActionTypeSelectOption"]`
+        '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeTruthy();
       expect(

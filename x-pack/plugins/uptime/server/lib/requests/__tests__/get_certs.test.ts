@@ -5,6 +5,7 @@
  */
 
 import { getCerts } from '../get_certs';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getCerts', () => {
   let mockHits: any;
@@ -18,9 +19,10 @@ describe('getCerts', () => {
         _score: 0,
         _source: {
           tls: {
-            certificate_not_valid_before: '2019-08-16T01:40:25.000Z',
             server: {
               x509: {
+                not_before: '2019-08-16T01:40:25.000Z',
+                not_after: '2020-07-16T03:15:39.000Z',
                 subject: {
                   common_name: 'r2.shared.global.fastly.net',
                 },
@@ -33,11 +35,13 @@ describe('getCerts', () => {
                 sha256: '12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d',
               },
             },
-            certificate_not_valid_after: '2020-07-16T03:15:39.000Z',
           },
           monitor: {
             name: 'Real World Test',
             id: 'real-world-test',
+          },
+          url: {
+            full: 'https://fullurl.com',
           },
         },
         fields: {
@@ -86,30 +90,39 @@ describe('getCerts', () => {
   it('parses query result and returns expected values', async () => {
     const result = await getCerts({
       callES: mockCallES,
-      dynamicSettings: { heartbeatIndices: 'heartbeat*' },
+      dynamicSettings: {
+        heartbeatIndices: 'heartbeat*',
+        certThresholds: DYNAMIC_SETTINGS_DEFAULTS.certThresholds,
+      },
       index: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
       size: 30,
+      sortBy: 'not_after',
+      direction: 'desc',
     });
     expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "certificate_not_valid_after": "2020-07-16T03:15:39.000Z",
-          "certificate_not_valid_before": "2019-08-16T01:40:25.000Z",
-          "common_name": "r2.shared.global.fastly.net",
-          "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
-          "monitors": Array [
-            Object {
-              "id": "real-world-test",
-              "name": "Real World Test",
-            },
-          ],
-          "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
-          "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
-        },
-      ]
+      Object {
+        "certs": Array [
+          Object {
+            "common_name": "r2.shared.global.fastly.net",
+            "issuer": "GlobalSign CloudSSL CA - SHA256 - G3",
+            "monitors": Array [
+              Object {
+                "id": "real-world-test",
+                "name": "Real World Test",
+                "url": undefined,
+              },
+            ],
+            "not_after": "2020-07-16T03:15:39.000Z",
+            "not_before": "2019-08-16T01:40:25.000Z",
+            "sha1": "b7b4b89ef0d0caf39d223736f0fdbb03c7b426f1",
+            "sha256": "12b00d04db0db8caa302bfde043e88f95baceb91e86ac143e93830b4bbec726d",
+          },
+        ],
+        "total": 0,
+      }
     `);
     expect(mockCallES.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -124,9 +137,16 @@ describe('getCerts', () => {
                 "tls.server.x509.subject.common_name",
                 "tls.server.hash.sha1",
                 "tls.server.hash.sha256",
-                "tls.certificate_not_valid_before",
-                "tls.certificate_not_valid_after",
+                "tls.server.x509.not_after",
+                "tls.server.x509.not_before",
               ],
+              "aggs": Object {
+                "total": Object {
+                  "cardinality": Object {
+                    "field": "tls.server.hash.sha256",
+                  },
+                },
+              },
               "collapse": Object {
                 "field": "tls.server.hash.sha256",
                 "inner_hits": Object {
@@ -134,6 +154,7 @@ describe('getCerts', () => {
                     "includes": Array [
                       "monitor.id",
                       "monitor.name",
+                      "url.full",
                     ],
                   },
                   "collapse": Object {
@@ -147,13 +168,13 @@ describe('getCerts', () => {
                   ],
                 },
               },
-              "from": 1,
+              "from": 30,
               "query": Object {
                 "bool": Object {
                   "filter": Array [
                     Object {
                       "exists": Object {
-                        "field": "tls",
+                        "field": "tls.server",
                       },
                     },
                     Object {
@@ -165,39 +186,32 @@ describe('getCerts', () => {
                       },
                     },
                   ],
+                  "minimum_should_match": 1,
                   "should": Array [
                     Object {
-                      "wildcard": Object {
-                        "tls.server.issuer": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "tls.common_name": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "monitor.id": Object {
-                          "value": "*my_common_name*",
-                        },
-                      },
-                    },
-                    Object {
-                      "wildcard": Object {
-                        "monitor.name": Object {
-                          "value": "*my_common_name*",
-                        },
+                      "multi_match": Object {
+                        "fields": Array [
+                          "monitor.id.text",
+                          "monitor.name.text",
+                          "url.full.text",
+                          "tls.server.x509.subject.common_name.text",
+                          "tls.server.x509.issuer.common_name.text",
+                        ],
+                        "query": "my_common_name",
+                        "type": "phrase_prefix",
                       },
                     },
                   ],
                 },
               },
               "size": 30,
+              "sort": Array [
+                Object {
+                  "tls.server.x509.not_after": Object {
+                    "order": "desc",
+                  },
+                },
+              ],
             },
             "index": "heartbeat*",
           },

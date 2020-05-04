@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
-import { ActionType } from './types';
+import { ActionType, PreConfiguredAction } from './types';
 import { ActionType as CommonActionType } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 
@@ -17,6 +17,7 @@ export interface ActionTypeRegistryOpts {
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class ActionTypeRegistry {
@@ -25,12 +26,14 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
+  private readonly preconfiguredActions: PreConfiguredAction[];
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
+    this.preconfiguredActions = constructorParams.preconfiguredActions;
   }
 
   /**
@@ -59,6 +62,19 @@ export class ActionTypeRegistry {
   }
 
   /**
+   * Returns true if action type is enabled or it is a preconfigured action type.
+   */
+  public isActionExecutable(actionId: string, actionTypeId: string) {
+    return (
+      this.isActionTypeEnabled(actionTypeId) ||
+      (!this.isActionTypeEnabled(actionTypeId) &&
+        this.preconfiguredActions.find(
+          preconfiguredAction => preconfiguredAction.id === actionId
+        ) !== undefined)
+    );
+  }
+
+  /**
    * Registers an action type to the action type registry
    */
   public register(actionType: ActionType) {
@@ -81,7 +97,7 @@ export class ActionTypeRegistry {
         title: actionType.name,
         type: `actions:${actionType.id}`,
         maxAttempts: actionType.maxAttempts || 1,
-        getRetry(attempts: number, error: any) {
+        getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }

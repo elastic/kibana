@@ -7,7 +7,7 @@
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
-import { notify } from '../../lib/notify';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { RenderWithFn as Component } from './render_with_fn';
 import { ElementHandlers } from './lib/handlers';
 
@@ -19,9 +19,10 @@ export const RenderWithFn = compose(
       handlers: Object.assign(new ElementHandlers(), handlers),
     })
   ),
-  withProps({
-    onError: notify.error,
-  })
+  withKibana,
+  withProps(props => ({
+    onError: props.kibana.services.canvas.notify.error,
+  }))
 )(Component);
 
 RenderWithFn.propTypes = {

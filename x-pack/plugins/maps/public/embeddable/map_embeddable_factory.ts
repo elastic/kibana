@@ -23,6 +23,7 @@ import { addLayerWithoutDataSync } from '../actions/map_actions';
 import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInitialLayers } from '../angular/get_initial_layers';
 import { mergeInputWithSavedMap } from './merge_input_with_saved_map';
+import '../index.scss';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
