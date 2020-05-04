@@ -11,7 +11,14 @@ import {
   useGetCaseUserActions,
   UseGetCaseUserActions,
 } from './use_get_case_user_actions';
-import { basicCase, basicPushSnake, caseUserActions, elasticUser, getUserAction } from './mock';
+import {
+  basicCase,
+  basicPush,
+  basicPushSnake,
+  caseUserActions,
+  elasticUser,
+  getUserAction,
+} from './mock';
 import * as api from './api';
 
 jest.mock('./api');
@@ -112,7 +119,7 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: false,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
             hasDataToPush: false,
@@ -132,7 +139,7 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: true,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
             hasDataToPush: true,
@@ -152,7 +159,7 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: false,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
             hasDataToPush: false,
@@ -172,7 +179,7 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: false,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 5,
             hasDataToPush: false,
@@ -205,13 +212,16 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: true,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
             hasDataToPush: true,
           },
           '456': {
-            ...push456,
+            ...basicPush,
+            connectorId: '456',
+            connectorName: 'other connector name',
+            externalId: 'other_external_id',
             firstPushIndex: 5,
             lastPushIndex: 5,
             hasDataToPush: false,
@@ -244,13 +254,16 @@ describe('useGetCaseUserActions', () => {
         hasDataToPush: false,
         caseServices: {
           '123': {
-            ...basicPushSnake,
+            ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
             hasDataToPush: true,
           },
           '456': {
-            ...push456,
+            ...basicPush,
+            connectorId: '456',
+            connectorName: 'other connector name',
+            externalId: 'other_external_id',
             firstPushIndex: 5,
             lastPushIndex: 5,
             hasDataToPush: false,

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { getUserAction } from '../../../../containers/case/mock';
+import { basicPush, getUserAction } from '../../../../containers/case/mock';
 import { getLabelTitle } from './helpers';
 import * as i18n from '../case_view/translations';
 import { mount } from 'enzyme';
@@ -111,7 +111,7 @@ describe('User action tree helpers', () => {
         .find(`[data-test-subj="pushed-label"]`)
         .first()
         .text()
-    ).toEqual(i18n.PUSHED_NEW_INCIDENT);
+    ).toEqual(`${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`);
     expect(
       wrapper
         .find(`[data-test-subj="pushed-value"]`)
@@ -134,7 +134,7 @@ describe('User action tree helpers', () => {
         .find(`[data-test-subj="pushed-label"]`)
         .first()
         .text()
-    ).toEqual(i18n.UPDATE_INCIDENT);
+    ).toEqual(`${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`);
     expect(
       wrapper
         .find(`[data-test-subj="pushed-value"]`)
