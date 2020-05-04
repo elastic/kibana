@@ -14,11 +14,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
-  EuiTabs,
-  EuiTab,
   EuiSteps,
   EuiText,
-  EuiSelect,
   EuiLink,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
@@ -26,11 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../types';
 import { EnrollmentStepAgentConfig } from './config_selection';
-import { useGetOneEnrollmentAPIKey, useCore } from '../../../../hooks';
-import {
-  QuickSetupInstructions,
-  ManualInstructions,
-} from '../../../../components/enrollment_instructions';
+import { useGetOneEnrollmentAPIKey, useCore, useGetSettings } from '../../../../hooks';
+import { ManualInstructions } from '../../../../components/enrollment_instructions';
 
 interface Props {
   onClose: () => void;
@@ -43,39 +37,38 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const core = useCore();
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('macos');
-  const [selectedTab, setSelectedTab] = useState<'quick_setup' | 'manual'>('quick_setup');
 
+  const settings = useGetSettings();
   const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
 
+  const kibanaUrl =
+    settings.data?.item?.kibana_url ?? `${window.location.origin}${core.http.basePath.get()}`;
+  const kibanaCASha256 = settings.data?.item?.kibana_ca_sha256;
+
   const steps: EuiContainedStepProps[] = [
-    ...(selectedTab === 'manual'
-      ? [
-          {
-            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
-              defaultMessage: 'Download the Elastic Agent',
-            }),
-            children: (
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.ingestManager.agentEnrollment.downloadDescription"
-                  defaultMessage="Download the Elastic agent on your host’s machine. You can download the agent binary and it’s verification signature from Elastic’s {downloadLink}."
-                  values={{
-                    downloadLink: (
-                      <EuiLink href="https://ela.st/download-elastic-agent" target="_blank">
-                        <FormattedMessage
-                          id="xpack.ingestManager.agentEnrollment.downloadLink"
-                          defaultMessage="download page"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            ),
-          },
-        ]
-      : []),
+    {
+      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
+        defaultMessage: 'Download the Elastic Agent',
+      }),
+      children: (
+        <EuiText>
+          <FormattedMessage
+            id="xpack.ingestManager.agentEnrollment.downloadDescription"
+            defaultMessage="Download the Elastic agent on your host’s machine. You can download the agent binary and it’s verification signature from Elastic’s {downloadLink}."
+            values={{
+              downloadLink: (
+                <EuiLink href="https://ela.st/download-elastic-agent" target="_blank">
+                  <FormattedMessage
+                    id="xpack.ingestManager.agentEnrollment.downloadLink"
+                    defaultMessage="download page"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      ),
+    },
     {
       title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChooseAgentConfigTitle', {
         defaultMessage: 'Choose an agent configuration',
@@ -84,85 +77,23 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         <EnrollmentStepAgentConfig agentConfigs={agentConfigs} onKeyChange={setSelectedAPIKeyId} />
       ),
     },
-    ...(selectedTab === 'manual'
-      ? [
-          {
-            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepRunAgentTitle', {
-              defaultMessage: 'Enroll and run the Elastic Agent',
-            }),
-            children: apiKey.data && (
-              <ManualInstructions
-                apiKey={apiKey.data.item}
-                kibanaUrl={`${window.location.origin}${core.http.basePath.get()}`}
-              />
-            ),
-          },
-        ]
-      : [
-          {
-            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChoosePlatformTitle', {
-              defaultMessage: 'Select your agent platform',
-            }),
-            children: (
-              <EuiSelect
-                fullWidth
-                prepend={
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.ingestManager.agentEnrollment.selectPlatformLabel"
-                      defaultMessage="Agent platform"
-                    />
-                  </EuiText>
-                }
-                value={selectedPlatform}
-                onChange={e => setSelectedPlatform(e.target.value)}
-                options={[
-                  {
-                    text: i18n.translate(
-                      'xpack.ingestManager.agentEnrollment.platformDarwinLabel',
-                      {
-                        defaultMessage: 'Macos',
-                      }
-                    ),
-                    value: 'macos',
-                  },
-                  {
-                    text: i18n.translate('xpack.ingestManager.agentEnrollment.platformLinuxLabel', {
-                      defaultMessage: 'Linux 64-bit',
-                    }),
-                    value: 'linux',
-                  },
-                  {
-                    text: i18n.translate(
-                      'xpack.ingestManager.agentEnrollment.platformWindowsLabel',
-                      {
-                        defaultMessage: 'Windows',
-                      }
-                    ),
-                    value: 'windows',
-                  },
-                ]}
-              />
-            ),
-          },
-          {
-            title: i18n.translate('xpack.ingestManager.agentEnrollment.stepQuickSetupTitle', {
-              defaultMessage: 'Download and enroll the Elastic Agent',
-            }),
-            children: apiKey.data && (
-              <QuickSetupInstructions
-                apiKey={apiKey.data.item}
-                kibanaUrl={`${window.location.origin}${core.http.basePath.get()}`}
-                platform={selectedPlatform}
-              />
-            ),
-          },
-        ]),
+    {
+      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepRunAgentTitle', {
+        defaultMessage: 'Enroll and run the Elastic Agent',
+      }),
+      children: apiKey.data && (
+        <ManualInstructions
+          apiKey={apiKey.data.item}
+          kibanaUrl={kibanaUrl}
+          kibanaCASha256={kibanaCASha256}
+        />
+      ),
+    },
   ];
 
   return (
     <EuiFlyout onClose={onClose} size="l" maxWidth={860}>
-      <EuiFlyoutHeader aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
+      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
         <EuiTitle size="m">
           <h2 id="FleetAgentEnrollmentFlyoutTitle">
             <FormattedMessage
@@ -172,27 +103,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <div>
-        <EuiTabs>
-          {/* TODO check if we can do better */}
-          &nbsp; &nbsp;
-          <EuiTab
-            onClick={() => setSelectedTab('quick_setup')}
-            isSelected={selectedTab === 'quick_setup'}
-          >
-            <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.tabQuickSetupTitle"
-              defaultMessage="Quick setup"
-            />
-          </EuiTab>
-          <EuiTab onClick={() => setSelectedTab('manual')} isSelected={selectedTab === 'manual'}>
-            <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.manualInstructionsTitle"
-              defaultMessage="Manual instructions"
-            />
-          </EuiTab>
-        </EuiTabs>
-      </div>
       <EuiFlyoutBody>
         <EuiSteps steps={steps} />
       </EuiFlyoutBody>
