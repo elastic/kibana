@@ -59,7 +59,7 @@ export const OutputTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionText"
-            defaultMessage="The output of the executed pipeline. {runLink}"
+            defaultMessage="View the final output data, or see how each processor affects the ingest document as it passes through the pipeline. {runLink}"
             values={{
               runLink: (
                 <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
@@ -79,20 +79,10 @@ export const OutputTab: React.FunctionComponent<Props> = ({
 
       <EuiSwitch
         label={
-          <>
-            <FormattedMessage
-              id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
-              defaultMessage="View verbose output"
-            />{' '}
-            <EuiIconTip
-              content={
-                <FormattedMessage
-                  id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchTooltipLabel"
-                  defaultMessage="Include output data for each processor in the executed pipeline response"
-                />
-              }
-            />
-          </>
+          <FormattedMessage
+            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
+            defaultMessage="View verbose output"
+          />
         }
         checked={cachedVerbose}
         onChange={e => onEnableVerbose(e.target.checked)}

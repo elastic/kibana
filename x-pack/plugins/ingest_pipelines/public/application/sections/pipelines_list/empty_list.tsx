@@ -18,6 +18,14 @@ export const EmptyList: FunctionComponent = () => (
         })}
       </h2>
     }
+    body={
+      <p>
+        {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompDescription', {
+          defaultMessage:
+            'For example, you might create a pipeline with one processor that removes a field and another processor that renames a field.',
+        })}
+      </p>
+    }
     actions={
       <EuiButton href={`#${BASE_PATH}/create`} iconType="plusInCircle" fill>
         {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {

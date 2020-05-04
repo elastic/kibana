@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent, EuiCode } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
@@ -71,16 +71,32 @@ export const App: FunctionComponent = () => {
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="You're missing cluster privileges"
+                    defaultMessage="Cluster privileges required"
                   />
                 }
                 message={
                   <FormattedMessage
                     id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                    defaultMessage="You must have the {missingPrivileges} {privilegesCount,
+                    plural, one {privilege} other {privileges}} to access Ingest Node Pipelines."
                     values={{
-                      missingPrivileges: privilegesMissing.cluster!.join(', '),
+                      missingPrivileges: privilegesMissing
+                        .cluster!.map(privilege => <EuiCode>{privilege}</EuiCode>)
+                        .reduce((acc, currPrivilege, idx) => {
+                          if (idx === 0) {
+                            return currPrivilege;
+                          }
+                          return (
+                            <>
+                              {acc}{' '}
+                              <FormattedMessage
+                                id="xpack.ingestPipelines.app.deniedPrivilegeAndLabel"
+                                defaultMessage="and"
+                              />{' '}
+                              {currPrivilege}
+                            </>
+                          );
+                        }),
                       privilegesCount: privilegesMissing.cluster!.length,
                     }}
                   />
