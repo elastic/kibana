@@ -167,7 +167,6 @@ export const signalRulesAlertType = ({
             from,
             to,
           });
-          // TODO What happens if the ML checks fail?
 
           const anomalyCount = anomalyResults.hits.hits.length;
           if (anomalyCount) {
