@@ -48,25 +48,33 @@ const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
   },
 ];
 
-const createSuperSelectOptions = <T extends {}>(
-  options: Array<{ key: T; label: string }>
-): Array<EuiSuperSelectOption<T>> => {
-  return options.map(option => ({
-    value: option.key,
-    inputDisplay: <span>{option.label}</span>,
-    'data-test-subj': `dropdown-mapping-${option.key}`,
-  }));
-};
-
 const getThirdPartyOptions = (
   caseField: CaseField,
   thirdPartyFields: Record<string, ConnectorConfigurationThirdPartyField>
-) =>
-  createSuperSelectOptions<AllThirdPartyFields>(
-    Object.keys(thirdPartyFields)
-      .filter(key => thirdPartyFields[key].validSourceFields.includes(caseField))
-      .map(key => ({ key: key as AllThirdPartyFields, label: thirdPartyFields[key].label }))
-      .concat([{ key: 'not_mapped', label: i18n.MAPPING_FIELD_NOT_MAPPED }])
+): Array<EuiSuperSelectOption<AllThirdPartyFields>> =>
+  (Object.keys(thirdPartyFields) as AllThirdPartyFields[]).reduce<
+    Array<EuiSuperSelectOption<AllThirdPartyFields>>
+  >(
+    (acc, key) => {
+      if (thirdPartyFields[key].validSourceFields.includes(caseField)) {
+        return [
+          ...acc,
+          {
+            value: key,
+            inputDisplay: <span>{thirdPartyFields[key].label}</span>,
+            'data-test-subj': `dropdown-mapping-${key}`,
+          },
+        ];
+      }
+      return acc;
+    },
+    [
+      {
+        value: 'not_mapped',
+        inputDisplay: i18n.MAPPING_FIELD_NOT_MAPPED,
+        'data-test-subj': 'dropdown-mapping-not_mapped',
+      },
+    ]
   );
 
 export interface FieldMappingProps {
