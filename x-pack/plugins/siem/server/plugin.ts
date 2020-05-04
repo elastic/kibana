@@ -15,16 +15,12 @@ import {
   PluginInitializerContext,
   Logger,
 } from '../../../../src/core/server';
-import {
-  PluginStartContract as AlertingStart,
-  PluginSetupContract as AlertingSetup,
-} from '../../alerting/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { PluginStartContract as ActionsStart } from '../../actions/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -40,8 +36,6 @@ import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
 import { APP_ID, APP_ICON } from '../common/constants';
 
-export { CoreSetup, CoreStart };
-
 export interface SetupPlugins {
   alerting: AlertingSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
@@ -52,10 +46,8 @@ export interface SetupPlugins {
   ml?: MlSetup;
 }
 
-export interface StartPlugins {
-  actions: ActionsStart;
-  alerting: AlertingStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartPlugins {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -77,7 +69,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup, plugins: SetupPlugins) {
+  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
     if (hasListsFeature()) {
