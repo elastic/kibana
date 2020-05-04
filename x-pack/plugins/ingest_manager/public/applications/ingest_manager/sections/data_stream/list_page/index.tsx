@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, memo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -17,13 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
-import { EuiContextMenuItem } from '@elastic/eui';
 import { DataStream } from '../../../types';
 import { WithHeaderLayout } from '../../../layouts';
 import { useGetDataStreams, useStartDeps, usePagination } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
-import { TableRowActions } from '../../../components/table_row_actions';
-import { useKibanaLink } from '../../../hooks/use_kibana_link';
+import { DataStreamRowActions } from './components/data_stream_row_actions';
 
 const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
   <WithHeaderLayout
@@ -55,27 +53,6 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
     {children}
   </WithHeaderLayout>
 );
-
-const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
-  const url = datastream.dashboards.length > 0 ? datastream.dashboards[0].id : '';
-  return (
-    <TableRowActions
-      items={[
-        <EuiContextMenuItem
-          icon="dashboardApp"
-          href={useKibanaLink(`/dashboard/${url}`)}
-          key="viewDashboard"
-          disabled={!(datastream.dashboards?.length > 0)}
-        >
-          <FormattedMessage
-            id="xpack.ingestManager.dataStreamList.viewDashboardActionText"
-            defaultMessage="View dashboard"
-          />
-        </EuiContextMenuItem>,
-      ]}
-    />
-  );
-});
 
 export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const {

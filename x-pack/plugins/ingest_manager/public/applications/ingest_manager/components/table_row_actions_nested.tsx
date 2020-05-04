@@ -5,12 +5,12 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelProps } from '@elastic/eui/src/components/context_menu/context_menu_panel';
+import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 
-export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['items'] }>(
-  ({ items }) => {
+export const TableRowActionsNested = React.memo<{ panels: EuiContextMenuProps['panels'] }>(
+  ({ panels }) => {
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
     const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
@@ -23,7 +23,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
           <EuiButtonIcon
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.ingestManager.genericActionsMenuText', {
+            aria-label={i18n.translate('xpack.ingestManager.genericActionsMenuTextB', {
               defaultMessage: 'Open',
             })}
           />
@@ -31,7 +31,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
         isOpen={isOpen}
         closePopover={handleCloseMenu}
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenu panels={panels} initialPanelId={0} />
       </EuiPopover>
     );
   }
