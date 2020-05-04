@@ -7,15 +7,37 @@
 import expect from '@kbn/expect';
 // @ts-ignore no module definition
 import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
-import { ReportingUsageType } from '../../../legacy/plugins/reporting/server/usage/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-function removeWhitespace(str: string) {
-  return str.replace(/\s/g, '');
+interface PDFAppCounts {
+  app: {
+    [appName: string]: number;
+  };
+  layout: {
+    [layoutType: string]: number;
+  };
+}
+
+export interface ReportingUsageStats {
+  available: boolean;
+  enabled: boolean;
+  total: number;
+  last_7_days: {
+    total: number;
+    printable_pdf: PDFAppCounts;
+    [jobType: string]: any;
+  };
+  printable_pdf: PDFAppCounts;
+  status: any;
+  [jobType: string]: any;
 }
 
 interface UsageStats {
-  reporting: ReportingUsageType;
+  reporting: ReportingUsageStats;
+}
+
+function removeWhitespace(str: string) {
+  return str.replace(/\s/g, '');
 }
 
 export function ReportingAPIProvider({ getService }: FtrProviderContext) {

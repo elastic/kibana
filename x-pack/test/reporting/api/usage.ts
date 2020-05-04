@@ -5,8 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import * as GenerationUrls from './generation_urls';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { ReportingUsageStats } from '../services/reporting_api';
+import * as GenerationUrls from './generation_urls';
+
+interface UsageStats {
+  reporting: ReportingUsageStats;
+}
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
@@ -19,10 +24,10 @@ export default function({ getService }: FtrProviderContext) {
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
-      let usage: any; // FIXME after https://github.com/elastic/kibana/pull/64841 is merged use ReportingUsageType
+      let usage: UsageStats;
 
       before(async () => {
-        usage = await usageAPI.getUsageStats();
+        usage = (await usageAPI.getUsageStats()) as UsageStats;
       });
 
       it('shows reporting as available and enabled', async () => {
