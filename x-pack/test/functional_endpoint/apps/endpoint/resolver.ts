@@ -58,26 +58,19 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
     it('compare resolver Nodes and Table data', async () => {
       const $: string[] = [];
-      let count = 1;
       const tableData = await pageObjects.endpointAlerts.getEndpointAlertResolverTableData(
         'resolverEmbeddable',
         'tr'
       );
-      await retry.try(async function() {
-        await testSubjects.click('zoom-out');
-        const Nodes = await testSubjects.findAll('resolverNode');
-        expect(tableData.length - 1).to.eql(Nodes.length);
-        for (const value of Nodes) {
-          $.push(await value._webElement.getText());
-        }
-        count++;
-      });
+      await testSubjects.click('zoom-out');
+      const Nodes = await testSubjects.findAll('resolverNode');
+      for (const value of Nodes) {
+        $.push(await value._webElement.getText());
+      }
       for (let i = 0; i < $.length; i++) {
         expect(tableData[i + 1][0]).to.eql($[i].split('\n')[1]);
       }
-      for (let i = 0; i < count; i++) {
-        await testSubjects.click('zoom-in');
-      }
+      await testSubjects.click('zoom-in');
     });
 
     it('resolver Nodes navigation Up', async () => {
