@@ -1,18 +1,18 @@
 {
   "type": "doc",
   "value": {
-    "id": "agents:agent1",
+    "id": "fleet-agents:agent1",
     "index": ".kibana",
     "source": {
-      "type": "agents",
-      "agents": {
+      "type": "fleet-agents",
+      "fleet-agents": {
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent1_filebeat",
         "config_id": "1",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -21,17 +21,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "agents:agent2",
+    "id": "fleet-agents:agent2",
     "index": ".kibana",
     "source": {
-      "type": "agents",
-      "agents": {
+      "type": "fleet-agents",
+      "fleet-agents": {
         "access_api_key_id": "api-key-2",
         "active": true,
         "shared_id": "agent2_filebeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -40,17 +40,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "agents:agent3",
+    "id": "fleet-agents:agent3",
     "index": ".kibana",
     "source": {
-      "type": "agents",
-      "agents": {
+      "type": "fleet-agents",
+      "fleet-agents": {
         "access_api_key_id": "api-key-3",
         "active": true,
         "shared_id": "agent3_metricbeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -59,17 +59,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "agents:agent4",
+    "id": "fleet-agents:agent4",
     "index": ".kibana",
     "source": {
-      "type": "agents",
-      "agents": {
+      "type": "fleet-agents",
+      "fleet-agents": {
         "access_api_key_id": "api-key-4",
         "active": true,
         "shared_id": "agent4_metricbeat",
         "type": "PERMANENT",
-        "local_metadata": "{}",
-        "user_provided_metadata": "{}"
+        "local_metadata": {},
+        "user_provided_metadata": {}
       }
     }
   }
@@ -78,17 +78,17 @@
 {
   "type": "doc",
   "value": {
-    "id": "enrollment_api_keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
+    "id": "fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
     "index": ".kibana",
     "source": {
-      "enrollment_api_keys" :  {
+      "fleet-enrollment-api-keys" :  {
         "created_at" : "2019-10-10T16:31:12.518Z",
         "name": "FleetEnrollmentKey:1",
         "api_key_id" : "key",
         "config_id" : "policy:1",
         "active" : true
       },
-      "type" : "enrollment_api_keys",
+      "type" : "fleet-enrollment-api-keys",
       "references": []
     }
   }
@@ -97,11 +97,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "events:event1",
+    "id": "fleet-agent-events:event1",
     "index": ".kibana",
     "source": {
-      "type": "agent_events",
-      "agent_events": {
+      "type": "fleet-agent-events",
+      "fleet-agent-events": {
         "agent_id": "agent1",
         "type": "STATE",
         "subtype": "STARTED",
@@ -116,11 +116,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "events:event2",
+    "id": "fleet-agent-events:event2",
     "index": ".kibana",
     "source": {
-      "type": "agent_events",
-      "agent_events": {
+      "type": "fleet-agent-events",
+      "fleet-agent-events": {
         "agent_id": "agent1",
         "type": "STATE",
         "subtype": "STOPPED",
@@ -135,11 +135,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "agent_actions:37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
+    "id": "fleet-agent-actions:37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
     "index": ".kibana",
     "source": {
-      "type": "agent_actions",
-      "agent_actions": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
         "agent_id": "agent1",
         "created_at": "2019-09-04T15:04:07+0000",
         "type": "RESUME",
@@ -152,11 +152,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "agent_actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
+    "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
     "index": ".kibana",
     "source": {
-      "type": "agent_actions",
-      "agent_actions": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
         "agent_id": "agent1",
         "type": "PAUSE",
         "created_at": "2019-09-04T15:01:07+0000",
@@ -169,11 +169,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "agent_actions:48cebde1-c906-4893-b89f-595d943b72a1",
+    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a1",
     "index": ".kibana",
     "source": {
-      "type": "agent_actions",
-      "agent_actions": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
         "agent_id": "agent1",
         "type": "CONFIG_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",
@@ -186,11 +186,11 @@
 {
   "type": "doc",
   "value": {
-    "id": "agent_actions:48cebde1-c906-4893-b89f-595d943b72a2",
+    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a2",
     "index": ".kibana",
     "source": {
-      "type": "agent_actions",
-      "agent_actions": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
         "agent_id": "agent1",
         "type": "CONFIG_CHANGE",
         "created_at": "2020-03-15T03:47:15.129Z",

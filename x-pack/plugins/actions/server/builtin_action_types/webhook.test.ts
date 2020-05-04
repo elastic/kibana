@@ -11,20 +11,17 @@ jest.mock('axios', () => ({
 import { getActionType } from './webhook';
 import { ActionType, Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
+import { actionsMock } from '../mocks';
 import axios from 'axios';
 
 const axiosRequestMock = axios.request as jest.Mock;
 
 const ACTION_TYPE_ID = '.webhook';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -44,7 +41,7 @@ describe('actionType', () => {
 
 describe('secrets validation', () => {
   test('succeeds when secrets is valid', () => {
-    const secrets: Record<string, any> = {
+    const secrets: Record<string, string> = {
       user: 'bob',
       password: 'supersecret',
     };
@@ -60,20 +57,18 @@ describe('secrets validation', () => {
   });
 
   test('succeeds when basic authentication credentials are omitted', () => {
-    expect(() => {
-      validateSecrets(actionType, {}).toEqual({});
-    });
+    expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
   });
 });
 
 describe('config validation', () => {
-  const defaultValues: Record<string, any> = {
+  const defaultValues: Record<string, string | null> = {
     headers: null,
     method: 'post',
   };
 
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
@@ -84,7 +79,7 @@ describe('config validation', () => {
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach(method => {
-      const config: Record<string, any> = {
+      const config: Record<string, string> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
       };
@@ -96,7 +91,7 @@ describe('config validation', () => {
   });
 
   test('should validate and throw error when method on config is invalid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
       method: 'https',
     };
@@ -110,7 +105,7 @@ describe('config validation', () => {
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
     expect(validateConfig(actionType, config)).toEqual({
@@ -120,6 +115,8 @@ describe('config validation', () => {
   });
 
   test('config validation passes when valid headers are provided', () => {
+    // any for testing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: {
@@ -133,7 +130,7 @@ describe('config validation', () => {
   });
 
   test('should validate and throw error when headers on config is invalid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
       headers: 'application/json',
     };
@@ -147,6 +144,8 @@ describe('config validation', () => {
   });
 
   test('config validation passes when kibana config whitelists the url', () => {
+    // any for testing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -171,6 +170,8 @@ describe('config validation', () => {
       },
     });
 
+    // any for testing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
       url: 'http://mylisteningserver.com:9200/endpoint',
       headers: {
@@ -188,12 +189,12 @@ describe('config validation', () => {
 
 describe('params validation', () => {
   test('param validation passes when no fields are provided as none are required', () => {
-    const params: Record<string, any> = {};
+    const params: Record<string, string> = {};
     expect(validateParams(actionType, params)).toEqual({});
   });
 
   test('params validation passes when a valid body is provided', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, string> = {
       body: 'count: {{ctx.payload.hits.total}}',
     };
     expect(validateParams(actionType, params)).toEqual({

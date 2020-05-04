@@ -104,6 +104,10 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
         <meta name="theme-color" content="#ffffff" />
         <Styles darkMode={darkMode} />
+
+        {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
+        <meta name="add-styles-here" />
+        <meta name="add-scripts-here" />
       </head>
       <body>
         {createElement('kbn-csp', {

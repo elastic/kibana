@@ -409,7 +409,7 @@ export class TaskManagerRunner implements TaskRunner {
     attempts,
     addDuration,
   }: {
-    error: any;
+    error: Error;
     attempts: number;
     addDuration?: string;
   }): Date | null {

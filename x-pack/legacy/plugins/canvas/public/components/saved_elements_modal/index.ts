@@ -11,8 +11,8 @@ import { camelCase } from 'lodash';
 // @ts-ignore Untyped local
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
-// @ts-ignore Untyped local
-import { notify } from '../../lib/notify';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { WithKibanaProps } from '../../';
 // @ts-ignore Untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';
 // @ts-ignore Untyped local
@@ -64,7 +64,7 @@ const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
 const mergeProps = (
   stateProps: StateProps,
   dispatchProps: DispatchProps,
-  ownProps: OwnPropsWithState
+  ownProps: OwnPropsWithState & WithKibanaProps
 ): ComponentProps => {
   const { pageId } = stateProps;
   const { onClose, search, setCustomElements } = ownProps;
@@ -92,7 +92,9 @@ const mergeProps = (
       try {
         await findCustomElements();
       } catch (err) {
-        notify.error(err, { title: `Couldn't find custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't find custom elements`,
+        });
       }
     },
     // remove custom element
@@ -101,7 +103,9 @@ const mergeProps = (
         await customElementService.remove(id);
         await findCustomElements();
       } catch (err) {
-        notify.error(err, { title: `Couldn't delete custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't delete custom elements`,
+        });
       }
     },
     // update custom element
@@ -115,13 +119,16 @@ const mergeProps = (
         });
         await findCustomElements();
       } catch (err) {
-        notify.error(err, { title: `Couldn't update custom elements` });
+        ownProps.kibana.services.canvas.notify.error(err, {
+          title: `Couldn't update custom elements`,
+        });
       }
     },
   };
 };
 
 export const SavedElementsModal = compose<ComponentProps, OwnProps>(
+  withKibana,
   withState('search', 'setSearch', ''),
   withState('customElements', 'setCustomElements', []),
   connect(mapStateToProps, mapDispatchToProps, mergeProps)

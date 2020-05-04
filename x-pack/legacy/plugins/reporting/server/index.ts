@@ -14,3 +14,5 @@ export const plugin = (context: PluginInitializerContext, config: ReportingConfi
 
 export { ReportingPlugin } from './plugin';
 export { ReportingConfig, ReportingCore };
+
+export { PreserveLayout, PrintLayout } from '../export_types/common/layouts';

@@ -5,24 +5,26 @@
  */
 
 import expect from '@kbn/expect';
+import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { defaultDynamicSettings } from '../../../../../legacy/plugins/uptime/common/runtime_types/dynamic_settings';
-
+import { DynamicSettingsType } from '../../../../../plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../plugins/uptime/common/constants';
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('dynamic settings', () => {
     it('returns the defaults when no user settings have been saved', async () => {
       const apiResponse = await supertest.get(`/api/uptime/dynamic_settings`);
-      expect(apiResponse.body).to.eql(defaultDynamicSettings as any);
+      expect(apiResponse.body).to.eql(DYNAMIC_SETTINGS_DEFAULTS);
+      expect(isRight(DynamicSettingsType.decode(apiResponse.body))).to.be.ok();
     });
 
     it('can change the settings', async () => {
       const newSettings = {
         heartbeatIndices: 'myIndex1*',
-        certificatesThresholds: {
-          errorState: 5,
-          warningState: 15,
+        certThresholds: {
+          expiration: 5,
+          age: 15,
         },
       };
       const postResponse = await supertest
@@ -35,6 +37,7 @@ export default function({ getService }: FtrProviderContext) {
 
       const getResponse = await supertest.get(`/api/uptime/dynamic_settings`);
       expect(getResponse.body).to.eql(newSettings);
+      expect(isRight(DynamicSettingsType.decode(getResponse.body))).to.be.ok();
     });
   });
 }

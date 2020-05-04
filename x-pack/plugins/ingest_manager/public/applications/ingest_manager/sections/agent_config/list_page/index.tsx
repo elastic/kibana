@@ -36,13 +36,11 @@ import {
   useConfig,
   useUrlParams,
 } from '../../../hooks';
-import { AgentConfigDeleteProvider } from '../components';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
 import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from '../details_page/hooks/use_details_uri';
 import { TableRowActions } from '../components/table_row_actions';
-import { DangerEuiContextMenuItem } from '../components/danger_eui_context_menu_item';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -108,30 +106,12 @@ const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
               defaultMessage="Create data source"
             />
           </EuiContextMenuItem>,
-
-          <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
-            <FormattedMessage
-              id="xpack.ingestManager.agentConfigList.copyConfigActionText"
-              defaultMessage="Copy configuration"
-            />
-          </EuiContextMenuItem>,
-
-          <AgentConfigDeleteProvider key="deleteConfig">
-            {deleteAgentConfigsPrompt => {
-              return (
-                <DangerEuiContextMenuItem
-                  icon="trash"
-                  disabled={Boolean(config.is_default)}
-                  onClick={() => deleteAgentConfigsPrompt([config.id], onDelete)}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentConfigList.deleteConfigActionText"
-                    defaultMessage="Delete Configuration"
-                  />
-                </DangerEuiContextMenuItem>
-              );
-            }}
-          </AgentConfigDeleteProvider>,
+          // <EuiContextMenuItem disabled={true} icon="copy" key="copyConfig">
+          //   <FormattedMessage
+          //     id="xpack.ingestManager.agentConfigList.copyConfigActionText"
+          //     defaultMessage="Copy configuration"
+          //   />
+          // </EuiContextMenuItem>,
         ]}
       />
     );
@@ -156,7 +136,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
       : urlParams.kuery ?? ''
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [selectedAgentConfigs, setSelectedAgentConfigs] = useState<AgentConfig[]>([]);
   const history = useHistory();
   const isCreateAgentConfigFlyoutOpen = 'create' in urlParams;
   const setIsCreateAgentConfigFlyoutOpen = useCallback(
@@ -191,7 +170,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           defaultMessage: 'Name',
         }),
         width: '20%',
-        // FIXME: use version once available - see: https://github.com/elastic/kibana/issues/56750
         render: (name: string, agentConfig: AgentConfig) => (
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
@@ -322,34 +300,6 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         />
       ) : null}
       <EuiFlexGroup alignItems={'center'} gutterSize="m">
-        {selectedAgentConfigs.length ? (
-          <EuiFlexItem>
-            <AgentConfigDeleteProvider>
-              {deleteAgentConfigsPrompt => (
-                <EuiButton
-                  color="danger"
-                  onClick={() => {
-                    deleteAgentConfigsPrompt(
-                      selectedAgentConfigs.map(agentConfig => agentConfig.id),
-                      () => {
-                        sendRequest();
-                        setSelectedAgentConfigs([]);
-                      }
-                    );
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.ingestManager.agentConfigList.deleteButton"
-                    defaultMessage="Delete {count, plural, one {# agent config} other {# agent configs}}"
-                    values={{
-                      count: selectedAgentConfigs.length,
-                    }}
-                  />
-                </EuiButton>
-              )}
-            </AgentConfigDeleteProvider>
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem grow={4}>
           <SearchBar
             value={search}
@@ -406,13 +356,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         items={agentConfigData ? agentConfigData.items : []}
         itemId="id"
         columns={columns}
-        isSelectable={true}
-        selection={{
-          selectable: (agentConfig: AgentConfig) => !agentConfig.is_default,
-          onSelectionChange: (newSelectedAgentConfigs: AgentConfig[]) => {
-            setSelectedAgentConfigs(newSelectedAgentConfigs);
-          },
-        }}
+        isSelectable={false}
         pagination={{
           pageIndex: pagination.currentPage - 1,
           pageSize: pagination.pageSize,

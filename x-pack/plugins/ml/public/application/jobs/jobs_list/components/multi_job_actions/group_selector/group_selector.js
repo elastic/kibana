@@ -22,7 +22,7 @@ import {
 import { cloneDeep } from 'lodash';
 
 import { ml } from '../../../../../services/ml_api_service';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
 import { mlMessageBarService } from '../../../../../components/messagebar';

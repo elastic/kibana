@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { tlsQuery } from '../../../../legacy/plugins/siem/public/containers/tls/index.gql_query';
+import { tlsQuery } from '../../../../plugins/siem/public/containers/tls/index.gql_query';
 import {
   Direction,
   TlsFields,
   FlowTarget,
   GetTlsQuery,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();

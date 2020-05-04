@@ -156,15 +156,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * takes special care to ensure that 404 errors are generic and don't distinguish
  * between index missing or document missing.
  *
- * ### 503s from missing index
- *
- * Unlike all other methods, create requests are supposed to succeed even when
- * the Kibana index does not exist because it will be automatically created by
- * elasticsearch. When that is not the case it is because Elasticsearch's
- * `action.auto_create_index` setting prevents it from being created automatically
- * so we throw a special 503 with the intention of informing the user that their
- * Elasticsearch settings need to be updated.
- *
  * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
