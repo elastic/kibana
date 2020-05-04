@@ -21,6 +21,10 @@ export const HISTORY_COLUMN_LABEL = i18n.translate(
   }
 );
 
+export const TLS_COLUMN_LABEL = i18n.translate('xpack.uptime.monitorList.tlsColumnLabel', {
+  defaultMessage: 'TLS Certificate',
+});
+
 export const getExpandDrawerLabel = (id: string) => {
   return i18n.translate('xpack.uptime.monitorList.expandDrawerButton.ariaLabel', {
     defaultMessage: 'Expand row for monitor with ID {id}',
