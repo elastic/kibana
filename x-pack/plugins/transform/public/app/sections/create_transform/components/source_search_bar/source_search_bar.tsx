@@ -57,10 +57,11 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ indexPattern, search
     >
       <EuiCode>
         {i18n.translate('xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar', {
-          defaultMessage: 'Invalid query',
+          defaultMessage: 'Invalid query: {errorMessage}',
+          values: {
+            errorMessage: errorMessage?.message.split('\n')[0],
+          },
         })}
-        {': '}
-        {errorMessage?.message.split('\n')[0]}
       </EuiCode>
     </EuiInputPopover>
   );
