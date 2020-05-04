@@ -19,9 +19,9 @@ run(
 
     if (path) {
       log.info(`Limiting tests to ${path}...`);
-      path = 'legacy/plugins/canvas/' + path;
+      path = 'plugins/canvas/' + path;
     } else {
-      path = 'legacy/plugins/canvas';
+      path = 'plugins/canvas';
     }
 
     if (coverage) {
@@ -49,7 +49,7 @@ run(
         '--collectCoverageFrom', // Include TS/X files
         `${path}/**/*.ts*`,
         '--coverageDirectory', // Output to canvas/coverage
-        'legacy/plugins/canvas/coverage',
+        'plugins/canvas/coverage',
       ];
     }
     // Mitigation for https://github.com/facebook/jest/issues/7267
@@ -60,7 +60,7 @@ run(
     if (all) {
       log.info('Running all available tests. This will take a while...');
     } else if (storybook) {
-      path = 'legacy/plugins/canvas/.storybook';
+      path = 'plugins/canvas/.storybook';
       log.info('Running Storybook Snapshot tests...');
     } else {
       log.info('Running tests. This does not include Storybook Snapshots...');

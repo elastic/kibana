@@ -77,7 +77,7 @@
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
 # Canvas
-/x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/plugins/canvas/  @elastic/kibana-canvas
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui

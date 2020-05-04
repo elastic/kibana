@@ -51,7 +51,7 @@ run(
         [
           'webpack',
           '--config',
-          'x-pack/legacy/plugins/canvas/.storybook/webpack.dll.config.js',
+          'x-pack/plugins/canvas/.storybook/webpack.dll.config.js',
           '--progress',
           '--hide-modules',
           '--display-entrypoints',
