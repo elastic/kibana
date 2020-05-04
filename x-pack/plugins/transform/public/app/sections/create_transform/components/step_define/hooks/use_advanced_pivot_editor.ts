@@ -8,12 +8,16 @@ import { useEffect, useState } from 'react';
 
 import { useXJsonMode } from '../../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 
+import { PreviewRequestBody } from '../../../../../common';
+
 import { StepDefineExposedState } from '../common';
 
 export const useAdvancedPivotEditor = (
   defaults: StepDefineExposedState,
-  stringifiedPivotConfig: string
+  previewRequest: PreviewRequestBody
 ) => {
+  const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+
   // Advanced editor for pivot config state
   const [isAdvancedEditorSwitchModalVisible, setAdvancedEditorSwitchModalVisible] = useState(false);
 

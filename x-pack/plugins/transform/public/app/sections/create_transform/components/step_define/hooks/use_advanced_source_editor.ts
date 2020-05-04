@@ -6,12 +6,16 @@
 
 import { useState } from 'react';
 
+import { PreviewRequestBody } from '../../../../../common';
+
 import { StepDefineExposedState } from '../common';
 
 export const useAdvancedSourceEditor = (
   defaults: StepDefineExposedState,
-  stringifiedSourceConfig: string
+  previewRequest: PreviewRequestBody
 ) => {
+  const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
+
   // Advanced editor for source config state
   const [sourceConfigUpdated, setSourceConfigUpdated] = useState(defaults.sourceConfigUpdated);
 

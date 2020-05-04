@@ -55,7 +55,7 @@ export function getAggNameConflictToastMessages(
   // check all aggs against new aggName
   for (const aggListName of Object.keys(aggList)) {
     const aggListNameSplit = aggListName.split('.');
-    let aggListNameCheck: string;
+    let aggListNameCheck: string | undefined;
     let shouldBreak = false;
     for (const aggListNamePart of aggListNameSplit) {
       aggListNameCheck =
@@ -83,8 +83,8 @@ export function getAggNameConflictToastMessages(
   // check all group-bys against new aggName
   for (const groupByListName of Object.keys(groupByList)) {
     const groupByListNameSplit = groupByListName.split('.');
-    let groupByListNameCheck: string;
-    const shouldBreak = false;
+    let groupByListNameCheck: string | undefined;
+    let shouldBreak = false;
     for (const groupByListNamePart of groupByListNameSplit) {
       groupByListNameCheck =
         groupByListNameCheck === undefined

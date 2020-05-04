@@ -34,12 +34,10 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
   );
 
   // pivot config hook
-  const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
-  const advancedPivotEditor = useAdvancedPivotEditor(defaults, stringifiedPivotConfig);
+  const advancedPivotEditor = useAdvancedPivotEditor(defaults, previewRequest);
 
   // source config hook
-  const stringifiedSourceConfig = JSON.stringify(previewRequest.source.query, null, 2);
-  const advancedSourceEditor = useAdvancedSourceEditor(defaults, stringifiedSourceConfig);
+  const advancedSourceEditor = useAdvancedSourceEditor(defaults, previewRequest);
 
   useEffect(() => {
     if (!advancedSourceEditor.state.isAdvancedSourceEditorEnabled) {
