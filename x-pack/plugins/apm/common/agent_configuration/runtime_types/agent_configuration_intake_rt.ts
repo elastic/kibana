@@ -6,11 +6,11 @@
 
 import * as t from 'io-ts';
 import { settingDefinitions } from '../setting_definitions';
+import { SettingValidation } from '../setting_definitions/types';
 
 // retrieve validation from config definitions settings and validate on the server
 const knownSettings = settingDefinitions.reduce<
-  // TODO: is it possible to get rid of any?
-  Record<string, t.Type<any, string, unknown>>
+  Record<string, SettingValidation>
 >((acc, { key, validation }) => {
   acc[key] = validation;
   return acc;
