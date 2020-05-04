@@ -5,7 +5,7 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { mockNow } from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+import { mockNow } from '../../../../public/utils/testHelpers';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
 
