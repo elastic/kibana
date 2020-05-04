@@ -34,7 +34,7 @@ function getTargetBranchChoices(
   options: BackportOptions,
   selectedTargetBranches: string[]
 ) {
-  // remove sourceBranch from targetBranchChoices
+  // exclude sourceBranch from targetBranchChoices
   const targetBranchChoices = options.targetBranchChoices?.filter(
     (choice) => choice.name !== options.sourceBranch
   );
