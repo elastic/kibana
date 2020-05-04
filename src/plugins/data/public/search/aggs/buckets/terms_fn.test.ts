@@ -27,7 +27,6 @@ describe('agg_expression_functions', () => {
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'machine.os.keyword',
-        order: 'asc',
         orderBy: '1',
       });
       expect(actual).toMatchInlineSnapshot(`
@@ -43,7 +42,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
               "missingBucket": false,
               "missingBucketLabel": "Missing",
-              "order": "asc",
+              "order": undefined,
               "orderAgg": undefined,
               "orderBy": "1",
               "otherBucket": false,

@@ -65,9 +65,9 @@ export interface TermsBucketAggDependencies {
 
 export interface AggParamsTerms extends BaseAggParams {
   field: string;
-  order: 'asc' | 'desc';
   orderBy: string;
   orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
   size?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
