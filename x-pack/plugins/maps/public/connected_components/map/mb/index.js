@@ -40,7 +40,6 @@ function mapStateToProps(state = {}) {
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
     hideViewControl: isViewControlHidden(state),
   };
 }

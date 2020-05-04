@@ -18,6 +18,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { Client } from 'elasticsearch';
 import { IClusterClient, ICustomClusterClient } from './cluster_client';
 import { IScopedClusterClient } from './scoped_cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -130,6 +131,55 @@ const createMock = () => {
   return mocked;
 };
 
+const createElasticsearchClientMock = () => {
+  const mocked: jest.Mocked<Client> = {
+    cat: {} as any,
+    cluster: {} as any,
+    indices: {} as any,
+    ingest: {} as any,
+    nodes: {} as any,
+    snapshot: {} as any,
+    tasks: {} as any,
+    bulk: jest.fn(),
+    clearScroll: jest.fn(),
+    count: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    deleteByQuery: jest.fn(),
+    deleteScript: jest.fn(),
+    deleteTemplate: jest.fn(),
+    exists: jest.fn(),
+    explain: jest.fn(),
+    fieldStats: jest.fn(),
+    get: jest.fn(),
+    getScript: jest.fn(),
+    getSource: jest.fn(),
+    getTemplate: jest.fn(),
+    index: jest.fn(),
+    info: jest.fn(),
+    mget: jest.fn(),
+    msearch: jest.fn(),
+    msearchTemplate: jest.fn(),
+    mtermvectors: jest.fn(),
+    ping: jest.fn(),
+    putScript: jest.fn(),
+    putTemplate: jest.fn(),
+    reindex: jest.fn(),
+    reindexRethrottle: jest.fn(),
+    renderSearchTemplate: jest.fn(),
+    scroll: jest.fn(),
+    search: jest.fn(),
+    searchShards: jest.fn(),
+    searchTemplate: jest.fn(),
+    suggest: jest.fn(),
+    termvectors: jest.fn(),
+    update: jest.fn(),
+    updateByQuery: jest.fn(),
+    close: jest.fn(),
+  };
+  return mocked;
+};
+
 export const elasticsearchServiceMock = {
   create: createMock,
   createInternalSetup: createInternalSetupContractMock,
@@ -138,4 +188,5 @@ export const elasticsearchServiceMock = {
   createClusterClient: createClusterClientMock,
   createCustomClusterClient: createCustomClusterClientMock,
   createScopedClusterClient: createScopedClusterClientMock,
+  createElasticsearchClient: createElasticsearchClientMock,
 };
