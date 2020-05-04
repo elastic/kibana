@@ -28,7 +28,7 @@ export function LayerSettings({
   return (
     <EuiPopover
       id={`lnsLayerPopover_${layerId}`}
-      panelPaddingSize="s"
+      panelPaddingSize="m"
       ownFocus
       button={
         <EuiToolTip
@@ -48,7 +48,7 @@ export function LayerSettings({
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="leftUp"
+      anchorPosition="downLeft"
     >
       <NativeRenderer
         render={activeVisualization.renderLayerContextMenu}

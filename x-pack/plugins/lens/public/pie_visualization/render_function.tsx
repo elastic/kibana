@@ -30,6 +30,7 @@ import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import './visualization.scss';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -81,9 +82,9 @@ export function PieComponent(
   });
 
   const fillLabel: Partial<PartitionFillLabel> = {
-    textInvertible: true,
+    textInvertible: false,
     valueFont: {
-      fontWeight: 800,
+      fontWeight: 700,
     },
   };
 
@@ -147,19 +148,21 @@ export function PieComponent(
     partitionLayout: shape === 'treemap' ? PartitionLayout.treemap : PartitionLayout.sunburst,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
-    specialFirstInnermostSector: false,
+    specialFirstInnermostSector: true,
+    clockwiseSectors: false,
     minFontSize: 10,
     maxFontSize: 16,
     // Labels are added outside the outer ring when the slice is too small
     linkLabel: {
-      fontSize: 12,
+      maxCount: 5,
+      fontSize: 11,
       // Dashboard background color is affected by dark mode, which we need
       // to account for in outer labels
       // This does not handle non-dashboard embeddables, which are allowed to
       // have different backgrounds.
-      textColor: isDarkMode ? 'white' : 'black',
+      textColor: chartTheme.axes?.axisTitleStyle?.fill,
     },
-    sectorLineStroke: isDarkMode ? 'rgb(26, 27, 32)' : undefined,
+    sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,
     circlePadding: 4,
   };

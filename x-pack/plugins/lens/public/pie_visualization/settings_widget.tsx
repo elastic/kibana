@@ -6,10 +6,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiForm, EuiFormRow, EuiSuperSelect, EuiFieldNumber, EuiSwitch } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiFormRow,
+  EuiSuperSelect,
+  EuiRange,
+  EuiSwitch,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiButtonGroup,
+} from '@elastic/eui';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieVisualizationState, SharedLayerState } from './types';
 import { VisualizationLayerWidgetProps } from '../types';
+import './settings_widget.scss';
 
 const numberOptions: Array<{ value: SharedLayerState['numberDisplay']; inputDisplay: string }> = [
   {
@@ -58,24 +68,28 @@ const categoryOptions: Array<{
 
 const legendOptions: Array<{
   value: SharedLayerState['legendDisplay'];
-  inputDisplay: string;
+  label: string;
+  id: string;
 }> = [
   {
+    id: 'pieLegendDisplay-default',
     value: 'default',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.defaultLegendLabel', {
-      defaultMessage: 'Default legend',
+    label: i18n.translate('xpack.lens.pieChart.defaultLegendLabel', {
+      defaultMessage: 'auto',
     }),
   },
   {
+    id: 'pieLegendDisplay-show',
     value: 'show',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.alwaysShowLegendLabel', {
-      defaultMessage: 'Show legend',
+    label: i18n.translate('xpack.lens.pieChart.alwaysShowLegendLabel', {
+      defaultMessage: 'show',
     }),
   },
   {
+    id: 'pieLegendDisplay-hide',
     value: 'hide',
-    inputDisplay: i18n.translate('xpack.lens.pieChart.hideLegendLabel', {
-      defaultMessage: 'Hide legend',
+    label: i18n.translate('xpack.lens.pieChart.hideLegendLabel', {
+      defaultMessage: 'hide',
     }),
   },
 ];
@@ -88,7 +102,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
   }
 
   return (
-    <EuiForm>
+    <EuiForm className="lnsPieSettingsWidget">
       <EuiFormRow
         label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {
           defaultMessage: 'Label position',
@@ -97,6 +111,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
         display="columnCompressed"
       >
         <EuiSuperSelect
+          compressed
           valueOfSelected={layer.categoryDisplay}
           options={categoryOptions}
           onChange={option => {
@@ -115,7 +130,9 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
         display="columnCompressed"
       >
         <EuiSuperSelect
-          valueOfSelected={layer.numberDisplay}
+          compressed
+          disabled={layer.categoryDisplay === 'hide'}
+          valueOfSelected={layer.categoryDisplay === 'hide' ? 'hidden' : layer.numberDisplay}
           options={numberOptions}
           onChange={option => {
             setState({
@@ -125,6 +142,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
           }}
         />
       </EuiFormRow>
+      <EuiHorizontalRule margin="s" />
       <EuiFormRow
         label={i18n.translate('xpack.lens.pieChart.percentDecimalsLabel', {
           defaultMessage: 'Decimal places for percent',
@@ -132,55 +150,62 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
         fullWidth
         display="columnCompressed"
       >
-        <EuiFieldNumber
+        <EuiRange
           data-test-subj="indexPattern-dimension-formatDecimals"
           value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
           min={0}
           max={10}
+          showInput
+          compressed
           onChange={e => {
             setState({
               ...state,
-              layers: [{ ...layer, percentDecimals: Number(e.target.value) }],
+              layers: [{ ...layer, percentDecimals: Number(e.currentTarget.value) }],
             });
           }}
-          compressed
-          fullWidth
         />
       </EuiFormRow>
-
+      <EuiHorizontalRule margin="s" />
       <EuiFormRow
         label={i18n.translate('xpack.lens.pieChart.legendDisplayLabel', {
           defaultMessage: 'Legend display',
         })}
         display="columnCompressed"
       >
-        <EuiSuperSelect
-          valueOfSelected={layer.legendDisplay}
-          options={legendOptions}
-          onChange={option => {
-            setState({
-              ...state,
-              layers: [{ ...layer, legendDisplay: option }],
-            });
-          }}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressedSwitch"
-        label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-          defaultMessage: 'Nested legend',
-        })}
-      >
-        <EuiSwitch
-          label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
-            defaultMessage: 'Nested legend',
-          })}
-          showLabel={false}
-          checked={!!layer.nestedLegend}
-          onChange={() => {
-            setState({ ...state, layers: [{ ...layer, nestedLegend: !layer.nestedLegend }] });
-          }}
-        />
+        <div>
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.lens.pieChart.legendDisplayLegend', {
+              defaultMessage: 'Legend display',
+            })}
+            options={legendOptions}
+            idSelected={legendOptions.find(({ value }) => value === layer.legendDisplay)!.id}
+            onChange={optionId => {
+              setState({
+                ...state,
+                layers: [
+                  {
+                    ...layer,
+                    legendDisplay: legendOptions.find(({ id }) => id === optionId)!.value,
+                  },
+                ],
+              });
+            }}
+            buttonSize="compressed"
+            isFullWidth
+          />
+
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.pieChart.nestedLegendLabel', {
+              defaultMessage: 'Nested legend',
+            })}
+            checked={!!layer.nestedLegend}
+            onChange={() => {
+              setState({ ...state, layers: [{ ...layer, nestedLegend: !layer.nestedLegend }] });
+            }}
+          />
+        </div>
       </EuiFormRow>
     </EuiForm>
   );
