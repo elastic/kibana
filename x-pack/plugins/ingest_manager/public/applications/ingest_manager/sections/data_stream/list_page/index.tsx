@@ -59,7 +59,12 @@ const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) =
   return (
     <TableRowActions
       items={[
-        <EuiContextMenuItem icon="dashboardApp" href="" key="viewDashboard">
+        <EuiContextMenuItem
+          icon="dashboardApp"
+          href=""
+          key="viewDashboard"
+          disabled={!(datastream.dashboards?.length > 0)}
+        >
           <FormattedMessage
             id="xpack.ingestManager.dataStreamList.viewDashboardActionText"
             defaultMessage="View dashboard"
