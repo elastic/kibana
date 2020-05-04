@@ -7,7 +7,7 @@
 
 A simple CLI tool that automates the process of backporting commits on a GitHub repo.
 
-![backport-demo](https://user-images.githubusercontent.com/209966/80359514-371b1500-887e-11ea-96e4-7026005ad206.gif)
+![backport-demo](https://user-images.githubusercontent.com/209966/80993576-95766380-8e3b-11ea-9efd-b35eb2e6a9ec.gif)
 
 
 
