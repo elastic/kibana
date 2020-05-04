@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './_index.scss';
+import './space_selector.scss';
 
 import {
   EuiFieldSearch,
