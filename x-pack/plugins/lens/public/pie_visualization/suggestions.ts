@@ -6,7 +6,7 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, VisualizationSuggestion } from '../types';
+import { SuggestionRequest, TableSuggestion, VisualizationSuggestion } from '../types';
 import { PieVisualizationState } from './types';
 import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
 
@@ -45,7 +45,11 @@ export function suggestions({
     }
 
     results.push({
-      title: getTitle(newShape, { table, state, keptLayerIds }),
+      title: i18n.translate('xpack.lens.pie.suggestionLabel', {
+        defaultMessage: 'As {chartName}',
+        values: { chartName: CHART_NAMES[newShape].label },
+        description: 'chartName is already translated',
+      }),
       score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
       state: {
         shape: newShape,
@@ -76,10 +80,9 @@ export function suggestions({
 
   if (groups.length <= MAX_TREEMAP_BUCKETS) {
     results.push({
-      title:
-        state?.shape === 'treemap'
-          ? getTitle('treemap', { table, state, keptLayerIds })
-          : i18n.translate('xpack.lens.pie.treemapLabel', { defaultMessage: 'Treemap' }),
+      title: i18n.translate('xpack.lens.pie.treemapSuggestionLabel', {
+        defaultMessage: 'As Treemap',
+      }),
       // Use a higher score when currently active, to prevent chart type switching
       // on the user unintentionally
       score: state?.shape === 'treemap' ? 0.7 : 0.5,
@@ -111,38 +114,4 @@ export function suggestions({
   }
 
   return results;
-}
-
-export function getTitle(
-  newShape: PieVisualizationState['shape'],
-  { table, state }: SuggestionRequest<PieVisualizationState>
-) {
-  if (state && newShape !== state.shape) {
-    return i18n.translate('xpack.lens.pie.suggestionLabel', {
-      defaultMessage: 'As {chartName}',
-      values: { chartName: state ? CHART_NAMES[newShape].label : CHART_NAMES.donut.label },
-    });
-  }
-  return table.changeType === 'unchanged'
-    ? i18n.translate('xpack.lens.pie.suggestionLabel', {
-        defaultMessage: 'As {chartName}',
-        values: { chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label },
-      })
-    : i18n.translate('xpack.lens.pie.suggestionOf', {
-        defaultMessage: '{chartName} {operations}',
-        values: {
-          chartName: state ? CHART_NAMES[state.shape].label : CHART_NAMES.donut.label,
-          operations:
-            table.label ||
-            table.columns
-              .map(col => col.operation.label)
-              .join(
-                i18n.translate('xpack.lens.datatable.conjunctionSign', {
-                  defaultMessage: ' & ',
-                  description:
-                    'A character that can be used for conjunction of multiple enumarated items. Make sure to include spaces around it if needed.',
-                })
-              ),
-        },
-      });
 }

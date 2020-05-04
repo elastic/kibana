@@ -109,7 +109,7 @@ export function PieComponent(
         return String(d);
       },
       fillLabel:
-        isDarkMode && shape === 'treemap'
+        isDarkMode && shape === 'treemap' && layerIndex < columnGroups.length - 1
           ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
           : fillLabel,
       shape: {
@@ -126,12 +126,9 @@ export function PieComponent(
           // Look up round-robin color from default palette
           const outputColor = sortedColors[parentIndex % sortedColors.length];
 
-          if (shape === 'treemap' && layerIndex < columnGroups.length - 1) {
-            return 'rgba(0,0,0,0)';
-          }
-
           if (shape === 'treemap') {
-            return outputColor;
+            // Only highlight the innermost color of the treemap, as it accurately represents area
+            return layerIndex < columnGroups.length - 1 ? 'rgba(0,0,0,0)' : outputColor;
           }
 
           const lighten = (d.depth - 1) / (columnGroups.length * 2);
