@@ -18,22 +18,23 @@
  */
 
 import { overwrite } from '../../helpers';
+import { esQuery } from '../../../../../../data/server';
 
-export function topHits(req, panel, annotation) {
+export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
-    const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField = annotation.time_field;
-    overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
-      sort: [
-        {
-          [timeField]: { order: 'desc' },
-        },
-      ],
-      _source: {
-        includes: [...fields, timeField],
-      },
-      size: 5,
-    });
+    panel.series
+      .filter(c => !(c.aggregate_by && c.aggregate_function))
+      .forEach(column => {
+        if (column.filter) {
+          overwrite(
+            doc,
+            `aggs.pivot.aggs.${column.id}.filter`,
+            esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
+          );
+        } else {
+          overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
+        }
+      });
     return next(doc);
   };
 }

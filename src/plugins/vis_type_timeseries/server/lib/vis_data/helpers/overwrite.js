@@ -17,23 +17,15 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import set from 'set-value';
 
-export function topHits(req, panel, annotation) {
-  return next => doc => {
-    const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
-    const timeField = annotation.time_field;
-    overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
-      sort: [
-        {
-          [timeField]: { order: 'desc' },
-        },
-      ],
-      _source: {
-        includes: [...fields, timeField],
-      },
-      size: 5,
-    });
-    return next(doc);
-  };
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj, path, val) {
+  set(obj, path, undefined);
+  set(obj, path, val);
 }

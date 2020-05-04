@@ -18,21 +18,34 @@
  */
 
 import { overwrite } from '../../helpers';
+import { getBucketSize } from '../../helpers/get_bucket_size';
+import { getTimerange } from '../../helpers/get_timerange';
+import { search } from '../../../../../../../plugins/data/server';
+const { dateHistogramInterval } = search.aggs;
 
-export function topHits(req, panel, annotation) {
+export function dateHistogram(
+  req,
+  panel,
+  annotation,
+  esQueryConfig,
+  indexPatternObject,
+  capabilities
+) {
   return next => doc => {
-    const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
     const timeField = annotation.time_field;
-    overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
-      sort: [
-        {
-          [timeField]: { order: 'desc' },
-        },
-      ],
-      _source: {
-        includes: [...fields, timeField],
+    const { bucketSize, intervalString } = getBucketSize(req, 'auto', capabilities);
+    const { from, to } = getTimerange(req);
+    const timezone = capabilities.searchTimezone;
+
+    overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
+      field: timeField,
+      min_doc_count: 0,
+      time_zone: timezone,
+      extended_bounds: {
+        min: from.valueOf(),
+        max: to.valueOf() - bucketSize * 1000,
       },
-      size: 5,
+      ...dateHistogramInterval(intervalString),
     });
     return next(doc);
   };
