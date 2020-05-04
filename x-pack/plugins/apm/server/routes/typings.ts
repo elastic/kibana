@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 import { Server } from 'hapi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FetchOptions } from '../../public/services/rest/callApi';
+import { SecurityPluginSetup } from '../../../security/public';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -62,6 +63,7 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
+  security?: SecurityPluginSetup;
 };
 
 export type RouteFactoryFn<
@@ -105,6 +107,7 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
+      security?: SecurityPluginSetup;
     }
   ) => void;
 }
