@@ -39,16 +39,16 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         index: config.annotations.index,
         context: this.initContext,
       }).catch(err => {
-        this.initContext.logger.get('annotations').warn(err);
+        const logger = this.initContext.logger.get('annotations');
+        logger.warn(err);
         throw err;
       });
     }
 
     return {
       getScopedAnnotationsClient: async (...args) => {
-        return annotationsApiPromise
-          ? (await annotationsApiPromise).getScopedAnnotationsClient(...args)
-          : undefined;
+        const api = await annotationsApiPromise;
+        return api?.getScopedAnnotationsClient(...args);
       },
     };
   }

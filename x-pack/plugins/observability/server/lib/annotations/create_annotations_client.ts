@@ -15,6 +15,7 @@ import {
 } from '../../../common/annotations';
 import { PromiseReturnType } from '../../../../apm/typings/common';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
+import { mappings } from './mappings';
 
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
@@ -45,47 +46,7 @@ export function createAnnotationsClient(params: {
   const initIndex = () =>
     createOrUpdateIndex({
       index,
-      mappings: {
-        dynamic: 'strict',
-        properties: {
-          annotation: {
-            properties: {
-              type: {
-                type: 'keyword',
-              },
-            },
-          },
-          message: {
-            type: 'text',
-          },
-          tags: {
-            type: 'keyword',
-          },
-          '@timestamp': {
-            type: 'date',
-          },
-          event: {
-            properties: {
-              created: {
-                type: 'date',
-              },
-            },
-          },
-          service: {
-            properties: {
-              name: {
-                type: 'keyword',
-              },
-              environment: {
-                type: 'keyword',
-              },
-              version: {
-                type: 'keyword',
-              },
-            },
-          },
-        },
-      },
+      mappings,
       apiCaller,
       logger,
     });
@@ -97,7 +58,13 @@ export function createAnnotationsClient(params: {
     create: async (
       createParams: CreateParams
     ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-      await initIndex();
+      const indexExists = await apiCaller('indices.exists', {
+        index,
+      });
+
+      if (!indexExists) {
+        await initIndex();
+      }
 
       const annotation = {
         ...createParams,

@@ -22,7 +22,7 @@ export async function getServiceAnnotations({
   annotationsClient?: ScopedAnnotationsClient;
   apiCaller: APICaller;
 }) {
-  // start fetching derived annotations, but don't wait on it
+  // start fetching derived annotations (based on transactions), but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
     setup,
