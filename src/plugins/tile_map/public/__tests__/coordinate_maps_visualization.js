@@ -91,24 +91,22 @@ describe('CoordinateMapsVisualizationTest', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
+      const mapConfig = {
+        emsFileApiUrl: '',
+        emsTileApiUrl: '',
+        emsLandingPageUrl: '',
+      };
+      const tilemapsConfig = {
+        deprecated: {
+          config: {
+            options: {
+              attribution: '123',
+            },
+          },
+        },
+      };
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
           case 'version':
             return '123';
           default:
@@ -125,7 +123,7 @@ describe('CoordinateMapsVisualizationTest', function() {
           getInjectedVar: () => {},
         },
       };
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
       const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
       const uiSettings = $injector.get('config');
 
