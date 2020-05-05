@@ -1,25 +1,28 @@
 [role="xpack"]
-[[pre-configured-connectors]]
+[[pre-configured-action-types-and-connectors]]
 
-== Preconfigured connectors
+== Preconfigured action types and connectors
 
-You can preconfigure an action connector to have all the information it needs prior to startup
+You can preconfigure an action type or just a connector to have all the information it needs prior to startup
 by adding it to the `kibana.yml` file.
-Sensitive configuration information, such as credentials, can use the <<creating-keystore, {kib} keystore>>.
 
 Preconfigured connectors offer the following capabilities:
 
-- Require no setup. Configuration and credentials needed to execute an
-action are predefined, including the connector name and ID.
+- Requires no setup. Configuration and credentials needed to execute an
+action are predefined, including the connectors name and ID.
 - Appear in all spaces because they are not saved objects.
 - Cannot be edited or deleted.
 
+Sensitive configuration information, such as credentials, can use the <<creating-keystore, {kib} keystore>>.
+
+A preconfigured action types has only preconfigured connectors. But preconfigured connectors could belong to the preconfigured action type or to the regular action type as well.
+
 [float]
 [[preconfigured-connector-example]]
-=== Example of a preconfigured connector
+=== Creating a preconfigured connector
 
 The following example shows a valid configuration 2 out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
-You can find all details about available action types configuration <<action-types, here>>
+You can find all details about available action types configuration <<action-types, here>>.
 
 ```js
   xpack.actions.preconfigured:
@@ -54,8 +57,31 @@ Sensitive properties, such as passwords, can also be stored in the <<creating-ke
 ==============================================
 
 [float]
+[[preconfigured-action-type-example]]
+=== Creating a preconfigured action type
+
+In the `kibana.yml` file:
+
+. Exclude the action type from `xpack.actions.enabledActionTypes`.
+. Add all its preconfigured connectors.
+
+The following example shows a valid configuration of preconfigured action type with one out-of-the box connector.
+
+```js
+  xpack.actions.enabledActionTypes: ['.slack', '.email', '.index'] <1>
+  xpack.actions.preconfigured:                                     <2>
+    - id: 'my-server-log'
+      actionTypeId: .server-log
+      name: 'Server log #xyz'
+```
+
+<1> `enabledActionTypes` should exclude preconfigured action type to prevent creating and deleting connectors.
+<2> `preconfigured` is the setting for defining the list of available connectors for the preconfigured action type.
+
+
+[float]
 [[pre-configured-connector-alert-form]]
-=== Creating an alert with a preconfigured connector
+=== Alert with a preconfigured connector
 
 When attaching an action to an alert,
 select from a list of available action types, and
@@ -86,3 +112,19 @@ A message indicates that this is a preconfigured connector.
 
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
+
+If preconfigured connector belong to the preconfigured action type, it is disabled for the details preview.
+
+[role="screenshot"]
+image::images/pre-configured-action-type-managing.png[Connectors managing tab with pre-cofigured]
+
+
+[float]
+[[managing-pre-configured-action-types]]
+=== Managing preconfigured action types
+
+Clicking *Create connector* shows the list of available action types.
+Preconfigured action types are not included because you can't create a connector with a preconfigured action type.
+
+[role="screenshot"]
+image::images/pre-configured-action-type-select-type.png[Pre-configured connector create menu]

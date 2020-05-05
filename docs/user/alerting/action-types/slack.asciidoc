@@ -26,7 +26,7 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-`config:` define action type specific to the configuration. Index `config:` consists from the next sub properties:
+`config:` define action type specific to the configuration. The config object contains the following properties:
 
 [cols="3*<"]
 |=====

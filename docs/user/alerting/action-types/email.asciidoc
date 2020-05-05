@@ -28,7 +28,7 @@ Password::  password for 'login' type authentication.
  name: preconfigured-email-action-type
  actionTypeId: .email
  config:
-   sender: testsender@test.com
+   from: testsender@test.com
    host: validhostname
    port: 8080
    secure: false
@@ -37,7 +37,7 @@ Password::  password for 'login' type authentication.
    password: passwordkeystorevalue
 --
 
-`config:` define action type specific to the configuration. Index `config:` consists from the next sub properties:
+`config:` define action type specific to the configuration. The config object contains the following properties:
 
 [cols="3*<"]
 |=====

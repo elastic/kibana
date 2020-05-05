@@ -30,7 +30,7 @@ Execution time field::  This field will be automatically set to the time the ale
    executionTimeField: somedate
 --
 
-`config:` define action type specific to the configuration. Index `config:` consists from the next sub properties:
+`config:` define action type specific to the configuration. The config object contains the following properties:
 
 [cols="3*<"]
 |=====

@@ -36,7 +36,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
    password: passwordkeystorevalue
 --
 
-`config:` define action type specific to the configuration. Index `config:` consists from the next sub properties:
+`config:` define action type specific to the configuration. The config object contains the following properties:
 
 [cols="3*<"]
 |=====
