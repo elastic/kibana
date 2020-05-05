@@ -10,6 +10,8 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { TimelineType } from '../../../common/types/timeline';
+
 import { useGetAllTimeline } from '../../containers/timeline/all';
 import { SortFieldTimeline, Direction } from '../../graphql/types';
 import { queryTimelineById, dispatchUpdateTimeline } from '../open_timeline/helpers';
@@ -76,7 +78,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           sortOrder: Direction.desc,
         },
         onlyUserFavorite: filterBy === 'favorites',
-        timelineType: null,
+        timelineType: TimelineType.default,
       });
     }, [filterBy]);
 

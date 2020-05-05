@@ -6,7 +6,7 @@
 
 import { getOr, noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
@@ -17,7 +17,7 @@ import {
   SortTimeline,
   TimelineResult,
 } from '../../../graphql/types';
-import { inputsModel, inputsActions } from '../../../store/inputs';
+import { inputsActions } from '../../../store/inputs';
 import { useApolloClient } from '../../../utils/apollo_context';
 
 import { allTimelinesQuery } from './index.gql_query';

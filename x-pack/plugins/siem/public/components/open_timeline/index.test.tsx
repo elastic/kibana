@@ -31,7 +31,6 @@ jest.mock('../../containers/timeline/all', () => {
   };
 });
 jest.mock('./use_timeline_types', () => {
-  const originalModule = jest.requireActual('../../containers/timeline/all');
   return {
     useTimelineTypes: jest.fn().mockReturnValue({
       timelineType: 'default',
