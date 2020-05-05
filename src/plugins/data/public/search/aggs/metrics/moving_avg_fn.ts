@@ -27,7 +27,7 @@ const fnName = 'aggMovingAvg';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.MOVING_FN>;
-type Arguments = Assign<AggArgs, { metricAgg?: string; customMetric?: AggExpressionType }>;
+type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 

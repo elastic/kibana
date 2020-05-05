@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '../../../../../expressions/public';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
@@ -27,9 +26,8 @@ const fnName = 'aggPercentiles';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.PERCENTILES>;
-type Arguments = Assign<AggArgs, { percents?: number[] }>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
 
 export const aggPercentiles = (): FunctionDefinition => ({
   name: fnName,

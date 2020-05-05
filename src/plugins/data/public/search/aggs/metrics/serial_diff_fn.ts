@@ -27,7 +27,7 @@ const fnName = 'aggSerialDiff';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SERIAL_DIFF>;
-type Arguments = Assign<AggArgs, { metricAgg?: string; customMetric?: AggExpressionType }>;
+type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 

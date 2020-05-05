@@ -27,7 +27,7 @@ const fnName = 'aggCumulativeSum';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.CUMULATIVE_SUM>;
-type Arguments = Assign<AggArgs, { metricAgg?: string; customMetric?: AggExpressionType }>;
+type Arguments = Assign<AggArgs, { customMetric?: AggExpressionType }>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
