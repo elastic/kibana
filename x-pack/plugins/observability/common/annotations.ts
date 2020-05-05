@@ -47,5 +47,5 @@ export interface Annotation {
   event: {
     created: string;
   };
-  '@timestamp': string;
+  '@timestamp': number;
 }

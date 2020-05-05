@@ -112,11 +112,10 @@ export function createAnnotationsClient(params: {
         refresh: 'wait_for',
       })) as IndexDocumentResponse;
 
-      return {
-        _id: response._id,
-        _index: response._index,
-        _source: annotation,
-      };
+      return apiCaller('get', {
+        index,
+        id: response._id,
+      });
     },
     getById: async (getByIdParams: GetByIdParams) => {
       const { id } = getByIdParams;

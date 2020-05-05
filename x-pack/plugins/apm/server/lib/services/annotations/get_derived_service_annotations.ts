@@ -102,7 +102,7 @@ export async function getDerivedServiceAnnotations({
       return {
         type: AnnotationType.VERSION,
         id: version,
-        time: firstSeen,
+        '@timestamp': firstSeen,
         text: version
       };
     })

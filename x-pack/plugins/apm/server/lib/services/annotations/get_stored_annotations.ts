@@ -61,7 +61,7 @@ export async function getStoredAnnotations({
       return {
         type: AnnotationType.VERSION,
         id: hit._id,
-        time: new Date(hit._source['@timestamp']).getTime(),
+        '@timestamp': hit._source['@timestamp'],
         text: hit._source.message
       };
     });

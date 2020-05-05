@@ -81,13 +81,13 @@ describe('getServiceAnnotations', () => {
         {
           id: '8.0.0',
           text: '8.0.0',
-          time: 1.5281138e12,
+          '@timestamp': 1.5281138e12,
           type: 'version'
         },
         {
           id: '7.5.0',
           text: '7.5.0',
-          time: 1.5281138e12,
+          '@timestamp': 1.5281138e12,
           type: 'version'
         }
       ]);
