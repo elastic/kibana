@@ -15,6 +15,7 @@ import { errorToToaster, useStateToaster, displaySuccessToast } from '../../comp
 import { getCase, pushToService, pushCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
+import { CaseServices } from './use_get_case_user_actions';
 
 interface PushToServiceState {
   serviceData: ServiceConnectorCaseResponse | null;
@@ -65,11 +66,18 @@ interface PushToServiceRequest {
   caseId: string;
   connectorId: string;
   connectorName: string;
+  caseServices: CaseServices;
   updateCase: (newCase: Case) => void;
 }
 
 export interface UsePostPushToService extends PushToServiceState {
-  postPushToService: ({ caseId, connectorId, updateCase }: PushToServiceRequest) => void;
+  postPushToService: ({
+    caseId,
+    caseServices,
+    connectorId,
+    connectorName,
+    updateCase,
+  }: PushToServiceRequest) => void;
 }
 
 export const usePostPushToService = (): UsePostPushToService => {
@@ -82,7 +90,13 @@ export const usePostPushToService = (): UsePostPushToService => {
   const [, dispatchToaster] = useStateToaster();
 
   const postPushToService = useCallback(
-    async ({ caseId, connectorId, connectorName, updateCase }: PushToServiceRequest) => {
+    async ({
+      caseId,
+      caseServices,
+      connectorId,
+      connectorName,
+      updateCase,
+    }: PushToServiceRequest) => {
       let cancel = false;
       const abortCtrl = new AbortController();
       try {
@@ -90,7 +104,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connectorId,
-          formatServiceRequestData(casePushData),
+          formatServiceRequestData(casePushData, connectorId, caseServices),
           abortCtrl.signal
         );
         const responseCase = await pushCase(
@@ -131,7 +145,11 @@ export const usePostPushToService = (): UsePostPushToService => {
   return { ...state, postPushToService };
 };
 
-export const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
+export const formatServiceRequestData = (
+  myCase: Case,
+  connectorId: string,
+  caseServices: CaseServices
+): ServiceConnectorCaseParams => {
   const {
     id: caseId,
     createdAt,
@@ -143,6 +161,20 @@ export const formatServiceRequestData = (myCase: Case): ServiceConnectorCasePara
     updatedAt,
     updatedBy,
   } = myCase;
+  let actualExternalService = externalService;
+  if (
+    externalService != null &&
+    externalService.connectorId !== connectorId &&
+    caseServices[connectorId]
+  ) {
+    actualExternalService = caseServices[connectorId];
+  } else if (
+    externalService != null &&
+    externalService.connectorId !== connectorId &&
+    !caseServices[connectorId]
+  ) {
+    actualExternalService = null;
+  }
   return {
     caseId,
     createdAt,
@@ -180,7 +212,7 @@ export const formatServiceRequestData = (myCase: Case): ServiceConnectorCasePara
             : null,
       })),
     description,
-    externalId: externalService?.externalId ?? null,
+    externalId: actualExternalService?.externalId ?? null,
     title,
     updatedAt,
     updatedBy:

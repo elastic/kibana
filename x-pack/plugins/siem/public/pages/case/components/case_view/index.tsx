@@ -35,6 +35,8 @@ import { navTabs } from '../../../home/home_navigations';
 import { SpyRoute } from '../../../../utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../../../containers/case/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
+import { EditConnector } from '../edit_connector';
+import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 
 interface Props {
   caseId: string;
@@ -67,17 +69,15 @@ export const CaseComponent = React.memo<CaseProps>(
     const basePath = window.location.origin + useBasePath();
     const caseLink = `${basePath}/app/siem#/case/${caseId}`;
     const search = useGetUrlSearch(navTabs.case);
-
     const [initLoadingData, setInitLoadingData] = useState(true);
     const {
       caseUserActions,
       fetchCaseUserActions,
-      firstIndexPushToService,
+      caseServices,
       hasDataToPush,
       isLoading: isLoadingUserActions,
-      lastIndexPushToService,
       participants,
-    } = useGetCaseUserActions(caseId);
+    } = useGetCaseUserActions(caseId, caseData.connectorId);
     const { isLoading, updateKey, updateCaseProperty } = useUpdateCase({
       caseId,
     });
@@ -95,6 +95,18 @@ export const CaseComponent = React.memo<CaseProps>(
                 fetchCaseUserActions,
                 updateKey: 'title',
                 updateValue: titleUpdate,
+                updateCase: handleUpdateNewCase,
+                version: caseData.version,
+              });
+            }
+            break;
+          case 'connectorId':
+            const connectorId = getTypedPayload<string>(updateValue);
+            if (connectorId.length > 0) {
+              updateCaseProperty({
+                fetchCaseUserActions,
+                updateKey: 'connector_id',
+                updateValue: connectorId,
                 updateCase: handleUpdateNewCase,
                 version: caseData.version,
               });
@@ -147,14 +159,26 @@ export const CaseComponent = React.memo<CaseProps>(
       [updateCase, fetchCaseUserActions]
     );
 
+    const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const caseConnectorName = useMemo(
+      () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
+      [connectors, caseData.connectorId]
+    );
     const { pushButton, pushCallouts } = usePushToService({
+      caseConnectorId: caseData.connectorId,
+      caseConnectorName,
+      caseServices,
       caseId: caseData.id,
       caseStatus: caseData.status,
-      isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
+      connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
     });
 
+    const onSubmitConnector = useCallback(
+      connectorId => onUpdateField('connectorId', connectorId),
+      [onUpdateField]
+    );
     const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
     const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [
       onUpdateField,
@@ -241,7 +265,7 @@ export const CaseComponent = React.memo<CaseProps>(
         </MyWrapper>
         <WhitePageWrapper>
           <MyWrapper>
-            {pushCallouts != null && pushCallouts}
+            {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && <EuiLoadingContent lines={8} />}
@@ -249,12 +273,12 @@ export const CaseComponent = React.memo<CaseProps>(
                   <>
                     <UserActionTree
                       caseUserActions={caseUserActions}
+                      connectors={connectors}
                       data={caseData}
                       fetchUserActions={fetchCaseUserActions.bind(null, caseData.id)}
-                      firstIndexPushToService={firstIndexPushToService}
+                      caseServices={caseServices}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
-                      lastIndexPushToService={lastIndexPushToService}
                       onUpdateField={onUpdateField}
                       updateCase={updateCase}
                       userCanCrud={userCanCrud}
@@ -301,6 +325,12 @@ export const CaseComponent = React.memo<CaseProps>(
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
+                />
+                <EditConnector
+                  isLoading={isLoadingConnectors}
+                  onSubmit={onSubmitConnector}
+                  connectors={connectors}
+                  selectedConnector={caseData.connectorId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
