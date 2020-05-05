@@ -12,6 +12,7 @@ import {
 } from 'src/core/server';
 import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { SecurityPluginSetup } from '../../security/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
 import { AlertingPlugin } from '../../alerting/server';
@@ -57,6 +58,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       features: FeaturesPluginSetup;
+      security?: SecurityPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
@@ -110,7 +112,10 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     createApmApi().init(core, {
       config$: mergedConfig$,
-      logger: this.logger!
+      logger: this.logger!,
+      plugins: {
+        security: plugins.security
+      }
     });
 
     return {

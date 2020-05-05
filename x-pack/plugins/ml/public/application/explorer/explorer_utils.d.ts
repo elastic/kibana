@@ -17,10 +17,16 @@ interface ClearedSelectedAnomaliesState {
 
 export declare const getClearedSelectedAnomaliesState: () => ClearedSelectedAnomaliesState;
 
+export interface SwimlanePoint {
+  laneLabel: string;
+  time: number;
+  value: number;
+}
+
 export declare interface SwimlaneData {
-  fieldName: string;
+  fieldName?: string;
   laneLabels: string[];
-  points: any[];
+  points: SwimlanePoint[];
   interval: number;
 }
 

@@ -41,7 +41,7 @@ import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
-import { TimeBuckets } from '../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -318,7 +318,7 @@ export const Page: FC = () => {
 
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
-    const buckets = new TimeBuckets();
+    const buckets = getTimeBucketsFromCache();
 
     const tf = timefilter as any;
     let earliest: number | undefined;

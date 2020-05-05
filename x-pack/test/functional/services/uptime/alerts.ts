@@ -13,6 +13,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   return {
     async openFlyout() {
       await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
+      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
       await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
     },
     async openMonitorStatusAlertType(alertType: string) {
