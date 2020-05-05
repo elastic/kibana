@@ -188,10 +188,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             if (deleteResponse?.hasDeletedPipelines) {
               // reload pipelines list
               sendRequest();
+              setSelectedPipeline(undefined);
+              goHome();
             }
             setPipelinesToDelete([]);
-            setSelectedPipeline(undefined);
-            goHome();
           }}
           pipelinesToDelete={pipelinesToDelete}
         />
