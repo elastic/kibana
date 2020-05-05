@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import styled from 'styled-components';
+import { fontSize, px } from '../../../../style/variables';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
@@ -47,6 +48,13 @@ const VerticallyCentered = styled.div`
 
 const SubduedText = styled.span`
   color: ${theme.euiTextSubduedColor};
+`;
+
+const EnableText = styled.section`
+  color: ${theme.euiTextSubduedColor};
+  line-height: 1.4;
+  font-size: ${fontSize};
+  width: ${px(popoverMinWidth)};
 `;
 
 export const ContentLine = styled.section`
@@ -100,6 +108,14 @@ const ANOMALY_DETECTION_LINK = i18n.translate(
   { defaultMessage: 'View anomalies' }
 );
 
+const ANOMALY_DETECTION_ENABLE_TEXT = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverEnable',
+  {
+    defaultMessage:
+      'Enable anomaly detection from the Integrations menu in the Service details view.'
+  }
+);
+
 export function Contents({
   selectedNodeData,
   isService,
@@ -136,7 +152,7 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {hasAnomalyDetection && (
+      {isService && (
         <FlexColumnItem>
           <section>
             <HealthStatusTitle size="xxs">
@@ -145,27 +161,35 @@ export function Contents({
             &nbsp;
             <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_INFO} />
           </section>
-          <ContentLine>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <VerticallyCentered>
-                  <EuiHealth color={getSeverityColor(severity)} />
-                  <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
-                </VerticallyCentered>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div>
-                  {asInteger(maxScore)}
-                  <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ContentLine>
-          <ContentLine>
-            <MLJobLink external jobId={jobId}>
-              {ANOMALY_DETECTION_LINK}
-            </MLJobLink>
-          </ContentLine>
+          {hasAnomalyDetection ? (
+            <>
+              <ContentLine>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <VerticallyCentered>
+                      <EuiHealth color={getSeverityColor(severity)} />
+                      <SubduedText>
+                        {ANOMALY_DETECTION_SCORE_METRIC}
+                      </SubduedText>
+                    </VerticallyCentered>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <div>
+                      {asInteger(maxScore)}
+                      <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </ContentLine>
+              <ContentLine>
+                <MLJobLink external jobId={jobId}>
+                  {ANOMALY_DETECTION_LINK}
+                </MLJobLink>
+              </ContentLine>
+            </>
+          ) : (
+            <EnableText>{ANOMALY_DETECTION_ENABLE_TEXT}</EnableText>
+          )}
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>
       )}

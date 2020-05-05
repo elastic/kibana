@@ -13,14 +13,12 @@ describe('addAnomaliesToServicesData', () => {
       {
         'service.name': 'opbeans-ruby',
         'agent.name': 'ruby',
-        'service.environment': null,
-        'service.framework.name': 'Ruby on Rails'
+        'service.environment': null
       },
       {
         'service.name': 'opbeans-java',
         'agent.name': 'java',
-        'service.environment': null,
-        'service.framework.name': null
+        'service.environment': null
       }
     ];
 
@@ -72,7 +70,6 @@ describe('addAnomaliesToServicesData', () => {
         'service.name': 'opbeans-ruby',
         'agent.name': 'ruby',
         'service.environment': null,
-        'service.framework.name': 'Ruby on Rails',
         max_score: 50,
         severity: 'major',
         actual_value: 2000,
@@ -83,7 +80,6 @@ describe('addAnomaliesToServicesData', () => {
         'service.name': 'opbeans-java',
         'agent.name': 'java',
         'service.environment': null,
-        'service.framework.name': null,
         max_score: 100,
         severity: 'critical',
         actual_value: 9000,

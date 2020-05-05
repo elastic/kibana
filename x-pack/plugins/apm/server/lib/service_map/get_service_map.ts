@@ -7,7 +7,6 @@ import { chunk } from 'lodash';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../../common/projections/services';
@@ -19,6 +18,7 @@ import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
 import { addAnomaliesToServicesData } from './ml_helpers';
 import { getMlIndex } from '../../../common/ml_job_constants';
+import { rangeFilter } from '../helpers/range_filter';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -107,11 +107,6 @@ async function getServicesData(options: IEnvOptions) {
               terms: {
                 field: AGENT_NAME
               }
-            },
-            service_framework_name: {
-              terms: {
-                field: SERVICE_FRAMEWORK_NAME
-              }
             }
           }
         }
@@ -129,55 +124,31 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_NAME]: bucket.key as string,
         [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: options.environment || null,
-        [SERVICE_FRAMEWORK_NAME]:
-          (bucket.service_framework_name.buckets[0]?.key as
-            | string
-            | undefined) || null
+        [SERVICE_ENVIRONMENT]: options.environment || null
       };
     }) || []
   );
 }
 
 function getAnomaliesData(options: IEnvOptions) {
-  const { client } = options.setup;
+  const { start, end, client } = options.setup;
+  const rangeQuery = { range: rangeFilter(start, end, 'timestamp') };
 
   const params = {
     index: getMlIndex('*'),
     body: {
       size: 0,
       query: {
-        bool: {
-          filter: {
-            term: {
-              result_type: 'record'
-            }
-          }
-        }
+        bool: { filter: [{ term: { result_type: 'record' } }, rangeQuery] }
       },
       aggs: {
         jobs: {
-          terms: {
-            field: 'job_id',
-            size: 10
-          },
+          terms: { field: 'job_id', size: 10 },
           aggs: {
             top_score_hits: {
               top_hits: {
-                sort: [
-                  {
-                    record_score: {
-                      order: 'desc' as const
-                    }
-                  }
-                ],
-                _source: [
-                  'job_id',
-                  'record_score',
-                  'typical',
-                  'actual',
-                  'field_name'
-                ],
+                sort: [{ record_score: { order: 'desc' as const } }],
+                _source: ['job_id', 'record_score', 'typical', 'actual'],
                 size: 1
               }
             }
