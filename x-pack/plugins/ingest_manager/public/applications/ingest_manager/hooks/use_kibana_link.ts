@@ -3,4 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
+
+import { useCore } from './';
+
+const BASE_PATH = '/app/kibana';
+
+export function useKibanaLink(path: string = '/') {
+  const core = useCore();
+  return core.http.basePath.prepend(`${BASE_PATH}#${path}`);
+}
