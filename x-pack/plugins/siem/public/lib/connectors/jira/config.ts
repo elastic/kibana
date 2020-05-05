@@ -4,17 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from '../types';
+import { ConnectorConfiguration } from './types';
 
-import { JIRA_TITLE } from './translations';
+import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const connector: Connector = {
+export const connector: ConnectorConfiguration = {
   id: '.jira',
-  name: JIRA_TITLE,
+  name: i18n.JIRA_TITLE,
   logo,
   enabled: true,
   enabledInConfig: true,
   enabledInLicense: true,
   minimumLicenseRequired: 'platinum',
+  fields: {
+    summary: {
+      label: i18n.MAPPING_FIELD_SUMMARY,
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'title',
+      defaultActionType: 'overwrite',
+    },
+    description: {
+      label: i18n.MAPPING_FIELD_DESC,
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'description',
+      defaultActionType: 'overwrite',
+    },
+    comments: {
+      label: i18n.MAPPING_FIELD_COMMENTS,
+      validSourceFields: ['comments'],
+      defaultSourceField: 'comments',
+      defaultActionType: 'append',
+    },
+  },
 };

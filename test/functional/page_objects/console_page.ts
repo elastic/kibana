@@ -17,46 +17,47 @@
  * under the License.
  */
 
-import Bluebird from 'bluebird';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-export function ConsolePageProvider({ getService }) {
+export function ConsolePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  async function getVisibleTextFromAceEditor(editor) {
-    const lines = await editor.findAllByClassName('ace_line_group');
-    const linesText = await Bluebird.map(lines, l => l.getVisibleText());
-    return linesText.join('\n');
-  }
+  class ConsolePage {
+    public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
+      const lines = await editor.findAllByClassName('ace_line_group');
+      const linesText = await Promise.all(lines.map(async line => await line.getVisibleText()));
+      return linesText.join('\n');
+    }
 
-  return new (class ConsolePage {
-    async getRequestEditor() {
+    public async getRequestEditor() {
       return await testSubjects.find('request-editor');
     }
 
-    async getRequest() {
+    public async getRequest() {
       const requestEditor = await this.getRequestEditor();
-      return await getVisibleTextFromAceEditor(requestEditor);
+      return await this.getVisibleTextFromAceEditor(requestEditor);
     }
 
-    async getResponse() {
+    public async getResponse() {
       const responseEditor = await testSubjects.find('response-editor');
-      return await getVisibleTextFromAceEditor(responseEditor);
+      return await this.getVisibleTextFromAceEditor(responseEditor);
     }
 
-    async clickPlay() {
+    public async clickPlay() {
       await testSubjects.click('sendRequestButton');
     }
 
-    async collapseHelp() {
+    public async collapseHelp() {
       await testSubjects.click('help-close-button');
     }
 
-    async openSettings() {
+    public async openSettings() {
       await testSubjects.click('consoleSettingsButton');
     }
 
-    async setFontSizeSetting(newSize) {
+    public async setFontSizeSetting(newSize: number) {
       await this.openSettings();
 
       // while the settings form opens/loads this may fail, so retry for a while
@@ -70,13 +71,15 @@ export function ConsolePageProvider({ getService }) {
       await testSubjects.click('settings-save-button');
     }
 
-    async getFontSize(editor) {
+    public async getFontSize(editor: WebElementWrapper) {
       const aceLine = await editor.findByClassName('ace_line');
       return await aceLine.getComputedStyle('font-size');
     }
 
-    async getRequestFontSize() {
+    public async getRequestFontSize() {
       return await this.getFontSize(await this.getRequestEditor());
     }
-  })();
+  }
+
+  return new ConsolePage();
 }

@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function TimelionPageProvider({ getService, getPageObjects }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function TimelionPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -25,7 +27,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
 
   class TimelionPage {
-    async initTests() {
+    public async initTests() {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -36,29 +38,29 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('timelion');
     }
 
-    async setExpression(expression) {
+    public async setExpression(expression: string) {
       const input = await testSubjects.find('timelionExpressionTextArea');
       await input.clearValue();
       await input.type(expression);
     }
 
-    async updateExpression(updates) {
+    public async updateExpression(updates: string) {
       const input = await testSubjects.find('timelionExpressionTextArea');
       await input.type(updates);
       await PageObjects.common.sleep(500);
     }
 
-    async getExpression() {
+    public async getExpression() {
       const input = await testSubjects.find('timelionExpressionTextArea');
       return input.getVisibleText();
     }
 
-    async getSuggestionItemsText() {
+    public async getSuggestionItemsText() {
       const elements = await testSubjects.findAll('timelionSuggestionListItem');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
+    public async clickSuggestion(suggestionIndex = 0, waitTime = 500) {
       const elements = await testSubjects.findAll('timelionSuggestionListItem');
       if (suggestionIndex > elements.length) {
         throw new Error(
@@ -70,7 +72,7 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(waitTime);
     }
 
-    async saveTimelionSheet() {
+    public async saveTimelionSheet() {
       await testSubjects.click('timelionSaveButton');
       await testSubjects.click('timelionSaveAsSheetButton');
       await testSubjects.click('timelionFinishSaveButton');
@@ -78,12 +80,12 @@ export function TimelionPageProvider({ getService, getPageObjects }) {
       await testSubjects.waitForDeleted('timelionSaveSuccessToast');
     }
 
-    async expectWriteControls() {
+    public async expectWriteControls() {
       await testSubjects.existOrFail('timelionSaveButton');
       await testSubjects.existOrFail('timelionDeleteButton');
     }
 
-    async expectMissingWriteControls() {
+    public async expectMissingWriteControls() {
       await testSubjects.missingOrFail('timelionSaveButton');
       await testSubjects.missingOrFail('timelionDeleteButton');
     }

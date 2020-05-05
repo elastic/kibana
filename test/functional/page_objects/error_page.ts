@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from '@kbn/expect';
 
-export function ErrorPageProvider({ getPageObjects }) {
-  const PageObjects = getPageObjects(['common']);
+import expect from '@kbn/expect/expect.js';
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {
+  const { common } = getPageObjects(['common']);
 
   class ErrorPage {
-    async expectForbidden() {
-      const messageText = await PageObjects.common.getBodyText();
+    public async expectForbidden() {
+      const messageText = await common.getBodyText();
       expect(messageText).to.eql(
         JSON.stringify({
           statusCode: 403,
@@ -32,8 +34,9 @@ export function ErrorPageProvider({ getPageObjects }) {
         })
       );
     }
-    async expectNotFound() {
-      const messageText = await PageObjects.common.getBodyText();
+
+    public async expectNotFound() {
+      const messageText = await common.getBodyText();
       expect(messageText).to.eql(
         JSON.stringify({
           statusCode: 404,
