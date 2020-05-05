@@ -398,6 +398,8 @@
           '@types/good-squeeze',
           'inert',
           '@types/inert',
+          'accept',
+          '@types/accept',
         ],
       },
       {
