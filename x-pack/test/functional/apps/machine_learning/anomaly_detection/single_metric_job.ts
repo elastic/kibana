@@ -325,7 +325,8 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.advanceToValidationSection();
     });
 
-    it('job cloning displays the summary step', async () => {
+    // https://github.com/elastic/kibana/issues/65377
+    it.skip('job cloning displays the summary step', async () => {
       await ml.jobWizardCommon.advanceToSummarySection();
     });
 
