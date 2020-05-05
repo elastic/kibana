@@ -138,6 +138,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           charts,
                           dataFieldsFormats: dataPlugin.fieldFormats,
                           reloadAlerts: setAlert,
+                          capabilities,
                         }}
                       >
                         <AlertEdit
