@@ -6,10 +6,9 @@
 
 import { APICaller, Logger } from 'kibana/server';
 import * as t from 'io-ts';
-import { SearchResponse, Client } from 'elasticsearch';
+import { Client } from 'elasticsearch';
 import {
   createAnnotationRt,
-  searchAnnotationsRt,
   deleteAnnotationRt,
   Annotation,
   getAnnotationByIdRt,
@@ -17,7 +16,6 @@ import {
 import { PromiseReturnType } from '../../../../apm/typings/common';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
-type SearchParams = t.TypeOf<typeof searchAnnotationsRt>;
 type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
 type GetByIdParams = t.TypeOf<typeof getAnnotationByIdRt>;
@@ -93,53 +91,8 @@ export function createAnnotationsClient(params: {
     });
 
   return {
-    search: async (searchParams: SearchParams): Promise<SearchResponse<Annotation>> => {
-      const { start, end, size, annotation, tags, filter } = searchParams;
-
-      try {
-        return await apiCaller('search', {
-          index,
-          body: {
-            size: size ?? 50,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: start,
-                        lt: end,
-                      },
-                    },
-                  },
-                  ...(annotation?.type ? [{ term: { 'annotation.type': annotation.type } }] : []),
-                  ...(tags ? [{ terms: { tags } }] : []),
-                  ...(filter ? [filter] : []),
-                ],
-              },
-            },
-          },
-        });
-      } catch (err) {
-        if (err.body?.error?.type !== 'index_not_found_exception') {
-          throw err;
-        }
-        return {
-          hits: {
-            total: 0,
-            max_score: 0,
-            hits: [],
-          },
-          took: 0,
-          _shards: {
-            failed: 0,
-            skipped: 0,
-            successful: 0,
-            total: 0,
-          },
-          timed_out: false,
-        };
-      }
+    get index() {
+      return index;
     },
     create: async (
       createParams: CreateParams

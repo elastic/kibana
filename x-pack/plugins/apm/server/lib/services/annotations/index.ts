@@ -3,52 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import { APICaller } from 'kibana/server';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
+import { getStoredAnnotations } from './get_stored_annotations';
 
 export async function getServiceAnnotations({
   setup,
   serviceName,
   environment,
-  annotationsClient
+  annotationsClient,
+  apiCaller
 }: {
   serviceName: string;
   environment?: string;
   setup: Setup & SetupTimeRange;
   annotationsClient?: ScopedAnnotationsClient;
+  apiCaller: APICaller;
 }) {
-  async function getStoredAnnotations(): Promise<Annotation[]> {
-    if (!annotationsClient) {
-      return [];
-    }
-
-    const response = await annotationsClient.search({
-      start: setup.start,
-      end: setup.end,
-      annotation: {
-        type: 'deployment'
-      },
-      tags: ['apm'],
-      filter: {
-        term: {
-          [SERVICE_NAME]: serviceName
-        }
-      }
-    });
-
-    return response.hits.hits.map(hit => {
-      return {
-        type: AnnotationType.VERSION,
-        id: hit._id,
-        time: new Date(hit._source['@timestamp']).getTime(),
-        text: hit._source.message
-      };
-    });
-  }
-
   // start fetching derived annotations, but don't wait on it
   // it will likely be significantly slower than the stored annotations
   const derivedAnnotationsPromise = getDerivedServiceAnnotations({
@@ -57,7 +30,15 @@ export async function getServiceAnnotations({
     environment
   });
 
-  const storedAnnotations = await getStoredAnnotations();
+  const storedAnnotations = annotationsClient
+    ? await getStoredAnnotations({
+        setup,
+        serviceName,
+        environment,
+        annotationsClient,
+        apiCaller
+      })
+    : [];
 
   if (storedAnnotations.length) {
     return { annotations: storedAnnotations };

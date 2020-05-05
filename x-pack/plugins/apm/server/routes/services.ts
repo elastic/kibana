@@ -107,7 +107,8 @@ export const serviceAnnotationsRoute = createRoute(() => ({
       setup,
       serviceName,
       environment,
-      annotationsClient
+      annotationsClient,
+      apiCaller: context.core.elasticsearch.dataClient.callAsCurrentUser
     });
   }
 }));

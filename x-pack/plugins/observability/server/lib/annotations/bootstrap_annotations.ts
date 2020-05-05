@@ -3,18 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as t from 'io-ts';
-import { CoreSetup, PluginInitializerContext, KibanaRequest, RequestHandler } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isLeft } from 'fp-ts/lib/Either';
-import {
-  getAnnotationByIdRt,
-  createAnnotationRt,
-  deleteAnnotationRt,
-} from '../../../common/annotations';
+import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
 import { PromiseReturnType } from '../../../../apm/typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
+import { registerAnnotationAPIs } from './register_annotation_apis';
 
 interface Params {
   index: string;
@@ -29,90 +21,14 @@ export type ScopedAnnotationsClientFactory = PromiseReturnType<
 export type ScopedAnnotationsClient = ReturnType<ScopedAnnotationsClientFactory>;
 export type AnnotationsAPI = PromiseReturnType<typeof bootstrapAnnotations>;
 
-const unknowns = schema.object({}, { unknowns: 'allow' });
-
 export async function bootstrapAnnotations({ index, core, context }: Params) {
   const logger = context.logger.get('annotations');
 
-  function wrapRouteHandler<TType extends t.Type<any>>(
-    types: TType,
-    handler: (params: { data: t.TypeOf<TType>; client: ScopedAnnotationsClient }) => Promise<any>
-  ): RequestHandler {
-    return async (...args: Parameters<RequestHandler>) => {
-      const [, request, response] = args;
-
-      const rt = types;
-
-      const data = {
-        body: request.body,
-        query: request.query,
-        params: request.params,
-      };
-
-      const validation = rt.decode(data);
-
-      if (isLeft(validation)) {
-        return response.badRequest({
-          body: PathReporter.report(validation).join(', '),
-        });
-      }
-
-      const apiCaller = core.elasticsearch.dataClient.asScoped(request).callAsCurrentUser;
-
-      const client = createAnnotationsClient({
-        index,
-        apiCaller,
-        logger,
-      });
-
-      const res = await handler({
-        data: validation.right as any,
-        client,
-      });
-
-      return response.ok({
-        body: res,
-      });
-    };
-  }
-
-  const router = core.http.createRouter();
-
-  router.post(
-    {
-      path: '/api/observability/annotation',
-      validate: {
-        body: unknowns,
-      },
-    },
-    wrapRouteHandler(t.type({ body: createAnnotationRt }), ({ data, client }) => {
-      return client.create(data.body);
-    })
-  );
-
-  router.delete(
-    {
-      path: '/api/observability/annotation/{id}',
-      validate: {
-        params: unknowns,
-      },
-    },
-    wrapRouteHandler(t.type({ params: deleteAnnotationRt }), ({ data, client }) => {
-      return client.delete(data.params);
-    })
-  );
-
-  router.get(
-    {
-      path: '/api/observability/annotation/{id}',
-      validate: {
-        params: unknowns,
-      },
-    },
-    wrapRouteHandler(t.type({ params: getAnnotationByIdRt }), ({ data, client }) => {
-      return client.getById(data.params);
-    })
-  );
+  registerAnnotationAPIs({
+    core,
+    index,
+    logger,
+  });
 
   return {
     getScopedAnnotationsClient: (request: KibanaRequest) => {
