@@ -93,10 +93,6 @@ export const aggSerialDiff = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
-    // Need to spread this object to work around TS bug:
-    // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
-    const customMetric = args.customMetric?.value ? { ...args.customMetric.value } : undefined;
-
     return {
       type: 'agg_type',
       value: {
@@ -106,7 +102,7 @@ export const aggSerialDiff = (): FunctionDefinition => ({
         type: METRIC_TYPES.SERIAL_DIFF,
         params: {
           ...rest,
-          customMetric,
+          customMetric: args.customMetric?.value,
           json: getParsedValue(args, 'json'),
         },
       },

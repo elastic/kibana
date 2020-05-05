@@ -106,10 +106,6 @@ export const aggMovingAvg = (): FunctionDefinition => ({
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;
 
-    // Need to spread this object to work around TS bug:
-    // https://github.com/microsoft/TypeScript/issues/15300#issuecomment-436793742
-    const customMetric = args.customMetric?.value ? { ...args.customMetric.value } : undefined;
-
     return {
       type: 'agg_type',
       value: {
@@ -119,7 +115,7 @@ export const aggMovingAvg = (): FunctionDefinition => ({
         type: METRIC_TYPES.MOVING_FN,
         params: {
           ...rest,
-          customMetric,
+          customMetric: args.customMetric?.value,
           json: getParsedValue(args, 'json'),
         },
       },
