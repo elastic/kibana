@@ -12,3 +12,5 @@ export * from '../common/types/anomalies';
 export * from '../common/types/modules';
 
 export * from '../common/util/anomaly_utils';
+
+export * from './application/formatters/metric_change_description';
