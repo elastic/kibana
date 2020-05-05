@@ -8,7 +8,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
 import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
-import { Filter, TimeRange as TimeRangeArg } from '../../../types';
+import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -37,7 +37,7 @@ type Return = EmbeddableExpression<SavedLensInput>;
 
 export function savedLens(): ExpressionFunctionDefinition<
   'savedLens',
-  Filter | null,
+  ExpressionValueFilter | null,
   Arguments,
   Return
 > {
@@ -63,8 +63,8 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (context, args) => {
-      const filters = context ? context.and : [];
+    fn: (input, args) => {
+      const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,

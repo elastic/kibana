@@ -71,5 +71,16 @@ export function createStream(variables: DatasourceConfigRecord, streamTemplate: 
   const stream = template(vars);
   const yamlFromStream = safeLoad(stream, {});
 
-  return replaceVariablesInYaml(yamlValues, yamlFromStream);
+  // Hack to keep empty string ('') values around in the end yaml because
+  // `safeLoad` replaces empty strings with null
+  const patchedYamlFromStream = Object.entries(yamlFromStream).reduce((acc, [key, value]) => {
+    if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+      acc[key] = '';
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as { [k: string]: any });
+
+  return replaceVariablesInYaml(yamlValues, patchedYamlFromStream);
 }

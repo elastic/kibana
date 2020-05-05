@@ -37,7 +37,7 @@ import {
 } from '../../../common';
 import { findByTitle, getRoutes } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { Field, FieldList, IFieldList } from '../fields';
+import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -56,7 +56,7 @@ export class IndexPattern implements IIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IFieldList;
+  public fields: IIndexPatternFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -111,7 +111,12 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats: getFieldFormats(),
+      toastNotifications: getNotifications().toasts,
+    });
+
+    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
     this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
@@ -136,7 +141,7 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -286,7 +291,11 @@ export class IndexPattern implements IIndexPattern {
           filterable: true,
           searchable: true,
         },
-        false
+        false,
+        {
+          fieldFormats: getFieldFormats(),
+          toastNotifications: getNotifications().toasts,
+        }
       )
     );
 
