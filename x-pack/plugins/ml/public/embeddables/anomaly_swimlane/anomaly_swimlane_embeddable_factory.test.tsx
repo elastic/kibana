@@ -35,8 +35,9 @@ describe('AnomalySwimlaneEmbeddableFactory', () => {
     } as AnomalySwimlaneEmbeddableInput);
 
     // assert
-    const mockCalls = (AnomalySwimlaneEmbeddable as jest.Mock<AnomalySwimlaneEmbeddable>).mock
-      .calls[0];
+    const mockCalls = ((AnomalySwimlaneEmbeddable as unknown) as jest.Mock<
+      AnomalySwimlaneEmbeddable
+    >).mock.calls[0];
     const input = mockCalls[0];
     const createServices = mockCalls[1];
 

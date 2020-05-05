@@ -7,7 +7,6 @@
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { COLOR_PALETTE_MAX_SIZE } from '../../../common/constants';
 import { indexPatterns } from '../../../../../../src/plugins/data/public';
 import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';
@@ -89,16 +88,16 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getCategoricalFieldMetaRequest(): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
     const indexPatternField = await this._getIndexPatternField();
-    if (!indexPatternField) {
+    if (!indexPatternField || size <= 0) {
       return null;
     }
 
     // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
     // https://github.com/elastic/kibana/issues/60102
     const topTerms: { size: number; script?: unknown; field?: string } = {
-      size: COLOR_PALETTE_MAX_SIZE - 1, // need additional color for the "other"-value
+      size: size - 1, // need additional color for the "other"-value
     };
     if (indexPatternField.scripted) {
       topTerms.script = {
