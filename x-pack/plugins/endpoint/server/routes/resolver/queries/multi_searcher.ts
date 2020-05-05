@@ -16,6 +16,7 @@ export class MultiSearcher {
     private readonly ids: string | string[]
   ) {}
 
+  // user visitor pattern here
   async search() {
     const res = await this.client.callAsCurrentUser('msearch', this.query.build(this.ids));
     return this.query.formatResults(res);
