@@ -11,9 +11,9 @@ import { rangeFilter } from '../../helpers/range_filter';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   SERVICE_VERSION
 } from '../../../../common/elasticsearch_fieldnames';
+import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export async function getDerivedServiceAnnotations({
   setup,
@@ -32,8 +32,10 @@ export async function getDerivedServiceAnnotations({
     { term: { [SERVICE_NAME]: serviceName } }
   ];
 
-  if (environment) {
-    filter.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
+  const environmentFilter = getEnvironmentUiFilterES(environment);
+
+  if (environmentFilter) {
+    filter.push(environmentFilter);
   }
 
   const versions =

@@ -171,6 +171,9 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
                     version: {
                       type: 'keyword',
                     },
+                    environment: {
+                      type: 'keyword',
+                    },
                   },
                 },
                 '@timestamp': {
@@ -216,6 +219,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
             service: {
               name: serviceName,
               version: '1.2',
+              environment: 'production',
             },
             observer: {
               version_major: 8,
@@ -318,6 +322,67 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         expect(responseFromEarlierRange.body.annotations.length).to.be(2);
         expect(responseFromEarlierRange.body.annotations[0].text).to.be('1.1');
         expect(responseFromEarlierRange.body.annotations[1].text).to.be('1.2');
+      });
+
+      it('returns stored annotations for the given environment', async () => {
+        expect(
+          (
+            await request({
+              url: `/api/apm/services/${serviceName}/annotation`,
+              method: 'POST',
+              data: {
+                service: {
+                  version: '1.3',
+                },
+                '@timestamp': new Date(2020, 4, 2, 21, 30).toISOString(),
+              },
+            })
+          ).status
+        ).to.be(200);
+
+        expect(
+          (
+            await request({
+              url: `/api/apm/services/${serviceName}/annotation`,
+              method: 'POST',
+              data: {
+                service: {
+                  version: '1.4',
+                  environment: 'production',
+                },
+                '@timestamp': new Date(2020, 4, 2, 21, 31).toISOString(),
+              },
+            })
+          ).status
+        ).to.be(200);
+
+        const range = {
+          start: new Date(2020, 4, 2, 18).toISOString(),
+          end: new Date(2020, 4, 2, 23).toISOString(),
+        };
+
+        const allEnvironmentsResponse = await request({
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}`,
+          method: 'GET',
+        });
+
+        expect(allEnvironmentsResponse.body.annotations.length).to.be(2);
+
+        const productionEnvironmentResponse = await request({
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=production`,
+          method: 'GET',
+        });
+
+        expect(productionEnvironmentResponse.body.annotations.length).to.be(1);
+        expect(productionEnvironmentResponse.body.annotations[0].text).to.be('1.4');
+
+        const missingEnvironmentsResponse = await request({
+          url: `/api/apm/services/${serviceName}/annotation/search?start=${range.start}&end=${range.end}&environment=ENVIRONMENT_NOT_DEFINED`,
+          method: 'GET',
+        });
+
+        expect(missingEnvironmentsResponse.body.annotations.length).to.be(1);
+        expect(missingEnvironmentsResponse.body.annotations[0].text).to.be('1.3');
       });
     });
   });

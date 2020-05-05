@@ -142,13 +142,9 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
     ])
   },
   handler: async ({ request, context }) => {
-    let annotationsClient: ScopedAnnotationsClient | undefined;
-
-    if (context.plugins.observability) {
-      annotationsClient = await context.plugins.observability.getScopedAnnotationsClient(
-        request
-      );
-    }
+    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
+      request
+    );
 
     if (!annotationsClient) {
       throw Boom.notFound();

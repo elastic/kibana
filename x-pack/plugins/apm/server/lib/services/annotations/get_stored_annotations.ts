@@ -5,15 +5,13 @@
  */
 
 import { APICaller } from 'kibana/server';
-import {
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT
-} from '../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { SetupTimeRange, Setup } from '../../helpers/setup_request';
+import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 
 export async function getStoredAnnotations({
   setup,
@@ -29,6 +27,8 @@ export async function getStoredAnnotations({
   annotationsClient: ScopedAnnotationsClient;
 }): Promise<Annotation[]> {
   try {
+    const environmentFilter = getEnvironmentUiFilterES(environment);
+
     const response: ESSearchResponse<ESAnnotation, any> = (await apiCaller(
       'search',
       {
@@ -49,9 +49,7 @@ export async function getStoredAnnotations({
                 { term: { 'annotation.type': 'deployment' } },
                 { term: { tags: 'apm' } },
                 { term: { [SERVICE_NAME]: serviceName } },
-                ...(environment
-                  ? [{ term: { [SERVICE_ENVIRONMENT]: environment } }]
-                  : [])
+                ...(environmentFilter ? [environmentFilter] : [])
               ]
             }
           }
