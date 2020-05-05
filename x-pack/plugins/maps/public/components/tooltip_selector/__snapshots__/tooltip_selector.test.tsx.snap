@@ -39,7 +39,7 @@ exports[`TooltipSelector should render component 1`] = `
           Object {
             "label": "foobar_label",
             "name": "iso2",
-            "type": "foobar_type",
+            "type": "string",
           },
         ]
       }

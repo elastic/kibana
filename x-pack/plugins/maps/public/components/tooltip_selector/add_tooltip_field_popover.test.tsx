@@ -18,15 +18,17 @@ const defaultProps = {
     },
     {
       name: 'prop2',
+      label: 'prop2',
       type: 'string',
     },
     {
       name: '@timestamp',
+      label: '@timestamp',
       type: 'date',
     },
   ],
   selectedFields: [],
-  onSelect: () => {},
+  onAdd: () => {},
 };
 
 test('Should render', () => {
@@ -39,7 +41,10 @@ test('Should remove selected fields from selectable', () => {
   const component = shallow(
     <AddTooltipFieldPopover
       {...defaultProps}
-      selectedFields={[{ name: 'prop2' }, { name: 'prop1' }]}
+      selectedFields={[
+        { name: 'prop2', label: 'prop2', type: 'string' },
+        { name: 'prop1', label: 'prop1', type: 'string' },
+      ]}
     />
   );
 
