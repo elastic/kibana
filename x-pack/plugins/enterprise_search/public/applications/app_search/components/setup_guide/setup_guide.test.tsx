@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPageSideBar, EuiTabbedContent } from '@elastic/eui';
+import { EuiPageSideBar, EuiSteps } from '@elastic/eui';
 
 import { SetupGuide } from './';
 
@@ -14,7 +14,7 @@ describe('SetupGuide', () => {
   it('renders', () => {
     const wrapper = shallow(<SetupGuide />);
 
-    expect(wrapper.find(EuiTabbedContent)).toHaveLength(1);
+    expect(wrapper.find(EuiSteps)).toHaveLength(1);
     expect(wrapper.find(EuiPageSideBar)).toHaveLength(1);
   });
 });
