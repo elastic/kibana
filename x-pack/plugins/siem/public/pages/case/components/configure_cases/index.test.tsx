@@ -119,13 +119,12 @@ describe('ConfigureCases', () => {
       ).toBeTruthy();
     });
 
-    test('it disables the update connector button when the connectorId is invalid', () => {
+    test('it hides the update connector button when the connectorId is invalid', () => {
       expect(
         wrapper
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
+          .exists()
+      ).toBeFalsy();
     });
   });
 
@@ -189,14 +188,6 @@ describe('ConfigureCases', () => {
       ).toBeFalsy();
     });
 
-    test('it disables the update connector button when loading the configuration', () => {
-      expect(
-        wrapper
-          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
-          .prop('disabled')
-      ).toBe(true);
-    });
-
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
         wrappingComponent: TestProviders,
@@ -242,7 +233,18 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       jest.restoreAllMocks();
       jest.clearAllMocks();
-      useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        mapping: connectors[1].config.casesConfiguration.mapping,
+        closureType: 'close-by-user',
+        connectorId: 'servicenow-2',
+        connectorName: 'unchanged',
+        currentConfiguration: {
+          connectorName: 'unchanged',
+          connectorId: 'servicenow-1',
+          closureType: 'close-by-user',
+        },
+      }));
       useConnectorsMock.mockImplementation(() => ({
         ...useConnectorsResponse,
         loading: true,
@@ -266,7 +268,7 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
     });
 
-    test('it disables the update connector button when loading the connectors', () => {
+    test('it hides the update connector button when loading the connectors', () => {
       expect(
         wrapper
           .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
@@ -275,18 +277,6 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables the buttons of action bar when loading connectors', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[1].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'servicenow-2',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-      }));
       const newWrapper = mount(<ConfigureCases userCanCrud />, {
         wrappingComponent: TestProviders,
       });
@@ -314,6 +304,7 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
+        connectorId: 'servicenow-1',
         persistLoading: true,
       }));
 
@@ -417,6 +408,32 @@ describe('ConfigureCases', () => {
           .first()
           .prop('isLoading')
       ).toBe(true);
+    });
+  });
+
+  describe('loading configuration', () => {
+    let wrapper: ReactWrapper;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        loading: true,
+      }));
+      useConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+      }));
+      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+      useGetUrlSearchMock.mockImplementation(() => searchURL);
+      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    });
+
+    test('it hides the update connector button when loading the configuration', () => {
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .exists()
+      ).toBeFalsy();
     });
   });
 
@@ -813,6 +830,31 @@ describe('ConfigureCases', () => {
       expect(
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
+    });
+
+    test('the text of the update button is changed successfully', () => {
+      useCaseConfigureMock
+        .mockImplementationOnce(() => ({
+          ...useCaseConfigureResponse,
+          connectorId: 'servicenow-1',
+        }))
+        .mockImplementation(() => ({
+          ...useCaseConfigureResponse,
+          connectorId: 'servicenow-2',
+        }));
+
+      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .text()
+      ).toBe('Update My Connector 2');
     });
   });
 });

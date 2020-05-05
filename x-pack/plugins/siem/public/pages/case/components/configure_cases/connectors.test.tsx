@@ -91,4 +91,16 @@ describe('Connectors', () => {
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');
   });
+
+  test('the text of the update button is shown correctly', () => {
+    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(
+      newWrapper
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+        .text()
+    ).toBe('Update My Connector');
+  });
 });
