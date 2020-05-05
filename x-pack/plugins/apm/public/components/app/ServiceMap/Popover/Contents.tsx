@@ -110,19 +110,23 @@ export function Contents({
 }: ContentsProps) {
   const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
 
+  // Anomaly Detection
   const severity = selectedNodeData.severity;
   const maxScore = selectedNodeData.max_score;
   const actualValue = selectedNodeData.actual_value;
   const typicalValue = selectedNodeData.typical_value;
-  const hasAnomalyDetectionData = [
+  const jobId = selectedNodeData.job_id;
+  const hasAnomalyDetection = [
     severity,
     maxScore,
     actualValue,
-    typicalValue
+    typicalValue,
+    jobId
   ].every(value => value !== undefined);
-  const anomalyDescription = hasAnomalyDetectionData
+  const anomalyDescription = hasAnomalyDetection
     ? getMetricChangeDescription(actualValue, typicalValue).message
     : null;
+
   return (
     <FlexColumnGroup
       direction="column"
@@ -135,7 +139,7 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {hasAnomalyDetectionData && (
+      {hasAnomalyDetection && (
         <FlexColumnItem>
           <section>
             <HealthStatusTitle size="xxs">
@@ -148,13 +152,7 @@ export function Contents({
             <EuiFlexGroup>
               <EuiFlexItem>
                 <VerticallyCentered>
-                  <EuiHealth
-                    color={
-                      (selectedNodeData.severity &&
-                        getSeverityColor(selectedNodeData.severity)) ||
-                      theme.euiColorLightShade
-                    }
-                  />
+                  <EuiHealth color={getSeverityColor(severity)} />
                   <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
                 </VerticallyCentered>
               </EuiFlexItem>
@@ -167,9 +165,7 @@ export function Contents({
             </EuiFlexGroup>
           </ContentLine>
           <ContentLine>
-            <MLJobLink jobId={selectedNodeData.job_id}>
-              {ANOMALY_DETECTION_LINK}
-            </MLJobLink>
+            <MLJobLink jobId={jobId}>{ANOMALY_DETECTION_LINK}</MLJobLink>
           </ContentLine>
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>
