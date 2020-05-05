@@ -66,6 +66,7 @@ export interface IndexPatternField {
   enabled?: boolean;
   script?: string;
   lang?: string;
+  readFromDocValues: boolean;
 }
 export enum IndexPatternType {
   logs = 'logs',
@@ -237,6 +238,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     searchable: field.searchable ?? true,
     aggregatable: field.aggregatable ?? true,
     doc_values: field.doc_values ?? true,
+    readFromDocValues: field.doc_values ?? true,
   };
 
   // if type exists, check if it exists in the map
@@ -254,6 +256,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.aggregatable = false;
     newField.analyzed = false;
     newField.doc_values = field.doc_values ?? false;
+    newField.readFromDocValues = field.doc_values ?? false;
     newField.indexed = false;
     newField.searchable = false;
   }
@@ -265,6 +268,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
       newField.aggregatable = false;
       newField.analyzed = false;
       newField.doc_values = false;
+      newField.readFromDocValues = false;
       newField.indexed = false;
       newField.searchable = false;
     }
@@ -279,6 +283,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.script = field.script;
     newField.lang = 'painless';
     newField.doc_values = false;
+    newField.readFromDocValues = false;
   }
 
   return newField;
