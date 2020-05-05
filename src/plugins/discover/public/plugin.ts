@@ -39,7 +39,7 @@ import { KibanaLegacySetup, AngularRenderedAppUpdater } from 'src/plugins/kibana
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
+import { SavedObjectLoader } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';

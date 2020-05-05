@@ -142,15 +142,14 @@ export class Vis {
           this.data.searchSource,
           this.data.savedSearchId
         );
+        this.data.indexPattern = this.data.searchSource.getField('index');
       }
     }
-    if (state.data && state.data.aggs) {
-      const configStates = this.initializeDefaultsFromSchemas(
-        cloneDeep(state.data.aggs),
-        this.type.schemas.all || []
-      );
+    if (state.data && (state.data.aggs || !this.data.aggs)) {
+      const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
+      const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
       if (!this.data.indexPattern) {
-        if (state.data.aggs.length) {
+        if (aggs.length) {
           throw new Error('trying to initialize aggs without index pattern');
         }
         return;

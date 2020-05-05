@@ -37,6 +37,7 @@ import {
   setAggs,
   setChrome,
   setOverlays,
+  setSavedSearchLoader,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -64,6 +65,7 @@ import {
   convertFromSerializedVis,
   convertToSerializedVis,
 } from './saved_visualizations/_saved_vis';
+import { createSavedSearchesLoader } from '../../discover/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -168,7 +170,14 @@ export class VisualizationsPlugin
       visualizationTypes: types,
     });
     setSavedVisualizationsLoader(savedVisualizationsLoader);
-
+    const savedSearchLoader = createSavedSearchesLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedSearchLoader(savedSearchLoader);
     return {
       ...types,
       showNewVisModal,

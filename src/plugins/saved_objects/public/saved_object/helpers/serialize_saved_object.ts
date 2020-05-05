@@ -48,6 +48,11 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
     references.push(...searchSourceReferences);
   }
 
+  if (savedObject.searchSourceFields) {
+    const searchSourceJSON = JSON.stringify(savedObject.searchSourceFields);
+    attributes.kibanaSavedObjectMeta = { searchSourceJSON };
+  }
+
   if (savedObject.unresolvedIndexPatternReference) {
     references.push(savedObject.unresolvedIndexPatternReference);
   }
