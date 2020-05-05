@@ -42,6 +42,7 @@ import {
   registerInstallScriptRoutes,
   registerOutputRoutes,
   registerSettingsRoutes,
+  registerAppRoutes,
 } from './routes';
 import { IngestManagerConfigType } from '../common';
 import {
@@ -168,6 +169,7 @@ export class IngestManagerPlugin
     registerOutputRoutes(router);
     registerSettingsRoutes(router);
     registerDataStreamRoutes(router);
+    registerAppRoutes(router);
 
     // Conditional routes
     if (config.epm.enabled) {
