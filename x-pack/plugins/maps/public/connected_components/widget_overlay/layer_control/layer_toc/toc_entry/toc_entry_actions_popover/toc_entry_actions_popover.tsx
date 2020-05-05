@@ -75,7 +75,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   _removeLayer() {
-    this.props.fitToBounds(this.props.layer.getId());
+    this.props.removeLayer(this.props.layer.getId());
   }
 
   _toggleVisible() {
