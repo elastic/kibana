@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './slide.css';
+import './slide.scss';
 
 import { TransitionStrings } from '../../../i18n';
 
