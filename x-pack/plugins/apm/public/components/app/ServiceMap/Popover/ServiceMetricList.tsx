@@ -48,7 +48,6 @@ export const ItemDescription = styled('td')`
 `;
 
 interface ServiceMetricListProps extends ServiceNodeMetrics {
-  frameworkName?: string;
   isLoading: boolean;
 }
 
@@ -58,7 +57,6 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
-  frameworkName,
   numInstances,
   isLoading
 }: ServiceMetricListProps) {
@@ -112,7 +110,7 @@ export function ServiceMetricList({
         : null
     }
   ];
-  const showBadgeRow = frameworkName || numInstances > 1;
+  const showBadgeRow = numInstances > 1;
 
   return isLoading ? (
     <LoadingSpinner />
@@ -121,7 +119,6 @@ export function ServiceMetricList({
       {showBadgeRow && (
         <BadgeRow>
           <EuiFlexGroup gutterSize="none">
-            {frameworkName && <EuiBadge>{frameworkName}</EuiBadge>}
             {numInstances > 1 && (
               <EuiBadge iconType="apps" color="hollow">
                 {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {

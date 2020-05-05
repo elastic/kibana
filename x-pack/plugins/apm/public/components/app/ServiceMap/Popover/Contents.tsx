@@ -17,13 +17,12 @@ import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import styled from 'styled-components';
-import { SERVICE_FRAMEWORK_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceMetricFetcher } from './ServiceMetricFetcher';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { getSeverityColor } from '../cytoscapeOptions';
-import { asDecimal } from '../../../../utils/formatters';
+import { asInteger } from '../../../../utils/formatters';
 import { getMetricChangeDescription } from '../../../../../../ml/public';
 
 const popoverMinWidth = 280;
@@ -98,7 +97,7 @@ const ANOMALY_DETECTION_SCORE_METRIC = i18n.translate(
 
 const ANOMALY_DETECTION_LINK = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverLink',
-  { defaultMessage: 'View in Anomaly Explorer' }
+  { defaultMessage: 'View anomalies' }
 );
 
 export function Contents({
@@ -108,8 +107,6 @@ export function Contents({
   onFocusClick,
   selectedNodeServiceName
 }: ContentsProps) {
-  const frameworkName = selectedNodeData[SERVICE_FRAMEWORK_NAME];
-
   // Anomaly Detection
   const severity = selectedNodeData.severity;
   const maxScore = selectedNodeData.max_score;
@@ -158,7 +155,7 @@ export function Contents({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <div>
-                  {asDecimal(maxScore)}
+                  {asInteger(maxScore)}
                   <SubduedText>&nbsp;({anomalyDescription})</SubduedText>
                 </div>
               </EuiFlexItem>
@@ -174,10 +171,7 @@ export function Contents({
       )}
       <FlexColumnItem>
         {isService ? (
-          <ServiceMetricFetcher
-            frameworkName={frameworkName}
-            serviceName={selectedNodeServiceName}
-          />
+          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
         ) : (
           <Info {...selectedNodeData} />
         )}
