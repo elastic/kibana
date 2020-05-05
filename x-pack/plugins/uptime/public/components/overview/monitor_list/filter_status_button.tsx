@@ -27,8 +27,8 @@ export const FilterStatusButton = ({
   color,
   withNext,
 }: FilterStatusButtonProps) => {
-  const setUrlParams = useUrlParams()[1];
-
+  const [getUrlParams, setUrlParams] = useUrlParams();
+  const { statusFilter: urlValue } = getUrlParams();
   return (
     <EuiFilterButton
       color={(isActive ? color : undefined) as any}
@@ -36,10 +36,7 @@ export const FilterStatusButton = ({
       hasActiveFilters={isActive}
       isDisabled={isDisabled}
       onClick={() => {
-        const nextFilter = {
-          statusFilter: value,
-          pagination: '',
-        };
+        const nextFilter = { statusFilter: urlValue === value ? '' : value, pagination: '' };
         setUrlParams(nextFilter);
       }}
       withNext={withNext}
