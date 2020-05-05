@@ -19,8 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
-import { Subscription } from 'rxjs';
-import { SavedObjectAttributes, ApplicationStart } from '../../../../core/public';
+import { first } from 'rxjs/operators';
+import { SavedObjectAttributes } from '../../../../core/public';
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
@@ -62,9 +62,6 @@ export class VisualizeEmbeddableFactory
     > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  public currentAppId: string | undefined = undefined;
-  public appIdSubscription: Subscription = {} as Subscription;
-
   public readonly savedObjectMetaData: SavedObjectMetaData<VisualizationAttributes> = {
     name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
     includeFields: ['visState'],
@@ -92,20 +89,7 @@ export class VisualizeEmbeddableFactory
     },
   };
 
-  constructor(
-    private readonly deps: VisualizeEmbeddableFactoryDeps,
-    getApplicationStart: () => Promise<ApplicationStart>
-  ) {
-    getApplicationStart().then((applicationStart: ApplicationStart) => {
-      if (applicationStart?.currentAppId$) {
-        this.appIdSubscription = applicationStart.currentAppId$.subscribe(
-          (newAppId: string | undefined) => {
-            this.currentAppId = newAppId;
-          }
-        );
-      }
-    });
-  }
+  constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}
 
   public async isEditable() {
     return getCapabilities().visualize.save as boolean;
@@ -115,6 +99,18 @@ export class VisualizeEmbeddableFactory
     return i18n.translate('visualizations.displayName', {
       defaultMessage: 'visualization',
     });
+  }
+
+  public async getCurrentAppId() {
+    let currentAppId = await this.deps
+      .start()
+      .core.application.currentAppId$.pipe(first())
+      .toPromise();
+    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
+    if (currentAppId === 'kibana') {
+      currentAppId += `:${window.location.hash.split(/[\/\?]/)[1]}`;
+    }
+    return currentAppId;
   }
 
   public async createFromSavedObject(
@@ -137,18 +133,10 @@ export class VisualizeEmbeddableFactory
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
-    let originatingAppParam = this.currentAppId;
-    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
-    if (originatingAppParam === 'kibana') {
-      originatingAppParam += `:${window.location.hash.split(/[\/\?]/)[1]}`;
-    }
+    const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
       editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
     });
     return undefined;
-  }
-
-  public unsubscribeSubscriptions() {
-    this.appIdSubscription.unsubscribe();
   }
 }
