@@ -22,7 +22,7 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { green, always } from '../utils';
 
-import { STATIC_SITE_URL_PROP_NAME, TOTALS_INDEX, COVERAGE_INDEX } from '../constants';
+import { STATIC_SITE_URL_PROP_NAME, COVERAGE_INDEX } from '../constants';
 
 const ROOT_DIR = resolve(__dirname, '../../../../..');
 const MOCKS_DIR = resolve(__dirname, './mocks');
@@ -55,51 +55,11 @@ describe('Ingesting Coverage to Cluster', () => {
     '--path',
   ];
 
-  const justTotalPath = 'jest-combined/coverage-summary-just-total.json';
   const noTotalsPath = 'jest-combined/coverage-summary-NO-total.json';
   const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
-  const moreThanOneKibanaInPath =
-    'jest-combined/coverage-summary-manual-mix-for-testing-kibana-path-error-dima-found.json';
 
   describe('with NODE_ENV set to "integration_test"', () => {
     describe(`and debug || verbose turned on`, () => {
-      describe(`to the [${TOTALS_INDEX}] index`, () => {
-        const mutableTotalsIndexLoggingChunks = [];
-        beforeAll(done => {
-          const ingestAndMutateAsync = ingestAndMutate(done);
-          const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(justTotalPath);
-          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
-
-          verboseIngestAndMutateAsyncWithPath(mutableTotalsIndexLoggingChunks);
-        });
-
-        it(`should say it's Just Logging when sending to the totals index: [${TOTALS_INDEX}]`, () => {
-          const filtered = mutableTotalsIndexLoggingChunks.filter(x =>
-            x.includes('debg ### Just Logging')
-          );
-          const justLoggingMsgsCount = filtered.length;
-
-          expect(justLoggingMsgsCount > 0).to.be(true);
-          expect(filtered.some(x => x.includes(TOTALS_INDEX)));
-        });
-
-        it(`should have a link to the index page for the specific test runner`, () => {
-          const totalsIndexRegexes = {
-            ...staticSiteUrlRegexes,
-            containsTestRunner: /jest-combined/,
-            endsInDotHtml: /.html$/,
-          };
-
-          const justUrl = text => x => x.split(text)[1].trim();
-
-          const splitFromText = justUrl('staticSiteUrl:');
-
-          siteUrlsSplitByNewLineWithoutBlanks(mutableTotalsIndexLoggingChunks)
-            .filter(x => x.includes('### staticSiteUrl'))
-            .map(splitFromText)
-            .forEach(expectAllRegexesToPass(totalsIndexRegexes));
-        });
-      });
       describe(`to the [${COVERAGE_INDEX}] index`, () => {
         const mutableCoverageIndexChunks = [];
 
@@ -169,12 +129,6 @@ describe('Ingesting Coverage to Cluster', () => {
             expect(portion).to.contain(sha);
             expect(portion).to.contain(`"f07b34f6206"`);
           });
-          it(`should have a url to the sha`, () => {
-            const vcsUrl = `"vcsUrl":`;
-            const portion = filteredWith(vcsUrl);
-            expect(portion).to.contain(vcsUrl);
-            expect(portion).to.contain(`"https://github.com/elastic/kibana/commit/f07b34f6206"`);
-          });
           it(`should have an author`, () => {
             const author = `"author":`;
             const portion = filteredWith(author);
@@ -186,50 +140,6 @@ describe('Ingesting Coverage to Cluster', () => {
             const portion = filteredWith(commitMsg);
             expect(portion).to.contain(commitMsg);
             expect(portion).to.contain(`"Lorem :) ipsum Tre' λ dolor sit amet, consectetur ..."`);
-          });
-        });
-      });
-      describe(`when 'kibana'`, () => {
-        const chunks = [];
-
-        const parseForCoveredFilePath = xs =>
-          xs
-            .filter(x => x.includes('coveredFilePath'))[0]
-            .split(',')
-            .filter(x => x.includes('coveredFilePath'))
-            .join('/')
-            .replace('"', '')
-            .replace('coveredFilePath":', '')
-            .trim()
-            .replace(/"/g, '');
-
-        let coveredFilePath;
-
-        beforeAll(done => {
-          const ingestAndMutateAsync = ingestAndMutate(done);
-          const ingestAndMutateMoreThanOneKibana = ingestAndMutateAsync(moreThanOneKibanaInPath);
-          const verboseIngestAndMutateAsyncWithPath = ingestAndMutateMoreThanOneKibana(verboseArgs);
-          verboseIngestAndMutateAsyncWithPath(chunks);
-        });
-
-        beforeAll(function loseRaceOfChunksArray() {
-          // This 'should' run after the first beforeAll()
-          coveredFilePath = parseForCoveredFilePath(chunks);
-        });
-
-        describe(`exists in the 'covered file path' more than once`, () => {
-          it(`should only truncate the first one`, () => {
-            expect(coveredFilePath).to.be(
-              'src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts'
-            );
-          });
-        });
-
-        describe(`exists in the 'static site url' more than once`, () => {
-          it(`should only truncate the first one`, () => {
-            expect(siteUrlsSplitByNewLineWithoutBlanks(chunks)[1]).to.contain(
-              'https://kibana-coverage.elastic.dev/2020-03-02T21:11:47Z/jest-combined/src/legacy/core_plugins/kibana/public/discover/get_inner_angular.ts.html'
-            );
           });
         });
       });
