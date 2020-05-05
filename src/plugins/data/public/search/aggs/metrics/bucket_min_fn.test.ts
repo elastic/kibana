@@ -37,17 +37,20 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customBucket": undefined,
+              "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
             },
             "schema": undefined,
             "type": "min_bucket",
           },
+          "customLabel": undefined,
           "customMetric": Object {
             "enabled": true,
             "id": undefined,
             "params": Object {
               "customBucket": undefined,
+              "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
             },

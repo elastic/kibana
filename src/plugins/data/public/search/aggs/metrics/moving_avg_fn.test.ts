@@ -36,6 +36,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "buckets_path": "the_sum",
+              "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": undefined,
@@ -64,6 +65,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "buckets_path": "the_sum",
+              "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": "sum",
@@ -86,11 +88,13 @@ describe('agg_expression_functions', () => {
       expect(actual.value.params).toMatchInlineSnapshot(`
         Object {
           "buckets_path": "the_sum",
+          "customLabel": undefined,
           "customMetric": Object {
             "enabled": true,
             "id": undefined,
             "params": Object {
               "buckets_path": "the_sum",
+              "customLabel": undefined,
               "customMetric": undefined,
               "json": undefined,
               "metricAgg": undefined,

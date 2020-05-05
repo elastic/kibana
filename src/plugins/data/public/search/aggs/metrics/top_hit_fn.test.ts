@@ -37,6 +37,7 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "aggregate": "min",
+              "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
               "size": undefined,
@@ -68,6 +69,7 @@ describe('agg_expression_functions', () => {
           "id": "1",
           "params": Object {
             "aggregate": "min",
+            "customLabel": undefined,
             "field": "machine.os.keyword",
             "json": undefined,
             "size": 6,

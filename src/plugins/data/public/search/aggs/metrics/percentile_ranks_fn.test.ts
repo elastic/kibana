@@ -35,6 +35,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
               "values": undefined,
@@ -58,6 +59,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
               "values": Array [

@@ -33,6 +33,7 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "json": undefined,
             },
             "schema": undefined,
