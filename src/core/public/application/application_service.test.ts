@@ -20,7 +20,7 @@
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
@@ -30,6 +30,7 @@ import { MockCapabilitiesService, MockHistory } from './application_service.test
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
+import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -452,9 +453,9 @@ describe('#setup()', () => {
     const container = setupDeps.context.createContextContainer.mock.results[0].value;
     const pluginId = Symbol();
 
-    const mount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, mount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', mount);
+    const appMount = () => () => undefined;
+    registerMountContext(pluginId, 'test' as any, appMount);
+    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
   });
 });
 
@@ -805,6 +806,74 @@ describe('#start()', () => {
           "beta",
           "gamma",
           "delta",
+        ]
+      `);
+    });
+
+    it('updates httpLoadingCount$ while mounting', async () => {
+      // Use a memory history so that mounting the component will work
+      const { createMemoryHistory } = jest.requireActual('history');
+      const history = createMemoryHistory();
+      setupDeps.history = history;
+
+      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      // Create an app and a promise that allows us to control when the app completes mounting
+      const createWaitingApp = (props: Partial<App>): [App, () => void] => {
+        let finishMount: () => void;
+        const mountPromise = new Promise(resolve => (finishMount = resolve));
+        const app = {
+          id: 'some-id',
+          title: 'some-title',
+          mount: async () => {
+            await mountPromise;
+            return () => undefined;
+          },
+          ...props,
+        };
+
+        return [app, finishMount!];
+      };
+
+      // Create some dummy applications
+      const { register } = service.setup(setupDeps);
+      const [alphaApp, finishAlphaMount] = createWaitingApp({ id: 'alpha' });
+      const [betaApp, finishBetaMount] = createWaitingApp({ id: 'beta' });
+      register(Symbol(), alphaApp);
+      register(Symbol(), betaApp);
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+      const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
+      const stop$ = new Subject();
+      const currentLoadingCount$ = new BehaviorSubject(0);
+      httpLoadingCount$.pipe(takeUntil(stop$)).subscribe(currentLoadingCount$);
+      const loadingPromise = httpLoadingCount$.pipe(bufferCount(5), takeUntil(stop$)).toPromise();
+      mount(getComponent()!);
+
+      await act(() => navigateToApp('alpha'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishAlphaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
+      await act(() => navigateToApp('beta'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishBetaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
+      stop$.next();
+      const loadingCounts = await loadingPromise;
+      expect(loadingCounts).toMatchInlineSnapshot(`
+        Array [
+          0,
+          1,
+          0,
+          1,
+          0,
         ]
       `);
     });

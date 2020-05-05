@@ -28,7 +28,7 @@ import {
   EuiHorizontalRule,
   EuiText,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -57,10 +57,12 @@ interface ActionAccordionFormProps {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +83,8 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  capabilities,
+  docLinks,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -106,10 +110,6 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
-        if (setHasActionsDisabled) {
-          setHasActionsDisabled(hasActionsDisabled);
-        }
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -129,7 +129,8 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingConnectors(true);
-        setConnectors(await loadConnectors({ http }));
+        const loadedConnectors = await loadConnectors({ http });
+        setConnectors(loadedConnectors);
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -145,6 +146,27 @@ export const ActionForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const setActionTypesAvalilability = () => {
+      const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
+      const hasActionsDisabled = actions.some(
+        action =>
+          !actionTypesIndex![action.actionTypeId].enabled &&
+          !checkActionFormActionTypeEnabled(
+            actionTypesIndex![action.actionTypeId],
+            preconfiguredConnectors
+          ).isEnabled
+      );
+      if (setHasActionsDisabled) {
+        setHasActionsDisabled(hasActionsDisabled);
+      }
+    };
+    if (connectors.length > 0 && actionTypesIndex) {
+      setActionTypesAvalilability();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectors, actionTypesIndex]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -538,14 +560,14 @@ export const ActionForm = ({
         );
 
         return (
-          <Fragment key={`keypad-${item.id}`}>
+          <EuiFlexItem grow={false} key={`keypad-${item.id}`}>
             {checkEnabledResult.isEnabled && keyPadItem}
             {checkEnabledResult.isEnabled === false && (
               <EuiToolTip position="top" content={checkEnabledResult.message}>
                 {keyPadItem}
               </EuiToolTip>
             )}
-          </Fragment>
+          </EuiFlexItem>
         );
       });
   }
@@ -638,7 +660,7 @@ export const ActionForm = ({
                 )}
               </EuiFlexGroup>
               <EuiSpacer />
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+              <EuiFlexGroup gutterSize="m" wrap>
                 {isLoadingActionTypes ? (
                   <SectionLoading>
                     <FormattedMessage
@@ -667,6 +689,8 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
           http={http}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

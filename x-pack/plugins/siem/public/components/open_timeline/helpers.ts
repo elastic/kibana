@@ -8,8 +8,8 @@ import ApolloClient from 'apollo-client';
 import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
 import uuid from 'uuid';
-
 import { Dispatch } from 'redux';
+
 import { oneTimelineQuery } from '../../containers/timeline/one/index.gql_query';
 import { TimelineResult, GetOneTimeline, NoteResult } from '../../graphql/types';
 import {
@@ -169,6 +169,8 @@ export const defaultTimelineToTimelineModel = (
     savedObjectId: duplicate ? null : timeline.savedObjectId,
     version: duplicate ? null : timeline.version,
     title: duplicate ? '' : timeline.title || '',
+    templateTimelineId: duplicate ? null : timeline.templateTimelineId,
+    templateTimelineVersion: duplicate ? null : timeline.templateTimelineVersion,
   }).reduce((acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc), {
     ...timelineDefaults,
     id: '',

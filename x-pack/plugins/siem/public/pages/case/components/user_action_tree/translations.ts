@@ -8,19 +8,17 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../case_view/translations';
 
-export const ALREADY_PUSHED_TO_SERVICE = i18n.translate(
-  'xpack.siem.case.caseView.alreadyPushedToService',
-  {
-    defaultMessage: 'Already pushed to Service Now incident',
-  }
-);
+export const ALREADY_PUSHED_TO_SERVICE = (externalService: string) =>
+  i18n.translate('xpack.siem.case.caseView.alreadyPushedToExternalService', {
+    values: { externalService },
+    defaultMessage: 'Already pushed to { externalService } incident',
+  });
 
-export const REQUIRED_UPDATE_TO_SERVICE = i18n.translate(
-  'xpack.siem.case.caseView.requiredUpdateToService',
-  {
-    defaultMessage: 'Requires update to ServiceNow incident',
-  }
-);
+export const REQUIRED_UPDATE_TO_SERVICE = (externalService: string) =>
+  i18n.translate('xpack.siem.case.caseView.requiredUpdateToExternalService', {
+    values: { externalService },
+    defaultMessage: 'Requires update to { externalService } incident',
+  });
 
 export const COPY_REFERENCE_LINK = i18n.translate('xpack.siem.case.caseView.copyCommentLinkAria', {
   defaultMessage: 'Copy reference link',

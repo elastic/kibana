@@ -27,7 +27,7 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
-import { dateHistogramInterval } from '../../../../common';
+import { dateHistogramInterval, TimeRange } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
@@ -35,6 +35,8 @@ import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { QuerySetup } from '../../../query/query_service';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+import { ExtendedBounds } from './lib/extended_bounds';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
@@ -67,6 +69,19 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
   return Boolean(agg.buckets);
 }
 
+export interface AggParamsDateHistogram extends BaseAggParams {
+  field?: string;
+  timeRange?: TimeRange;
+  useNormalizedEsInterval?: boolean;
+  scaleMetricValues?: boolean;
+  interval?: string;
+  time_zone?: string;
+  drop_partials?: boolean;
+  format?: string;
+  min_doc_count?: number;
+  extended_bounds?: ExtendedBounds;
+}
+
 export const getDateHistogramBucketAgg = ({
   uiSettings,
   query,
@@ -89,6 +104,7 @@ export const getDateHistogramBucketAgg = ({
         }
 
         const field = agg.getFieldDisplayName();
+
         return i18n.translate('data.search.aggs.buckets.dateHistogramLabel', {
           defaultMessage: '{fieldName} per {intervalDescription}',
           values: {
