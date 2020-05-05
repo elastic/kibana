@@ -41,6 +41,7 @@ export function decodeCloudId(
     // throw new Error(`Expected at least 3 parts in ${decoded}`);
     // eslint-disable-next-line no-console
     console.log(`Expected at least 3 parts in ${decoded}`);
+    return;
   }
   // 4. extract port from the ES and Kibana host
   const [host, defaultPort] = extractPortFromName(words[0]);
