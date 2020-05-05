@@ -91,8 +91,7 @@ export class EMSFileCreateSourceEditor extends Component<Props, State> {
             defaultMessage: 'Select EMS vector shapes',
           })}
           options={this.state.emsFileOptions}
-          // @ts-ignore
-          selectedOptions={this.state.selectedOption ? [this.state.selectedOption] : []}
+          selectedOptions={this.state.selectedOption ? [this.state.selectedOption!] : []}
           onChange={this._onChange}
           isClearable={false}
           singleSelection={true}

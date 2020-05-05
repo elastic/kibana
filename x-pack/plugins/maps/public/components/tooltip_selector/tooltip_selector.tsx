@@ -110,11 +110,10 @@ export class TooltipSelector extends Component<Props, State> {
     if (!this.state.fieldProps.length) {
       return propertyName;
     }
-    const prop = this.state.fieldProps.find((field: FieldProps) => {
+    const prop: FieldProps | undefined = this.state.fieldProps.find((field: FieldProps) => {
       return field.name === propertyName;
     });
-    // @ts-ignore
-    return prop ? prop.label : propertyName;
+    return prop ? prop!.label : propertyName;
   };
 
   _getTooltipFieldNames(): string[] {

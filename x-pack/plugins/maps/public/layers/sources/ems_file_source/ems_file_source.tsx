@@ -108,7 +108,6 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature: Feature, index: number) => {
-      // @ts-ignore
       feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
     });
 
