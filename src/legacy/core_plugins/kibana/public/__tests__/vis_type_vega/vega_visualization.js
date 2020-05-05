@@ -21,6 +21,9 @@ import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
+
+import 'leaflet/dist/leaflet.js';
+import 'leaflet-vega';
 // Will be replaced with new path when tests are moved
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createVegaVisualization } from '../../../../../../plugins/vis_type_vega/public/vega_visualization';
