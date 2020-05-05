@@ -180,7 +180,7 @@
     "https-proxy-agent": "^5.0.0",
     "inert": "^5.1.0",
     "joi": "^13.5.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-yaml": "3.13.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",

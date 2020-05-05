@@ -18,7 +18,7 @@
 
             <a ng-click="ui.changeTab(tab)">
               {{ tab.title }}
-              <i ng-hide='ui.validation.tabs[tab.index].valid' class='validation-error fa fa-exclamation-circle' />
+              <i ng-hide='ui.validation.tabs[tab.index].valid' class='validation-error fa fa-exclamation-circle'></i>
             </a>
           </li>
         </ul>
@@ -66,7 +66,7 @@
                 aria-labelledby="ml_aria_label_new_job_group"
                 aria-describedby="ml_aria_description_new_job_group"
                 job-groups='job.groups'
-                external-update-function='jobGroupsUpdateFunction' />
+                external-update-function='jobGroupsUpdateFunction'></ml-job-group-select>
               <div ng-hide="ui.validation.checks.groupIds.valid" class="validation-error">{{ ui.validation.tabs[0].checks.groupIds.message }}</div>
             </div>
 
@@ -75,7 +75,7 @@
                 class="kuiFormLabel"
                 i18n-id="xpack.ml.newJob.advanced.jobDetails.customUrlsLabel"
                 i18n-default-message="Custom URLs"
-              ></label><i ml-info-icon="new_job_custom_urls" />
+              ></label><i ml-info-icon="new_job_custom_urls"></i>
               <div class="euiSpacer euiSpacer--s"></div>
               <div ng-if="job.custom_settings && job.custom_settings.custom_urls">
                 <div ng-repeat="item in job.custom_settings.custom_urls track by $index" class="custom-url">
@@ -118,7 +118,7 @@
                     tooltip-append-to-body="true"
                     type="button"
                     class="kuiButton kuiButton--danger kuiButton--small remove-button">
-                      <i aria-hidden="true" class="fa fa-times" />
+                      <i aria-hidden="true" class="fa fa-times"></i>
                   </button>
                 </div>
               </div>
@@ -129,7 +129,7 @@
                   ng-click="addCustomUrl()"
                   type="button"
                   class="kuiButton kuiButton--primary kuiButton--small">
-                  <i aria-hidden="true" class="fa fa-plus" />
+                  <i aria-hidden="true" class="fa fa-plus"></i>
                   <span
                     id="ml_aria_label_new_job_custom_urls"
                     i18n-id="xpack.ml.newJob.advanced.jobDetails.addCustomUrlButtonLabel"
@@ -154,7 +154,7 @@
                     i18n-id="xpack.ml.newJob.advanced.jobDetails.useDedicatedIndexLabel"
                     i18n-default-message="Use dedicated index"
                   ></span>
-                  <i ml-info-icon="new_job_dedicated_index" />
+                  <i ml-info-icon="new_job_dedicated_index"></i>
                 </span>
               </label>
             </div>
@@ -223,7 +223,7 @@
                 i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.categorizationFiltersLabel"
                 i18n-default-message="Categorization Filters"
               ></label>
-              <i ml-info-icon="new_job_categorizationfilters" />
+              <i ml-info-icon="new_job_categorizationfilters"></i>
               <div class="euiSpacer euiSpacer--s"></div>
               <div ng-if="job.analysis_config && job.analysis_config.categorization_filters">
                 <div ng-repeat="item in job.analysis_config.categorization_filters track by $index" class="categorization-filter">
@@ -244,7 +244,7 @@
                     tooltip-append-to-body="true"
                     type="button"
                     class="kuiButton kuiButton--danger kuiButton--small remove-button">
-                      <i aria-hidden="true" class="fa fa-times" />
+                      <i aria-hidden="true" class="fa fa-times"></i>
                   </button>
                 </div>
               </div>
@@ -255,7 +255,7 @@
                   type="button"
                   ng-disabled="job.analysis_config.categorization_field_name === undefined || job.analysis_config.categorization_field_name === ''"
                   class="kuiButton kuiButton--primary kuiButton--small">
-                  <i aria-hidden="true" class="fa fa-plus" />
+                  <i aria-hidden="true" class="fa fa-plus"></i>
                   <span
                     id="ml_aria_label_add_categorization_filter"
                     i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.addCategorizationFilterButtonLabel"
@@ -275,7 +275,7 @@
               i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.detectorsLabel"
               i18n-default-message="Detectors"
             ></label>
-            <i ml-info-icon="new_job_detectors" />
+            <i ml-info-icon="new_job_detectors"></i>
 
             <div class="euiSpacer euiSpacer--s"></div>
 
@@ -299,7 +299,7 @@
               i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.influencersLabel"
               i18n-default-message="Influencers"
             ></label>
-            <i ml-info-icon="new_job_influencers" />
+            <i ml-info-icon="new_job_influencers"></i>
             <div class="influencer-list-container">
 
               <div ng-repeat="inf in ui.allInfluencers()" >
@@ -323,7 +323,7 @@
                   class="kuiButton kuiButton--primary kuiButton--small"
                   i18n-id="xpack.ml.newJob.advanced.analysisConfiguration.addLabel"
                   i18n-default-message="{icon} Add"
-                  i18n-values="{ html_icon: '<i aria-hidden=\'true\' class=\'fa fa-plus\' />' }"
+                  i18n-values="{ html_icon: '<i aria-hidden=\'true\' class=\'fa fa-plus\'></i>' }"
                 ></button>
               </div>
             </div>
@@ -346,7 +346,7 @@
                   <span id="ml_aria_label_new_job_enable_model_plot">
                     {{ ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.RUNNING ? validatingCardinalityLabel : enableModelPlotLabel }}
                   </span>
-                  <i ml-info-icon="new_job_enable_model_plot" />
+                  <i ml-info-icon="new_job_enable_model_plot"></i>
                 </span>
               </label>
               <div class='ml-new-job-callout kuiVerticalRhythm'>
@@ -387,7 +387,7 @@
                   aria-describedby="ml_aria_description_new_job_delimiter"
                   ng-model="ui.selectedFieldDelimiter"
                   ng-options="item.value as item.title for item in ui.fieldDelimiterOptions"
-                  class="form-control" />
+                  class="form-control"></select>
               </div>
               <div class="form-group">
                 <input
@@ -469,7 +469,7 @@
                   i18n-id="xpack.ml.newJob.advanced.datafeed.datafeedJobLabel"
                   i18n-default-message="Datafeed job"
                 ></span>
-                <i ml-info-icon="new_job_enable_datafeed_job" />
+                <i ml-info-icon="new_job_enable_datafeed_job"></i>
               </span>
             </label>
             <div class="euiSpacer euiSpacer--s"></div>
@@ -616,7 +616,7 @@
             <ml-loading-indicator
               label="{{ ::'xpack.ml.newJob.advanced.dataPreview.loadingDataPreviewLabel' | i18n: {defaultMessage: 'Loading data preview'} }}"
               is-loading="(ui.dataPreview === '')"
-            />
+            ></ml-loading-indicator>
             <div ng-hide="(ui.dataPreview === '')">
               <div
                 id="datafeed-preview"
@@ -648,7 +648,7 @@
               is-current-job-config="isCurrentJobConfig"
               is-disabled="(saveLock === true)"
               ng-show="jobState === JOB_STATE.NOT_STARTED"
-            />
+            ></ml-validate-job>
           </div>
           <div class="euiFlexItem euiFlexItem--flexGrowZero">
             <button

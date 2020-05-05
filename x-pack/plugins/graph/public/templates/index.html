@@ -37,7 +37,7 @@
         >
           <svg class="gphNode" width="30" height="30" ng-click="clickVertexFieldIcon(f, $event)" ng-class="{'gphNode-disabled':f.hopSize<=0}">
             <circle class="gphNode__circle" r="13" cx="15" cy="15" ng-class="{selectedNode:kbnTopNav.currentKey === 'fieldConfig'&&f === selectedFieldConfig}"
-              ng-attr-style="fill:{{f.color}}" />
+              ng-attr-style="fill:{{f.color}}"></circle>
             <text ng-if="f.icon" class="gphNode__text fa" text-anchor="middle" x="15" y="20">
               {{f.icon.code}}
             </text>
@@ -243,11 +243,11 @@
         <g>
           <line ng-repeat="edge in workspace.edges" class="edge" ng-attr-x1="{{edge.topSrc.kx}}" ng-attr-y1="{{edge.topSrc.ky}}"
             ng-attr-x2="{{edge.topTarget.kx}}" ng-attr-y2="{{edge.topTarget.ky}}" ng-click="clickEdge(edge)" ng-class="{'selectedEdge':edge.isSelected, 'inferredEdge':edge.inferred}"
-            ng-attr-style="stroke-width:{{edge.width}}px" stroke-linecap="round" />
+            ng-attr-style="stroke-width:{{edge.width}}px" stroke-linecap="round"></line>
         </g>
         <g ng-repeat="n in workspace.nodes" ng-if="!n.parent">
           <circle class="gphNode__circle" ng-attr-r="{{n.scaledSize}}" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}" ng-click="nodeClick(n, $event)"
-            ng-class="{selectedNode:n.isSelected}" ng-attr-style="fill:{{n.color}}" />
+            ng-class="{selectedNode:n.isSelected}" ng-attr-style="fill:{{n.color}}"></circle>
           <text class="fa gphNode__text gphNode__text--lowOpacity" transform="translate(0,5)" text-anchor="middle" ng-attr-x="{{n.kx}}"
             ng-attr-y="{{n.ky}}" ng-if="n.icon" ng-click="nodeClick(n, $event)">{{n.icon.code}}</text>
 
@@ -269,7 +269,7 @@
 
           <g ng-if="n.numChildren>0">
             <circle r="5" class="gphNode__markerCircle" transform="translate(10,10)" ng-attr-cx="{{n.kx}}" ng-attr-cy="{{n.ky}}"
-              ng-click="nodeClick(n, $event)" />
+              ng-click="nodeClick(n, $event)"></circle>
             <text class="gphNode__markerText" text-anchor="middle" transform="translate(10,12)" ng-attr-x="{{n.kx}}"
               ng-attr-y="{{n.ky}}" ng-click="nodeClick(n, $event)">{{n.numChildren}}
             </text>
@@ -421,7 +421,7 @@
             ng-click="selectSelected(n)">
             <svg width="24" height="24">
               <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{n.color}}"
-                ng-click="workspace.deselectNode(n)" />
+                ng-click="workspace.deselectNode(n)"></circle>
 
               <text ng-if="n.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="17" ng-click="workspace.deselectNode(n)">{{n.icon.code}}</text>
             </svg>
@@ -613,7 +613,7 @@
                 <span class="kui fa-chevron-circle-down"></span>
               </button>
               <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}" />
+                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topSrc.color}}"></circle>
 
                 <text ng-if="detail.inferredEdge.topSrc.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topSrc.icon.code}}</text>
               </svg>
@@ -631,7 +631,7 @@
               </button>
 
               <svg width="24" height="24">
-                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}" />
+                <circle class="gphNode__circle " r="10" cx="12" cy="12" ng-attr-style="fill:{{detail.inferredEdge.topTarget.color}}"></circle>
 
                 <text ng-if="detail.inferredEdge.topTarget.icon" class="fa gphNode__text" text-anchor="middle" x="12" y="16">{{detail.inferredEdge.topTarget.icon.code}}</text>
               </svg>
