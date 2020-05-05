@@ -12218,7 +12218,6 @@
     "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "{reportObjectType}「{reportObjectTitle}」のレポートが作成されました",
     "xpack.reporting.registerFeature.reportingDescription": "ディスカバリ、可視化、ダッシュボードから生成されたレポートを管理します。",
     "xpack.reporting.registerFeature.reportingTitle": "レポート",
-    "xpack.reporting.screencapture.asyncTook": "{description} にかかった時間は {took}ms でした",
     "xpack.reporting.screencapture.couldntFinishRendering": "{count} 件のビジュアライゼーションのレンダリングが完了するのを待つ間にエラーが発生しました。「{configKey}」を増やす必要があるかもしれません。 {error}",
     "xpack.reporting.screencapture.couldntLoadKibana": "Kibana URL を開こうとするときにエラーが発生しました。「{configKey}」を増やす必要があるかもしれません。 {error}",
     "xpack.reporting.screencapture.injectCss": "Kibana CSS をレポート用に更新しようとしたときにエラーが発生しました。{error}",
