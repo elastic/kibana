@@ -52,7 +52,7 @@ export const HeroImage = memo(() => {
       ? toAssets('illustration_integrations_darkmode.svg')
       : toAssets('illustration_integrations_lightmode.svg'),
   }))`
-    margin-bottom: -60px;
+    margin-bottom: -68px;
     width: 80%;
   `;
 

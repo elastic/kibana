@@ -48,7 +48,7 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-vsphere.html',
       },
     }),
-    // euiIconType: 'logoVSphere',
+    euiIconType: '/plugins/home/assets/logos/vsphere.svg',
     isBeta: true,
     artifacts: {
       application: {
@@ -63,7 +63,6 @@ export function vSphereMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    // previewImagePath: '/plugins/kibana/home/tutorial_resources/vsphere_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
