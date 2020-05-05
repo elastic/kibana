@@ -14,7 +14,6 @@ import { esKuery, IIndexPattern } from '../../../../../../../../src/plugins/data
 interface Props {
   derivedIndexPattern: IIndexPattern;
   onSubmit: (query: string) => void;
-  onChange?: (query: string) => void;
   value?: string | null;
   placeholder?: string;
 }
@@ -31,7 +30,6 @@ function validateQuery(query: string) {
 export const MetricsExplorerKueryBar = ({
   derivedIndexPattern,
   onSubmit,
-  onChange,
   value,
   placeholder,
 }: Props) => {
@@ -48,9 +46,6 @@ export const MetricsExplorerKueryBar = ({
   const handleChange = (query: string) => {
     setValidation(validateQuery(query));
     setDraftQuery(query);
-    if (onChange) {
-      onChange(query);
-    }
   };
 
   const filteredDerivedIndexPattern = {
