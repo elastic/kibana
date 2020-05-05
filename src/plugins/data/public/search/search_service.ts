@@ -40,16 +40,9 @@ import { SearchInterceptor } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
-  AggType,
   AggTypesRegistry,
-  AggConfig,
   AggConfigs,
-  FieldParamType,
   getCalculateAutoTimeExpression,
-  MetricAggType,
-  aggTypeFieldFilters,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
 } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
@@ -158,13 +151,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const legacySearch = {
       esClient: this.esClient!,
-      AggConfig,
-      AggType,
-      aggTypeFieldFilters,
-      FieldParamType,
-      MetricAggType,
-      parentPipelineAggHelper,
-      siblingPipelineAggHelper,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {

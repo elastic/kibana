@@ -18,7 +18,7 @@
  */
 
 import { CoreStart, SavedObjectReference } from 'kibana/public';
-import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
+import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
@@ -91,5 +91,5 @@ export interface ISearchStart {
     startSession: () => void;
     clearSession: () => void;
   };
-  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
+  __LEGACY: ISearchStartLegacy;
 }

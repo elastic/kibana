@@ -5,22 +5,35 @@
  */
 
 import { ValidationIndicesError } from '../../../../../common/http_api';
+import { DatasetFilter } from '../../../../../common/log_analysis';
+
+export { ValidationIndicesError };
 
 export type ValidationIndicesUIError =
   | ValidationIndicesError
   | { error: 'NETWORK_ERROR' }
   | { error: 'TOO_FEW_SELECTED_INDICES' };
 
-interface ValidIndex {
+interface ValidAvailableIndex {
   validity: 'valid';
   name: string;
   isSelected: boolean;
+  availableDatasets: string[];
+  datasetFilter: DatasetFilter;
 }
 
-interface InvalidIndex {
+interface InvalidAvailableIndex {
   validity: 'invalid';
   name: string;
   errors: ValidationIndicesError[];
 }
 
-export type ValidatedIndex = ValidIndex | InvalidIndex;
+interface UnvalidatedAvailableIndex {
+  validity: 'unknown';
+  name: string;
+}
+
+export type AvailableIndex =
+  | ValidAvailableIndex
+  | InvalidAvailableIndex
+  | UnvalidatedAvailableIndex;
