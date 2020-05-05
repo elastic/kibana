@@ -5,19 +5,21 @@
  */
 
 import React from 'react';
-import { getUserAction } from '../../../../containers/case/mock';
+import { basicPush, getUserAction } from '../../../../containers/case/mock';
 import { getLabelTitle } from './helpers';
 import * as i18n from '../case_view/translations';
 import { mount } from 'enzyme';
+import { connectorsMock } from '../../../../containers/case/configure/mock';
 
 describe('User action tree helpers', () => {
+  const connectors = connectorsMock;
   it('label title generated for update tags', () => {
     const action = getUserAction(['title'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'tags',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -39,9 +41,9 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['title'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'title',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(
@@ -54,9 +56,9 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['description'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'description',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
@@ -65,9 +67,9 @@ describe('User action tree helpers', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'status',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.REOPENED_CASE.toLowerCase()} ${i18n.CASE}`);
@@ -76,9 +78,9 @@ describe('User action tree helpers', () => {
     const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'status',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.CLOSED_CASE.toLowerCase()} ${i18n.CASE}`);
@@ -87,9 +89,9 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['comment'], 'update');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'comment',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: false,
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`);
@@ -98,9 +100,9 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'pushed',
-      firstIndexPushToService: 0,
-      index: 0,
+      firstPush: true,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -109,7 +111,7 @@ describe('User action tree helpers', () => {
         .find(`[data-test-subj="pushed-label"]`)
         .first()
         .text()
-    ).toEqual(i18n.PUSHED_NEW_INCIDENT);
+    ).toEqual(`${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`);
     expect(
       wrapper
         .find(`[data-test-subj="pushed-value"]`)
@@ -121,9 +123,9 @@ describe('User action tree helpers', () => {
     const action = getUserAction(['pushed'], 'push-to-service');
     const result: string | JSX.Element = getLabelTitle({
       action,
+      connectors,
       field: 'pushed',
-      firstIndexPushToService: 0,
-      index: 1,
+      firstPush: false,
     });
 
     const wrapper = mount(<>{result}</>);
@@ -132,12 +134,36 @@ describe('User action tree helpers', () => {
         .find(`[data-test-subj="pushed-label"]`)
         .first()
         .text()
-    ).toEqual(i18n.UPDATE_INCIDENT);
+    ).toEqual(`${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`);
     expect(
       wrapper
         .find(`[data-test-subj="pushed-value"]`)
         .first()
         .prop('href')
     ).toEqual(JSON.parse(action.newValue).external_url);
+  });
+  it('label title generated for update connector', () => {
+    const action = getUserAction(['connector_id'], 'update');
+    const result: string | JSX.Element = getLabelTitle({
+      action,
+      connectors,
+      field: 'tags',
+      firstPush: false,
+    });
+
+    const wrapper = mount(<>{result}</>);
+    expect(
+      wrapper
+        .find(`[data-test-subj="ua-tags-label"]`)
+        .first()
+        .text()
+    ).toEqual(` ${i18n.TAGS.toLowerCase()}`);
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="ua-tag"]`)
+        .first()
+        .text()
+    ).toEqual(action.newValue);
   });
 });
