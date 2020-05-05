@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/without_babel_regster');
+require('../src/setup_node_env/prebuilt_dev_only_entry');
 require('@kbn/dev-utils/target/precommit_hook/cli');
