@@ -128,12 +128,11 @@ export const importTimelinesRoute = (
                       timelineType,
                       version = null,
                     } = parsedTimeline;
+                    const isHandlingTemplateTimeline = timelineType === TimelineType.template;
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
-                    console.log('parsedTimeline', JSON.stringify(parsedTimeline));
-                    console.log('parsedTimelineObject', JSON.stringify(parsedTimelineObject));
                     let newTimeline = null;
                     try {
                       const templateTimeline =
@@ -144,7 +143,6 @@ export const importTimelinesRoute = (
                       const timeline =
                         savedObjectId != null &&
                         (await getTimeline(frameworkRequest, savedObjectId));
-                      const isHandlingTemplateTimeline = timelineType === TimelineType.template;
 
                       if (
                         (timeline == null && !isHandlingTemplateTimeline) ||
@@ -157,7 +155,9 @@ export const importTimelinesRoute = (
                           null, // timelineSavedObjectId
                           null, // timelineVersion
                           pinnedEventIds,
-                          [...globalNotes, ...eventNotes],
+                          isHandlingTemplateTimeline
+                            ? globalNotes
+                            : [...globalNotes, ...eventNotes],
                           [] // existing note ids
                         );
 

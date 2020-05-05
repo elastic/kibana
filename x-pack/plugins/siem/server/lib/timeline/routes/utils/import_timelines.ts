@@ -87,6 +87,10 @@ export const isBulkError = (
   return has('error', importRuleResponse);
 };
 
+/**
+ * This fields do not exists in savedObject mapping, but exist in Users' import,
+ * exclude them here to avoid creating savedObject failure
+ */
 export const timelineSavedObjectOmittedFields = [
   'globalNotes',
   'eventNotes',
