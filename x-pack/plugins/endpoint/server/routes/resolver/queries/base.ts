@@ -5,46 +5,29 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
 import { ResolverEvent } from '../../../../common/types';
-import {
-  paginate,
-  paginatedResults,
-  PaginationParams,
-  PaginatedResults,
-} from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
-export abstract class ResolverQuery {
-  constructor(
-    private readonly indexPattern: string,
-    private readonly endpointID?: string,
-    private readonly pagination?: PaginationParams
-  ) {}
+export interface Query {
+  build(ids: string | string[]): JsonObject;
+}
 
-  protected paginateBy(tiebreaker: string, aggregator: string) {
-    return (query: JsonObject) => {
-      if (!this.pagination) {
-        return query;
-      }
-      return paginate(this.pagination, tiebreaker, aggregator, query);
-    };
+export abstract class ResolverQuery<T> implements Query {
+  constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
+
+  private static createIdsArray(ids: string | string[]): string[] {
+    return Array.isArray(ids) ? ids : [ids];
   }
 
-  build(...ids: string[]) {
+  // todo make this specific to `search` and add a new method that returns the `msearch` style
+  // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
+  build(ids: string | string[]) {
+    const idsArray = ResolverQuery.createIdsArray(ids);
     if (this.endpointID) {
-      return this.legacyQuery(this.endpointID, ids, legacyEventIndexPattern);
+      return this.legacyQuery(this.endpointID, idsArray, legacyEventIndexPattern);
     }
-    return this.query(ids, this.indexPattern);
-  }
-
-  async search(client: IScopedClusterClient, ...ids: string[]) {
-    return this.postSearch(await client.callAsCurrentUser('search', this.build(...ids)));
-  }
-
-  protected postSearch(response: SearchResponse<ResolverEvent>): PaginatedResults {
-    return paginatedResults(response);
+    return this.query(idsArray, this.indexPattern);
   }
 
   protected abstract legacyQuery(
@@ -53,4 +36,6 @@ export abstract class ResolverQuery {
     index: string
   ): JsonObject;
   protected abstract query(entityIDs: string[], index: string): JsonObject;
+
+  public abstract formatResults(response: SearchResponse<ResolverEvent>): T;
 }

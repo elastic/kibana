@@ -3,11 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { SearchResponse } from 'elasticsearch';
+import { ResolverEvent } from '../../../../common/types';
 import { ResolverQuery } from './base';
+import { TotalsAggregation, TotalsResult } from './totals_aggs';
+import { PaginationParams } from '../utils/pagination';
 
-export class ChildrenQuery extends ResolverQuery {
+export class ChildrenQuery extends ResolverQuery<TotalsResult> {
+  private readonly totalsAggs: TotalsAggregation;
+  constructor(
+    indexPattern: string,
+    private readonly pagination: PaginationParams,
+    endpointID?: string
+  ) {
+    super(indexPattern, endpointID);
+    this.totalsAggs = new TotalsAggregation(this.pagination);
+  }
+
   protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
-    const paginator = this.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
+    const paginator = this.totalsAggs.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
     return {
       body: paginator({
         query: {
@@ -46,7 +60,7 @@ export class ChildrenQuery extends ResolverQuery {
   }
 
   protected query(entityIDs: string[], index: string) {
-    const paginator = this.paginateBy('event.id', 'process.parent.entity_id');
+    const paginator = this.totalsAggs.paginateBy('event.id', 'process.parent.entity_id');
     return {
       body: paginator({
         query: {
@@ -70,5 +84,9 @@ export class ChildrenQuery extends ResolverQuery {
       }),
       index,
     };
+  }
+
+  formatResults(response: SearchResponse<ResolverEvent>): TotalsResult {
+    return this.totalsAggs.formatResults(response);
   }
 }
