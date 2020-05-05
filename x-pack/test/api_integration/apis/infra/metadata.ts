@@ -12,6 +12,18 @@ import {
 } from '../../../../plugins/infra/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { DATES } from './constants';
+
+const timeRange700 = {
+  from: DATES['7.0.0'].hosts.min,
+  to: DATES[`7.0.0`].hosts.max,
+};
+
+const timeRange660 = {
+  from: DATES['6.6.0'].docker.min,
+  to: DATES[`6.6.0`].docker.max,
+};
+
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -236,40 +248,6 @@ export default function({ getService }: FtrProviderContext) {
                 containerized: false,
               },
             });
-          } else {
-            throw new Error('Metadata should never be empty');
-          }
-        });
-      });
-      describe('APM metrics', () => {
-        const archiveName = 'infra/8.0.0/metrics_and_apm';
-        before(() => esArchiver.load(archiveName));
-        after(() => esArchiver.unload(archiveName));
-
-        it('host without APM data', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'gke-observability-8--observability-8--bc1afd95-f0zc',
-            nodeType: 'host',
-          });
-          if (metadata) {
-            expect(
-              metadata.features.some(f => f.name === 'apm.transaction' && f.source === 'apm')
-            ).to.be(false);
-          } else {
-            throw new Error('Metadata should never be empty');
-          }
-        });
-        it('pod with APM data', async () => {
-          const metadata = await fetchMetadata({
-            sourceId: 'default',
-            nodeId: 'c1031331-9ae0-11e9-9a96-42010a84004d',
-            nodeType: 'pod',
-          });
-          if (metadata) {
-            expect(
-              metadata.features.some(f => f.name === 'apm.transaction' && f.source === 'apm')
-            ).to.be(true);
           } else {
             throw new Error('Metadata should never be empty');
           }
