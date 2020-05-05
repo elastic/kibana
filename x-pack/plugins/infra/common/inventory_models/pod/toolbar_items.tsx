@@ -10,15 +10,14 @@ import { ToolbarProps } from '../../../public/pages/metrics/inventory_view/compo
 import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
-export const podMetricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'rx', 'tx'];
-export const podGroupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
-
 export const PodToolbarItems = (props: ToolbarProps) => {
+  const metricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'rx', 'tx'];
+  const groupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
   return (
     <MetricsAndGroupByToolbarItems
       {...props}
-      metricTypes={podMetricTypes}
-      groupByFields={podGroupByFields}
+      metricTypes={metricTypes}
+      groupByFields={groupByFields}
     />
   );
 };

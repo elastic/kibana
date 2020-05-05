@@ -12,6 +12,7 @@ import {
 } from 'src/core/server';
 import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
@@ -57,6 +58,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
+      observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
       security?: SecurityPluginSetup;
     }
@@ -114,6 +116,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       config$: mergedConfig$,
       logger: this.logger!,
       plugins: {
+        observability: plugins.observability,
         security: plugins.security
       }
     });
