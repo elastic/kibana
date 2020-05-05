@@ -56,7 +56,7 @@ describe('read_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should accept an undefined for "id", "list_id", value"', () => {
+  test('it should accept an undefined for "id", "list_id", "value"', () => {
     const payload = getReadListItemSchemaMock();
     delete payload.id;
     delete payload.value;
@@ -81,10 +81,10 @@ describe('read_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should accept an undefined for "id", value"', () => {
+  test('it should accept an undefined for "id", "value"', () => {
     const payload = getReadListItemSchemaMock();
     delete payload.id;
-    delete payload.list_id;
+    delete payload.value;
     const decoded = readListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
@@ -93,7 +93,7 @@ describe('read_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should accept an undefined for "list_id", value"', () => {
+  test('it should accept an undefined for "list_id", "value"', () => {
     const payload = getReadListItemSchemaMock();
     delete payload.value;
     delete payload.list_id;
