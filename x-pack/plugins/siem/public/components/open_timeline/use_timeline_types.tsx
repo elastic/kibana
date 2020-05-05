@@ -17,13 +17,13 @@ import * as i18n from './translations';
 import { TimelineTabsStyle, TimelineTab } from './types';
 
 export const useTimelineTypes = (): {
-  timelineTypes: TimelineTypeLiteralWithNull;
+  timelineType: TimelineTypeLiteralWithNull;
   timelineTabs: JSX.Element;
   timelineFilters: JSX.Element;
 } => {
   const urlSearch = useGetUrlSearch(navTabs.timelines);
   const { tabName } = useParams<{ pageName: string; tabName: string }>();
-  const [timelineTypes, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
+  const [timelineType, setTimelineTypes] = useState<TimelineTypeLiteralWithNull>(
     tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
   );
 
@@ -52,13 +52,13 @@ export const useTimelineTypes = (): {
 
   const onFilterClicked = useCallback(
     (timelineTabsStyle, tabId) => {
-      if (timelineTabsStyle === TimelineTabsStyle.filter && tabId === timelineTypes) {
+      if (timelineTabsStyle === TimelineTabsStyle.filter && tabId === timelineType) {
         setTimelineTypes(null);
       } else {
         setTimelineTypes(tabId);
       }
     },
-    [timelineTypes, setTimelineTypes]
+    [timelineType, setTimelineTypes]
   );
 
   const timelineTabs = useMemo(() => {
@@ -87,7 +87,7 @@ export const useTimelineTypes = (): {
       <>
         {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
           <EuiFilterButton
-            hasActiveFilters={tab.id === timelineTypes}
+            hasActiveFilters={tab.id === timelineType}
             key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
             onClick={onFilterClicked.bind(null, TimelineTabsStyle.filter, tab.id)}
           >
@@ -96,10 +96,10 @@ export const useTimelineTypes = (): {
         ))}
       </>
     );
-  }, [timelineTypes]);
+  }, [timelineType]);
 
   return {
-    timelineTypes,
+    timelineType,
     timelineTabs,
     timelineFilters,
   };

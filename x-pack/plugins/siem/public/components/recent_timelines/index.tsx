@@ -76,7 +76,7 @@ const StatefulRecentTimelinesComponent = React.memo<Props>(
           sortOrder: Direction.desc,
         },
         onlyUserFavorite: filterBy === 'favorites',
-        timelineTypes: null,
+        timelineType: null,
       });
     }, [filterBy]);
 

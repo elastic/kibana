@@ -53,7 +53,7 @@ export const createTimelineResolvers = (
         args.pageInfo || null,
         args.search || null,
         args.sort || null,
-        args.timelineTypes || null
+        args.timelineType || null
       );
     },
   },

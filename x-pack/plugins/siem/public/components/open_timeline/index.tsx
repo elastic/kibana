@@ -105,7 +105,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { timelineTypes, timelineTabs, timelineFilters } = useTimelineTypes();
+    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes();
     const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
 
     const refetch = useCallback(() => {
@@ -117,9 +117,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         search,
         sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
         onlyUserFavorite: onlyFavorites,
-        timelineTypes,
+        timelineType,
       });
-    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
+    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {

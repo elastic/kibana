@@ -31,7 +31,7 @@ jest.mock('../../../containers/timeline/all', () => {
 jest.mock('../use_timeline_types', () => {
   return {
     useTimelineTypes: jest.fn().mockReturnValue({
-      timelineTypes: 'default',
+      timelineType: 'default',
       timelineTabs: <div />,
       timelineFilters: <div />,
     }),

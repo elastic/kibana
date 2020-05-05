@@ -30,7 +30,7 @@ export interface AllTimelinesArgs {
     pageInfo,
     search,
     sort,
-    timelineTypes,
+    timelineType,
   }: AllTimelinesVariables) => void;
   timelines: OpenTimelineResult[];
   loading: boolean;
@@ -42,7 +42,7 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  timelineTypes: TimelineTypeLiteralWithNull;
+  timelineType: TimelineTypeLiteralWithNull;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -94,7 +94,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   });
 
   const fetchAllTimeline = useCallback(
-    async ({ onlyUserFavorite, pageInfo, search, sort, timelineTypes }: AllTimelinesVariables) => {
+    async ({ onlyUserFavorite, pageInfo, search, sort, timelineType }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -111,7 +111,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               pageInfo,
               search,
               sort,
-              timelineTypes,
+              timelineType,
             };
             const response = await apolloClient.query<
               GetAllTimeline.Query,

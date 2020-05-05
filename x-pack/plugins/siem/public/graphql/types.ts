@@ -2236,7 +2236,7 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 
-  timelineTypes?: Maybe<string>;
+  timelineType?: Maybe<string>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4014,7 +4014,7 @@ export namespace GetAllTimeline {
     search?: Maybe<string>;
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
-    timelineTypes?: Maybe<string>;
+    timelineType?: Maybe<string>;
   };
 
   export type Query = {

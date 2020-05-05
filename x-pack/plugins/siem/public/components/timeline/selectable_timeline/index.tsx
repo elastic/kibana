@@ -73,7 +73,7 @@ const TIMELINE_ITEM_HEIGHT = 50;
 export interface GetSelectableOptions {
   timelines: OpenTimelineResult[];
   onlyFavorites: boolean;
-  timelineTypes?: TimelineTypeLiteralWithNull;
+  timelineType?: TimelineTypeLiteralWithNull;
   searchTimelineValue: string;
 }
 
@@ -82,7 +82,7 @@ interface SelectableTimelineProps {
   getSelectableOptions: ({
     timelines,
     onlyFavorites,
-    timelineTypes,
+    timelineType,
     searchTimelineValue,
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
@@ -232,7 +232,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
-      timelineTypes: TimelineType.default,
+      timelineType: TimelineType.default,
     });
   }, [onlyFavorites, pageSize, searchTimelineValue]);
 
@@ -270,7 +270,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
           timelines,
           onlyFavorites,
           searchTimelineValue,
-          timelineTypes: TimelineType.default,
+          timelineType: TimelineType.default,
         })}
       >
         {(list, search) => (

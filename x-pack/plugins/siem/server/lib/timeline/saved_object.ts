@@ -48,7 +48,7 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineTypes: string | null
+    timelineType: string | null
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (
@@ -97,13 +97,13 @@ export const getTimelineByTemplateTimelineId = async (
 
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
-const getTimelineTypeFilter = (timelineTypes: string | null) => {
-  if (timelineTypes === TimelineType.template) {
+const getTimelineTypeFilter = (timelineType: string | null) => {
+  if (timelineType === TimelineType.template) {
     /** Show only whose timelineType is "template" */
     return `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
   }
 
-  if (timelineTypes === TimelineType.default) {
+  if (timelineType === TimelineType.default) {
     /** Show me every timeline whose timelineType is not "template".
      * which includes timelineType === 'default' and
      * those timelineType doesn't exists */
@@ -119,7 +119,7 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline | null,
   search: string | null,
   sort: SortTimeline | null,
-  timelineTypes: string | null
+  timelineType: string | null
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -129,7 +129,7 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineTypes),
+    filter: getTimelineTypeFilter(timelineType),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
