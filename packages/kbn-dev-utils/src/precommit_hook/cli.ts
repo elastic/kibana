@@ -23,7 +23,7 @@ import { promisify } from 'util';
 
 import { run } from '../run';
 import { REPO_ROOT } from '../repo_root';
-import { SCRIPT_SOURCE } from './script_soruce';
+import { SCRIPT_SOURCE } from './script_source';
 import { getGitDir } from './get_git_dir';
 
 const chmodAsync = promisify(chmod);
