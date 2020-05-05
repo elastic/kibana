@@ -12,22 +12,41 @@ export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
     defaultMessage: 'To send cases to external systems, you need to:',
   }
 );
+export const PUSH_THIRD = (thirdParty: string) => {
+  if (thirdParty === 'none') {
+    return i18n.translate('xpack.siem.case.caseView.pushThirdPartyIncident', {
+      defaultMessage: 'Push as third party incident',
+    });
+  }
+  return i18n.translate('xpack.siem.case.caseView.pushNamedIncident', {
+    values: { thirdParty },
+    defaultMessage: 'Push as { thirdParty } incident',
+  });
+};
 
-export const PUSH_SERVICENOW = i18n.translate('xpack.siem.case.caseView.pushAsServicenowIncident', {
-  defaultMessage: 'Push as ServiceNow incident',
-});
+export const UPDATE_THIRD = (thirdParty: string) => {
+  if (thirdParty === 'none') {
+    return i18n.translate('xpack.siem.case.caseView.updateThirdPartyIncident', {
+      defaultMessage: 'Update third party incident',
+    });
+  }
+  return i18n.translate('xpack.siem.case.caseView.updateNamedIncident', {
+    values: { thirdParty },
+    defaultMessage: 'Update { thirdParty } incident',
+  });
+};
 
-export const UPDATE_PUSH_SERVICENOW = i18n.translate(
-  'xpack.siem.case.caseView.updatePushAsServicenowIncident',
+export const PUSH_DISABLE_BY_NO_CONFIG_TITLE = i18n.translate(
+  'xpack.siem.case.caseView.pushToServiceDisableByNoConfigTitle',
   {
-    defaultMessage: 'Update ServiceNow incident',
+    defaultMessage: 'Configure external connector',
   }
 );
 
 export const PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigTitle',
   {
-    defaultMessage: 'Configure external connector',
+    defaultMessage: 'Select external connector',
   }
 );
 

@@ -14,45 +14,32 @@ import {
 } from '@elastic/eui';
 
 import { capitalize } from 'lodash/fp';
-import * as i18n from './translations';
+
 import {
   CaseField,
   ActionType,
   ThirdPartyField,
 } from '../../../../containers/case/configure/types';
+import { AllThirdPartyFields } from '../../../../lib/connectors/types';
 
 export interface RowProps {
+  id: string;
   disabled: boolean;
   siemField: CaseField;
-  thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>>;
+  thirdPartyOptions: Array<EuiSuperSelectOption<AllThirdPartyFields>>;
+  actionTypeOptions: Array<EuiSuperSelectOption<ActionType>>;
   onChangeActionType: (caseField: CaseField, newActionType: ActionType) => void;
   onChangeThirdParty: (caseField: CaseField, newThirdPartyField: ThirdPartyField) => void;
   selectedActionType: ActionType;
   selectedThirdParty: ThirdPartyField;
 }
 
-const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
-  {
-    value: 'nothing',
-    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_NOTHING}</>,
-    'data-test-subj': 'edit-update-option-nothing',
-  },
-  {
-    value: 'overwrite',
-    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_OVERWRITE}</>,
-    'data-test-subj': 'edit-update-option-overwrite',
-  },
-  {
-    value: 'append',
-    inputDisplay: <>{i18n.FIELD_MAPPING_EDIT_APPEND}</>,
-    'data-test-subj': 'edit-update-option-append',
-  },
-];
-
 const FieldMappingRowComponent: React.FC<RowProps> = ({
+  id,
   disabled,
   siemField,
   thirdPartyOptions,
+  actionTypeOptions,
   onChangeActionType,
   onChangeThirdParty,
   selectedActionType,
@@ -77,7 +64,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={thirdPartyOptions}
           valueOfSelected={selectedThirdParty}
           onChange={onChangeThirdParty.bind(null, siemField)}
-          data-test-subj={'case-configure-third-party-select'}
+          data-test-subj={`case-configure-third-party-select-${id}`}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -86,7 +73,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
           options={actionTypeOptions}
           valueOfSelected={selectedActionType}
           onChange={onChangeActionType.bind(null, siemField)}
-          data-test-subj={'case-configure-action-type-select'}
+          data-test-subj={`case-configure-action-type-select-${id}`}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

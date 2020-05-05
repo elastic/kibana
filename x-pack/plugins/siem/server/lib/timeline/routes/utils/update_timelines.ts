@@ -14,8 +14,7 @@ export const NO_MATCH_VERSION_ERROR_MESSAGE =
   'TimelineVersion conflict: The given version doesn not match with existing timeline';
 export const NO_MATCH_ID_ERROR_MESSAGE =
   "Timeline id doesn't match with existing template timeline";
-export const OLDER_VERSION_ERROR_MESSAGE =
-  'Template timelineVersion conflict: The given version is older then existing version';
+export const TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE = 'Template timelineVersion conflict';
 
 export const checkIsFailureCases = (
   isHandlingTemplateTimeline: boolean,
@@ -68,11 +67,11 @@ export const checkIsFailureCases = (
     templateTimelineVersion != null &&
     existTemplateTimeline != null &&
     existTemplateTimeline.templateTimelineVersion != null &&
-    existTemplateTimeline.templateTimelineVersion >= templateTimelineVersion
+    existTemplateTimeline.templateTimelineVersion !== templateTimelineVersion
   ) {
     // Throw error you can not update a template timeline version with an old version
     return {
-      body: OLDER_VERSION_ERROR_MESSAGE,
+      body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
       statusCode: 409,
     };
   } else {
