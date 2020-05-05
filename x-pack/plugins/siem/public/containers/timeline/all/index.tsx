@@ -35,7 +35,6 @@ export interface AllTimelinesArgs {
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
-  refetch: (existingTimelines?: OpenTimelineResult[], existingTotalCount?: number) => void;
 }
 
 export interface AllTimelinesVariables {
@@ -86,12 +85,10 @@ export const getAllTimeline = memoizeOne(
 export const useGetAllTimeline = (): AllTimelinesArgs => {
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
-  const refetch = useRef<inputsModel.Refetch>();
   const [, dispatchToaster] = useStateToaster();
   const [allTimelines, setAllTimelines] = useState<AllTimelinesArgs>({
     fetchAllTimeline: noop,
     loading: false,
-    refetch: refetch.current ?? noop,
     totalCount: 0,
     timelines: [],
   });
@@ -101,16 +98,11 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
-      const fetchData = async (
-        existingTimelines?: OpenTimelineResult[],
-        existingTotalCount?: number
-      ) => {
+      const fetchData = async () => {
         try {
           if (apolloClient != null) {
             setAllTimelines({
               ...allTimelines,
-              timelines: existingTimelines ?? allTimelines.timelines,
-              totalCount: existingTotalCount ?? allTimelines.totalCount,
               loading: true,
             });
 
@@ -142,15 +134,13 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                   inputId: 'global',
                   id: ALL_TIMELINE_QUERY_ID,
                   loading: false,
-                  refetch: refetch?.current?.bind(null, timelines, totalCount) ?? noop,
+                  refetch: fetchData,
                   inspect: null,
                 })
               );
-
               setAllTimelines({
                 fetchAllTimeline,
                 loading: false,
-                refetch: refetch?.current?.bind(null, timelines, totalCount) ?? noop,
                 totalCount,
                 timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
               });
@@ -166,21 +156,19 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             setAllTimelines({
               fetchAllTimeline,
               loading: false,
-              refetch: noop,
               totalCount: 0,
               timelines: [],
             });
           }
         }
       };
-      refetch.current = fetchData;
       fetchData();
       return () => {
         didCancel = true;
         abortCtrl.abort();
       };
     },
-    [apolloClient, allTimelines, refetch]
+    [apolloClient, allTimelines]
   );
 
   useEffect(() => {
@@ -192,6 +180,5 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   return {
     ...allTimelines,
     fetchAllTimeline,
-    refetch: refetch.current ?? noop,
   };
 };

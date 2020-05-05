@@ -106,7 +106,20 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
     const { timelineTypes, timelineTabs, timelineFilters } = useTimelineTypes();
-    const { fetchAllTimeline, timelines, loading, totalCount, refetch } = useGetAllTimeline();
+    const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
+
+    const refetch = useCallback(() => {
+      fetchAllTimeline({
+        pageInfo: {
+          pageIndex: pageIndex + 1,
+          pageSize,
+        },
+        search,
+        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
+        onlyUserFavorite: onlyFavorites,
+        timelineTypes,
+      });
+    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -139,8 +152,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
-        const existingTimelines = [...timelines];
-        const existingTimelinesCount = totalCount;
         if (timelineIds.includes(timeline.savedObjectId || '')) {
           createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
         }
@@ -153,9 +164,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           fetchPolicy: 'no-cache',
           variables: { id: timelineIds },
         });
-        refetch(existingTimelines, existingTimelinesCount);
+        refetch();
       },
-      [apolloClient, createNewTimeline, refetch, timeline, timelines, totalCount]
+      [apolloClient, createNewTimeline, refetch, timeline]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(
@@ -235,17 +246,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     useEffect(() => {
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        search,
-        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
-        onlyUserFavorite: onlyFavorites,
-        timelineTypes,
-      });
-    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineTypes, onlyFavorites]);
+      refetch();
+    }, [refetch]);
 
     return !isModal ? (
       <OpenTimeline
