@@ -17,7 +17,7 @@ interface UsageStats {
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI' as any);
+  const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
 
   describe('reporting usage', () => {
     before(() => reportingAPI.deleteAllReportingIndexes());
