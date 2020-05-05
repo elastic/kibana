@@ -21,10 +21,26 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { TransformPivotConfig } from '../../../../common';
+import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { getErrorMessage } from '../../../../../shared_imports';
+
+import {
+  refreshTransformList$,
+  TransformPivotConfig,
+  REFRESH_TRANSFORM_LIST_STATE,
+} from '../../../../common';
+import { ToastNotificationText } from '../../../../components';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+
+import { useApi } from '../../../../hooks/use_api';
 
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
+import {
+  applyFormFieldsToTransformConfig,
+  useEditTransformFlyout,
+} from './use_edit_transform_flyout';
 
 interface EditTransformFlyoutProps {
   closeFlyout: () => void;
@@ -32,9 +48,37 @@ interface EditTransformFlyoutProps {
 }
 
 export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout, config }) => {
-  // When the transform is updated, a series of validations occur to ensure its success. You can use the defer_validation parameter to skip these checks.
+  const { overlays } = useAppDependencies();
+  const api = useApi();
+  const toastNotifications = useToastNotifications();
 
-  // All updated properties except description do not take effect until after the transform starts the next checkpoint. This is so there is consistency with the pivoted data in each checkpoint.',
+  const [state, dispatch] = useEditTransformFlyout(config);
+
+  async function submitFormHandler() {
+    const requestConfig = applyFormFieldsToTransformConfig(config, state.formFields);
+    const transformId = config.id;
+
+    try {
+      await api.updateTransform(transformId, requestConfig);
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.transform.transformList.updateTransformSuccessMessage', {
+          defaultMessage: 'Transform {transformId} updated.',
+          values: { transformId },
+        })
+      );
+      closeFlyout();
+      refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
+    } catch (e) {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
+          defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
+        }),
+        text: toMountPoint(<ToastNotificationText overlays={overlays} text={getErrorMessage(e)} />),
+      });
+    }
+  }
+
+  const isUpdateButtonDisabled = !state.isFormValid || !state.isFormTouched;
 
   return (
     <EuiOverlayMask>
@@ -52,19 +96,19 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody banner={<EditTransformFlyoutCallout />}>
-          <EditTransformFlyoutForm config={config} />
+          <EditTransformFlyoutForm editTransformFlyout={[state, dispatch]} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                {i18n.translate('xpack.transform.transformList.editFlyoutCloseButtonText', {
-                  defaultMessage: 'Close',
+                {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
+                  defaultMessage: 'Cancel',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={closeFlyout} fill>
+              <EuiButton onClick={submitFormHandler} fill isDisabled={isUpdateButtonDisabled}>
                 {i18n.translate('xpack.transform.transformList.editFlyoutUpdateButtonText', {
                   defaultMessage: 'Update',
                 })}
