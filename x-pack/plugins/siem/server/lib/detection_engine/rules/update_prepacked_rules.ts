@@ -5,14 +5,12 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { ActionsClient } from '../../../../../actions/server';
 import { AlertsClient } from '../../../../../alerting/server';
 import { patchRules } from './patch_rules';
 import { PrepackagedRules } from '../types';
 
 export const updatePrepackagedRules = async (
   alertsClient: AlertsClient,
-  actionsClient: ActionsClient,
   savedObjectsClient: SavedObjectsClientContract,
   rules: PrepackagedRules[],
   outputIndex: string
@@ -48,7 +46,6 @@ export const updatePrepackagedRules = async (
     // or enable rules on the user when they were not expecting it if a rule updates
     return patchRules({
       alertsClient,
-      actionsClient,
       description,
       falsePositives,
       from,
