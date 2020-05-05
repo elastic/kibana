@@ -1,7 +1,7 @@
 {
   "id": "auditbeat_process_docker_ecs",
   "title": "Auditbeat docker processes",
-  "description": "Detect unusual processes in docker containers from auditd data (ECS)",
+  "description": "Detect unusual processes in docker containers from auditd data (ECS).",
   "type": "Auditbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*",
