@@ -214,7 +214,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
         const theText = await testSubjects.getVisibleText('tab-scriptedFields');
-        return theText.replace(/\((.*)\)/, '$1');
+        return theText.split(' ')[1].replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -430,7 +430,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      await testSubjects.click('tab-indexedFields');
     }
 
     async clickScriptedFieldsTab() {
