@@ -8,7 +8,6 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { getKibanaFrameworkAdapter } from '../lib/adapters/framework/new_platform_adapter';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
@@ -56,6 +55,10 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
       title: PLUGIN.TITLE,
       async mount(params: AppMountParameters) {
         const [coreStart, corePlugins] = await core.getStartServices();
+        const { getKibanaFrameworkAdapter } = await import(
+          '../lib/adapters/framework/new_platform_adapter'
+        );
+
         const { element } = params;
         const libs: UMFrontendLibs = {
           framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
