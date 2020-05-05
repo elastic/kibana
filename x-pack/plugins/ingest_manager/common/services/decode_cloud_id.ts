@@ -20,7 +20,7 @@ export function decodeCloudId(
   if (!id) {
     // throw new Error(`Unable to decode ${id}`);
     // eslint-disable-next-line no-console
-    console.log(`Unable to decode ${id}`);
+    console.debug(`Unable to decode ${id}`);
     return;
   }
 
@@ -31,7 +31,7 @@ export function decodeCloudId(
   } catch {
     // throw new Error(`base64 decoding failed on ${id}`);
     // eslint-disable-next-line no-console
-    console.log(`base64 decoding failed on ${id}`);
+    console.debug(`base64 decoding failed on ${id}`);
     return;
   }
 
@@ -40,7 +40,7 @@ export function decodeCloudId(
   if (words.length < 3) {
     // throw new Error(`Expected at least 3 parts in ${decoded}`);
     // eslint-disable-next-line no-console
-    console.log(`Expected at least 3 parts in ${decoded}`);
+    console.debug(`Expected at least 3 parts in ${decoded}`);
     return;
   }
   // 4. extract port from the ES and Kibana host
