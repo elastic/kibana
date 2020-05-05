@@ -18,6 +18,7 @@ export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
       triggers_actions_ui: { actionTypeRegistry, alertTypeRegistry },
       uiSettings,
       docLinks,
+      application: { capabilities },
     },
   } = useKibana();
 
@@ -32,6 +33,7 @@ export const UptimeAlertsContextProvider: React.FC = ({ children }) => {
         http,
         toastNotifications: notifications?.toasts,
         uiSettings,
+        capabilities,
       }}
     >
       {children}

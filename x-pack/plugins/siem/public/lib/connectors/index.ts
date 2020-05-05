@@ -5,3 +5,4 @@
  */
 
 export { getActionType as serviceNowActionType } from './servicenow';
+export { getActionType as jiraActionType } from './jira';

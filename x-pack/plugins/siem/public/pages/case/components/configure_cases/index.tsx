@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useState, Dispatch, SetStateAction, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -32,6 +32,8 @@ import { ActionConnectorTableItem } from '../../../../../../triggers_actions_ui/
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
 import { CCMapsCombinedActionAttributes } from '../../../../containers/case/configure/types';
+import { connectorsConfiguration } from '../../../../lib/connectors/config';
+
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
 import { Mapping } from '../configure_cases/mapping';
@@ -54,16 +56,7 @@ const FormWrapper = styled.div`
   `}
 `;
 
-const actionTypes: ActionType[] = [
-  {
-    id: '.servicenow',
-    name: 'ServiceNow',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'platinum',
-  },
-];
+const actionTypes: ActionType[] = Object.values(connectorsConfiguration);
 
 interface ConfigureCasesComponentProps {
   userCanCrud: boolean;
@@ -71,7 +64,7 @@ interface ConfigureCasesComponentProps {
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
-  const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+  const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -207,6 +200,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     currentConfiguration.closureType,
   ]);
 
+  const connectorActionTypeId = useMemo(
+    () => connectors.find(c => c.id === connectorId)?.actionTypeId ?? '.none',
+    [connectorId, connectors]
+  );
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -243,6 +241,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           disabled
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
+          connectorActionTypeId={connectorActionTypeId}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}
         />
@@ -298,6 +297,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
           reloadConnectors,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout

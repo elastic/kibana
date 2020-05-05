@@ -11,7 +11,7 @@ import { RouteMethod, RouteConfig } from '../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { APMPluginContract } from '../../../../../../plugins/apm/server';
+import { APMPluginSetup } from '../../../../../../plugins/apm/server';
 import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
 import { PluginSetupContract as AlertingPluginContract } from '../../../../../../plugins/alerting/server';
 
@@ -22,7 +22,7 @@ export interface InfraServerPluginDeps {
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
-  apm: APMPluginContract;
+  apm: APMPluginSetup;
   alerting: AlertingPluginContract;
 }
 
