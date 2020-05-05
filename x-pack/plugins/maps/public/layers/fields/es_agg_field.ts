@@ -125,8 +125,8 @@ export class ESAggField implements IESAggField {
     return this._esDocField ? this._esDocField.getOrdinalFieldMetaRequest() : null;
   }
 
-  async getCategoricalFieldMetaRequest(): Promise<unknown> {
-    return this._esDocField ? this._esDocField.getCategoricalFieldMetaRequest() : null;
+  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+    return this._esDocField ? this._esDocField.getCategoricalFieldMetaRequest(size) : null;
   }
 }
 

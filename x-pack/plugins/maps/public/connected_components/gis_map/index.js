@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { GisMap } from './view';
+import { GisMap as UnconnectedGisMap } from './view';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
@@ -42,5 +42,6 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(GisMap);
-export { connectedGisMap as GisMap };
+const connectedGisMap = connect(mapStateToProps, mapDispatchToProps)(UnconnectedGisMap);
+export { connectedGisMap as GisMap }; // GisMap is pulled in by name by the Maps-app itself
+export default connectedGisMap; //lazy-loading in the embeddable requires default export

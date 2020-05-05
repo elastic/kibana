@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './space_card.scss';
 import { EuiCard } from '@elastic/eui';
 import React from 'react';
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';

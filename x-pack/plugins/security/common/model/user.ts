@@ -12,6 +12,8 @@ export interface User {
   enabled: boolean;
   metadata?: {
     _reserved: boolean;
+    _deprecated?: boolean;
+    _deprecated_reason?: string;
   };
 }
 
