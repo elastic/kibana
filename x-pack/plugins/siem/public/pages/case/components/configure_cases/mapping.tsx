@@ -24,6 +24,7 @@ export interface MappingProps {
   disabled: boolean;
   updateConnectorDisabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
+  connectorActionTypeId: string;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
   setEditFlyoutVisibility: () => void;
 }
@@ -39,6 +40,7 @@ const MappingComponent: React.FC<MappingProps> = ({
   mapping,
   onChangeMapping,
   setEditFlyoutVisibility,
+  connectorActionTypeId,
 }) => {
   return (
     <EuiDescribedFormGroup
@@ -62,6 +64,7 @@ const MappingComponent: React.FC<MappingProps> = ({
       </EuiFormRow>
       <FieldMapping
         disabled={disabled}
+        connectorActionTypeId={connectorActionTypeId}
         mapping={mapping}
         onChangeMapping={onChangeMapping}
         data-test-subj="case-mapping-field"

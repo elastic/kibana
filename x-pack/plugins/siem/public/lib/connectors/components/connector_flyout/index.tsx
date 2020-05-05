@@ -13,14 +13,16 @@ import { isEmpty, get } from 'lodash/fp';
 import { ActionConnectorFieldsProps } from '../../../../../../triggers_actions_ui/public/types';
 import { FieldMapping } from '../../../../pages/case/components/configure_cases/field_mapping';
 
-import { defaultMapping } from '../../config';
 import { CasesConfigurationMapping } from '../../../../containers/case/configure/types';
 
 import * as i18n from '../../translations';
 import { ActionConnector, ConnectorFlyoutHOCProps } from '../../types';
+import { createDefaultMapping } from '../../utils';
+import { connectorsConfiguration } from '../../config';
 
 export const withConnectorFlyout = <T extends ActionConnector>({
   ConnectorFormComponent,
+  connectorActionTypeId,
   secretKeys = [],
   configKeys = [],
 }: ConnectorFlyoutHOCProps<T>) => {
@@ -56,7 +58,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
     if (isEmpty(mapping)) {
       editActionConfig('casesConfiguration', {
         ...action.config.casesConfiguration,
-        mapping: defaultMapping,
+        mapping: createDefaultMapping(connectorsConfiguration[connectorActionTypeId].fields),
       });
     }
 
@@ -135,6 +137,7 @@ export const withConnectorFlyout = <T extends ActionConnector>({
           <EuiFlexItem>
             <FieldMapping
               disabled={true}
+              connectorActionTypeId={connectorActionTypeId}
               mapping={mapping as CasesConfigurationMapping[]}
               onChangeMapping={handleOnChangeMappingConfig}
             />
