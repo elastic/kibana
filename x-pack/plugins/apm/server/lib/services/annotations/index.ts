@@ -49,20 +49,21 @@ export async function getServiceAnnotations({
     });
   }
 
-  const [derivedAnnotations, storedAnnotations] = await Promise.all([
-    getDerivedServiceAnnotations({
-      setup,
-      serviceName,
-      environment
-    }),
-    getStoredAnnotations()
-  ]);
+  // start fetching derived annotations, but don't wait on it
+  // it will likely be significantly slower than the stored annotations
+  const derivedAnnotationsPromise = getDerivedServiceAnnotations({
+    setup,
+    serviceName,
+    environment
+  });
+
+  const storedAnnotations = await getStoredAnnotations();
 
   if (storedAnnotations.length) {
     return { annotations: storedAnnotations };
   }
 
   return {
-    annotations: derivedAnnotations
+    annotations: await derivedAnnotationsPromise
   };
 }
