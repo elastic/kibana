@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { FieldFormat } from '../../../../../../../../plugins/data/public';
+import { FieldFormat } from '../../../../../../../../data/public';
 
 import { DateNanosFormatEditor } from './date_nanos';
 

@@ -27,7 +27,7 @@ import {
   EuiTitle,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
   indexPattern: IIndexPattern;

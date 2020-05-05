@@ -30,9 +30,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
-
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
 
 const filterHeader = i18n.translate(
   'indexPatternManagement.editIndexPattern.source.table.filterHeader',

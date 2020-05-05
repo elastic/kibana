@@ -21,11 +21,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { HttpStart } from 'src/core/public';
 // eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../../../core/public/doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '../../../../../../../core/public/doc_links/doc_links_service.mock';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
-import { IndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../data/public';
 
 import { ExecuteScript } from '../../types';
 
@@ -47,8 +47,7 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
-        getHttpStart={() => (({} as unknown) as HttpStart)}
-        // docLinksScriptedFields={docLinksScriptedFields}
+        http={({} as unknown) as HttpStart}
         docLinksScriptedFields={{} as typeof docLinksScriptedFields}
       />
     );
@@ -64,7 +63,7 @@ describe('ScriptingHelpFlyout', () => {
         lang="painless"
         executeScript={((() => {}) as unknown) as ExecuteScript}
         onClose={() => {}}
-        getHttpStart={() => (({} as unknown) as HttpStart)}
+        http={({} as unknown) as HttpStart}
         docLinksScriptedFields={{} as typeof docLinksScriptedFields}
       />
     );

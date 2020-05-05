@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table } from './table';
 

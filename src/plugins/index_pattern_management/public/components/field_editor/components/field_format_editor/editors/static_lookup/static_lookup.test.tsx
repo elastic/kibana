@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '../../../../../../../../test_utils/public/enzyme_helpers';
+import { shallowWithI18nProvider } from '../../../../../../../../../test_utils/public/enzyme_helpers';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
-import { FieldFormat } from '../../../../../../../../plugins/data/public';
+import { FieldFormat } from '../../../../../../../../data/public';
 
 import { StaticLookupFormatEditor } from './static_lookup';
 

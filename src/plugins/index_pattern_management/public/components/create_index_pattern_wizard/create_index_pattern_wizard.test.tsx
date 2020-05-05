@@ -21,11 +21,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
-import { coreMock } from '../../../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../../../../plugins/data/public/mocks';
-import { IndexPatternCreationConfig } from '../../../../../../../../plugins/index_pattern_management/public';
-import { IndexPattern } from '../../../../../../../../plugins/data/public';
-import { SavedObjectsClient } from '../../../../../../../../core/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
+import { IndexPatternCreationConfig } from '../../../../../plugins/index_pattern_management/public';
+import { IndexPattern } from '../../../../../plugins/data/public';
+import { SavedObjectsClient } from '../../../../../core/public';
 
 jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPatternField, IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IndexPatternField, IIndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 
 jest.mock('@elastic/eui', () => ({

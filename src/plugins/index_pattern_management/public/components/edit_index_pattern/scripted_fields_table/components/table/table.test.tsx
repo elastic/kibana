@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { Table } from '../table';
 import { ScriptedFieldItem } from '../../types';
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 

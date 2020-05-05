@@ -22,7 +22,7 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { FieldFormat } from 'src/plugins/data/public';
 
 import { ColorFormatEditor } from './color';
-import { fieldFormats } from '../../../../../../../../plugins/data/public';
+import { fieldFormats } from '../../../../../../../../data/public';
 
 const fieldType = 'string';
 const format = {

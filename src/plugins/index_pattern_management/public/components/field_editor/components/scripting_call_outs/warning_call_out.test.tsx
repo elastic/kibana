@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { ScriptingWarningCallOut } from './warning_call_out';
 // eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../../../core/public/doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '../../../../../../../core/public/doc_links/doc_links_service.mock';
 
 describe('ScriptingWarningCallOut', () => {
   const docLinksScriptedFields = docLinksServiceMock.createStartContract().links.scriptedFields;

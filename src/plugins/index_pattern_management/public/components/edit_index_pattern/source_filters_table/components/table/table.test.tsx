@@ -22,7 +22,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
 import { EuiTableFieldDataColumnType, keyCodes } from '@elastic/eui';
-import { IIndexPattern } from '../../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const indexPattern = {} as IIndexPattern;

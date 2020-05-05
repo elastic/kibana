@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SourceFiltersTable } from './source_filters_table';
-import { IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 jest.mock('@elastic/eui', () => ({
   EuiButton: 'eui-button',
