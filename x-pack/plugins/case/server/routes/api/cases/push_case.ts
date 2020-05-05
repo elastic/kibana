@@ -16,6 +16,7 @@ import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../..
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -83,6 +84,11 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        // old case may not have new attribute connector_id, so we default to the configured system
+        const updateConnectorId =
+          myCase.attributes.connector_id == null ? { connector_id: caseConfigureConnectorId } : {};
+
         const [updatedCase, updatedComments] = await Promise.all([
           caseService.patchCase({
             client,
@@ -98,6 +104,7 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
+              ...updateConnectorId,
             },
             version: myCase.version,
           }),
@@ -143,14 +150,14 @@ export function initPushCaseUserActionApi({
         ]);
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments.saved_objects.map(origComment => {
+              comments: comments.saved_objects.map(origComment => {
                 const updatedComment = updatedComments.saved_objects.find(
                   c => c.id === origComment.id
                 );
@@ -164,8 +171,8 @@ export function initPushCaseUserActionApi({
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],
                 };
-              })
-            )
+              }),
+            })
           ),
         });
       } catch (error) {

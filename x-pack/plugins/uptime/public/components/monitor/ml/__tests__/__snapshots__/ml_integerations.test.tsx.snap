@@ -15,10 +15,8 @@ exports[`ML Integrations renders without errors 1`] = `
       <span
         class="euiButtonEmpty__content"
       >
-        <div
-          aria-hidden="true"
-          class="euiButtonEmpty__icon"
-          data-euiicon-type="machineLearningApp"
+        <span
+          class="euiLoadingSpinner euiLoadingSpinner--medium euiButton__spinner"
         />
         <span
           class="euiButtonEmpty__text"
