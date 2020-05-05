@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import glob from 'glob';
 import { resolve } from 'path';
 import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export function makeJunitReportPath(rootDirectory: string, reportName: string) {
-  return resolve(
-    rootDirectory,
-    'target/junit',
-    process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}.xml`
-  );
+  return glob
+    .sync(`TEST-${CI_PARALLEL_PROCESS_PREFIX}*${reportName}.xml`, {
+      cwd: resolve(rootDirectory, 'target/junit', process.env.JOB || '.', ``),
+    })
+    .pop();
 }
