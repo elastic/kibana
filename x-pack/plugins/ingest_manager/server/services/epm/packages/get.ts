@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -118,4 +118,12 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+export async function getKibanaSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  type: KibanaAssetType,
+  id: string
+) {
+  return savedObjectsClient.get(type, id);
 }
