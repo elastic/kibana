@@ -128,6 +128,26 @@ describe('buildExpressionFunction()', () => {
     `);
   });
 
+  test('handles subexpressions in multi-args in initial state', () => {
+    const subexpression = buildExpression([buildExpressionFunction('mySubexpression', {})]);
+    const fn = buildExpressionFunction('hello', { world: [true, subexpression] });
+    expect(fn.toAst().arguments.world).toMatchInlineSnapshot(`
+      Array [
+        true,
+        Object {
+          "chain": Array [
+            Object {
+              "arguments": Object {},
+              "function": "mySubexpression",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
+        },
+      ]
+    `);
+  });
+
   describe('handles subexpressions as args', () => {
     test('when provided an AST for the subexpression', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
