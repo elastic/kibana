@@ -95,6 +95,18 @@ export const getTimelineByTemplateTimelineId = async (
   return getAllSavedTimeline(request, options);
 };
 
+const getTimelineTypeFilter = (timelineTypes: string | null) => {
+  if (timelineTypes === TimelineType.template) {
+    return `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+  }
+
+  if (timelineTypes === TimelineType.default) {
+    return `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+  }
+
+  return undefined;
+};
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -111,10 +123,7 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter:
-      timelineTypes === 'template' || timelineTypes === 'default'
-        ? `siem-ui-timeline.attributes.timelineType: ${timelineTypes}`
-        : undefined,
+    filter: getTimelineTypeFilter(timelineTypes),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
