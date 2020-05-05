@@ -7,7 +7,7 @@
         <h1>{{indexPattern.title}}</h1>
       </div>
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
-          <ml-full-time-range-selector ng-if="showSidebar" index-pattern='indexPattern' query='searchQuery' />
+          <ml-full-time-range-selector ng-if="showSidebar" index-pattern='indexPattern' query='searchQuery'></ml-full-time-range-selector>
       </div>
     </div>
 
@@ -138,7 +138,7 @@
               filter="metricFieldFilter"
               filter-icon="metricFilterIcon"
               filter-changed="metricFieldFilterChanged"
-              clear-filter="clearMetricFilter" />
+              clear-filter="clearMetricFilter"></ml-form-filter-input>
           </div>
         </div>
 
@@ -231,7 +231,7 @@
                   filter="fieldFilter"
                   filter-icon="fieldFilterIcon"
                   filter-changed="fieldFilterChanged"
-                  clear-filter="clearFieldFilter" />
+                  clear-filter="clearFieldFilter"></ml-form-filter-input>
               </div>
             </div>
           </div>

@@ -8,7 +8,7 @@
   <ml-loading-indicator
     label="{{ ::'xpack.ml.jobSelectList.loadingJobsLabel' | i18n: { defaultMessage: 'Loading jobs'} }}"
     is-loading="noJobsCreated===undefined"
-  />
+  ></ml-loading-indicator>
   <div class="select-list" ng-show='noJobsCreated!==undefined'>
     <div ng-if="groups.length && singleSelection !== true">
       <div class="list-section-title">

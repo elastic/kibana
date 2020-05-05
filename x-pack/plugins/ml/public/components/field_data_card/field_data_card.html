@@ -1,12 +1,12 @@
 <div class="ml-field-data-card">
-  <ml-field-title-bar card="card" />
+  <ml-field-title-bar card="card"></ml-field-title-bar>
 
   <div ng-if="card.loading === true" class="card-contents">
     <ml-loading-indicator
       label="{{:: 'xpack.ml.fieldDataCard.loadingLabel' | i18n: { defaultMessage: 'Loading' } }}"
       is-loading="card.loading"
       height="200"
-    />
+    ></ml-loading-indicator>
   </div>
 
   <div ng-if="card.existsInDocs === false" class="card-contents">
