@@ -33,7 +33,7 @@ export const NO_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.noCon
 });
 
 export const ADD_NEW_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.addNewConnector', {
-  defaultMessage: 'Add new connector option',
+  defaultMessage: 'Add new connector',
 });
 
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
@@ -169,6 +169,13 @@ export const MAPPING_FIELD_NOT_MAPPED = i18n.translate(
 export const UPDATE_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.updateConnector', {
   defaultMessage: 'Update connector',
 });
+
+export const UPDATE_SELECTED_CONNECTOR = i18n.translate(
+  'xpack.siem.case.configureCases.updateSelectedConnector',
+  {
+    defaultMessage: 'Update selected connector',
+  }
+);
 
 export const UNSAVED_CHANGES = (unsavedChanges: number): string => {
   return i18n.translate('xpack.siem.case.configureCases.unsavedChanges', {

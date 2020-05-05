@@ -55,17 +55,11 @@ describe('ConfigureCases', () => {
     });
 
     test('it renders the Connectors', () => {
-      expect(wrapper.find('[data-test-subj="case-connectors-form-group"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="dropdown-connectors"]').exists()).toBeTruthy();
     });
 
     test('it renders the ClosureType', () => {
-      expect(
-        wrapper.find('[data-test-subj="case-closure-options-form-group"]').exists()
-      ).toBeTruthy();
-    });
-
-    test('it renders the Mapping', () => {
-      expect(wrapper.find('[data-test-subj="case-mapping-form-group"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="closure-options-radio-group"]').exists()).toBeTruthy();
     });
 
     test('it renders the ActionsConnectorsContextProvider', () => {
@@ -128,7 +122,12 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables the update connector button when the connectorId is invalid', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
     });
   });
 
@@ -171,14 +170,6 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(false);
       expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-user');
 
-      // Mapping
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-      expect(wrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(false);
-      expect(wrapper.find(Mapping).prop('connectorActionTypeId')).toBe('.servicenow');
-      expect(wrapper.find(Mapping).prop('mapping')).toEqual(
-        connectors[0].config.casesConfiguration.mapping
-      );
-
       // Flyouts
       expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(false);
       expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
@@ -200,17 +191,6 @@ describe('ConfigureCases', () => {
       ).toBeFalsy();
     });
 
-    test('it disables the mapping permanently', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-    });
-
-    test('it sets the mapping of a connector correctly', () => {
-      expect(wrapper.find(Mapping).prop('mapping')).toEqual(
-        connectors[0].config.casesConfiguration.mapping
-      );
-    });
-
-    // TODO: When mapping is enabled the test.todo should be implemented.
     test.todo('it disables the update connector button when loading the configuration');
 
     test('it disables correctly when the user cannot crud', () => {
@@ -218,10 +198,36 @@ describe('ConfigureCases', () => {
         wrappingComponent: TestProviders,
       });
 
-      expect(newWrapper.find(Connectors).prop('disabled')).toBe(true);
-      expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-      expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
-      expect(newWrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(true);
+      expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
+        true
+      );
+
+      expect(
+        newWrapper
+          .find('button[data-test-subj="case-configure-add-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        newWrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+
+      // Two closure options
+      expect(
+        newWrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        newWrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .at(1)
+          .prop('disabled')
+      ).toBe(true);
     });
   });
 
@@ -243,7 +249,9 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly Connector when loading connectors', () => {
-      expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
+      expect(
+        wrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')
+      ).toBeTruthy();
     });
 
     test('it pass the correct value to isLoading attribute on Connector', () => {
@@ -255,8 +263,13 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables the update connector button when loading the connectors', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
     });
+
     test('it disables the buttons of action bar when loading connectors', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
@@ -276,16 +289,16 @@ describe('ConfigureCases', () => {
 
       expect(
         newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
+          .find('button[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
           .first()
-          .prop('isDisabled')
+          .prop('disabled')
       ).toBe(true);
 
       expect(
         newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
+          .find('button[data-test-subj="case-configure-action-bottom-bar-save-button"]')
           .first()
-          .prop('isDisabled')
+          .prop('disabled')
       ).toBe(true);
     });
   });
@@ -311,11 +324,27 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly ClosureOptions when saving configuration', () => {
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .at(1)
+          .prop('disabled')
+      ).toBe(true);
     });
 
     test('it disables the update connector button when saving the configuration', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
     });
 
     test('it disables the buttons of action bar when saving configuration', () => {
@@ -500,18 +529,22 @@ describe('ConfigureCases', () => {
       wrapper.update();
 
       expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
-      expect(wrapper.find(EuiBottomBar).exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeFalsy();
     });
 
     test('it show the edit flyout when pressing the update connector button', () => {
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper
-        .find('button[data-test-subj="case-mapping-update-connector-button"]')
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .simulate('click');
       wrapper.update();
 
       expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
-      expect(wrapper.find(EuiBottomBar).exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeFalsy();
     });
 
     test('it tracks the changes successfully', () => {
@@ -681,7 +714,7 @@ describe('ConfigureCases', () => {
 
       // Press update connector button
       wrapper
-        .find('button[data-test-subj="case-mapping-update-connector-button"]')
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .simulate('click');
       wrapper.update();
 

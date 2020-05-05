@@ -16,13 +16,17 @@ describe('Connectors', () => {
   let wrapper: ReactWrapper;
   const onChangeConnector = jest.fn();
   const handleShowAddFlyout = jest.fn();
+  const handleShowEditFlyout = jest.fn();
+
   const props: Props = {
     disabled: false,
+    updateConnectorDisabled: false,
     connectors,
     selectedConnector: 'none',
     isLoading: false,
     onChangeConnector,
     handleShowAddFlyout,
+    handleShowEditFlyout,
   };
 
   beforeAll(() => {
