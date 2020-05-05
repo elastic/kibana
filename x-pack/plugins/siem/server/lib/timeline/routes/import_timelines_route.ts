@@ -128,11 +128,11 @@ export const importTimelinesRoute = (
                       timelineType,
                       version = null,
                     } = parsedTimeline;
-                    const isHandlingTemplateTimeline = timelineType === TimelineType.template;
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
+
                     let newTimeline = null;
                     try {
                       const templateTimeline =
@@ -143,6 +143,7 @@ export const importTimelinesRoute = (
                       const timeline =
                         savedObjectId != null &&
                         (await getTimeline(frameworkRequest, savedObjectId));
+                      const isHandlingTemplateTimeline = timelineType === TimelineType.template;
 
                       if (
                         (timeline == null && !isHandlingTemplateTimeline) ||

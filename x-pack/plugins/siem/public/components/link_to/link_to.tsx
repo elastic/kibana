@@ -118,11 +118,6 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToTimelinesPage}
-      exact
-      path={`${match.url}/:pageName(${SiemPageName.timelines})`}
-    />
-    <Route
-      component={RedirectToTimelinesPage}
       path={`${match.url}/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`}
     />
     <Redirect to="/" />

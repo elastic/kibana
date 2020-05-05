@@ -100,4 +100,5 @@ export const timelineSavedObjectOmittedFields = [
   'createdBy',
   'updated',
   'updatedBy',
+  'version',
 ];
