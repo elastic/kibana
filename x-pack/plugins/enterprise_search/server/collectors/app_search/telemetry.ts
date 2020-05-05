@@ -24,7 +24,7 @@ export const registerTelemetryUsageCollector = ({
   savedObjects,
 }: Dependencies) => {
   const telemetryUsageCollector = usageCollection.makeUsageCollector({
-    type: AS_TELEMETRY_NAME,
+    type: 'app_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects),
   });
   usageCollection.registerCollector(telemetryUsageCollector);
