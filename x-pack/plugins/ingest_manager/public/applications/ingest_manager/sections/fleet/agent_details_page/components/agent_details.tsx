@@ -65,9 +65,10 @@ export const AgentDetailsContent: React.FunctionComponent<{
             defaultMessage: 'Agent version',
           }),
           description:
-            typeof agent.local_metadata['elastic.agent'] === 'object' &&
-            typeof agent.local_metadata['elastic.agent'].version === 'string'
-              ? agent.local_metadata['elastic.agent'].version
+            typeof agent.local_metadata.elastic === 'object' &&
+            typeof agent.local_metadata.elastic.agent === 'object' &&
+            typeof agent.local_metadata.elastic.agent.version === 'string'
+              ? agent.local_metadata.elastic.agent.version
               : '-',
         },
         {
