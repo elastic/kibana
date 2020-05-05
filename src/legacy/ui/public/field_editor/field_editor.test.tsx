@@ -22,9 +22,9 @@ import React from 'react';
 import { npStart } from 'ui/new_platform';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
-  Field,
   IndexPattern,
-  IndexPatternFieldList,
+  IndexPatternField,
+  IIndexPatternFieldList,
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
 import { HttpStart } from '../../../../core/public';
@@ -76,10 +76,10 @@ jest.mock('./components/field_format_editor', () => ({
   FieldFormatEditor: 'field-format-editor',
 }));
 
-const fields: Field[] = [
+const fields: IndexPatternField[] = [
   {
     name: 'foobar',
-  } as Field,
+  } as IndexPatternField,
 ];
 
 // @ts-ignore
@@ -114,7 +114,7 @@ describe('FieldEditor', () => {
 
   beforeEach(() => {
     indexPattern = ({
-      fields: fields as IndexPatternFieldList,
+      fields: fields as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
 
     npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(
@@ -133,7 +133,7 @@ describe('FieldEditor', () => {
     const component = shallowWithI18nProvider(
       <FieldEditor
         indexPattern={indexPattern}
-        field={(field as unknown) as Field}
+        field={(field as unknown) as IndexPatternField}
         helpers={helpers}
       />
     );
@@ -149,18 +149,18 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    indexPattern.fields.push(testField as Field);
+    indexPattern.fields.push(testField as IndexPatternField);
     indexPattern.fields.getByName = name => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as Field;
+      return flds[name] as IndexPatternField;
     };
 
     const component = shallowWithI18nProvider(
       <FieldEditor
         indexPattern={indexPattern}
-        field={(testField as unknown) as Field}
+        field={(testField as unknown) as IndexPatternField}
         helpers={helpers}
       />
     );
@@ -177,18 +177,18 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
       lang: 'testlang',
     };
-    indexPattern.fields.push((testField as unknown) as Field);
+    indexPattern.fields.push((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = name => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as Field;
+      return flds[name] as IndexPatternField;
     };
 
     const component = shallowWithI18nProvider(
       <FieldEditor
         indexPattern={indexPattern}
-        field={(testField as unknown) as Field}
+        field={(testField as unknown) as IndexPatternField}
         helpers={helpers}
       />
     );
@@ -203,7 +203,7 @@ describe('FieldEditor', () => {
     const component = shallowWithI18nProvider(
       <FieldEditor
         indexPattern={indexPattern}
-        field={(testField as unknown) as Field}
+        field={(testField as unknown) as IndexPatternField}
         helpers={helpers}
       />
     );
@@ -226,7 +226,7 @@ describe('FieldEditor', () => {
     const component = shallowWithI18nProvider(
       <FieldEditor
         indexPattern={indexPattern}
-        field={(testField as unknown) as Field}
+        field={(testField as unknown) as IndexPatternField}
         helpers={helpers}
       />
     );

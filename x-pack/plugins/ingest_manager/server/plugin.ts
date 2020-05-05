@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  HttpServiceSetup,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -42,7 +43,6 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
 } from './routes';
-
 import { IngestManagerConfigType } from '../common';
 import {
   appContextService,
@@ -52,12 +52,14 @@ import {
   AgentService,
 } from './services';
 import { getAgentStatusById } from './services/agents';
+import { CloudSetup } from '../../cloud/server';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -67,6 +69,10 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
+  isProductionMode: boolean;
+  kibanaVersion: string;
+  cloud?: CloudSetup;
+  httpSetup?: HttpServiceSetup;
 }
 
 export type IngestManagerSetupContract = void;
@@ -100,16 +106,25 @@ export class IngestManagerPlugin
   private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
+  private cloud: CloudSetup | undefined;
+
+  private isProductionMode: boolean;
+  private kibanaVersion: string;
+  private httpSetup: HttpServiceSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
+    this.isProductionMode = this.initializerContext.env.mode.prod;
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
     }
+    this.cloud = deps.cloud;
 
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -167,7 +182,6 @@ export class IngestManagerPlugin
       registerEnrollmentApiKeyRoutes(router);
       registerInstallScriptRoutes({
         router,
-        serverInfo: core.http.getServerInfo(),
         basePath: core.http.basePath,
       });
     }
@@ -184,6 +198,10 @@ export class IngestManagerPlugin
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
+      isProductionMode: this.isProductionMode,
+      kibanaVersion: this.kibanaVersion,
+      httpSetup: this.httpSetup,
+      cloud: this.cloud,
     });
     licenseService.start(this.licensing$);
     return {

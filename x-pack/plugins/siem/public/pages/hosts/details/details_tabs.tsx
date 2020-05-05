@@ -7,6 +7,7 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
+import { UpdateDateRange } from '../../../components/charts/common';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../../components/ml/types';
 import { HostsTableType } from '../../../store/hosts/model';
@@ -50,8 +51,12 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       [setAbsoluteRangeDatePicker]
     );
 
-    const updateDateRange = useCallback(
-      (min: number, max: number) => {
+    const updateDateRange = useCallback<UpdateDateRange>(
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]

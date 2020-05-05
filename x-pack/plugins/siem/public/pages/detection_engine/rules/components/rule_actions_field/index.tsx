@@ -27,6 +27,8 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     http,
     triggers_actions_ui: { actionTypeRegistry },
     notifications,
+    docLinks,
+    application: { capabilities },
   } = useKibana().services;
 
   const setActionIdByIndex = useCallback(
@@ -78,6 +80,8 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       actionTypes={supportedActionTypes}
       defaultActionMessage={DEFAULT_ACTION_MESSAGE}
       toastNotifications={notifications.toasts}
+      docLinks={docLinks}
+      capabilities={capabilities}
     />
   );
 };

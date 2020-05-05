@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 import { getFormMock, useFormMock } from '../__mock__/form';
 import { useUpdateComment } from '../../../../containers/case/use_update_comment';
-import { basicCase, getUserAction } from '../../../../containers/case/mock';
+import { basicCase, basicPush, getUserAction } from '../../../../containers/case/mock';
 import { UserActionTree } from './';
 import { TestProviders } from '../../../../mock';
 import { wait } from '../../../../lib/helpers';
@@ -20,16 +20,16 @@ const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const defaultProps = {
-  data: basicCase,
+  caseServices: {},
   caseUserActions: [],
-  firstIndexPushToService: -1,
+  connectors: [],
+  data: basicCase,
+  fetchUserActions,
   isLoadingDescription: false,
   isLoadingUserActions: false,
-  lastIndexPushToService: -1,
-  userCanCrud: true,
-  fetchUserActions,
   onUpdateField,
   updateCase,
+  userCanCrud: true,
 };
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 jest.mock('../../../../containers/case/use_update_comment');
@@ -76,13 +76,20 @@ describe('UserActionTree ', () => {
   });
   it('Renders service now update line with top and bottom when push is required', () => {
     const ourActions = [
-      getUserAction(['comment'], 'push-to-service'),
+      getUserAction(['pushed'], 'push-to-service'),
       getUserAction(['comment'], 'update'),
     ];
     const props = {
       ...defaultProps,
+      caseServices: {
+        '123': {
+          ...basicPush,
+          firstPushIndex: 0,
+          lastPushIndex: 0,
+          hasDataToPush: true,
+        },
+      },
       caseUserActions: ourActions,
-      lastIndexPushToService: 0,
     };
     const wrapper = mount(
       <TestProviders>
@@ -95,11 +102,18 @@ describe('UserActionTree ', () => {
     expect(wrapper.find(`[data-test-subj="show-bottom-footer"]`).exists()).toBeTruthy();
   });
   it('Renders service now update line with top only when push is up to date', () => {
-    const ourActions = [getUserAction(['comment'], 'push-to-service')];
+    const ourActions = [getUserAction(['pushed'], 'push-to-service')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
-      lastIndexPushToService: 0,
+      caseServices: {
+        '123': {
+          ...basicPush,
+          firstPushIndex: 0,
+          lastPushIndex: 0,
+          hasDataToPush: false,
+        },
+      },
     };
     const wrapper = mount(
       <TestProviders>

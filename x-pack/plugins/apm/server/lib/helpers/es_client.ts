@@ -7,10 +7,10 @@
 /* eslint-disable no-console */
 import {
   IndexDocumentParams,
-  IndicesDeleteParams,
   SearchParams,
   IndicesCreateParams,
-  DeleteDocumentResponse
+  DeleteDocumentResponse,
+  DeleteDocumentParams
 } from 'elasticsearch';
 import { cloneDeep, isString, merge } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
@@ -27,9 +27,8 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
-interface IndexPrivileges {
+export interface IndexPrivileges {
   has_all_requested: boolean;
-  username: string;
   index: Record<string, { read: boolean }>;
 }
 
@@ -205,7 +204,9 @@ export function getESClient(
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
       return callEs('index', params);
     },
-    delete: (params: IndicesDeleteParams): Promise<DeleteDocumentResponse> => {
+    delete: (
+      params: Omit<DeleteDocumentParams, 'type'>
+    ): Promise<DeleteDocumentResponse> => {
       return callEs('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {

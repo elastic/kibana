@@ -69,15 +69,15 @@ describe('Connectors', () => {
 
   test('the connector is changed successfully', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
 
     expect(onChangeConnector).toHaveBeenCalled();
-    expect(onChangeConnector).toHaveBeenCalledWith('456');
+    expect(onChangeConnector).toHaveBeenCalledWith('servicenow-2');
   });
 
   test('the connector is changed successfully to none', () => {
     onChangeConnector.mockClear();
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'123'} />, {
+    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
       wrappingComponent: TestProviders,
     });
 
