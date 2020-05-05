@@ -315,7 +315,7 @@ export class EndpointDocGenerator {
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : 'powershell.exe',
+        name: options.processName ? options.processName : randomProcessName(),
       },
     };
   }
@@ -719,4 +719,17 @@ export class EndpointDocGenerator {
       HostPolicyResponseActionStatus.warning,
     ]);
   }
+}
+
+const fakeProcessNames = [
+  'lsass.exe',
+  'notepad.exe',
+  'mimikatz.exe',
+  'powershell.exe',
+  'iexlorer.exe',
+  'explorer.exe',
+];
+/** Return a random fake process name */
+function randomProcessName(): string {
+  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
 }
