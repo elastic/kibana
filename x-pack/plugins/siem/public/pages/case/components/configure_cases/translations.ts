@@ -39,7 +39,7 @@ export const ADD_NEW_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.
 export const CASE_CLOSURE_OPTIONS_TITLE = i18n.translate(
   'xpack.siem.case.configureCases.caseClosureOptionsTitle',
   {
-    defaultMessage: 'Cases Closures',
+    defaultMessage: 'Case Closures',
   }
 );
 
