@@ -38,9 +38,9 @@ async function getFieldProps(field: IField): Promise<FieldProps> {
 }
 
 interface Props {
-  fields?: IField[];
+  fields: IField[] | null;
   onChange: (selectedFieldNames: string[]) => void;
-  tooltipFields?: IField[];
+  tooltipFields: IField[];
 }
 
 interface State {

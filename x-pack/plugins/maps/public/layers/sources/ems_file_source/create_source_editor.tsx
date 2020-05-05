@@ -4,31 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { getEMSClient } from '../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
-import { i18n } from '@kbn/i18n';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
-export class EMSFileCreateSourceEditor extends React.Component {
+interface Props {
+  onSourceConfigChange: (sourceConfig: Partial<EMSFileSourceDescriptor>) => void;
+}
+
+interface State {
+  hasLoadedOptions: boolean;
+  emsFileOptions: Array<EuiComboBoxOptionOption<string>>;
+  selectedOption: EuiComboBoxOptionOption<string> | null;
+}
+
+export class EMSFileCreateSourceEditor extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   state = {
-    emsFileOptionsRaw: null,
+    hasLoadedOptions: false,
+    emsFileOptions: [],
     selectedOption: null,
   };
 
   _loadFileOptions = async () => {
+    // @ts-ignore
     const emsClient = getEMSClient();
-    const fileLayers = await emsClient.getFileLayers();
+    // @ts-ignore
+    const fileLayers: unknown[] = await emsClient.getFileLayers();
     const options = fileLayers.map(fileLayer => {
       return {
-        id: fileLayer.getId(),
-        name: fileLayer.getDisplayName(),
+        // @ts-ignore
+        value: fileLayer.getId(),
+        // @ts-ignore
+        label: fileLayer.getDisplayName(),
       };
     });
     if (this._isMounted) {
       this.setState({
-        emsFileOptionsRaw: options,
+        hasLoadedOptions: true,
+        emsFileOptions: options,
       });
     }
   };
@@ -42,7 +62,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
     this._loadFileOptions();
   }
 
-  _onChange = selectedOptions => {
+  _onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (selectedOptions.length === 0) {
       return;
     }
@@ -54,32 +74,28 @@ export class EMSFileCreateSourceEditor extends React.Component {
   };
 
   render() {
-    if (!this.state.emsFileOptionsRaw) {
+    if (!this.state.hasLoadedOptions) {
       // TODO display loading message
       return null;
     }
-
-    const options = this.state.emsFileOptionsRaw.map(({ id, name }) => {
-      return { label: name, value: id };
-    });
 
     return (
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.emsFile.layerLabel', {
           defaultMessage: 'Layer',
         })}
-        helpText={this.state.emsFileOptionsRaw.length === 0 ? getEmsUnavailableMessage() : null}
+        helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
       >
         <EuiComboBox
           placeholder={i18n.translate('xpack.maps.source.emsFile.selectPlaceholder', {
             defaultMessage: 'Select EMS vector shapes',
           })}
-          options={options}
-          selectedOptions={this.state.selectedOption ? [this.state.selectedOption] : []}
+          options={this.state.emsFileOptions}
+          selectedOptions={this.state.selectedOption === null ? [] : [this.state.selectedOption]}
           onChange={this._onChange}
           isClearable={false}
           singleSelection={true}
-          isDisabled={this.state.emsFileOptionsRaw.length === 0}
+          isDisabled={this.state.emsFileOptions.length === 0}
           data-test-subj="emsVectorComboBox"
         />
       </EuiFormRow>

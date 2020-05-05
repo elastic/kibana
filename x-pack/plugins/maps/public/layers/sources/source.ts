@@ -16,6 +16,11 @@ import { copyPersistentState } from '../../reducers/util';
 import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+
+export type SourceEditorArgs = {
+  onChange: (args: OnSourceChangeArgs) => void;
+};
 
 export type ImmutableSourceProperty = {
   label: string;
@@ -48,7 +53,7 @@ export interface ISource {
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
   isESSource(): boolean;
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }): ReactElement<any> | null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   isJoinable(): boolean;
   cloneDescriptor(): SourceDescriptor;

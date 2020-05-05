@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInjectedVarFunc } from '../../kibana_services';
 import { i18n } from '@kbn/i18n';
+import { getInjectedVarFunc } from '../../kibana_services';
 
-export function getEmsUnavailableMessage() {
+export function getEmsUnavailableMessage(): string {
   const isEmsEnabled = getInjectedVarFunc()('isEmsEnabled', true);
   if (isEmsEnabled) {
     return i18n.translate('xpack.maps.source.ems.noAccessDescription', {

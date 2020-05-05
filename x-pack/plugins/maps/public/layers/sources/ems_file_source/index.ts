@@ -5,4 +5,4 @@
  */
 
 export { emsBoundariesLayerWizardConfig } from './ems_boundaries_layer_wizard';
-export { EMSFileSource } from './ems_file_source';
+export { EMSFileSource, IEmsFileSource } from './ems_file_source';
