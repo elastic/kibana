@@ -351,7 +351,9 @@ export const ProcessEventDot = styled(
                 }}
               >
                 <span className="euiButton__content">
-                  <span className="euiButton__text">{eventModel.eventName(event)}</span>
+                  <span className="euiButton__text" data-test-subj={'euiButton__text'}>
+                    {eventModel.eventName(event)}
+                  </span>
                 </span>
               </div>
               {magFactorX >= 2 && (

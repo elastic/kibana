@@ -101,7 +101,7 @@ describe('metric_suggestions', () => {
     expect(suggestion).toMatchInlineSnapshot(`
       Object {
         "previewIcon": "test-file-stub",
-        "score": 0.5,
+        "score": 0.1,
         "state": Object {
           "accessor": "bytes",
           "layerId": "l1",

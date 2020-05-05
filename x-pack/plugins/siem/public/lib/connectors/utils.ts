@@ -16,10 +16,12 @@ import {
   ActionConnectorParams,
   ActionConnectorValidationErrors,
   Optional,
+  ThirdPartyField,
 } from './types';
 import { isUrlInvalid } from './validators';
 
 import * as i18n from './translations';
+import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 
 export const createActionType = ({
   id,
@@ -69,3 +71,15 @@ const ConnectorParamsFields: React.FunctionComponent<ActionParamsProps<ActionCon
 const connectorParamsValidator = (actionParams: ActionConnectorParams): ValidationResult => {
   return { errors: {} };
 };
+
+export const createDefaultMapping = (
+  fields: Record<string, ThirdPartyField>
+): CasesConfigurationMapping[] =>
+  Object.keys(fields).map(
+    key =>
+      ({
+        source: fields[key].defaultSourceField,
+        target: key,
+        actionType: fields[key].defaultActionType,
+      } as CasesConfigurationMapping)
+  );
