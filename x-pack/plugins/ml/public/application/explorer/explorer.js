@@ -284,6 +284,7 @@ export class Explorer extends React.Component {
       annotationsData,
       chartsData,
       filterActive,
+      filteredFields,
       filterPlaceHolder,
       indexPattern,
       influencers,
@@ -418,6 +419,7 @@ export class Explorer extends React.Component {
                     <ExplorerSwimlane
                       chartWidth={swimlaneContainerWidth}
                       filterActive={filterActive}
+                      filteredFields={filteredFields}
                       maskAll={maskAll}
                       timeBuckets={this.timeBuckets}
                       swimlaneCellClick={this.swimlaneCellClick}
@@ -499,6 +501,7 @@ export class Explorer extends React.Component {
                           <ExplorerSwimlane
                             chartWidth={swimlaneContainerWidth}
                             filterActive={filterActive}
+                            filteredFields={filteredFields}
                             maskAll={maskAll}
                             timeBuckets={this.timeBuckets}
                             swimlaneCellClick={this.swimlaneCellClick}
