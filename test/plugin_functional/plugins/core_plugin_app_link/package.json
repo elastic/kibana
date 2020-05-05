@@ -1,7 +1,7 @@
 {
-  "name": "core_plugin_appleave",
+  "name": "core_plugin_app_link",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/core_plugin_appleave",
+  "main": "target/test/plugin_functional/plugins/core_plugin_app_link",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"
