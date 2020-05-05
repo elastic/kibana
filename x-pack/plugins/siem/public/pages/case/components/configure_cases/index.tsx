@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useState, Dispatch, SetStateAction, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -200,6 +200,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     currentConfiguration.closureType,
   ]);
 
+  const connectorActionTypeId = useMemo(
+    () => connectors.find(c => c.id === connectorId)?.actionTypeId ?? '.none',
+    [connectorId, connectors]
+  );
+
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -236,6 +241,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           disabled
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           mapping={mapping}
+          connectorActionTypeId={connectorActionTypeId}
           onChangeMapping={setMapping}
           setEditFlyoutVisibility={onClickUpdateConnector}
         />
