@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { CSSProperties } from 'styled-components';
-import { AgentEnrollmentFlyout } from './components';
+import { AgentEnrollmentFlyout } from '../components';
 import { Agent } from '../../../types';
 import {
   usePagination,
