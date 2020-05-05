@@ -57,6 +57,8 @@ export const optimizeMixin = async (
       basePublicPath: config.get('server.basePath'),
       builtCssPath: fromRoot('built_assets/css'),
       npUiPluginPublicDirs: getNpUiPluginPublicDirs(kbnServer),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
+      isDist: kbnServer.newPlatform.env.packageInfo.dist,
     })
   );
 

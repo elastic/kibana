@@ -8,7 +8,7 @@ import { CallAPIOptions } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
-import { KIBANA_STATS_TYPE_MONITORING } from '../../../../legacy/plugins/monitoring/common/constants';
+import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
 import { PluginsSetup } from '../plugin';
 

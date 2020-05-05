@@ -4,18 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IContextProvider, RequestHandler, ScopedClusterClient } from 'kibana/server';
+import { IContextProvider, RequestHandler } from 'kibana/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 
 import { ListClient } from './services/lists/client';
 
-export type DataClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
 export type ContextProvider = IContextProvider<RequestHandler<unknown, unknown, unknown>, 'lists'>;
 
 export interface PluginsSetup {
-  security: SecurityPluginSetup;
+  security: SecurityPluginSetup | undefined | null;
   spaces: SpacesPluginSetup | undefined | null;
 }
 
