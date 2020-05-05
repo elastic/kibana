@@ -6,8 +6,8 @@
 
 import { InstallTemplateFunction } from './types';
 
-export const macosInstallTemplate: InstallTemplateFunction = variables => {
-  const artifact = `elastic-agent-${variables.kibanaVersion}-darwin-x86_64`;
+export const linuxInstallTemplate: InstallTemplateFunction = variables => {
+  const artifact = `elastic-agent-${variables.kibanaVersion}-linux-x86_64`;
 
   return `#!/bin/sh
 
