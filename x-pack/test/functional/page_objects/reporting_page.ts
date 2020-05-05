@@ -9,10 +9,12 @@ import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import { parse } from 'url';
 
 export function ReportingPageProvider({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
-  const log = getService('log');
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const log = getService('log');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+
   const PageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
 
   class ReportingPage {
@@ -163,6 +165,12 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       const fromTime = 'Sep 19, 1999 @ 06:31:44.000';
       const toTime = 'Sep 23, 1999 @ 18:31:44.000';
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    }
+
+    async verifyDownloadCSVButton(panelSelector: string) {
+      const savedSearchPanel = await testSubjects.find(panelSelector);
+      await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
+      await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport');
     }
   }
   return new ReportingPage();
