@@ -308,6 +308,30 @@ describe('copy to space', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"[objects]: duplicate objects are not allowed"`);
     });
 
+    it(`does not allow "idToOverwrite" to be used without "overwrite"`, async () => {
+      const payload = {
+        retries: {
+          ['a-space']: [
+            {
+              type: 'foo',
+              id: 'bar',
+              overwrite: false,
+              idToOverwrite: 'baz',
+            },
+          ],
+        },
+        objects: [{ type: 'foo', id: 'bar' }],
+      };
+
+      const { resolveConflicts } = await setup();
+
+      expect(() =>
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[retries.a-space.0]: cannot use [idToOverwrite] without [overwrite]"`
+      );
+    });
+
     it(`requires well-formed space ids`, async () => {
       const payload = {
         retries: {

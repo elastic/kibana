@@ -5,7 +5,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject, CoreStart, KibanaRequest } from 'src/core/server';
+import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
 import {
   exportSavedObjectsToStream,
   resolveSavedObjectsImportErrors,
@@ -44,12 +44,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   const resolveConflictsForSpace = async (
     spaceId: string,
     objectsStream: Readable,
-    retries: Array<{
-      type: string;
-      id: string;
-      overwrite: boolean;
-      replaceReferences: Array<{ type: string; from: string; to: string }>;
-    }>
+    retries: SavedObjectsImportRetry[]
   ) => {
     try {
       const importResponse = await resolveSavedObjectsImportErrors({
@@ -64,6 +59,7 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       return {
         success: importResponse.success,
         successCount: importResponse.successCount,
+        successResults: importResponse.successResults,
         errors: importResponse.errors,
       };
     } catch (error) {

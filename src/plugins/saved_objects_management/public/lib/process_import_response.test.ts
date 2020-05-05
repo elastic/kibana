@@ -19,6 +19,7 @@
 
 import {
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportMissingReferencesError,
 } from 'src/core/public';
@@ -35,7 +36,7 @@ describe('processImportResponse()', () => {
     expect(result.importCount).toBe(0);
   });
 
-  test('conflict errors get added to failedImports', () => {
+  test('conflict errors get added to failedImports and result in idle status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -63,9 +64,41 @@ describe('processImportResponse()', () => {
         },
       ]
     `);
+    expect(result.status).toBe('idle');
   });
 
-  test('unknown errors get added to failedImports', () => {
+  test('ambiguous conflict errors get added to failedImports and result in idle status', () => {
+    const response = {
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          type: 'a',
+          id: '1',
+          error: {
+            type: 'ambiguous_conflict',
+          } as SavedObjectsImportAmbiguousConflictError,
+        },
+      ],
+    };
+    const result = processImportResponse(response);
+    expect(result.failedImports).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "error": Object {
+            "type": "ambiguous_conflict",
+          },
+          "obj": Object {
+            "id": "1",
+            "type": "a",
+          },
+        },
+      ]
+    `);
+    expect(result.status).toBe('idle');
+  });
+
+  test('unknown errors get added to failedImports and result in success status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -93,9 +126,10 @@ describe('processImportResponse()', () => {
         },
       ]
     `);
+    expect(result.status).toBe('success');
   });
 
-  test('missing references get added to failedImports', () => {
+  test('missing references get added to failedImports and result in idle status', () => {
     const response = {
       success: false,
       successCount: 0,
@@ -135,5 +169,6 @@ describe('processImportResponse()', () => {
         },
       ]
     `);
+    expect(result.status).toBe('idle');
   });
 });

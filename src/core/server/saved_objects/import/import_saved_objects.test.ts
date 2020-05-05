@@ -18,613 +18,170 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObject } from '../types';
-import { importSavedObjectsFromStream } from './import_saved_objects';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsType,
+  SavedObject,
+  SavedObjectsImportError,
+} from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsErrorHelpers } from '..';
+import { SavedObjectsImportOptions, ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
+import { importSavedObjectsFromStream } from './import_saved_objects';
 
-const emptyResponse = {
-  saved_objects: [],
-  total: 0,
-  per_page: 0,
-  page: 0,
-};
+import { collectSavedObjects } from './collect_saved_objects';
+import { validateReferences } from './validate_references';
+import { checkConflicts } from './check_conflicts';
+import { createSavedObjects } from './create_saved_objects';
 
-const createTypeRegistryMock = (supportedTypes: string[]) => {
-  const typeRegistry = typeRegistryMock.create();
-  const types = supportedTypes.map((name) => ({
-    name,
-    hidden: false,
-    namespaceType: 'single' as 'single',
-    mappings: { properties: {} },
-  }));
-  typeRegistry.getImportableAndExportableTypes.mockReturnValue(types);
-  return typeRegistry;
-};
+jest.mock('./collect_saved_objects');
+jest.mock('./validate_references');
+jest.mock('./check_conflicts');
+jest.mock('./create_saved_objects');
 
-describe('importSavedObjects()', () => {
-  const savedObjects: SavedObject[] = [
-    {
-      id: '1',
-      type: 'index-pattern',
-      attributes: {
-        title: 'My Index Pattern',
-      },
-      references: [],
-    },
-    {
-      id: '2',
-      type: 'search',
-      attributes: {
-        title: 'My Search',
-      },
-      references: [],
-    },
-    {
-      id: '3',
-      type: 'visualization',
-      attributes: {
-        title: 'My Visualization',
-      },
-      references: [],
-    },
-    {
-      id: '4',
-      type: 'dashboard',
-      attributes: {
-        title: 'My Dashboard',
-      },
-      references: [],
-    },
-  ];
-  const savedObjectsClient = savedObjectsClientMock.create();
-  const supportedTypes = ['index-pattern', 'search', 'visualization', 'dashboard'];
+const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
+  fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
 
+describe('#importSavedObjectsFromStream', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    // mock empty output of each of these mocked modules so the import doesn't throw an error
+    getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects: [] });
+    getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects: [] });
+    getMockFn(checkConflicts).mockResolvedValue({
+      errors: [],
+      filteredObjects: [],
+      importIdMap: new Map(),
+    });
+    getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
   });
 
-  test('returns early when no objects exist', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        this.push(null);
-      },
+  let readStream: Readable;
+  const objectLimit = 10;
+  const overwrite = (Symbol() as unknown) as boolean;
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
+  const namespace = 'some-namespace';
+
+  const setupOptions = (): SavedObjectsImportOptions => {
+    readStream = new Readable();
+    savedObjectsClient = savedObjectsClientMock.create();
+    typeRegistry = typeRegistryMock.create();
+    return { readStream, objectLimit, overwrite, savedObjectsClient, typeRegistry, namespace };
+  };
+  const createObject = () => {
+    return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObject<{ title: string }>;
+  };
+  const createError = () => {
+    return ({ type: 'foo-type', id: uuidv4() } as unknown) as SavedObjectsImportError;
+  };
+
+  /**
+   * These tests use minimal mocks which don't look realistic, but are sufficient to exercise the code paths correctly. For example, for an
+   * object to be imported successfully it would need to be obtained from `collectSavedObjects`, passed to `validateReferences`, passed to
+   * `checkConflicts`, passed to `createSavedObjects`, and returned from that. However, for each of the tests below, we skip the
+   * intermediate steps in the interest of brevity.
+   */
+  describe('module calls', () => {
+    test('collects saved objects from stream', async () => {
+      const options = setupOptions();
+      const supportedTypes = ['foo-type'];
+      typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+        supportedTypes.map((name) => ({ name })) as SavedObjectsType[]
+      );
+
+      await importSavedObjectsFromStream(options);
+      expect(typeRegistry.getImportableAndExportableTypes).toHaveBeenCalled();
+      const collectSavedObjectsOptions = { readStream, objectLimit, supportedTypes };
+      expect(collectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
     });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 1,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock([]),
+
+    test('validates references', async () => {
+      const options = setupOptions();
+      const collectedObjects = [createObject()];
+      getMockFn(collectSavedObjects).mockResolvedValue({ errors: [], collectedObjects });
+
+      await importSavedObjectsFromStream(options);
+      expect(validateReferences).toHaveBeenCalledWith(
+        collectedObjects,
+        savedObjectsClient,
+        namespace
+      );
     });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "success": true,
-        "successCount": 0,
-      }
-    `);
+
+    test('checks conflicts', async () => {
+      const options = setupOptions();
+      const filteredObjects = [createObject()];
+      getMockFn(validateReferences).mockResolvedValue({ errors: [], filteredObjects });
+
+      await importSavedObjectsFromStream(options);
+      const checkConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
+      expect(checkConflicts).toHaveBeenCalledWith(filteredObjects, checkConflictsOptions);
+    });
+
+    test('creates saved objects', async () => {
+      const options = setupOptions();
+      const filteredObjects = [createObject()];
+      const importIdMap = new Map();
+      getMockFn(checkConflicts).mockResolvedValue({ errors: [], filteredObjects, importIdMap });
+
+      await importSavedObjectsFromStream(options);
+      const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
+      expect(createSavedObjects).toHaveBeenCalledWith(filteredObjects, createSavedObjectsOptions);
+    });
   });
 
-  test('calls bulkCreate without overwrite', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        savedObjects.forEach((obj) => this.push(obj));
-        this.push(null);
-      },
-    });
-    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
-    });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 4,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "success": true,
-        "successCount": 4,
-      }
-    `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "My Index Pattern",
-                },
-                "id": "1",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "index-pattern",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Search",
-                },
-                "id": "2",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "search",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Visualization",
-                },
-                "id": "3",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "visualization",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Dashboard",
-                },
-                "id": "4",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": false,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
-  });
+  describe('results', () => {
+    test('returns success=true if no errors occurred', async () => {
+      const options = setupOptions();
 
-  test('uses the provided namespace when present', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        savedObjects.forEach((obj) => this.push(obj));
-        this.push(null);
-      },
+      const result = await importSavedObjectsFromStream(options);
+      expect(result).toEqual({ success: true, successCount: 0 });
     });
-    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
-    });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 4,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-      namespace: 'foo',
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "success": true,
-        "successCount": 4,
-      }
-    `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "My Index Pattern",
-                },
-                "id": "1",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "index-pattern",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Search",
-                },
-                "id": "2",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "search",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Visualization",
-                },
-                "id": "3",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "visualization",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Dashboard",
-                },
-                "id": "4",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": "foo",
-              "overwrite": false,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
-  });
 
-  test('calls bulkCreate with overwrite', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        savedObjects.forEach((obj) => this.push(obj));
-        this.push(null);
-      },
-    });
-    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
-    });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 4,
-      overwrite: true,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "success": true,
-        "successCount": 4,
-      }
-    `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "My Index Pattern",
-                },
-                "id": "1",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "index-pattern",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Search",
-                },
-                "id": "2",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "search",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Visualization",
-                },
-                "id": "3",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "visualization",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Dashboard",
-                },
-                "id": "4",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": true,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
-  });
+    test('returns success=false if an error occurred', async () => {
+      const options = setupOptions();
+      const errors = [createError()];
+      getMockFn(collectSavedObjects).mockResolvedValue({ errors, collectedObjects: [] });
 
-  test('extracts errors for conflicts', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        savedObjects.forEach((obj) => this.push(obj));
-        this.push(null);
-      },
+      const result = await importSavedObjectsFromStream(options);
+      expect(result).toEqual({ success: false, successCount: 0, errors });
     });
-    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(({ type, id }) => ({
-        type,
-        id,
-        error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
-        attributes: {},
-        references: [],
-      })),
-    });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 4,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [
-          Object {
-            "error": Object {
-              "type": "conflict",
-            },
-            "id": "1",
-            "title": "My Index Pattern",
-            "type": "index-pattern",
-          },
-          Object {
-            "error": Object {
-              "type": "conflict",
-            },
-            "id": "2",
-            "title": "My Search",
-            "type": "search",
-          },
-          Object {
-            "error": Object {
-              "type": "conflict",
-            },
-            "id": "3",
-            "title": "My Visualization",
-            "type": "visualization",
-          },
-          Object {
-            "error": Object {
-              "type": "conflict",
-            },
-            "id": "4",
-            "title": "My Dashboard",
-            "type": "dashboard",
-          },
-        ],
-        "success": false,
-        "successCount": 0,
-      }
-    `);
-  });
 
-  test('validates references', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        this.push({
-          id: '1',
-          type: 'search',
-          attributes: {
-            title: 'My Search',
-          },
-          references: [
-            {
-              name: 'ref_0',
-              type: 'index-pattern',
-              id: '2',
-            },
-          ],
-        });
-        this.push({
-          id: '3',
-          type: 'visualization',
-          attributes: {
-            title: 'My Visualization',
-          },
-          references: [
-            {
-              name: 'ref_0',
-              type: 'search',
-              id: '1',
-            },
-          ],
-        });
-        this.push(null);
-      },
-    });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          type: 'index-pattern',
-          id: '2',
-          error: SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '2').output
-            .payload,
-          attributes: {},
-          references: [],
-        },
-      ],
-    });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 4,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [
-          Object {
-            "error": Object {
-              "blocking": Array [
-                Object {
-                  "id": "3",
-                  "type": "visualization",
-                },
-              ],
-              "references": Array [
-                Object {
-                  "id": "2",
-                  "type": "index-pattern",
-                },
-              ],
-              "type": "missing_references",
-            },
-            "id": "1",
-            "title": "My Search",
-            "type": "search",
-          },
-        ],
-        "success": false,
-        "successCount": 0,
-      }
-    `);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "fields": Array [
-                  "id",
-                ],
-                "id": "2",
-                "type": "index-pattern",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
-  });
+    test('handles a mix of successes and errors', async () => {
+      const options = setupOptions();
+      const errors = [createError()];
+      const obj1 = createObject();
+      const obj2 = { ...createObject(), newId: 'some-newId' };
+      getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects: [obj1, obj2] });
 
-  test('validates supported types', async () => {
-    const readStream = new Readable({
-      objectMode: true,
-      read() {
-        savedObjects.forEach((obj) => this.push(obj));
-        this.push({ id: '1', type: 'wigwags', attributes: { title: 'my title' }, references: [] });
-        this.push(null);
-      },
+      const result = await importSavedObjectsFromStream(options);
+      // successResults only includes the imported object's type, id, and newId (if a new one was generated)
+      const successResults = [
+        { type: obj1.type, id: obj1.id },
+        { type: obj2.type, id: obj2.id, newId: 'some-newId' },
+      ];
+      expect(result).toEqual({ success: false, successCount: 2, successResults, errors });
     });
-    savedObjectsClient.find.mockResolvedValueOnce(emptyResponse);
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
+
+    test('accumulates multiple errors', async () => {
+      const options = setupOptions();
+      const errors = [createError(), createError(), createError(), createError()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [errors[0]],
+        collectedObjects: [],
+      });
+      getMockFn(validateReferences).mockResolvedValue({ errors: [errors[1]], filteredObjects: [] });
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [errors[2]],
+        filteredObjects: [],
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[3]], createdObjects: [] });
+
+      const result = await importSavedObjectsFromStream(options);
+      expect(result).toEqual({ success: false, successCount: 0, errors });
     });
-    const result = await importSavedObjectsFromStream({
-      readStream,
-      objectLimit: 5,
-      overwrite: false,
-      savedObjectsClient,
-      typeRegistry: createTypeRegistryMock(supportedTypes),
-    });
-    expect(result).toMatchInlineSnapshot(`
-      Object {
-        "errors": Array [
-          Object {
-            "error": Object {
-              "type": "unsupported_type",
-            },
-            "id": "1",
-            "title": "my title",
-            "type": "wigwags",
-          },
-        ],
-        "success": false,
-        "successCount": 4,
-      }
-    `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-      [MockFunction] {
-        "calls": Array [
-          Array [
-            Array [
-              Object {
-                "attributes": Object {
-                  "title": "My Index Pattern",
-                },
-                "id": "1",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "index-pattern",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Search",
-                },
-                "id": "2",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "search",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Visualization",
-                },
-                "id": "3",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "visualization",
-              },
-              Object {
-                "attributes": Object {
-                  "title": "My Dashboard",
-                },
-                "id": "4",
-                "migrationVersion": Object {},
-                "references": Array [],
-                "type": "dashboard",
-              },
-            ],
-            Object {
-              "namespace": undefined,
-              "overwrite": false,
-            },
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      }
-    `);
   });
 });

@@ -29,6 +29,10 @@ export interface SavedObjectsImportRetry {
   type: string;
   id: string;
   overwrite: boolean;
+  /**
+   * The object ID that will be overwritten. Only used if `overwrite` == true. This is required to resolve ambiguous conflicts.
+   */
+  idToOverwrite?: string;
   replaceReferences: Array<{
     type: string;
     from: string;
@@ -42,6 +46,16 @@ export interface SavedObjectsImportRetry {
  */
 export interface SavedObjectsImportConflictError {
   type: 'conflict';
+}
+
+/**
+ * Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite.
+ * @public
+ */
+export interface SavedObjectsImportAmbiguousConflictError {
+  type: 'ambiguous_conflict';
+  sources: Array<{ id: string; title?: string; updatedAt?: string }>;
+  destinations: Array<{ id: string; title?: string; updatedAt?: string }>;
 }
 
 /**
@@ -88,9 +102,23 @@ export interface SavedObjectsImportError {
   title?: string;
   error:
     | SavedObjectsImportConflictError
+    | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError;
+}
+
+/**
+ * Represents a successful import.
+ * @public
+ */
+export interface SavedObjectsImportSuccess {
+  id: string;
+  type: string;
+  /**
+   * If `newId` is specified, the new object has a new ID that is different from the import ID.
+   */
+  newId?: string;
 }
 
 /**
@@ -100,6 +128,7 @@ export interface SavedObjectsImportError {
 export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
+  successResults?: SavedObjectsImportSuccess[];
   errors?: SavedObjectsImportError[];
 }
 

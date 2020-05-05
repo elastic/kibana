@@ -5,7 +5,11 @@
  */
 
 import { Payload } from 'boom';
-import { SavedObjectsImportError } from 'src/core/server';
+import {
+  SavedObjectsImportSuccess,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from 'src/core/server';
 
 export interface CopyOptions {
   objects: Array<{ type: string; id: string }>;
@@ -17,7 +21,7 @@ export interface ResolveConflictsOptions {
   objects: Array<{ type: string; id: string }>;
   includeReferences: boolean;
   retries: {
-    [spaceId: string]: Array<{ type: string; id: string; overwrite: boolean }>;
+    [spaceId: string]: Array<Omit<SavedObjectsImportRetry, 'replaceReferences'>>;
   };
 }
 
@@ -25,6 +29,7 @@ export interface CopyResponse {
   [spaceId: string]: {
     success: boolean;
     successCount: number;
+    successResults?: SavedObjectsImportSuccess[];
     errors?: Array<SavedObjectsImportError | Payload>;
   };
 }

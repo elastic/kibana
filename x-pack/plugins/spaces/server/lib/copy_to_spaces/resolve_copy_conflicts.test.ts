@@ -7,6 +7,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsExportOptions,
+  SavedObjectsImportSuccess,
 } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { Readable } from 'stream';
@@ -77,6 +78,9 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
           const response: SavedObjectsImportResponse = {
             success: true,
             successCount: setupOpts.objects.length,
+            successResults: [
+              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
+            ],
           };
 
           return response;
@@ -152,11 +156,17 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                                                     "errors": undefined,
                                                     "success": true,
                                                     "successCount": 3,
+                                                    "successResults": Array [
+                                                      "Some success(es) occurred!",
+                                                    ],
                                                   },
                                                   "destination2": Object {
                                                     "errors": undefined,
                                                     "success": true,
                                                     "successCount": 3,
+                                                    "successResults": Array [
+                                                      "Some success(es) occurred!",
+                                                    ],
                                                   },
                                                 }
                                 `);
@@ -388,6 +398,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
         return Promise.resolve({
           success: true,
           successCount: 3,
+          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         });
       },
     });
@@ -446,11 +457,17 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
                       "errors": undefined,
                       "success": true,
                       "successCount": 3,
+                      "successResults": Array [
+                        "Some success(es) occurred!",
+                      ],
                     },
                     "non-existent-space": Object {
                       "errors": undefined,
                       "success": true,
                       "successCount": 3,
+                      "successResults": Array [
+                        "Some success(es) occurred!",
+                      ],
                     },
                   }
             `);

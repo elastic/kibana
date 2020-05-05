@@ -18,13 +18,14 @@
  */
 
 import { collectSavedObjects } from './collect_saved_objects';
-import { extractErrors } from './extract_errors';
 import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
 } from './types';
 import { validateReferences } from './validate_references';
+import { checkConflicts } from './check_conflicts';
+import { createSavedObjects } from './create_saved_objects';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -51,35 +52,37 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
 
   // Validate references
-  const { filteredObjects, errors: validationErrors } = await validateReferences(
+  const validateReferencesResult = await validateReferences(
     objectsFromStream,
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...validationErrors];
+  errorAccumulator = [...errorAccumulator, ...validateReferencesResult.errors];
 
-  // Exit early if no objects to import
-  if (filteredObjects.length === 0) {
-    return {
-      success: errorAccumulator.length === 0,
-      successCount: 0,
-      ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
-    };
-  }
+  // Check multi-namespace object types for regular conflicts and ambiguous conflicts
+  const checkConflictsOptions = { savedObjectsClient, typeRegistry, namespace };
+  const { filteredObjects, errors: conflictErrors, importIdMap } = await checkConflicts(
+    validateReferencesResult.filteredObjects,
+    checkConflictsOptions
+  );
+  errorAccumulator = [...errorAccumulator, ...conflictErrors];
 
   // Create objects in bulk
-  const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
-    overwrite,
-    namespace,
+  const createSavedObjectsOptions = { savedObjectsClient, importIdMap, overwrite, namespace };
+  const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+    filteredObjects,
+    createSavedObjectsOptions
+  );
+  errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
+
+  const successResults = createdObjects.map(({ type, id, newId }) => {
+    return { type, id, ...(newId && { newId }) };
   });
-  errorAccumulator = [
-    ...errorAccumulator,
-    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
-  ];
 
   return {
+    successCount: createdObjects.length,
     success: errorAccumulator.length === 0,
-    successCount: bulkCreateResult.saved_objects.filter((obj) => !obj.error).length,
-    ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
+    ...(successResults.length && { successResults }),
+    ...(errorAccumulator.length && { errors: errorAccumulator }),
   };
 }

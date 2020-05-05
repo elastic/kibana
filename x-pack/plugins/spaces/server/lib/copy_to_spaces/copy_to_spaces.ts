@@ -60,6 +60,7 @@ export function copySavedObjectsToSpacesFactory(
       return {
         success: importResponse.success,
         successCount: importResponse.successCount,
+        successResults: importResponse.successResults,
         errors: importResponse.errors,
       };
     } catch (error) {

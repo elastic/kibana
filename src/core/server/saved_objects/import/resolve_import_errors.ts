@@ -18,7 +18,6 @@
  */
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
-import { extractErrors } from './extract_errors';
 import { splitOverwrites } from './split_overwrites';
 import {
   SavedObjectsImportError,
@@ -27,6 +26,9 @@ import {
 } from './types';
 import { validateReferences } from './validate_references';
 import { validateRetries } from './validate_retries';
+import { createSavedObjects } from './create_saved_objects';
+import { getImportIdMapForRetries } from './check_conflicts';
+import { SavedObject } from '../types';
 
 /**
  * Resolve and return saved object import errors.
@@ -86,40 +88,36 @@ export async function resolveSavedObjectsImportErrors({
   }
 
   // Validate references
-  const { filteredObjects, errors: validationErrors } = await validateReferences(
+  const { filteredObjects, errors: referenceErrors } = await validateReferences(
     objectsToResolve,
     savedObjectsClient,
     namespace
   );
-  errorAccumulator = [...errorAccumulator, ...validationErrors];
+  errorAccumulator = [...errorAccumulator, ...referenceErrors];
+
+  // Check multi-namespace object types for regular conflicts and ambiguous conflicts
+  const importIdMap = await getImportIdMapForRetries(filteredObjects, { typeRegistry, retries });
 
   // Bulk create in two batches, overwrites and non-overwrites
+  let successResults: Array<{ type: string; id: string; newId?: string }> = [];
+  const bulkCreateObjects = async (objects: Array<SavedObject<unknown>>, overwrite?: boolean) => {
+    const options = { savedObjectsClient, importIdMap, namespace, overwrite };
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(objects, options);
+    errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
+    successCount += createdObjects.length;
+    successResults = [
+      ...successResults,
+      ...createdObjects.map(({ type, id, newId }) => ({ type, id, ...(newId && { newId }) })),
+    ];
+  };
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
-  if (objectsToOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
-      overwrite: true,
-      namespace,
-    });
-    errorAccumulator = [
-      ...errorAccumulator,
-      ...extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite),
-    ];
-    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
-  }
-  if (objectsToNotOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite, {
-      namespace,
-    });
-    errorAccumulator = [
-      ...errorAccumulator,
-      ...extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite),
-    ];
-    successCount += bulkCreateResult.saved_objects.filter((obj) => !obj.error).length;
-  }
+  await bulkCreateObjects(objectsToOverwrite, true);
+  await bulkCreateObjects(objectsToNotOverwrite);
 
   return {
     successCount,
     success: errorAccumulator.length === 0,
-    ...(errorAccumulator.length ? { errors: errorAccumulator } : {}),
+    ...(successResults.length && { successResults }),
+    ...(errorAccumulator.length && { errors: errorAccumulator }),
   };
 }

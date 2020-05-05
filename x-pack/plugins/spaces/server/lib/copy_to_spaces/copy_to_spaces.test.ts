@@ -7,6 +7,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
   SavedObjectsExportOptions,
+  SavedObjectsImportSuccess,
 } from 'src/core/server';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 import { Readable } from 'stream';
@@ -76,6 +77,9 @@ describe('copySavedObjectsToSpaces', () => {
           const response: SavedObjectsImportResponse = {
             success: true,
             successCount: setupOpts.objects.length,
+            successResults: [
+              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
+            ],
           };
 
           return Promise.resolve(response);
@@ -136,11 +140,17 @@ describe('copySavedObjectsToSpaces', () => {
                                                                             "errors": undefined,
                                                                             "success": true,
                                                                             "successCount": 3,
+                                                                            "successResults": Array [
+                                                                              "Some success(es) occurred!",
+                                                                            ],
                                                                           },
                                                                           "destination2": Object {
                                                                             "errors": undefined,
                                                                             "success": true,
                                                                             "successCount": 3,
+                                                                            "successResults": Array [
+                                                                              "Some success(es) occurred!",
+                                                                            ],
                                                                           },
                                                                         }
                                                 `);
@@ -358,6 +368,7 @@ describe('copySavedObjectsToSpaces', () => {
         return Promise.resolve({
           success: true,
           successCount: 3,
+          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         });
       },
     });
@@ -398,11 +409,17 @@ describe('copySavedObjectsToSpaces', () => {
                             "errors": undefined,
                             "success": true,
                             "successCount": 3,
+                            "successResults": Array [
+                              "Some success(es) occurred!",
+                            ],
                           },
                           "non-existent-space": Object {
                             "errors": undefined,
                             "success": true,
                             "successCount": 3,
+                            "successResults": Array [
+                              "Some success(es) occurred!",
+                            ],
                           },
                         }
                 `);

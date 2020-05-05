@@ -17,18 +17,9 @@
  * under the License.
  */
 
-export { importSavedObjectsFromStream } from './import_saved_objects';
-export { resolveSavedObjectsImportErrors } from './resolve_import_errors';
-export {
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsImportRetry,
-} from './types';
+const mockUuidv4 = jest.fn().mockReturnValue('uuidv4');
+jest.mock('uuid', () => ({
+  v4: mockUuidv4,
+}));
+
+export { mockUuidv4 };

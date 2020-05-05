@@ -101,11 +101,21 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
               },
             }),
             schema.arrayOf(
-              schema.object({
-                type: schema.string(),
-                id: schema.string(),
-                overwrite: schema.boolean({ defaultValue: false }),
-              })
+              schema.object(
+                {
+                  type: schema.string(),
+                  id: schema.string(),
+                  overwrite: schema.boolean({ defaultValue: false }),
+                  idToOverwrite: schema.maybe(schema.string()),
+                },
+                {
+                  validate: (object) => {
+                    if (object.idToOverwrite && !object.overwrite) {
+                      return 'cannot use [idToOverwrite] without [overwrite]';
+                    }
+                  },
+                }
+              )
             )
           ),
           objects: schema.arrayOf(
