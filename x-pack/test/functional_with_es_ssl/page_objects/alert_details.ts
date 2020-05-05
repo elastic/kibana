@@ -70,12 +70,10 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
         const muteAlertInstanceButton = await testSubjects.find(
           `muteAlertInstanceButton_${instance}`
         );
-        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('checked')}`);
-        expect(await muteAlertInstanceButton.getAttribute('checked')).to.eql(
-          isMuted ? 'true' : null
+        log.debug(`checked:${await muteAlertInstanceButton.getAttribute('aria-checked')}`);
+        expect(await muteAlertInstanceButton.getAttribute('aria-checked')).to.eql(
+          isMuted ? 'true' : 'false'
         );
-
-        expect(await testSubjects.exists(`mutedAlertInstanceLabel_${instance}`)).to.eql(isMuted);
       });
     },
     async ensureAlertInstanceExistance(instance: string, shouldExist: boolean) {

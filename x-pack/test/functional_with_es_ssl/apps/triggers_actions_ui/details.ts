@@ -80,23 +80,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the alert', async () => {
-        const enableSwitch = await testSubjects.find('enableSwitch');
+        const disableSwitch = await testSubjects.find('disableSwitch');
 
-        const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('true');
+        const isChecked = await disableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
 
-        await enableSwitch.click();
+        await disableSwitch.click();
 
-        const enabledSwitchAfterDisabling = await testSubjects.find('enableSwitch');
-        const isCheckedAfterDisabling = await enabledSwitchAfterDisabling.getAttribute(
+        const disableSwitchAfterDisabling = await testSubjects.find('disableSwitch');
+        const isCheckedAfterDisabling = await disableSwitchAfterDisabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('false');
+        expect(isCheckedAfterDisabling).to.eql('true');
       });
 
       it('shouldnt allow you to mute a disabled alert', async () => {
-        const disabledEnableSwitch = await testSubjects.find('enableSwitch');
-        expect(await disabledEnableSwitch.getAttribute('aria-checked')).to.eql('false');
+        const disabledDisableSwitch = await testSubjects.find('disableSwitch');
+        expect(await disabledDisableSwitch.getAttribute('aria-checked')).to.eql('true');
 
         const muteSwitch = await testSubjects.find('muteSwitch');
         expect(await muteSwitch.getAttribute('aria-checked')).to.eql('false');
@@ -111,18 +111,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the alert', async () => {
-        const enableSwitch = await testSubjects.find('enableSwitch');
+        const disableSwitch = await testSubjects.find('disableSwitch');
 
-        const isChecked = await enableSwitch.getAttribute('aria-checked');
-        expect(isChecked).to.eql('false');
+        const isChecked = await disableSwitch.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
 
-        await enableSwitch.click();
+        await disableSwitch.click();
 
-        const enabledSwitchAfterReenabling = await testSubjects.find('enableSwitch');
-        const isCheckedAfterDisabling = await enabledSwitchAfterReenabling.getAttribute(
+        const disableSwitchAfterReenabling = await testSubjects.find('disableSwitch');
+        const isCheckedAfterDisabling = await disableSwitchAfterReenabling.getAttribute(
           'aria-checked'
         );
-        expect(isCheckedAfterDisabling).to.eql('true');
+        expect(isCheckedAfterDisabling).to.eql('false');
       });
 
       it('should mute the alert', async () => {
