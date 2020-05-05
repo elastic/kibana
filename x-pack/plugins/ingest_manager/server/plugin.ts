@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  HttpServerInfo,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -42,7 +43,6 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
 } from './routes';
-
 import { IngestManagerConfigType } from '../common';
 import {
   appContextService,
@@ -52,12 +52,14 @@ import {
   AgentService,
 } from './services';
 import { getAgentStatusById } from './services/agents';
+import { CloudSetup } from '../../cloud/server';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export type IngestManagerStartDeps = object;
@@ -67,6 +69,9 @@ export interface IngestManagerAppContext {
   security?: SecurityPluginSetup;
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
+  isProductionMode: boolean;
+  serverInfo?: HttpServerInfo;
+  cloud?: CloudSetup;
 }
 
 export type IngestManagerSetupContract = void;
@@ -100,16 +105,23 @@ export class IngestManagerPlugin
   private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
+  private cloud: CloudSetup | undefined;
+
+  private isProductionMode: boolean;
+  private serverInfo: HttpServerInfo | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
+    this.isProductionMode = this.initializerContext.env.mode.prod;
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+    this.serverInfo = core.http.getServerInfo();
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
     }
+    this.cloud = deps.cloud;
 
     registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
@@ -184,6 +196,9 @@ export class IngestManagerPlugin
       security: this.security,
       config$: this.config$,
       savedObjects: core.savedObjects,
+      isProductionMode: this.isProductionMode,
+      serverInfo: this.serverInfo,
+      cloud: this.cloud,
     });
     licenseService.start(this.licensing$);
     return {
