@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Must render zoom tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FitToData) />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Must zoom tools and draw filter tools 1`] = `
+<EuiFlexGroup
+  alignItems="flexStart"
+  className="mapToolbarOverlay"
+  direction="column"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem>
+    <Connect(SetViewControl) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(FitToData) />
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <Connect(ToolsControl)
+      geoFields={
+        Array [
+          "coordinates",
+        ]
+      }
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
