@@ -149,10 +149,12 @@ export class ApplicationService {
       let handler: AppMount;
       if (isAppMountDeprecated(app.mount)) {
         handler = this.mountContext!.createHandler(plugin, app.mount);
-        // eslint-disable-next-line no-console
-        console.warn(
-          `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
-        );
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
+          );
+        }
       } else {
         handler = app.mount;
       }

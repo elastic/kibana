@@ -111,8 +111,8 @@ export class ChromeService {
     this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
     const appHidden$ = merge(
-      // For the isVisible$ logic, having no mounted app is equivalent to having an hidden app
-      // in the sense that the chrome UI should now be displayed until an non-chromeless app is mounting or mounted
+      // For the isVisible$ logic, having no mounted app is equivalent to having a hidden app
+      // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
         flatMap(appId =>

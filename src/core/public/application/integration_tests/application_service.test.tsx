@@ -70,7 +70,7 @@ describe('ApplicationService', () => {
         register(Symbol(), {
           id: 'app1',
           title: 'App1',
-          mount: async ({ onAppLeave }: AppMountParameters) => {
+          mount: async ({}: AppMountParameters) => {
             await promise;
             return () => undefined;
           },
@@ -101,7 +101,7 @@ describe('ApplicationService', () => {
         register(Symbol(), {
           id: 'app1',
           title: 'App1',
-          mount: async ({ onAppLeave }: AppMountParameters) => {
+          mount: async ({}: AppMountParameters) => {
             await promise;
             return () => undefined;
           },
