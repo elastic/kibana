@@ -403,13 +403,7 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const {
-          requestedId,
-          rawMigratedDoc: {
-            _source: { type },
-          },
-          esRequestIndex,
-        } = expectedResult.value;
+        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
           bulkResponse.items[esRequestIndex]
         )[0] as any;
@@ -417,12 +411,15 @@ export class SavedObjectsRepository {
         if (error) {
           return {
             id: requestedId,
-            type,
-            error: getBulkOperationError(error, type, requestedId),
+            type: rawMigratedDoc._source.type,
+            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
           };
         }
 
-        return this._serializer.rawToSavedObject(rawResponse);
+        // When method == 'index' the bulkResponse doesn't include the indexed
+        // _source so we return rawMigratedDoc but have to spread rawResponse
+        // to return the latest _seq_no and _primary_term values from ES.
+        return this._serializer.rawToSavedObject({ ...rawMigratedDoc, ...rawResponse });
       }),
     };
   }
