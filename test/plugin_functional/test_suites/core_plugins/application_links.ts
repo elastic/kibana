@@ -60,7 +60,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     });
   };
 
-  describe('TOTO cross-app links', () => {
+  describe('cross-app links', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('applink_start');
       await setNonReloadedFlag();
