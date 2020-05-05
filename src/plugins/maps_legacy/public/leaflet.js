@@ -21,7 +21,7 @@ export let L;
 
 if (!window.hasOwnProperty('L')) {
   require('leaflet/dist/leaflet.css');
-  window.L = module.exports = require('leaflet/dist/leaflet.js');
+  window.L = require('leaflet/dist/leaflet.js');
   window.L.Browser.touch = false;
   window.L.Browser.pointer = false;
 
