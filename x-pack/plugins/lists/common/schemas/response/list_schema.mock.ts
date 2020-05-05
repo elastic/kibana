@@ -11,6 +11,7 @@ import {
   LIST_ID,
   META,
   NAME,
+  TIE_BREAKER,
   TYPE,
   USER,
 } from '../../../common/constants.mock';
@@ -22,7 +23,7 @@ export const getListResponseMock = (): ListSchema => ({
   id: LIST_ID,
   meta: META,
   name: NAME,
-  tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+  tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,

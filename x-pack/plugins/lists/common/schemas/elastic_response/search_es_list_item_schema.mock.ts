@@ -12,6 +12,8 @@ import {
   LIST_ID,
   LIST_INDEX,
   LIST_ITEM_ID,
+  META,
+  TIE_BREAKER,
   USER,
   VALUE,
 } from '../../../common/constants.mock';
@@ -23,8 +25,8 @@ export const getSearchEsListItemMock = (): SearchEsListItemSchema => ({
   ip: VALUE,
   keyword: undefined,
   list_id: LIST_ID,
-  meta: {},
-  tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
+  meta: META,
+  tie_breaker_id: TIE_BREAKER,
   updated_at: DATE_NOW,
   updated_by: USER,
 });

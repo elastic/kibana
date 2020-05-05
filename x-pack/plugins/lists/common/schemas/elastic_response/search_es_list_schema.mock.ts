@@ -12,7 +12,10 @@ import {
   DESCRIPTION,
   LIST_ID,
   LIST_INDEX,
+  META,
   NAME,
+  TIE_BREAKER,
+  TYPE,
   USER,
 } from '../../../common/constants.mock';
 import { getShardMock } from '../../get_shard.mock';
@@ -21,10 +24,10 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
-  meta: {},
+  meta: META,
   name: NAME,
-  tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-  type: 'ip',
+  tie_breaker_id: TIE_BREAKER,
+  type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
 });
