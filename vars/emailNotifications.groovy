@@ -7,6 +7,25 @@ def getFailedBuildParts() {
   return messages.findAll { !!it }.join("\n\n")
 }
 
+def getGitChanges() {
+  def changes = []
+  (currentBuild.changeSets ?: []).each { changeSet ->
+    changeSet.items.each { changes << it }
+  }
+
+  def message = ["<div><strong>Changes</strong></div>"]
+
+  message << changes.take(10).collect {
+    "<div><a href=\"https://github.com/elastic/kibana/commit/${$it.id}\">${it.title}</a></div>"
+  }.join("\n")
+
+  if (changes.size() > 10) {
+    message << "<div>...and ${changes.size()-10} more</div>"
+  }
+
+  return message.join("\n")
+}
+
 def getHeader() {
   def pipelinesUrl = "https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}"
 
@@ -18,14 +37,6 @@ def getHeader() {
     ["Pipelines UI", "<a href=\"${pipelinesUrl}\">${pipelinesUrl}</a>"],
     ["Build Cause", currentBuild.getBuildCauses().collect { "<div>${it.shortDescription}</div>" }.join("\n") ],
   ]
-
-  catchErrors {
-    (currentBuild.changeSets ?: []).each { changeSet ->
-      print "Changeset"
-      print changeSet.items
-      changeSet.items.each { print it.commitId }
-    }
-  }
 
   def rows = info.collect { "<tr><td><strong>${it[0]}</strong>:&nbsp;</td><td>${it[1]}</td></tr>" }
 
@@ -82,6 +93,7 @@ def sendFailedBuild(Map params = [:]) {
       getHeader(),
       params.extra ?: '',
       getFailedBuildParts(),
+      getGitChanges(),
     ]
       .findAll { !!it }
       .join("\n\n")
