@@ -9,6 +9,9 @@ import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import IndexActionConnectorFields from './es_index_connector';
+import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
+import { TypeRegistry } from '../../../type_registry';
+import { DocLinksStart } from 'kibana/public';
 
 jest.mock('../../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),
@@ -20,6 +23,25 @@ jest.mock('../../../../common/index_controls', () => ({
 describe('IndexActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
     const mocks = coreMock.createSetup();
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+    const deps = {
+      toastNotifications: mocks.notifications.toasts,
+      http: mocks.http,
+      capabilities: {
+        ...capabilities,
+        actions: {
+          delete: true,
+          save: true,
+          show: true,
+        },
+      },
+      actionTypeRegistry: {} as TypeRegistry<any>,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
+    };
 
     const { getIndexPatterns } = jest.requireMock('../../../../common/index_controls');
     getIndexPatterns.mockResolvedValueOnce([
@@ -60,13 +82,25 @@ describe('IndexActionConnectorFields renders', () => {
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
-      <IndexActionConnectorFields
-        action={actionConnector}
-        errors={{ index: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        http={mocks.http}
-      />
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+          docLinks: deps!.docLinks,
+        }}
+      >
+        <IndexActionConnectorFields
+          action={actionConnector}
+          errors={{ index: [] }}
+          editActionConfig={() => {}}
+          editActionSecrets={() => {}}
+        />
+      </ActionsConnectorsContextProvider>
     );
 
     await act(async () => {

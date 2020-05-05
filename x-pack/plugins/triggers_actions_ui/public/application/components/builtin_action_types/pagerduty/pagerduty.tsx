@@ -11,7 +11,7 @@ import { PagerDutyActionParams, PagerDutyActionConnector } from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
-export function getActionType(): ActionTypeModel<PagerDutyActionConnector, PagerDutyActionParams> {
+export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
     iconClass: pagerDutySvg,

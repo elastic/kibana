@@ -11,7 +11,7 @@ import { SlackActionConnector } from '../types';
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
 
-beforeAll(() => {
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);

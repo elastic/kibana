@@ -25,13 +25,14 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../../common/index_controls';
+import { useActionsConnectorsContext } from '../../../context/actions_connectors_context';
 
 export const IndexActionConnectorFields = ({
   action,
   editActionConfig,
   errors,
-  http,
 }: ActionConnectorFieldsProps<EsIndexActionConnector>) => {
+  const { http } = useActionsConnectorsContext();
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -39,7 +40,9 @@ export const IndexActionConnectorFields = ({
 
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>([
+    firstFieldOption,
+  ]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   useEffect(() => {

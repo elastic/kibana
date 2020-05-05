@@ -9,10 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
+import { useActionsConnectorsContext } from '../../../context/actions_connectors_context';
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
 >> = ({ errors, action, editActionConfig, editActionSecrets }) => {
+  const { docLinks } = useActionsConnectorsContext();
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -23,7 +25,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
-            defaultMessage: 'API URL',
+            defaultMessage: 'API URL (optional)',
           }
         )}
       >
@@ -47,7 +49,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-pagerduty.html#configuring-pagerduty"
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
             target="_blank"
           >
             <FormattedMessage
@@ -61,7 +63,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
-            defaultMessage: 'Routing key',
+            defaultMessage: 'Integration key',
           }
         )}
       >
