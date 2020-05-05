@@ -96,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(fields.certExpirationThreshold).to.eql(newExpirationThreshold);
     });
 
-    it('changing certificate expiration warning threshold is reflected in settings page', async () => {
+    it('changing certificate expiration threshold is reflected in settings page', async () => {
       const settings = uptimeService.settings;
 
       await settings.go();
