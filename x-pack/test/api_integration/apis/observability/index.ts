@@ -6,11 +6,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('APM specs', () => {
+export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
+  describe('Observability specs', () => {
     loadTestFile(require.resolve('./annotations'));
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./agent_configuration'));
-    loadTestFile(require.resolve('./custom_link'));
   });
 }
