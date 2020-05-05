@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AGG_DELIMITER, AGG_TYPE, JOIN_FIELD_NAME_PREFIX } from './constants';
+import { AGG_DELIMITER, AGG_TYPE, COUNT_PROP_NAME, JOIN_FIELD_NAME_PREFIX } from './constants';
 
-// function in common since its needed by migration
 export function getJoinAggKey({
   aggType,
   aggFieldName,
@@ -15,8 +14,18 @@ export function getJoinAggKey({
   aggType: AGG_TYPE;
   aggFieldName?: string;
   rightSourceId: string;
-}) {
+}): string {
   const metricKey =
     aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : aggType;
   return `${JOIN_FIELD_NAME_PREFIX}${metricKey}__${rightSourceId}`;
+}
+
+export function getSourceAggKey({
+  aggType,
+  aggFieldName,
+}: {
+  aggType: AGG_TYPE;
+  aggFieldName?: string;
+}): string {
+  return aggType !== AGG_TYPE.COUNT ? `${aggType}${AGG_DELIMITER}${aggFieldName}` : COUNT_PROP_NAME;
 }

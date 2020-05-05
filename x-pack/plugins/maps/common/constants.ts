@@ -57,6 +57,7 @@ export enum SOURCE_TYPES {
   ES_GEO_GRID = 'ES_GEO_GRID',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
+  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
