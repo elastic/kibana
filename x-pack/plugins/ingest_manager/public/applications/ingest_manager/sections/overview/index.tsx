@@ -51,7 +51,6 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
                   defaultMessage="Ingest Manager"
                 />
                 <AlphaBadge
-                  iconType="beaker"
                   label={i18n.translate('xpack.ingestManager.alphaBadge.labelText', {
                     defaultMessage: 'Experimental',
                   })}

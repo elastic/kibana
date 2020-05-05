@@ -20,21 +20,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
+import { MapCenter } from '../../../common/descriptor_types';
 
 interface Props {
   cancelChanges: () => void;
+  center: MapCenter;
   hasMapSettingsChanges: boolean;
   keepChanges: () => void;
   settings: MapSettings;
-  updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => void;
+  updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => void;
+  zoom: number;
 }
 
 export function MapSettingsPanel({
   cancelChanges,
+  center,
   hasMapSettingsChanges,
   keepChanges,
   settings,
   updateMapSetting,
+  zoom,
 }: Props) {
   // TODO move common text like Cancel and Close to common i18n translation
   const closeBtnLabel = hasMapSettingsChanges
@@ -60,7 +65,12 @@ export function MapSettingsPanel({
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
-          <NavigationPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <NavigationPanel
+            center={center}
+            settings={settings}
+            updateMapSetting={updateMapSetting}
+            zoom={zoom}
+          />
           <EuiSpacer size="s" />
           <SpatialFiltersPanel settings={settings} updateMapSetting={updateMapSetting} />
         </div>
