@@ -1427,6 +1427,11 @@
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
+"@elastic/static-fs@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/static-fs/-/static-fs-1.0.0.tgz#9fc762aabc6a19f59807590f1fb3761377b80123"
+  integrity sha512-mDPt4NDn2lROrb7kMYsooOdjSv64AjRGJRxYgtAYL/q/gijzHsote4qWCvaMIZVCkRI1n+Xfs2kHoaZpVcy2sA==
+
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
@@ -27789,11 +27794,6 @@ static-extend@^0.1.1:
   dependencies:
     define-property "^0.2.5"
     object-copy "^0.1.0"
-
-static-fs@1.10.0:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/static-fs/-/static-fs-1.10.0.tgz#3f80d4047c5d575ac9d70007961d2fceae3c9a19"
-  integrity sha512-MmlegjZZXsLiKO51zFHvwJIluZEeRb0UwqFBEz1tweHPPa4fCouTVuLusCo1JMEefzVyKuPl/u7iJd5FkYLDDA==
 
 static-module@^2.2.0:
   version "2.2.5"
