@@ -11,8 +11,7 @@ import { ActionParamsProps } from '../../../../types';
 import { EmailActionParams } from '../types';
 import { AddMessageVariables } from '../../add_message_variables';
 
-// eslint-disable-next-line import/no-default-export
-export default ({
+export const EmailParamsFields = ({
   actionParams,
   editAction,
   index,
@@ -263,3 +262,6 @@ export default ({
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { EmailParamsFields as default };

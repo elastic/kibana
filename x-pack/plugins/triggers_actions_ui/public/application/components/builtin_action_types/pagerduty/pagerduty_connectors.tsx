@@ -20,87 +20,11 @@ import {
   ActionConnectorFieldsProps,
   ValidationResult,
   ActionParamsProps,
-} from '../../../types';
-import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
-import pagerDutySvg from './pagerduty.svg';
-import { AddMessageVariables } from '../add_message_variables';
-import { hasMustacheTokens } from '../../lib/has_mustache_tokens';
-
-export function getActionType(): ActionTypeModel {
-  return {
-    id: '.pagerduty',
-    iconClass: pagerDutySvg,
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
-      {
-        defaultMessage: 'Send an event in PagerDuty.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.actionTypeTitle',
-      {
-        defaultMessage: 'Send to PagerDuty',
-      }
-    ),
-    validateConnector: (action: PagerDutyActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
-        routingKey: new Array<string>(),
-      };
-      validationResult.errors = errors;
-      if (!action.secrets.routingKey) {
-        errors.routingKey.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredRoutingKeyText',
-            {
-              defaultMessage: 'A routing key is required.',
-            }
-          )
-        );
-      }
-      return validationResult;
-    },
-    validateParams: (actionParams: PagerDutyActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
-        summary: new Array<string>(),
-        timestamp: new Array<string>(),
-      };
-      validationResult.errors = errors;
-      if (!actionParams.summary?.length) {
-        errors.summary.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.requiredSummaryText',
-            {
-              defaultMessage: 'Summary is required.',
-            }
-          )
-        );
-      }
-      if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
-        if (isNaN(Date.parse(actionParams.timestamp))) {
-          const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
-          errors.timestamp.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
-              {
-                defaultMessage:
-                  'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
-                values: {
-                  nowShortFormat,
-                  nowLongFormat,
-                },
-              }
-            )
-          );
-        }
-      }
-      return validationResult;
-    },
-    actionConnectorFields: PagerDutyActionConnectorFields,
-    actionParamsFields: PagerDutyParamsFields,
-  };
-}
+} from '../../../../types';
+import { PagerDutyActionParams, PagerDutyActionConnector } from '.././types';
+import pagerDutySvg from '.././pagerduty.svg';
+import { AddMessageVariables } from '../../add_message_variables';
+import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
@@ -561,10 +485,5 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   );
 };
 
-function getValidTimestampExamples() {
-  const now = moment();
-  return {
-    nowShortFormat: now.format('YYYY-MM-DD'),
-    nowLongFormat: now.format('YYYY-MM-DD h:mm:ss'),
-  };
-}
+// eslint-disable-next-line import/no-default-export
+export { PagerDutyActionConnectorFields as default };

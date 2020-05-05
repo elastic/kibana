@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFormRow,
   EuiSwitch,
   EuiSpacer,
-  EuiCodeEditor,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiSelect,
@@ -17,68 +16,22 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { useXJsonMode } from '../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
-import {
-  ActionTypeModel,
-  ActionConnectorFieldsProps,
-  ValidationResult,
-  ActionParamsProps,
-} from '../../../types';
-import { IndexActionParams, EsIndexActionConnector } from './types';
-import { getTimeFieldOptions } from '../../../common/lib/get_time_options';
+import { ActionConnectorFieldsProps } from '../../../../types';
+import { EsIndexActionConnector } from '.././types';
+import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
 import {
   firstFieldOption,
   getFields,
   getIndexOptions,
   getIndexPatterns,
-} from '../../../common/index_controls';
-import { AddMessageVariables } from '../add_message_variables';
+} from '../../../../common/index_controls';
 
-export function getActionType(): ActionTypeModel {
-  return {
-    id: '.index',
-    iconClass: 'indexOpen',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.selectMessageText',
-      {
-        defaultMessage: 'Index data into Elasticsearch.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.actionTypeTitle',
-      {
-        defaultMessage: 'Index data',
-      }
-    ),
-    validateConnector: (action: EsIndexActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
-        index: new Array<string>(),
-      };
-      validationResult.errors = errors;
-      if (!action.config.index) {
-        errors.index.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexText',
-            {
-              defaultMessage: 'Index is required.',
-            }
-          )
-        );
-      }
-      return validationResult;
-    },
-    actionConnectorFields: IndexActionConnectorFields,
-    actionParamsFields: IndexParamsFields,
-    validateParams: (): ValidationResult => {
-      return { errors: {} };
-    },
-  };
-}
-
-const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+export const IndexActionConnectorFields = ({
+  action,
+  editActionConfig,
+  errors,
+  http,
+}: ActionConnectorFieldsProps<EsIndexActionConnector>) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -269,74 +222,11 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   );
 };
 
-const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionParams>> = ({
-  actionParams,
-  index,
-  editAction,
-  messageVariables,
-}) => {
-  const { documents } = actionParams;
-  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
-    documents && documents.length > 0 ? documents[0] : null
-  );
-  const onSelectMessageVariable = (variable: string) => {
-    const value = (xJson ?? '').concat(` {{${variable}}}`);
-    setXJson(value);
-    // Keep the documents in sync with the editor content
-    onDocumentsChange(convertToJson(value));
-  };
-
-  function onDocumentsChange(updatedDocuments: string) {
-    try {
-      const documentsJSON = JSON.parse(updatedDocuments);
-      editAction('documents', [documentsJSON], index);
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-  return (
-    <Fragment>
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
-          {
-            defaultMessage: 'Document to index',
-          }
-        )}
-        labelAppend={
-          <AddMessageVariables
-            messageVariables={messageVariables}
-            onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
-            paramsProperty="documents"
-          />
-        }
-      >
-        <EuiCodeEditor
-          mode={xJsonMode}
-          width="100%"
-          height="200px"
-          theme="github"
-          data-test-subj="actionIndexDoc"
-          aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
-            {
-              defaultMessage: 'Code editor',
-            }
-          )}
-          value={xJson}
-          onChange={(xjson: string) => {
-            setXJson(xjson);
-            // Keep the documents in sync with the editor content
-            onDocumentsChange(convertToJson(xjson));
-          }}
-        />
-      </EuiFormRow>
-    </Fragment>
-  );
-};
-
 // if the string == null or is empty, return null, else return string
 function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
 }
+
+// eslint-disable-next-line import/no-default-export
+export { IndexActionConnectorFields as default };

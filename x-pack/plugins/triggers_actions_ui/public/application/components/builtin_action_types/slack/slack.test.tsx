@@ -5,10 +5,10 @@
  */
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../type_registry';
-import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionParamsProps } from '../../../types';
-import { SlackActionParams, SlackActionConnector } from './types';
+import { TypeRegistry } from '../../../type_registry';
+import { registerBuiltInActionTypes } from '.././index';
+import { ActionTypeModel, ActionParamsProps } from '../../../../types';
+import { SlackActionParams, SlackActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
@@ -74,70 +74,6 @@ describe('slack action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { message: [] },
     });
-  });
-});
-
-describe('SlackActionFields renders', () => {
-  test('all connector fields is rendered', () => {
-    expect(actionTypeModel.actionConnectorFields).not.toBeNull();
-    if (!actionTypeModel.actionConnectorFields) {
-      return;
-    }
-    const ConnectorFields = actionTypeModel.actionConnectorFields;
-    const actionConnector = {
-      secrets: {
-        webhookUrl: 'http:\\test',
-      },
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
-      config: {},
-    } as SlackActionConnector;
-    const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="slackWebhookUrlInput"]')
-        .first()
-        .prop('value')
-    ).toBe('http:\\test');
-  });
-});
-
-describe('SlackParamsFields renders', () => {
-  test('all params fields is rendered', () => {
-    expect(actionTypeModel.actionParamsFields).not.toBeNull();
-    if (!actionTypeModel.actionParamsFields) {
-      return;
-    }
-    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
-      ActionParamsProps<SlackActionParams>
-    >;
-    const actionParams = {
-      message: 'test message',
-    };
-    const wrapper = mountWithIntl(
-      <ParamsFields
-        actionParams={actionParams}
-        errors={{ message: [] }}
-        editAction={() => {}}
-        index={0}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="slackMessageTextArea"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="slackMessageTextArea"]')
-        .first()
-        .prop('value')
-    ).toStrictEqual('test message');
   });
 
   test('params validation fails when message is not valid', () => {

@@ -17,8 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
-// eslint-disable-next-line import/no-default-export
-export default ({
+export const EmailActionConnectorFields = ({
   action,
   editActionConfig,
   editActionSecrets,
@@ -208,3 +207,6 @@ function nullableString(str: string | null | undefined) {
   if (str == null || str.trim() === '') return null;
   return str;
 }
+
+// eslint-disable-next-line import/no-default-export
+export { EmailActionConnectorFields as default };

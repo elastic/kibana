@@ -5,10 +5,10 @@
  */
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../type_registry';
-import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionParamsProps } from '../../../types';
-import { WebhookActionParams, WebhookActionConnector } from './types';
+import { TypeRegistry } from '../../../type_registry';
+import { registerBuiltInActionTypes } from '.././index';
+import { ActionTypeModel, ActionParamsProps } from '../../../../types';
+import { WebhookActionParams, WebhookActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
@@ -90,79 +90,6 @@ describe('webhook action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: { body: [] },
     });
-  });
-});
-
-describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
-    expect(actionTypeModel.actionConnectorFields).not.toBeNull();
-    if (!actionTypeModel.actionConnectorFields) {
-      return;
-    }
-    const ConnectorFields = actionTypeModel.actionConnectorFields;
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.webhook',
-      isPreconfigured: false,
-      name: 'webhook',
-      config: {
-        method: 'PUT',
-        url: 'http:\\test',
-        headers: { 'content-type': 'text' },
-      },
-    } as WebhookActionConnector;
-    const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ url: [], method: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
-    wrapper
-      .find('[data-test-subj="webhookViewHeadersSwitch"]')
-      .first()
-      .simulate('click');
-    expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
-  });
-});
-
-describe('WebhookParamsFields renders', () => {
-  test('all params fields is rendered', () => {
-    expect(actionTypeModel.actionParamsFields).not.toBeNull();
-    if (!actionTypeModel.actionParamsFields) {
-      return;
-    }
-    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
-      ActionParamsProps<WebhookActionParams>
-    >;
-    const actionParams = {
-      body: 'test message',
-    };
-    const wrapper = mountWithIntl(
-      <ParamsFields
-        actionParams={actionParams}
-        errors={{ body: [] }}
-        editAction={() => {}}
-        index={0}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="webhookBodyEditor"]')
-        .first()
-        .prop('value')
-    ).toStrictEqual('test message');
-    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });
 
   test('params validation fails when body is not valid', () => {
