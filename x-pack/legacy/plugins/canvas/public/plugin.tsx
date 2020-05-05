@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
   Plugin,
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
+  AppUpdater,
 } from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
@@ -61,6 +63,7 @@ export type CanvasStart = void;
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
 
@@ -71,10 +74,12 @@ export class CanvasPlugin
 
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.analyze,
+      defaultPath: '#',
       id: 'canvas',
       title: 'Canvas',
       euiIconType: 'canvasApp',
       order: 0, // need to figure out if this is the proper order for us
+      updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
@@ -82,7 +87,14 @@ export class CanvasPlugin
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
+        const canvasStore = await initializeCanvas(
+          core,
+          coreStart,
+          plugins,
+          depsStart,
+          registries,
+          this.appUpdater
+        );
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 

@@ -8,12 +8,14 @@ import { CoreSetup, CoreStart } from '../../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
+import { navLinkServiceFactory } from './nav_link';
 
 export type CanvasServiceFactory<Service> = (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
-  canvasStartPlugins: CanvasStartDeps
+  canvasStartPlugins: CanvasStartDeps,
+  appUpdater: any
 ) => Service;
 
 class CanvasServiceProvider<Service> {
@@ -28,9 +30,16 @@ class CanvasServiceProvider<Service> {
     coreSetup: CoreSetup,
     coreStart: CoreStart,
     canvasSetupPlugins: CanvasSetupDeps,
-    canvasStartPlugins: CanvasStartDeps
+    canvasStartPlugins: CanvasStartDeps,
+    appUpdater: any
   ) {
-    this.service = this.factory(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins);
+    this.service = this.factory(
+      coreSetup,
+      coreStart,
+      canvasSetupPlugins,
+      canvasStartPlugins,
+      appUpdater
+    );
   }
 
   getService(): Service {
@@ -51,20 +60,24 @@ export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? 
 export const services = {
   notify: new CanvasServiceProvider(notifyServiceFactory),
   platform: new CanvasServiceProvider(platformServiceFactory),
+  navLink: new CanvasServiceProvider(navLinkServiceFactory),
 };
 
 export interface CanvasServices {
   notify: ServiceFromProvider<typeof services.notify>;
+  platform: ServiceFromProvider<typeof services.platform>;
+  navLink: ServiceFromProvider<typeof services.navLink>;
 }
 
 export const startServices = (
   coreSetup: CoreSetup,
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
-  canvasStartPlugins: CanvasStartDeps
+  canvasStartPlugins: CanvasStartDeps,
+  appUpdater: any
 ) => {
   Object.entries(services).forEach(([key, provider]) =>
-    provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins)
+    provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater)
   );
 };
 
@@ -72,4 +85,8 @@ export const stopServices = () => {
   Object.entries(services).forEach(([key, provider]) => provider.stop());
 };
 
-export const { notify: notifyService, platform: platformService } = services;
+export const {
+  notify: notifyService,
+  platform: platformService,
+  navLink: navLinkService,
+} = services;
