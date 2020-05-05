@@ -13,7 +13,6 @@ import {
   MlSetupDependencies,
   MlStartDependencies,
 } from './plugin';
-import { getMetricChangeDescription } from './application/formatters/metric_change_description';
 
 export const plugin: PluginInitializer<
   MlPluginSetup,
