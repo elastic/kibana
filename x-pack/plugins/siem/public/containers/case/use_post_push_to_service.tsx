@@ -163,7 +163,6 @@ export const formatServiceRequestData = (
     updatedAt,
     updatedBy,
   } = myCase;
-
   const actualExternalService = caseServices[connectorId] ?? null;
 
   return {
