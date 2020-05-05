@@ -13,6 +13,7 @@ import { Anomaly } from '../../components/ml/types';
 import { HostsTableType } from '../../store/hosts/model';
 import { AnomaliesQueryTabBody } from '../../containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
+import { UpdateDateRange } from '../../components/charts/common';
 
 import {
   HostsQueryTabBody,
@@ -55,8 +56,12 @@ export const HostsTabs = memo<HostsTabsProps>(
         },
         [setAbsoluteRangeDatePicker]
       ),
-      updateDateRange: useCallback(
-        (min: number, max: number) => {
+      updateDateRange: useCallback<UpdateDateRange>(
+        ({ x }) => {
+          if (!x) {
+            return;
+          }
+          const [min, max] = x;
           setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
         },
         [setAbsoluteRangeDatePicker]

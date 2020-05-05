@@ -143,8 +143,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       },
     });
 
-    uiActions.registerAction(action);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, action);
+    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
 
     share.register(csvReportingProvider({ apiClient, toasts, license$ }));
     share.register(

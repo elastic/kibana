@@ -239,6 +239,9 @@ export class ApplicationService {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
 
+    const httpLoadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(httpLoadingCount$);
+
     this.registrationClosed = true;
     window.addEventListener('beforeunload', this.onBeforeUnload);
 
@@ -304,6 +307,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
+            setIsMounting={isMounting => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
       },
