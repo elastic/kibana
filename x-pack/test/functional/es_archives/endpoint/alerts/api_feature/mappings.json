@@ -389,7 +389,8 @@
                   "type": "nested"
                 },
                 "file_extension": {
-                  "type": "long"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "project_file": {
                   "properties": {

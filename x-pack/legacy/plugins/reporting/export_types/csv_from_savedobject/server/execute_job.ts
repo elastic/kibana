@@ -58,7 +58,20 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
       let decryptedHeaders: Record<string, unknown>;
       const serializedEncryptedHeaders = job.headers;
       try {
-        decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
+        if (typeof serializedEncryptedHeaders !== 'string') {
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
+        }
+        decryptedHeaders = (await crypto.decrypt(serializedEncryptedHeaders)) as Record<
+          string,
+          unknown
+        >;
       } catch (err) {
         jobLogger.error(err);
         throw new Error(

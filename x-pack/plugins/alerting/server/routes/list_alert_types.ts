@@ -26,9 +26,9 @@ export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState)
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
+      req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });

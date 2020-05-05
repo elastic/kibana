@@ -21,7 +21,7 @@ import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '../../../../common';
 import { AggGroupNames } from '../agg_groups';
 import { IAggConfigs } from '../agg_configs';
-import { IBucketAggConfig } from './_bucket_agg_type';
+import { IBucketAggConfig } from './bucket_agg_type';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

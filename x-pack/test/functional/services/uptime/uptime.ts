@@ -11,6 +11,8 @@ import { UptimeCommonProvider } from './common';
 import { UptimeMonitorProvider } from './monitor';
 import { UptimeNavigationProvider } from './navigation';
 import { UptimeAlertsProvider } from './alerts';
+import { UptimeMLAnomalyProvider } from './ml_anomaly';
+import { UptimeCertProvider } from './certificates';
 
 export function UptimeProvider(context: FtrProviderContext) {
   const common = UptimeCommonProvider(context);
@@ -18,6 +20,8 @@ export function UptimeProvider(context: FtrProviderContext) {
   const monitor = UptimeMonitorProvider(context);
   const navigation = UptimeNavigationProvider(context);
   const alerts = UptimeAlertsProvider(context);
+  const ml = UptimeMLAnomalyProvider(context);
+  const cert = UptimeCertProvider(context);
 
   return {
     common,
@@ -25,5 +29,7 @@ export function UptimeProvider(context: FtrProviderContext) {
     monitor,
     navigation,
     alerts,
+    ml,
+    cert,
   };
 }

@@ -6,18 +6,18 @@
 import { KibanaRequest } from 'kibana/server';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import { EndpointAppContext } from '../../types';
-import { EndpointAppConstants } from '../../../common/types';
 
 export const kibanaRequestToMetadataListESQuery = async (
   request: KibanaRequest<any, any, any>,
-  endpointAppContext: EndpointAppContext
+  endpointAppContext: EndpointAppContext,
+  index: string
 ): Promise<Record<string, any>> => {
   const pagingProperties = await getPagingProperties(request, endpointAppContext);
   return {
     body: {
       query: buildQueryBody(request),
       collapse: {
-        field: 'host.id.keyword',
+        field: 'host.id',
         inner_hits: {
           name: 'most_recent',
           size: 1,
@@ -27,7 +27,7 @@ export const kibanaRequestToMetadataListESQuery = async (
       aggs: {
         total: {
           cardinality: {
-            field: 'host.id.keyword',
+            field: 'host.id',
           },
         },
       },
@@ -41,7 +41,7 @@ export const kibanaRequestToMetadataListESQuery = async (
     },
     from: pagingProperties.pageIndex * pagingProperties.pageSize,
     size: pagingProperties.pageSize,
-    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+    index,
   };
 };
 
@@ -74,12 +74,12 @@ function buildQueryBody(request: KibanaRequest<any, any, any>): Record<string, a
   };
 }
 
-export function getESQueryHostMetadataByID(hostID: string) {
+export function getESQueryHostMetadataByID(hostID: string, index: string) {
   return {
     body: {
       query: {
         match: {
-          'host.id.keyword': hostID,
+          'host.id': hostID,
         },
       },
       sort: [
@@ -91,6 +91,6 @@ export function getESQueryHostMetadataByID(hostID: string) {
       ],
       size: 1,
     },
-    index: EndpointAppConstants.ENDPOINT_INDEX_NAME,
+    index,
   };
 }

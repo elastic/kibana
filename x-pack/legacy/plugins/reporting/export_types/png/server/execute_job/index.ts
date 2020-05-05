@@ -25,13 +25,11 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
   parentLogger: Logger
 ) {
   const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
   const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
-    const browserDriverFactory = await reporting.getBrowserDriverFactory();
-    const generatePngObservable = generatePngObservableFactory(captureConfig, browserDriverFactory);
+    const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
       mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),

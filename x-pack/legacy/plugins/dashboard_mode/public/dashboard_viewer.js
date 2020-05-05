@@ -27,7 +27,6 @@ import 'uiExports/search';
 import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
-import 'ui/agg_response';
 import 'leaflet';
 import { npStart } from 'ui/new_platform';
 import { localApplicationService } from 'plugins/kibana/local_application_service';

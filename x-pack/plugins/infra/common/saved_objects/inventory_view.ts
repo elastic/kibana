@@ -5,18 +5,18 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchMappingOf } from '../../server/utils/typed_elasticsearch_mappings';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { WaffleViewState } from '../../public/containers/waffle/with_waffle_view_state';
+import { SavedObjectsType } from 'src/core/server';
 
-export const inventoryViewSavedObjectType = 'inventory-view';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedViewSavedObject } from '../../public/hooks/use_saved_view';
+export const inventoryViewSavedObjectName = 'inventory-view';
 
-export const inventoryViewSavedObjectMappings: {
-  [inventoryViewSavedObjectType]: ElasticsearchMappingOf<SavedViewSavedObject<WaffleViewState>>;
-} = {
-  [inventoryViewSavedObjectType]: {
+export const inventoryViewSavedObjectType: SavedObjectsType = {
+  name: inventoryViewSavedObjectName,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+  },
+  mappings: {
     properties: {
       name: {
         type: 'keyword',
@@ -102,7 +102,7 @@ export const inventoryViewSavedObjectMappings: {
         type: 'boolean',
       },
       time: {
-        type: 'integer',
+        type: 'long',
       },
       autoReload: {
         type: 'boolean',
@@ -116,6 +116,12 @@ export const inventoryViewSavedObjectMappings: {
             type: 'keyword',
           },
         },
+      },
+      accountId: {
+        type: 'keyword',
+      },
+      region: {
+        type: 'keyword',
       },
     },
   },

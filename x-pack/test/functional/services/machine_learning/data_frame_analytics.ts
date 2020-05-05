@@ -41,7 +41,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async assertRegressionTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
     },
 
     async assertClassificationEvaluatePanelElementsExists() {
@@ -50,7 +50,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async assertClassificationTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationTablePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
     },
 
     async assertOutlierTablePanelExists() {

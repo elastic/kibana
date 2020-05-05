@@ -24,7 +24,7 @@ import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
-import { createFiltersFromEvent } from './actions';
+import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
@@ -49,7 +49,8 @@ export interface DataPublicPluginSetup {
 
 export interface DataPublicPluginStart {
   actions: {
-    createFiltersFromEvent: typeof createFiltersFromEvent;
+    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+    createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
   };
   autocomplete: AutocompleteStart;
   indexPatterns: IndexPatternsContract;
@@ -71,3 +72,15 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
 }
+
+/** @internal **/
+export interface InternalStartServices {
+  readonly fieldFormats: FieldFormatsStart;
+  readonly notifications: CoreStart['notifications'];
+  readonly uiSettings: CoreStart['uiSettings'];
+  readonly searchService: DataPublicPluginStart['search'];
+  readonly injectedMetadata: CoreStart['injectedMetadata'];
+}
+
+/** @internal **/
+export type GetInternalStartServicesFn = () => InternalStartServices;

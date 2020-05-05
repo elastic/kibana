@@ -5,6 +5,6 @@
  */
 
 export * from './defaults';
-export * from './saved_object_mappings';
+export { infraSourceConfigurationSavedObjectType } from './saved_object_type';
 export * from './sources';
-export * from './types';
+export * from '../../../common/http_api/source_api';

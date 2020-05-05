@@ -24,7 +24,7 @@ export default function({ getService, getPageObjects }) {
       }
 
       await PageObjects.discover.selectIndexPattern('metricbeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+      await PageObjects.timePicker.setCommonlyUsedTime('Today');
       await retry.try(async function() {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);

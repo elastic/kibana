@@ -25,6 +25,6 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
       PageObjects.common.debug('Data Table = ' + dataTable.trim());
       // we loaded specific test data so we know exactly what this result should be
     });
-    await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+    await PageObjects.timePicker.setCommonlyUsedTime('Today');
   });
 });

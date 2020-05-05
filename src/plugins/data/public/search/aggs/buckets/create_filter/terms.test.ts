@@ -17,17 +17,32 @@
  * under the License.
  */
 
-import { termsBucketAgg } from '../terms';
+import { getTermsBucketAgg } from '../terms';
 import { createFilterTerms } from './terms';
 import { AggConfigs, CreateAggConfigParams } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { Filter, ExistsFilter } from '../../../../../common';
+import { RangeBucketAggDependencies } from '../range';
+import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../core/public/mocks';
+import { InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {
-    const typesRegistry = mockAggTypesRegistry([termsBucketAgg]);
+    let aggTypesDependencies: RangeBucketAggDependencies;
+
+    beforeEach(() => {
+      aggTypesDependencies = {
+        getInternalStartServices: () =>
+          (({
+            fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
+          } as unknown) as InternalStartServices),
+      };
+    });
+
     const getAggConfigs = (aggs: CreateAggConfigParams[]) => {
       const indexPattern = {
         id: '1234',
@@ -43,10 +58,13 @@ describe('AggConfig Filters', () => {
         indexPattern,
       };
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry });
+      return new AggConfigs(indexPattern, aggs, {
+        typesRegistry: mockAggTypesRegistry([getTermsBucketAgg(aggTypesDependencies)]),
+        fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+      });
     };
 
-    it('should return a match_phrase filter for terms', () => {
+    test('should return a match_phrase filter for terms', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
@@ -65,7 +83,7 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('index', '1234');
     });
 
-    it('should set query to true or false for boolean filter', () => {
+    test('should set query to true or false for boolean filter', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
@@ -93,7 +111,7 @@ describe('AggConfig Filters', () => {
       expect(filterTrue.query.match_phrase.field).toBeTruthy();
     });
 
-    it('should generate correct __missing__ filter', () => {
+    test('should generate correct __missing__ filter', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
@@ -110,7 +128,7 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('negate', true);
     });
 
-    it('should generate correct __other__ filter', () => {
+    test('should generate correct __other__ filter', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);

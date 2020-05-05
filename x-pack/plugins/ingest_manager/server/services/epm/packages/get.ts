@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -31,21 +31,26 @@ export async function getPackages(
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
     );
   });
-  const searchObjects = registryItems.map(({ name, version }) => ({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    id: `${name}-${version}`,
-  }));
-  const results = await savedObjectsClient.bulkGet<Installation>(searchObjects);
-  const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
+  // get the installed packages
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
+  // filter out any internal packages
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(o => !o.attributes.internal);
   const packageList = registryItems
     .map(item =>
       createInstallableFrom(
         item,
-        savedObjects.find(({ id }) => id === `${item.name}-${item.version}`)
+        savedObjectsVisible.find(({ id }) => id === item.name)
       )
     )
     .sort(sortByName);
   return packageList;
+}
+
+export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 export async function getPackageKeysByStatus(
@@ -53,9 +58,9 @@ export async function getPackageKeysByStatus(
   status: InstallationStatus
 ) {
   const allPackages = await getPackages({ savedObjectsClient });
-  return allPackages.reduce<string[]>((acc, pkg) => {
+  return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
-      acc.push(`${pkg.name}-${pkg.version}`);
+      acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
     }
     return acc;
   }, []);
@@ -63,13 +68,15 @@ export async function getPackageKeysByStatus(
 
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
+  pkgVersion: string;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgkey } = options;
-  const [item, savedObject] = await Promise.all([
-    Registry.fetchInfo(pkgkey),
-    getInstallationObject({ savedObjectsClient, pkgkey }),
-    Registry.getArchiveInfo(pkgkey),
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const [item, savedObject, latestPackage, assets] = await Promise.all([
+    Registry.fetchInfo(pkgName, pkgVersion),
+    getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchFindLatestPackage(pkgName),
+    Registry.getArchiveInfo(pkgName, pkgVersion),
   ] as const);
   // adding `as const` due to regression in TS 3.7.2
   // see https://github.com/microsoft/TypeScript/issues/34925#issuecomment-550021453
@@ -78,43 +85,29 @@ export async function getPackageInfo(options: {
   // add properties that aren't (or aren't yet) on Registry response
   const updated = {
     ...item,
+    latestVersion: latestPackage.version,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(item?.assets || []),
+    assets: Registry.groupPathsByService(assets || []),
   };
   return createInstallableFrom(updated, savedObject);
 }
 
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
 }) {
-  const { savedObjectsClient, pkgkey } = options;
+  const { savedObjectsClient, pkgName } = options;
   return savedObjectsClient
-    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgkey)
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch(e => undefined);
 }
 
 export async function getInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkgName: string;
 }) {
   const savedObject = await getInstallationObject(options);
   return savedObject?.attributes;
-}
-
-export async function findInstalledPackageByName(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-}): Promise<Installation | undefined> {
-  const { savedObjectsClient, pkgName } = options;
-
-  const res = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-    search: pkgName,
-    searchFields: ['name'],
-  });
-  if (res.saved_objects.length) return res.saved_objects[0].attributes;
-  return undefined;
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {
@@ -125,4 +118,12 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+export async function getKibanaSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  type: KibanaAssetType,
+  id: string
+) {
+  return savedObjectsClient.get(type, id);
 }

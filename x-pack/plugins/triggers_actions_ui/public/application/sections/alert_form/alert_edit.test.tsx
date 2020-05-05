@@ -27,6 +27,11 @@ describe('alert_edit', () => {
   });
 
   async function setup() {
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mockedCoreSetup.getStartServices();
     deps = {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
@@ -34,9 +39,13 @@ describe('alert_edit', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+      capabilities,
     };
 
-    mockedCoreSetup.http.get.mockResolvedValue({ isSufficientlySecure: true });
+    mockedCoreSetup.http.get.mockResolvedValue({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    });
 
     const alertType = {
       id: 'my-alert-type',
@@ -119,6 +128,7 @@ describe('alert_edit', () => {
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
             docLinks: deps.docLinks,
+            capabilities: deps!.capabilities,
           }}
         >
           <AlertEdit

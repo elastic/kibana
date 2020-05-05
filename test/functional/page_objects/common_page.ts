@@ -43,48 +43,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     appConfig: {};
     ensureCurrentUrl: boolean;
     shouldLoginIfPrompted: boolean;
-    shouldAcceptAlert: boolean;
     useActualUrl: boolean;
     insertTimestamp: boolean;
   }
 
   class CommonPage {
-    /**
-     * Navigates the browser window to provided URL
-     * @param url URL
-     * @param shouldAcceptAlert pass 'true' if browser alert should be accepted
-     * @param insertTimestamp pass 'false' to skip inserting timestamp in URL
-     */
-    private static async navigateToUrlAndHandleAlert(
-      url: string,
-      shouldAcceptAlert: boolean,
-      insertTimestamp: boolean
-    ) {
-      log.debug('Navigate to: ' + url);
-      try {
-        await browser.get(url, insertTimestamp);
-      } catch (navigationError) {
-        log.debug('Error navigating to url');
-        const alert = await browser.getAlert();
-        if (alert && alert.accept) {
-          if (shouldAcceptAlert) {
-            log.debug('Should accept alert');
-            try {
-              await alert.accept();
-            } catch (alertException) {
-              log.debug('Error accepting alert');
-              throw alertException;
-            }
-          } else {
-            log.debug('Will not accept alert');
-            throw navigationError;
-          }
-        } else {
-          throw navigationError;
-        }
-      }
-    }
-
     /**
      * Returns Kibana host URL
      */
@@ -138,7 +101,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
         insertTimestamp,
       } = navigateProps;
@@ -149,7 +111,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug(`navigateToActualUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
         } else {
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert, insertTimestamp);
+          log.debug(`navigateToUrl ${appUrl}`);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
         }
 
         const currentUrl = shouldLoginIfPrompted
@@ -175,7 +141,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = false,
         insertTimestamp = true,
       } = {}
@@ -189,7 +154,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
         insertTimestamp,
       });
@@ -210,7 +174,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         basePath = '',
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
         useActualUrl = true,
         insertTimestamp = true,
       } = {}
@@ -225,7 +188,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         appConfig,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl,
         insertTimestamp,
       });
@@ -240,18 +202,12 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async navigateToActualUrl(
       appName: string,
       hash?: string,
-      {
-        basePath = '',
-        ensureCurrentUrl = true,
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-      } = {}
+      { basePath = '', ensureCurrentUrl = true, shouldLoginIfPrompted = true } = {}
     ) {
       await this.navigateToUrl(appName, hash, {
         basePath,
         ensureCurrentUrl,
         shouldLoginIfPrompted,
-        shouldAcceptAlert,
         useActualUrl: true,
       });
     }
@@ -264,13 +220,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      {
-        basePath = '',
-        shouldLoginIfPrompted = true,
-        shouldAcceptAlert = true,
-        hash = '',
-        insertTimestamp = true,
-      } = {}
+      { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
     ) {
       log.debug(`++++++++++++ insertTimestamp = ${insertTimestamp}`);
       let appUrl: string;
@@ -293,7 +243,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.tryForTime(defaultTryTimeout * 2, async () => {
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
-          await CommonPage.navigateToUrlAndHandleAlert(appUrl, shouldAcceptAlert, insertTimestamp);
+          log.debug('navigate to: ' + appUrl);
+          await browser.get(appUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
+          await alert?.accept();
           await this.sleep(700);
           log.debug('returned from get, calling refresh');
           await browser.refresh();
@@ -306,25 +260,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           }
 
           currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
-          const maxAdditionalLengthOnNavUrl = 230;
 
-          // On several test failures at the end of the TileMap test we try to navigate back to
-          // Visualize so we can create the next Vertical Bar Chart, but we can see from the
-          // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
-          // with a new timestamped URL go? I thought that sleep(700) between the get and the
-          // refresh would solve the problem but didn't seem to always work.
-          // So this hack fails the navSuccessful check if the currentUrl doesn't match the
-          // appUrl plus up to 230 other chars.
-          // Navigating to Settings when there is a default index pattern has a URL length of 196
-          // (from debug output). Some other tabs may also be long. But a rather simple configured
-          // visualization is about 1000 chars long. So at least we catch that case.
-
-          // Browsers don't show the ':port' if it's 80 or 443 so we have to
-          // remove that part so we can get a match in the tests.
-          const navSuccessful = new RegExp(
-            appUrl.replace(':80/', '/').replace(':443/', '/') +
-              `.{0,${maxAdditionalLengthOnNavUrl}}$`
-          ).test(currentUrl);
+          const navSuccessful = currentUrl
+            .replace(':80/', '/')
+            .replace(':443/', '/')
+            .startsWith(appUrl);
 
           if (!navSuccessful) {
             const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;

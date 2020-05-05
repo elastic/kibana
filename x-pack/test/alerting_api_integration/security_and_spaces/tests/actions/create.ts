@@ -55,6 +55,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               objectRemover.add(space.id, response.body.id, 'action');
               expect(response.body).to.eql({
                 id: response.body.id,
+                isPreconfigured: false,
                 name: 'My action',
                 actionTypeId: 'test.index-record',
                 config: {

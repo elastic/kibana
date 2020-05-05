@@ -24,14 +24,24 @@ import { initRegistries, populateRegistries, destroyRegistries } from './registr
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore } from './store';
+import { createStore, destroyStore } from './store';
 
 import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui_actions/public';
 /* eslint-disable */
 import { ACTION_VALUE_CLICK } from '../../../../../src/plugins/data/public/actions/value_click_action';
 /* eslint-enable */
+import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
+
+import { startServices, stopServices, services } from './services';
+// @ts-ignore Untyped local
+import { destroyHistory } from './lib/history_provider';
+// @ts-ignore Untyped local
+import { stopRouter } from './lib/router_provider';
+
+import './style/index.scss';
+
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 let restoreAction: ActionByType<any> | undefined;
@@ -50,8 +60,16 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  element.classList.add('canvas');
+  element.classList.add('canvasContainerWrapper');
+  const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
+    reduction[key] = provider.getService();
+
+    return reduction;
+  }, {} as Record<string, any>);
+
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
+    <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
       <I18nProvider>
         <Provider store={canvasStore}>
           <App />
@@ -60,7 +78,9 @@ export const renderApp = (
     </KibanaContextProvider>,
     element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };
 
 export const initializeCanvas = async (
@@ -70,6 +90,8 @@ export const initializeCanvas = async (
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries
 ) => {
+  startServices(coreSetup, coreStart, setupPlugins, startPlugins);
+
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
 
@@ -104,8 +126,9 @@ export const initializeCanvas = async (
         href: getDocumentationLinks().canvas,
       },
     ],
-    content: domNode => () => {
+    content: domNode => {
       ReactDOM.render(<HelpMenu />, domNode);
+      return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });
 
@@ -117,22 +140,31 @@ export const initializeCanvas = async (
     restoreAction = action;
 
     startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, action.id);
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, emptyAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emptyAction);
+  }
+
+  if (setupPlugins.usageCollection) {
+    initStatsReporter(setupPlugins.usageCollection.reportUiStats);
   }
 
   return canvasStore;
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
+  stopServices();
   destroyRegistries();
   resetInterpreter();
+  destroyStore();
 
   startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
   if (restoreAction) {
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, restoreAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, restoreAction);
     restoreAction = undefined;
   }
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);
+
+  destroyHistory();
+  stopRouter();
 };

@@ -12,7 +12,6 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { LicenseStatus } from '../common/types/license_status';
 
 import { ILicense } from '../../licensing/public';
-import { TimeBuckets } from './legacy';
 import { PLUGIN } from '../common/constants';
 import { Dependencies } from './types';
 
@@ -41,6 +40,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         const [core] = await getStartServices();
         const { i18n: i18nDep, docLinks, savedObjects } = core;
         const { boot } = await import('./application/boot');
+        const { TimeBuckets } = await import('./legacy');
 
         return boot({
           // Skip the first license status, because that's already been used to determine

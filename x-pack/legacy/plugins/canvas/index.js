@@ -6,16 +6,13 @@
 
 import { resolve } from 'path';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { init } from './init';
-import { mappings } from './server/mappings';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
-import { migrations } from './migrations';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
     configPrefix: 'xpack.canvas',
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
@@ -33,8 +30,6 @@ export function canvas(kibana) {
         'plugins/canvas/lib/window_error_handler.js',
       ],
       home: ['plugins/canvas/legacy_register_feature'],
-      mappings,
-      migrations,
       savedObjectsManagement: {
         [CANVAS_TYPE]: {
           icon: 'canvasApp',
@@ -68,6 +63,6 @@ export function canvas(kibana) {
       }).default();
     },
 
-    init,
+    init: () => undefined,
   });
 }

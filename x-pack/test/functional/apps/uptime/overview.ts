@@ -10,10 +10,22 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
 
   describe('overview page', function() {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+
+    before(async () => {
+      await esArchiver.loadIfNeeded('uptime/full_heartbeat');
+    });
+
+    beforeEach(async () => {
+      await uptime.goToRoot();
+      await uptime.setDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await uptime.resetFilters();
+    });
+
     it('loads and displays uptime data based on date range', async () => {
       await uptime.goToUptimeOverviewAndLoadData(
         DEFAULT_DATE_START,
@@ -22,13 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
-    it('runs filter query without issues', async () => {
-      await uptime.inputFilterQuery('monitor.status:up and monitor.id:"0000-intermittent"');
-      await uptime.pageHasExpectedIds(['0000-intermittent']);
-    });
-
     it('applies filters for multiple fields', async () => {
-      await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await uptime.selectFilterItems({
         location: ['mpls'],
         port: ['5678'],
@@ -49,7 +55,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('pagination is cleared when filter criteria changes', async () => {
-      await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await uptime.changePage('next');
       await uptime.pageHasExpectedIds([
         '0010-down',
@@ -83,7 +88,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('clears pagination parameters when size changes', async () => {
-      await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await uptime.changePage('next');
       await uptime.pageUrlContains('pagination');
       await uptime.setMonitorListPageSize(50);
@@ -92,7 +96,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('pagination size updates to reflect current selection', async () => {
-      await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
       await uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
@@ -161,23 +164,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('snapshot counts', () => {
-      it('updates the snapshot count when status filter is set to down', async () => {
-        await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      it('should not update  when status filter is set to down', async () => {
         await uptime.setStatusFilter('down');
 
         await retry.tryForTime(12000, async () => {
           const counts = await uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '0', down: '7' });
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
       });
 
-      it('updates the snapshot count when status filter is set to up', async () => {
-        await uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      it('should not update when status filter is set to up', async () => {
         await uptime.setStatusFilter('up');
         await retry.tryForTime(12000, async () => {
           const counts = await uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '93', down: '0' });
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
+      });
+
+      it('runs filter query without issues', async () => {
+        await uptime.inputFilterQuery('monitor.status:up and monitor.id:"0000-intermittent"');
+        await uptime.pageHasExpectedIds(['0000-intermittent']);
+        await uptime.resetFilters();
       });
     });
   });

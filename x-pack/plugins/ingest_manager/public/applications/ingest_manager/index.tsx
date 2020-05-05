@@ -16,13 +16,15 @@ import {
   IngestManagerConfigType,
   IngestManagerStartDeps,
 } from '../../plugin';
-import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
-import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
+import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
 import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { sendSetup } from './hooks/use_request/setup';
+import { FleetStatusProvider } from './hooks/use_fleet_status';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -98,6 +100,11 @@ const IngestManagerRoutes = ({ ...rest }) => {
               <AgentConfigApp />
             </DefaultLayout>
           </Route>
+          <Route path={DATA_STREAM_PATH}>
+            <DefaultLayout section="data_stream">
+              <DataStreamApp />
+            </DefaultLayout>
+          </Route>
           <ProtectedRoute path={FLEET_PATH} isAllowed={fleet.enabled}>
             <DefaultLayout section="fleet">
               <FleetApp />
@@ -136,7 +143,9 @@ const IngestManagerApp = ({
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <PackageInstallProvider notifications={coreStart.notifications}>
-                <IngestManagerRoutes basepath={basepath} />
+                <FleetStatusProvider>
+                  <IngestManagerRoutes basepath={basepath} />
+                </FleetStatusProvider>
               </PackageInstallProvider>
             </EuiThemeProvider>
           </ConfigContext.Provider>

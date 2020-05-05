@@ -66,6 +66,7 @@ export interface ActionConnector {
   name: string;
   referencedByCount?: number;
   config: Record<string, any>;
+  isPreconfigured: boolean;
 }
 
 export type ActionConnectorWithoutId = Omit<ActionConnector, 'id'>;
@@ -103,7 +104,7 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeModel {
   id: string;
-  name: string;
+  name: string | JSX.Element;
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
@@ -111,5 +112,5 @@ export interface AlertTypeModel {
 }
 
 export interface IErrorObject {
-  [key: string]: string[];
+  [key: string]: string | string[] | IErrorObject;
 }

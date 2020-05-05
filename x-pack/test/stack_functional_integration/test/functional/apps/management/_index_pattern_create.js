@@ -20,7 +20,7 @@ export default ({ getService, getPageObjects }) => {
 
     it('create makelogs工程 index pattern', async function pageHeader() {
       log.debug('create makelogs工程 index pattern');
-      await PageObjects.settings.createIndexPattern('makelogs工程-');
+      await PageObjects.settings.createIndexPattern('makelogs工程-*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('makelogs工程-*');
     });

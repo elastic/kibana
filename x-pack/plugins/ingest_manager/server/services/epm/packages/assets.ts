@@ -58,7 +58,7 @@ export async function getAssetsData(
 ): Promise<Registry.ArchiveEntry[]> {
   // TODO: Needs to be called to fill the cache but should not be required
   const pkgkey = packageInfo.name + '-' + packageInfo.version;
-  if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(pkgkey);
+  if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(packageInfo.name, packageInfo.version);
 
   // Gather all asset data
   const assets = getAssets(packageInfo, filter, datasetName);
@@ -70,4 +70,14 @@ export async function getAssetsData(
   });
 
   return entries;
+}
+
+export async function getAssetsDataForPackageKey(
+  { pkgName, pkgVersion }: { pkgName: string; pkgVersion: string },
+  filter = (path: string): boolean => true,
+  datasetName?: string
+): Promise<Registry.ArchiveEntry[]> {
+  const registryPkgInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+
+  return getAssetsData(registryPkgInfo, filter, datasetName);
 }

@@ -139,7 +139,7 @@ export default ({ getService, getPageObjects }) => {
       await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
 
       await PageObjects.discover.selectIndexPattern('local:makelogs工程*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_makelogs');
+      await PageObjects.timePicker.setCommonlyUsedTime('makelogs');
       // const currentUrl = await browser.getCurrentUrl();
       // const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
       // const urlWithGlobalTime = `${kibanaBaseUrl}#/discover/?_g=(time:(from:now-3d,to:now%2B3d))`;
@@ -163,7 +163,7 @@ export default ({ getService, getPageObjects }) => {
 
     it('star:makelogs-star should discover data from both clusters', async function() {
       await PageObjects.discover.selectIndexPattern('*:makelogs工程-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_makelogs');
+      await PageObjects.timePicker.setCommonlyUsedTime('makelogs');
       await retry.tryForTime(40000, async () => {
         const hitCount = await PageObjects.discover.getHitCount();
         log.debug('### hit count = ' + hitCount);

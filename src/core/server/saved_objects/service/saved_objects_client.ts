@@ -111,6 +111,26 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  version?: string;
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+}
+
+/**
+ *
+ * @public
+ */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
@@ -268,6 +288,40 @@ export class SavedObjectsClient {
     options: SavedObjectsUpdateOptions = {}
   ): Promise<SavedObjectsUpdateResponse<T>> {
     return await this._repository.update(type, id, attributes, options);
+  }
+
+  /**
+   * Adds namespaces to a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async addToNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsAddToNamespacesOptions = {}
+  ): Promise<{}> {
+    return await this._repository.addToNamespaces(type, id, namespaces, options);
+  }
+
+  /**
+   * Removes namespaces from a SavedObject
+   *
+   * @param type
+   * @param id
+   * @param namespaces
+   * @param options
+   */
+  async deleteFromNamespaces(
+    type: string,
+    id: string,
+    namespaces: string[],
+    options: SavedObjectsDeleteFromNamespacesOptions = {}
+  ): Promise<{}> {
+    return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
 
   /**

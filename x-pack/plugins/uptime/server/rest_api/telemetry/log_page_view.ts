@@ -8,10 +8,11 @@ import { schema } from '@kbn/config-schema';
 import { KibanaTelemetryAdapter } from '../../lib/adapters/telemetry';
 import { UMRestApiRouteFactory } from '../types';
 import { PageViewParams } from '../../lib/adapters/telemetry/types';
+import { API_URLS } from '../../../common/constants';
 
 export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
-  path: '/api/uptime/logPageView',
+  path: API_URLS.LOG_PAGE_VIEW,
   validate: {
     body: schema.object({
       page: schema.string(),
@@ -19,15 +20,20 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       dateEnd: schema.string(),
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
+      refreshTelemetryHistory: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ callES, dynamicSettings }, _context, _request, response): Promise<any> => {
-    const result = KibanaTelemetryAdapter.countPageView(_request.body as PageViewParams);
+  handler: async (
+    { savedObjectsClient, callES, dynamicSettings },
+    _context,
+    request,
+    response
+  ): Promise<any> => {
+    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(callES, savedObjectsClient);
+    const pageViewResult = KibanaTelemetryAdapter.countPageView(request.body as PageViewParams);
+
     return response.ok({
-      body: result,
+      body: pageViewResult,
     });
-  },
-  options: {
-    tags: ['access:uptime-read'],
   },
 });

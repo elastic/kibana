@@ -19,9 +19,10 @@ beforeEach(() => {
   mockAuditLogger = encryptedSavedObjectsAuditLoggerMock.create();
 
   // Call actual `@elastic/node-crypto` by default, but allow to override implementation in tests.
-  jest
-    .requireMock('@elastic/node-crypto')
-    .mockImplementation((...args: any[]) => jest.requireActual('@elastic/node-crypto')(...args));
+  jest.requireMock('@elastic/node-crypto').mockImplementation((...args: any[]) => {
+    const { default: nodeCrypto } = jest.requireActual('@elastic/node-crypto');
+    return nodeCrypto(...args);
+  });
 
   service = new EncryptedSavedObjectsService(
     'encryption-key-abc',

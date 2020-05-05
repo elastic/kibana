@@ -12,7 +12,7 @@ import { CaptureConfig } from '../server/types';
 export const createMockLayoutInstance = (captureConfig: CaptureConfig) => {
   const mockLayout = createLayout(captureConfig, {
     id: LayoutTypes.PRESERVE_LAYOUT,
-    dimensions: { height: 12, width: 12 },
+    dimensions: { height: 100, width: 100 },
   }) as LayoutInstance;
   mockLayout.selectors = {
     renderComplete: 'renderedSelector',

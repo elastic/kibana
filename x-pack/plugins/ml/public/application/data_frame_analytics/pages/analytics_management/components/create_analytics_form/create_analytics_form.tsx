@@ -55,7 +55,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const { setFormState, setEstimatedModelMemoryLimit } = actions;
   const mlContext = useMlContext();
-  const { form, indexPatternsMap, isAdvancedEditorEnabled, isJobCreated, requestMessages } = state;
+  const {
+    estimatedModelMemoryLimit,
+    form,
+    indexPatternsMap,
+    isAdvancedEditorEnabled,
+    isJobCreated,
+    requestMessages,
+  } = state;
 
   const forceInput = useRef<HTMLInputElement | null>(null);
   const firstUpdate = useRef<boolean>(true);
@@ -152,6 +159,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
 
   const debouncedGetExplainData = debounce(async () => {
     const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateEstimatedMml =
+      !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
+
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
@@ -167,13 +177,12 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       const jobConfig = getJobConfigFromFormState(form);
       delete jobConfig.dest;
       delete jobConfig.model_memory_limit;
-      delete jobConfig.analyzed_fields;
       const resp: DfAnalyticsExplainResponse = await ml.dataFrameAnalytics.explainDataFrameAnalytics(
         jobConfig
       );
       const expectedMemoryWithoutDisk = resp.memory_estimation?.expected_memory_without_disk;
 
-      if (shouldUpdateModelMemoryLimit) {
+      if (shouldUpdateEstimatedMml) {
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
@@ -250,7 +259,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
         };
 
-        await newJobCapsService.initializeFromIndexPattern(indexPattern);
+        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
@@ -340,7 +349,14 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, sourceIndex, sourceIndexNameEmpty, dependentVariable, trainingPercent]);
+  }, [
+    jobType,
+    sourceIndex,
+    sourceIndexNameEmpty,
+    dependentVariable,
+    trainingPercent,
+    JSON.stringify(excludes),
+  ]);
 
   // Temp effect to close the context menu popover on Clone button click
   useEffect(() => {

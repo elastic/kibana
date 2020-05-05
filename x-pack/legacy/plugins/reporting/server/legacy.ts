@@ -5,7 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
+import { take } from 'rxjs/operators';
 import { PluginInitializerContext } from 'src/core/server';
+import { PluginsSetup } from '../../../../plugins/reporting/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../types';
 import { buildConfig } from './config';
@@ -17,7 +19,6 @@ const buildLegacyDependencies = (
   reportingPlugin: ReportingPluginSpecOptions
 ): LegacySetup => ({
   route: server.route.bind(server),
-  config: server.config,
   plugins: {
     xpack_main: server.plugins.xpack_main,
     reporting: reportingPlugin,
@@ -32,14 +33,13 @@ export const legacyInit = async (
   reportingLegacyPlugin: ReportingPluginSpecOptions
 ) => {
   const { core: coreSetup } = server.newPlatform.setup;
-  const legacyConfig = server.config();
-  const reportingConfig = buildConfig(coreSetup, server, legacyConfig.get('xpack.reporting'));
-
+  const { config$ } = (server.newPlatform.setup.plugins.reporting as PluginsSetup).__legacy;
+  const reportingConfig = await config$.pipe(take(1)).toPromise();
   const __LEGACY = buildLegacyDependencies(server, reportingLegacyPlugin);
 
   const pluginInstance = plugin(
     server.newPlatform.coreContext as PluginInitializerContext,
-    reportingConfig
+    buildConfig(coreSetup, server, reportingConfig)
   );
   await pluginInstance.setup(coreSetup, {
     elasticsearch: coreSetup.elasticsearch,

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { useXJsonMode } from '../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -31,6 +32,8 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../common/index_controls';
+import { AddMessageVariables } from '../add_message_variables';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -76,7 +79,8 @@ export function getActionType(): ActionTypeModel {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+>> = ({ action, editActionConfig, errors }) => {
+  const { http } = useActionsConnectorsContext();
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -84,7 +88,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>([
+    firstFieldOption,
+  ]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -149,7 +155,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               : []
           }
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            editActionConfig('index', selected[0].value);
+            editActionConfig('index', selected.length > 0 ? selected[0].value : '');
             const indices = selected.map(s => s.value as string);
 
             // reset time field and expression fields if indices are deleted
@@ -271,8 +277,18 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
   actionParams,
   index,
   editAction,
+  messageVariables,
 }) => {
   const { documents } = actionParams;
+  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(
+    documents && documents.length > 0 ? documents[0] : null
+  );
+  const onSelectMessageVariable = (variable: string) => {
+    const value = (xJson ?? '').concat(` {{${variable}}}`);
+    setXJson(value);
+    // Keep the documents in sync with the editor content
+    onDocumentsChange(convertToJson(value));
+  };
 
   function onDocumentsChange(updatedDocuments: string) {
     try {
@@ -291,27 +307,32 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps<IndexActionPa
             defaultMessage: 'Document to index',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable(variable)}
+            paramsProperty="documents"
+          />
+        }
       >
         <EuiCodeEditor
-          aria-label={''}
-          mode={'json'}
+          mode={xJsonMode}
+          width="100%"
+          height="200px"
           theme="github"
           data-test-subj="actionIndexDoc"
-          value={JSON.stringify(documents && documents.length > 0 ? documents[0] : {}, null, 2)}
-          onChange={onDocumentsChange}
-          width="100%"
-          height="auto"
-          minLines={6}
-          maxLines={30}
-          isReadOnly={false}
-          setOptions={{
-            showLineNumbers: true,
-            tabSize: 2,
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
+            {
+              defaultMessage: 'Code editor',
+            }
+          )}
+          value={xJson}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            // Keep the documents in sync with the editor content
+            onDocumentsChange(convertToJson(xjson));
           }}
-          editorProps={{
-            $blockScrolling: Infinity,
-          }}
-          showGutter={true}
         />
       </EuiFormRow>
     </Fragment>

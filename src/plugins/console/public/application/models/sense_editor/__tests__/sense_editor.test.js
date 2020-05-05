@@ -22,8 +22,8 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
-import { collapseLiteralStrings } from '../../../../../../es_ui_shared/console_lang/lib';
-const editorInput1 = require('./editor_input1.txt');
+import { collapseLiteralStrings } from '../../../../../../es_ui_shared/public';
+import editorInput1 from './editor_input1.txt';
 
 describe('Editor', () => {
   let input;
@@ -470,6 +470,18 @@ curl -XGET "http://localhost:9200/_stats?level=shards"
 curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
 {
   "f": 1
+}'`.trim()
+  );
+
+  multiReqCopyAsCurlTest(
+    'with single quotes',
+    editorInput1,
+    { start: { lineNumber: 29 }, end: { lineNumber: 33 } },
+    `
+curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -d'
+{
+  "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
+  "fetch_size": 1
 }'`.trim()
   );
 });

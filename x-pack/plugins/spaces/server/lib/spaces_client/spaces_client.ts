@@ -74,16 +74,14 @@ export class SpacesClient {
 
       const privilege = privilegeFactory(this.authorization!);
 
-      const { username, spacePrivileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][privilege];
-      });
+      const authorized = privileges.filter(x => x.authorized).map(x => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
           authorized.length
-        } spaces, derived from ES privilege check: ${JSON.stringify(spacePrivileges)}`
+        } spaces, derived from ES privilege check: ${JSON.stringify(privileges)}`
       );
 
       if (authorized.length === 0) {
@@ -94,7 +92,7 @@ export class SpacesClient {
         throw Boom.forbidden();
       }
 
-      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized);
+      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
       const filteredSpaces: Space[] = spaces.filter((space: any) => authorized.includes(space.id));
       this.debugLogger(
         `SpacesClient.getAll(), using RBAC. returning spaces: ${filteredSpaces
@@ -211,9 +209,9 @@ export class SpacesClient {
       throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
     }
 
-    await repository.delete('space', id);
-
     await repository.deleteByNamespace(id);
+
+    await repository.delete('space', id);
   }
 
   private useRbac(): boolean {

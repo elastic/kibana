@@ -45,7 +45,7 @@ import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
 
-const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
+const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
@@ -159,6 +159,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         getAllEmbeddableFactories={start.getEmbeddableFactories}
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
+        application={{} as any}
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
@@ -198,6 +199,7 @@ const renderInEditModeAndOpenContextMenu = async (
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -212,13 +214,17 @@ const renderInEditModeAndOpenContextMenu = async (
 };
 
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
-  const action: Action = {
+  const action = {
     id: 'FOO',
     type: 'FOO' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -244,13 +250,17 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 });
 
 test('HelloWorldContainer hides disabled badges', async () => {
-  const action: Action = {
+  const action = {
     id: 'BAR',
     type: 'BAR' as ActionType,
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -296,6 +306,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -358,6 +369,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -410,6 +422,7 @@ test('Check when hide header option is false', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
@@ -447,6 +460,7 @@ test('Check when hide header option is true', async () => {
         getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}

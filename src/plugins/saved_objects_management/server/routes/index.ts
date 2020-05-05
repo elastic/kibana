@@ -23,6 +23,7 @@ import { registerFindRoute } from './find';
 import { registerScrollForCountRoute } from './scroll_count';
 import { registerScrollForExportRoute } from './scroll_export';
 import { registerRelationshipsRoute } from './relationships';
+import { registerGetAllowedTypesRoute } from './get_allowed_types';
 
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
@@ -35,4 +36,5 @@ export function registerRoutes({ http, managementServicePromise }: RegisterRoute
   registerScrollForCountRoute(router);
   registerScrollForExportRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);
+  registerGetAllowedTypesRoute(router);
 }

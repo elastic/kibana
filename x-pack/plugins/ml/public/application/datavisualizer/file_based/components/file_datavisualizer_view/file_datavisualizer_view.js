@@ -17,19 +17,17 @@ import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
 import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
+import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
-import { MAX_BYTES } from '../../../../../../common/constants/file_datavisualizer';
-import { isErrorResponse } from '../../../../../../common/types/errors';
 import {
+  getMaxBytes,
   readFile,
   createUrlOverrides,
   processResults,
-  reduceData,
   hasImportPermission,
 } from '../utils';
-import { MODE } from './constants';
 
-const UPLOAD_SIZE_MB = 5;
+import { MODE } from './constants';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -39,15 +37,18 @@ export class FileDataVisualizerView extends Component {
       files: {},
       fileName: '',
       fileContents: '',
+      data: [],
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
-      serverErrorMessage: '',
+      serverError: null,
       loading: false,
       loaded: false,
       results: undefined,
+      explanation: undefined,
       mode: MODE.READ,
       isEditFlyoutVisible: false,
+      isExplanationFlyoutVisible: false,
       bottomBarVisible: false,
       hasPermissionToImport: false,
     };
@@ -55,6 +56,7 @@ export class FileDataVisualizerView extends Component {
     this.overrides = {};
     this.previousOverrides = {};
     this.originalSettings = {};
+    this.maxFileUploadBytes = getMaxBytes();
   }
 
   async componentDidMount() {
@@ -75,11 +77,13 @@ export class FileDataVisualizerView extends Component {
         loaded: false,
         fileName: '',
         fileContents: '',
+        data: [],
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
-        serverErrorMessage: '',
+        serverError: null,
         results: undefined,
+        explanation: undefined,
       },
       () => {
         if (files.length) {
@@ -90,19 +94,18 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size <= MAX_BYTES) {
+    if (file.size <= this.maxFileUploadBytes) {
       try {
-        const fileContents = await readFile(file);
-        const data = fileContents.data;
+        const { data, fileContents } = await readFile(file);
         this.setState({
-          fileContents: data,
+          data,
+          fileContents,
           fileName: file.name,
           fileSize: file.size,
         });
 
-        await this.loadSettings(data);
+        await this.analyzeFile(fileContents);
       } catch (error) {
-        console.error(error);
         this.setState({
           loaded: false,
           loading: false,
@@ -120,15 +123,10 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async loadSettings(data, overrides, isRetry = false) {
+  async analyzeFile(fileContents, overrides, isRetry = false) {
     try {
-      // reduce the amount of data being sent to the endpoint
-      // 5MB should be enough to contain 1000 lines
-      const lessData = reduceData(data, UPLOAD_SIZE_MB);
-      console.log('overrides', overrides);
-      const { analyzeFile } = ml.fileDatavisualizer;
-      const resp = await analyzeFile(lessData, overrides);
-      const serverSettings = processResults(resp.results);
+      const resp = await ml.fileDatavisualizer.analyzeFile(fileContents, overrides);
+      const serverSettings = processResults(resp);
       const serverOverrides = resp.overrides;
 
       this.previousOverrides = this.overrides;
@@ -172,26 +170,19 @@ export class FileDataVisualizerView extends Component {
 
       this.setState({
         results: resp.results,
+        explanation: resp.explanation,
         loaded: true,
         loading: false,
         fileCouldNotBeRead: isRetry,
       });
     } catch (error) {
-      console.error(error);
-
-      let serverErrorMsg;
-      if (isErrorResponse(error) === true) {
-        serverErrorMsg = `${error.body.error}: ${error.body.message}`;
-      } else {
-        serverErrorMsg = JSON.stringify(error, null, 2);
-      }
-
       this.setState({
         results: undefined,
+        explanation: undefined,
         loaded: false,
         loading: false,
         fileCouldNotBeRead: true,
-        serverErrorMessage: serverErrorMsg,
+        serverError: error,
       });
 
       // as long as the previous overrides are different to the current overrides,
@@ -201,7 +192,7 @@ export class FileDataVisualizerView extends Component {
           loading: true,
           loaded: false,
         });
-        this.loadSettings(data, this.previousOverrides, true);
+        this.analyzeFile(fileContents, this.previousOverrides, true);
       }
     }
   }
@@ -213,6 +204,16 @@ export class FileDataVisualizerView extends Component {
 
   showEditFlyout = () => {
     this.setState({ isEditFlyoutVisible: true });
+    this.hideBottomBar();
+  };
+
+  closeExplanationFlyout = () => {
+    this.setState({ isExplanationFlyoutVisible: false });
+    this.showBottomBar();
+  };
+
+  showExplanationFlyout = () => {
+    this.setState({ isExplanationFlyoutVisible: true });
     this.hideBottomBar();
   };
 
@@ -233,7 +234,7 @@ export class FileDataVisualizerView extends Component {
       },
       () => {
         const formattedOverrides = createUrlOverrides(overrides, this.originalSettings);
-        this.loadSettings(this.state.fileContents, formattedOverrides);
+        this.analyzeFile(this.state.fileContents, formattedOverrides);
       }
     );
   };
@@ -252,14 +253,17 @@ export class FileDataVisualizerView extends Component {
       loading,
       loaded,
       results,
+      explanation,
       fileContents,
+      data,
       fileName,
       fileSize,
       fileTooLarge,
       fileCouldNotBeRead,
-      serverErrorMessage,
+      serverError,
       mode,
       isEditFlyoutVisible,
+      isExplanationFlyoutVisible,
       bottomBarVisible,
       hasPermissionToImport,
     } = this.state;
@@ -277,11 +281,13 @@ export class FileDataVisualizerView extends Component {
 
             {loading && <LoadingPanel />}
 
-            {fileTooLarge && <FileTooLarge fileSize={fileSize} maxFileSize={MAX_BYTES} />}
+            {fileTooLarge && (
+              <FileTooLarge fileSize={fileSize} maxFileSize={this.maxFileUploadBytes} />
+            )}
 
             {fileCouldNotBeRead && loading === false && (
               <React.Fragment>
-                <FileCouldNotBeRead error={serverErrorMessage} loaded={loaded} />
+                <FileCouldNotBeRead error={serverError} loaded={loaded} />
                 <EuiSpacer size="l" />
               </React.Fragment>
             )}
@@ -289,9 +295,12 @@ export class FileDataVisualizerView extends Component {
             {loaded && (
               <ResultsView
                 results={results}
+                explanation={explanation}
                 fileName={fileName}
                 data={fileContents}
                 showEditFlyout={() => this.showEditFlyout()}
+                showExplanationFlyout={() => this.showExplanationFlyout()}
+                disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}
               />
             )}
             <EditFlyout
@@ -302,6 +311,10 @@ export class FileDataVisualizerView extends Component {
               overrides={this.overrides}
               fields={fields}
             />
+
+            {isExplanationFlyoutVisible && (
+              <ExplanationFlyout results={results} closeFlyout={this.closeExplanationFlyout} />
+            )}
 
             {bottomBarVisible && loaded && (
               <BottomBar
@@ -321,6 +334,7 @@ export class FileDataVisualizerView extends Component {
               results={results}
               fileName={fileName}
               fileContents={fileContents}
+              data={data}
               indexPatterns={this.props.indexPatterns}
               kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}

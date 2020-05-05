@@ -6,19 +6,8 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSelectable,
-  EuiSpacer,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { Error } from '../../../components';
-import { AGENT_CONFIG_PATH } from '../../../constants';
-import { useCapabilities, useLink } from '../../../hooks';
 import { AgentConfig, PackageInfo, GetAgentConfigsResponseItem } from '../../../types';
 import { useGetPackageInfoByKey, useGetAgentConfigs, sendGetOneAgentConfig } from '../../../hooks';
 
@@ -27,19 +16,12 @@ export const StepSelectConfig: React.FunctionComponent<{
   updatePackageInfo: (packageInfo: PackageInfo | undefined) => void;
   agentConfig: AgentConfig | undefined;
   updateAgentConfig: (config: AgentConfig | undefined) => void;
-  cancelUrl: string;
-  onNext: () => void;
-}> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig, cancelUrl, onNext }) => {
-  const hasWriteCapabilites = useCapabilities().write;
+}> = ({ pkgkey, updatePackageInfo, agentConfig, updateAgentConfig }) => {
   // Selected config state
   const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>(
     agentConfig ? agentConfig.id : undefined
   );
-  const [selectedConfigLoading, setSelectedConfigLoading] = useState<boolean>(false);
   const [selectedConfigError, setSelectedConfigError] = useState<Error>();
-
-  // Todo: replace with create agent config flyout
-  const CREATE_NEW_CONFIG_URI = useLink(AGENT_CONFIG_PATH);
 
   // Fetch package info
   const { data: packageInfoData, error: packageInfoError } = useGetPackageInfoByKey(pkgkey);
@@ -70,9 +52,7 @@ export const StepSelectConfig: React.FunctionComponent<{
   useEffect(() => {
     const fetchAgentConfigInfo = async () => {
       if (selectedConfigId) {
-        setSelectedConfigLoading(true);
         const { data, error } = await sendGetOneAgentConfig(selectedConfigId);
-        setSelectedConfigLoading(false);
         if (error) {
           setSelectedConfigError(error);
           updateAgentConfig(undefined);
@@ -122,33 +102,6 @@ export const StepSelectConfig: React.FunctionComponent<{
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.StepSelectConfig.selectAgentConfigTitle"
-                  defaultMessage="Select an agent configuration"
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              isDisabled={!hasWriteCapabilites}
-              iconType="plusInCircle"
-              href={CREATE_NEW_CONFIG_URI}
-              size="s"
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.StepSelectConfig.createNewConfigButtonText"
-                defaultMessage="Create new configuration"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelectable
           searchable
@@ -227,33 +180,6 @@ export const StepSelectConfig: React.FunctionComponent<{
           />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={cancelUrl}>
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.cancelLinkText"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="arrowRight"
-              iconSide="right"
-              isLoading={selectedConfigLoading}
-              disabled={!selectedConfigId || !!selectedConfigError || selectedConfigLoading}
-              onClick={() => onNext()}
-            >
-              <FormattedMessage
-                id="xpack.ingestManager.createDatasource.continueButtonText"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

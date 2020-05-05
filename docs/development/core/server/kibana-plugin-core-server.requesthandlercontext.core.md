@@ -8,7 +8,6 @@
 
 ```typescript
 core: {
-        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;

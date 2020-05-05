@@ -29,7 +29,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     core.savedObjects.registerType({
       name: SAVED_OBJECT_WITH_SECRET_TYPE,
       hidden: false,
-      namespaceAgnostic: false,
+      namespaceType: 'single',
       mappings: deepFreeze({
         properties: {
           publicProperty: { type: 'keyword' },
