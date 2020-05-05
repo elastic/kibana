@@ -23,7 +23,7 @@ export const TableRowActions = React.memo<{ items: EuiContextMenuPanelProps['ite
           <EuiButtonIcon
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.ingestManager.agentConfigList.ActionsMenuText', {
+            aria-label={i18n.translate('xpack.ingestManager.agentConfigList.actionsMenuText', {
               defaultMessage: 'Open',
             })}
           />

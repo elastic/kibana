@@ -7,6 +7,7 @@
 import React, { memo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { useKibanaLink } from '../../../../hooks/use_kibana_link';
 import { DataStream } from '../../../../types';
 import { TableRowActionsNested } from '../../../../components/table_row_actions_nested';
@@ -26,6 +27,10 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       defaultMessage="View dashboards"
     />
   );
+
+  const panelTitle = i18n.translate('xpack.ingestManager.dataStreamList.viewDashboardsPanelTitle', {
+    defaultMessage: 'View dashboards',
+  });
 
   if (!dashboards || dashboards.length === 0) {
     panels.push({
@@ -62,7 +67,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     });
     panels.push({
       id: 1,
-      title: 'View dashboards',
+      title: panelTitle,
       items: dashboards.map(dashboard => {
         return {
           icon: 'dashboardApp',

@@ -23,7 +23,7 @@ export const TableRowActionsNested = React.memo<{ panels: EuiContextMenuProps['p
           <EuiButtonIcon
             iconType="boxesHorizontal"
             onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.ingestManager.genericActionsMenuTextB', {
+            aria-label={i18n.translate('xpack.ingestManager.genericActionsMenuText', {
               defaultMessage: 'Open',
             })}
           />
