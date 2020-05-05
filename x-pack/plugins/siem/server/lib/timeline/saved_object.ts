@@ -95,6 +95,24 @@ export const getTimelineByTemplateTimelineId = async (
   return getAllSavedTimeline(request, options);
 };
 
+/** The filter here is able to handle the legacy data,
+ * which has no timelineType exists in the savedObject */
+const getTimelineTypeFilter = (timelineTypes: string | null) => {
+  if (timelineTypes === TimelineType.template) {
+    /** Show only whose timelineType is "template" */
+    return `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+  }
+
+  if (timelineTypes === TimelineType.default) {
+    /** Show me every timeline whose timelineType is not "template".
+     * which includes timelineType === 'default' and
+     * those timelineType doesn't exists */
+    return `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+  }
+
+  return undefined;
+};
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -111,10 +129,7 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter:
-      timelineTypes === 'template' || timelineTypes === 'default'
-        ? `siem-ui-timeline.attributes.timelineType: ${timelineTypes}`
-        : undefined,
+    filter: getTimelineTypeFilter(timelineTypes),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
