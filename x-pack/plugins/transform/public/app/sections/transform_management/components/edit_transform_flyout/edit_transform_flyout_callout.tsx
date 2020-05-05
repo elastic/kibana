@@ -28,11 +28,10 @@ export const EditTransformFlyoutCallout: FC = () => {
           <EuiIcon type="help" />
         </EuiFlexItem>
         <EuiFlexItem>
-          {' '}
           <EuiTextColor color="subdued">
             {i18n.translate('xpack.transform.transformList.editFlyoutCalloutText', {
               defaultMessage:
-                'This form allows you to update an transform. The list of properties that you can update is a subset of the list that you can define when you create a transform.',
+                'This form allows you to update a transform. The list of properties that you can update is a subset of the list that you can define when you create a transform.',
             })}
           </EuiTextColor>
           <EuiLink href={esTransformUpdate} target="_BLANK">
