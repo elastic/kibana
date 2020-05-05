@@ -59,6 +59,7 @@ export const initialData: Case = {
   closedBy: null,
   createdAt: '',
   comments: [],
+  connectorId: 'none',
   createdBy: {
     username: '',
   },

@@ -12,6 +12,10 @@ import {
   ServiceNowSecretConfigurationType,
 } from '../../../../../actions/server/builtin_action_types/servicenow/types';
 
+export { ServiceNowFieldsType } from '../../../../../case/common/api/connectors';
+
+export * from '../types';
+
 export interface ServiceNowActionConnector {
   config: ServiceNowPublicConfigurationType;
   secrets: ServiceNowSecretConfigurationType;

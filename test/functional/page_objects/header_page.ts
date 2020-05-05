@@ -31,13 +31,13 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-    async clickDiscover() {
+    public async clickDiscover() {
       await appsMenu.clickLink('Discover', { category: 'kibana' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickVisualize() {
+    public async clickVisualize() {
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
@@ -51,7 +51,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
-    async clickDashboard() {
+    public async clickDashboard() {
       await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
@@ -61,12 +61,12 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async clickStackManagement() {
+    public async clickStackManagement() {
       await appsMenu.clickLink('Stack Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async waitUntilLoadingHasFinished() {
+    public async waitUntilLoadingHasFinished() {
       try {
         await this.isGlobalLoadingIndicatorVisible();
       } catch (exception) {
@@ -79,19 +79,19 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    async isGlobalLoadingIndicatorVisible() {
+    public async isGlobalLoadingIndicatorVisible() {
       log.debug('isGlobalLoadingIndicatorVisible');
       return await testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
     }
 
-    async awaitGlobalLoadingIndicatorHidden() {
+    public async awaitGlobalLoadingIndicatorHidden() {
       await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
         allowHidden: true,
         timeout: defaultFindTimeout * 10,
       });
     }
 
-    async awaitKibanaChrome() {
+    public async awaitKibanaChrome() {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }

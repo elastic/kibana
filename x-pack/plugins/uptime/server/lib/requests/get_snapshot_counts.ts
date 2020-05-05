@@ -55,7 +55,13 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 
-  return res.aggregations.counts.value;
+  return (
+    res.aggregations?.counts?.value ?? {
+      total: 0,
+      up: 0,
+      down: 0,
+    }
+  );
 };
 
 const statusCountBody = (filters: any): any => {
