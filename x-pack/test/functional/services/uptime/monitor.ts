@@ -44,5 +44,16 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
         );
       });
     },
+    hasRedirectInfo() {
+      return retry.tryForTime(30000, async () => {
+        await testSubjects.existOrFail('uptimeMonitorRedirectInfo');
+      });
+    },
+    hasRedirectInfoInPingList() {
+      testSubjects.click('uptimePingListExpandBtn');
+      return retry.tryForTime(30000, async () => {
+        await testSubjects.existOrFail('uptimeMonitorPingListRedirectInfo');
+      });
+    },
   };
 }

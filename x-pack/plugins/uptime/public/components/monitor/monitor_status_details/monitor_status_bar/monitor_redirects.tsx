@@ -20,7 +20,11 @@ export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiButtonEmpty flush="left" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+    <EuiButtonEmpty
+      flush="left"
+      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      data-test-subj="uptimeMonitorRedirectInfo"
+    >
       {i18n.translate('xpack.uptime.monitorList.redirects.title.number', {
         defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
         values: {

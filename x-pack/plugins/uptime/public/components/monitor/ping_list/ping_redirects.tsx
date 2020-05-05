@@ -26,7 +26,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showDescription 
   const list = monitorStatus?.http?.response?.redirects;
 
   return list ? (
-    <div>
+    <div data-test-subj="uptimeMonitorPingListRedirectInfo">
       <EuiText size="xs">
         <h3>
           {i18n.translate('xpack.uptime.monitorList.redirects.title', {
