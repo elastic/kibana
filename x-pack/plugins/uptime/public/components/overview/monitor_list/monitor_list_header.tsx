@@ -16,7 +16,7 @@ const TitleStyle = styled(EuiTitle)`
   margin-left: auto;
 `;
 
-export const MonitorListHeader: React.FC<Props> = () => {
+export const MonitorListHeader: React.FC = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
