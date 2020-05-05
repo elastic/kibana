@@ -1,6 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
+<button
+  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--iconRight euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
+  data-test-subj="foo"
+  type="button"
+>
+  <span
+    class="euiButtonEmpty__content"
+  >
+    <span
+      class="euiButtonEmpty__text"
+    >
+      <span
+        class="euiFilterButton__textShift"
+        data-text="Up"
+        title="Up"
+      >
+        Up
+      </span>
+    </span>
+  </span>
+</button>
+`;
+
+exports[`FilterStatusButton shallow renders without errors for valid props 1`] = `
 <ContextProvider
   value={
     Object {
@@ -54,6 +78,7 @@ exports[`FilterStatusButton renders without errors for valid props 1`] = `
   <FilterStatusButton
     content="Up"
     dataTestSubj="foo"
+    isActive={true}
     value="up"
     withNext={true}
   />
