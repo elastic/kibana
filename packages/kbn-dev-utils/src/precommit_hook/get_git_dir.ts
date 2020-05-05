@@ -17,4 +17,16 @@
  * under the License.
  */
 
-export { registerPrecommitGitHook } from './register_git_hook';
+import execa from 'execa';
+
+import { REPO_ROOT } from '../repo_root';
+
+// Retrieves the correct location for the .git dir for
+// every git setup (including git worktree)
+export async function getGitDir() {
+  return (
+    await execa('git', ['rev-parse', '--git-common-dir'], {
+      cwd: REPO_ROOT,
+    })
+  ).stdout.trim();
+}
