@@ -9,6 +9,7 @@ exports[`MonitorRedirects component renders duration in ms, not us 1`] = `
   >
     <button
       class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+      data-test-subj="uptimeMonitorRedirectInfo"
       type="button"
     >
       <span
@@ -30,6 +31,7 @@ exports[`MonitorRedirects component shallow renders duration in ms, not us 1`] =
   anchorPosition="downLeft"
   button={
     <EuiButtonEmpty
+      data-test-subj="uptimeMonitorRedirectInfo"
       flush="left"
       onClick={[Function]}
     >
