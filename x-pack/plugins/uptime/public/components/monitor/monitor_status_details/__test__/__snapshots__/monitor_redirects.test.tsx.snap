@@ -48,7 +48,6 @@ exports[`MonitorRedirects component shallow renders duration in ms, not us 1`] =
   <PingRedirects
     monitorStatus={
       Object {
-        "@timestamp": "2020-05-05T16:14:56.469Z",
         "docId": "v0We5XEBoeLtfKIcbuQb",
         "http": Object {
           "response": Object {
