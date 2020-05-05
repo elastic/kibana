@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { AppState } from '../../../../state';
 import { monitorDetailsSelector } from '../../../../state/selectors';
 import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
@@ -25,15 +25,13 @@ const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, moni
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     loadMonitorDetails({
       dateStart,
       dateEnd,
       monitorId,
     });
-  }, [dateStart, dateEnd, monitorId, loadMonitorDetails, dispatch]);
+  }, [dateStart, dateEnd, monitorId, loadMonitorDetails]);
   return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
 };
 
