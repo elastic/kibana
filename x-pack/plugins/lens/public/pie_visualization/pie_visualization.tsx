@@ -63,7 +63,7 @@ export const pieVisualization: Visualization<PieVisualizationState, PieVisualiza
   clearLayer(state) {
     return {
       shape: state.shape,
-      layers: state.layers.map(l => newLayerState(l.layerId, state.shape)),
+      layers: state.layers.map(l => newLayerState(l.layerId)),
     };
   },
 
