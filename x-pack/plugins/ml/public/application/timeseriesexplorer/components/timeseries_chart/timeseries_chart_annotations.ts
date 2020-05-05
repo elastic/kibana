@@ -11,9 +11,6 @@ import { ANNOTATION_TYPE } from '../../../../../common/constants/annotations';
 import { Annotation, Annotations } from '../../../../../common/types/annotations';
 import { Dictionary } from '../../../../../common/types/common';
 
-// @ts-ignore
-import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
-
 import { TimeseriesChart } from './timeseries_chart';
 
 import { annotation$ } from '../../../services/annotations_service';
@@ -110,7 +107,8 @@ export function renderAnnotations(
   focusChartHeight: number,
   focusXScale: TimeseriesChart['focusXScale'],
   showAnnotations: boolean,
-  showFocusChartTooltip: (d: Annotation, t: object) => {}
+  showFocusChartTooltip: (d: Annotation, t: object) => {},
+  hideFocusChartTooltip: () => void
 ) {
   const upperRectMargin = ANNOTATION_UPPER_RECT_MARGIN;
   const upperTextMargin = ANNOTATION_UPPER_TEXT_MARGIN;
@@ -156,7 +154,7 @@ export function renderAnnotations(
     .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
     })
-    .on('mouseout', () => mlChartTooltipService.hide())
+    .on('mouseout', () => hideFocusChartTooltip())
     .on('click', (d: Annotation) => {
       // clear a possible existing annotation set up for editing before setting the new one.
       // this needs to be done explicitly here because a new annotation created using the brush tool
