@@ -61,7 +61,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
     try {
       await api.updateTransform(transformId, requestConfig);
       toastNotifications.addSuccess(
-        i18n.translate('xpack.transform.transformList.updateTransformSuccessMessage', {
+        i18n.translate('xpack.transform.transformList.editTransformSuccessMessage', {
           defaultMessage: 'Transform {transformId} updated.',
           values: { transformId },
         })
@@ -70,7 +70,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({ closeFlyout,
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.REFRESH);
     } catch (e) {
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
+        title: i18n.translate('xpack.transform.transformList.editTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to update transforms.',
         }),
         text: toMountPoint(<ToastNotificationText overlays={overlays} text={getErrorMessage(e)} />),
