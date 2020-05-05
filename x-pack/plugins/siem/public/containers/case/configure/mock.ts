@@ -30,7 +30,7 @@ export const mapping: CasesConfigurationMapping[] = [
 ];
 export const connectorsMock: Connector[] = [
   {
-    id: '123',
+    id: 'servicenow-1',
     actionTypeId: '.servicenow',
     name: 'My Connector',
     config: {
@@ -42,7 +42,7 @@ export const connectorsMock: Connector[] = [
     isPreconfigured: false,
   },
   {
-    id: '456',
+    id: 'servicenow-2',
     actionTypeId: '.servicenow',
     name: 'My Connector 2',
     config: {
@@ -52,6 +52,34 @@ export const connectorsMock: Connector[] = [
           {
             source: 'title',
             target: 'short_description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'description',
+            target: 'description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'comments',
+            target: 'comments',
+            actionType: 'append',
+          },
+        ],
+      },
+    },
+    isPreconfigured: false,
+  },
+  {
+    id: 'jira-1',
+    actionTypeId: '.jira',
+    name: 'Jira',
+    config: {
+      apiUrl: 'https://instance.atlassian.ne',
+      casesConfiguration: {
+        mapping: [
+          {
+            source: 'title',
+            target: 'summary',
             actionType: 'overwrite',
           },
           {
