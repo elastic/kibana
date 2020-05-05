@@ -14,7 +14,6 @@ import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_save
 
 export const patchRules = async ({
   alertsClient,
-  actionsClient, // TODO: Use this whenever we add feature support for different action types
   savedObjectsClient,
   description,
   falsePositives,

@@ -17,9 +17,14 @@ describe('createStream', () => {
     exclude_files: [".gz$"]
     processors:
       - add_locale: ~
+    password: {{password}}
+    {{#if password}}
+    hidden_password: {{password}}
+    {{/if}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+      password: { type: 'password', value: '' },
     };
 
     const output = createStream(vars, streamTemplate);
@@ -28,6 +33,7 @@ describe('createStream', () => {
       paths: ['/usr/local/var/log/nginx/access.log'],
       exclude_files: ['.gz$'],
       processors: [{ add_locale: null }],
+      password: '',
     });
   });
 
@@ -36,6 +42,7 @@ describe('createStream', () => {
     input: redis/metrics
     metricsets: ["key"]
     test: null
+    password: {{password}}
     {{#if key.patterns}}
     key.patterns: {{key.patterns}}
     {{/if}}
@@ -48,6 +55,7 @@ describe('createStream', () => {
           pattern: '*'
         `,
       },
+      password: { type: 'password', value: '' },
     };
 
     const output = createStream(vars, streamTemplate);
@@ -61,6 +69,7 @@ describe('createStream', () => {
           pattern: '*',
         },
       ],
+      password: '',
     });
   });
 });
