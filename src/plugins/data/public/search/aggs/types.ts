@@ -30,12 +30,33 @@ import {
   AggParamsGeoTile,
   AggParamsGeoHash,
   AggParamsTerms,
+  AggParamsAvg,
+  AggParamsCardinality,
+  AggParamsGeoBounds,
+  AggParamsGeoCentroid,
+  AggParamsMax,
+  AggParamsMedian,
+  AggParamsMin,
+  AggParamsStdDeviation,
+  AggParamsSum,
+  AggParamsBucketAvg,
+  AggParamsBucketMax,
+  AggParamsBucketMin,
+  AggParamsBucketSum,
+  AggParamsCumulativeSum,
+  AggParamsDerivative,
+  AggParamsMovingAvg,
+  AggParamsPercentileRanks,
+  AggParamsPercentiles,
+  AggParamsSerialDiff,
+  AggParamsTopHit,
   AggParamsHistogram,
   AggParamsDateHistogram,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
+  METRIC_TYPES,
   BUCKET_TYPES,
 } from './';
 
@@ -102,4 +123,25 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [METRIC_TYPES.AVG]: AggParamsAvg;
+  [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
+  [METRIC_TYPES.COUNT]: BaseAggParams;
+  [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
+  [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
+  [METRIC_TYPES.MAX]: AggParamsMax;
+  [METRIC_TYPES.MEDIAN]: AggParamsMedian;
+  [METRIC_TYPES.MIN]: AggParamsMin;
+  [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
+  [METRIC_TYPES.SUM]: AggParamsSum;
+  [METRIC_TYPES.AVG_BUCKET]: AggParamsBucketAvg;
+  [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
+  [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
+  [METRIC_TYPES.SUM_BUCKET]: AggParamsBucketSum;
+  [METRIC_TYPES.CUMULATIVE_SUM]: AggParamsCumulativeSum;
+  [METRIC_TYPES.DERIVATIVE]: AggParamsDerivative;
+  [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
+  [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
+  [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
+  [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
 }
