@@ -92,7 +92,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => <EuiLink href={`#${BASE_PATH}?pipeline=${name}`}>{name}</EuiLink>,
+        render: (name: string) => (
+          <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
+            {name}
+          </EuiLink>
+        ),
       },
       {
         name: (
