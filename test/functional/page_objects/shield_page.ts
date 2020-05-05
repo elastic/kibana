@@ -17,11 +17,13 @@
  * under the License.
  */
 
-export function ShieldPageProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function ShieldPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   class ShieldPage {
-    async login(user, pwd) {
+    async login(user: string, pwd: string) {
       await testSubjects.setValue('loginUsername', user);
       await testSubjects.setValue('loginPassword', pwd);
       await testSubjects.click('loginSubmit');
