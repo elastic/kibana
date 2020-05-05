@@ -37,7 +37,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
       type: EMSFileSource.type,
-      id,
+      id: id!,
       tooltipProperties,
     };
   }
@@ -108,7 +108,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature: Feature, index: number) => {
-      feature.id = emsIdField ? feature.properties[emsIdField.id] : index;
+      // @ts-ignore
+      feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
     });
 
     return {
