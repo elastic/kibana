@@ -8202,6 +8202,7 @@
     "xpack.ingestManager.agentConfigForm.systemMonitoringText": "收集系统指标",
     "xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText": "启用此选项可使用收集系统指标和信息的数据源启动您的配置。",
     "xpack.ingestManager.agentConfigList.actionsColumnTitle": "操作",
+    "xpack.ingestManager.agentConfigList.actionsMenuText": "打开",
     "xpack.ingestManager.agentConfigList.addButton": "创建代理配置",
     "xpack.ingestManager.agentConfigList.agentsColumnTitle": "代理",
     "xpack.ingestManager.agentConfigList.clearFiltersLinkText": "清除筛选",

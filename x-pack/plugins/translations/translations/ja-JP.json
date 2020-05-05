@@ -8196,6 +8196,7 @@
     "xpack.ingestManager.agentConfigForm.systemMonitoringText": "システムメトリックを収集",
     "xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText": "このオプションを有効にすると、システムメトリックと情報を収集するデータソースで構成をブートストラップできます。",
     "xpack.ingestManager.agentConfigList.actionsColumnTitle": "アクション",
+    "xpack.ingestManager.agentConfigList.actionsMenuText": "開く",
     "xpack.ingestManager.agentConfigList.addButton": "エージェント構成を作成",
     "xpack.ingestManager.agentConfigList.agentsColumnTitle": "エージェント",
     "xpack.ingestManager.agentConfigList.clearFiltersLinkText": "フィルターを消去",
