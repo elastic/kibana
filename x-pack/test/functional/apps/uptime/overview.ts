@@ -7,8 +7,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const ARCHIVE = 'uptime/full_heartbeat';
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const retry = getService('retry');
@@ -19,7 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
     before(async () => {
-      await esArchiver.loadIfNeeded(ARCHIVE);
+      await esArchiver.loadIfNeeded('uptime/full_heartbeat');
     });
 
     beforeEach(async () => {

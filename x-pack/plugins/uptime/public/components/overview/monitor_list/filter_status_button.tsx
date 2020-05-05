@@ -12,6 +12,7 @@ export interface FilterStatusButtonProps {
   content: string | JSX.Element;
   dataTestSubj: string;
   isDisabled?: boolean;
+  isActive: boolean;
   value: string;
   withNext: boolean;
   color?: string;
@@ -21,6 +22,7 @@ export const FilterStatusButton = ({
   content,
   dataTestSubj,
   isDisabled,
+  isActive,
   value,
   color,
   withNext,
@@ -28,7 +30,6 @@ export const FilterStatusButton = ({
   const [getUrlParams, setUrlParams] = useUrlParams();
   const { statusFilter: urlValue } = getUrlParams();
 
-  const isActive = (value === 'all' && urlValue === '') || urlValue === value;
   return (
     <EuiFilterButton
       color={(isActive ? color : undefined) as any}
