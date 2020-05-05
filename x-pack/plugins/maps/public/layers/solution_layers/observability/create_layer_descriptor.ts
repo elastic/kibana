@@ -13,6 +13,7 @@ import {
   LayerDescriptor,
   SizeDynamicOptions,
   StylePropertyField,
+  VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
 import {
   AGG_TYPE,
@@ -233,7 +234,7 @@ export function createLayerDescriptor({
     origin: FIELD_ORIGIN.SOURCE,
   };
 
-  const styleProperties = {
+  const styleProperties: VectorStylePropertiesDescriptor = {
     [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, metricStyleField),
     [VECTOR_STYLES.ICON_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
