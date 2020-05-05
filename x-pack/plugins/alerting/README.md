@@ -87,7 +87,7 @@ The following table describes the properties of the `options` object.
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
 |actionGroups|An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType. |Array<{id:string, name:string}>|
-|defaultActionGroupId|Default ID value for the group of the alert type.|ActionGroup['id']|
+|defaultActionGroupId|Default ID value for the group of the alert type.|string|
 |actionVariables|An explicit list of action variables the alert type makes available via context and state in action parameter templates, and a short human readable description. Alert UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
@@ -148,14 +148,14 @@ server.newPlatform.setup.plugins.alerting.registerType({
 		}),
 	},
 	actionGroups: [
-    {
-      id: 'default',
-      name: 'Default',
+		{
+			id: 'default',
+			name: 'Default',
 		},
 		{
-      id: 'warning',
-      name: 'Warning',
-    },
+			id: 'warning',
+			name: 'Warning',
+		},
 	],
 	defaultActionGroupId: 'default',
 	actionVariables: {
@@ -227,9 +227,9 @@ server.newPlatform.setup.plugins.alerting.registerType({
 		}),
 	},
 	actionGroups: [
-    {
-      id: 'default',
-      name: 'Default',
+		{
+			id: 'default',
+			name: 'Default',
 		},
 	],
 	defaultActionGroupId: 'default',
@@ -492,7 +492,7 @@ This factory returns an instance of `AlertInstance`. The alert instance class ha
 |Method|Description|
 |---|---|
 |getState()|Get the current state of the alert instance.|
-|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup is a string `id` of relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
+|scheduleActions(actionGroup, context)|Called to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. This should only be called once per alert instance.|
 |replaceState(state)|Used to replace the current state of the alert instance. This doesn't work like react, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between alert type executions whenever you re-create an alert instance with the same id. The instance state will be erased when `scheduleActions` isn't called during an execution.|
 
 ## Templating actions
@@ -509,7 +509,7 @@ When an alert instance executes, the first argument is the `group` of actions to
 - `spaceId` - the id of the space the alert exists in
 - `tags` - the tags set in the alert
 
-The templating engine is [mustache]. General definition fot the [mustache variable] is a double-brace {{}}. All variables are HTML-escaped by default and if there is a requirenment to render unescaped HTML, should be applied the triple mustache: `{{{name}}}`. Also, can be used `&` to unescape a variable.
+The templating engine is [mustache]. General definition for the [mustache variable] is a double-brace {{}}. All variables are HTML-escaped by default and if there is a requirement to render unescaped HTML, it should be applied the triple mustache: `{{{name}}}`. Also, can be used `&` to unescape a variable.
 
 ## Examples
 
