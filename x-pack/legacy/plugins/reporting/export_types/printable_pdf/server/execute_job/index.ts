@@ -34,7 +34,7 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
-    let apmGeneratePdf: any; // Note: Type can not be imported from apm module
+    let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const generatePdfObservable = await generatePdfObservableFactory(reporting);
 

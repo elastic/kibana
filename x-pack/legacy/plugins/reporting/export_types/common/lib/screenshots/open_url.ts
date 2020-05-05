@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { startTrace } from '../../../../server/lib';
-import { ConditionalHeaders, Logger } from '../../../../types';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
+import { ConditionalHeaders } from '../../../../types';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
@@ -16,7 +16,7 @@ export const openUrl = async (
   url: string,
   pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<void> => {
   const endTrace = startTrace('open_url', 'wait');
   try {

@@ -32,7 +32,7 @@ export const executeJobFactory: QueuedPngExecutorFactory = async function execut
   return async function executeJob(jobId: string, job: JobDocPayloadPNG, cancellationToken: any) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
     const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
-    let apmGeneratePng: any;
+    let apmGeneratePng: { end: () => void } | null | undefined;
 
     const generatePngObservable = await generatePngObservableFactory(reporting);
     const jobLogger = logger.clone([jobId]);
