@@ -29,9 +29,8 @@ import {
   removeLabelOverlap,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { TimeBuckets } from '../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { CHART_TYPE } from '../explorer_constants';
 
@@ -50,6 +49,7 @@ export class ExplorerChartDistribution extends React.Component {
   static propTypes = {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number,
+    tooltipService: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -61,7 +61,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets } = this.props;
+    const { tooManyBuckets, tooltipService } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -259,7 +259,7 @@ export class ExplorerChartDistribution extends React.Component {
 
     function drawRareChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new TimeBuckets();
+      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
@@ -397,7 +397,7 @@ export class ExplorerChartDistribution extends React.Component {
         .on('mouseover', function(d) {
           showLineChartTooltip(d, this);
         })
-        .on('mouseout', () => mlChartTooltipService.hide());
+        .on('mouseout', () => tooltipService.hide());
 
       // Update all dots to new positions.
       dots
@@ -550,7 +550,7 @@ export class ExplorerChartDistribution extends React.Component {
         });
       }
 
-      mlChartTooltipService.show(tooltipData, circle, {
+      tooltipService.show(tooltipData, circle, {
         x: LINE_CHART_ANOMALY_RADIUS * 3,
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
