@@ -8,7 +8,8 @@
     "data",
     "embeddable",
     "uiActions",
-    "inspector"
+    "inspector",
+    "discover"
   ],
   "server": false,
   "ui": true
