@@ -59,18 +59,15 @@ export function DiscoverIndexPatternTitle({
           <EuiToolTip
             content={
               <FormattedMessage
-                id="kbn.discover.fieldChooser.indexPattern.changeLinkTooltip"
+                id="discover.fieldChooser.indexPattern.changeLinkTooltip"
                 defaultMessage="Change current index pattern"
               />
             }
           >
             <EuiButtonEmpty
-              aria-label={i18n.translate(
-                'kbn.discover.fieldChooser.indexPattern.changeLinkAriaLabel',
-                {
-                  defaultMessage: 'Change current index pattern',
-                }
-              )}
+              aria-label={i18n.translate('discover.fieldChooser.indexPattern.changeLinkAriaLabel', {
+                defaultMessage: 'Change current index pattern',
+              })}
               data-test-subj="indexPattern-switch-link"
               size="xs"
               onClick={() => onChange()}
