@@ -29,5 +29,5 @@ export interface ChromeNavLink
 |  [subUrlBase](./kibana-plugin-core-public.chromenavlink.suburlbase.md) | <code>string</code> | A url base that legacy apps can set to match deep URLs to an application. |
 |  [title](./kibana-plugin-core-public.chromenavlink.title.md) | <code>string</code> | The title of the application. |
 |  [tooltip](./kibana-plugin-core-public.chromenavlink.tooltip.md) | <code>string</code> | A tooltip shown when hovering over an app link. |
-|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | A url that legacy apps can set to deep link into their applications. |
+|  [url](./kibana-plugin-core-public.chromenavlink.url.md) | <code>string</code> | The route used to open the [default path](./kibana-plugin-core-public.appbase.defaultpath.md) of an application. If unset, <code>baseUrl</code> will be used instead. |
 

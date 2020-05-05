@@ -6,13 +6,13 @@
 
 import { getImportTimelinesRequest } from './__mocks__/request_responses';
 import {
-  createMockConfig,
   serverMock,
   requestContextMock,
   requestMock,
+  createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
-import { SecurityPluginSetup } from '../../../../../security/server';
+import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
   mockUniqueParsedObjects,
@@ -24,12 +24,12 @@ import {
 } from './__mocks__/import_timelines';
 
 describe('import timelines', () => {
-  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;
+  let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
@@ -43,7 +43,6 @@ describe('import timelines', () => {
 
     server = serverMock.create();
     context = requestContextMock.createTools().context;
-    config = createMockConfig();
 
     securitySetup = ({
       authc: {
@@ -53,6 +52,7 @@ describe('import timelines', () => {
     } as unknown) as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
+    mockGetTemplateTimeline = jest.fn();
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
@@ -84,40 +84,29 @@ describe('import timelines', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(null),
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
-              }),
-            };
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
+          persistTimeline: mockPersistTimeline.mockReturnValue({
+            timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
           }),
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
 
       const importTimelinesRoute = jest.requireActual('./import_timelines_route')
         .importTimelinesRoute;
-      importTimelinesRoute(server.router, config, securitySetup);
+      importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('should use given timelineId to check if the timeline savedObject already exist', async () => {
@@ -226,42 +215,31 @@ describe('import timelines', () => {
     });
   });
 
-  describe('Import a timeline already exist but overwrite is not allowed', () => {
+  describe('Import a timeline already exist', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
-              persistTimeline: mockPersistTimeline,
-            };
-          }),
+          getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
+          persistTimeline: mockPersistTimeline,
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
 
       const importTimelinesRoute = jest.requireActual('./import_timelines_route')
         .importTimelinesRoute;
-      importTimelinesRoute(server.router, config, securitySetup);
+      importTimelinesRoute(server.router, createMockConfig(), securitySetup);
     });
 
     test('returns error message', async () => {
@@ -286,36 +264,24 @@ describe('import timelines', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
-          Timeline: jest.fn().mockImplementation(() => {
-            return {
-              getTimeline: mockGetTimeline.mockReturnValue(null),
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
-              }),
-            };
+          getTimeline: mockGetTimeline.mockReturnValue(null),
+          persistTimeline: mockPersistTimeline.mockReturnValue({
+            timeline: { savedObjectId: '79deb4c0-6bc1-11ea-9999-f5341fb7a189' },
           }),
         };
       });
 
       jest.doMock('../../pinned_event/saved_object', () => {
         return {
-          PinnedEvent: jest.fn().mockImplementation(() => {
-            return {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline.mockReturnValue(
-                new Error('Test error')
-              ),
-            };
-          }),
+          persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline.mockReturnValue(
+            new Error('Test error')
+          ),
         };
       });
 
       jest.doMock('../../note/saved_object', () => {
         return {
-          Note: jest.fn().mockImplementation(() => {
-            return {
-              persistNote: mockPersistNote,
-            };
-          }),
+          persistNote: mockPersistNote,
         };
       });
     });
@@ -328,11 +294,14 @@ describe('import timelines', () => {
       const importTimelinesRoute = jest.requireActual('./import_timelines_route')
         .importTimelinesRoute;
 
-      importTimelinesRoute(server.router, config, securitySetup);
+      importTimelinesRoute(server.router, createMockConfig(), securitySetup);
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "file",Invalid value "undefined" supplied to "file"'
+        [
+          'Invalid value "undefined" supplied to "file"',
+          'Invalid value "undefined" supplied to "file"',
+        ].join(',')
       );
     });
   });

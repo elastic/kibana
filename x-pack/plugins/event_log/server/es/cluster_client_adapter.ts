@@ -7,7 +7,7 @@
 import { reject, isUndefined } from 'lodash';
 import { SearchResponse, Client } from 'elasticsearch';
 import { Logger, ClusterClient } from '../../../../../src/core/server';
-import { IEvent } from '../types';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 
 export type EsClusterClient = Pick<ClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -157,6 +157,13 @@ export class ClusterClientAdapter {
                           must: [
                             {
                               term: {
+                                'kibana.saved_objects.rel': {
+                                  value: SAVED_OBJECT_REL_PRIMARY,
+                                },
+                              },
+                            },
+                            {
+                              term: {
                                 'kibana.saved_objects.type': {
                                   value: type,
                                 },
@@ -176,14 +183,14 @@ export class ClusterClientAdapter {
                   },
                   start && {
                     range: {
-                      'event.start': {
+                      '@timestamp': {
                         gte: start,
                       },
                     },
                   },
                   end && {
                     range: {
-                      'event.end': {
+                      '@timestamp': {
                         lte: end,
                       },
                     },

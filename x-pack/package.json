@@ -20,6 +20,11 @@
     "build": {
       "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
       "oss": false
+    },
+    "clean": {
+      "extraPatterns": [
+        "plugins/*/target"
+      ]
     }
   },
   "resolutions": {
@@ -76,7 +81,7 @@
     "@types/json-stable-stringify": "^1.0.32",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/lodash": "^3.10.1",
-    "@types/mapbox-gl": "^1.8.1",
+    "@types/mapbox-gl": "^1.9.1",
     "@types/memoize-one": "^4.1.0",
     "@types/mime": "^2.0.1",
     "@types/mocha": "^7.0.2",
@@ -100,6 +105,7 @@
     "@types/recompose": "^0.30.6",
     "@types/reduce-reducers": "^1.0.0",
     "@types/redux-actions": "^2.6.1",
+    "@types/set-value": "^2.0.0",
     "@types/sinon": "^7.0.13",
     "@types/styled-components": "^4.4.2",
     "@types/supertest": "^2.0.5",
@@ -262,7 +268,7 @@
     "io-ts": "^2.0.5",
     "isbinaryfile": "4.0.2",
     "joi": "^13.5.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-search": "^1.4.3",
     "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",
@@ -274,7 +280,7 @@
     "lodash.topath": "^4.5.2",
     "lodash.uniqby": "^4.7.0",
     "lz-string": "^1.4.4",
-    "mapbox-gl": "^1.9.0",
+    "mapbox-gl": "^1.10.0",
     "mapbox-gl-draw-rectangle-mode": "^1.0.4",
     "markdown-it": "^10.0.0",
     "memoize-one": "^5.0.0",
@@ -339,6 +345,7 @@
     "rison-node": "0.3.1",
     "rxjs": "^6.5.3",
     "semver": "5.7.0",
+    "set-value": "^3.0.2",
     "squel": "^5.13.0",
     "stats-lite": "^2.2.0",
     "style-it": "^2.1.3",

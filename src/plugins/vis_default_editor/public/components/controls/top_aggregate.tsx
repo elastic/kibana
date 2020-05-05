@@ -26,10 +26,9 @@ import {
   IAggConfig,
   AggParam,
   OptionedValueProp,
-  OptionedParamEditorProps,
   OptionedParamType,
 } from 'src/plugins/data/public';
-import { AggParamEditorProps } from '../agg_param_props';
+import { AggParamEditorProps, OptionedParamEditorProps } from '../agg_param_props';
 
 export interface AggregateValueProp extends OptionedValueProp {
   isCompatible(aggConfig: IAggConfig): boolean;

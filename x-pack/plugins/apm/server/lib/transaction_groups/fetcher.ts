@@ -12,7 +12,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { getTransactionGroupsProjection } from '../../../common/projections/transaction_groups';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import { PromiseReturnType } from '../../../typings/common';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import { SortOptions } from '../../../typings/elasticsearch/aggregations';
 import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import {
@@ -83,7 +83,11 @@ export function transactionGroupsFetcher(
             sample: { top_hits: { size: 1, sort } },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95] }
+              percentiles: {
+                field: TRANSACTION_DURATION,
+                percents: [95],
+                hdr: { number_of_significant_value_digits: 2 }
+              }
             },
             sum: { sum: { field: TRANSACTION_DURATION } }
           }
