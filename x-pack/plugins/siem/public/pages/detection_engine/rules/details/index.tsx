@@ -22,6 +22,7 @@ import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { UpdateDateRange } from '../../../../components/charts/common';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
 import {
@@ -209,8 +210,12 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     signalIndexName,
   ]);
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
+  const updateDateRangeCallback = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

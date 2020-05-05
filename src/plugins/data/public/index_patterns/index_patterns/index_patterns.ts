@@ -32,6 +32,13 @@ import {
   createEnsureDefaultIndexPattern,
   EnsureDefaultIndexPattern,
 } from './ensure_default_index_pattern';
+import {
+  getIndexPatternFieldListCreator,
+  CreateIndexPatternFieldList,
+  Field,
+  FieldSpec,
+} from '../fields';
+import { FieldFormatsStart } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
@@ -47,12 +54,33 @@ export class IndexPatternsService {
   private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
+  createFieldList: CreateIndexPatternFieldList;
+  createField: (
+    indexPattern: IndexPattern,
+    spec: FieldSpec | Field,
+    shortDotsEnable: boolean
+  ) => Field;
 
-  constructor(core: CoreStart, savedObjectsClient: SavedObjectsClientContract, http: HttpStart) {
+  constructor(
+    core: CoreStart,
+    savedObjectsClient: SavedObjectsClientContract,
+    http: HttpStart,
+    fieldFormats: FieldFormatsStart
+  ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats,
+      toastNotifications: core.notifications.toasts,
+    });
+    this.createField = (indexPattern, spec, shortDotsEnable) => {
+      return new Field(indexPattern, spec, shortDotsEnable, {
+        fieldFormats,
+        toastNotifications: core.notifications.toasts,
+      });
+    };
   }
 
   private async refreshSavedObjectsCache() {
