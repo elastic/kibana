@@ -22,6 +22,7 @@ export class IngestPipelinesPlugin implements Plugin {
 
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN_ID,
+      order: 1,
       title: i18n.translate('xpack.ingestPipelines.appTitle', {
         defaultMessage: 'Ingest Node Pipelines',
       }),
