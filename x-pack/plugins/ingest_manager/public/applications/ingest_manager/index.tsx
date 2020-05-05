@@ -49,7 +49,7 @@ const Panel = styled(EuiPanel)`
 
 const ErrorLayout = ({ children }: { children: JSX.Element }) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
+    <DefaultLayout showSettings={false}>
       <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
     </DefaultLayout>
   </EuiErrorBoundary>
