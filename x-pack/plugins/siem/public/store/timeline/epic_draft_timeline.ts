@@ -6,11 +6,12 @@
 
 import { of, Observable, from } from 'rxjs';
 import { get } from 'lodash/fp';
-import { filter, withLatestFrom, mergeMap, takeUntil } from 'rxjs/operators';
+import { filter, withLatestFrom, mergeMap, takeUntil, startWith } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
 import {
-  getDraftTimeline as getDraftTimelineAction,
+  addTimeline,
+  createTimeline,
   showCallOutUnauthorizedMsg,
   endTimelineSaving,
 } from './actions';
@@ -24,6 +25,7 @@ import {
 } from '../../components/open_timeline/helpers';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 import { ResponseTimeline } from '../../graphql/types';
+import { timelineDefaults } from './defaults';
 
 export const epicDraftTimeline = (
   action: ActionTimeline,
@@ -57,9 +59,13 @@ export const epicDraftTimeline = (
           id: 'timeline-1',
           notes,
           timeline: {
-            ...timelineModel,
             ...savedTimeline,
-            show: savedTimeline?.show ?? false,
+            ...timelineModel,
+            ...action.payload,
+            id: timelineModel.savedObjectId!,
+            savedObjectId: timelineModel.savedObjectId!,
+            version: timelineModel.version,
+            show: savedTimeline.show ?? false,
           },
           to: savedTimeline?.dateRange.end ?? settingsTo,
         }),
@@ -73,6 +79,9 @@ export const epicDraftTimeline = (
         withLatestFrom(timeline$),
         filter(([checkAction, updatedTimeline]) => {
           if (checkAction.type === addError.type) {
+            return true;
+          }
+          if (checkAction.type === addTimeline.type) {
             return true;
           }
           if (
@@ -94,4 +103,8 @@ export const epicDraftTimeline = (
   );
 
 export const createDraftTimelineEpic = <State>(): Epic<Action, Action, State> => () =>
-  of(getDraftTimelineAction({ id: 'timeline-1' }));
+  of(createTimeline({ id: 'timeline-1', columns: timelineDefaults.columns })).pipe(
+    startWith(
+      addTimeline({ id: 'timeline-1', timeline: { id: 'timeline-1', ...timelineDefaults } })
+    )
+  );

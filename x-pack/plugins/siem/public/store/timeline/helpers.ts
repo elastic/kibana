@@ -125,7 +125,7 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
-    isLoading: timelineById[id].isLoading,
+    isLoading: timelineById[id]?.isLoading ?? timeline.isSaving,
   },
 });
 
@@ -177,10 +177,6 @@ export const addNewTimeline = ({
     kqlQuery,
     sort,
     show,
-    savedObjectId: null,
-    version: null,
-    isSaving: false,
-    isLoading: false,
     showCheckboxes,
     showRowRenderers,
   },

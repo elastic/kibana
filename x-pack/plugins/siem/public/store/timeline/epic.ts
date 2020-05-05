@@ -150,6 +150,10 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
+          if (timelineObj.timelineType !== 'draft') {
+            myEpicTimelineId.setTimelineVersion(null);
+            myEpicTimelineId.setTimelineId(null);
+          }
           return true;
         } else if (action.type === getDraftTimeline.type && isItAtimelineAction(timelineId)) {
           return true;
