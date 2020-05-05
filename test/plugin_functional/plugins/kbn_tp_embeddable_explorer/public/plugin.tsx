@@ -69,7 +69,7 @@ export class EmbeddableExplorerPublicPlugin
     setupDeps.uiActions.registerAction(sayHelloAction);
     setupDeps.uiActions.registerAction(sendMessageAction);
 
-    setupDeps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
+    setupDeps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, helloWorldAction.id);
 
     setupDeps.embeddable.registerEmbeddableFactory(
       HELLO_WORLD_EMBEDDABLE,
