@@ -32,7 +32,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('querying the entire infrastructure', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
-          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), '@timestamp');
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType));
           const result = await client.search({
             index,
             body: searchBody,
@@ -45,7 +45,6 @@ export default function({ getService }: FtrProviderContext) {
       it('should work with a filterQuery', async () => {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -60,7 +59,6 @@ export default function({ getService }: FtrProviderContext) {
       it('should work with a filterQuery in KQL format', async () => {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
           undefined,
           '"agent.hostname":"foo"'
         );
@@ -76,11 +74,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
-          const searchBody = getElasticsearchMetricQuery(
-            getSearchParams(aggType),
-            '@timestamp',
-            'agent.id'
-          );
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), 'agent.id');
           const result = await client.search({
             index,
             body: searchBody,
@@ -93,7 +87,6 @@ export default function({ getService }: FtrProviderContext) {
       it('should work with a filterQuery', async () => {
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
