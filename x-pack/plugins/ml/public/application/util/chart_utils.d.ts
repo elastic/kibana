@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, PluginsSetup } from './shim';
-
-export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {}
-}
+export declare function numTicksForDateFormat(axisWidth: number, dateFormat: string): number;

@@ -72,19 +72,17 @@ export const updateRulesRoute = (router: IRouter) => {
         validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
 
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
           alertsClient,
-          actionsClient,
           anomalyThreshold,
           description,
           enabled,
