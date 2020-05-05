@@ -152,6 +152,16 @@ module.exports = {
     },
 
     /**
+     * New Platform client-side
+     */
+    {
+      files: ['{src,x-pack}/plugins/*/public/**/*.{js,ts,tsx}'],
+      rules: {
+        'import/no-commonjs': 'error',
+      },
+    },
+
+    /**
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
