@@ -99,7 +99,8 @@ export const javaSettings: RawSettingDefinition[] = [
           'The minimal time required in order to determine whether the system is either currently under stress, or that the stress detected previously has been relieved. All measurements during this time must be consistent in comparison to the relevant threshold in order to detect a change of stress state. Must be at least `1m`.'
       }
     ),
-    includeAgents: ['java']
+    includeAgents: ['java'],
+    min: '1m'
   },
   {
     key: 'stress_monitor_system_cpu_stress_threshold',
@@ -176,7 +177,9 @@ export const javaSettings: RawSettingDefinition[] = [
           'The frequency at which stack traces are gathered within a profiling session. The lower you set it, the more accurate the durations will be. This comes at the expense of higher overhead and more spans for potentially irrelevant operations. The minimal duration of a profiling-inferred span is the same as the value of this setting.'
       }
     ),
-    includeAgents: ['java']
+    includeAgents: ['java'],
+    min: '1ms',
+    max: '1s'
   },
   {
     key: 'profiling_inferred_spans_min_duration',

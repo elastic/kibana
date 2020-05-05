@@ -20,6 +20,8 @@ export {
   DatasourceConfigRecordEntry,
   Output,
   DataStream,
+  // API schema - misc setup, status
+  GetFleetStatusResponse,
   // API schemas - Agent Config
   GetAgentConfigsResponse,
   GetAgentConfigsResponseItem,
@@ -28,8 +30,8 @@ export {
   CreateAgentConfigResponse,
   UpdateAgentConfigRequest,
   UpdateAgentConfigResponse,
-  DeleteAgentConfigsRequest,
-  DeleteAgentConfigsResponse,
+  DeleteAgentConfigRequest,
+  DeleteAgentConfigResponse,
   // API schemas - Datasource
   CreateDatasourceRequest,
   CreateDatasourceResponse,
@@ -90,4 +92,5 @@ export {
   DetailViewPanelName,
   InstallStatus,
   InstallationStatus,
+  Installable,
 } from '../../../../common';

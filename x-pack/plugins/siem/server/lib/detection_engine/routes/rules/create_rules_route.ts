@@ -72,12 +72,11 @@ export const createRulesRoute = (router: IRouter): void => {
       try {
         validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -100,7 +99,6 @@ export const createRulesRoute = (router: IRouter): void => {
         }
         const createdRule = await createRules({
           alertsClient,
-          actionsClient,
           anomalyThreshold,
           description,
           enabled,
