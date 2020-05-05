@@ -36,6 +36,12 @@
       "indexPatternsWithGeoFieldCount": {
         "type": "long"
       },
+      "indexPatternsWithGeoPointFieldCount": {
+        "type": "long"
+      },
+      "indexPatternsWithGeoShapeFieldCount": {
+        "type": "long"
+      },
       "mapsTotalCount": {
         "type": "long"
       },

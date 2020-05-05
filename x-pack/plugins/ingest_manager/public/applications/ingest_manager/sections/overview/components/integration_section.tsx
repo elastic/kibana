@@ -22,10 +22,11 @@ import { InstallationStatus } from '../../../types';
 
 export const OverviewIntegrationSection: React.FC = () => {
   const packagesRequest = useGetPackages();
-
-  const total = packagesRequest.data?.response?.length ?? 0;
-  const installed =
-    packagesRequest.data?.response?.filter(p => p.status === InstallationStatus.installed)
+  const res = packagesRequest.data?.response;
+  const total = res?.length ?? 0;
+  const installed = res?.filter(p => p.status === InstallationStatus.installed)?.length ?? 0;
+  const updatablePackages =
+    res?.filter(item => 'savedObject' in item && item.version > item.savedObject.attributes.version)
       ?.length ?? 0;
   return (
     <EuiFlexItem component="section">
@@ -68,6 +69,15 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiI18nNumber value={installed} />
+              </EuiDescriptionListDescription>
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.ingestManager.overviewIntegrationsUpdatesAvailableTitle"
+                  defaultMessage="Updates available"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                <EuiI18nNumber value={updatablePackages} />
               </EuiDescriptionListDescription>
             </>
           )}

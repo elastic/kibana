@@ -39,6 +39,7 @@ export async function getAgentEvents(
 
   const items: AgentEvent[] = saved_objects.map(so => {
     return {
+      id: so.id,
       ...so.attributes,
       payload: so.attributes.payload ? JSON.parse(so.attributes.payload) : undefined,
     };

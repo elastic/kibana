@@ -15,10 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
-import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
-import { TypeRegistry } from '../../type_registry';
+import { ActionConnector, IErrorObject } from '../../../types';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -47,8 +46,6 @@ interface ActionConnectorProps {
     body: { message: string; error: string };
   };
   errors: IErrorObject;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  http: HttpSetup;
 }
 
 export const ActionConnectorForm = ({
@@ -57,9 +54,8 @@ export const ActionConnectorForm = ({
   actionTypeName,
   serverError,
   errors,
-  actionTypeRegistry,
-  http,
 }: ActionConnectorProps) => {
+  const { actionTypeRegistry, docLinks } = useActionsConnectorsContext();
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
@@ -94,7 +90,10 @@ export const ActionConnectorForm = ({
                 values={{
                   actionType: actionTypeName,
                   docLink: (
-                    <EuiLink target="_blank">
+                    <EuiLink
+                      href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningHelpLinkText"
                         defaultMessage="Learn more."
@@ -151,7 +150,6 @@ export const ActionConnectorForm = ({
           errors={errors}
           editActionConfig={setActionConfigProperty}
           editActionSecrets={setActionSecretsProperty}
-          http={http}
         />
       ) : null}
     </EuiForm>

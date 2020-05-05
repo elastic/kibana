@@ -21,11 +21,22 @@ import { IndexPattern } from '../../index_patterns';
 import {
   AggConfigSerialized,
   AggConfigs,
+  AggParamsRange,
+  AggParamsIpRange,
+  AggParamsDateRange,
+  AggParamsFilter,
+  AggParamsFilters,
+  AggParamsSignificantTerms,
+  AggParamsGeoTile,
+  AggParamsGeoHash,
   AggParamsTerms,
+  AggParamsHistogram,
+  AggParamsDateHistogram,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   CreateAggConfigParams,
   getCalculateAutoTimeExpression,
+  BUCKET_TYPES,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -56,6 +67,12 @@ export interface SearchAggsStart {
 }
 
 /** @internal */
+export interface BaseAggParams {
+  json?: string;
+  customLabel?: string;
+}
+
+/** @internal */
 export interface AggExpressionType {
   type: 'agg_type';
   value: AggConfigSerialized;
@@ -74,5 +91,15 @@ export type AggExpressionFunctionArgs<
  * @internal
  */
 export interface AggParamsMapping {
-  terms: AggParamsTerms;
+  [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
+  [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
+  [BUCKET_TYPES.FILTER]: AggParamsFilter;
+  [BUCKET_TYPES.FILTERS]: AggParamsFilters;
+  [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
+  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
+  [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
+  [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
+  [BUCKET_TYPES.TERMS]: AggParamsTerms;
 }
