@@ -11,6 +11,7 @@ import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
+  Logger,
   SavedObjectsServiceStart,
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
@@ -30,10 +31,12 @@ export interface ServerConfigType {
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: Observable<ServerConfigType>;
+  private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<ServerConfigType>();
+    this.logger = initializerContext.logger.get();
   }
 
   public async setup(
@@ -42,7 +45,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   ) {
     const router = http.createRouter();
     const config = await this.config.pipe(first()).toPromise();
-    const dependencies = { router, config };
+    const dependencies = { router, config, log: this.logger };
 
     registerEnginesRoute(dependencies);
 
