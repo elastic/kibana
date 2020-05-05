@@ -15,13 +15,15 @@ def getGitChanges() {
 
   def message = ["<div><strong>Changes</strong></div>"]
 
-  message << changes.take(10).collect {
-    "<div><a href=\"https://github.com/elastic/kibana/commit/${it.commitId}\">${it.msg}</a></div>"
+  message << changes.reverse().take(10).collect {
+    "<div><a href=\"https://github.com/elastic/kibana/commit/${it.commitId}\">${it.msg}</a></div>\n<ul>"
   }.join("\n")
 
   if (changes.size() > 10) {
-    message << "<div>...and ${changes.size()-10} more</div>"
+    message << "<li>...and ${changes.size()-10} more</li>"
   }
+
+  message << "</ul>"
 
   return message.join("\n")
 }
