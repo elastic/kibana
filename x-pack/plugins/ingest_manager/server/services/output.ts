@@ -48,7 +48,7 @@ class OutputService {
     });
 
     if (!outputs.saved_objects.length) {
-      throw new Error('No default output');
+      return null;
     }
 
     return outputs.saved_objects[0].id;
@@ -56,6 +56,9 @@ class OutputService {
 
   public async getAdminUser(soClient: SavedObjectsClientContract) {
     const defaultOutputId = await this.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      return null;
+    }
     const so = await appContextService
       .getEncryptedSavedObjects()
       ?.getDecryptedAsInternalUser<Output>(OUTPUT_SAVED_OBJECT_TYPE, defaultOutputId);
