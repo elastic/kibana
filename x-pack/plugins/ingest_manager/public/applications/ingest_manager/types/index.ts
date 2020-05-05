@@ -63,7 +63,7 @@ export {
   PutSettingsRequest,
   PutSettingsResponse,
   // API schemas - app
-  GetCheckPermissionsResponse,
+  CheckPermissionsResponse,
   // EPM types
   AssetReference,
   AssetsGroupedByServiceByType,

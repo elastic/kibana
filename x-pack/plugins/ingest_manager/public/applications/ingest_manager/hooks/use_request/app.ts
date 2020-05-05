@@ -6,10 +6,10 @@
 
 import { sendRequest } from './use_request';
 import { appRoutesService } from '../../services';
-import { GetCheckPermissionsResponse } from '../../types';
+import { CheckPermissionsResponse } from '../../types';
 
 export const sendGetPermissionsCheck = () => {
-  return sendRequest<GetCheckPermissionsResponse>({
+  return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
   });

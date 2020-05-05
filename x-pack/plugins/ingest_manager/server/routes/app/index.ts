@@ -9,27 +9,27 @@ import { appContextService } from '../../services';
 import { CheckPermissionsResponse } from '../../../common';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
-  const security = await appContextService.getSecurity();
   const body: CheckPermissionsResponse = { success: true };
+  try {
+    const security = await appContextService.getSecurity();
+    const user = security.authc.getCurrentUser(request);
 
-  if (!security) {
+    if (!user?.roles.includes('superuser')) {
+      body.success = false;
+      body.error = 'MISSING_SUPERUSER_ROLE';
+      return response.ok({
+        body,
+      });
+    }
+
+    return response.ok({ body: { success: true } });
+  } catch (e) {
     body.success = false;
     body.error = 'MISSING_SECURITY';
     return response.ok({
       body,
     });
   }
-  const user = security.authc.getCurrentUser(request);
-
-  if (!user?.roles.includes('superuser')) {
-    body.success = false;
-    body.error = 'MISSING_SUPERUSER_ROLE';
-    return response.ok({
-      body,
-    });
-  }
-
-  return response.ok({ body: { success: true } });
 };
 
 export const registerRoutes = (router: IRouter) => {
