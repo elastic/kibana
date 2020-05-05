@@ -13301,8 +13301,6 @@
     "xpack.siem.containers.anomalies.stackByJobId": "ジョブ",
     "xpack.siem.containers.anomalies.title": "異常",
     "xpack.siem.containers.case.errorTitle": "データの取得中にエラーが発生",
-    "xpack.siem.containers.case.pushToExterService": "ServiceNow への送信が正常に完了しました",
-    "xpack.siem.containers.case.tagFetchFailDescription": "タグを取得できませんでした",
     "xpack.siem.containers.detectionEngine.addRuleFailDescription": "ルールを追加できませんでした",
     "xpack.siem.containers.detectionEngine.createPrePackagedRuleFailDescription": "Elasticから事前にパッケージ化されているルールをインストールすることができませんでした",
     "xpack.siem.containers.detectionEngine.createPrePackagedRuleSuccesDescription": "Elasticから事前にパッケージ化されているルールをインストールしました",

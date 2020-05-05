@@ -17,6 +17,7 @@ import { CaseFullExternalService } from '../../../../case/common/api/cases';
 interface CaseService extends CaseExternalService {
   firstPushIndex: number;
   lastPushIndex: number;
+  commentsToUpdate: string[];
   hasDataToPush: boolean;
 }
 
@@ -69,11 +70,30 @@ export const getPushedInfo = (
         .action !== 'push-to-service'
     );
   };
+  const commentsAndIndex = caseUserActions.reduce<
+    Array<{
+      commentId: string;
+      commentIndex: number;
+    }>
+  >(
+    (bacc, mua, index) =>
+      mua.actionField[0] === 'comment' && mua.commentId != null
+        ? [
+            ...bacc,
+            {
+              commentId: mua.commentId,
+              commentIndex: index,
+            },
+          ]
+        : bacc,
+    []
+  );
 
   const caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
     if (cua.action !== 'push-to-service') {
       return acc;
     }
+
     const externalService = getExternalService(`${cua.newValue}`);
     if (externalService === null) {
       return acc;
@@ -87,6 +107,18 @@ export const getPushedInfo = (
               ...acc[externalService.connectorId],
               ...externalService,
               lastPushIndex: i,
+              commentsToUpdate: commentsAndIndex.reduce<string[]>(
+                (bacc, currentComment) =>
+                  currentComment.commentIndex > i
+                    ? bacc.indexOf(currentComment.commentId) > -1
+                      ? [
+                          ...bacc.filter(e => e !== currentComment.commentId),
+                          currentComment.commentId,
+                        ]
+                      : [...bacc, currentComment.commentId]
+                    : bacc,
+                []
+              ),
             },
           }
         : {
@@ -95,6 +127,18 @@ export const getPushedInfo = (
               firstPushIndex: i,
               lastPushIndex: i,
               hasDataToPush: hasDataToPushForConnector(externalService.connectorId),
+              commentsToUpdate: commentsAndIndex.reduce<string[]>(
+                (bacc, currentComment) =>
+                  currentComment.commentIndex > i
+                    ? bacc.indexOf(currentComment.commentId) > -1
+                      ? [
+                          ...bacc.filter(e => e !== currentComment.commentId),
+                          currentComment.commentId,
+                        ]
+                      : [...bacc, currentComment.commentId]
+                    : bacc,
+                []
+              ),
             },
           }),
     };
