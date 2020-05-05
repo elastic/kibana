@@ -5,7 +5,7 @@
  */
 
 // @ts-ignore Untyped local
-import { createStore as createReduxStore } from './state/store';
+import { createStore as createReduxStore, destroyStore as destroy } from './state/store';
 // @ts-ignore Untyped local
 import { getInitialState } from './state/initial_state';
 
@@ -28,4 +28,8 @@ export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {
   };
 
   return createReduxStore(initialState);
+}
+
+export function destroyStore() {
+  destroy();
 }
