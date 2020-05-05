@@ -38,7 +38,7 @@ export const MonitorType = t.intersection([
     name: t.string,
     timespan: t.partial({
       gte: t.string,
-      lte: t.string,
+      lt: t.string,
     }),
   }),
 ]);

@@ -15,12 +15,9 @@ describe('MonitorRedirects component', () => {
   beforeEach(() => {
     monitorStatus = {
       observer: {
-        geo: { name: 'US-West', location: '37.422994, -122.083666' },
-        hostname: 'ElasticacLoaner',
+        geo: { name: 'US-West' },
       },
-      '@timestamp': '2020-05-05T16:14:56.469Z',
       http: {
-        rtt: { total: { us: 157784 } },
         response: {
           status_code: 200,
           redirects: ['http://localhost:3000/first', 'https://www.washingtonpost.com/'],

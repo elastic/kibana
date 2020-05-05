@@ -62,11 +62,6 @@ exports[`MonitorRedirects component shallow renders duration in ms, not us 1`] =
             ],
             "status_code": 200,
           },
-          "rtt": Object {
-            "total": Object {
-              "us": 157784,
-            },
-          },
         },
         "monitor": Object {
           "check_group": "6bd9f8ce-8eeb-11ea-b33f-acde48001122",
@@ -84,10 +79,8 @@ exports[`MonitorRedirects component shallow renders duration in ms, not us 1`] =
         },
         "observer": Object {
           "geo": Object {
-            "location": "37.422994, -122.083666",
             "name": "US-West",
           },
-          "hostname": "ElasticacLoaner",
         },
         "timestamp": "2020-05-05T16:14:56.469Z",
         "tls": Object {},
