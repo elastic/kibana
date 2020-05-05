@@ -29,7 +29,6 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { ChromeService } from './chrome_service';
 import { App } from '../application';
-import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -52,7 +51,6 @@ function defaultStartDeps(availableApps?: App[]) {
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   if (availableApps) {
@@ -163,7 +161,7 @@ describe('start', () => {
   });
 
   describe('visibility', () => {
-    it('updates/emits the visibility', async () => {
+    it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
       const promise = chrome
         .getIsVisible$()
@@ -177,33 +175,37 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
-          true,
           false,
-          true,
+          false,
+          false,
+          false,
         ]
       `);
     });
 
-    it('always emits false if embed query string is preset when set up', async () => {
+    it('emits false until manually overridden when in embed mode', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
+      const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
 
-      const { chrome, service } = await start();
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
+      await navigateToApp('alpha');
+
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
-      chrome.setIsVisible(true);
+
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
           false,
           false,
-          false,
+          true,
           false,
         ]
       `);
@@ -228,7 +230,7 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
+          false,
           true,
           false,
           true,
@@ -245,13 +247,13 @@ describe('start', () => {
         .pipe(toArray())
         .toPromise();
 
-      navigateToApp('alpha');
+      await navigateToApp('alpha');
       chrome.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
+          false,
           false,
           false,
         ]
