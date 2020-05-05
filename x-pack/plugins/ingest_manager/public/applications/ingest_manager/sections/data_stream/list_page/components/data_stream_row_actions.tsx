@@ -72,7 +72,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
         return {
           icon: 'dashboardApp',
           href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
-          name: dashboard.id,
+          name: dashboard.title,
         };
       }),
     });

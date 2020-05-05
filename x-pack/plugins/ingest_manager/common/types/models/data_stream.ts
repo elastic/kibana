@@ -15,6 +15,6 @@ export interface DataStream {
   size_in_bytes: number;
   dashboards: Array<{
     id: string;
-    type: string;
+    title: string;
   }>;
 }

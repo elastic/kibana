@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { DataStream } from '../../types';
-import { GetDataStreamsResponse } from '../../../common';
-import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { GetDataStreamsResponse, KibanaAssetType } from '../../../common';
+import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
@@ -104,7 +104,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
     const packageMetadata: any = {};
 
-    const dataStreams: DataStream[] = (indexResults as any[]).map(result => {
+    const dataStreamsPromises = (indexResults as any[]).map(async result => {
       const {
         key: indexName,
         dataset: { buckets: datasetBuckets },
@@ -122,10 +122,20 @@ export const getListHandler: RequestHandler = async (context, request, response)
       // - and the package has been installed through EPM
       // - and we didn't pick the metadata in an earlier iteration of this map()
       if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
+        // then pick the dashboards from the package saved object
+        const dashboards =
+          pkgSavedObject[0].attributes?.installed?.filter(
+            o => o.type === KibanaAssetType.dashboard
+          ) || [];
+        // and then pick the human-readable titles from the dashboard saved objects
+        const enhancedDashboards = await getEnhancedDashboards(
+          context.core.savedObjects.client,
+          dashboards
+        );
+
         packageMetadata[pkg] = {
           version: pkgSavedObject[0].attributes?.version || '',
-          dashboards:
-            pkgSavedObject[0].attributes?.installed?.filter(o => o.type === 'dashboard') || [],
+          dashboards: enhancedDashboards,
         };
       }
       return {
@@ -141,6 +151,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       };
     });
 
+    const dataStreams: DataStream[] = await Promise.all(dataStreamsPromises);
+
     body.data_streams = dataStreams;
 
     return response.ok({
@@ -152,4 +164,22 @@ export const getListHandler: RequestHandler = async (context, request, response)
       body: { message: e.message },
     });
   }
+};
+
+const getEnhancedDashboards = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  dashboards: any[]
+) => {
+  const dashboardsPromises = dashboards.map(async db => {
+    const dbSavedObject: any = await getKibanaSavedObject(
+      savedObjectsClient,
+      KibanaAssetType.dashboard,
+      db.id
+    );
+    return {
+      id: db.id,
+      title: dbSavedObject.attributes?.title || db.id,
+    };
+  });
+  return await Promise.all(dashboardsPromises);
 };
