@@ -44,7 +44,5 @@ export const pickSavedTimeline = (
     savedTimeline.templateTimelineVersion = null;
   }
 
-  console.log('pickSavedTimeline', JSON.stringify(savedTimeline));
-
   return savedTimeline;
 };
