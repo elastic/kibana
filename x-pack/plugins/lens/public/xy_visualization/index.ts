@@ -12,7 +12,6 @@ import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
-import { setExecuteTriggerActions } from '../services';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface XyVisualizationPluginSetupPlugins {
@@ -59,7 +58,5 @@ export class XyVisualization {
 
     editorFrame.registerVisualization(xyVisualization);
   }
-  start(core: CoreStart, { uiActions }: XyVisualizationPluginStartPlugins) {
-    setExecuteTriggerActions(uiActions.executeTriggerActions);
-  }
+  start() {}
 }

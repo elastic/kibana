@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +17,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
 import { Datasource, Visualization, FramePublicAPI } from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
@@ -25,6 +28,11 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import {
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -43,6 +51,7 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
+  plugins: { uiActions?: UiActionsStart };
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -58,6 +67,7 @@ export function InnerWorkspacePanel({
   framePublicAPI,
   dispatch,
   core,
+  plugins,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
@@ -184,6 +194,22 @@ export function InnerWorkspacePanel({
       }
     }, [expression]);
 
+    const handleEvent = useCallback(
+      (event: ExpressionRendererEvent) => {
+        if (!plugins.uiActions) {
+          // ui actions not available, not handling event...
+          return;
+        }
+        if (event.name === VALUE_CLICK_TRIGGER) {
+          plugins.uiActions.executeTriggerActions(VALUE_CLICK_TRIGGER, event.data);
+        }
+        if (event.name === SELECT_RANGE_TRIGGER) {
+          plugins.uiActions.executeTriggerActions(SELECT_RANGE_TRIGGER, event.data);
+        }
+      },
+      [plugins]
+    );
+
     if (expression === null) {
       return renderEmptyWorkspace();
     }
@@ -211,6 +237,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          onEvent={handleEvent}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">

@@ -7,11 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -466,4 +476,31 @@ export interface Visualization<T = unknown, P = unknown> {
    * If there is no expression provided, the preview icon is used.
    */
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+}
+
+export type LensInterpreterEvent =
+  | { name: typeof VALUE_CLICK_TRIGGER; data: TriggerContext<typeof VALUE_CLICK_TRIGGER> }
+  | { name: typeof SELECT_RANGE_TRIGGER; data: TriggerContext<typeof SELECT_RANGE_TRIGGER> };
+
+/**
+ * Expression renderer handlers specifically for lens renderers. This is a narrowed down
+ * version of the general render handlers, specifying supported event types. If this type is
+ * used, dispatched events will be handled correctly.
+ */
+export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
+  event: (event: LensInterpreterEvent) => void;
+}
+
+/**
+ * Type narrowing down an expression renderer definition by specifying the events which are handled by the
+ * lens embeddable. If this type is used to define a renderer, dispatched event will be handled correctly.
+ * Other events will be ignored.
+ */
+export interface LensExpressionRenderDefinition<Config = unknown>
+  extends ExpressionRenderDefinition<Config> {
+  render: (
+    domNode: HTMLElement,
+    config: Config,
+    handlers: ILensInterpreterRenderHandlers
+  ) => void | Promise<void>;
 }

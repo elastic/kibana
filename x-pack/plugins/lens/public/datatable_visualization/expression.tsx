@@ -10,17 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
-import { FormatFactory, LensMultiTable } from '../types';
 import {
-  ExpressionFunctionDefinition,
-  ExpressionRenderDefinition,
-  IInterpreterRenderHandlers,
-} from '../../../../../src/plugins/expressions/public';
+  FormatFactory,
+  ILensInterpreterRenderHandlers,
+  LensExpressionRenderDefinition,
+  LensMultiTable,
+} from '../types';
+import { ExpressionFunctionDefinition } from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
 import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { getExecuteTriggerActions } from '../services';
+import { TriggerContext, VALUE_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -37,7 +36,7 @@ export interface DatatableProps {
 
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  onClickValue: (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => void;
   getType: (name: string) => IAggType;
 };
 
@@ -114,7 +113,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 export const getDatatableRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   getType: Promise<(name: string) => IAggType>;
-}): ExpressionRenderDefinition<DatatableProps> => ({
+}): LensExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
@@ -125,17 +124,19 @@ export const getDatatableRenderer = (dependencies: {
   render: async (
     domNode: Element,
     config: DatatableProps,
-    handlers: IInterpreterRenderHandlers
+    handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedFormatFactory = await dependencies.formatFactory;
-    const executeTriggerActions = getExecuteTriggerActions();
     const resolvedGetType = await dependencies.getType;
+    const onClickValue = (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => {
+      handlers.event({ name: VALUE_CLICK_TRIGGER, data: context });
+    };
     ReactDOM.render(
       <I18nProvider>
         <DatatableComponent
           {...config}
           formatFactory={resolvedFormatFactory}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           getType={resolvedGetType}
         />
       </I18nProvider>,
@@ -176,7 +177,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
       },
       timeFieldName,
     };
-    props.executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+    props.onClickValue(context);
   };
 
   return (

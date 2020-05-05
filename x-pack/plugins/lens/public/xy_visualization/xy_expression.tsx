@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import {
@@ -21,8 +21,6 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  IInterpreterRenderHandlers,
-  ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
@@ -33,13 +31,20 @@ import {
   ValueClickTriggerContext,
   RangeSelectTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { LensMultiTable, FormatFactory } from '../types';
+import {
+  LensMultiTable,
+  FormatFactory,
+  LensExpressionRenderDefinition,
+  ILensInterpreterRenderHandlers,
+} from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
-import { getExecuteTriggerActions } from '../services';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import {
+  VALUE_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+} from '../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
@@ -63,7 +68,8 @@ type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  onClickValue: (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => void;
+  onSelectRange: (context: TriggerContext<typeof SELECT_RANGE_TRIGGER>) => void;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -117,7 +123,7 @@ export const getXyChartRenderer = (dependencies: {
   chartTheme: PartialTheme;
   histogramBarTarget: number;
   timeZone: string;
-}): ExpressionRenderDefinition<XYChartProps> => ({
+}): LensExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
@@ -125,9 +131,18 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+  render: async (
+    domNode: Element,
+    config: XYChartProps,
+    handlers: ILensInterpreterRenderHandlers
+  ) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const onClickValue = (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => {
+      handlers.event({ name: VALUE_CLICK_TRIGGER, data: context });
+    };
+    const onSelectRange = (context: TriggerContext<typeof SELECT_RANGE_TRIGGER>) => {
+      handlers.event({ name: SELECT_RANGE_TRIGGER, data: context });
+    };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
@@ -137,7 +152,8 @@ export const getXyChartRenderer = (dependencies: {
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       </I18nProvider>,
       domNode,
@@ -177,7 +193,8 @@ export function XYChart({
   timeZone,
   chartTheme,
   histogramBarTarget,
-  executeTriggerActions,
+  onClickValue,
+  onSelectRange,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
@@ -304,7 +321,7 @@ export function XYChart({
             },
             timeFieldName,
           };
-          executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
+          onSelectRange(context);
         }}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -357,7 +374,7 @@ export function XYChart({
             },
             timeFieldName,
           };
-          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+          onClickValue(context);
         }}
       />
 
