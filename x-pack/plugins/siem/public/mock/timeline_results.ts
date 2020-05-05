@@ -2148,7 +2148,6 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineVersion: null,
   version: '1',
   width: 1100,
-  timelineType: TimelineType.default,
 };
 
 export const mockTimelineResult: TimelineResult = {
@@ -2244,12 +2243,11 @@ export const defaultTimelineProps: CreateTimelineProps = {
     showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     title: '',
-    timelineType: TimelineType.default,
+    timelineType: TimelineType.draft,
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
     width: 1100,
-    timelineType: TimelineType.draft,
   },
   to: 1541444605937,
   ruleNote: '# this is some markdown documentation',
