@@ -42,7 +42,6 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
-import './discover/legacy';
 import './management';
 import './dev_tools';
 import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
