@@ -170,12 +170,12 @@ export const UPDATE_CONNECTOR = i18n.translate('xpack.siem.case.configureCases.u
   defaultMessage: 'Update connector',
 });
 
-export const UPDATE_SELECTED_CONNECTOR = i18n.translate(
-  'xpack.siem.case.configureCases.updateSelectedConnector',
-  {
-    defaultMessage: 'Update selected connector',
-  }
-);
+export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string => {
+  return i18n.translate('xpack.siem.case.configureCases.updateSelectedConnector', {
+    values: { connectorName },
+    defaultMessage: 'Update { connectorName }',
+  });
+};
 
 export const UNSAVED_CHANGES = (unsavedChanges: number): string => {
   return i18n.translate('xpack.siem.case.configureCases.unsavedChanges', {

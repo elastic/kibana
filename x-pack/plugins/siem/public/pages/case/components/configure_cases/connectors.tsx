@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -55,19 +55,29 @@ const ConnectorsComponent: React.FC<Props> = ({
   handleShowAddFlyout,
   handleShowEditFlyout,
 }) => {
-  const dropDownLabel = (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          disabled={updateConnectorDisabled}
-          onClick={handleShowEditFlyout}
-          data-test-subj="case-configure-update-selected-connector-button"
-        >
-          {i18n.UPDATE_SELECTED_CONNECTOR}
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  const connectorsName = useMemo(
+    () => connectors.find(c => c.id === selectedConnector)?.name ?? 'none',
+    [connectors, selectedConnector]
+  );
+
+  const dropDownLabel = useMemo(
+    () => (
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {connectorsName !== 'none' && (
+            <EuiLink
+              disabled={updateConnectorDisabled}
+              onClick={handleShowEditFlyout}
+              data-test-subj="case-configure-update-selected-connector-button"
+            >
+              {i18n.UPDATE_SELECTED_CONNECTOR(connectorsName)}
+            </EuiLink>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [connectorsName]
   );
 
   return (
