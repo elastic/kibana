@@ -37,7 +37,7 @@ run(
 
     // Ensure SASS dependencies have been built before doing anything.
     execa.sync(process.execPath, ['scripts/build_sass'], {
-      cwd: path.resolve(__dirname, '../../../../..'),
+      cwd: path.resolve(__dirname, '../../../..'),
       ...options,
     });
 
@@ -58,7 +58,7 @@ run(
           'false',
         ],
         {
-          cwd: path.resolve(__dirname, '../../../../..'),
+          cwd: path.resolve(__dirname, '../../../..'),
           stdio: ['ignore', 'inherit', 'inherit'],
           buffer: false,
         }
@@ -96,7 +96,7 @@ run(
 
     // Watch the SASS sheets for changes
     execa(process.execPath, ['scripts/build_sass', '--watch'], {
-      cwd: path.resolve(__dirname, '../../../../..'),
+      cwd: path.resolve(__dirname, '../../../..'),
       ...options,
     });
 

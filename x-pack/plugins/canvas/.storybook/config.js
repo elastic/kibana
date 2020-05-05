@@ -50,7 +50,7 @@ function loadStories() {
   // Only gather and require CSS files related to Canvas.  The other CSS files
   // are built into the DLL.
   const css = require.context(
-    '../../../../../built_assets/css',
+    '../../../../built_assets/css',
     true,
     /plugins\/(?=canvas).*light\.css/
   );

@@ -5,13 +5,13 @@
  */
 
 export * from './api';
-import '../../../../../built_assets/css/plugins/kibana/index.light.css';
+import '../../../../built_assets/css/plugins/kibana/index.light.css';
 import '../public/style/index.scss';
 import '@elastic/eui/dist/eui_theme_light.css';
 import '@kbn/ui-framework/dist/kui_light.css';
 
 const css = require.context(
-  '../../../../../built_assets/css',
+  '../../../../built_assets/css',
   true,
   /\.\/plugins\/(?!canvas).*light\.css/
 );
@@ -20,7 +20,7 @@ css.keys().forEach(filename => {
 });
 
 const uiStyles = require.context(
-  '../../../../../src/legacy/ui/public/styles',
+  '../../../../src/legacy/ui/public/styles',
   false,
   /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
 );

@@ -7,7 +7,7 @@
 const path = require('path');
 const { LIBRARY_NAME, SHAREABLE_RUNTIME_NAME } = require('./constants_static');
 
-const KIBANA_ROOT_PATH = '../../../../..';
+const KIBANA_ROOT_PATH = '../../../..';
 const CANVAS_ROOT_PATH = 'x-pack/plugins/canvas';
 const SHAREABLE_RUNTIME_PATH = 'shareable_runtime';
 const SHAREABLE_RUNTIME_OUTPUT_PATH = 'shareable_runtime/build';
