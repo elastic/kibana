@@ -28,7 +28,6 @@ export async function getDerivedServiceAnnotations({
 
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
-    { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } }
   ];
 
@@ -44,10 +43,9 @@ export async function getDerivedServiceAnnotations({
         index: indices['apm_oss.transactionIndices'],
         body: {
           size: 0,
-          track_total_hits: false,
           query: {
             bool: {
-              filter
+              filter: filter.concat({ range: rangeFilter(start, end) })
             }
           },
           aggs: {
@@ -61,56 +59,53 @@ export async function getDerivedServiceAnnotations({
       })
     ).aggregations?.versions.buckets.map(bucket => bucket.key) ?? [];
 
-  if (versions.length > 1) {
-    const annotations = await Promise.all(
-      versions.map(async version => {
-        const response = await client.search({
-          index: indices['apm_oss.transactionIndices'],
-          body: {
-            size: 0,
-            query: {
-              bool: {
-                filter: filter
-                  .filter(esFilter => !Object.keys(esFilter).includes('range'))
-                  .concat({
-                    term: {
-                      [SERVICE_VERSION]: version
-                    }
-                  })
-              }
-            },
-            aggs: {
-              first_seen: {
-                min: {
-                  field: '@timestamp'
-                }
-              }
-            },
-            track_total_hits: false
-          }
-        });
-
-        const firstSeen = response.aggregations?.first_seen.value;
-
-        if (!isNumber(firstSeen)) {
-          throw new Error(
-            'First seen for version was unexpectedly undefined or null.'
-          );
-        }
-
-        if (firstSeen < start || firstSeen > end) {
-          return null;
-        }
-
-        return {
-          type: AnnotationType.VERSION,
-          id: version,
-          time: firstSeen,
-          text: version
-        };
-      })
-    );
-    return annotations.filter(Boolean) as Annotation[];
+  if (versions.length <= 1) {
+    return [];
   }
-  return [];
+  const annotations = await Promise.all(
+    versions.map(async version => {
+      const response = await client.search({
+        index: indices['apm_oss.transactionIndices'],
+        body: {
+          size: 0,
+          query: {
+            bool: {
+              filter: filter.concat({
+                term: {
+                  [SERVICE_VERSION]: version
+                }
+              })
+            }
+          },
+          aggs: {
+            first_seen: {
+              min: {
+                field: '@timestamp'
+              }
+            }
+          }
+        }
+      });
+
+      const firstSeen = response.aggregations?.first_seen.value;
+
+      if (!isNumber(firstSeen)) {
+        throw new Error(
+          'First seen for version was unexpectedly undefined or null.'
+        );
+      }
+
+      if (firstSeen < start || firstSeen > end) {
+        return null;
+      }
+
+      return {
+        type: AnnotationType.VERSION,
+        id: version,
+        time: firstSeen,
+        text: version
+      };
+    })
+  );
+  return annotations.filter(Boolean) as Annotation[];
 }
