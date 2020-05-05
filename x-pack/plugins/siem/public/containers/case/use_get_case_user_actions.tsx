@@ -49,6 +49,24 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 
 const getExternalService = (value: string): CaseExternalService | null =>
   convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
+interface CommentsAndIndex {
+  commentId: string;
+  commentIndex: number;
+}
+// if the comment happens after the lastUpdateToCaseIndex, it should be included in commentsToUpdate
+const buildCommentsToUpdate = (
+  commentsAndIndex: CommentsAndIndex[],
+  lastUpdateToCaseIndex: number
+) =>
+  commentsAndIndex.reduce<string[]>(
+    (bacc, currentComment) =>
+      currentComment.commentIndex > lastUpdateToCaseIndex
+        ? bacc.indexOf(currentComment.commentId) > -1
+          ? [...bacc.filter(e => e !== currentComment.commentId), currentComment.commentId]
+          : [...bacc, currentComment.commentId]
+        : bacc,
+    []
+  );
 
 export const getPushedInfo = (
   caseUserActions: CaseUserActions[],
@@ -70,12 +88,7 @@ export const getPushedInfo = (
         .action !== 'push-to-service'
     );
   };
-  const commentsAndIndex = caseUserActions.reduce<
-    Array<{
-      commentId: string;
-      commentIndex: number;
-    }>
-  >(
+  const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
     (bacc, mua, index) =>
       mua.actionField[0] === 'comment' && mua.commentId != null
         ? [
@@ -107,18 +120,7 @@ export const getPushedInfo = (
               ...acc[externalService.connectorId],
               ...externalService,
               lastPushIndex: i,
-              commentsToUpdate: commentsAndIndex.reduce<string[]>(
-                (bacc, currentComment) =>
-                  currentComment.commentIndex > i
-                    ? bacc.indexOf(currentComment.commentId) > -1
-                      ? [
-                          ...bacc.filter(e => e !== currentComment.commentId),
-                          currentComment.commentId,
-                        ]
-                      : [...bacc, currentComment.commentId]
-                    : bacc,
-                []
-              ),
+              commentsToUpdate: buildCommentsToUpdate(commentsAndIndex, i),
             },
           }
         : {
@@ -127,18 +129,7 @@ export const getPushedInfo = (
               firstPushIndex: i,
               lastPushIndex: i,
               hasDataToPush: hasDataToPushForConnector(externalService.connectorId),
-              commentsToUpdate: commentsAndIndex.reduce<string[]>(
-                (bacc, currentComment) =>
-                  currentComment.commentIndex > i
-                    ? bacc.indexOf(currentComment.commentId) > -1
-                      ? [
-                          ...bacc.filter(e => e !== currentComment.commentId),
-                          currentComment.commentId,
-                        ]
-                      : [...bacc, currentComment.commentId]
-                    : bacc,
-                []
-              ),
+              commentsToUpdate: buildCommentsToUpdate(commentsAndIndex, i),
             },
           }),
     };
