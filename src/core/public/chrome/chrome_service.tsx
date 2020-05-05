@@ -17,28 +17,26 @@
  * under the License.
  */
 
+import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
-
-import { i18n } from '@kbn/i18n';
-import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
-
+import { InternalApplicationStart } from '../application';
+import { DocLinksStart } from '../doc_links';
+import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { InternalApplicationStart } from '../application';
-import { HttpStart } from '../http';
-
+import { IUiSettingsClient } from '../ui_settings';
+import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import { ChromeDocTitle, DocTitleService } from './doc_title';
+import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { NavControlsService, ChromeNavControls } from './nav_controls';
-import { DocTitleService, ChromeDocTitle } from './doc_title';
-import { LoadingIndicator, Header } from './ui';
-import { DocLinksStart } from '../doc_links';
-import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import { Header, LoadingIndicator } from './ui';
 import { NavType } from './ui/header';
+import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -85,6 +83,7 @@ interface StartDeps {
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -137,6 +136,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
