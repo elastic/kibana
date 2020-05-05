@@ -80,7 +80,7 @@ function renderNotifications(
 
     if (tooltip) {
       badge = (
-        <EuiToolTip position="left" delay="regular" content={tooltip}>
+        <EuiToolTip position="top" delay="regular" content={tooltip}>
           {badge}
         </EuiToolTip>
       );
