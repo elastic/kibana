@@ -10,11 +10,27 @@ def getFailedBuildParts() {
 def getHeader() {
   def pipelinesUrl = "https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}"
 
-  return """<p>
-    <div><strong>Job</strong>: ${env.JOB_NAME}</div>
-    <div><strong>Build URL</strong>: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
-    <div><strong>Pipelines UI:</strong> <a href="${pipelinesUrl}">${pipelinesUrl}</a></div>
-  </p>"""
+  def info = [
+    ["Job", env.JOB_NAME],
+    ["Status", buildUtils.getBuildStatus()],
+    ["Duration", currentBuild.durationString.replace(' and counting', '')],
+    ["Build URL", "<a href=\"${env.BUILD_URL}\">${env.BUILD_URL}</a>"],
+    ["Pipelines UI", "<a href=\"${pipelinesUrl}\">${pipelinesUrl}</a>"]
+  ]
+
+  def rows = info.collect { "<tr><td>${it[0]}</td><td>${it[1]}</td></tr>" }
+
+  return """<table><tbody>
+    ${rows.join("\n")}
+  </tbody></table>"""
+
+  // return """<p>
+  //   <div><strong>Job</strong>: ${env.JOB_NAME}</div>
+  //   <div><strong>Status</strong>: ${buildUtils.getBuildStatus()}</div>
+  //   <div><strong>Duration</strong>: ${currentBuild.durationString.replace(' and counting', '')}</div>
+  //   <div><strong>Build URL</strong>: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
+  //   <div><strong>Pipelines UI</strong>: <a href="${pipelinesUrl}">${pipelinesUrl}</a></div>
+  // </p>"""
 }
 
 def getFailedSteps() {
