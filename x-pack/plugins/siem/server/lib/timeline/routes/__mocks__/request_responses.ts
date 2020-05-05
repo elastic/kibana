@@ -109,7 +109,7 @@ export const updateTemplateTimelineWithTimelineId = {
   timeline: {
     ...inputTemplateTimeline,
     templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-    templateTimelineVersion: 2,
+    templateTimelineVersion: 1,
   },
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
   version: 'WzEyMjUsMV0=',

@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
@@ -184,23 +183,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
-    },
-    {
-      field: 'referencedByCount',
-      'data-test-subj': 'connectorsTableCell-referencedByCount',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Actions' }
-      ),
-      sortable: false,
-      truncateText: true,
-      render: (value: number, item: ActionConnectorTableItem) => {
-        return (
-          <EuiBadge color="hollow" key={item.id}>
-            {value}
-          </EuiBadge>
-        );
-      },
     },
     {
       field: 'isPreconfigured',
