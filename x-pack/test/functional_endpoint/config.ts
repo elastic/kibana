@@ -7,7 +7,7 @@
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { pageObjects } from './page_objects';
-import { services as endpointServices } from './services';
+import { services } from './services';
 
 export default async function({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
@@ -19,10 +19,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack Endpoint Functional Tests',
     },
-    services: {
-      ...xpackFunctionalConfig.get('services'),
-      ...endpointServices,
-    },
+    services,
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       endpoint: {

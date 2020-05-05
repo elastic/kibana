@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { services as xPackFunctionalServices } from '../../functional/services';
 import { EndpointPolicyTestResourcesProvider } from './endpoint_policy';
 
 export const services = {
+  ...xPackFunctionalServices,
   policyTestResources: EndpointPolicyTestResourcesProvider,
 };
