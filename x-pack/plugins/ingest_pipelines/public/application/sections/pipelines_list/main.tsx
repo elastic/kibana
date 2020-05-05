@@ -125,14 +125,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     } else {
       // Somehow we triggered show pipeline details, but do not have a pipeline.
       // We assume not found.
-      return (
-        <PipelineNotFoundFlyout
-          onClose={() => {
-            goHome();
-          }}
-          pipelineName={pipelineNameFromLocation}
-        />
-      );
+      return <PipelineNotFoundFlyout onClose={goHome} pipelineName={pipelineNameFromLocation} />;
     }
   };
 
@@ -198,6 +191,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             }
             setPipelinesToDelete([]);
             setSelectedPipeline(undefined);
+            goHome();
           }}
           pipelinesToDelete={pipelinesToDelete}
         />
