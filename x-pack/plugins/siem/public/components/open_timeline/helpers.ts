@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import ApolloClient from 'apollo-client';
 import { getOr, set, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';

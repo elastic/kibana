@@ -162,7 +162,6 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       onSelectionChange,
     };
     const basicTableProps = tableRef != null ? { ref: tableRef } : {};
-
     return (
       <BasicTable
         columns={getTimelinesTableColumns({
