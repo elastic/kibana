@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import { incrementUICounter } from '../../collectors/app_search/telemetry';
 
-export function registerTelemetryRoute({ router, getSavedObjectsService }) {
+export function registerTelemetryRoute({ router, getSavedObjectsService, log }) {
   router.put(
     {
       path: '/api/app_search/telemetry',
@@ -35,6 +35,7 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }) {
           }),
         });
       } catch (e) {
+        log.error(`App Search UI telemetry error: ${e instanceof Error ? e.stack : e.toString()}`);
         return response.internalError({ body: 'App Search UI telemetry failed' });
       }
     }

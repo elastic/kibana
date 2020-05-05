@@ -10,6 +10,8 @@ import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
+import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
+
 interface IEngineTableProps {
   data: Array<{
     name: string;
@@ -103,7 +105,7 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
       columns={columns}
       pagination={{
         pageIndex,
-        pageSize: 10, // TODO: pull this out to a constant?
+        pageSize: ENGINES_PAGE_SIZE,
         totalItemCount: totalEngines,
         hidePerPageOptions: true,
       }}

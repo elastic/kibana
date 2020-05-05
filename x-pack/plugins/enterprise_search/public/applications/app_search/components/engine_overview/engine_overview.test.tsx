@@ -52,7 +52,7 @@ describe('EngineOverview', () => {
 
     it('hasNoAccount', async () => {
       const wrapper = await mountWithApiMock({
-        get: () => ({ message: 'no-as-account' }),
+        get: () => Promise.reject({ body: { message: 'no-as-account' } }),
       });
       expect(wrapper.find(NoUserState)).toHaveLength(1);
     });

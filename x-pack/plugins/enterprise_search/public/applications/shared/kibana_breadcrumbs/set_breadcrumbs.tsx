@@ -30,7 +30,7 @@ export const SetAppSearchBreadcrumbs: React.FC<ISetBreadcrumbsProps> = ({ text, 
 
   useEffect(() => {
     setBreadcrumbs(appSearchBreadcrumbs(history)(crumb));
-  }, []); // eslint-disable-line
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 };
