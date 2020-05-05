@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FormSchema } from '../../../../shared_imports';
 
-import { CoreSetup, PluginsSetup } from './shim';
-
-export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {}
-}
+export const schema: FormSchema = {
+  connector: {
+    defaultValue: 'none',
+  },
+};
