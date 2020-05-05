@@ -82,8 +82,6 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
       frequency: getFrequencyFieldMock(undefined),
     });
 
-    // This case will return an empty object. In the actual UI, this case should not happen
-    // because the Update-Button will be disabled when no form field was changed.
     expect(Object.keys(updateConfig)).toHaveLength(1);
     expect(updateConfig.description).toBe('the-new-description');
     expect(updateConfig.frequency).toBe(undefined);
