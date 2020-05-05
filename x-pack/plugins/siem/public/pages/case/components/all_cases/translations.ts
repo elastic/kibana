@@ -46,9 +46,16 @@ export const BULK_ACTIONS = i18n.translate('xpack.siem.case.caseTable.bulkAction
   defaultMessage: 'Bulk actions',
 });
 
-export const SERVICENOW_INCIDENT = i18n.translate('xpack.siem.case.caseTable.snIncident', {
-  defaultMessage: 'ServiceNow Incident',
+export const EXTERNAL_INCIDENT = i18n.translate('xpack.siem.case.caseTable.snIncident', {
+  defaultMessage: 'External Incident',
 });
+
+export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate(
+  'xpack.siem.case.caseTable.incidentSystem',
+  {
+    defaultMessage: 'Incident Management System',
+  }
+);
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.siem.case.caseTable.searchPlaceholder', {
   defaultMessage: 'e.g. case name',

@@ -79,3 +79,17 @@ export const EMAIL_REQUIRED = i18n.translate(
     defaultMessage: 'Email is required',
   }
 );
+
+export const MAPPING_FIELD_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.mappingFieldDescription',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const MAPPING_FIELD_COMMENTS = i18n.translate(
+  'xpack.siem.case.configureCases.mappingFieldComments',
+  {
+    defaultMessage: 'Comments',
+  }
+);

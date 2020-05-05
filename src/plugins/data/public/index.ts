@@ -59,6 +59,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  convertRangeFilterToTimeRangeString,
 } from './query';
 
 // Filter helpers namespace:
@@ -96,6 +97,7 @@ export const esFilters = {
   onlyDisabledFiltersChanged,
 
   changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
 };
@@ -252,11 +254,12 @@ export const indexPatterns = {
 export {
   IndexPatternsContract,
   IndexPattern,
+  IIndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
+  getIndexPatternFieldListCreator,
   Field,
 } from './index_patterns';
 

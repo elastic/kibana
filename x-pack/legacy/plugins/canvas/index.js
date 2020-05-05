@@ -6,14 +6,13 @@
 
 import { resolve } from 'path';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
-import { init } from './init';
 import { CANVAS_APP, CANVAS_TYPE, CUSTOM_ELEMENT_TYPE } from './common/lib';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
     id: CANVAS_APP,
     configPrefix: 'xpack.canvas',
-    require: ['kibana', 'elasticsearch', 'xpack_main', 'interpreter'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
@@ -64,6 +63,6 @@ export function canvas(kibana) {
       }).default();
     },
 
-    init,
+    init: () => undefined,
   });
 }

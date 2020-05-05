@@ -36,6 +36,7 @@ import { KueryFilterQueryKind } from '../../store/model';
 import { Note } from '../../lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
+import { TimelineType } from '../../../common/types/timeline';
 
 jest.mock('../../store/inputs/actions');
 jest.mock('../../store/timeline/actions');
@@ -299,6 +300,9 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         version: '1',
         width: 1100,
       });
@@ -393,6 +397,9 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         version: '1',
         width: 1100,
       });
@@ -467,6 +474,9 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
@@ -632,6 +642,9 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
