@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import { Readable } from 'stream';
 import {
   createConcatStream,
@@ -27,6 +28,7 @@ import {
 import { SavedObject } from '../types';
 import { createLimitStream } from './create_limit_stream';
 import { SavedObjectsImportError } from './types';
+import { getNonUniqueEntries } from './utilities';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;
@@ -42,10 +44,12 @@ export async function collectSavedObjects({
   supportedTypes,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportError[] = [];
+  const entries: Array<{ type: string; id: string }> = [];
   const collectedObjects: Array<SavedObject<{ title: string }>> = await createPromiseFromStreams([
     readStream,
     createLimitStream(objectLimit),
     createFilterStream<SavedObject<{ title: string }>>((obj) => {
+      entries.push({ type: obj.type, id: obj.id });
       if (supportedTypes.includes(obj.type)) {
         return true;
       }
@@ -66,6 +70,13 @@ export async function collectSavedObjects({
     }),
     createConcatStream([]),
   ]);
+
+  // throw a BadRequest error if we see the same import object type/id more than once
+  const nonUniqueEntries = getNonUniqueEntries(entries);
+  if (nonUniqueEntries.length > 0) {
+    throw Boom.badRequest(`Non-unique import objects detected: [${nonUniqueEntries.join()}]`);
+  }
+
   return {
     errors,
     collectedObjects,

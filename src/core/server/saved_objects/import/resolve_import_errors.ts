@@ -26,6 +26,7 @@ import {
   SavedObjectsResolveImportErrorsOptions,
 } from './types';
 import { validateReferences } from './validate_references';
+import { validateRetries } from './validate_retries';
 
 /**
  * Resolve and return saved object import errors.
@@ -41,6 +42,9 @@ export async function resolveSavedObjectsImportErrors({
   typeRegistry,
   namespace,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+  // throw a BadRequest error if we see invalid retries
+  validateRetries(retries);
+
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
