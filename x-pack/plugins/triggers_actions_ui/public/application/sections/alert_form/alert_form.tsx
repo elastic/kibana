@@ -87,7 +87,14 @@ export const AlertForm = ({
   setHasActionsDisabled,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+  const {
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    docLinks,
+    capabilities,
+  } = alertsContext;
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
@@ -245,6 +252,8 @@ export const AlertForm = ({
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

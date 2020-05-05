@@ -5112,6 +5112,12 @@ export namespace GetOneTimeline {
 
     title: Maybe<string>;
 
+    timelineType: Maybe<TimelineType>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
+
     savedQueryId: Maybe<string>;
 
     sort: Maybe<Sort>;
