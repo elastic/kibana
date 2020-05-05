@@ -10240,7 +10240,6 @@
     "xpack.ml.newJob.wizard.jobType.singleMetricTitle": "シングルメトリック",
     "xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription": "データのフィールドが既知のカテゴリーと一致することが認識されました。選択して一連の機械学習ジョブと関連ダッシュボードを作成します。",
     "xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle": "提供された構成を使用",
-    "xpack.ml.newJob.wizard.jobType.useWizardDescription": "ウィザードの 1 つを使用し、データの異常を検知する機械学習ジョブを作成します。",
     "xpack.ml.newJob.wizard.jobType.useWizardTitle": "ウィザードを使用",
     "xpack.ml.newJob.wizard.jsonFlyout.closeButton": "閉じる",
     "xpack.ml.newJob.wizard.jsonFlyout.datafeed.title": "データフィード構成 JSON",
