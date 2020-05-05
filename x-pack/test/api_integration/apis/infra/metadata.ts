@@ -12,18 +12,6 @@ import {
 } from '../../../../plugins/infra/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { DATES } from './constants';
-
-const timeRange700 = {
-  from: DATES['7.0.0'].hosts.min,
-  to: DATES[`7.0.0`].hosts.max,
-};
-
-const timeRange660 = {
-  from: DATES['6.6.0'].docker.min,
-  to: DATES[`6.6.0`].docker.max,
-};
-
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
