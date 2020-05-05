@@ -30,7 +30,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { AppCategory } from '../../../../types';
 import { OnIsLockedUpdate } from './';
 import { NavLink, RecentNavLink } from './nav_link';
