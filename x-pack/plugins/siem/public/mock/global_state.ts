@@ -13,7 +13,6 @@ import {
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
-  TimelineType,
 } from '../graphql/types';
 import { networkModel, State } from '../store';
 
@@ -24,6 +23,7 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
 } from '../../common/constants';
+import { TimelineType } from '../../common/types/timeline';
 
 export const mockGlobalState: State = {
   app: {
@@ -202,6 +202,9 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null, filterQueryDraft: null },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         dateRange: {
           start: 0,

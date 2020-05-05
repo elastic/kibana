@@ -29,6 +29,7 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../src/plugins/data/public';
+import { TimelineType } from '../../../common/types/timeline';
 import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
 import { addError } from '../app/actions';
@@ -243,6 +244,9 @@ export const createTimelineEpic = <State>(): Epic<
                         ...savedTimeline,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
+                        timelineType: response.timeline.timelineType ?? TimelineType.default,
+                        templateTimelineId: response.timeline.templateTimelineId ?? null,
+                        templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
                         isSaving: false,
                       },
                     }),
@@ -290,6 +294,9 @@ const timelineInput: TimelineInput = {
   kqlMode: null,
   kqlQuery: null,
   title: null,
+  timelineType: TimelineType.default,
+  templateTimelineVersion: null,
+  templateTimelineId: null,
   dateRange: null,
   savedQueryId: null,
   sort: null,

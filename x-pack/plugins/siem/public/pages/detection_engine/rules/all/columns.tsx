@@ -62,6 +62,7 @@ export const getActions = (
     },
   },
   {
+    'data-test-subj': 'exportRuleAction',
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
