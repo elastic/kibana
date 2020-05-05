@@ -13,6 +13,9 @@ import { useGetUrlParams } from '../../../hooks';
 export const StatusFilter: React.FC = () => {
   const { statusFilter } = useGetUrlParams();
 
+  // Empty string for all filter button value, since we dont store it in url, so keeping it in sync
+  const ALL = '';
+
   return (
     <EuiFilterGroup>
       <FilterStatusButton
@@ -20,8 +23,7 @@ export const StatusFilter: React.FC = () => {
           defaultMessage: 'All',
         })}
         dataTestSubj="xpack.uptime.filterBar.filterStatusAll"
-        // Empty string for all filter, since we dont store it in url, so keeping it in sync
-        value=""
+        value={ALL}
         withNext={true}
         isActive={statusFilter === ''}
       />
