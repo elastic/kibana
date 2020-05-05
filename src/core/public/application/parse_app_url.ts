@@ -27,7 +27,7 @@ interface AppUrlInfo {
 }
 
 /**
- * Parse given url and return the associated app id and path.
+ * Parse given url and return the associated app id and path if any app matches.
  * Input can either be:
  * - a path containing the basePath, ie `/base-path/app/my-app/some-path`
  * - an absolute url matching the `origin` of the kibana instance (as seen by the browser),

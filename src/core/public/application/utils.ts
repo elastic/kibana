@@ -78,14 +78,15 @@ export const relativeToAbsolute = (url: string): string => {
 };
 
 /**
- * Returns the absolute url for the current basePath.
- * See {@link relativeToAbsolute} for implementation details.
+ * Return the current origin of the browser
  */
 export const getOrigin = (): string => {
   return window.location.origin;
 };
 
-// TODO: add tests
+/**
+ * Return true if given element or any parent has the given class.
+ */
 export const selfOrParentHasClass = (element: HTMLElement, className: string): boolean => {
   let current = element;
   while (current) {
@@ -100,6 +101,9 @@ export const selfOrParentHasClass = (element: HTMLElement, className: string): b
   return false;
 };
 
+/**
+ * Return true if any modifier key is pressed.
+ */
 export const isModifiedEvent = (event: MouseEvent): boolean => {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 };

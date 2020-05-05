@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { removeSlashes, appendAppPath, isLegacyApp, relativeToAbsolute, getOrigin } from './utils';
+import {
+  removeSlashes,
+  appendAppPath,
+  isLegacyApp,
+  relativeToAbsolute,
+  getOrigin,
+  selfOrParentHasClass,
+} from './utils';
 
 describe('removeSlashes', () => {
   it('only removes duplicates by default', () => {
@@ -110,5 +117,30 @@ describe('relativeToAbsolute', () => {
     expect(relativeToAbsolute('path')).toEqual(`${origin}/path`);
     expect(relativeToAbsolute('/path#hash')).toEqual(`${origin}/path#hash`);
     expect(relativeToAbsolute('/path?query=foo')).toEqual(`${origin}/path?query=foo`);
+  });
+});
+
+describe('selfOrParentHasClass', () => {
+  it('returns true if the element has the given class', () => {
+    const el = document.createElement('div');
+    el.className = 'foo bar dolly';
+
+    expect(selfOrParentHasClass(el, 'foo')).toEqual(true);
+    expect(selfOrParentHasClass(el, 'missing')).toEqual(false);
+  });
+
+  it('returns true if any parent has the given class', () => {
+    const el = document.createElement('div');
+    const parent = document.createElement('div');
+    parent.className = 'foo classB';
+    const parent2 = document.createElement('div');
+    parent2.className = 'bar classC';
+
+    parent2.appendChild(parent);
+    parent.appendChild(el);
+
+    expect(selfOrParentHasClass(el, 'foo')).toEqual(true);
+    expect(selfOrParentHasClass(el, 'bar')).toEqual(true);
+    expect(selfOrParentHasClass(el, 'missing')).toEqual(false);
   });
 });
