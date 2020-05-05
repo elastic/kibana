@@ -9,7 +9,7 @@ import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_ru
 
 export const totalNumberOfPrebuiltRules = rawRules.length;
 
-export const totalLoadedRules = 127;
+export const totalNumberOfPrebuiltRulesInEsArchive = 127;
 
 interface Mitre {
   tactic: string;

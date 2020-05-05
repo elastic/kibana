@@ -71,6 +71,9 @@ describe('Signal detection rules, prebuilt rules', () => {
 
 describe('Deleting prebuilt rules', () => {
   beforeEach(() => {
+    const expectedNumberOfRules = totalNumberOfPrebuiltRules;
+    const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
+
     esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS);
     waitForSignalsPanelToBeLoaded();
@@ -79,6 +82,17 @@ describe('Deleting prebuilt rules', () => {
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     loadPrebuiltDetectionRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
+
+    cy.get(ELASTIC_RULES_BTN)
+      .invoke('text')
+      .should('eql', expectedElasticRulesBtnText);
+
+    changeToThreeHundredRowsPerPage();
+    waitForRulesToBeLoaded();
+
+    cy.get(RULES_TABLE).then($table => {
+      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
+    });
   });
 
   afterEach(() => {
