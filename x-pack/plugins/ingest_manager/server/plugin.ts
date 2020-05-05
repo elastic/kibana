@@ -162,28 +162,32 @@ export class IngestManagerPlugin
     const router = core.http.createRouter();
     const config = await this.config$.pipe(first()).toPromise();
 
-    // Register routes
-    registerSetupRoutes(router, config);
-    registerAgentConfigRoutes(router);
-    registerDatasourceRoutes(router);
-    registerOutputRoutes(router);
-    registerSettingsRoutes(router);
-    registerDataStreamRoutes(router);
+    // Always register app routes for permissions checking
     registerAppRoutes(router);
 
-    // Conditional routes
-    if (config.epm.enabled) {
-      registerEPMRoutes(router);
-    }
+    if (this.security) {
+      // Only register all other routes if security is enabled
+      registerSetupRoutes(router, config);
+      registerAgentConfigRoutes(router);
+      registerDatasourceRoutes(router);
+      registerOutputRoutes(router);
+      registerSettingsRoutes(router);
+      registerDataStreamRoutes(router);
 
-    if (config.fleet.enabled) {
-      registerAgentRoutes(router);
-      registerEnrollmentApiKeyRoutes(router);
-      registerInstallScriptRoutes({
-        router,
-        serverInfo: core.http.getServerInfo(),
-        basePath: core.http.basePath,
-      });
+      // Conditional routes
+      if (config.epm.enabled) {
+        registerEPMRoutes(router);
+      }
+
+      if (config.fleet.enabled) {
+        registerAgentRoutes(router);
+        registerEnrollmentApiKeyRoutes(router);
+        registerInstallScriptRoutes({
+          router,
+          serverInfo: core.http.getServerInfo(),
+          basePath: core.http.basePath,
+        });
+      }
     }
   }
 
