@@ -17,6 +17,8 @@ import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines/timelines
 
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
+import { TimelineTabsStyle } from './types';
+
 import { StatefulOpenTimeline } from '.';
 import { useGetAllTimeline, getAllTimeline } from '../../containers/timeline/all';
 jest.mock('../../lib/kibana');
@@ -29,11 +31,12 @@ jest.mock('../../containers/timeline/all', () => {
   };
 });
 jest.mock('./use_timeline_types', () => {
+  const originalModule = jest.requireActual('../../containers/timeline/all');
   return {
     useTimelineTypes: jest.fn().mockReturnValue({
       timelineType: 'default',
-      timelineTabs: <div />,
-      timelineFilters: <div />,
+      timelineTabs: <div data-test-subj="timeline-tab" />,
+      timelineFilters: <div data-test-subj="timeline-filter" />,
     }),
   };
 });
@@ -498,6 +501,30 @@ describe('StatefulOpenTimeline', () => {
           .first()
           .text()
       ).toEqual('elastic');
+    });
+
+    test('it renders the title', async () => {
+      const wrapper = mount(
+        <ThemeProvider theme={theme}>
+          <TestProviderWithoutDragAndDrop>
+            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+              <StatefulOpenTimeline
+                data-test-subj="stateful-timeline"
+                apolloClient={apolloClient}
+                isModal={false}
+                defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+                title={title}
+              />
+            </MockedProvider>
+          </TestProviderWithoutDragAndDrop>
+        </ThemeProvider>
+      );
+
+      await wait();
+
+      expect(wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()).toEqual(
+        true
+      );
     });
   });
 
