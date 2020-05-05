@@ -7,12 +7,19 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForConfigId } from './api_keys';
 import { updateAgentsForConfigId, unenrollForConfigId } from './agents';
+import { outputService } from './output';
 
 export async function agentConfigUpdateEventHandler(
   soClient: SavedObjectsClientContract,
   action: string,
   configId: string
 ) {
+  const adminUser = await outputService.getAdminUser(soClient);
+  // If no admin user fleet is not enabled just skip this hook
+  if (!adminUser) {
+    return;
+  }
+
   if (action === 'created') {
     await generateEnrollmentAPIKey(soClient, {
       configId,

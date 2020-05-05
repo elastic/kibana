@@ -5,16 +5,13 @@
  */
 
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { getMlResult } from '../routes/__mocks__/request_responses';
 import { createRules } from './create_rules';
 
 describe('createRules', () => {
-  let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
 
   beforeEach(() => {
-    actionsClient = actionsClientMock.create();
     alertsClient = alertsClientMock.create();
   });
 
@@ -27,7 +24,6 @@ describe('createRules', () => {
 
     await createRules({
       alertsClient,
-      actionsClient,
       ...params,
       ruleId: 'new-rule-id',
       enabled: true,

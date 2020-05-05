@@ -8,15 +8,17 @@ import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../.
 import { ActionType } from '../../../../../../plugins/actions/server';
 
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
-import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
+import { initPlugin as initServiceNow } from './servicenow_simulation';
+import { initPlugin as initJira } from './jira_simulation';
 
 const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
   PAGERDUTY = 'pagerduty',
   SERVICENOW = 'servicenow',
+  JIRA = 'jira',
   SLACK = 'slack',
   WEBHOOK = 'webhook',
 }
@@ -29,7 +31,9 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   const allPaths = Object.values(ExternalServiceSimulator).map(service =>
     getExternalServiceSimulatorPath(service)
   );
+
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/api/now/v2/table/incident`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.JIRA}/rest/api/2/issue`);
   return allPaths;
 }
 
@@ -78,9 +82,10 @@ export default function(kibana: any) {
       });
 
       initPagerduty(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
-      initServiceNow(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
+      initServiceNow(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW));
+      initJira(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     },
   });
 }

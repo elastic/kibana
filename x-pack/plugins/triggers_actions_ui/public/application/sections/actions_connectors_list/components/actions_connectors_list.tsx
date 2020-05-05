@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
@@ -33,7 +32,13 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    docLinks,
+  } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -184,23 +189,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
-    },
-    {
-      field: 'referencedByCount',
-      'data-test-subj': 'connectorsTableCell-referencedByCount',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Actions' }
-      ),
-      sortable: false,
-      truncateText: true,
-      render: (value: number, item: ActionConnectorTableItem) => {
-        return (
-          <EuiBadge color="hollow" key={item.id}>
-            {value}
-          </EuiBadge>
-        );
-      },
     },
     {
       field: 'isPreconfigured',
@@ -412,6 +400,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           capabilities,
           toastNotifications,
           reloadConnectors: loadActions,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout

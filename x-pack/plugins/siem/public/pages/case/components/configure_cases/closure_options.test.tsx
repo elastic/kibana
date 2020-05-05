@@ -61,7 +61,6 @@ describe('ClosureOptions', () => {
   test('the closure type is changed successfully', () => {
     wrapper.find('input[id="close-by-pushing"]').simulate('change');
 
-    expect(onChangeClosureType).toHaveBeenCalled();
     expect(onChangeClosureType).toHaveBeenCalledWith('close-by-pushing');
   });
 });
