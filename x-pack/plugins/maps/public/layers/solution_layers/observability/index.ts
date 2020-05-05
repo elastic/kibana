@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ReportingAPIProvider } from './reporting_api';
+export { ObservabilityLayerWizardConfig } from './observability_layer_wizard';
