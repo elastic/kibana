@@ -18,10 +18,12 @@ const stringNotValidErrorMessage = i18n.translate(
   }
 );
 
+type Validator = (arg: any) => string[];
+
 // The way the current form is set up,
 // this validator is just a sanity check,
 // it should never trigger an error.
-const stringValidator = (arg: any): string[] =>
+const stringValidator: Validator = arg =>
   typeof arg === 'string' ? [] : [stringNotValidErrorMessage];
 
 const frequencyNotValidErrorMessage = i18n.translate(
@@ -33,11 +35,15 @@ const frequencyNotValidErrorMessage = i18n.translate(
 
 // Only allow frequencies in the form of 1s/1h etc.
 // Note this doesn't do a check against 0s yet.
-const frequencyValidator = (arg: any): string[] => {
+const frequencyValidator: Validator = arg => {
   return /^([0-9]+[d|h|m|s|])$/.test(arg) ? [] : [frequencyNotValidErrorMessage];
 };
 
-const validate = {
+interface Validate {
+  [key: string]: Validator;
+}
+
+const validate: Validate = {
   string: stringValidator,
   frequency: frequencyValidator,
 };
@@ -91,11 +97,19 @@ export const applyFormFieldsToTransformConfig = (
 ): Partial<UpdateTransformPivotConfig> => {
   const updateConfig: Partial<UpdateTransformPivotConfig> = {};
 
-  if (!(config.frequency === undefined && frequency.value === '')) {
+  // set the values only if they changed from the default
+  // and actually differ from the previous value.
+  if (
+    !(config.frequency === undefined && frequency.value === '') &&
+    config.frequency !== frequency.value
+  ) {
     updateConfig.frequency = frequency.value;
   }
 
-  if (!(config.description === undefined && description.value === '')) {
+  if (
+    !(config.description === undefined && description.value === '') &&
+    config.description !== description.value
+  ) {
     updateConfig.description = description.value;
   }
 
@@ -104,7 +118,7 @@ export const applyFormFieldsToTransformConfig = (
 
 // Takes in a transform configuration and returns
 // the default state to populate the form.
-const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
+export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyoutState => ({
   formFields: {
     description: { ...defaultField, value: config?.description ?? '' },
     frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
@@ -133,7 +147,7 @@ const formFieldReducer = (state: Field, value: string): Field => {
 // - `formFieldReducer` to update the actions field
 // - compares the most recent state against the original one to update `isFormTouched`
 // - sets `isFormValid` to have a flag if any of the form fields contains an error.
-const formReducerFactory = (config: TransformPivotConfig) => {
+export const formReducerFactory = (config: TransformPivotConfig) => {
   const defaultState = getDefaultState(config);
   return (state: EditTransformFlyoutState, { field, value }: Action): EditTransformFlyoutState => {
     const formFields = {
