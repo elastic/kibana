@@ -6,7 +6,6 @@
 
 import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
