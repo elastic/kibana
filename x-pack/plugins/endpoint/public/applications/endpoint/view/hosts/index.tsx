@@ -20,7 +20,7 @@ import { HostInfo, HostStatus, Immutable } from '../../../../../common/types';
 import { PageView } from '../components/page_view';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
-export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
+const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
   {
     [key in HostStatus]: string;
   }

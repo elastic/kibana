@@ -25,7 +25,7 @@ describe('when on the hosts page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<HostList />);
@@ -127,6 +127,15 @@ describe('when on the hosts page', () => {
     ) => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
+      policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
+      policyResponse.endpoint.policy.applied.response.actions.download_model!.status = overallStatus;
+      if (
+        overallStatus === HostPolicyResponseActionStatus.failure ||
+        overallStatus === HostPolicyResponseActionStatus.warning
+      ) {
+        policyResponse.endpoint.policy.applied.response.actions.download_model!.message =
+          'no action taken';
+      }
       store.dispatch({
         type: 'serverReturnedHostPolicyResponse',
         payload: {
@@ -281,6 +290,9 @@ describe('when on the hosts page', () => {
           fireEvent.click(policyStatusLink);
         });
         await userChangedUrlChecker;
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse();
+        });
       });
       it('should hide the host details panel', async () => {
         const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
@@ -300,9 +312,6 @@ describe('when on the hosts page', () => {
         ).toBe('Policy Response');
       });
       it('should show a configuration section for each protection', async () => {
-        reactTestingLibrary.act(() => {
-          dispatchServerReturnedHostPolicyResponse();
-        });
         const configAccordions = await renderResult.findAllByTestId(
           'hostDetailsPolicyResponseConfigAccordion'
         );
@@ -310,19 +319,35 @@ describe('when on the hosts page', () => {
         expect(configAccordions.length).toBe(4);
       });
       it('should show a actions section for each configuration', async () => {
-        reactTestingLibrary.act(() => {
-          dispatchServerReturnedHostPolicyResponse();
-        });
-        const configAccordionTriggers = await renderResult.findByText('Malware');
-        reactTestingLibrary.act(() => {
-          fireEvent.click(configAccordionTriggers);
-        });
-
         const actionAccordions = await renderResult.findAllByTestId(
-          'hostDetailsPolicyResponseActionAccordion'
+          'hostDetailsPolicyResponseActionsAccordion'
         );
-        expect(actionAccordions).not.toBeNull();
-        expect(actionAccordions.length).toBe(10);
+        const action = await renderResult.findAllByTestId('policyResponseAction');
+        const statusHealth = await renderResult.findAllByTestId('policyResponseStatusHealth');
+        const message = await renderResult.findAllByTestId('policyResponseMessage');
+        expect(actionAccordions.length).toBe(9);
+        expect(action).not.toBeNull();
+        expect(statusHealth).not.toBeNull();
+        expect(message).not.toBeNull();
+      });
+      it('should not show any numbered badges if all actions are succesful', () => {
+        return renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
+          expect(e).not.toBeNull();
+        });
+      });
+      it('should show an numbered badge if at least one action failed', () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
+        });
+        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        expect(attentionBadge).not.toBeNull();
+      });
+      it('should show a numbered badge if at least one action has a warning', () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
+        });
+        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        expect(attentionBadge).not.toBeNull();
       });
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');

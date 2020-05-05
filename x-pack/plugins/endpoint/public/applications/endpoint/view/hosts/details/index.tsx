@@ -27,6 +27,7 @@ import {
   detailsLoading,
   policyResponseConfigurations,
   policyResponseActions,
+  policyResponseFailedOrWarningActionCount,
 } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
@@ -105,6 +106,7 @@ const PolicyResponseFlyoutPanel = memo<{
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
   const responseConfig = useHostSelector(policyResponseConfigurations);
   const responseActionStatus = useHostSelector(policyResponseActions);
+  const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -140,11 +142,14 @@ const PolicyResponseFlyoutPanel = memo<{
         </EuiTitle>
       </FlyoutSubHeader>
       <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        {responseConfig !== undefined && responseActionStatus !== undefined && (
+        {responseConfig !== undefined && responseActionStatus !== undefined ? (
           <PolicyResponse
             responseConfig={responseConfig}
             responseActionStatus={responseActionStatus}
+            responseAttentionCount={responseAttentionCount}
           />
+        ) : (
+          <p>No Policy Response Available</p>
         )}
       </EuiFlyoutBody>
     </>

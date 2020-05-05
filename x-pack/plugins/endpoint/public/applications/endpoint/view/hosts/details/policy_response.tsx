@@ -10,12 +10,12 @@ import { EuiText } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
   HostPolicyResponseActions,
-  HostPolicyResponseActionStatus,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
 } from '../../../../../../common/types';
 import { formatResponse } from './policy_response_friendly_names';
+import { POLICY_STATUS_TO_HEALTH_COLOR } from './host_constants';
 
 /**
  * Nested accordion in the policy response detailing any concerned
@@ -31,7 +31,7 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   .euiAccordion__childWrapper {
     background-color: ${props => props.theme.eui.euiColorLightestShade};
   }
-  .policyResponseFailedBadge {
+  .policyResponseAttentionBadge {
     background-color: ${props => props.theme.eui.euiColorDanger};
     color: ${props => props.theme.eui.euiColorEmptyShade};
   }
@@ -40,15 +40,6 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   }
 `;
 
-export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
-  {
-    [key in HostPolicyResponseActionStatus]: string;
-  }
->({
-  [HostPolicyResponseActionStatus.failure]: 'danger',
-  [HostPolicyResponseActionStatus.success]: 'success',
-  [HostPolicyResponseActionStatus.warning]: 'subdued',
-});
 const ResponseActions = memo(
   ({
     actions,
@@ -70,18 +61,23 @@ const ResponseActions = memo(
               key={useMemo(() => htmlIdGenerator()(), [])}
               data-test-subj="hostDetailsPolicyResponseActionsAccordion"
               buttonContent={
-                <EuiText size="xs">
+                <EuiText size="xs" data-test-subj="policyResponseAction">
                   <h4>{formatResponse(action)}</h4>
                 </EuiText>
               }
               paddingSize="s"
               extraAction={
-                <EuiHealth color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}>
-                  <p>{formatResponse(statuses.status)}</p>
+                <EuiHealth
+                  color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}
+                  data-test-subj="policyResponseStatusHealth"
+                >
+                  <EuiText size="xs">
+                    <p>{formatResponse(statuses.status)}</p>
+                  </EuiText>
                 </EuiHealth>
               }
             >
-              <EuiText size="xs">
+              <EuiText size="xs" data-test-subj="policyResponseMessage">
                 <p>{statuses.message}</p>
               </EuiText>
             </EuiAccordion>
@@ -93,19 +89,22 @@ const ResponseActions = memo(
 );
 
 /**
- * A policy response ise returned by the endpoint and shown in the host details after a user modifies a policy
+ * A policy response is returned by the endpoint and shown in the host details after a user modifies a policy
  */
 export const PolicyResponse = memo(
   ({
     responseConfig,
     responseActionStatus,
+    responseAttentionCount,
   }: {
     responseConfig: Immutable<HostPolicyResponseConfiguration>;
     responseActionStatus: Partial<HostPolicyResponseActions>;
+    responseAttentionCount: Map<string, number>;
   }) => {
     return (
       <>
         {Object.entries(responseConfig).map(([key, val]) => {
+          const attentionCount = responseAttentionCount.get(key);
           return (
             <PolicyResponseConfigAccordion
               id={useMemo(() => htmlIdGenerator()(), [])}
@@ -118,12 +117,13 @@ export const PolicyResponse = memo(
               }
               paddingSize="m"
               extraAction={
-                val.status === 'failure' && (
+                attentionCount &&
+                attentionCount > 0 && (
                   <EuiNotificationBadge
-                    className="policyResponseFailedBadge"
-                    data-test-subj="hostDetailsPolicyResponseFailedBadge"
+                    className="policyResponseAttentionBadge"
+                    data-test-subj="hostDetailsPolicyResponseAttentionBadge"
                   >
-                    2
+                    {attentionCount}
                   </EuiNotificationBadge>
                 )
               }

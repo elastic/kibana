@@ -647,12 +647,7 @@ export interface HostPolicyResponseActions {
   [key: string]: HostPolicyResponseActionDetails;
 }
 
-export interface HostPolicyResponseConfiguration {
-  malware: HostPolicyResponseConfigurationStatus;
-  events: HostPolicyResponseConfigurationStatus;
-  logging: HostPolicyResponseConfigurationStatus;
-  streaming: HostPolicyResponseConfigurationStatus;
-}
+export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
@@ -688,7 +683,12 @@ export interface HostPolicyResponse {
         id: string;
         status: HostPolicyResponseActionStatus;
         response: {
-          configurations: HostPolicyResponseConfiguration;
+          configurations: {
+            malware: HostPolicyResponseConfigurationStatus;
+            events: HostPolicyResponseConfigurationStatus;
+            logging: HostPolicyResponseConfigurationStatus;
+            streaming: HostPolicyResponseConfigurationStatus;
+          };
           actions: Partial<HostPolicyResponseActions>;
         };
       };

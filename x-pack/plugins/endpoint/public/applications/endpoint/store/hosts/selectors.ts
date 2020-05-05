@@ -9,6 +9,7 @@ import {
   Immutable,
   HostPolicyResponseActions,
   HostPolicyResponseConfiguration,
+  HostPolicyResponseActionStatus,
 } from '../../../../../common/types';
 import { HostState, HostIndexUIQueryParams } from '../../types';
 
@@ -32,9 +33,15 @@ export const detailsLoading = (state: Immutable<HostState>): boolean => state.de
 
 export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 
+/**
+ * Returns the full policy response from the endpoint after a user modifies a policy.
+ */
 const detailsPolicyResponse = (state: Immutable<HostState>) =>
   state.policyResponse && state.policyResponse.endpoint.policy.applied.response;
 
+/**
+ * Returns the response configurations from the endpoint after a user modifies a policy.
+ */
 export const policyResponseConfigurations: (
   state: Immutable<HostState>
 ) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
@@ -44,6 +51,34 @@ export const policyResponseConfigurations: (
   }
 );
 
+/**
+ * Returns a map of the number of failed and warning policy response actions per configuration.
+ */
+export const policyResponseFailedOrWarningActionCount: (
+  state: Immutable<HostState>
+) => Map<string, number> = createSelector(detailsPolicyResponse, response => {
+  const failureOrWarningByConfigType = new Map<string, number>();
+  if (response?.configurations !== undefined && response?.actions !== undefined) {
+    Object.entries(response.configurations).map(([key, val]) => {
+      let count = 0;
+      for (const action of val.concerned_actions) {
+        const actionStatus = response.actions[action]?.status;
+        if (
+          actionStatus === HostPolicyResponseActionStatus.failure ||
+          actionStatus === HostPolicyResponseActionStatus.warning
+        ) {
+          count += 1;
+        }
+      }
+      return failureOrWarningByConfigType.set(key, count);
+    });
+  }
+  return failureOrWarningByConfigType;
+});
+
+/**
+ * Returns the actions taken by the endpoint for each response configuration after a user modifies a policy.
+ */
 export const policyResponseActions: (
   state: Immutable<HostState>
 ) => undefined | Partial<HostPolicyResponseActions> = createSelector(
