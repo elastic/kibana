@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
+import { L } from '../../../maps_legacy/public';
 
 /**
  * Map overlay: canvas layer with leaflet.heat plugin

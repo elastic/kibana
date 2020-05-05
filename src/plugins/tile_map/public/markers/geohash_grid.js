@@ -18,6 +18,7 @@
  */
 
 import { ScaledCirclesMarkers } from './scaled_circles';
+import { L } from '../../../maps_legacy/public';
 
 export class GeohashGridMarkers extends ScaledCirclesMarkers {
   getMarkerFunction() {

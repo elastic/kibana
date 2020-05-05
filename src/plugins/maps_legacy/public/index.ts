@@ -18,8 +18,8 @@
  */
 
 // @ts-ignore
-import './leaflet';
 import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+import { L } from './leaflet';
 // @ts-ignore
 import { KibanaMap } from './map/kibana_map';
 import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
@@ -68,6 +68,7 @@ export {
   FileLayer,
   TmsLayer,
   mapTooltipProvider,
+  L,
 };
 
 // Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control

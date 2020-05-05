@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export let L;
+
 if (!window.hasOwnProperty('L')) {
   require('leaflet/dist/leaflet.css');
   window.L = module.exports = require('leaflet/dist/leaflet.js');
@@ -29,4 +31,6 @@ if (!window.hasOwnProperty('L')) {
   require('leaflet-draw/dist/leaflet.draw.js');
   require('leaflet-responsive-popup/leaflet.responsive.popup.css');
   require('leaflet-responsive-popup/leaflet.responsive.popup.js');
+} else {
+  L = window.L;
 }

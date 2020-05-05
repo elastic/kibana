@@ -25,6 +25,7 @@ import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../common/constants/origin';
 import { getToasts } from '../kibana_services';
+import { L } from '../leaflet';
 
 function makeFitControl(fitContainer, kibanaMap) {
   // eslint-disable-next-line no-undef
