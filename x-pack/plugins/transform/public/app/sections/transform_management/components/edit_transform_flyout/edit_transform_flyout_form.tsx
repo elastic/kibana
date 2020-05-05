@@ -26,11 +26,11 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
     <EuiForm>
       <EditTransformFlyoutFormTextInput
         errorMessages={formFields.description.errorMessages}
-        value={formFields.description.value}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
           defaultMessage: 'Description',
         })}
         onChange={value => dispatch({ field: 'description', value })}
+        value={formFields.description.value}
       />
       {/*
       <EditTransformFlyoutFormTextInput
@@ -42,15 +42,16 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       />*/}
       <EditTransformFlyoutFormTextInput
         errorMessages={formFields.frequency.errorMessages}
-        value={formFields.frequency.value}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelptext', {
           defaultMessage:
-            'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h. The default value is 1m.',
+            'The interval between checks for changes in the source indices when the transform is running continuously. Also determines the retry interval in the event of transient failures while the transform is searching or indexing. The minimum value is 1s and the maximum is 1h.',
         })}
         label={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyLabel', {
           defaultMessage: 'Frequency',
         })}
         onChange={value => dispatch({ field: 'frequency', value })}
+        placeholder="1m"
+        value={formFields.frequency.value}
       />
     </EuiForm>
   );

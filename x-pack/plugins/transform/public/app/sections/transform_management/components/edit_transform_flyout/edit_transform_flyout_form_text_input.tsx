@@ -10,18 +10,20 @@ import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 interface EditTransformFlyoutFormTextInputProps {
   errorMessages: string[];
-  value: string;
   helpText?: string;
   label: string;
   onChange: (value: string) => void;
+  placeholder?: string;
+  value: string;
 }
 
 export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
   errorMessages,
-  value,
   helpText,
   label,
   onChange,
+  placeholder,
+  value,
 }) => {
   return (
     <EuiFormRow
@@ -31,6 +33,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
       error={errorMessages}
     >
       <EuiFieldText
+        placeholder={placeholder}
         isInvalid={errorMessages.length > 0}
         value={value}
         onChange={e => onChange(e.target.value)}

@@ -9,6 +9,7 @@ import { TransformPivotConfig } from '../../../../common';
 import {
   applyFormFieldsToTransformConfig,
   formReducerFactory,
+  frequencyValidator,
   getDefaultState,
 } from './use_edit_transform_flyout';
 
@@ -131,5 +132,37 @@ describe('Transform: formReducerFactory()', () => {
     expect(state3.formFields.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
+  });
+});
+
+describe('Transform: frequencyValidator()', () => {
+  test('it should only allow values between 1s and 1h', () => {
+    // frequencyValidator() returns an array of error messages so
+    // an array with a length of 0 means a successful validation.
+
+    // invalid
+    expect(frequencyValidator(0)).toHaveLength(1);
+    expect(frequencyValidator('0')).toHaveLength(1);
+    expect(frequencyValidator('0s')).toHaveLength(1);
+    expect(frequencyValidator(1)).toHaveLength(1);
+    expect(frequencyValidator('1')).toHaveLength(1);
+    expect(frequencyValidator('1ms')).toHaveLength(1);
+    expect(frequencyValidator('1d')).toHaveLength(1);
+    expect(frequencyValidator('60s')).toHaveLength(1);
+    expect(frequencyValidator('60m')).toHaveLength(1);
+    expect(frequencyValidator('60h')).toHaveLength(1);
+    expect(frequencyValidator('2h')).toHaveLength(1);
+    expect(frequencyValidator('h2')).toHaveLength(1);
+    expect(frequencyValidator('2h2')).toHaveLength(1);
+    expect(frequencyValidator('h2h')).toHaveLength(1);
+
+    // valid
+    expect(frequencyValidator('1s')).toHaveLength(0);
+    expect(frequencyValidator('1m')).toHaveLength(0);
+    expect(frequencyValidator('1h')).toHaveLength(0);
+    expect(frequencyValidator('10s')).toHaveLength(0);
+    expect(frequencyValidator('10m')).toHaveLength(0);
+    expect(frequencyValidator('59s')).toHaveLength(0);
+    expect(frequencyValidator('59m')).toHaveLength(0);
   });
 });
