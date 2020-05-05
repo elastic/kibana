@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { DataStream } from '../../types';
-import { GetDataStreamsResponse } from '../../../common';
+import { GetDataStreamsResponse, KibanaAssetType } from '../../../common';
+import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*';
 
@@ -100,7 +101,10 @@ export const getListHandler: RequestHandler = async (context, request, response)
       index: { buckets: indexResults },
     } = aggregations;
 
-    const dataStreams: DataStream[] = (indexResults as any[]).map(result => {
+    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
+    const packageMetadata: any = {};
+
+    const dataStreamsPromises = (indexResults as any[]).map(async result => {
       const {
         key: indexName,
         dataset: { buckets: datasetBuckets },
@@ -109,16 +113,45 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package: { buckets: packageBuckets },
         last_activity: { value_as_string: lastActivity },
       } = result;
+
+      const pkg = packageBuckets.length ? packageBuckets[0].key : '';
+      const pkgSavedObject = packageSavedObjects.saved_objects.filter(p => p.id === pkg);
+
+      // if
+      // - the datastream is associated with a package
+      // - and the package has been installed through EPM
+      // - and we didn't pick the metadata in an earlier iteration of this map()
+      if (pkg !== '' && pkgSavedObject.length > 0 && !packageMetadata[pkg]) {
+        // then pick the dashboards from the package saved object
+        const dashboards =
+          pkgSavedObject[0].attributes?.installed?.filter(
+            o => o.type === KibanaAssetType.dashboard
+          ) || [];
+        // and then pick the human-readable titles from the dashboard saved objects
+        const enhancedDashboards = await getEnhancedDashboards(
+          context.core.savedObjects.client,
+          dashboards
+        );
+
+        packageMetadata[pkg] = {
+          version: pkgSavedObject[0].attributes?.version || '',
+          dashboards: enhancedDashboards,
+        };
+      }
       return {
         index: indexName,
         dataset: datasetBuckets.length ? datasetBuckets[0].key : '',
         namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
         type: typeBuckets.length ? typeBuckets[0].key : '',
-        package: packageBuckets.length ? packageBuckets[0].key : '',
+        package: pkg,
+        package_version: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
         last_activity: lastActivity,
         size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
+        dashboards: packageMetadata[pkg] ? packageMetadata[pkg].dashboards : [],
       };
     });
+
+    const dataStreams: DataStream[] = await Promise.all(dataStreamsPromises);
 
     body.data_streams = dataStreams;
 
@@ -131,4 +164,22 @@ export const getListHandler: RequestHandler = async (context, request, response)
       body: { message: e.message },
     });
   }
+};
+
+const getEnhancedDashboards = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  dashboards: any[]
+) => {
+  const dashboardsPromises = dashboards.map(async db => {
+    const dbSavedObject: any = await getKibanaSavedObject(
+      savedObjectsClient,
+      KibanaAssetType.dashboard,
+      db.id
+    );
+    return {
+      id: db.id,
+      title: dbSavedObject.attributes?.title || db.id,
+    };
+  });
+  return await Promise.all(dashboardsPromises);
 };

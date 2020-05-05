@@ -4,57 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { FilterStatusButton } from './filter_status_button';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
+import { filterLabels } from './translations';
+import { useFilterUpdate } from '../../../hooks/use_filter_update';
 
 interface PresentationalComponentProps {
   loading: boolean;
   overviewFilters: OverviewFilters;
-  currentFilter: string;
-  onFilterUpdate: (filtersKuery: string) => void;
 }
 
 export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
-  currentFilter,
   overviewFilters,
   loading,
-  onFilterUpdate,
 }) => {
   const { locations, ports, schemes, tags } = overviewFilters;
 
-  let filterKueries: Map<string, string[]>;
-  try {
-    filterKueries = new Map<string, string[]>(JSON.parse(currentFilter));
-  } catch {
-    filterKueries = new Map<string, string[]>();
-  }
+  const [updatedFieldValues, setUpdatedFieldValues] = useState<{
+    fieldName: string;
+    values: string[];
+  }>({ fieldName: '', values: [] });
 
-  /**
-   * Handle an added or removed value to filter against for an uptime field.
-   * @param fieldName the name of the field to filter against
-   * @param values the list of values to use when filter a field
-   */
+  const currentFilters = useFilterUpdate(updatedFieldValues.fieldName, updatedFieldValues.values);
+
   const onFilterFieldChange = (fieldName: string, values: string[]) => {
-    // add new term to filter map, toggle it off if already present
-    const updatedFilterMap = new Map<string, string[]>(filterKueries);
-    updatedFilterMap.set(fieldName, values);
-    Array.from(updatedFilterMap.keys()).forEach(key => {
-      const value = updatedFilterMap.get(key);
-      if (value && value.length === 0) {
-        updatedFilterMap.delete(key);
-      }
-    });
-
-    // store the new set of filters
-    const persistedFilters = Array.from(updatedFilterMap);
-    onFilterUpdate(persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters));
+    setUpdatedFieldValues({ fieldName, values });
   };
 
-  const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {
@@ -64,9 +45,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       id: 'location',
       items: locations,
       selectedItems: getSelectedItems('observer.geo.name'),
-      title: i18n.translate('xpack.uptime.filterBar.options.location.name', {
-        defaultMessage: 'Location',
-      }),
+      title: filterLabels.LOCATION,
     },
     {
       loading,
@@ -76,7 +55,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       disabled: ports.length === 0,
       items: ports.map((p: number) => p.toString()),
       selectedItems: getSelectedItems('url.port'),
-      title: i18n.translate('xpack.uptime.filterBar.options.portLabel', { defaultMessage: 'Port' }),
+      title: filterLabels.PORT,
     },
     {
       loading,
@@ -86,9 +65,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       disabled: schemes.length === 0,
       items: schemes,
       selectedItems: getSelectedItems('monitor.type'),
-      title: i18n.translate('xpack.uptime.filterBar.options.schemeLabel', {
-        defaultMessage: 'Scheme',
-      }),
+      title: filterLabels.SCHEME,
     },
     {
       loading,
@@ -98,9 +75,7 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
       disabled: tags.length === 0,
       items: tags,
       selectedItems: getSelectedItems('tags'),
-      title: i18n.translate('xpack.uptime.filterBar.options.tagsLabel', {
-        defaultMessage: 'Tags',
-      }),
+      title: filterLabels.TAGS,
     },
   ];
 
