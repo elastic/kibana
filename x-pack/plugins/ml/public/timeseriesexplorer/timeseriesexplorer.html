@@ -62,14 +62,14 @@
       entities="entities"
       loadForForecastId="loadForForecastId"
       class="forecast-controls"
-    />
+    ></ml-forecasting-modal>
 
   </div>
 
   <ml-loading-indicator
     label="{{ ::'xpack.ml.timeSeriesExplorer.loadingLabel' | i18n: {defaultMessage: 'Loading'} }}"
     is-loading="loading === true"
-  />
+  ></ml-loading-indicator>
 
   <div class="no-results-container" ng-show="jobs.length > 0 && loading === false && hasResults === false">
     <div class="no-results">
@@ -179,7 +179,7 @@
           zoom-from="zoomFrom"
           zoom-to="zoomTo"
           auto-zoom-duration="autoZoomDuration"
-        />
+        ></ml-timeseries-chart>
 
       </div>
 
@@ -194,12 +194,12 @@
           annotations="focusAnnotationData"
           drill-down="false"
           number-badge="true"
-        />
+        ></ml-annotation-table>
 
         <div class="euiSpacer euiSpacer--l"></div>
       </div>
 
-      <ml-annotation-flyout />
+      <ml-annotation-flyout></ml-annotation-flyout>
 
       <span
         class="panel-title euiText"
@@ -217,7 +217,7 @@
               i18n-default-message="Severity threshold"
             ></label>
             <div class="euiFormControlLayout">
-              <ml-select-severity id="select_severity" />
+              <ml-select-severity id="select_severity"></ml-select-severity>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@
               i18n-default-message="Interval"
             ></label>
             <div class="euiFormControlLayout">
-              <ml-select-interval id="select_interval" />
+              <ml-select-interval id="select_interval"></ml-select-interval>
             </div>
           </div>
         </div>
@@ -239,7 +239,7 @@
       <ml-anomalies-table
         table-data="tableData"
         filter="filter"
-      />
+      ></ml-anomalies-table>
 
     </div>
   </div>

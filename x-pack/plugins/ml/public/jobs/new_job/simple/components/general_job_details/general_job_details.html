@@ -36,7 +36,7 @@
       aria-labelledby="ml_aria_label_new_job_group"
       aria-describedby="ml_aria_description_new_job_group"
       job-groups='formConfig.jobGroups'
-      disabled='(jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)' />
+      disabled='(jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED)'></ml-job-group-select>
     <div ng-hide="ui.validation.checks.groupIds.valid" class="validation-error">{{ ui.validation.checks.groupIds.message }}</div>
   </div>
 
