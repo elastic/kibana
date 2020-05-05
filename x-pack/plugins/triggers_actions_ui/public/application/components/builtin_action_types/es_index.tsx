@@ -33,6 +33,7 @@ import {
   getIndexPatterns,
 } from '../../../common/index_controls';
 import { AddMessageVariables } from '../add_message_variables';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -78,7 +79,8 @@ export function getActionType(): ActionTypeModel {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+>> = ({ action, editActionConfig, errors }) => {
+  const { http } = useActionsConnectorsContext();
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null

@@ -27,7 +27,6 @@ describe('agg_expression_functions', () => {
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({
         field: 'machine.os.keyword',
-        order: 'asc',
         orderBy: '1',
       });
       expect(actual).toMatchInlineSnapshot(`
@@ -37,18 +36,19 @@ describe('agg_expression_functions', () => {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "exclude": undefined,
               "field": "machine.os.keyword",
               "include": undefined,
               "json": undefined,
-              "missingBucket": false,
-              "missingBucketLabel": "Missing",
-              "order": "asc",
+              "missingBucket": undefined,
+              "missingBucketLabel": undefined,
+              "order": undefined,
               "orderAgg": undefined,
               "orderBy": "1",
-              "otherBucket": false,
-              "otherBucketLabel": "Other",
-              "size": 5,
+              "otherBucket": undefined,
+              "otherBucketLabel": undefined,
+              "size": undefined,
             },
             "schema": undefined,
             "type": "terms",
@@ -70,6 +70,7 @@ describe('agg_expression_functions', () => {
         missingBucketLabel: 'missing',
         otherBucket: true,
         otherBucketLabel: 'other',
+        include: 'win',
         exclude: 'ios',
       });
 
@@ -78,9 +79,10 @@ describe('agg_expression_functions', () => {
           "enabled": false,
           "id": "1",
           "params": Object {
+            "customLabel": undefined,
             "exclude": "ios",
             "field": "machine.os.keyword",
-            "include": undefined,
+            "include": "win",
             "json": undefined,
             "missingBucket": true,
             "missingBucketLabel": "missing",
@@ -107,37 +109,39 @@ describe('agg_expression_functions', () => {
 
       expect(actual.value.params).toMatchInlineSnapshot(`
         Object {
+          "customLabel": undefined,
           "exclude": undefined,
           "field": "machine.os.keyword",
           "include": undefined,
           "json": undefined,
-          "missingBucket": false,
-          "missingBucketLabel": "Missing",
+          "missingBucket": undefined,
+          "missingBucketLabel": undefined,
           "order": "asc",
           "orderAgg": Object {
             "enabled": true,
             "id": undefined,
             "params": Object {
+              "customLabel": undefined,
               "exclude": undefined,
               "field": "name",
               "include": undefined,
               "json": undefined,
-              "missingBucket": false,
-              "missingBucketLabel": "Missing",
+              "missingBucket": undefined,
+              "missingBucketLabel": undefined,
               "order": "asc",
               "orderAgg": undefined,
               "orderBy": "1",
-              "otherBucket": false,
-              "otherBucketLabel": "Other",
-              "size": 5,
+              "otherBucket": undefined,
+              "otherBucketLabel": undefined,
+              "size": undefined,
             },
             "schema": undefined,
             "type": "terms",
           },
           "orderBy": "1",
-          "otherBucket": false,
-          "otherBucketLabel": "Other",
-          "size": 5,
+          "otherBucket": undefined,
+          "otherBucketLabel": undefined,
+          "size": undefined,
         }
       `);
     });

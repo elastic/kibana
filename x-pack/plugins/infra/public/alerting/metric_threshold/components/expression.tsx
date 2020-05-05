@@ -251,7 +251,7 @@ export const Expressions: React.FC<Props> = props => {
                 context={alertsContext}
                 derivedIndexPattern={derivedIndexPattern}
                 source={source}
-                filterQuery={alertParams.filterQuery}
+                filterQuery={alertParams.filterQueryText}
                 groupBy={alertParams.groupBy}
               />
             </ExpressionRow>
