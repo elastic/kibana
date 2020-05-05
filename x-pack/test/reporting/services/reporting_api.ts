@@ -5,28 +5,57 @@
  */
 
 import expect from '@kbn/expect';
+// @ts-ignore no module definition
 import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-function removeWhitespace(str) {
+interface PDFAppCounts {
+  app: {
+    [appName: string]: number;
+  };
+  layout: {
+    [layoutType: string]: number;
+  };
+}
+
+export interface ReportingUsageStats {
+  available: boolean;
+  enabled: boolean;
+  total: number;
+  last_7_days: {
+    total: number;
+    printable_pdf: PDFAppCounts;
+    [jobType: string]: any;
+  };
+  printable_pdf: PDFAppCounts;
+  status: any;
+  [jobType: string]: any;
+}
+
+interface UsageStats {
+  reporting: ReportingUsageStats;
+}
+
+function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
 }
 
-export function ReportingAPIProvider({ getService }) {
+export function ReportingAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
   return {
-    async waitForJobToFinish(downloadReportPath) {
+    async waitForJobToFinish(downloadReportPath: string) {
       log.debug(`Waiting for job to finish: ${downloadReportPath}`);
       const JOB_IS_PENDING_CODE = 503;
 
       const statusCode = await new Promise(resolve => {
         const intervalId = setInterval(async () => {
-          const response = await supertest
+          const response = (await supertest
             .get(downloadReportPath)
             .responseType('blob')
-            .set('kbn-xsrf', 'xxx');
+            .set('kbn-xsrf', 'xxx')) as any;
           log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
           if (response.statusCode !== JOB_IS_PENDING_CODE) {
             clearInterval(intervalId);
@@ -38,7 +67,7 @@ export function ReportingAPIProvider({ getService }) {
       expect(statusCode).to.be(200);
     },
 
-    async expectAllJobsToFinishSuccessfully(jobPaths) {
+    async expectAllJobsToFinishSuccessfully(jobPaths: string[]) {
       await Promise.all(
         jobPaths.map(async path => {
           await this.waitForJobToFinish(path);
@@ -46,7 +75,7 @@ export function ReportingAPIProvider({ getService }) {
       );
     },
 
-    async postJob(apiPath) {
+    async postJob(apiPath: string) {
       log.debug(`ReportingAPI.postJob(${apiPath})`);
       const { body } = await supertest
         .post(removeWhitespace(apiPath))
@@ -59,7 +88,7 @@ export function ReportingAPIProvider({ getService }) {
      *
      * @return {Promise<Function>} A function to call to clean up the index alias that was added.
      */
-    async coerceReportsIntoExistingIndex(indexName) {
+    async coerceReportsIntoExistingIndex(indexName: string) {
       log.debug(`ReportingAPI.coerceReportsIntoExistingIndex(${indexName})`);
 
       // Adding an index alias coerces the report to be generated on an existing index which means any new
@@ -96,35 +125,35 @@ export function ReportingAPIProvider({ getService }) {
       await esSupertest.delete('/.reporting*').expect(200);
     },
 
-    expectRecentPdfAppStats(stats, app, count) {
+    expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
       expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
     },
 
-    expectAllTimePdfAppStats(stats, app, count) {
+    expectAllTimePdfAppStats(stats: UsageStats, app: string, count: number) {
       expect(stats.reporting.printable_pdf.app[app]).to.be(count);
     },
 
-    expectRecentPdfLayoutStats(stats, layout, count) {
+    expectRecentPdfLayoutStats(stats: UsageStats, layout: string, count: number) {
       expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
     },
 
-    expectAllTimePdfLayoutStats(stats, layout, count) {
+    expectAllTimePdfLayoutStats(stats: UsageStats, layout: string, count: number) {
       expect(stats.reporting.printable_pdf.layout[layout]).to.be(count);
     },
 
-    expectRecentJobTypeTotalStats(stats, jobType, count) {
+    expectRecentJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
       expect(stats.reporting.last_7_days[jobType].total).to.be(count);
     },
 
-    expectAllTimeJobTypeTotalStats(stats, jobType, count) {
+    expectAllTimeJobTypeTotalStats(stats: UsageStats, jobType: string, count: number) {
       expect(stats.reporting[jobType].total).to.be(count);
     },
 
-    getCompletedReportCount(stats) {
+    getCompletedReportCount(stats: UsageStats) {
       return stats.reporting.status.completed;
     },
 
-    expectCompletedReportCount(stats, count) {
+    expectCompletedReportCount(stats: UsageStats, count: number) {
       expect(this.getCompletedReportCount(stats)).to.be(count);
     },
   };

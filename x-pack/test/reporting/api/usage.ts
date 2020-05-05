@@ -5,22 +5,29 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../ftr_provider_context';
+import { ReportingUsageStats } from '../services/reporting_api';
 import * as GenerationUrls from './generation_urls';
 
-export default function({ getService }) {
+interface UsageStats {
+  reporting: ReportingUsageStats;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI');
+  const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
 
   describe('reporting usage', () => {
     before(() => reportingAPI.deleteAllReportingIndexes());
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
-      let usage;
+      let usage: UsageStats;
 
       before(async () => {
-        usage = await usageAPI.getUsageStats();
+        usage = (await usageAPI.getUsageStats()) as UsageStats;
       });
 
       it('shows reporting as available and enabled', async () => {
