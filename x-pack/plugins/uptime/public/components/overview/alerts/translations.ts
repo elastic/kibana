@@ -108,7 +108,7 @@ export const LOCATION = i18n.translate('xpack.uptime.alerts.monitorStatus.addFil
 });
 
 export const TAG = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.tag', {
-  defaultMessage: `TAG`,
+  defaultMessage: `Tag`,
 });
 
 export const PORT = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.port', {
