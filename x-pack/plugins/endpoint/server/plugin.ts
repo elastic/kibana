@@ -16,6 +16,7 @@ import { registerEndpointRoutes } from './routes/metadata';
 import { IngestIndexPatternRetriever } from './index_pattern';
 import { IngestManagerStartContract } from '../../ingest_manager/server';
 import { EndpointAppContextService } from './endpoint_app_context_services';
+import { registerPolicyRoutes } from './routes/policy';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -87,6 +88,7 @@ export class EndpointPlugin
     registerResolverRoutes(router, endpointContext);
     registerAlertRoutes(router, endpointContext);
     registerIndexPatternRoute(router, endpointContext);
+    registerPolicyRoutes(router, endpointContext);
   }
 
   public start(core: CoreStart, plugins: EndpointPluginStartDependencies) {
