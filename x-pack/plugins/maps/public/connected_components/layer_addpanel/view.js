@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { SourceSelect } from './source_select/source_select';
+import { LayerWizardSelect } from './layer_wizard_select';
 import { FlyoutFooter } from './flyout_footer';
 import { ImportEditor } from './import_editor';
 import { EuiButtonEmpty, EuiPanel, EuiTitle, EuiFlyoutHeader, EuiSpacer } from '@elastic/eui';
@@ -80,8 +80,8 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   };
 
-  _onSourceSelectionChange = ({ layerWizard, isIndexingSource }) => {
-    this.setState({ layerWizard, importView: isIndexingSource });
+  _onWizardSelect = layerWizard => {
+    this.setState({ layerWizard, importView: !!layerWizard.isIndexingSource });
   };
 
   _layerAddHandler = () => {
@@ -100,7 +100,7 @@ export class AddLayerPanel extends Component {
 
   _renderPanelBody() {
     if (!this.state.layerWizard) {
-      return <SourceSelect updateSourceSelection={this._onSourceSelectionChange} />;
+      return <LayerWizardSelect onSelect={this._onWizardSelect} />;
     }
 
     const backButton = this.props.isIndexingTriggered ? null : (

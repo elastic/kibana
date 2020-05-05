@@ -138,7 +138,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const adapters = this.handler.inspect();
     if (!adapters) return;
 
-    this.deps.start().plugins.inspector.open(adapters, {
+    return this.deps.start().plugins.inspector.open(adapters, {
       title: this.getTitle() || '',
     });
   };
