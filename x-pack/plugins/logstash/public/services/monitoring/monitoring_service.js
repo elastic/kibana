@@ -11,12 +11,12 @@ import { PipelineListItem } from '../../models/pipeline_list_item';
 export class MonitoringService {
   constructor(http, isMonitoringEnabled, clusterService) {
     this.http = http;
-    this.isMonitoringEnabled = isMonitoringEnabled;
+    this._isMonitoringEnabled = isMonitoringEnabled;
     this.clusterService = clusterService;
   }
 
   isMonitoringEnabled() {
-    return this.isMonitoringEnabled;
+    return this._isMonitoringEnabled;
   }
 
   getPipelineList() {
