@@ -18,4 +18,4 @@
  */
 
 require('../src/setup_node_env/without_babel_regster');
-require('@kbn/dev-utils').runRegisterGitHooksCli();
+require('@kbn/dev-utils/target/precommit_hook/cli');

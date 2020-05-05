@@ -29,24 +29,22 @@ import { getGitDir } from './get_git_dir';
 const chmodAsync = promisify(chmod);
 const writeFileAsync = promisify(writeFile);
 
-export function runRegisterGitHooksCli() {
-  run(
-    async ({ log }) => {
-      try {
-        const gitDir = await getGitDir();
-        const installPath = Path.resolve(REPO_ROOT, gitDir, 'hooks/pre-commit');
+run(
+  async ({ log }) => {
+    try {
+      const gitDir = await getGitDir();
+      const installPath = Path.resolve(REPO_ROOT, gitDir, 'hooks/pre-commit');
 
-        log.info(`Registering Kibana pre-commit git hook...`);
-        await writeFileAsync(installPath, SCRIPT_SOURCE);
-        await chmodAsync(installPath, 0o755);
-        log.success(`Kibana pre-commit git hook was installed successfully.`);
-      } catch (e) {
-        log.error(`Kibana pre-commit git hook was not installed as an error occur.`);
-        throw e;
-      }
-    },
-    {
-      description: 'Register git hooks in the local repo',
+      log.info(`Registering Kibana pre-commit git hook...`);
+      await writeFileAsync(installPath, SCRIPT_SOURCE);
+      await chmodAsync(installPath, 0o755);
+      log.success(`Kibana pre-commit git hook was installed successfully.`);
+    } catch (e) {
+      log.error(`Kibana pre-commit git hook was not installed as an error occur.`);
+      throw e;
     }
-  );
-}
+  },
+  {
+    description: 'Register git hooks in the local repo',
+  }
+);
