@@ -32,7 +32,11 @@ export function suggestions({
 
   const [groups, metrics] = partition(table.columns, col => col.operation.isBucketed);
 
-  if (groups.length === 0 || metrics.length !== 1) {
+  if (
+    groups.length === 0 ||
+    metrics.length !== 1 ||
+    groups.length > Math.max(MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS)
+  ) {
     return [];
   }
 
@@ -44,7 +48,7 @@ export function suggestions({
       newShape = 'pie';
     }
 
-    results.push({
+    const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
         values: { chartName: CHART_NAMES[newShape].label },
@@ -75,6 +79,22 @@ export function suggestions({
       previewIcon: 'bullseye',
       // dont show suggestions for same type
       hide: table.changeType === 'reduced' || (state && state.shape !== 'treemap'),
+    };
+
+    results.push(baseSuggestion);
+    results.push({
+      ...baseSuggestion,
+      title: i18n.translate('xpack.lens.pie.suggestionLabel', {
+        defaultMessage: 'As {chartName}',
+        values: { chartName: CHART_NAMES[newShape === 'pie' ? 'donut' : 'pie'].label },
+        description: 'chartName is already translated',
+      }),
+      score: 0.1,
+      state: {
+        ...baseSuggestion.state,
+        shape: newShape === 'pie' ? 'donut' : 'pie',
+      },
+      hide: true,
     });
   }
 
@@ -113,5 +133,5 @@ export function suggestions({
     });
   }
 
-  return results;
+  return [...results].sort((a, b) => a.score - b.score);
 }
