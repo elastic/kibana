@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './lib';
+export { fooLibFn } from './lib';
 export * from './ext';
 
 export async function getFoo() {

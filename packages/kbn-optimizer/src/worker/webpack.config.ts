@@ -149,6 +149,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           options: {
             key: bundle.id,
           },
+          sideEffects: true,
         },
         {
           test: /\.css$/,
@@ -164,6 +165,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
               },
             },
           ],
+          sideEffects: true,
         },
         {
           test: /\.scss$/,
@@ -261,6 +263,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
               loader: require.resolve('./theme_loader'),
             },
           ],
+          sideEffects: true,
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
@@ -320,6 +323,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
       }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: false,
+        },
+      }),
       new CompressionPlugin({
         algorithm: 'brotliCompress',
         filename: '[path].br',
@@ -331,20 +344,12 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         test: /\.(js|css)$/,
       }),
     ],
-
     optimization: {
-      minimizer: [
-        new TerserPlugin({
-          cache: false,
-          sourceMap: false,
-          extractComments: false,
-          parallel: false,
-          terserOptions: {
-            compress: false,
-            mangle: false,
-          },
-        }),
-      ],
+      usedExports: true,
+
+      // NODE: this is the default with `mode: production` and results in
+      // less than ideal module name reporting
+      concatenateModules: true,
     },
   };
 

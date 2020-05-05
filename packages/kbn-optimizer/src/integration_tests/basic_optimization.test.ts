@@ -52,7 +52,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
   expect(config).toMatchSnapshot('OptimizerConfig');
@@ -125,12 +125,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
-  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
-  expectFileMatchesSnapshotWithCompression(
-    'plugins/foo/target/public/1.plugin.js',
-    '1 async bundle'
-  );
-  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
+  expectFile('plugins/foo/target/public/foo.plugin.js').toContain('UNUSED_FUNCTION');
 
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
@@ -195,10 +190,85 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
+      "initialized",
+      "running",
+      "running",
+      "running",
       "success",
     ]
   `);
 });
+
+it('prepares assets for distribution', async () => {
+  const config = OptimizerConfig.create({
+    repoRoot: MOCK_REPO_DIR,
+    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
+    maxWorkerCount: 1,
+    dist: true,
+  });
+
+  expect(config).toMatchSnapshot('OptimizerConfig');
+
+  const log = new ToolingLog({
+    level: 'error',
+    writeTo: {
+      write(chunk) {
+        if (chunk.endsWith('\n')) {
+          chunk = chunk.slice(0, -1);
+        }
+        // eslint-disable-next-line no-console
+        console.error(chunk);
+      },
+    },
+  });
+
+  await runOptimizer(config)
+    .pipe(logOptimizerState(log, config), toArray())
+    .toPromise();
+
+  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/1.plugin.js',
+    '1 async bundle'
+  );
+  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
+
+  // removed during tree shaking
+  expectFile('plugins/foo/target/public/foo.plugin.js').not.toContain('UNUSED_FUNCTION');
+
+  const foo = config.bundles.find(b => b.id === 'foo')!;
+  expect(foo).toBeTruthy();
+  foo.cache.refresh();
+  expect(foo.cache.getModuleCount()).toBe(1);
+  expect(foo.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
+    ]
+  `);
+
+  const bar = config.bundles.find(b => b.id === 'bar')!;
+  expect(bar).toBeTruthy();
+  bar.cache.refresh();
+  expect(bar.cache.getModuleCount()).toBe(10);
+
+  expect(bar.cache.getReferencedFiles()).toMatchInlineSnapshot(`
+    Array [
+      <absolute path>/node_modules/css-loader/package.json,
+      <absolute path>/node_modules/style-loader/package.json,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/bar/public/legacy/styles.scss,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts,
+      <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo/src/legacy/ui/public/icon.svg,
+    ]
+  `);
+});
+
+/**
+ * Helper to provide expect for a file content
+ */
+const expectFile = (filePath: string) => {
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  return expect(raw);
+};
 
 /**
  * Verifies that the file matches the expected output and has matching compressed variants.

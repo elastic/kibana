@@ -21,6 +21,7 @@ module.exports = {
   env: {
     web: {
       presets: ['@kbn/babel-preset/webpack_preset'],
+      plugins: [require.resolve('@babel/plugin-transform-modules-commonjs')],
     },
     node: {
       presets: ['@kbn/babel-preset/node_preset'],

@@ -1,6 +1,8 @@
 {
   "presets": ["@kbn/babel-preset/webpack_preset"],
   "plugins": [
+    "@babel/plugin-transform-modules-commonjs",
+    "@babel/plugin-syntax-dynamic-import",
     ["@babel/plugin-transform-runtime", {
       "regenerator": true
     }]

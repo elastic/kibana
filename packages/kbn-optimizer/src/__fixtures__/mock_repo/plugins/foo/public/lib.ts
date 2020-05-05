@@ -20,3 +20,7 @@
 export function fooLibFn() {
   return 'foo';
 }
+
+export function unused() {
+  return 'UNUSED_FUNCTION';
+}

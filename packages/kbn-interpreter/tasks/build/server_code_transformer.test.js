@@ -28,15 +28,10 @@ describe('js support', () => {
   it('transpiles js file', () => {
     const transformer = createServerCodeTransformer();
     expect(transformer(JS_FIXTURE, JS_FIXTURE_PATH)).toMatchInlineSnapshot(`
-"\\"use strict\\";
-
-var _util = _interopRequireDefault(require(\\"util\\"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/* eslint-disable */
-console.log(_util.default.format('hello world'));"
-`);
+      "/* eslint-disable */
+      import util from 'util';
+      console.log(util.format('hello world'));"
+    `);
   });
 
   it('throws errors for js syntax errors', () => {

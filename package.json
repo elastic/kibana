@@ -502,6 +502,10 @@
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
   },
+  "sideEffects": [
+    "./webpackShims/*.js",
+    "./src/plugins/console/public/application/models/legacy_core_editor/mode/*.{js,ts}"
+  ],
   "engines": {
     "node": "10.19.0",
     "yarn": "^1.21.1"

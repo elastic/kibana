@@ -49,6 +49,13 @@ const STATS_WARNINGS_FILTER = new RegExp(
 );
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 
+const LEGACY_PRESETS = {
+  plugins: [
+    require.resolve('@babel/plugin-transform-modules-commonjs'),
+    require.resolve('@babel/plugin-syntax-dynamic-import'),
+  ],
+};
+
 function recursiveIssuer(m) {
   if (m.issuer) {
     return recursiveIssuer(m.issuer);
@@ -123,7 +130,7 @@ export default class BaseOptimizer {
   }
 
   warmupThreadLoaderPool() {
-    const baseModules = ['babel-loader', BABEL_PRESET_PATH];
+    const baseModules = ['babel-loader', BABEL_PRESET_PATH, LEGACY_PRESETS];
 
     threadLoader.warmup(
       // pool options, like passed to loader options
@@ -522,6 +529,8 @@ export default class BaseOptimizer {
   }
 
   getPresets() {
-    return IS_CODE_COVERAGE ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH] : [BABEL_PRESET_PATH];
+    return IS_CODE_COVERAGE
+      ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH, LEGACY_PRESETS]
+      : [BABEL_PRESET_PATH, LEGACY_PRESETS];
   }
 }
