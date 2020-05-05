@@ -114,6 +114,7 @@ export class ApplicationService {
   private mountContext?: IContextContainer<AppMountDeprecated>;
   private navigate?: (url: string, state: any) => void;
   private linkClickDelegateHandler?: DelegatedClickEventHandler;
+  private legacyMode = false;
 
   public setup({
     context,
@@ -123,7 +124,8 @@ export class ApplicationService {
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
-    if (injectedMetadata.getLegacyMode()) {
+    this.legacyMode = injectedMetadata.getLegacyMode();
+    if (this.legacyMode) {
       this.currentAppId$.next(injectedMetadata.getLegacyMetadata().app.id);
     } else {
       // Only setup history if we're not in legacy mode
@@ -313,22 +315,27 @@ export class ApplicationService {
       },
     };
 
-    this.linkClickDelegateHandler = e => {
-      const link = e.currentTarget as HTMLAnchorElement;
-      if (
-        link.href && // ignore links with empty hrefs
-        !selfOrParentHasClass(link, 'disableCoreNavigation') && // ignore explicitly ignored links
-        e.button === 0 && // ignore everything but left clicks
-        !isModifiedEvent(e) // ignore clicks with modifier keys
-      ) {
-        const appInfo = parseAppUrl(link.href, http.basePath, this.apps);
-        if (appInfo && appInfo.app !== this.currentAppId$.value) {
-          e.preventDefault();
-          startContract.navigateToApp(appInfo.app, { path: appInfo.path });
+    // do not add the global handler in legacy mode as it would perform a full refresh anyway
+    // also, there is a trick with 'multiple' legacy apps such as kibana:XXX we don't want to
+    // handle to avoid adding complexity to the handler's logic.
+    if (!this.legacyMode) {
+      this.linkClickDelegateHandler = e => {
+        const link = e.currentTarget as HTMLAnchorElement;
+        if (
+          link.href && // ignore links with empty hrefs
+          !selfOrParentHasClass(link, 'disableCoreNavigation') && // ignore explicitly ignored links
+          e.button === 0 && // ignore everything but left clicks
+          !isModifiedEvent(e) // ignore clicks with modifier keys
+        ) {
+          const appInfo = parseAppUrl(link.href, http.basePath, this.apps);
+          if (appInfo && appInfo.app !== this.currentAppId$.value) {
+            e.preventDefault();
+            startContract.navigateToApp(appInfo.app, { path: appInfo.path });
+          }
         }
-      }
-    };
-    on('click', 'a', this.linkClickDelegateHandler);
+      };
+      on('click', 'a', this.linkClickDelegateHandler);
+    }
 
     return startContract;
   }

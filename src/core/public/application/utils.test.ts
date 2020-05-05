@@ -68,6 +68,11 @@ describe('appendAppPath', () => {
     );
     expect(appendAppPath('/app/my-app', '/some-path#/hash')).toEqual('/app/my-app/some-path#/hash');
   });
+  it('appends the path to the hash when the base url contains a hash', () => {
+    expect(appendAppPath('/app/kibana#management', '/kibana/settings')).toEqual(
+      '/app/kibana#management/kibana/settings'
+    );
+  });
 });
 
 describe('isLegacyApp', () => {

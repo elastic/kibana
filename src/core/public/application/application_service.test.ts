@@ -882,22 +882,53 @@ describe('#stop()', () => {
     expect(removeListenerSpy).toHaveBeenCalledTimes(1);
     expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
   });
+});
 
-  it('removes the delegated link listener', async () => {
-    service.setup(setupDeps);
+describe('global link navigation handler', () => {
+  beforeEach(() => {
+    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    setupDeps = {
+      http,
+      context: contextServiceMock.createSetupContract(),
+      injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+    };
+    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    service = new ApplicationService();
+  });
 
-    expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(0);
+  describe('when in standard mode', () => {
+    it('is added during `start` and removed during `stop`', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
+      service.setup(setupDeps);
 
-    await service.start(startDeps);
+      expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(0);
 
-    expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(1);
-    expect(MockDelegatedEvents.on).toHaveBeenCalledWith('click', 'a', expect.any(Function));
+      await service.start(startDeps);
 
-    const handler = MockDelegatedEvents.on.mock.calls[0][2];
+      expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(1);
+      expect(MockDelegatedEvents.on).toHaveBeenCalledWith('click', 'a', expect.any(Function));
 
-    service.stop();
+      const handler = MockDelegatedEvents.on.mock.calls[0][2];
 
-    expect(MockDelegatedEvents.off).toHaveBeenCalledTimes(1);
-    expect(MockDelegatedEvents.off).toHaveBeenCalledWith('click', 'a', handler);
+      service.stop();
+
+      expect(MockDelegatedEvents.off).toHaveBeenCalledTimes(1);
+      expect(MockDelegatedEvents.off).toHaveBeenCalledWith('click', 'a', handler);
+    });
+  });
+
+  describe('when in legacy mode', () => {
+    it('is not added or removed', async () => {
+      setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
+      service.setup(setupDeps);
+
+      await service.start(startDeps);
+
+      expect(MockDelegatedEvents.on).toHaveBeenCalledTimes(0);
+
+      service.stop();
+
+      expect(MockDelegatedEvents.off).toHaveBeenCalledTimes(0);
+    });
   });
 });
