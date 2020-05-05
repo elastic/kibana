@@ -98,19 +98,12 @@ export const getTimelineByTemplateTimelineId = async (
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
 const getTimelineTypeFilter = (timelineType: string | null) => {
-  if (timelineType === TimelineType.template) {
-    /** Show only whose timelineType is "template" */
-    return `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
-  }
-
-  if (timelineType === TimelineType.default) {
-    /** Show me every timeline whose timelineType is not "template".
-     * which includes timelineType === 'default' and
-     * those timelineType doesn't exists */
-    return `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
-  }
-
-  return undefined;
+  return timelineType === TimelineType.template
+    ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+    : /** Show me every timeline whose timelineType is not "template".
+       * which includes timelineType === 'default' and
+       * those timelineType doesn't exists */
+      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
 };
 
 export const getAllTimeline = async (
