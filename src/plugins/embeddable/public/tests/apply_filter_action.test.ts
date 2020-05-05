@@ -31,7 +31,7 @@ import {
   FilterableEmbeddableInput,
 } from '../lib/test_samples';
 // eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../plugins/inspector/public/mocks';
 import { esFilters } from '../../../../plugins/data/public';
 
 test('ApplyFilterAction applies the filter to the root of the container tree', async () => {
@@ -110,6 +110,7 @@ test('ApplyFilterAction is incompatible if the root container does not accept a 
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector,
       SavedObjectFinder: () => null,
     }
@@ -145,6 +146,7 @@ test('trying to execute on incompatible context throws an error ', async () => {
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector,
       SavedObjectFinder: () => null,
     }

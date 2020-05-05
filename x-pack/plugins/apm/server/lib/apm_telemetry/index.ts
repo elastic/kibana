@@ -87,7 +87,8 @@ export async function createApmTelemetry({
         return {
           run: async () => {
             await collectAndStore();
-          }
+          },
+          cancel: async () => {}
         };
       }
     }

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { persistTimelineNoteMutation } from '../../../../../legacy/plugins/siem/public/containers/timeline/notes/persist.gql_query';
+import { persistTimelineNoteMutation } from '../../../../../plugins/siem/public/containers/timeline/notes/persist.gql_query';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

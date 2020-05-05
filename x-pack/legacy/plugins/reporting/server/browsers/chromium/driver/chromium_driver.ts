@@ -190,19 +190,14 @@ export class HeadlessChromiumDriver {
   }
 
   public async screenshot(elementPosition: ElementPosition): Promise<string> {
-    let clip;
-    if (elementPosition) {
-      const { boundingClientRect, scroll = { x: 0, y: 0 } } = elementPosition;
-      clip = {
+    const { boundingClientRect, scroll } = elementPosition;
+    const screenshot = await this.page.screenshot({
+      clip: {
         x: boundingClientRect.left + scroll.x,
         y: boundingClientRect.top + scroll.y,
         height: boundingClientRect.height,
         width: boundingClientRect.width,
-      };
-    }
-
-    const screenshot = await this.page.screenshot({
-      clip,
+      },
     });
 
     return screenshot.toString('base64');

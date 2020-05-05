@@ -21,6 +21,8 @@
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
 import angular from 'angular';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 import { EuiIcon } from '@elastic/eui';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
@@ -200,7 +202,6 @@ function createDocTableModule() {
     .module('discoverDocTable', ['discoverPagerFactory', 'react'])
     .directive('docTable', createDocTableDirective)
     .directive('kbnTableHeader', createTableHeaderDirective)
-    .directive('toolBarPagerText', createToolBarPagerTextDirective)
     .directive('toolBarPagerText', createToolBarPagerTextDirective)
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)

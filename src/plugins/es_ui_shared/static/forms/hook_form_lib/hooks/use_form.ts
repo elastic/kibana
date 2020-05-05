@@ -129,8 +129,7 @@ export function useForm<T extends FormData = FormData>(
     }, [] as string[]);
   };
 
-  const isFieldValid = (field: FieldHook) =>
-    field.getErrorsMessages() === null && !field.isValidating;
+  const isFieldValid = (field: FieldHook) => field.isValid && !field.isValidating;
 
   const updateFormValidity = () => {
     const fieldsArray = fieldsToArray();
@@ -167,14 +166,24 @@ export function useForm<T extends FormData = FormData>(
   };
 
   const validateAllFields = async (): Promise<boolean> => {
-    const fieldsToValidate = fieldsToArray().filter(field => !field.isValidated);
+    const fieldsArray = fieldsToArray();
+    const fieldsToValidate = fieldsArray.filter(field => !field.isValidated);
+
+    let isFormValid: boolean | undefined = isValid;
 
     if (fieldsToValidate.length === 0) {
-      // Nothing left to validate, all fields are already validated.
-      return isValid!;
+      if (isFormValid === undefined) {
+        // We should never enter this condition as the form validity is updated each time
+        // a field is validated. But sometimes, during tests it does not happen and we need
+        // to wait the next tick (hooks lifecycle being tricky) to make sure the "isValid" state is updated.
+        // In order to avoid this unintentional behaviour, we add this if condition here.
+        isFormValid = fieldsArray.every(isFieldValid);
+        setIsValid(isFormValid);
+      }
+      return isFormValid;
     }
 
-    const { isFormValid } = await validateFields(fieldsToValidate.map(field => field.path));
+    ({ isFormValid } = await validateFields(fieldsToValidate.map(field => field.path)));
 
     return isFormValid!;
   };

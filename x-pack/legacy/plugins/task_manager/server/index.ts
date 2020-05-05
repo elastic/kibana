@@ -6,8 +6,6 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import mappings from './mappings.json';
-import { migrations } from './migrations';
 
 import { createLegacyApi, getTaskManagerSetup } from './legacy';
 export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from './legacy';
@@ -15,19 +13,13 @@ export { LegacyTaskManagerApi, getTaskManagerSetup, getTaskManagerStart } from '
 // Once all plugins are migrated to NP, this can be removed
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TaskManager } from '../../../../plugins/task_manager/server/task_manager';
+import {
+  LegacyPluginApi,
+  LegacyPluginSpec,
+  ArrayOrItem,
+} from '../../../../../src/legacy/plugin_discovery/types';
 
-const savedObjectSchemas = {
-  task: {
-    hidden: true,
-    isNamespaceAgnostic: true,
-    convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
-    indexPattern(config: any) {
-      return config.get('xpack.task_manager.index');
-    },
-  },
-};
-
-export function taskManager(kibana: any) {
+export function taskManager(kibana: LegacyPluginApi): ArrayOrItem<LegacyPluginSpec> {
   return new kibana.Plugin({
     id: 'task_manager',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -51,14 +43,18 @@ export function taskManager(kibana: any) {
       server.expose(
         createLegacyApi(
           getTaskManagerSetup(server)!
-            .registerLegacyAPI({})
+            .registerLegacyAPI()
             .then((taskManagerPlugin: TaskManager) => {
               // we can't tell the Kibana Platform Task Manager plugin to
               // to wait to `start` as that happens before legacy plugins
               // instead we will start the internal Task Manager plugin when
               // all legacy plugins have finished initializing
               // Once all plugins are migrated to NP, this can be removed
-              this.kbnServer.afterPluginsInit(() => {
+
+              // the typing for the lagcy server isn't quite correct, so
+              // we'll bypase it for now
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (this as any).kbnServer.afterPluginsInit(() => {
                 taskManagerPlugin.start();
               });
               return taskManagerPlugin;
@@ -66,10 +62,5 @@ export function taskManager(kibana: any) {
         )
       );
     },
-    uiExports: {
-      mappings,
-      migrations,
-      savedObjectSchemas,
-    },
-  });
+  } as Legacy.PluginSpecOptions);
 }

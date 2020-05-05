@@ -13,7 +13,7 @@ indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 [cols="50, 50"]
 |===
 
-a| <<working-remote-clusters, *Cross-Cluster Replication*>>
+a| <<managing-cross-cluster-replication, *Cross-Cluster Replication*>>
 
 Replicate indices on a remote cluster and copy them to a follower index on a local cluster.
 This is important for
@@ -85,7 +85,8 @@ set the timespan for notification messages, and much more.
 
 | <<managing-alerts-and-actions, *Alerts and Actions*>>
 
-Centrally manage your alerts from across {kib}. Create and manage re-usable connectors for triggering actions. 
+Centrally manage your alerts across {kib}. Create and manage reusable 
+connectors for triggering actions.
 
 | <<managing-fields, *Index Patterns*>>
 
@@ -124,6 +125,8 @@ include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
 include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-ccr.asciidoc[]
 
 include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
 

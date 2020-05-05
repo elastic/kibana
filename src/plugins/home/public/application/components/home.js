@@ -203,7 +203,7 @@ export class Home extends Component {
                 </p>
               </EuiText>
               <EuiSpacer size="s" />
-              <EuiButton href="#/home/feature_directory">
+              <EuiButton data-test-subj="allPlugins" href="#/home/feature_directory">
                 <FormattedMessage
                   id="home.directories.notFound.viewFullButtonLabel"
                   defaultMessage="View full directory of Kibana plugins"

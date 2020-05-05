@@ -28,6 +28,16 @@ beforeEach(() => {
     ),
     actionsConfigUtils: mockedActionsConfig,
     licenseState: mockedLicenseState,
+    preconfiguredActions: [
+      {
+        actionTypeId: 'foo',
+        config: {},
+        id: 'my-slack1',
+        name: 'Slack #xyz',
+        secrets: {},
+        isPreconfigured: true,
+      },
+    ],
   };
 });
 
@@ -192,6 +202,19 @@ describe('isActionTypeEnabled', () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
     actionTypeRegistry.isActionTypeEnabled('foo');
     expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+  });
+
+  test('should call isActionExecutable of the actions config', async () => {
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    actionTypeRegistry.isActionExecutable('my-slack1', 'foo');
+    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+  });
+
+  test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has preconfigured connectors', async () => {
+    mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+    expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
   });
 
   test('should call isLicenseValidForActionType of the license state', async () => {

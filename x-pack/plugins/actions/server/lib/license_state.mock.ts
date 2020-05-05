@@ -5,7 +5,6 @@
  */
 
 import { ILicenseState } from './license_state';
-import { LICENSE_CHECK_STATE } from '../../../licensing/server';
 
 export const createLicenseStateMock = () => {
   const licenseState: jest.Mocked<ILicenseState> = {
@@ -14,7 +13,7 @@ export const createLicenseStateMock = () => {
     ensureLicenseForActionType: jest.fn(),
     isLicenseValidForActionType: jest.fn(),
     checkLicense: jest.fn().mockResolvedValue({
-      state: LICENSE_CHECK_STATE.Valid,
+      state: 'valid',
     }),
   };
   return licenseState;

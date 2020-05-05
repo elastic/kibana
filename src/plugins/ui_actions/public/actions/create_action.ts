@@ -28,7 +28,6 @@ export function createAction<T extends ActionType>(action: ActionDefinition<T>):
     id: action.type,
     isCompatible: () => Promise.resolve(true),
     getDisplayName: () => '',
-    getHref: () => undefined,
     ...action,
   };
 }

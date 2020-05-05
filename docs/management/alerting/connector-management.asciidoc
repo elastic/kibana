@@ -15,7 +15,7 @@ image::images/connector-listing.png[Example connector listing in the Alerts and 
 [float]
 ==== Connector list
 
-The *Connectors* tab lists all connectors in the current space. The *search bar* can be used to find specific connectors by name and/or type. 
+The *Connectors* tab lists all connectors in the current space. The *search bar* can be used to find specific connectors by name and/or type.
 
 [role="screenshot"]
 image::images/connector-filter-by-search.png[Filtering the connector list using the search bar]
@@ -26,12 +26,12 @@ The *type* dropdown also lets you filter to a subset of action types.
 [role="screenshot"]
 image::images/connector-filter-by-type.png[Filtering the connector list by types of actions]
 
-The *Actions* column indicates the number of actions that reference the connector. This count helps you confirm a connector is unused before you delete it, and tells you how many actions will be affected when a connector is modified. 
+The *Actions* column indicates the number of actions that reference the connector. This count helps you confirm a connector is unused before you delete it, and tells you how many actions will be affected when a connector is modified.
 
 [role="screenshot"]
 image::images/connector-action-count.png[Filtering the connector list by types of actions]
 
-You can delete individual connectors using the trash icon on the right of each row. Connectors can also be deleted in bulk by multi-selecting them and clicking the *Delete* button to the left of the search box. 
+You can delete individual connectors using the trash icon. Connectors can also be deleted in bulk by multi-selecting them and clicking the *Delete* button to the left of the search box. 
 
 [role="screenshot"]
 image::images/connector-delete.png[Deleting connectors individually or in bulk]

@@ -21,6 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import classNames from 'classnames';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
@@ -29,6 +30,7 @@ export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
   data?: DataPublicPluginStart;
+  className?: string;
 };
 
 /*
@@ -65,6 +67,7 @@ export function TopNavMenu(props: TopNavMenuProps) {
   }
 
   function renderLayout() {
+    const className = classNames('kbnTopNavMenu', props.className);
     return (
       <span className="kbnTopNavMenu__wrapper">
         <EuiFlexGroup
@@ -72,7 +75,7 @@ export function TopNavMenu(props: TopNavMenuProps) {
           justifyContent="flexStart"
           alignItems="center"
           gutterSize="none"
-          className="kbnTopNavMenu"
+          className={className}
           responsive={false}
         >
           {renderItems()}

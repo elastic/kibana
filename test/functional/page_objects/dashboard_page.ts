@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
+import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -215,6 +215,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
     }
 
     public async clickCreateDashboardPrompt() {

@@ -125,7 +125,7 @@ export function getVisualizeUrl(
   services: DiscoverServices
 ) {
   const aggsTermSize = services.uiSettings.get('discover:aggs:terms:size');
-  const urlParams = parse(services.history.location.search) as Record<string, string>;
+  const urlParams = parse(services.history().location.search) as Record<string, string>;
 
   if (
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&

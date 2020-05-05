@@ -138,7 +138,9 @@ To apply CSS overrides:
 
 . Next to *Element style*, click *+*, then select *CSS*.
 
-. Enter the *CSS*. For example, to center the Markdown element, enter:
+. Enter the *CSS*.
++
+For example, to center the Markdown element, enter:
 +
 [source,text]
 --------------------------------------------------

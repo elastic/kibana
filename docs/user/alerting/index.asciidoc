@@ -154,16 +154,20 @@ Pre-packaged *alert types* simplify setup, hide the details complex domain-speci
 [[alerting-setup-prerequisites]]
 == Setup and prerequisites
 
+If you are using an *on-premises* Elastic Stack deployment:
+
+* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encryptedSavedObjects.encryptionKey`>> setting.
+
 If you are using an *on-premises* Elastic Stack deployment with <<using-kibana-with-security, *security*>>:
 
-* TLS must be configured for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-* In the kibana.yml configuration file, add the <<alert-action-settings-kb,`xpack.encrypted_saved_objects.encryptionKey` setting>> 
+* Transport Layer Security (TLS) must be configured for communication <<configuring-tls-kib-es, between {es} and {kib}>>. {kib} alerting uses <<api-keys, API keys>> to secure background alert checks and actions, and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
 
 [float]
 [[alerting-security]]
 == Security
 
-To access alerting in a space, a user must have access to one of the following features: 
+To access alerting in a space, a user must have access to one of the following features:
+
 * <<xpack-apm,*APM*>>
 * <<xpack-infra,*Metrics*>>
 * <<xpack-siem,*SIEM*>>

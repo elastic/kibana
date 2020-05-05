@@ -61,13 +61,6 @@ export type CasesConnectorConfiguration = rt.TypeOf<typeof CasesConnectorConfigu
 
 export type Connector = ActionResult;
 
-export interface CasesConnectorsFindResult {
-  page: number;
-  perPage: number;
-  total: number;
-  data: Connector[];
-}
-
 // TO DO we will need to add this type rt.literal('close-by-thrid-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 

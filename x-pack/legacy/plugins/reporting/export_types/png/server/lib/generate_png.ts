@@ -6,18 +6,15 @@
 
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { ConditionalHeaders, HeadlessChromiumDriverFactory, ServerFacade } from '../../../../types';
+import { ConditionalHeaders } from '../../../../types';
 import { LayoutParams } from '../../../common/layouts/layout';
 import { PreserveLayout } from '../../../common/layouts/preserve_layout';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 
-export function generatePngObservableFactory(
-  server: ServerFacade,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+export async function generatePngObservableFactory(reporting: ReportingCore) {
+  const getScreenshots = await reporting.getScreenshotsObservable();
 
   return function generatePngObservable(
     logger: LevelLogger,
@@ -31,7 +28,7 @@ export function generatePngObservableFactory(
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
-    const screenshots$ = screenshotsObservable({
+    const screenshots$ = getScreenshots({
       logger,
       urls: [url],
       conditionalHeaders,

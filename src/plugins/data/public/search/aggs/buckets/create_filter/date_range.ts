@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { DateRangeKey } from '../lib/date_range';
 import { buildRangeFilter, RangeFilterParams } from '../../../../../common';
 

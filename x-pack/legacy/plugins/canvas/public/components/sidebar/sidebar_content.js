@@ -10,7 +10,6 @@ import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
-import { globalStateUpdater } from '../workpad_page/integration_utils';
 import { ComponentStrings } from '../../../i18n';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
@@ -22,45 +21,19 @@ const { SidebarContent: strings } = ComponentStrings;
 const mapStateToProps = state => ({
   selectedToplevelNodes: getSelectedToplevelNodes(state),
   selectedElementId: getSelectedElementId(state),
-  state,
 });
 
-const mergeProps = (
-  { state, ...restStateProps },
-  { dispatch, ...restDispatchProps },
-  ownProps
-) => ({
-  ...ownProps,
-  ...restDispatchProps,
-  ...restStateProps,
-  updateGlobalState: globalStateUpdater(dispatch, state),
-});
-
-const withGlobalState = (commit, updateGlobalState) => (type, payload) => {
-  const newLayoutState = commit(type, payload);
-  if (newLayoutState.currentScene.gestureEnd) {
-    updateGlobalState(newLayoutState);
-  }
-};
-
-const MultiElementSidebar = ({ commit, updateGlobalState }) => (
+const MultiElementSidebar = () => (
   <Fragment>
-    <SidebarHeader
-      title={strings.getMultiElementSidebarTitle()}
-      commit={withGlobalState(commit, updateGlobalState)}
-    />
+    <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
     <EuiSpacer />
     <MultiElementSettings />
   </Fragment>
 );
 
-const GroupedElementSidebar = ({ commit, updateGlobalState }) => (
+const GroupedElementSidebar = () => (
   <Fragment>
-    <SidebarHeader
-      title={strings.getGroupedElementSidebarTitle()}
-      commit={withGlobalState(commit, updateGlobalState)}
-      groupIsSelected
-    />
+    <SidebarHeader title={strings.getGroupedElementSidebarTitle()} groupIsSelected />
     <EuiSpacer />
     <GroupSettings />
   </Fragment>
@@ -92,7 +65,4 @@ const branches = [
   ),
 ];
 
-export const SidebarContent = compose(
-  connect(mapStateToProps, null, mergeProps),
-  ...branches
-)(GlobalConfig);
+export const SidebarContent = compose(connect(mapStateToProps), ...branches)(GlobalConfig);

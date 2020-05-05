@@ -17,13 +17,13 @@
  * under the License.
  */
 import { TableHeader } from './table_header/table_header';
-import { wrapInI18nContext, getServices } from '../../../../kibana_services';
+import { getServices } from '../../../../kibana_services';
 
 export function createTableHeaderDirective(reactDirective: any) {
   const { uiSettings: config } = getServices();
 
   return reactDirective(
-    wrapInI18nContext(TableHeader),
+    TableHeader,
     [
       ['columns', { watchDepth: 'collection' }],
       ['hideTimeColumn', { watchDepth: 'value' }],

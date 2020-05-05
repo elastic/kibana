@@ -33,13 +33,19 @@ import { CoreService } from '../../types';
 import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { ClusterClient, ScopeableRequest } from './cluster_client';
+import {
+  ClusterClient,
+  ScopeableRequest,
+  IClusterClient,
+  ICustomClusterClient,
+} from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
 import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './types';
 import { CallAPIOptions } from './api_types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
+import { calculateStatus$ } from './status';
 
 /** @internal */
 interface CoreClusterClients {
@@ -57,12 +63,14 @@ export class ElasticsearchService
   implements CoreService<InternalElasticsearchServiceSetup, ElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private subscription: Subscription | undefined;
+  private subscription?: Subscription;
   private stop$ = new Subject();
   private kibanaVersion: string;
-  createClient: InternalElasticsearchServiceSetup['createClient'] | undefined;
-  dataClient: InternalElasticsearchServiceSetup['dataClient'] | undefined;
-  adminClient: InternalElasticsearchServiceSetup['adminClient'] | undefined;
+  private createClient?: (
+    type: string,
+    clientConfig?: Partial<ElasticsearchClientConfig>
+  ) => ICustomClusterClient;
+  private adminClient?: IClusterClient;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -186,6 +194,7 @@ export class ElasticsearchService
       adminClient: this.adminClient,
       dataClient,
       createClient: this.createClient,
+      status$: calculateStatus$(esNodesCompatibility$),
     };
   }
 

@@ -10,24 +10,28 @@ import { amountAndUnitToObject } from '../amount_and_unit';
 
 export const DURATION_UNITS = ['ms', 's', 'm'];
 
-export const durationRt = new t.Type<string, string, unknown>(
-  'durationRt',
-  t.string.is,
-  (input, context) => {
-    return either.chain(t.string.validate(input, context), inputAsString => {
-      const { amount, unit } = amountAndUnitToObject(inputAsString);
-      const amountAsInt = parseInt(amount, 10);
-      const isValidUnit = DURATION_UNITS.includes(unit);
-      const isValid = amountAsInt > 0 && isValidUnit;
+export function getDurationRt({ min }: { min: number }) {
+  return new t.Type<string, string, unknown>(
+    'durationRt',
+    t.string.is,
+    (input, context) => {
+      return either.chain(t.string.validate(input, context), inputAsString => {
+        const { amount, unit } = amountAndUnitToObject(inputAsString);
+        const amountAsInt = parseInt(amount, 10);
+        const isValidUnit = DURATION_UNITS.includes(unit);
+        const isValid = amountAsInt >= min && isValidUnit;
 
-      return isValid
-        ? t.success(inputAsString)
-        : t.failure(
-            input,
-            context,
-            `Must have numeric amount and a valid unit (${DURATION_UNITS})`
-          );
-    });
-  },
-  t.identity
-);
+        return isValid
+          ? t.success(inputAsString)
+          : t.failure(
+              input,
+              context,
+              `Must have numeric amount and a valid unit (${DURATION_UNITS})`
+            );
+      });
+    },
+    t.identity
+  );
+}
+
+export const durationRt = getDurationRt({ min: 1 });

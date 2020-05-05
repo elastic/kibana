@@ -29,6 +29,7 @@ export interface IFieldList extends Array<Field> {
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
   remove(field: IFieldType): void;
+  update(field: FieldSpec): void;
 }
 
 export class FieldList extends Array<Field> implements IFieldList {
@@ -70,11 +71,12 @@ export class FieldList extends Array<Field> implements IFieldList {
     this.splice(fieldIndex, 1);
   };
 
-  update = (field: Field) => {
-    const index = this.findIndex(f => f.name === field.name);
-    this.splice(index, 1, field);
-    this.setByName(field);
-    this.removeByGroup(field);
-    this.setByGroup(field);
+  update = (field: FieldSpec) => {
+    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
+    const index = this.findIndex(f => f.name === newField.name);
+    this.splice(index, 1, newField);
+    this.setByName(newField);
+    this.removeByGroup(newField);
+    this.setByGroup(newField);
   };
 }

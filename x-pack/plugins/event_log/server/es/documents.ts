@@ -9,7 +9,7 @@ import mappings from '../../generated/mappings.json';
 
 // returns the body of an index template used in an ES indices.putTemplate call
 export function getIndexTemplate(esNames: EsNames) {
-  const indexTemplateBody: any = {
+  const indexTemplateBody = {
     index_patterns: [esNames.indexPatternWithVersion],
     settings: {
       number_of_shards: 1,
@@ -31,10 +31,16 @@ export function getIlmPolicy() {
         hot: {
           actions: {
             rollover: {
-              max_size: '5GB',
+              max_size: '50GB',
               max_age: '30d',
               // max_docs: 1, // you know, for testing
             },
+          },
+        },
+        delete: {
+          min_age: '90d',
+          actions: {
+            delete: {},
           },
         },
       },

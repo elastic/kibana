@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UIPolicyConfig } from '../types';
+import { UIPolicyConfig } from '../../../../common/types';
 
 /**
  * A typed Object.entries() function where the keys and values are typed based on the given object
@@ -43,3 +43,33 @@ export function clone(policyDetailsConfig: UIPolicyConfig): UIPolicyConfig {
    */
   return clonedConfig as UIPolicyConfig;
 }
+
+/**
+ * Returns value from `configuration`
+ */
+export const getIn = (a: UIPolicyConfig) => <Key extends keyof UIPolicyConfig>(key: Key) => <
+  subKey extends keyof UIPolicyConfig[Key]
+>(
+  subKey: subKey
+) => <LeafKey extends keyof UIPolicyConfig[Key][subKey]>(
+  leafKey: LeafKey
+): UIPolicyConfig[Key][subKey][LeafKey] => {
+  return a[key][subKey][leafKey];
+};
+
+/**
+ * Returns cloned `configuration` with `value` set by the `keyPath`.
+ */
+export const setIn = (a: UIPolicyConfig) => <Key extends keyof UIPolicyConfig>(key: Key) => <
+  subKey extends keyof UIPolicyConfig[Key]
+>(
+  subKey: subKey
+) => <LeafKey extends keyof UIPolicyConfig[Key][subKey]>(leafKey: LeafKey) => <
+  V extends UIPolicyConfig[Key][subKey][LeafKey]
+>(
+  v: V
+): UIPolicyConfig => {
+  const c = clone(a);
+  c[key][subKey][leafKey] = v;
+  return c;
+};

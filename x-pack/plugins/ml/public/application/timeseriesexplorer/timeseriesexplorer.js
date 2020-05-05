@@ -150,7 +150,7 @@ function getTimeseriesexplorerDefaultState() {
   };
 }
 
-const containerPadding = 24;
+const containerPadding = 34;
 
 export class TimeSeriesExplorer extends React.Component {
   static propTypes = {

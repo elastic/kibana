@@ -94,7 +94,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -389,7 +389,8 @@
                   "type": "nested"
                 },
                 "file_extension": {
-                  "type": "long"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "project_file": {
                   "properties": {
@@ -454,7 +455,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -851,7 +852,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -1496,7 +1497,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {
@@ -1689,7 +1690,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {

@@ -21,6 +21,8 @@ You can optionally save these views and add them to {kibana-ref}/dashboard.html[
 
 * Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
 
+* Create alerts based on metric thresholds for one or more components.
+
 To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Metrics application to inspect and analyze your data>>.
 
 [role="screenshot"]

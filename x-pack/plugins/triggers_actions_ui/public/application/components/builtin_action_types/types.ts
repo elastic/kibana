@@ -39,7 +39,7 @@ export interface PagerDutyActionParams {
 }
 
 export interface IndexActionParams {
-  documents: string[];
+  documents: Array<Record<string, any>>;
 }
 
 export enum ServerLogLevelOptions {

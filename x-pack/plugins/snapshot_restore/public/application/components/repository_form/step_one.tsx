@@ -23,13 +23,14 @@ import {
 } from '@elastic/eui';
 
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
-import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common';
+import { SectionError, Error } from '../../../shared_imports';
 
 import { documentationLinksService } from '../../services/documentation';
 import { useLoadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
 import { RepositoryValidation } from '../../services/validation';
-import { SectionError, SectionLoading, RepositoryTypeLogo, Error } from '../';
+import { SectionLoading, RepositoryTypeLogo } from '../';
 
 interface Props {
   repository: Repository | EmptyRepository;

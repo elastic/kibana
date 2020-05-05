@@ -36,6 +36,10 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     host: config.host,
     port: config.port,
     routes: {
+      cache: {
+        privacy: 'private',
+        otherwise: 'private, no-cache, no-store, must-revalidate',
+      },
       cors: config.cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),

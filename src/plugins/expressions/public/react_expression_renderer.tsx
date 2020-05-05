@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { useRef, useEffect, useState, useLayoutEffect } from 'react';
-import React from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';

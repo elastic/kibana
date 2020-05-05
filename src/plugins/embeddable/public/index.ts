@@ -47,7 +47,8 @@ export {
   EmbeddableOutput,
   EmbeddablePanel,
   EmbeddableRoot,
-  EmbeddableVisTriggerContext,
+  ValueClickTriggerContext,
+  RangeSelectTriggerContext,
   ErrorEmbeddable,
   IContainer,
   IEmbeddable,
@@ -61,6 +62,8 @@ export {
   PropertySpec,
   ViewMode,
   withEmbeddableSubscription,
+  SavedObjectEmbeddableInput,
+  isSavedObjectEmbeddableInput,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

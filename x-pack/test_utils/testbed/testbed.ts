@@ -104,7 +104,7 @@ export const registerTestBed = <T extends string = string>(
        * ----------------------------------------------------------------
        */
 
-      const find: TestBed<T>['find'] = (testSubject: T) => {
+      const find: TestBed<T>['find'] = (testSubject: T, sourceReactWrapper = component) => {
         const testSubjectToArray = testSubject.split('.');
 
         return testSubjectToArray.reduce((reactWrapper, subject, i) => {
@@ -117,7 +117,7 @@ export const registerTestBed = <T extends string = string>(
             );
           }
           return target;
-        }, component);
+        }, sourceReactWrapper);
       };
 
       const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
@@ -138,7 +138,7 @@ export const registerTestBed = <T extends string = string>(
         });
       };
 
-      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T) => {
+      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T, count = 1) => {
         const triggeredAt = Date.now();
 
         /**
@@ -153,7 +153,7 @@ export const registerTestBed = <T extends string = string>(
         const WAIT_INTERVAL = 100;
 
         const process = async (): Promise<void> => {
-          const elemFound = exists(testSubject);
+          const elemFound = exists(testSubject, count);
 
           if (elemFound) {
             // Great! nothing else to do here.

@@ -22,6 +22,7 @@ A high level overview of our contributing guidelines.
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
   - [Internationalization](#internationalization)
+  - [Localization](#localization)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
     - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
@@ -407,6 +408,11 @@ ReactDOM.render(
 
 There are a number of tools created to support internationalization in Kibana that would allow one to validate internationalized labels,
 extract them to a `JSON` file or integrate translations back to Kibana. To know more, please read corresponding [readme](src/dev/i18n/README.md) file.
+
+### Localization
+
+We cannot support accepting contributions to the translations from any source other than the translators we have engaged to do the work.
+We are still to develop a proper process to accept any contributed translations. We certainly appreciate that people care enough about the localization effort to want to help improve the quality. We aim to build out a more comprehensive localization process for the future and will notify you once contributions can be supported, but for the time being, we are not able to incorporate suggestions.
 
 ### Testing and Building
 

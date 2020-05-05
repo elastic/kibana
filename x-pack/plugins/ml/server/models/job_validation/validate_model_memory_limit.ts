@@ -46,7 +46,7 @@ export async function validateModelMemoryLimit(
 
   // if there is no duration, do not run the estimate test
   const runCalcModelMemoryTest =
-    duration && typeof duration?.start !== undefined && duration?.end !== undefined;
+    duration && duration?.start !== undefined && duration?.end !== undefined;
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster

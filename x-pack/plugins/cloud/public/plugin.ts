@@ -11,6 +11,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 
 interface CloudConfigType {
   id?: string;
+  resetPasswordUrl?: string;
 }
 
 interface CloudSetupDependencies {
@@ -26,13 +27,13 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    const { id } = this.initializerContext.config.get<CloudConfigType>();
+    const { id, resetPasswordUrl } = this.initializerContext.config.get<CloudConfigType>();
     const isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
       home.environment.update({ cloud: isCloudEnabled });
       if (isCloudEnabled) {
-        home.tutorials.setVariable('cloud', { id });
+        home.tutorials.setVariable('cloud', { id, resetPasswordUrl });
       }
     }
 

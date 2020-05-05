@@ -100,6 +100,38 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
   });
 
+  describe('when es.BadRequest has a reason', () => {
+    it('makes a SavedObjectsClient/esCannotExecuteScriptError error when script context is disabled', () => {
+      const error = new esErrors.BadRequest();
+      (error as Record<string, any>).body = {
+        error: { reason: 'cannot execute scripts using [update] context' },
+      };
+      expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
+      expect(decorateEsError(error)).toBe(error);
+      expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
+      expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
+    });
+
+    it('makes a SavedObjectsClient/esCannotExecuteScriptError error when inline scripts are disabled', () => {
+      const error = new esErrors.BadRequest();
+      (error as Record<string, any>).body = {
+        error: { reason: 'cannot execute [inline] scripts' },
+      };
+      expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
+      expect(decorateEsError(error)).toBe(error);
+      expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
+      expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
+    });
+
+    it('makes a SavedObjectsClient/BadRequest error for any other reason', () => {
+      const error = new esErrors.BadRequest();
+      (error as Record<string, any>).body = { error: { reason: 'some other reason' } };
+      expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
+      expect(decorateEsError(error)).toBe(error);
+      expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
+    });
+  });
+
   it('returns other errors as Boom errors', () => {
     const error = new Error();
     expect(error).not.toHaveProperty('isBoom');

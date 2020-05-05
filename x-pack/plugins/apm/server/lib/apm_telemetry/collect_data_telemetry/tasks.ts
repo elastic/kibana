@@ -61,10 +61,10 @@ export const tasks: TelemetryTask[] = [
         return prevJob.then(async data => {
           const { processorEvent, timeRange } = current;
 
-          const response = await search({
+          const totalHitsResponse = await search({
             index: indicesByProcessorEvent[processorEvent],
             body: {
-              size: 1,
+              size: 0,
               query: {
                 bool: {
                   filter: [
@@ -83,25 +83,43 @@ export const tasks: TelemetryTask[] = [
                   ]
                 }
               },
-              sort: {
-                '@timestamp': 'asc'
-              },
-              _source: ['@timestamp'],
               track_total_hits: true
             }
           });
 
-          const event = response.hits.hits[0]?._source as {
-            '@timestamp': number;
-          };
+          const retainmentResponse =
+            timeRange === 'all'
+              ? await search({
+                  index: indicesByProcessorEvent[processorEvent],
+                  body: {
+                    query: {
+                      bool: {
+                        filter: [
+                          { term: { [PROCESSOR_EVENT]: processorEvent } }
+                        ]
+                      }
+                    },
+                    sort: {
+                      '@timestamp': 'asc'
+                    },
+                    _source: ['@timestamp']
+                  }
+                })
+              : null;
+
+          const event = retainmentResponse?.hits.hits[0]?._source as
+            | {
+                '@timestamp': number;
+              }
+            | undefined;
 
           return merge({}, data, {
             counts: {
               [processorEvent]: {
-                [timeRange]: response.hits.total.value
+                [timeRange]: totalHitsResponse.hits.total.value
               }
             },
-            ...(timeRange === 'all' && event
+            ...(event
               ? {
                   retainment: {
                     [processorEvent]: {

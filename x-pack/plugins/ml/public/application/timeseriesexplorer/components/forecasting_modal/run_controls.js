@@ -32,7 +32,7 @@ import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import {
   checkPermission,
   createPermissionFailureMessage,
-} from '../../../privilege/check_privilege';
+} from '../../../capabilities/check_capabilities';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

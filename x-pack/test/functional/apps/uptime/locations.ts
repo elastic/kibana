@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/graphql/helpers/make_checks';
+import { makeChecksWithStatus } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

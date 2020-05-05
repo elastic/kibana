@@ -27,7 +27,7 @@ import {
   ContactCardEmbeddable,
 } from '../../../test_samples';
 // eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { esFilters } from '../../../../../../../plugins/data/public';

@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { networkTopNFlowQuery } from '../../../../legacy/plugins/siem/public/containers/network_top_n_flow/index.gql_query';
+import { networkTopNFlowQuery } from '../../../../plugins/siem/public/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
   FlowTargetSourceDest,
   GetNetworkTopNFlowQuery,
   NetworkTopTablesFields,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const EDGE_LENGTH = 10;

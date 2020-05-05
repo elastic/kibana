@@ -29,7 +29,7 @@ import {
   ContactCardEmbeddable,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
 // eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { mount } from 'enzyme';
 import { embeddablePluginMock } from '../../mocks';
 
@@ -66,6 +66,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
       getAllEmbeddableFactories={start.getEmbeddableFactories}
       getEmbeddableFactory={getEmbeddableFactory}
       notifications={{} as any}
+      application={{} as any}
       overlays={{} as any}
       inspector={inspector}
       SavedObjectFinder={() => null}
@@ -105,6 +106,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
       getEmbeddableFactory={(() => undefined) as any}
       notifications={{} as any}
       overlays={{} as any}
+      application={{} as any}
       inspector={inspector}
       SavedObjectFinder={() => null}
     />

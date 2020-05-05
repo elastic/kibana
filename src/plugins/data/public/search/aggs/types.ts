@@ -19,21 +19,16 @@
 
 import { IndexPattern } from '../../index_patterns';
 import {
-  AggType,
+  AggConfigSerialized,
+  AggConfigs,
+  AggParamsTerms,
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
-  AggConfig,
-  AggConfigs,
   CreateAggConfigParams,
-  FieldParamType,
   getCalculateAutoTimeExpression,
-  MetricAggType,
-  aggTypeFieldFilters,
-  parentPipelineAggHelper,
-  siblingPipelineAggHelper,
 } from './';
 
-export { IAggConfig } from './agg_config';
+export { IAggConfig, AggConfigSerialized } from './agg_config';
 export { CreateAggConfigParams, IAggConfigs } from './agg_configs';
 export { IAggType } from './agg_type';
 export { AggParam, AggParamOption } from './agg_params';
@@ -41,23 +36,12 @@ export { IFieldParamType } from './param_types';
 export { IMetricAggType } from './metrics/metric_agg_type';
 export { DateRangeKey } from './buckets/lib/date_range';
 export { IpRangeKey } from './buckets/lib/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
+export { OptionedValueProp } from './param_types/optioned';
 
 /** @internal */
 export interface SearchAggsSetup {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   types: AggTypesRegistrySetup;
-}
-
-/** @internal */
-export interface SearchAggsStartLegacy {
-  AggConfig: typeof AggConfig;
-  AggType: typeof AggType;
-  aggTypeFieldFilters: typeof aggTypeFieldFilters;
-  FieldParamType: typeof FieldParamType;
-  MetricAggType: typeof MetricAggType;
-  parentPipelineAggHelper: typeof parentPipelineAggHelper;
-  siblingPipelineAggHelper: typeof siblingPipelineAggHelper;
 }
 
 /** @internal */
@@ -69,4 +53,26 @@ export interface SearchAggsStart {
     schemas?: Record<string, any>
   ) => InstanceType<typeof AggConfigs>;
   types: AggTypesRegistryStart;
+}
+
+/** @internal */
+export interface AggExpressionType {
+  type: 'agg_type';
+  value: AggConfigSerialized;
+}
+
+/** @internal */
+export type AggExpressionFunctionArgs<
+  Name extends keyof AggParamsMapping
+> = AggParamsMapping[Name] & Pick<AggConfigSerialized, 'id' | 'enabled' | 'schema'>;
+
+/**
+ * A global list of the param interfaces for each agg type.
+ * For now this is internal, but eventually we will probably
+ * want to make it public.
+ *
+ * @internal
+ */
+export interface AggParamsMapping {
+  terms: AggParamsTerms;
 }
