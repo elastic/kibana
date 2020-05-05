@@ -18,65 +18,90 @@
  */
 
 import moment from 'moment';
+import { FtrProviderContext } from '../ftr_provider_context.d';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-export function TimePickerPageProvider({ getService, getPageObjects }) {
+export function TimePickerProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['header', 'common']);
+  const { header, common } = getPageObjects(['header', 'common']);
 
-  class TimePickerPage {
-    async timePickerExists() {
-      return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+  type CommonlyUsed =
+    | 'Today'
+    | 'This_week'
+    | 'Last_15 minutes'
+    | 'Last_30 minutes'
+    | 'Last_1 hour'
+    | 'Last_24 hours'
+    | 'Last_7 days'
+    | 'Last_30 days'
+    | 'Last_90 days'
+    | 'Last_1 year';
+
+  class TimePicker {
+    defaultStartTime = 'Sep 19, 2015 @ 06:31:44.000';
+    defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
+
+    async setDefaultAbsoluteRange() {
+      await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
     }
 
-    formatDateToAbsoluteTimeString(date) {
-      // toISOString returns dates in format 'YYYY-MM-DDTHH:mm:ss.sssZ'
-      // Need to replace T with space and remove timezone
-      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
-      return moment(date).format(DEFAULT_DATE_FORMAT);
-    }
-
-    async getTimePickerPanel() {
+    private async getTimePickerPanel() {
       return await find.byCssSelector('div.euiPopover__panel-isOpen');
     }
 
-    async waitPanelIsGone(panelElement) {
+    private async waitPanelIsGone(panelElement: WebElementWrapper) {
       await find.waitForElementStale(panelElement);
     }
 
-    /**
-     * @param {String} commonlyUsedOption 'superDatePickerCommonlyUsed_This_week'
-     */
-    async setCommonlyUsedTime(commonlyUsedOption) {
-      await testSubjects.click('superDatePickerToggleQuickMenuButton');
-      await testSubjects.click(commonlyUsedOption);
+    public async timePickerExists() {
+      return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
     }
 
-    async inputValue(dataTestsubj, value) {
+    /**
+     * Sets commonly used time
+     * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
+     */
+    async setCommonlyUsedTime(option: CommonlyUsed) {
+      await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      await testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
+    }
+
+    private async inputValue(dataTestSubj: string, value: string) {
       if (browser.isFirefox) {
-        const input = await testSubjects.find(dataTestsubj);
+        const input = await testSubjects.find(dataTestSubj);
         await input.clearValue();
         await input.type(value);
       } else if (browser.isInternetExplorer) {
-        const input = await testSubjects.find(dataTestsubj);
+        const input = await testSubjects.find(dataTestSubj);
         const currentValue = await input.getAttribute('value');
         await input.type(browser.keys.ARROW_RIGHT.repeat(currentValue.length));
         await input.type(browser.keys.BACK_SPACE.repeat(currentValue.length));
         await input.type(value);
         await input.click();
       } else {
-        await testSubjects.setValue(dataTestsubj, value);
+        await testSubjects.setValue(dataTestSubj, value);
       }
+    }
+
+    private async showStartEndTimes() {
+      // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
+      await testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
+      const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
+      if (isShowDatesButton) {
+        await testSubjects.click('superDatePickerShowDatesButton');
+      }
+      await testSubjects.exists('superDatePickerstartDatePopoverButton');
     }
 
     /**
      * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
      * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
      */
-    async setAbsoluteRange(fromTime, toTime) {
+    public async setAbsoluteRange(fromTime: string, toTime: string) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
       await this.showStartEndTimes();
 
@@ -86,7 +111,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerAbsoluteTab');
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-      await PageObjects.common.sleep(500);
+      await common.sleep(500);
 
       // set from time
       await testSubjects.click('superDatePickerstartDatePopoverButton');
@@ -110,30 +135,18 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       }
 
       await this.waitPanelIsGone(panel);
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+      await header.awaitGlobalLoadingIndicatorHidden();
     }
 
-    get defaultStartTime() {
-      return 'Sep 19, 2015 @ 06:31:44.000';
-    }
-    get defaultEndTime() {
-      return 'Sep 23, 2015 @ 18:31:44.000';
+    public async isOff() {
+      return await find.existsByCssSelector('.euiDatePickerRange--readOnly');
     }
 
-    async setDefaultAbsoluteRange() {
-      await this.setAbsoluteRange(this.defaultStartTime, this.defaultEndTime);
-    }
-
-    async isOff() {
-      const element = await find.byClassName('euiDatePickerRange--readOnly');
-      return !!element;
-    }
-
-    async isQuickSelectMenuOpen() {
+    public async isQuickSelectMenuOpen() {
       return await testSubjects.exists('superDatePickerQuickMenu');
     }
 
-    async openQuickSelectTimeMenu() {
+    public async openQuickSelectTimeMenu() {
       log.debug('openQuickSelectTimeMenu');
       const isMenuOpen = await this.isQuickSelectMenuOpen();
       if (!isMenuOpen) {
@@ -144,7 +157,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async closeQuickSelectTimeMenu() {
+    public async closeQuickSelectTimeMenu() {
       log.debug('closeQuickSelectTimeMenu');
       const isMenuOpen = await this.isQuickSelectMenuOpen();
       if (isMenuOpen) {
@@ -155,17 +168,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async showStartEndTimes() {
-      // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-      await testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
-      const isShowDatesButton = await testSubjects.exists('superDatePickerShowDatesButton');
-      if (isShowDatesButton) {
-        await testSubjects.click('superDatePickerShowDatesButton');
-      }
-      await testSubjects.exists('superDatePickerstartDatePopoverButton');
-    }
-
-    async getRefreshConfig(keepQuickSelectOpen = false) {
+    public async getRefreshConfig(keepQuickSelectOpen = false) {
       await this.openQuickSelectTimeMenu();
       const interval = await testSubjects.getAttribute(
         'superDatePickerRefreshIntervalInput',
@@ -198,7 +201,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       };
     }
 
-    async getTimeConfig() {
+    public async getTimeConfig() {
       await this.showStartEndTimes();
       const start = await testSubjects.getVisibleText('superDatePickerstartDatePopoverButton');
       const end = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
@@ -208,15 +211,14 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       };
     }
 
-    async getTimeDurationForSharing() {
-      return await retry.try(async () => {
-        const element = await testSubjects.find('dataSharedTimefilterDuration');
-        const data = await element.getAttribute('data-shared-timefilter-duration');
-        return data;
-      });
+    public async getTimeDurationForSharing() {
+      return await testSubjects.getAttribute(
+        'dataSharedTimefilterDuration',
+        'data-shared-timefilter-duration'
+      );
     }
 
-    async getTimeConfigAsAbsoluteTimes() {
+    public async getTimeConfigAsAbsoluteTimes() {
       await this.showStartEndTimes();
 
       // get to time
@@ -237,17 +239,15 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       };
     }
 
-    async getTimeDurationInHours() {
+    public async getTimeDurationInHours() {
       const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
       const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
-
       const startMoment = moment(start, DEFAULT_DATE_FORMAT);
       const endMoment = moment(end, DEFAULT_DATE_FORMAT);
-
-      return moment.duration(moment(endMoment) - moment(startMoment)).asHours();
+      return moment.duration(endMoment.diff(startMoment)).asHours();
     }
 
-    async pauseAutoRefresh() {
+    public async pauseAutoRefresh() {
       log.debug('pauseAutoRefresh');
       const refreshConfig = await this.getRefreshConfig(true);
       if (!refreshConfig.isPaused) {
@@ -259,7 +259,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.closeQuickSelectTimeMenu();
     }
 
-    async resumeAutoRefresh() {
+    public async resumeAutoRefresh() {
       log.debug('resumeAutoRefresh');
       const refreshConfig = await this.getRefreshConfig(true);
       if (refreshConfig.isPaused) {
@@ -270,22 +270,22 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await this.closeQuickSelectTimeMenu();
     }
 
-    async setHistoricalDataRange() {
+    public async setHistoricalDataRange() {
       await this.setDefaultAbsoluteRange();
     }
 
-    async setDefaultDataRange() {
+    public async setDefaultDataRange() {
       const fromTime = 'Jan 1, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await this.setAbsoluteRange(fromTime, toTime);
     }
 
-    async setLogstashDataRange() {
+    public async setLogstashDataRange() {
       const fromTime = 'Apr 9, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await this.setAbsoluteRange(fromTime, toTime);
     }
   }
 
-  return new TimePickerPage();
+  return new TimePicker();
 }
