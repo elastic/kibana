@@ -10,7 +10,7 @@ import { EuiSuperSelectOption, EuiSuperSelect } from '@elastic/eui';
 
 import { FieldMappingRow, RowProps } from './field_mapping_row';
 import { TestProviders } from '../../../../mock';
-import { ThirdPartyField } from '../../../../containers/case/configure/types';
+import { ThirdPartyField, ActionType } from '../../../../containers/case/configure/types';
 
 const thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>> = [
   {
@@ -25,15 +25,35 @@ const thirdPartyOptions: Array<EuiSuperSelectOption<ThirdPartyField>> = [
   },
 ];
 
+const actionTypeOptions: Array<EuiSuperSelectOption<ActionType>> = [
+  {
+    value: 'nothing',
+    inputDisplay: <>{'Nothing'}</>,
+    'data-test-subj': 'edit-update-option-nothing',
+  },
+  {
+    value: 'overwrite',
+    inputDisplay: <>{'Overwrite'}</>,
+    'data-test-subj': 'edit-update-option-overwrite',
+  },
+  {
+    value: 'append',
+    inputDisplay: <>{'Append'}</>,
+    'data-test-subj': 'edit-update-option-append',
+  },
+];
+
 describe('FieldMappingRow', () => {
   let wrapper: ReactWrapper;
   const onChangeActionType = jest.fn();
   const onChangeThirdParty = jest.fn();
 
   const props: RowProps = {
+    id: 'title',
     disabled: false,
     siemField: 'title',
     thirdPartyOptions,
+    actionTypeOptions,
     onChangeActionType,
     onChangeThirdParty,
     selectedActionType: 'nothing',
@@ -47,14 +67,14 @@ describe('FieldMappingRow', () => {
   test('it renders', () => {
     expect(
       wrapper
-        .find('[data-test-subj="case-configure-third-party-select"]')
+        .find('[data-test-subj="case-configure-third-party-select-title"]')
         .first()
         .exists()
     ).toBe(true);
 
     expect(
       wrapper
-        .find('[data-test-subj="case-configure-action-type-select"]')
+        .find('[data-test-subj="case-configure-action-type-select-title"]')
         .first()
         .exists()
     ).toBe(true);
