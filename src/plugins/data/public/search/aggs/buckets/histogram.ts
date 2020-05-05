@@ -26,6 +26,8 @@ import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+import { ExtendedBounds } from './lib/extended_bounds';
 
 export interface AutoBounds {
   min: number;
@@ -40,6 +42,15 @@ export interface HistogramBucketAggDependencies {
 export interface IBucketHistogramAggConfig extends IBucketAggConfig {
   setAutoBounds: (bounds: AutoBounds) => void;
   getAutoBounds: () => AutoBounds;
+}
+
+export interface AggParamsHistogram extends BaseAggParams {
+  field: string;
+  interval: string;
+  intervalBase?: number;
+  min_doc_count?: boolean;
+  has_extended_bounds?: boolean;
+  extended_bounds?: ExtendedBounds;
 }
 
 export const getHistogramBucketAgg = ({

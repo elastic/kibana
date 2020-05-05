@@ -17,25 +17,7 @@
  * under the License.
  */
 
-export interface CidrMaskIpRangeAggKey {
-  type: 'mask';
-  mask: string;
+export interface ExtendedBounds {
+  min: number;
+  max: number;
 }
-
-export interface RangeIpRangeAggKey {
-  type: 'range';
-  from: string;
-  to: string;
-}
-
-export type IpRangeKey = CidrMaskIpRangeAggKey | RangeIpRangeAggKey;
-
-export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
-  if (range.type === 'mask') {
-    return format(range.mask);
-  }
-  const from = range.from ? format(range.from) : '-Infinity';
-  const to = range.to ? format(range.to) : 'Infinity';
-
-  return `${from} to ${to}`;
-};
