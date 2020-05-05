@@ -12,7 +12,7 @@ Elasticsearch will run with a basic license. To run with a trial license, includ
 
 Example: `yarn es snapshot --license trial --password changeme`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana` user which `elasticsearch.username` defaults to in development. If you wish to specific a password for a given native realm account, you can do that like so: `--password.kibana=notsecure`
+By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
 ## Running specific tests
