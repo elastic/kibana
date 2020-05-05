@@ -6,6 +6,7 @@
 
 import { mockRouter, RouterMock } from 'src/core/server/http/router/router.mock';
 import { savedObjectsServiceMock } from 'src/core/server/saved_objects/saved_objects_service.mock';
+import { loggingServiceMock } from 'src/core/server/mocks';
 import { httpServerMock } from 'src/core/server/http/http_server.mocks';
 
 import { registerTelemetryRoute } from './telemetry';
@@ -17,7 +18,8 @@ import { incrementUICounter } from '../../collectors/app_search/telemetry';
 
 describe('App Search Telemetry API', () => {
   let router: RouterMock;
-  const mockResponseFactory = httpServerMock.createResponseFactory();
+  const mockResponse = httpServerMock.createResponseFactory();
+  const mockLogger = loggingServiceMock.create().get();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -25,6 +27,7 @@ describe('App Search Telemetry API', () => {
     registerTelemetryRoute({
       router,
       getSavedObjectsService: () => savedObjectsServiceMock.create(),
+      log: mockLogger,
     });
   });
 
@@ -40,16 +43,17 @@ describe('App Search Telemetry API', () => {
         uiAction: 'ui_viewed',
         metric: 'setup_guide',
       });
-      expect(mockResponseFactory.ok).toHaveBeenCalledWith({ body: successResponse });
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: successResponse });
     });
 
     it('throws an error when incrementing fails', async () => {
-      incrementUICounter.mockImplementation(jest.fn(() => Promise.reject()));
+      incrementUICounter.mockImplementation(jest.fn(() => Promise.reject('Failed')));
 
       await callThisRoute('put', { body: { action: 'error', metric: 'error' } });
 
       expect(incrementUICounter).toHaveBeenCalled();
-      expect(mockResponseFactory.internalError).toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockResponse.internalError).toHaveBeenCalled();
     });
 
     describe('validates', () => {
@@ -96,7 +100,7 @@ describe('App Search Telemetry API', () => {
     const [_, handler] = router[method].mock.calls[0];
 
     const context = {};
-    await handler(context, httpServerMock.createKibanaRequest(request), mockResponseFactory);
+    await handler(context, httpServerMock.createKibanaRequest(request), mockResponse);
   };
 
   const executeRouteValidation = request => {
