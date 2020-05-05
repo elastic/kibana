@@ -18,8 +18,8 @@ export const AlertTls = () => {
   const { settings } = useSelector(selectDynamicSettings);
   return (
     <AlertTlsComponent
-      ageThreshold={settings?.certThresholds?.age}
-      expirationThreshold={settings?.certThresholds?.expiration}
+      ageThreshold={settings?.certAgeThreshold}
+      expirationThreshold={settings?.certExpirationThreshold}
       setAlertFlyoutVisible={setFlyoutVisible}
     />
   );

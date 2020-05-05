@@ -9,7 +9,6 @@ import { ILicense } from '../../licensing/public';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME,
   SPAN_SUBTYPE,
   SPAN_TYPE,
@@ -19,7 +18,6 @@ import {
 export interface ServiceConnectionNode {
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
-  [SERVICE_FRAMEWORK_NAME]: string | null;
   [AGENT_NAME]: string;
 }
 export interface ExternalConnectionNode {
