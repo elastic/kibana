@@ -2,5 +2,16 @@
   "id": "discover",
   "version": "kibana",
   "server": true,
-  "ui": true
+  "ui": true,
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "inspector",
+    "kibanaLegacy",
+    "navigation",
+    "uiActions",
+    "visualizations"
+  ],
+  "optionalPlugins": ["home", "share"]
 }
