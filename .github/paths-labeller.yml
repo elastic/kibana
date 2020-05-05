@@ -8,9 +8,8 @@
   - "Feature:ExpressionLanguage":
     - "src/plugins/expressions/**/*.*"
     - "src/plugins/bfetch/**/*.*"
-  - "Team:apm"
+  - "Team:apm":
     - "x-pack/plugins/apm/**/*.*"
-    - "x-pack/legacy/plugins/apm/**/*.*"
+    - "x-pack/plugins/apm/**/*.*"
   - "Team:uptime":
     - "x-pack/plugins/uptime/**/*.*"
-    - "x-pack/legacy/plugins/uptime/**/*.*"

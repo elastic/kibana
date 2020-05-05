@@ -16,7 +16,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
       avgRequestsPerMinute={164.47222031860858}
       avgCpuUsage={0.32809666568309237}
       avgMemoryUsage={0.5504868173242986}
-      frameworkName="Spring"
       numInstances={2}
       isLoading={false}
     />

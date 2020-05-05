@@ -92,7 +92,8 @@ describe('getCerts', () => {
       callES: mockCallES,
       dynamicSettings: {
         heartbeatIndices: 'heartbeat*',
-        certThresholds: DYNAMIC_SETTINGS_DEFAULTS.certThresholds,
+        certAgeThreshold: DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
+        certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
       },
       index: 1,
       from: 'now-2d',
