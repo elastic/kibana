@@ -20,7 +20,8 @@ export const StatusFilter: React.FC = () => {
           defaultMessage: 'All',
         })}
         dataTestSubj="xpack.uptime.filterBar.filterStatusAll"
-        value="all"
+        // Empty string for all filter, since we dont store it in url, so keeping it in sync
+        value=""
         withNext={true}
         isActive={statusFilter === ''}
       />

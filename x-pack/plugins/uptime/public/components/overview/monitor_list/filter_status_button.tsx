@@ -13,7 +13,7 @@ export interface FilterStatusButtonProps {
   dataTestSubj: string;
   isDisabled?: boolean;
   isActive: boolean;
-  value: string;
+  value: 'up' | 'down' | '';
   withNext: boolean;
   color?: string;
 }
@@ -27,8 +27,7 @@ export const FilterStatusButton = ({
   color,
   withNext,
 }: FilterStatusButtonProps) => {
-  const [getUrlParams, setUrlParams] = useUrlParams();
-  const { statusFilter: urlValue } = getUrlParams();
+  const [setUrlParams] = useUrlParams();
 
   return (
     <EuiFilterButton
@@ -38,7 +37,7 @@ export const FilterStatusButton = ({
       isDisabled={isDisabled}
       onClick={() => {
         const nextFilter = {
-          statusFilter: urlValue === value || value === 'all' ? '' : value,
+          statusFilter: value,
           pagination: '',
         };
         setUrlParams(nextFilter);
