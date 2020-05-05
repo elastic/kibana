@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LIST_ID, TYPE } from '../../constants.mock';
+import { LIST_ID, LIST_ITEM_ID, VALUE } from '../../constants.mock';
 
-import { ImportListItemQuerySchema } from './import_list_item_query_schema';
+import { ReadListItemSchema } from './read_list_item_schema';
 
-export const getImportListItemQuerySchemaMock = (): ImportListItemQuerySchema => ({
+export const getReadListItemSchemaMock = (): ReadListItemSchema => ({
+  id: LIST_ITEM_ID,
   list_id: LIST_ID,
-  type: TYPE,
+  value: VALUE,
 });

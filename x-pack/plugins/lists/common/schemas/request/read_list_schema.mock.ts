@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
+import { LIST_ID } from '../../constants.mock';
 
-export const listItemIndexExistSchema = t.exact(
-  t.type({
-    list_index: t.boolean,
-    list_item_index: t.boolean,
-  })
-);
+import { ReadListSchema } from './read_list_schema';
 
-export type ListItemIndexExistSchema = t.TypeOf<typeof listItemIndexExistSchema>;
+export const getReadListSchemaMock = (): ReadListSchema => ({
+  id: LIST_ID,
+});

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DESCRIPTION, LIST_ID, META, NAME, TYPE } from '../../constants.mock';
+import { DESCRIPTION, LIST_ITEM_ID, META, NAME } from '../../constants.mock';
 
-import { CreateListSchema } from './create_list_schema';
+import { PatchListSchema } from './patch_list_schema';
 
-export const getCreateListSchemaMock = (): CreateListSchema => ({
+export const getPathListSchemaMock = (): PatchListSchema => ({
   description: DESCRIPTION,
-  id: LIST_ID,
+  id: LIST_ITEM_ID,
   meta: META,
   name: NAME,
-  type: TYPE,
 });

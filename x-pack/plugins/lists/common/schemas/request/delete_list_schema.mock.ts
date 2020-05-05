@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LIST_ID } from '../../constants.mock';
+
 import { DeleteListSchema } from './delete_list_schema';
 
 export const getDeleteListSchemaMock = (): DeleteListSchema => ({
-  id: 'some-list-id',
+  id: LIST_ID,
 });

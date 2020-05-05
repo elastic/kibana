@@ -5,17 +5,25 @@
  */
 
 import { ListSchema } from '../../../common/schemas';
-import { DATE_NOW, DESCRIPTION, LIST_ID, NAME, USER } from '../../../common/constants.mock';
+import {
+  DATE_NOW,
+  DESCRIPTION,
+  LIST_ID,
+  META,
+  NAME,
+  TYPE,
+  USER,
+} from '../../../common/constants.mock';
 
 export const getListResponseMock = (): ListSchema => ({
   created_at: DATE_NOW,
   created_by: USER,
   description: DESCRIPTION,
   id: LIST_ID,
-  meta: {},
+  meta: META,
   name: NAME,
   tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-  type: 'ip',
+  type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
 });

@@ -5,7 +5,7 @@
  */
 
 import { ListItemSchema } from '../../../common/schemas';
-import { DATE_NOW, LIST_ID, LIST_ITEM_ID, USER, VALUE } from '../../../common/constants.mock';
+import { DATE_NOW, LIST_ID, LIST_ITEM_ID, TYPE, USER, VALUE } from '../../../common/constants.mock';
 
 export const getListItemResponseMock = (): ListItemSchema => ({
   created_at: DATE_NOW,
@@ -14,7 +14,7 @@ export const getListItemResponseMock = (): ListItemSchema => ({
   list_id: LIST_ID,
   meta: {},
   tie_breaker_id: '6a76b69d-80df-4ab2-8c3e-85f466b06a0e',
-  type: 'ip',
+  type: TYPE,
   updated_at: DATE_NOW,
   updated_by: USER,
   value: VALUE,

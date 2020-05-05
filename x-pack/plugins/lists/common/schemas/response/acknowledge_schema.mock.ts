@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as t from 'io-ts';
+import { AcknowledgeSchema } from './acknowledge_schema';
 
-export const listItemIndexExistSchema = t.exact(
-  t.type({
-    list_index: t.boolean,
-    list_item_index: t.boolean,
-  })
-);
-
-export type ListItemIndexExistSchema = t.TypeOf<typeof listItemIndexExistSchema>;
+export const getAcknowledgeSchemaResponseMock = (): AcknowledgeSchema => ({
+  acknowledged: true,
+});
