@@ -11,7 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
-  HttpServerInfo,
+  HttpServiceSetup,
 } from 'kibana/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
@@ -71,8 +71,9 @@ export interface IngestManagerAppContext {
   config$?: Observable<IngestManagerConfigType>;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: boolean;
-  serverInfo?: HttpServerInfo;
+  kibanaVersion: string;
   cloud?: CloudSetup;
+  httpSetup?: HttpServiceSetup;
 }
 
 export type IngestManagerSetupContract = void;
@@ -109,15 +110,17 @@ export class IngestManagerPlugin
   private cloud: CloudSetup | undefined;
 
   private isProductionMode: boolean;
-  private serverInfo: HttpServerInfo | undefined;
+  private kibanaVersion: string;
+  private httpSetup: HttpServiceSetup | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
-    this.serverInfo = core.http.getServerInfo();
+    this.httpSetup = core.http;
     this.licensing$ = deps.licensing.license$;
     if (deps.security) {
       this.security = deps.security;
@@ -165,8 +168,8 @@ export class IngestManagerPlugin
     // Always register app routes for permissions checking
     registerAppRoutes(router);
 
+    // Register rest of routes only if security is enabled
     if (this.security) {
-      // Only register all other routes if security is enabled
       registerSetupRoutes(router, config);
       registerAgentConfigRoutes(router);
       registerDatasourceRoutes(router);
@@ -174,7 +177,7 @@ export class IngestManagerPlugin
       registerSettingsRoutes(router);
       registerDataStreamRoutes(router);
 
-      // Conditional routes
+      // Conditional config routes
       if (config.epm.enabled) {
         registerEPMRoutes(router);
       }
@@ -184,7 +187,6 @@ export class IngestManagerPlugin
         registerEnrollmentApiKeyRoutes(router);
         registerInstallScriptRoutes({
           router,
-          serverInfo: core.http.getServerInfo(),
           basePath: core.http.basePath,
         });
       }
@@ -203,7 +205,8 @@ export class IngestManagerPlugin
       config$: this.config$,
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
-      serverInfo: this.serverInfo,
+      kibanaVersion: this.kibanaVersion,
+      httpSetup: this.httpSetup,
       cloud: this.cloud,
     });
     licenseService.start(this.licensing$);

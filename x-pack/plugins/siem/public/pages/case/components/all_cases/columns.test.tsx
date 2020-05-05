@@ -7,14 +7,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { ServiceNowColumn } from './columns';
+import { ExternalServiceColumn } from './columns';
 
 import { useGetCasesMockState } from '../../../../containers/case/mock';
 
-describe('ServiceNowColumn ', () => {
+describe('ExternalServiceColumn ', () => {
   it('Not pushed render', () => {
     const wrapper = mount(
-      <ServiceNowColumn {...{ theCase: useGetCasesMockState.data.cases[0] }} />
+      <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[0] }} />
     );
     expect(
       wrapper
@@ -25,7 +25,7 @@ describe('ServiceNowColumn ', () => {
   });
   it('Up to date', () => {
     const wrapper = mount(
-      <ServiceNowColumn {...{ theCase: useGetCasesMockState.data.cases[1] }} />
+      <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[1] }} />
     );
     expect(
       wrapper
@@ -36,7 +36,7 @@ describe('ServiceNowColumn ', () => {
   });
   it('Needs update', () => {
     const wrapper = mount(
-      <ServiceNowColumn {...{ theCase: useGetCasesMockState.data.cases[2] }} />
+      <ExternalServiceColumn {...{ theCase: useGetCasesMockState.data.cases[2] }} />
     );
     expect(
       wrapper
