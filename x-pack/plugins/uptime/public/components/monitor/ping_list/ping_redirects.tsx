@@ -17,9 +17,10 @@ const StyledLink = styled(EuiLink)`
 
 interface Props {
   monitorStatus: Ping;
+  showDescription?: boolean;
 }
 
-export const PingRedirects: React.FC<Props> = ({ monitorStatus }) => {
+export const PingRedirects: React.FC<Props> = ({ monitorStatus, showDescription }) => {
   const monitorUrl = monitorStatus?.url?.full;
 
   const list = monitorStatus?.http?.response?.redirects;
@@ -34,14 +35,16 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus }) => {
         </h3>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiText>
-        {i18n.translate('xpack.uptime.monitorList.redirects.description', {
-          defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
-          values: {
-            number: list?.length ?? 0,
-          },
-        })}
-      </EuiText>
+      {showDescription && (
+        <EuiText>
+          {i18n.translate('xpack.uptime.monitorList.redirects.description', {
+            defaultMessage: 'Heartbeat followed {number} redirects while executing ping.',
+            values: {
+              number: list?.length ?? 0,
+            },
+          })}
+        </EuiText>
+      )}
       <EuiSpacer size="s" />
       <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
       {list.map(url => {
