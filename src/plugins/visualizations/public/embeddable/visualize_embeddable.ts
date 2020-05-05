@@ -314,6 +314,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super.destroy();
     this.subscriptions.forEach(s => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
+    this.vis.uiState.off('reload', this.reload);
 
     if (this.handler) {
       this.handler.destroy();
