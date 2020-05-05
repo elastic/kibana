@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiListGroup,
+  EuiListGroupItem,
   EuiShowFor,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import { OnIsLockedUpdate } from './';
+import React, { useRef } from 'react';
+import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { AppCategory } from '../../../../types';
+import { OnIsLockedUpdate } from './';
 import { NavLink, RecentNavLink } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, NavLink[]>) {
@@ -58,14 +59,14 @@ function getCategoryLocalStorageKey(id: string) {
   return `core.navGroup.${id}`;
 }
 
-function getIsCategoryOpen(id: string) {
-  const value = localStorage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
+function getIsCategoryOpen(id: string, storage: Storage) {
+  const value = storage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
 
   return value === 'true';
 }
 
-function setIsCategoryOpen(id: string, isOpen: boolean) {
-  localStorage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
+function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
+  storage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
 }
 
 interface Props {
@@ -75,6 +76,7 @@ interface Props {
   recentNavLinks: RecentNavLink[];
   homeHref: string;
   id: string;
+  storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   onIsOpenUpdate: (isOpen?: boolean) => void;
 }
@@ -88,7 +90,9 @@ export function CollapsibleNav({
   onIsOpenUpdate,
   homeHref,
   id,
+  storage = window.localStorage,
 }: Props) {
+  const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, link => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
@@ -140,15 +144,20 @@ export function CollapsibleNav({
           key="recentlyViewed"
           title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
           isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed')}
-          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen)}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
         >
           {recentNavLinks.length > 0 ? (
             <EuiListGroup
               aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
                 defaultMessage: 'Recently viewed links',
               })}
-              listItems={recentNavLinks}
+              listItems={recentNavLinks.map(link => {
+                // TODO #64541
+                // Can remove icon from recent links completely
+                const { iconType, ...linkWithoutIcon } = link;
+                return linkWithoutIcon;
+              })}
               maxWidth="none"
               color="subdued"
               gutterSize="none"
@@ -188,8 +197,8 @@ export function CollapsibleNav({
               iconType={category.euiIconType}
               title={category.label}
               isCollapsible={true}
-              initialIsOpen={getIsCategoryOpen(category.id)}
-              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen)}
+              initialIsOpen={getIsCategoryOpen(category.id, storage)}
+              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup
@@ -234,9 +243,10 @@ export function CollapsibleNav({
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem
+                data-test-subj="collapsible-nav-lock"
+                buttonRef={lockRef}
                 size="xs"
                 color="subdued"
-                id="foo"
                 label={
                   isLocked
                     ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
@@ -257,7 +267,9 @@ export function CollapsibleNav({
                 }
                 onClick={() => {
                   onIsLockedUpdate(!isLocked);
-                  // TODO should keep focus here
+                  if (lockRef.current) {
+                    lockRef.current.focus();
+                  }
                 }}
                 iconType={isLocked ? 'lock' : 'lockOpen'}
               />

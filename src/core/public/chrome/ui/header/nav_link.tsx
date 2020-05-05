@@ -46,6 +46,15 @@ export interface NavLink {
   'data-test-subj': string;
 }
 
+/**
+ * Create a link that's actually ready to be passed into EUI
+ *
+ * @param navLink
+ * @param legacyMode
+ * @param currentAppId
+ * @param basePath
+ * @param navigateToApp
+ */
 export function createNavLink(
   navLink: ChromeNavLink,
   legacyMode: boolean,
@@ -127,8 +136,23 @@ function relativeToAbsolute(url: string) {
   return a.href;
 }
 
-export type RecentNavLink = ReturnType<typeof createRecentNavLink>;
+export interface RecentNavLink {
+  href: string;
+  label: string;
+  title: string;
+  'aria-label': string;
+  iconType?: string;
+}
 
+/**
+ * Add saved object type info to recently links
+ *
+ * Recent nav links are similar to normal nav links but are missing some Kibana Platform magic and
+ * because of legacy reasons have slightly different properties.
+ * @param recentLink
+ * @param navLinks
+ * @param basePath
+ */
 export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],

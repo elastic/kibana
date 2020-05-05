@@ -102,7 +102,7 @@ export class ValidatedDualRange extends Component<Props> {
     });
 
     if (this.props.onChange && isValid) {
-      this.props.onChange([value[0] as string, value[1] as string]);
+      this.props.onChange([value[0], value[1]]);
     }
   };
 

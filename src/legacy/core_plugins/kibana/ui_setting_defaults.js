@@ -1189,6 +1189,7 @@ export function getUiSettingDefaults() {
           defaultMessage: 'Legacy',
         }),
       },
+      schema: schema.oneOf(schema.literal('modern'), schema.literal('legacy')),
     },
   };
 }
