@@ -125,9 +125,13 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               defaultMessage="The processors to use to transform the documents before indexing. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
+                  <EuiLink
+                    href={services.documentation.getProcessorsUrl()}
+                    target="_blank"
+                    external
+                  >
                     {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),
@@ -172,12 +176,16 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           <>
             <FormattedMessage
               id="xpack.ingestPipelines.form.onFailureDescription"
-              defaultMessage="The processors to execute after a processor fails. {learnMoreLink}"
+              defaultMessage="The alternate processors to execute after a processor fails. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink href={services.documentation.getHandlingFailureUrl()} target="_blank">
+                  <EuiLink
+                    href={services.documentation.getHandlingFailureUrl()}
+                    target="_blank"
+                    external
+                  >
                     {i18n.translate('xpack.ingestPipelines.form.onFailureDocumentionLink', {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),

@@ -77,26 +77,10 @@ export const App: FunctionComponent = () => {
                 message={
                   <FormattedMessage
                     id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                    defaultMessage="You must have the {missingPrivileges} {privilegesCount,
-                    plural, one {privilege} other {privileges}} to access Ingest Node Pipelines."
+                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
+                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
                     values={{
-                      missingPrivileges: privilegesMissing
-                        .cluster!.map(privilege => <EuiCode>{privilege}</EuiCode>)
-                        .reduce((acc, currPrivilege, idx) => {
-                          if (idx === 0) {
-                            return currPrivilege;
-                          }
-                          return (
-                            <>
-                              {acc}{' '}
-                              <FormattedMessage
-                                id="xpack.ingestPipelines.app.deniedPrivilegeAndLabel"
-                                defaultMessage="and"
-                              />{' '}
-                              {currPrivilege}
-                            </>
-                          );
-                        }),
+                      missingPrivileges: privilegesMissing.cluster!.join(', '),
                       privilegesCount: privilegesMissing.cluster!.length,
                     }}
                   />

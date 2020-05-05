@@ -72,14 +72,18 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.documentsTab.tabDescriptionText"
-            defaultMessage="Specify an array of documents for the pipeline to ingest. {learnMoreLink}"
+            defaultMessage="Provide an array of documents for the pipeline to ingest. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={services.documentation.getSimulatePipelineApiUrl()} target="_blank">
+                <EuiLink
+                  href={services.documentation.getSimulatePipelineApiUrl()}
+                  target="_blank"
+                  external
+                >
                   {i18n.translate(
                     'xpack.ingestPipelines.testPipelineFlyout.documentsTab.simulateDocumentionLink',
                     {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     }
                   )}
                 </EuiLink>

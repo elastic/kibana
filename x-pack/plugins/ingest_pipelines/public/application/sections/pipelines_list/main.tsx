@@ -102,7 +102,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       />
     );
   } else {
-    content = <EmptyList />;
+    return <EmptyList />;
   }
 
   const renderFlyout = (): React.ReactNode => {
@@ -175,13 +175,13 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.list.loadErrorTitle"
-                  defaultMessage="Unable to load pipelines. Try {reloadLink} the page."
+                  defaultMessage="Unable to load pipelines. {reloadLink}"
                   values={{
                     reloadLink: (
                       <EuiLink onClick={sendRequest}>
                         <FormattedMessage
                           id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
-                          defaultMessage="reloading"
+                          defaultMessage="Try again."
                         />
                       </EuiLink>
                     ),

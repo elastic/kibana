@@ -58,23 +58,20 @@ export const OutputTab: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionText"
-            defaultMessage="View the final output data, or see how each processor affects the ingest document as it passes through the pipeline. {runLink}"
-            values={{
-              runLink: (
-                <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
-                    defaultMessage="Refresh output"
-                  />{' '}
-                  <EuiIcon type="refresh" />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="View the output data, or see how each processor affects the document as it passes through the pipeline."
           />
         </p>
+
+        <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
+          <FormattedMessage
+            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
+            defaultMessage="Refresh output"
+          />{' '}
+          <EuiIcon type="refresh" />
+        </EuiLink>
       </EuiText>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiSwitch
         label={
