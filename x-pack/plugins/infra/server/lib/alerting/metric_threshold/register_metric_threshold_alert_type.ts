@@ -11,12 +11,7 @@ import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metric
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
-
-const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
-  schema.string({
-    validate: value =>
-      arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
-  });
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
 export async function registerMetricThresholdAlertType(
   alertingPlugin: PluginSetupContract,
@@ -74,13 +69,20 @@ export async function registerMetricThresholdAlertType(
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
     validate: {
-      params: schema.object({
-        criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-        groupBy: schema.maybe(schema.string()),
-        filterQuery: schema.maybe(schema.string()),
-        sourceId: schema.string(),
-        alertOnNoData: schema.maybe(schema.boolean()),
-      }),
+      params: schema.object(
+        {
+          criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
+          groupBy: schema.maybe(schema.string()),
+          filterQuery: schema.maybe(
+            schema.string({
+              validate: validateIsStringElasticsearchJSONFilter,
+            })
+          ),
+          sourceId: schema.string(),
+          alertOnNoData: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'allow' }
+      ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],

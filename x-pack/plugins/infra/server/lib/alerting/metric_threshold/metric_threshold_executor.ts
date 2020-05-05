@@ -60,18 +60,7 @@ const getParsedFilterQuery: (
   filterQuery: string | undefined
 ) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
   if (!filterQuery) return {};
-  try {
-    return JSON.parse(filterQuery).bool;
-  } catch (e) {
-    return [
-      {
-        query_string: {
-          query: filterQuery,
-          analyze_wildcard: true,
-        },
-      },
-    ];
-  }
+  return JSON.parse(filterQuery).bool;
 };
 
 export const getElasticsearchMetricQuery = (
@@ -276,10 +265,16 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
     };
 
     const alertResults = await Promise.all(
-      criteria.map(criterion =>
-        (async () => {
-          const index = await getIndexPattern(services, sourceId);
-          const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
+      criteria.map(criterion => {
+        return (async () => {
+          const currentValues = await getMetric(
+            services,
+            criterion,
+            config.metricAlias,
+            config.fields.timestamp,
+            groupBy,
+            filterQuery
+          );
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
