@@ -11,13 +11,11 @@ import { ConfigureCases } from './';
 import { TestProviders } from '../../../../mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { Mapping } from './mapping';
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from '../../../../../../triggers_actions_ui/public';
-import { EuiBottomBar } from '@elastic/eui';
 
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
@@ -191,7 +189,13 @@ describe('ConfigureCases', () => {
       ).toBeFalsy();
     });
 
-    test.todo('it disables the update connector button when loading the configuration');
+    test('it disables the update connector button when loading the configuration', () => {
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+    });
 
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
@@ -810,30 +814,5 @@ describe('ConfigureCases', () => {
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
       ).toBeFalsy();
     });
-
-    test('it sets the mapping correctly when changing connector types', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[2].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'jira-1',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
-          connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-        persistLoading: false,
-      }));
-
-      const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      expect(
-        wrapper.find('button[data-test-subj="case-configure-third-party-select-title"]').text()
-      ).toBe('Summary');
-    });
-
-    // TODO: When mapping is enabled the test.todo should be implemented.
-    test.todo('the mapping is changed successfully when changing the third party');
-    test.todo('the mapping is changed successfully when changing the action type');
   });
 });
