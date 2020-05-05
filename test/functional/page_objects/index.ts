@@ -29,12 +29,7 @@ import { ErrorPageProvider } from './error_page';
 // @ts-ignore not TS yet
 import { HeaderPageProvider } from './header_page';
 import { HomePageProvider } from './home_page';
-// @ts-ignore not TS yet
-import { MonitoringPageProvider } from './monitoring_page';
 import { NewsfeedPageProvider } from './newsfeed_page';
-// @ts-ignore not TS yet
-import { PointSeriesPageProvider } from './point_series_page';
-// @ts-ignore not TS yet
 import { SettingsPageProvider } from './settings_page';
 import { SharePageProvider } from './share_page';
 // @ts-ignore not TS yet
@@ -60,9 +55,7 @@ export const pageObjects = {
   error: ErrorPageProvider,
   header: HeaderPageProvider,
   home: HomePageProvider,
-  monitoring: MonitoringPageProvider,
   newsfeed: NewsfeedPageProvider,
-  pointSeries: PointSeriesPageProvider,
   settings: SettingsPageProvider,
   share: SharePageProvider,
   shield: ShieldPageProvider,
