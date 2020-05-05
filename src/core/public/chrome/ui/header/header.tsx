@@ -176,7 +176,13 @@ export class Header extends Component<HeaderProps, State> {
       kibanaVersion,
     } = this.props;
     const navLinks = this.state.navLinks.map(link =>
-      euiNavLink(link, this.props.legacyMode, this.state.currentAppId, this.props.basePath)
+      euiNavLink(
+        link,
+        this.props.legacyMode,
+        this.state.currentAppId,
+        this.props.basePath,
+        this.props.application.navigateToApp
+      )
     );
 
     if (!isVisible) {
@@ -185,6 +191,7 @@ export class Header extends Component<HeaderProps, State> {
 
     const className = classnames(
       'chrHeaderWrapper',
+      'disableCoreNavigation',
       {
         'chrHeaderWrapper--navIsLocked': this.state.isLocked,
       },
