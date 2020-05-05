@@ -79,7 +79,7 @@ describe('confirmClick directive', function () {
     });
 
     it('should get a click handler', function () {
-      expect(events).to.be.a(Object);
+      expect(events).to.be.an('object');
       expect(events.click).to.be.a(Array);
     });
 
