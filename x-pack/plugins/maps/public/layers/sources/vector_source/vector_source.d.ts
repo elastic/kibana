@@ -25,7 +25,7 @@ export type GeoJsonWithMeta = {
 };
 
 export interface IVectorSource extends ISource {
-  filterAndFormatPropertiesToHtml(properties: unknown[]): Promise<ITooltipProperty>;
+  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',
@@ -41,7 +41,7 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  filterAndFormatPropertiesToHtml(properties: unknown[]): Promise<ITooltipProperty>;
+  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',

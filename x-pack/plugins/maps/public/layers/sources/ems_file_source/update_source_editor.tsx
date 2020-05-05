@@ -15,6 +15,7 @@ import { IField } from '../../fields/field';
 import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
 interface Props {
+  layerId: string;
   onChange: (args: OnSourceChangeArgs) => void;
   source: IEmsFileSource;
   tooltipFields: IField[];

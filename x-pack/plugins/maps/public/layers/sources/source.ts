@@ -25,6 +25,7 @@ export type SourceEditorArgs = {
 export type ImmutableSourceProperty = {
   label: string;
   value: string;
+  link?: string;
 };
 
 export type Attribution = {
@@ -129,7 +130,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  renderSourceSettingsEditor() {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
 
