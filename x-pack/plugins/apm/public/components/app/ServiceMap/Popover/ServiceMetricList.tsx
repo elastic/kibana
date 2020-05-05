@@ -34,16 +34,16 @@ const BadgeRow = styled(EuiFlexItem)`
   padding-bottom: ${lightTheme.gutterTypes.gutterSmall};
 `;
 
-const ItemRow = styled('tr')`
+export const ItemRow = styled('tr')`
   line-height: 2;
 `;
 
-const ItemTitle = styled('td')`
+export const ItemTitle = styled('td')`
   color: ${lightTheme.textColors.subdued};
   padding-right: 1rem;
 `;
 
-const ItemDescription = styled('td')`
+export const ItemDescription = styled('td')`
   text-align: right;
 `;
 

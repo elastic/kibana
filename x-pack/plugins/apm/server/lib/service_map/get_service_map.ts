@@ -147,8 +147,12 @@ function getAnomaliesData(options: IEnvOptions) {
     body: {
       size: 0,
       query: {
-        exists: {
-          field: 'bucket_span'
+        bool: {
+          filter: {
+            term: {
+              result_type: 'record'
+            }
+          }
         }
       },
       aggs: {
@@ -158,9 +162,23 @@ function getAnomaliesData(options: IEnvOptions) {
             size: 10
           },
           aggs: {
-            max_score: {
-              max: {
-                field: 'anomaly_score'
+            top_score_hits: {
+              top_hits: {
+                sort: [
+                  {
+                    record_score: {
+                      order: 'desc' as const
+                    }
+                  }
+                ],
+                _source: [
+                  'job_id',
+                  'record_score',
+                  'typical',
+                  'actual',
+                  'field_name'
+                ],
+                size: 1
               }
             }
           }
@@ -178,7 +196,13 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData, anomaliesData] = await Promise.all([
+  const [connectionData, servicesData, anomaliesData]: [
+    // explicit types to avoid TS "excessively deep" error
+    ConnectionsResponse,
+    ServicesResponse,
+    AnomaliesResponse
+    // @ts-ignore
+  ] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
     getAnomaliesData(options)

@@ -9,18 +9,20 @@ import { getMlJobId } from '../../../../../common/ml_job_constants';
 import { MLLink } from './MLLink';
 
 interface Props {
-  serviceName: string;
+  serviceName?: string;
   transactionType?: string;
+  jobId?: string;
 }
 
 export const MLJobLink: React.FC<Props> = ({
   serviceName,
   transactionType,
+  jobId,
   children
 }) => {
-  const jobId = getMlJobId(serviceName, transactionType);
+  const mlJobId = jobId ? jobId : getMlJobId(serviceName, transactionType);
   const query = {
-    ml: { jobIds: [jobId] }
+    ml: { jobIds: [mlJobId] }
   };
 
   return (
