@@ -17,16 +17,16 @@
  * under the License.
  */
 
-console.log('load leaflet');
-require('leaflet/dist/leaflet.css');
-window.L = module.exports = require('leaflet/dist/leaflet.js');
-window.L.Browser.touch = false;
-window.L.Browser.pointer = false;
+if (!window.hasOwnProperty('L')) {
+  require('leaflet/dist/leaflet.css');
+  window.L = module.exports = require('leaflet/dist/leaflet.js');
+  window.L.Browser.touch = false;
+  window.L.Browser.pointer = false;
 
-require('leaflet.heat/dist/leaflet-heat.js');
-
-require('leaflet-draw/dist/leaflet.draw.css');
-require('leaflet-draw/dist/leaflet.draw.js');
-
-require('leaflet-responsive-popup/leaflet.responsive.popup.css');
-require('leaflet-responsive-popup/leaflet.responsive.popup.js');
+  require('leaflet-vega');
+  require('leaflet.heat/dist/leaflet-heat.js');
+  require('leaflet-draw/dist/leaflet.draw.css');
+  require('leaflet-draw/dist/leaflet.draw.js');
+  require('leaflet-responsive-popup/leaflet.responsive.popup.css');
+  require('leaflet-responsive-popup/leaflet.responsive.popup.js');
+}

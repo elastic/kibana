@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'leaflet-vega';
 import { KibanaMapLayer } from '../../../maps_legacy/public';
 
 export class VegaMapLayer extends KibanaMapLayer {
@@ -27,7 +26,6 @@ export class VegaMapLayer extends KibanaMapLayer {
     // Used by super.getAttributions()
     this._attribution = options.attribution;
     delete options.attribution;
-
     this._leafletLayer = L.vega(spec, options);
   }
 
