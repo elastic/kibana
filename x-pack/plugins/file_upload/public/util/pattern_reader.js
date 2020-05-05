@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-const oboe = require('oboe');
+import oboe from 'oboe';
 
 export class PatternReader {
   constructor({ onFeatureDetect, onStreamComplete }) {
