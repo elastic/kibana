@@ -48,7 +48,7 @@ describe('App Search Telemetry Usage Collector', () => {
 
       expect(registerStub).toHaveBeenCalledTimes(1);
       expect(makeUsageCollectorStub).toHaveBeenCalledTimes(1);
-      expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('app_search_kibana_telemetry');
+      expect(makeUsageCollectorStub.mock.calls[0][0].type).toBe('app_search');
     });
   });
 
@@ -108,8 +108,8 @@ describe('App Search Telemetry Usage Collector', () => {
       });
 
       expect(savedObjectsRepoStub.incrementCounter).toHaveBeenCalledWith(
-        'app_search_kibana_telemetry',
-        'app_search_kibana_telemetry',
+        'app_search_telemetry',
+        'app_search_telemetry',
         'ui_clicked.button'
       );
       expect(response).toEqual({ success: true });

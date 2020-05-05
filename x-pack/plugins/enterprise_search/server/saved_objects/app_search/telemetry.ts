@@ -6,7 +6,7 @@
 
 import { SavedObjectsType } from 'src/core/server';
 
-export const AS_TELEMETRY_NAME = 'app_search_kibana_telemetry';
+export const AS_TELEMETRY_NAME = 'app_search_telemetry';
 
 export interface ITelemetrySavedObject {
   ui_viewed: {
