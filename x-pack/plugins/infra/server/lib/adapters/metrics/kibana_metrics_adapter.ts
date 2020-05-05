@@ -18,7 +18,6 @@ import {
   InventoryMetricRT,
 } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
-import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;
@@ -121,14 +120,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       indexPattern,
       options.timerange.interval
     );
-
-    const client = <Hit = {}, Aggregation = undefined>(
-      opts: CallWithRequestParams
-    ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
-      this.framework.callWithRequest(requestContext, 'search', opts);
-
     const calculatedInterval = await calculateMetricInterval(
-      client,
+      this.framework,
+      requestContext,
       {
         indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
         timestampField: options.sourceConfiguration.fields.timestamp,
