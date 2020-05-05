@@ -25,49 +25,29 @@ export default function({ getService }) {
         const host = config.get('servers.kibana.hostname');
         const ifLocalhost = host.includes('localhost') ? it : it.skip;
         ifLocalhost('should return 200 and stats for no extended', async () => {
-          const { body } = await supertestNoAuth
-            .get('/api/stats')
-            .auth(null, null)
-            .expect(200);
+          const { body } = await supertestNoAuth.get('/api/stats').expect(200);
           expect(isUUID(body.kibana.uuid)).to.be.ok();
-          expect(body.process.uptime_ms).to.be.greaterThan(0);
-          expect(body.os.uptime_ms).to.be.greaterThan(0);
-          expect(body.usage).to.be(undefined);
         });
 
         it('should return 401 for extended', async () => {
-          await supertestNoAuth
-            .get('/api/stats?extended')
-            .auth(null, null)
-            .expect(401);
+          await supertestNoAuth.get('/api/stats?extended').expect(401);
         });
       });
 
       describe('with auth', () => {
         it('should return 200 and stats for no extended', async () => {
           const { body } = await supertest.get('/api/stats').expect(200);
-          expect(body.kibana.uuid).to.eql('5b2de169-2785-441b-ae8c-186a1936b17d');
-          expect(body.process.uptime_ms).to.be.greaterThan(0);
-          expect(body.os.uptime_ms).to.be.greaterThan(0);
+          expect(isUUID(body.kibana.uuid)).to.be.ok();
         });
 
         it('should return 200 for extended', async () => {
           const { body } = await supertest.get('/api/stats?extended').expect(200);
           expect(isUUID(body.kibana.uuid)).to.be.ok();
-          expect(body.process.uptime_ms).to.be.greaterThan(0);
-          expect(body.os.uptime_ms).to.be.greaterThan(0);
-          expect(body.usage.kibana.index).to.be('.kibana');
-          expect(body.usage.dashboard.total).to.be.a('number');
         });
 
         it('should return 200 for extended and legacy', async () => {
           const { body } = await supertest.get('/api/stats?extended&legacy').expect(200);
           expect(isUUID(body.kibana.uuid)).to.be.ok();
-          expect(body.process.uptime_ms).to.be.greaterThan(0);
-          expect(body.os.uptime_ms).to.be.greaterThan(0);
-          expect(body.usage.index).to.be('.kibana');
-          expect(body.usage.dashboard.total).to.be.a('number');
-          expect(body.usage.xpack.reporting.available).to.be(true);
         });
       });
     });
