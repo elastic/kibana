@@ -149,7 +149,10 @@ const digestOnHashChange = (getHistory?: () => History) => ($rootScope: IRootSco
   const unlisten = getHistory().listen(() => {
     // dispatch synthetic hash change event to update hash history objects and angular routing
     // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    // this has to happen in the next tick to not change the existing timing of angular digest cycles.
+    setTimeout(() => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }, 0);
   });
   $rootScope.$on('$destroy', unlisten);
 };
