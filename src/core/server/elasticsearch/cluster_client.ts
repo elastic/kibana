@@ -64,9 +64,7 @@ const callAPI = async (
       const request = api.call(apiContext, clientParams);
       if (options.signal) {
         options.signal.addEventListener('abort', () => {
-          if (typeof request.abort === 'function') {
-            request.abort();
-          }
+          request.abort();
           reject(new Error('Request was aborted'));
         });
       }
