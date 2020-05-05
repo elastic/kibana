@@ -8,8 +8,8 @@ by adding it to the `kibana.yml` file.
 
 Preconfigured connectors offer the following capabilities:
 
-- Requires no setup. Configuration and credentials needed to execute an
-action are predefined, including the connectors name and ID.
+- Require no setup. Configuration and credentials needed to execute an
+action are predefined, including the connector name and ID.
 - Appear in all spaces because they are not saved objects.
 - Cannot be edited or deleted.
 
@@ -21,7 +21,7 @@ A preconfigured action types has only preconfigured connectors. But preconfigure
 [[preconfigured-connector-example]]
 === Creating a preconfigured connector
 
-The following example shows a valid configuration 2 out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
+The following example shows a valid configuration of two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
 You can find all details about available action types configuration <<action-types, here>>.
 
 ```js
@@ -113,7 +113,7 @@ A message indicates that this is a preconfigured connector.
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
 
-If preconfigured connector belong to the preconfigured action type, it is disabled for the details preview.
+The connector details preview is disabled for preconfigured connectors.
 
 [role="screenshot"]
 image::images/pre-configured-action-type-managing.png[Connectors managing tab with pre-cofigured]
@@ -124,7 +124,7 @@ image::images/pre-configured-action-type-managing.png[Connectors managing tab wi
 === Managing preconfigured action types
 
 Clicking *Create connector* shows the list of available action types.
-Preconfigured action types are not included because you can't create a connector with a preconfigured action type.
+Disabled action types are not included.
 
 [role="screenshot"]
 image::images/pre-configured-action-type-select-type.png[Pre-configured connector create menu]
