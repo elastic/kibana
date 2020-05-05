@@ -47,7 +47,7 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
-import { appendAppPath, relativeToAbsolute } from './utils';
+import { appendAppPath, relativeToAbsolute, selfOrParentHasClass, isModifiedEvent } from './utils';
 import { parseAppUrl } from './parse_app_url';
 
 interface SetupDeps {
@@ -94,7 +94,7 @@ interface AppUpdaterWrapper {
   updater: AppUpdater;
 }
 
-type DelegatedClickEventHandler = (event: CustomEvent & { currentTarget: Element }) => void;
+type DelegatedClickEventHandler = (event: MouseEvent & { currentTarget: Element }) => void;
 
 /**
  * Service that is responsible for registering new applications.
@@ -315,11 +315,16 @@ export class ApplicationService {
 
     this.linkClickDelegateHandler = e => {
       const link = e.currentTarget as HTMLAnchorElement;
-      if (link.href && !link.classList.contains('coreNavigationPrevented')) {
-        const linkedApp = parseAppUrl(link.href, http.basePath, this.apps);
-        if (linkedApp && linkedApp.app !== this.currentAppId$.value) {
+      if (
+        link.href && // ignore links with empty hrefs
+        !selfOrParentHasClass(link, 'disableCoreNavigation') && // ignore explicitly ignored links
+        e.button === 0 && // ignore everything but left clicks
+        !isModifiedEvent(e) // ignore clicks with modifier keys
+      ) {
+        const appInfo = parseAppUrl(link.href, http.basePath, this.apps);
+        if (appInfo && appInfo.app !== this.currentAppId$.value) {
           e.preventDefault();
-          startContract.navigateToApp(linkedApp.app, { path: linkedApp.path });
+          startContract.navigateToApp(appInfo.app, { path: appInfo.path });
         }
       }
     };
@@ -370,7 +375,8 @@ export class ApplicationService {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     window.removeEventListener('beforeunload', this.onBeforeUnload);
     if (this.linkClickDelegateHandler) {
-      off('click', 'a', this.linkClickDelegateHandler);
+      // off expects a custom event handler even when unregistering another type of events
+      off('click', 'a', this.linkClickDelegateHandler as any);
     }
   }
 }

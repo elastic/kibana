@@ -19,12 +19,8 @@
 
 import React from 'react';
 import { EuiImage } from '@elastic/eui';
-import { ChromeNavLink, CoreStart } from '../../../';
+import { ChromeNavLink } from '../../../';
 import { HttpStart } from '../../../http';
-
-function isModifiedEvent(event: MouseEvent) {
-  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-}
 
 function LinkIcon({ url }: { url: string }) {
   return <EuiImage size="s" alt="" aria-hidden={true} url={url} />;
@@ -36,8 +32,7 @@ export function euiNavLink(
   navLink: ChromeNavLink,
   legacyMode: boolean,
   currentAppId: string | undefined,
-  basePath: HttpStart['basePath'],
-  navigateToApp: CoreStart['application']['navigateToApp']
+  basePath: HttpStart['basePath']
 ) {
   const {
     legacy,
@@ -63,19 +58,7 @@ export function euiNavLink(
     category,
     key: id,
     label: tooltip ?? title,
-    href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-    onClick(event: MouseEvent) {
-      if (
-        !legacyMode && // ignore when in legacy mode
-        !legacy && // ignore links to legacy apps
-        !event.defaultPrevented && // onClick prevented default
-        event.button === 0 && // ignore everything but left clicks
-        !isModifiedEvent(event) // ignore clicks with modifier keys
-      ) {
-        event.preventDefault();
-        navigateToApp(navLink.id);
-      }
-    },
+    href, // SPA navigation is handled by core global link handler
     // Legacy apps use `active` property, NP apps should match the current app
     isActive: active || currentAppId === id,
     isDisabled: disabled,

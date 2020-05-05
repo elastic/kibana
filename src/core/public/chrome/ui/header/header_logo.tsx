@@ -92,6 +92,7 @@ interface Props {
 export function HeaderLogo({ href, forceNavigation, navLinks }: Props) {
   return (
     <EuiHeaderLogo
+      className="disableCoreNavigation"
       data-test-subj="logo"
       iconType="logoKibana"
       onClick={e => onClick(e, forceNavigation, navLinks)}

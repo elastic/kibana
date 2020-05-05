@@ -176,13 +176,7 @@ export class Header extends Component<HeaderProps, State> {
       kibanaVersion,
     } = this.props;
     const navLinks = this.state.navLinks.map(link =>
-      euiNavLink(
-        link,
-        this.props.legacyMode,
-        this.state.currentAppId,
-        this.props.basePath,
-        this.props.application.navigateToApp
-      )
+      euiNavLink(link, this.props.legacyMode, this.state.currentAppId, this.props.basePath)
     );
 
     if (!isVisible) {

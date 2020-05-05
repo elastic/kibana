@@ -84,3 +84,22 @@ export const relativeToAbsolute = (url: string): string => {
 export const getOrigin = (): string => {
   return window.location.origin;
 };
+
+// TODO: add tests
+export const selfOrParentHasClass = (element: HTMLElement, className: string): boolean => {
+  let current = element;
+  while (current) {
+    if (current.classList.contains(className)) {
+      return true;
+    }
+    if (!current.parentElement || current.parentElement === document.body) {
+      break;
+    }
+    current = current.parentElement;
+  }
+  return false;
+};
+
+export const isModifiedEvent = (event: MouseEvent): boolean => {
+  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+};
