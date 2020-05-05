@@ -48,7 +48,6 @@ export interface SearchResponse {
       buckets: {
         all: AggregationResultBuckets;
         last7Days: AggregationResultBuckets;
-        lastDay: AggregationResultBuckets;
       };
     };
   };
@@ -59,36 +58,51 @@ export interface AvailableTotal {
   total: number;
 }
 
-type BaseJobTypeKeys = 'csv' | 'PNG';
-export type JobTypes = { [K in BaseJobTypeKeys]: AvailableTotal } & {
+type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+export interface LayoutCounts {
+  print: number;
+  preserve_layout: number;
+}
+
+type AppNames = 'canvas workpad' | 'dashboard' | 'visualization';
+export type AppCounts = {
+  [A in AppNames]?: number;
+};
+
+export type JobTypes = { [K in BaseJobTypes]: AvailableTotal } & {
   printable_pdf: AvailableTotal & {
-    app: {
-      visualization: number;
-      dashboard: number;
-    };
-    layout: {
-      print: number;
-      preserve_layout: number;
-    };
+    app: AppCounts;
+    layout: LayoutCounts;
   };
 };
 
-interface StatusCounts {
-  [statusType: string]: number;
-}
-
-interface StatusByAppCounts {
-  [statusType: string]: {
-    [jobType: string]: {
-      [appName: string]: number;
-    };
+type Statuses =
+  | 'cancelled'
+  | 'completed'
+  | 'completed_with_warnings'
+  | 'failed'
+  | 'pending'
+  | 'processing';
+type StatusCounts = {
+  [S in Statuses]?: number;
+};
+type StatusByAppCounts = {
+  [S in Statuses]?: {
+    [J in BaseJobTypes]?: AppCounts;
   };
-}
+};
 
 export type RangeStats = JobTypes & {
   _all: number;
   status: StatusCounts;
   statuses: StatusByAppCounts;
+};
+
+export type ReportingUsageType = RangeStats & {
+  available: boolean;
+  browser_type: string;
+  enabled: boolean;
+  last7Days: RangeStats;
 };
 
 export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
