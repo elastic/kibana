@@ -101,12 +101,7 @@ describe('data generator', () => {
     });
 
     it('with n-1 process events', () => {
-      // for (let i = 1; i < events.length - 1; i++) {
-      //   expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
-      //   expect(events[i].event.kind).toEqual('event');
-      //   expect(events[i].event.category).toEqual('process');
-      // }
-      for (let i = events.length - 1; i > 0; ) {
+      for (let i = events.length - 2; i > 0; ) {
         const parentEntityIdOfChild = events[i].process.parent?.entity_id;
         for (
           ;
