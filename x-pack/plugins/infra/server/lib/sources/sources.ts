@@ -9,7 +9,7 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
-import { SavedObjectsClientContract } from 'src/core/server';
+import { RequestHandlerContext, SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
@@ -41,6 +41,7 @@ export class InfraSources {
     sourceId: string
   ): Promise<InfraSource> {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
+
     const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
       .then(internalSourceConfiguration => ({
         id: sourceId,
@@ -78,12 +79,10 @@ export class InfraSources {
     return savedSourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
+  public async getAllSourceConfigurations(requestContext: RequestHandlerContext) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
-      savedObjectsClient
-    );
+    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(requestContext);
 
     return savedSourceConfigurations.map(savedSourceConfiguration => ({
       ...savedSourceConfiguration,
@@ -95,7 +94,7 @@ export class InfraSources {
   }
 
   public async createSourceConfiguration(
-    savedObjectsClient: SavedObjectsClientContract,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
@@ -107,7 +106,7 @@ export class InfraSources {
     );
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.create(
+      await requestContext.core.savedObjects.client.create(
         infraSourceConfigurationSavedObjectType,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
@@ -123,22 +122,22 @@ export class InfraSources {
     };
   }
 
-  public async deleteSourceConfiguration(
-    savedObjectsClient: SavedObjectsClientContract,
-    sourceId: string
-  ) {
-    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectType, sourceId);
+  public async deleteSourceConfiguration(requestContext: RequestHandlerContext, sourceId: string) {
+    await requestContext.core.savedObjects.client.delete(
+      infraSourceConfigurationSavedObjectType,
+      sourceId
+    );
   }
 
   public async updateSourceConfiguration(
-    savedObjectsClient: SavedObjectsClientContract,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
     const { configuration, version } = await this.getSourceConfiguration(
-      savedObjectsClient,
+      requestContext.core.savedObjects.client,
       sourceId
     );
 
@@ -148,7 +147,7 @@ export class InfraSources {
     );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.update(
+      await requestContext.core.savedObjects.client.update(
         infraSourceConfigurationSavedObjectType,
         sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
@@ -214,8 +213,8 @@ export class InfraSources {
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
 
-  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
-    const savedObjects = await savedObjectsClient.find({
+  private async getAllSavedSourceConfigurations(requestContext: RequestHandlerContext) {
+    const savedObjects = await requestContext.core.savedObjects.client.find({
       type: infraSourceConfigurationSavedObjectType,
     });
 
