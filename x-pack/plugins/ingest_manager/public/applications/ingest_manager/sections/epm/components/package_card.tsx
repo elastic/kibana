@@ -46,7 +46,7 @@ export function PackageCard({
       layout="horizontal"
       title={title || ''}
       description={description}
-      icon={<PackageIcon icons={icons} packageName={name} version={version} size="l" />}
+      icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
       href={url}
     />
   );

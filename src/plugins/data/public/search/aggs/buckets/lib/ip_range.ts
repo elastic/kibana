@@ -17,9 +17,18 @@
  * under the License.
  */
 
-export type IpRangeKey =
-  | { type: 'mask'; mask: string }
-  | { type: 'range'; from: string; to: string };
+export interface CidrMaskIpRangeAggKey {
+  type: 'mask';
+  mask: string;
+}
+
+export interface RangeIpRangeAggKey {
+  type: 'range';
+  from: string;
+  to: string;
+}
+
+export type IpRangeKey = CidrMaskIpRangeAggKey | RangeIpRangeAggKey;
 
 export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
   if (range.type === 'mask') {

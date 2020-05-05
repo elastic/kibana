@@ -7,10 +7,12 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
+import { connectorsConfiguration } from '../../../../lib/connectors/config';
+import { createDefaultMapping } from '../../../../lib/connectors/utils';
+
 import { FieldMapping, FieldMappingProps } from './field_mapping';
 import { mapping } from './__mock__';
 import { FieldMappingRow } from './field_mapping_row';
-import { defaultMapping } from '../../../../lib/connectors/config';
 import { TestProviders } from '../../../../mock';
 
 describe('FieldMappingRow', () => {
@@ -20,6 +22,7 @@ describe('FieldMappingRow', () => {
     disabled: false,
     mapping,
     onChangeMapping,
+    connectorActionTypeId: '.servicenow',
   };
 
   beforeAll(() => {
@@ -65,6 +68,9 @@ describe('FieldMappingRow', () => {
     const newWrapper = mount(<FieldMapping {...props} mapping={null} />, {
       wrappingComponent: TestProviders,
     });
+
+    const selectedConnector = connectorsConfiguration['.servicenow'];
+    const defaultMapping = createDefaultMapping(selectedConnector.fields);
 
     const rows = newWrapper.find(FieldMappingRow);
     rows.forEach((row, index) => {
