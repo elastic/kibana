@@ -7,7 +7,15 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+  BrushEndListener,
+} from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -58,7 +66,11 @@ export const MetricsExplorerChart = ({
   const isDarkMode = useUiSetting<boolean>('theme:darkMode');
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
-  const handleTimeChange = (from: number, to: number) => {
+  const handleTimeChange: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [from, to] = x;
     onTimeChange(moment(from).toISOString(), moment(to).toISOString());
   };
   const dateFormatter = useMemo(

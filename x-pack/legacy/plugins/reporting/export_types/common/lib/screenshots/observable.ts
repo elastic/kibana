@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { catchError, concatMap, first, mergeMap, take, takeUntil, toArray } from 'rxjs/operators';
 import { CaptureConfig } from '../../../../server/types';
+import { DEFAULT_PAGELOAD_SELECTOR } from '../../constants';
 import { HeadlessChromiumDriverFactory } from '../../../../types';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
@@ -44,13 +45,29 @@ export function screenshotsObservableFactory(
       { viewport: layout.getBrowserViewport(), browserTimezone },
       logger
     );
-    return Rx.from(urls).pipe(
-      concatMap(url => {
-        return create$.pipe(
-          mergeMap(({ driver, exit$ }) => {
+
+    return create$.pipe(
+      mergeMap(({ driver, exit$ }) => {
+        return Rx.from(urls).pipe(
+          concatMap((url, index) => {
             const setup$: Rx.Observable<ScreenSetupData> = Rx.of(1).pipe(
               takeUntil(exit$),
-              mergeMap(() => openUrl(captureConfig, driver, url, conditionalHeaders, logger)),
+              mergeMap(() => {
+                // If we're moving to another page in the app, we'll want to wait for the app to tell us
+                // it's loaded the next page.
+                const page = index + 1;
+                const pageLoadSelector =
+                  page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
+
+                return openUrl(
+                  captureConfig,
+                  driver,
+                  url,
+                  pageLoadSelector,
+                  conditionalHeaders,
+                  logger
+                );
+              }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async itemsCount => {
                 const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
@@ -104,11 +121,11 @@ export function screenshotsObservableFactory(
               )
             );
           }),
-          first()
+          take(urls.length),
+          toArray()
         );
       }),
-      take(urls.length),
-      toArray()
+      first()
     );
   };
 }
