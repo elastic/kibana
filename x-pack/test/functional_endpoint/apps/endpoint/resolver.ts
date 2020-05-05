@@ -250,6 +250,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await browser.setWindowSize(1600, 1000);
       await testSubjects.click('euiFlyoutCloseButton');
       await pageObjects.common.sleep(2000);
       await esArchiver.unload('endpoint/resolver_tree/api_feature');
