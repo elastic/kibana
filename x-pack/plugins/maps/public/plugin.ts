@@ -38,9 +38,8 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { registerLayerWizards } from './layers/load_layer_wizards';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { MapEmbeddableFactory } from './embeddable';
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 
 export interface MapsPluginSetupDependencies {
@@ -85,7 +84,6 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setUiActions(plugins.uiActions);
   setNavigation(plugins.navigation);
   setCoreI18n(core.i18n);
-  registerLayerWizards();
 };
 
 /**
