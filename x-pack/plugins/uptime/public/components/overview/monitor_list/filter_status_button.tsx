@@ -27,7 +27,7 @@ export const FilterStatusButton = ({
   color,
   withNext,
 }: FilterStatusButtonProps) => {
-  const [setUrlParams] = useUrlParams();
+  const setUrlParams = useUrlParams()[1];
 
   return (
     <EuiFilterButton
