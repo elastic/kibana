@@ -16,7 +16,6 @@ import {
   RouteConfig,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
-import { LICENSE_CHECK_STATE } from '../../../../licensing/server';
 import { Authentication, AuthenticationResult } from '../../authentication';
 import { defineChangeUserPasswordRoutes } from './change_password';
 
@@ -54,7 +53,7 @@ describe('Change password', () => {
       now: Date.now(),
       idleTimeoutExpiration: null,
       lifespanExpiration: null,
-      provider: 'basic',
+      provider: { type: 'basic', name: 'basic' },
     });
 
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -63,7 +62,7 @@ describe('Change password', () => {
 
     mockContext = ({
       licensing: {
-        license: { check: jest.fn().mockReturnValue({ check: LICENSE_CHECK_STATE.Valid }) },
+        license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
     } as unknown) as RequestHandlerContext;
 
@@ -188,7 +187,7 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'basic',
+        provider: { name: 'basic1' },
         value: { username, password: 'new-password' },
       });
     });
@@ -196,7 +195,7 @@ describe('Change password', () => {
     it('successfully changes own password if provided old password is correct for non-basic provider.', async () => {
       const mockUser = mockAuthenticatedUser({
         username: 'user',
-        authentication_provider: 'token',
+        authentication_provider: 'token1',
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
@@ -215,7 +214,7 @@ describe('Change password', () => {
 
       expect(authc.login).toHaveBeenCalledTimes(1);
       expect(authc.login).toHaveBeenCalledWith(mockRequest, {
-        provider: 'token',
+        provider: { name: 'token1' },
         value: { username, password: 'new-password' },
       });
     });

@@ -1,0 +1,11 @@
+.canvasTimeFilter .euiSuperDatePicker__flexWrapper {
+  width: 100%;
+
+  &.euiFlexGroup--gutterSmall {
+    margin: 0;
+
+    > .euiFlexItem {
+      margin: 0;
+    }
+  }
+}

@@ -40,6 +40,10 @@ jest.mock('../services/save_modal', () => ({
   openSaveModal: jest.fn(),
 }));
 
+jest.mock('../helpers/saved_workspace_utils', () => ({
+  saveSavedWorkspace: jest.fn().mockResolvedValueOnce('123'),
+}));
+
 describe('persistence sagas', () => {
   let env: MockedGraphEnvironment;
 
@@ -90,7 +94,6 @@ describe('persistence sagas', () => {
           savePolicy: 'configAndDataWithConsent',
         },
       });
-      (env.mockedDeps.getSavedWorkspace().save as jest.Mock).mockResolvedValueOnce('123');
       env.mockedDeps.getSavedWorkspace().id = '123';
     });
 

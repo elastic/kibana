@@ -5,7 +5,14 @@
  */
 
 import React, { FC } from 'react';
-import { EuiCallOut, EuiSpacer, EuiCallOutProps } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiCallOutProps,
+  EuiAccordion,
+  EuiListGroup,
+  EuiListGroupItemProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -14,13 +21,24 @@ import {
   FieldExampleCheck,
 } from '../../../../../../../../../common/types/categories';
 import { EditCategorizationAnalyzerFlyout } from '../../../common/edit_categorization_analyzer_flyout';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../../../../common/constants/new_job';
+import {
+  CATEGORY_EXAMPLES_VALIDATION_STATUS,
+  VALIDATION_CHECK_DESCRIPTION,
+} from '../../../../../../../../../common/constants/categorization_job';
+import { VALIDATION_RESULT } from '../../../../../../../../../common/types/categories';
 
 interface Props {
   validationChecks: FieldExampleCheck[];
   overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS;
   categorizationAnalyzer: CategorizationAnalyzer;
 }
+
+const allChecksButtonContent = i18n.translate(
+  'xpack.ml.newJob.wizard.jobDetailsStep.allChecksButton',
+  {
+    defaultMessage: 'View all checks performed',
+  }
+);
 
 export const ExamplesValidCallout: FC<Props> = ({
   overallValidStatus,
@@ -66,6 +84,10 @@ export const ExamplesValidCallout: FC<Props> = ({
       ))}
       <EuiSpacer size="s" />
       {analyzerUsed}
+      <EuiSpacer size="s" />
+      <EuiAccordion id="all-checks" buttonContent={allChecksButtonContent}>
+        <AllValidationChecks validationChecks={validationChecks} />
+      </EuiAccordion>
     </EuiCallOut>
   );
 };
@@ -95,4 +117,29 @@ const AnalyzerUsed: FC<{ categorizationAnalyzer: CategorizationAnalyzer }> = ({
       </div>
     </>
   );
+};
+
+const AllValidationChecks: FC<{ validationChecks: FieldExampleCheck[] }> = ({
+  validationChecks,
+}) => {
+  const list: EuiListGroupItemProps[] = Object.keys(VALIDATION_CHECK_DESCRIPTION).map((k, i) => {
+    const failedCheck = validationChecks.find(vc => vc.id === i);
+    if (
+      failedCheck !== undefined &&
+      failedCheck?.valid !== CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID
+    ) {
+      return {
+        iconType: 'cross',
+        label: failedCheck.message,
+        size: 's',
+      };
+    }
+    return {
+      iconType: 'check',
+      label: VALIDATION_CHECK_DESCRIPTION[i as VALIDATION_RESULT],
+      size: 's',
+    };
+  });
+
+  return <EuiListGroup listItems={list} maxWidth={false} />;
 };

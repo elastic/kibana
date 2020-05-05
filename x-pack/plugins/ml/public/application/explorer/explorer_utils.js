@@ -26,7 +26,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
@@ -235,7 +235,7 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   // and the max bucket span for the jobs shown in the chart.
   const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
 
@@ -882,4 +882,43 @@ export async function loadTopInfluencers(
       resolve({});
     }
   });
+}
+
+// Recommended by MDN for escaping user input to be treated as a literal string within a regular expression
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function escapeParens(string) {
+  return string.replace(/[()]/g, '\\$&');
+}
+
+export function escapeDoubleQuotes(string) {
+  return string.replace(/\"/g, '\\$&');
+}
+
+export function getQueryPattern(fieldName, fieldValue) {
+  const sanitizedFieldName = escapeRegExp(fieldName);
+  const sanitizedFieldValue = escapeRegExp(fieldValue);
+
+  return new RegExp(`(${sanitizedFieldName})\\s?:\\s?(")?(${sanitizedFieldValue})(")?`, 'i');
+}
+
+export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
+  let newQueryString = '';
+  // Remove the passed in fieldName and value from the existing filter
+  const queryPattern = getQueryPattern(fieldName, fieldValue);
+  newQueryString = currentQueryString.replace(queryPattern, '');
+  // match 'and' or 'or' at the start/end of the string
+  const endPattern = /\s(and|or)\s*$/gi;
+  const startPattern = /^\s*(and|or)\s/gi;
+  // If string has a double operator (e.g. tag:thing or or tag:other) remove and replace with the first occurring operator
+  const invalidOperatorPattern = /\s+(and|or)\s+(and|or)\s+/gi;
+  newQueryString = newQueryString.replace(invalidOperatorPattern, ' $1 ');
+  // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
+  newQueryString = newQueryString.replace(endPattern, '');
+  newQueryString = newQueryString.replace(startPattern, '');
+
+  return newQueryString;
 }

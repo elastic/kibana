@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
+import { PreConfiguredAction } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
@@ -20,6 +20,7 @@ export interface AlertsClientFactoryOpts {
   getSpaceId: (request: KibanaRequest) => string | undefined;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
 export class AlertsClientFactory {
@@ -31,6 +32,7 @@ export class AlertsClientFactory {
   private getSpaceId!: (request: KibanaRequest) => string | undefined;
   private spaceIdToNamespace!: SpaceIdToNamespaceFunction;
   private encryptedSavedObjectsPlugin!: EncryptedSavedObjectsPluginStart;
+  private preconfiguredActions!: PreConfiguredAction[];
 
   public initialize(options: AlertsClientFactoryOpts) {
     if (this.isInitialized) {
@@ -44,6 +46,7 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
     this.spaceIdToNamespace = options.spaceIdToNamespace;
     this.encryptedSavedObjectsPlugin = options.encryptedSavedObjectsPlugin;
+    this.preconfiguredActions = options.preconfiguredActions;
   }
 
   public create(
@@ -71,10 +74,12 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const createAPIKeyResult = await securityPluginSetup.authc.createAPIKey(request, {
-          name: `source: alerting, generated uuid: "${uuid.v4()}"`,
-          role_descriptors: {},
-        });
+        // Create an API key using the new grant API - in this case the Kibana system user is creating the
+        // API key for the user, instead of having the user create it themselves, which requires api_key
+        // privileges
+        const createAPIKeyResult = await securityPluginSetup.authc.grantAPIKeyAsInternalUser(
+          request
+        );
         if (!createAPIKeyResult) {
           return { apiKeysEnabled: false };
         }
@@ -87,8 +92,7 @@ export class AlertsClientFactory {
         if (!securityPluginSetup) {
           return { apiKeysEnabled: false };
         }
-        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKey(
-          request,
+        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
           params
         );
         // Null when Elasticsearch security is disabled
@@ -100,6 +104,7 @@ export class AlertsClientFactory {
           result: invalidateAPIKeyResult,
         };
       },
+      preconfiguredActions: this.preconfiguredActions,
     });
   }
 }

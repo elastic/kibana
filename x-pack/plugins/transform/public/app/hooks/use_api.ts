@@ -8,7 +8,7 @@ import { TransformId, TransformEndpointRequest, TransformEndpointResult } from '
 import { API_BASE_PATH } from '../../../common/constants';
 
 import { useAppDependencies } from '../app_dependencies';
-import { PreviewRequestBody } from '../common';
+import { GetTransformsResponse, PreviewRequestBody } from '../common';
 
 import { EsIndex } from './use_api_types';
 
@@ -37,7 +37,7 @@ export const useApi = () => {
         body: JSON.stringify(transformsInfo),
       });
     },
-    getTransformsPreview(obj: PreviewRequestBody): Promise<any> {
+    getTransformsPreview(obj: PreviewRequestBody): Promise<GetTransformsResponse> {
       return http.post(`${API_BASE_PATH}transforms/_preview`, { body: JSON.stringify(obj) });
     },
     startTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {

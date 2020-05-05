@@ -62,7 +62,7 @@ export function PackageListGrid({
           query={searchTerm}
           box={{
             placeholder: i18n.translate('xpack.ingestManager.epmList.searchPackagesPlaceholder', {
-              defaultMessage: 'Search for a package',
+              defaultMessage: 'Search for integrations',
             }),
             incremental: true,
           }}

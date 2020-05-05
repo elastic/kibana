@@ -3,17 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
-import {
-  EuiFieldText,
-  EuiTextArea,
-  EuiButtonIcon,
-  EuiFormRow,
-  EuiLink,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-} from '@elastic/eui';
+import React, { Fragment, useEffect } from 'react';
+import { EuiFieldText, EuiTextArea, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,6 +14,7 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { SlackActionParams, SlackActionConnector } from './types';
+import { AddMessageVariables } from '../add_message_variables';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -98,7 +90,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-              defaultMessage="Learn how to create a Slack webhook URL"
+              defaultMessage="Create a Slack webhook URL"
             />
           </EuiLink>
         }
@@ -115,7 +107,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
           fullWidth
           isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
           name="webhookUrl"
-          placeholder="URL like https://hooks.slack.com/services"
+          placeholder="Example: https://hooks.slack.com/services"
           value={webhookUrl || ''}
           data-test-subj="slackWebhookUrlInput"
           onChange={e => {
@@ -141,26 +133,17 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
   defaultMessage,
 }) => {
   const { message } = actionParams;
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
   useEffect(() => {
     if (!message && defaultMessage && defaultMessage.length > 0) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const messageVariablesItems = messageVariables?.map((variable: string, i: number) => (
-    <EuiContextMenuItem
-      key={variable}
-      data-test-subj={`variableMenuButton-${i}`}
-      icon="empty"
-      onClick={() => {
-        editAction('message', (message ?? '').concat(` {{${variable}}}`), index);
-        setIsVariablesPopoverOpen(false);
-      }}
-    >
-      {`{{${variable}}}`}
-    </EuiContextMenuItem>
-  ));
+
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(paramsProperty, (message ?? '').concat(` {{${variable}}}`), index);
+  };
+
   return (
     <Fragment>
       <EuiFormRow
@@ -175,28 +158,13 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
           }
         )}
         labelAppend={
-          <EuiPopover
-            id="singlePanel"
-            button={
-              <EuiButtonIcon
-                data-test-subj="slackAddVariableButton"
-                onClick={() => setIsVariablesPopoverOpen(true)}
-                iconType="indexOpen"
-                aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.addVariablePopoverButton',
-                  {
-                    defaultMessage: 'Add variable',
-                  }
-                )}
-              />
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('message', variable)
             }
-            isOpen={isVariablesPopoverOpen}
-            closePopover={() => setIsVariablesPopoverOpen(false)}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={messageVariablesItems} />
-          </EuiPopover>
+            paramsProperty="message"
+          />
         }
       >
         <EuiTextArea

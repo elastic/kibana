@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 import { Logger, CallCluster } from '../../../types';
@@ -35,6 +36,8 @@ export async function timeSeriesQuery(
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
 
   // core query
+  // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const esQuery: any = {
     index,
     body: {
@@ -94,6 +97,7 @@ export async function timeSeriesQuery(
     dateAgg: {
       date_range: {
         field: timeField,
+        format: 'strict_date_time',
         ranges: dateRangeInfo.dateRanges,
       },
     },
@@ -121,7 +125,7 @@ export async function timeSeriesQuery(
     };
   }
 
-  let esResult: any;
+  let esResult: SearchResponse<unknown>;
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
 
@@ -134,8 +138,8 @@ export async function timeSeriesQuery(
     esResult = await callCluster('search', esQuery);
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
-    logger.warn(`${logPrefix} error: ${JSON.stringify(err.message)}`);
-    throw new Error('error running search');
+    logger.warn(`${logPrefix} error: ${err.message}`);
+    return { results: [] };
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
@@ -146,7 +150,7 @@ export async function timeSeriesQuery(
 function getResultFromEs(
   isCountAgg: boolean,
   isGroupAgg: boolean,
-  esResult: Record<string, any>
+  esResult: SearchResponse<unknown>
 ): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 

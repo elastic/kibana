@@ -5,11 +5,17 @@
  */
 
 import React, { FC, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CalendarsSelection } from './components/calendars';
 import { CustomUrlsSelection } from './components/custom_urls';
 
-const ButtonContent = <Fragment>Additional settings</Fragment>;
+const buttonContent = i18n.translate(
+  'xpack.ml.newJob.wizard.jobDetailsStep.additionalSectionButton',
+  {
+    defaultMessage: 'Additional settings',
+  }
+);
 
 interface Props {
   additionalExpanded: boolean;
@@ -22,7 +28,7 @@ export const AdditionalSection: FC<Props> = ({ additionalExpanded, setAdditional
       <EuiSpacer />
       <EuiAccordion
         id="advanced-section"
-        buttonContent={ButtonContent}
+        buttonContent={buttonContent}
         onToggle={setAdditionalExpanded}
         initialIsOpen={additionalExpanded}
         data-test-subj="mlJobWizardToggleAdditionalSettingsSection"

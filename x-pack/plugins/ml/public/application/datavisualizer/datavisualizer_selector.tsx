@@ -23,9 +23,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
-import { useTimefilter } from '../contexts/kibana';
+import { useTimefilter, useMlKibana } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
+import { getMaxBytesFormatted } from './file_based/components/utils';
 
 function startTrialDescription() {
   return (
@@ -50,8 +51,16 @@ function startTrialDescription() {
 
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const {
+    services: { licenseManagement },
+  } = useMlKibana();
 
-  const startTrialVisible = isFullLicense() === false;
+  const startTrialVisible =
+    licenseManagement !== undefined &&
+    licenseManagement.enabled === true &&
+    isFullLicense() === false;
+
+  const maxFileSize = getMaxBytesFormatted();
 
   return (
     <Fragment>
@@ -96,7 +105,8 @@ export const DatavisualizerSelector: FC = () => {
                 description={
                   <FormattedMessage
                     id="xpack.ml.datavisualizer.selector.importDataDescription"
-                    defaultMessage="Import data from a log file. You can upload files up to 100 MB."
+                    defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
+                    values={{ maxFileSize }}
                   />
                 }
                 betaBadgeLabel={i18n.translate(

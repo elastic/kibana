@@ -13,11 +13,12 @@ import {
   EdgeLineSegment,
   ProcessWithWidthMetadata,
   Matrix3,
+  AdjacentProcessMap,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess } from '../../models/process_event';
+import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
@@ -27,10 +28,14 @@ import {
 } from '../../models/indexed_process_tree';
 
 const unit = 100;
-const distanceBetweenNodesInUnits = 1;
+const distanceBetweenNodesInUnits = 2;
 
 export function isLoading(state: DataState) {
   return state.isLoading;
+}
+
+export function hasError(state: DataState) {
+  return state.hasError;
 }
 
 /**
@@ -292,7 +297,7 @@ function* levelOrderWithWidths(
         metadata.firstChildWidth = width;
       } else {
         const firstChildWidth = widths.get(siblings[0]);
-        const lastChildWidth = widths.get(siblings[0]);
+        const lastChildWidth = widths.get(siblings[siblings.length - 1]);
         if (firstChildWidth === undefined || lastChildWidth === undefined) {
           /**
            * All widths have been precalcluated, so this will not happen.
@@ -392,17 +397,42 @@ function processPositions(
   return positions;
 }
 
-export const processNodePositionsAndEdgeLineSegments = createSelector(
+export const indexedProcessTree = createSelector(graphableProcesses, function indexedTree(
+  /* eslint-disable no-shadow */
+  graphableProcesses
+  /* eslint-enable no-shadow */
+) {
+  return indexedProcessTreeFactory(graphableProcesses);
+});
+
+export const processAdjacencies = createSelector(
+  indexedProcessTree,
   graphableProcesses,
-  function processNodePositionsAndEdgeLineSegments(
+  function selectProcessAdjacencies(
     /* eslint-disable no-shadow */
+    indexedProcessTree,
     graphableProcesses
     /* eslint-enable no-shadow */
   ) {
-    /**
-     * Index the tree, creating maps from id -> node and id -> children
-     */
-    const indexedProcessTree = indexedProcessTreeFactory(graphableProcesses);
+    const processToAdjacencyMap = new Map<ResolverEvent, AdjacentProcessMap>();
+    const { idToAdjacent } = indexedProcessTree;
+
+    for (const graphableProcess of graphableProcesses) {
+      const processPid = uniquePidForProcess(graphableProcess);
+      const adjacencyMap = idToAdjacent.get(processPid)!;
+      processToAdjacencyMap.set(graphableProcess, adjacencyMap);
+    }
+    return { processToAdjacencyMap };
+  }
+);
+
+export const processNodePositionsAndEdgeLineSegments = createSelector(
+  indexedProcessTree,
+  function processNodePositionsAndEdgeLineSegments(
+    /* eslint-disable no-shadow */
+    indexedProcessTree
+    /* eslint-enable no-shadow */
+  ) {
     /**
      * Walk the tree in reverse level order, calculating the 'width' of subtrees.
      */

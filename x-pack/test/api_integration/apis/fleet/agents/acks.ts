@@ -18,8 +18,7 @@ export default function(providerContext: FtrProviderContext) {
   const supertest = getSupertestWithoutAuth(providerContext);
   let apiKey: { id: string; api_key: string };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/60471
-  describe.skip('fleet_agents_acks', () => {
+  describe('fleet_agents_acks', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('fleet/agents');
 
@@ -33,12 +32,12 @@ export default function(providerContext: FtrProviderContext) {
         body: { _source: agentDoc },
       } = await esClient.get({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
       });
-      agentDoc.agents.access_api_key_id = apiKey.id;
+      agentDoc['fleet-agents'].access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
         refresh: 'true',
         body: {
           doc: agentDoc,
@@ -107,7 +106,7 @@ export default function(providerContext: FtrProviderContext) {
           item.action_id === '48cebde1-c906-4893-b89f-595d943b72a2'
       );
       expect(expectedEvents.length).to.eql(2);
-      const expectedEvent = expectedEvents.find(
+      const { id, ...expectedEvent } = expectedEvents.find(
         (item: Record<string, string>) => item.action_id === '48cebde1-c906-4893-b89f-595d943b72a1'
       );
       expect(expectedEvent).to.eql({
@@ -179,7 +178,7 @@ export default function(providerContext: FtrProviderContext) {
           ],
         })
         .expect(400);
-      expect(apiResponse.message).to.eql('all actions should belong to current agent');
+      expect(apiResponse.message).to.eql('One or more actions cannot be found');
     });
 
     it('should return a 400 when request event list contains action types that are not allowed for acknowledgement', async () => {

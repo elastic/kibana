@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCodeEditor,
+  EuiCode,
+  EuiInputPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -31,20 +33,21 @@ import {
   QueryStringInput,
 } from '../../../../../../../../../src/plugins/data/public';
 
-import { PivotPreview } from '../../../../components/pivot_preview';
+import { useXJsonMode } from '../../../../../../../../../src/plugins/es_ui_shared/static/ace_x_json/hooks';
+
+import { DataGrid } from '../../../../../shared_imports';
+
+import {
+  getIndexDevConsoleStatement,
+  getPivotPreviewDevConsoleStatement,
+} from '../../../../common/data_grid';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { SavedSearchQuery, SearchItems } from '../../../../hooks/use_search_items';
-import { useXJsonMode, xJsonMode } from '../../../../hooks/use_x_json_mode';
+import { useIndexData } from '../../../../hooks/use_index_data';
+import { usePivotData } from '../../../../hooks/use_pivot_data';
 import { useToastNotifications } from '../../../../app_dependencies';
-import { TransformPivotConfig } from '../../../../common';
 import { dictionaryToArray, Dictionary } from '../../../../../../common/types/common';
-import { DropDown } from '../aggregation_dropdown';
-import { AggListForm } from '../aggregation_list';
-import { GroupByListForm } from '../group_by_list';
-import { SourceIndexPreview } from '../source_index_preview';
-import { SwitchModal } from './switch_modal';
-
 import {
   getPivotQuery,
   getPreviewRequestBody,
@@ -58,11 +61,17 @@ import {
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
+  TransformPivotConfig,
   PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
+import { DropDown } from '../aggregation_dropdown';
+import { AggListForm } from '../aggregation_list';
+import { GroupByListForm } from '../group_by_list';
+
 import { getPivotDropdownOptions } from './common';
+import { SwitchModal } from './switch_modal';
 
 export interface StepDefineExposedState {
   aggList: PivotAggsConfigDict;
@@ -74,6 +83,11 @@ export interface StepDefineExposedState {
   searchQuery: string | SavedSearchQuery;
   sourceConfigUpdated: boolean;
   valid: boolean;
+}
+
+interface ErrorMessage {
+  query: string;
+  message: string;
 }
 
 const defaultSearch = '*';
@@ -256,6 +270,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     query: defaults.searchString || '',
     language: defaults.searchLanguage,
   });
+  const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   // The state of the input query bar updated on every submit and to be exposed.
   const [searchLanguage, setSearchLanguage] = useState<StepDefineExposedState['searchLanguage']>(
@@ -272,18 +287,22 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
   const searchSubmitHandler = (query: Query) => {
     setSearchLanguage(query.language as QUERY_LANGUAGE);
     setSearchString(query.query !== '' ? (query.query as string) : undefined);
-    switch (query.language) {
-      case QUERY_LANGUAGE_KUERY:
-        setSearchQuery(
-          esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
-            indexPattern
-          )
-        );
-        return;
-      case QUERY_LANGUAGE_LUCENE:
-        setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
-        return;
+    try {
+      switch (query.language) {
+        case QUERY_LANGUAGE_KUERY:
+          setSearchQuery(
+            esKuery.toElasticsearchQuery(
+              esKuery.fromKueryExpression(query.query as string),
+              indexPattern
+            )
+          );
+          return;
+        case QUERY_LANGUAGE_LUCENE:
+          setSearchQuery(esQuery.luceneStringToDsl(query.query as string));
+          return;
+      }
+    } catch (e) {
+      setErrorMessage({ query: query.query as string, message: e.message });
     }
   };
 
@@ -419,6 +438,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     convertToJson,
     setXJson: setAdvancedEditorConfig,
     xJson: advancedEditorConfig,
+    xJsonMode,
   } = useXJsonMode(stringifiedPivotConfig);
 
   useEffect(() => {
@@ -578,6 +598,9 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
+  const indexPreviewProps = useIndexData(indexPattern, pivotQuery);
+  const pivotPreviewProps = usePivotData(indexPattern.title, pivotQuery, aggList, groupByList);
+
   // TODO This should use the actual value of `indices.query.bool.max_clause_count`
   const maxIndexFields = 1024;
   const numIndexFields = indexPattern.fields.length;
@@ -620,33 +643,54 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                           defaultMessage: 'Use a query to filter the source data (optional).',
                         })}
                       >
-                        <QueryStringInput
-                          bubbleSubmitEvent={true}
-                          query={searchInput}
-                          indexPatterns={[indexPattern]}
-                          onChange={searchChangeHandler}
-                          onSubmit={searchSubmitHandler}
-                          placeholder={
-                            searchInput.language === QUERY_LANGUAGE_KUERY
-                              ? i18n.translate(
-                                  'xpack.transform.stepDefineForm.queryPlaceholderKql',
-                                  {
-                                    defaultMessage: 'e.g. {example}',
-                                    values: { example: 'method : "GET" or status : "404"' },
-                                  }
-                                )
-                              : i18n.translate(
-                                  'xpack.transform.stepDefineForm.queryPlaceholderLucene',
-                                  {
-                                    defaultMessage: 'e.g. {example}',
-                                    values: { example: 'method:GET OR status:404' },
-                                  }
-                                )
+                        <EuiInputPopover
+                          style={{ maxWidth: '100%' }}
+                          closePopover={() => setErrorMessage(undefined)}
+                          input={
+                            <QueryStringInput
+                              bubbleSubmitEvent={true}
+                              query={searchInput}
+                              indexPatterns={[indexPattern]}
+                              onChange={searchChangeHandler}
+                              onSubmit={searchSubmitHandler}
+                              placeholder={
+                                searchInput.language === QUERY_LANGUAGE_KUERY
+                                  ? i18n.translate(
+                                      'xpack.transform.stepDefineForm.queryPlaceholderKql',
+                                      {
+                                        defaultMessage: 'e.g. {example}',
+                                        values: { example: 'method : "GET" or status : "404"' },
+                                      }
+                                    )
+                                  : i18n.translate(
+                                      'xpack.transform.stepDefineForm.queryPlaceholderLucene',
+                                      {
+                                        defaultMessage: 'e.g. {example}',
+                                        values: { example: 'method:GET OR status:404' },
+                                      }
+                                    )
+                              }
+                              disableAutoFocus={true}
+                              dataTestSubj="transformQueryInput"
+                              languageSwitcherPopoverAnchorPosition="rightDown"
+                            />
                           }
-                          disableAutoFocus={true}
-                          dataTestSubj="transformQueryInput"
-                          languageSwitcherPopoverAnchorPosition="rightDown"
-                        />
+                          isOpen={
+                            errorMessage?.query === searchInput.query &&
+                            errorMessage?.message !== ''
+                          }
+                        >
+                          <EuiCode>
+                            {i18n.translate(
+                              'xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar',
+                              {
+                                defaultMessage: 'Invalid query',
+                              }
+                            )}
+                            {': '}
+                            {errorMessage?.message.split('\n')[0]}
+                          </EuiCode>
+                        </EuiInputPopover>
                       </EuiFormRow>
                     )}
                   </Fragment>
@@ -671,6 +715,7 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
                       width="100%"
                       value={advancedEditorSourceConfig}
                       onChange={(d: string) => {
+                        setSearchString(undefined);
                         setAdvancedEditorSourceConfig(d);
 
                         // Disable the "Apply"-Button if the config hasn't changed.
@@ -936,13 +981,37 @@ export const StepDefineForm: FC<Props> = React.memo(({ overrides = {}, onChange,
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: 'calc(100% - 468px)' }}>
-        <SourceIndexPreview indexPattern={searchItems.indexPattern} query={pivotQuery} />
+        <DataGrid
+          {...indexPreviewProps}
+          copyToClipboard={getIndexDevConsoleStatement(pivotQuery, indexPattern.title)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.indexPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformIndexPreview"
+          title={i18n.translate('xpack.transform.indexPreview.indexPatternTitle', {
+            defaultMessage: 'Index {indexPatternTitle}',
+            values: { indexPatternTitle: indexPattern.title },
+          })}
+          toastNotifications={toastNotifications}
+        />
         <EuiHorizontalRule />
-        <PivotPreview
-          aggs={aggList}
-          groupBy={groupByList}
-          indexPatternTitle={searchItems.indexPattern.title}
-          query={pivotQuery}
+        <DataGrid
+          {...pivotPreviewProps}
+          copyToClipboard={getPivotPreviewDevConsoleStatement(previewRequest)}
+          copyToClipboardDescription={i18n.translate(
+            'xpack.transform.pivotPreview.copyClipboardTooltip',
+            {
+              defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+            }
+          )}
+          dataTestSubj="transformPivotPreview"
+          title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewTitle', {
+            defaultMessage: 'Transform pivot preview',
+          })}
+          toastNotifications={toastNotifications}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

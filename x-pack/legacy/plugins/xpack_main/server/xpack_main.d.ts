@@ -5,12 +5,12 @@
  */
 
 import KbnServer from 'src/legacy/server/kbn_server';
-import { Feature, FeatureWithAllOrReadPrivileges } from '../../../../plugins/features/server';
+import { Feature, FeatureConfig } from '../../../../plugins/features/server';
 import { XPackInfo, XPackInfoOptions } from './lib/xpack_info';
 export { XPackFeature } from './lib/xpack_info';
 
 export interface XPackMainPlugin {
   info: XPackInfo;
   getFeatures(): Feature[];
-  registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
+  registerFeature(feature: FeatureConfig): void;
 }

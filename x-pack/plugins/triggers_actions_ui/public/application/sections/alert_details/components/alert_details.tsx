@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { indexBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
   EuiPageContent,
@@ -17,11 +18,11 @@ import {
   EuiBadge,
   EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
   EuiBetaBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,10 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
+import { AlertEdit } from '../../alert_form';
+import { AlertsContextProvider } from '../../../context/alerts_context';
+import { routeToAlertDetails } from '../../../constants';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -52,7 +57,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   muteAlert,
   requestRefresh,
 }) => {
-  const { capabilities } = useAppDependencies();
+  const history = useHistory();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    uiSettings,
+    docLinks,
+    charts,
+    dataPlugin,
+  } = useAppDependencies();
 
   const canSave = hasSaveAlertsCapability(capabilities);
 
@@ -61,6 +77,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
 
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+
+  const setAlert = async () => {
+    history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
 
   return (
     <EuiPage>
@@ -78,7 +99,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                       {
                         defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
+                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        values: {
+                          pluginName: PLUGIN.getI18nName(i18n),
+                        },
                       }
                     )}
                   />
@@ -87,24 +111,44 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {canSave ? (
+                  <EuiFlexItem grow={false}>
+                    <Fragment>
+                      {' '}
+                      <EuiButtonEmpty
+                        data-test-subj="openEditAlertFlyoutButton"
+                        iconType="pencil"
+                        onClick={() => setEditFlyoutVisibility(true)}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+                          defaultMessage="Edit"
+                        />
+                      </EuiButtonEmpty>
+                      <AlertsContextProvider
+                        value={{
+                          http,
+                          actionTypeRegistry,
+                          alertTypeRegistry,
+                          toastNotifications,
+                          uiSettings,
+                          docLinks,
+                          charts,
+                          dataFieldsFormats: dataPlugin.fieldFormats,
+                          reloadAlerts: setAlert,
+                        }}
+                      >
+                        <AlertEdit
+                          initialAlert={alert}
+                          editFlyoutVisible={editFlyoutVisible}
+                          setEditFlyoutVisibility={setEditFlyoutVisibility}
+                        />
+                      </AlertsContextProvider>
+                    </Fragment>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
                   <ViewInApp alert={alert} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
@@ -194,7 +238,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                     <p>
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                        defaultMessage="This alert is disabled and cannot be displayed. Toggle Enable ↑ to activate it."
                       />
                     </p>
                   </EuiCallOut>

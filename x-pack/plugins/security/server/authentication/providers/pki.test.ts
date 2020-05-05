@@ -19,6 +19,7 @@ import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } 
 import {
   ElasticsearchErrorHelpers,
   IClusterClient,
+  KibanaRequest,
   ScopeableRequest,
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -78,13 +79,174 @@ describe('PKIAuthenticationProvider', () => {
   let provider: PKIAuthenticationProvider;
   let mockOptions: MockAuthenticationProviderOptions;
   beforeEach(() => {
-    mockOptions = mockAuthenticationProviderOptions();
+    mockOptions = mockAuthenticationProviderOptions({ name: 'pki' });
     provider = new PKIAuthenticationProvider(mockOptions);
   });
 
   afterEach(() => jest.clearAllMocks());
 
+  function defineCommonLoginAndAuthenticateTests(
+    operation: (request: KibanaRequest) => Promise<AuthenticationResult>
+  ) {
+    it('does not handle requests without certificate.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({ authorized: true }),
+      });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('does not handle unauthorized requests.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
+      });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.notHandled());
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('gets an access token in exchange to peer certificate chain and stores it in the state.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: {},
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
+        }),
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
+
+      await expect(operation(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'pki' },
+          {
+            authHeaders: { authorization: 'Bearer access-token' },
+            state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+          }
+        )
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        body: {
+          x509_certificate_chain: [
+            'fingerprint:2A:7A:C2:DD:base64',
+            'fingerprint:3B:8B:D3:EE:base64',
+          ],
+        },
+      });
+
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization: 'Bearer access-token' },
+      });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
+    it('gets an access token in exchange to a self-signed certificate and stores it in the state.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: {},
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
+        }),
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
+
+      await expect(operation(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'pki' },
+          {
+            authHeaders: { authorization: 'Bearer access-token' },
+            state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
+          }
+        )
+      );
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
+      });
+
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization: 'Bearer access-token' },
+      });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
+    it('fails if could not retrieve an access token in exchange to peer certificate chain.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
+        }),
+      });
+
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
+      });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
+    it('fails if could not retrieve user using the new access token.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {},
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
+        }),
+      });
+
+      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
+
+      await expect(operation(request)).resolves.toEqual(AuthenticationResult.failed(failureReason));
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
+        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
+      });
+
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization: 'Bearer access-token' },
+      });
+
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+  }
+
+  describe('`login` method', () => {
+    defineCommonLoginAndAuthenticateTests(request => provider.login(request));
+  });
+
   describe('`authenticate` method', () => {
+    defineCommonLoginAndAuthenticateTests(request => provider.authenticate(request, null));
+
     it('does not handle authentication via `authorization` header.', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Bearer some-token' },
@@ -117,25 +279,15 @@ describe('PKIAuthenticationProvider', () => {
       expect(request.headers.authorization).toBe('Bearer some-token');
     });
 
-    it('does not handle requests without certificate.', async () => {
+    it('does not exchange peer certificate to access token if request does not require authentication.', async () => {
       const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ authorized: true }),
+        routeAuthRequired: false,
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
+        }),
       });
-
-      await expect(provider.authenticate(request, null)).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
-
-      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-    });
-
-    it('does not handle unauthorized requests.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({ peerCertificate: getMockPeerCertificate('2A:7A:C2:DD') }),
-      });
-
-      await expect(provider.authenticate(request, null)).resolves.toEqual(
+      await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.notHandled()
       );
 
@@ -185,85 +337,6 @@ describe('PKIAuthenticationProvider', () => {
       expect(mockOptions.tokens.invalidate).toHaveBeenCalledWith({
         accessToken: state.accessToken,
       });
-    });
-
-    it('gets an access token in exchange to peer certificate chain and stores it in the state.', async () => {
-      const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
-        }),
-      });
-
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
-
-      await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
-          {
-            authHeaders: { authorization: 'Bearer access-token' },
-            state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
-          }
-        )
-      );
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
-        body: {
-          x509_certificate_chain: [
-            'fingerprint:2A:7A:C2:DD:base64',
-            'fingerprint:3B:8B:D3:EE:base64',
-          ],
-        },
-      });
-
-      expectAuthenticateCall(mockOptions.client, {
-        headers: { authorization: 'Bearer access-token' },
-      });
-
-      expect(request.headers).not.toHaveProperty('authorization');
-    });
-
-    it('gets an access token in exchange to a self-signed certificate and stores it in the state.', async () => {
-      const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
-
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
-
-      await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
-          {
-            authHeaders: { authorization: 'Bearer access-token' },
-            state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
-          }
-        )
-      );
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
-        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
-      });
-
-      expectAuthenticateCall(mockOptions.client, {
-        headers: { authorization: 'Bearer access-token' },
-      });
-
-      expect(request.headers).not.toHaveProperty('authorization');
     });
 
     it('invalidates existing token and gets a new one if fingerprints do not match.', async () => {
@@ -351,6 +424,30 @@ describe('PKIAuthenticationProvider', () => {
       expect(request.headers).not.toHaveProperty('authorization');
     });
 
+    it('does not exchange peer certificate to a new access token even if existing token is expired and request does not require authentication.', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        routeAuthRequired: false,
+        socket: getMockSocket({
+          authorized: true,
+          peerCertificate: getMockPeerCertificate(['2A:7A:C2:DD', '3B:8B:D3:EE']),
+        }),
+      });
+      const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValueOnce(
+        ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+
+      await expect(provider.authenticate(request, state)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+      expect(request.headers).not.toHaveProperty('authorization');
+    });
+
     it('fails with 401 if existing token is expired, but certificate is not present.', async () => {
       const request = httpServerMock.createKibanaRequest({ socket: getMockSocket() });
       const state = { accessToken: 'existing-token', peerCertificateFingerprint256: '2A:7A:C2:DD' };
@@ -366,60 +463,6 @@ describe('PKIAuthenticationProvider', () => {
       );
 
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
-
-      expect(request.headers).not.toHaveProperty('authorization');
-    });
-
-    it('fails if could not retrieve an access token in exchange to peer certificate chain.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
-
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      mockOptions.client.callAsInternalUser.mockRejectedValue(failureReason);
-
-      await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
-        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
-      });
-
-      expect(request.headers).not.toHaveProperty('authorization');
-    });
-
-    it('fails if could not retrieve user using the new access token.', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: {},
-        socket: getMockSocket({
-          authorized: true,
-          peerCertificate: getMockPeerCertificate('2A:7A:C2:DD'),
-        }),
-      });
-
-      const failureReason = ElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error());
-      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
-      mockOptions.client.callAsInternalUser.mockResolvedValue({ access_token: 'access-token' });
-
-      await expect(provider.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
-
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledTimes(1);
-      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.delegatePKI', {
-        body: { x509_certificate_chain: ['fingerprint:2A:7A:C2:DD:base64'] },
-      });
-
-      expectAuthenticateCall(mockOptions.client, {
-        headers: { authorization: 'Bearer access-token' },
-      });
 
       expect(request.headers).not.toHaveProperty('authorization');
     });

@@ -5,13 +5,14 @@
  */
 
 import { encode } from 'rison-node';
-import { createMemoryHistory, LocationDescriptorObject } from 'history';
+import { createMemoryHistory } from 'history';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { HistoryContext } from '../utils/history_context';
 import { coreMock } from 'src/core/public/mocks';
 import { useLinkProps, LinkDescriptor } from './use_link_props';
+import { ScopedHistory } from '../../../../../src/core/public';
 
 const PREFIX = '/test-basepath/s/test-space/app/';
 
@@ -23,18 +24,13 @@ coreStartMock.application.getUrlForApp.mockImplementation((app, options) => {
 
 const INTERNAL_APP = 'metrics';
 
-// Note: Memory history doesn't support basename,
-// we'll work around this by re-assigning 'createHref' so that
-// it includes a basename, this then acts as our browserHistory instance would.
 const history = createMemoryHistory();
-const originalCreateHref = history.createHref;
-history.createHref = (location: LocationDescriptorObject): string => {
-  return `${PREFIX}${INTERNAL_APP}${originalCreateHref.call(history, location)}`;
-};
+history.push(`${PREFIX}${INTERNAL_APP}`);
+const scopedHistory = new ScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
 
 const ProviderWrapper: React.FC = ({ children }) => {
   return (
-    <HistoryContext.Provider value={history}>
+    <HistoryContext.Provider value={scopedHistory}>
       <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>;
     </HistoryContext.Provider>
   );
@@ -111,7 +107,7 @@ describe('useLinkProps hook', () => {
         pathname: '/',
       });
       expect(result.current.href).toBe('/test-basepath/s/test-space/app/ml/');
-      expect(result.current.onClick).not.toBeDefined();
+      expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with pathname options', () => {
@@ -127,7 +123,7 @@ describe('useLinkProps hook', () => {
       expect(result.current.href).toBe(
         '/test-basepath/s/test-space/app/ml/explorer?type=host&id=some-id&count=12345'
       );
-      expect(result.current.onClick).not.toBeDefined();
+      expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with hash options', () => {
@@ -143,7 +139,7 @@ describe('useLinkProps hook', () => {
       expect(result.current.href).toBe(
         '/test-basepath/s/test-space/app/ml#/explorer?type=host&id=some-id&count=12345'
       );
-      expect(result.current.onClick).not.toBeDefined();
+      expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with more complex encoding', () => {
@@ -161,7 +157,7 @@ describe('useLinkProps hook', () => {
       expect(result.current.href).toBe(
         '/test-basepath/s/test-space/app/ml#/explorer?type=host%20%2B%20host&name=this%20name%20has%20spaces%20and%20**%20and%20%25&id=some-id&count=12345&animals=dog,cat,bear'
       );
-      expect(result.current.onClick).not.toBeDefined();
+      expect(result.current.onClick).toBeDefined();
     });
 
     it('Provides the correct props with a consumer using Rison encoding for search', () => {
@@ -180,7 +176,7 @@ describe('useLinkProps hook', () => {
       expect(result.current.href).toBe(
         '/test-basepath/s/test-space/app/rison-app#rison-route?type=host%20%2B%20host&state=(refreshInterval:(pause:!t,value:0),time:(from:12345,to:54321))'
       );
-      expect(result.current.onClick).not.toBeDefined();
+      expect(result.current.onClick).toBeDefined();
     });
   });
 });

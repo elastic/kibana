@@ -6,7 +6,7 @@
 
 import { chunk } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
   Token,
   CategorizationAnalyzer,

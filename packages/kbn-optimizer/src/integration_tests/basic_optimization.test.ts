@@ -19,6 +19,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 import { inspect } from 'util';
 
 import cpy from 'cpy';
@@ -124,17 +125,12 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/foo.plugin.js'), 'utf8')
-  ).toMatchSnapshot('foo bundle');
-
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/foo/target/public/1.plugin.js'), 'utf8')
-  ).toMatchSnapshot('1 async bundle');
-
-  expect(
-    Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, 'plugins/bar/target/public/bar.plugin.js'), 'utf8')
-  ).toMatchSnapshot('bar bundle');
+  expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/1.plugin.js',
+    '1 async bundle'
+  );
+  expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 
   const foo = config.bundles.find(b => b.id === 'foo')!;
   expect(foo).toBeTruthy();
@@ -203,3 +199,24 @@ it('uses cache on second run and exist cleanly', async () => {
     ]
   `);
 });
+
+/**
+ * Verifies that the file matches the expected output and has matching compressed variants.
+ */
+const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabel: string) => {
+  const raw = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, filePath), 'utf8');
+  expect(raw).toMatchSnapshot(snapshotLabel);
+
+  // Verify the brotli variant matches
+  expect(
+    // @ts-ignore @types/node is missing the brotli functions
+    Zlib.brotliDecompressSync(
+      Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
+    ).toString()
+  ).toEqual(raw);
+
+  // Verify the gzip variant matches
+  expect(
+    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
+  ).toEqual(raw);
+};

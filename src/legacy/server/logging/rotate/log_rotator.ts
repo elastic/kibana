@@ -50,6 +50,7 @@ export class LogRotator {
   public usePolling: boolean;
   public pollingInterval: number;
   private stalkerUsePollingPolicyTestTimeout: NodeJS.Timeout | null;
+  public shouldUsePolling: boolean;
 
   constructor(config: KibanaConfig, server: Server) {
     this.config = config;
@@ -64,6 +65,7 @@ export class LogRotator {
     this.stalker = null;
     this.usePolling = config.get('logging.rotate.usePolling');
     this.pollingInterval = config.get('logging.rotate.pollingInterval');
+    this.shouldUsePolling = false;
     this.stalkerUsePollingPolicyTestTimeout = null;
   }
 
@@ -150,12 +152,20 @@ export class LogRotator {
   }
 
   async _startLogFileSizeMonitor() {
-    this.usePolling = await this._shouldUsePolling();
+    this.usePolling = this.config.get('logging.rotate.usePolling');
+    this.shouldUsePolling = await this._shouldUsePolling();
 
-    if (this.usePolling && this.usePolling !== this.config.get('logging.rotate.usePolling')) {
+    if (this.usePolling && !this.shouldUsePolling) {
       this.log(
         ['warning', 'logging:rotate'],
-        'The current environment does not support `fs.watch`. Falling back to polling using `fs.watchFile`'
+        'Looks like your current environment support a faster algorithm then polling. You can try to disable `usePolling`'
+      );
+    }
+
+    if (!this.usePolling && this.shouldUsePolling) {
+      this.log(
+        ['error', 'logging:rotate'],
+        'Looks like within your current environment you need to use polling in order to enable log rotator. Please enable `usePolling`'
       );
     }
 

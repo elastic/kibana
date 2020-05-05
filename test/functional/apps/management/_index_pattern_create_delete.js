@@ -42,12 +42,9 @@ export default function({ getService, getPageObjects }) {
 
     describe('special character handling', () => {
       it('should handle special charaters in template input', async () => {
-        await PageObjects.settings.clickOptionalAddNewButton();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.settings.setIndexPatternField({
-          indexPatternName: '❤️',
-          expectWildcard: false,
-        });
+        await PageObjects.settings.setIndexPatternField('❤️');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
@@ -71,8 +68,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('should have index pattern in page header', async function() {
-        const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-        const patternName = await indexPageHeading.getVisibleText();
+        const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be('logstash-*');
       });
 
@@ -94,7 +90,6 @@ export default function({ getService, getPageObjects }) {
             'Searchable',
             'Aggregatable',
             'Excluded',
-            '',
           ];
 
           expect(headers.length).to.be(expectedHeaders.length);

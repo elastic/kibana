@@ -229,13 +229,12 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async getElasticsearchUsers() {
       const users = await testSubjects.findAll('userRow');
       return mapAsync(users, async user => {
-        const fullnameElement = await user.findByCssSelector('[data-test-subj="userRowFullName"]');
-        const usernameElement = await user.findByCssSelector('[data-test-subj="userRowUserName"]');
-        const emailElement = await user.findByCssSelector('[data-test-subj="userRowEmail"]');
-        const rolesElement = await user.findByCssSelector('[data-test-subj="userRowRoles"]');
-        // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
-        const isUserReserved =
-          (await user.findAllByCssSelector('span[data-test-subj="userReserved"]', 1)).length > 0;
+        const fullnameElement = await user.findByTestSubject('userRowFullName');
+        const usernameElement = await user.findByTestSubject('userRowUserName');
+        const emailElement = await user.findByTestSubject('userRowEmail');
+        const rolesElement = await user.findByTestSubject('userRowRoles');
+        // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+        const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
 
         return {
           username: await usernameElement.getVisibleText(),
@@ -251,15 +250,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const [rolename, reserved, deprecated] = await Promise.all([
-          role.findByCssSelector('[data-test-subj="roleRowName"]').then(el => el.getVisibleText()),
-          // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
-          role
-            .findAllByCssSelector('span[data-test-subj="roleReserved"]', 1)
-            .then(el => el.length > 0),
-          // findAllByCssSelector is substantially faster than `find.descendantExistsByCssSelector for negative cases
-          role
-            .findAllByCssSelector('span[data-test-subj="roleDeprecated"]', 1)
-            .then(el => el.length > 0),
+          role.findByTestSubject('roleRowName').then(el => el.getVisibleText()),
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          role.findAllByTestSubject('roleReserved', 1).then(el => el.length > 0),
+          // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
+          role.findAllByTestSubject('roleDeprecated', 1).then(el => el.length > 0),
         ]);
 
         return {
@@ -390,7 +385,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               // have to remove the '*'
               return find
                 .clickByCssSelector(
-                  'div[data-test-subj="fieldInput0"] .euiBadge[title="*"] svg.euiIcon'
+                  'div[data-test-subj="fieldInput0"] [title="Remove * from selection in this group"] svg.euiIcon'
                 )
                 .then(function() {
                   return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);

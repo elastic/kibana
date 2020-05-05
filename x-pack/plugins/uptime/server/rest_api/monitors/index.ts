@@ -5,5 +5,6 @@
  */
 
 export { createGetMonitorDetailsRoute } from './monitors_details';
+export { createMonitorListRoute } from './monitor_list';
 export { createGetMonitorLocationsRoute } from './monitor_locations';
-export { createGetMonitorRoute, createGetStatusBarRoute } from './status';
+export { createGetStatusBarRoute } from './monitor_status';

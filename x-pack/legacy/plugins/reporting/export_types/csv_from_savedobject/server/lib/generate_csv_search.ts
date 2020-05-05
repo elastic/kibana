@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ElasticsearchServiceSetup,
-  KibanaRequest,
-  IUiSettingsClient,
-} from '../../../../../../../../src/core/server';
+import { IUiSettingsClient, KibanaRequest } from '../../../../../../../../src/core/server';
 import {
   esQuery,
   EsQueryConfig,
@@ -21,7 +17,7 @@ import {
 } from '../../../../../../../../src/plugins/data/server';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ReportingCore } from '../../../../server';
-import { Logger, RequestFacade, ServerFacade } from '../../../../types';
+import { Logger, RequestFacade } from '../../../../types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
@@ -62,8 +58,6 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
   logger: Logger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
@@ -159,11 +153,12 @@ export async function generateCsvSearch(
     },
   };
 
+  const config = reporting.getConfig();
+  const elasticsearch = await reporting.getElasticsearchService();
   const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
     KibanaRequest.from(req.getRawRequest())
   );
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
-  const config = server.config();
   const uiSettings = await getUiSettings(uiConfig);
 
   const generateCsvParams: GenerateCsvParams = {
@@ -176,8 +171,9 @@ export async function generateCsvSearch(
     cancellationToken: new CancellationToken(),
     settings: {
       ...uiSettings,
-      maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
-      scroll: config.get('xpack.reporting.csv.scroll'),
+      maxSizeBytes: config.get('csv', 'maxSizeBytes'),
+      scroll: config.get('csv', 'scroll'),
+      escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       timezone,
     },
   };

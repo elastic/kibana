@@ -37,7 +37,7 @@ export const validateJobSchema = schema.object({
   job: schema.object(anomalyDetectionJobSchema),
 });
 
-export const validateCardinalitySchema = {
+export const validateCardinalitySchema = schema.object({
   ...anomalyDetectionJobSchema,
   datafeed_config: datafeedConfigSchema,
-};
+});

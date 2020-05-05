@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RequestHandler } from 'src/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
-import { serializeCluster, deserializeCluster, Cluster, ClusterEs } from '../../../common/lib';
+import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
@@ -24,6 +24,7 @@ const bodyValidation = schema.object({
   proxyAddress: schema.nullable(schema.string()),
   proxySocketConnections: schema.nullable(schema.number()),
   serverName: schema.nullable(schema.string()),
+  hasDeprecatedProxySetting: schema.maybe(schema.boolean()),
 });
 
 const paramsValidation = schema.object({
@@ -68,7 +69,10 @@ export const register = (deps: RouteDependencies): void => {
       });
 
       const acknowledged = get(updateClusterResponse, 'acknowledged');
-      const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`) as ClusterEs;
+      const cluster = get(
+        updateClusterResponse,
+        `persistent.cluster.remote.${name}`
+      ) as ClusterInfoEs;
 
       if (acknowledged && cluster) {
         const body = {

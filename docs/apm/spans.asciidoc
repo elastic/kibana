@@ -1,7 +1,8 @@
+[role="xpack"]
 [[spans]]
 === Span timeline
 
-TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is defined as the duration of a single event.
+TIP: A {apm-overview-ref-v}/transaction-spans.html[span] is the duration of a single event.
 Spans are automatically captured by APM agents, and you can also define custom spans.
 Each span has a type and is defined by a different color in the timeline/waterfall visualization.
 
@@ -28,10 +29,10 @@ Services in a distributed trace are separated by color and listed in the order t
 [role="screenshot"]
 image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM app in Kibana]
 
-Don't forget, a distributed trace includes more than one transaction.
+Don't forget; a distributed trace includes more than one transaction.
 When viewing these distributed traces in the timeline waterfall, you'll see this image:apm/images/transaction-icon.png[APM icon] icon,
 which indicates the next transaction in the trace.
 These transactions can be expanded and viewed in detail by clicking on them.
 
 After exploring these traces,
-you can return to the full trace by clicking *View full trace* in the upper right hand corner of the page.
+you can return to the full trace by clicking *View full trace*.

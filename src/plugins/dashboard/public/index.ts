@@ -17,19 +17,23 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+import { DashboardPlugin } from './plugin';
 
-export * from './types';
-export * from './actions';
-export * from './embeddable';
+export {
+  DashboardContainer,
+  DashboardContainerInput,
+  DashboardContainerFactory,
+  DASHBOARD_CONTAINER_TYPE,
+  // Types below here can likely be made private when dashboard app moved into this NP plugin.
+  DEFAULT_PANEL_WIDTH,
+  DEFAULT_PANEL_HEIGHT,
+} from './application';
+export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
+
+export { DashboardStart } from './plugin';
+export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return new DashboardPlugin(initializerContext);
 }
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';

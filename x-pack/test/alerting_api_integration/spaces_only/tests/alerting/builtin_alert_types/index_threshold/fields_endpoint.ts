@@ -139,6 +139,12 @@ export default function fieldsEndpointTests({ getService }: FtrProviderContext) 
       expect(field.name).to.eql('updated_at');
       expect(field.type).to.eql('date');
     });
+
+    // TODO: the pattern '*a:b,c:d*' throws an exception in dev, but not ci!
+    it('should handle no_such_remote_cluster', async () => {
+      const result = await runQueryExpect({ indexPatterns: ['*a:b,c:d*'] }, 200);
+      expect(result.fields.length).to.be(0);
+    });
   });
 
   function getFieldNamed(fields: any[], fieldName: string): any | undefined {

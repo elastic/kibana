@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { Filter, ExpressionFunctionDefinition } from '../../../types';
+import { ExpressionValueFilter, ExpressionFunctionDefinition } from '../../../types';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
@@ -17,9 +17,9 @@ interface Arguments {
 
 export function timefilter(): ExpressionFunctionDefinition<
   'timefilter',
-  Filter,
+  ExpressionValueFilter,
   Arguments,
-  Filter
+  ExpressionValueFilter
 > {
   const { help, args: argHelp } = getFunctionHelp().timefilter;
   const errors = getFunctionErrors().timefilter;
@@ -58,14 +58,15 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       const { from, to, column } = args;
-      const filter = {
-        type: 'time',
+      const filter: ExpressionValueFilter = {
+        type: 'filter',
+        filterType: 'time',
         column,
         and: [],
       };
 
-      function parseAndValidate(str: string): string {
-        const moment = dateMath.parse(str);
+      function parseAndValidate(str: string, { roundUp }: { roundUp: boolean }): string {
+        const moment = dateMath.parse(str, { roundUp });
 
         if (!moment || !moment.isValid()) {
           throw errors.invalidString(str);
@@ -75,11 +76,11 @@ export function timefilter(): ExpressionFunctionDefinition<
       }
 
       if (!!to) {
-        (filter as any).to = parseAndValidate(to);
+        filter.to = parseAndValidate(to, { roundUp: true });
       }
 
       if (!!from) {
-        (filter as any).from = parseAndValidate(from);
+        filter.from = parseAndValidate(from, { roundUp: false });
       }
 
       return { ...input, and: [...input.and, filter] };

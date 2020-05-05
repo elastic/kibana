@@ -22,6 +22,7 @@ import { INSTRUCTION_VARIANT } from '../../../common/instruction_variant';
 import { createTrycloudOption1, createTrycloudOption2 } from './onprem_cloud_instructions';
 import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
+import { cloudPasswordAndResetLink } from './cloud_instructions';
 
 export const createFilebeatInstructions = (context?: TutorialContext) => ({
   INSTALL: {
@@ -299,13 +300,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.osxTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     DEB: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.debTitle', {
@@ -318,13 +313,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.debTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     RPM: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.rpmTitle', {
@@ -337,13 +326,7 @@ export const createFilebeatCloudInstructions = () => ({
         },
       }),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.rpmTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
     WINDOWS: {
       title: i18n.translate('home.tutorials.common.filebeatCloudInstructions.config.windowsTitle', {
@@ -359,13 +342,7 @@ export const createFilebeatCloudInstructions = () => ({
         }
       ),
       commands: ['cloud.id: "{config.cloud.id}"', 'cloud.auth: "elastic:<password>"'],
-      textPost: i18n.translate(
-        'home.tutorials.common.filebeatCloudInstructions.config.windowsTextPost',
-        {
-          defaultMessage: 'Where {passwordTemplate} is the password of the `elastic` user.',
-          values: { passwordTemplate: '`<password>`' },
-        }
-      ),
+      textPost: cloudPasswordAndResetLink,
     },
   },
 });

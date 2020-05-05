@@ -45,6 +45,17 @@ describe('data generator', () => {
     expect(metadata.host).not.toBeNull();
   });
 
+  it('creates policy response documents', () => {
+    const timestamp = new Date().getTime();
+    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
+    expect(hostPolicyResponse.event.created).toEqual(timestamp);
+    expect(hostPolicyResponse.endpoint).not.toBeNull();
+    expect(hostPolicyResponse.agent).not.toBeNull();
+    expect(hostPolicyResponse.host).not.toBeNull();
+    expect(hostPolicyResponse.endpoint.policy.applied).not.toBeNull();
+  });
+
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
     const alert = generator.generateAlert(timestamp);
@@ -86,7 +97,7 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.generateAlertEventAncestry(3);
+      events = generator.createAlertEventAncestry(3);
     });
 
     it('with n-1 process events', () => {
@@ -153,7 +164,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = [root, ...generator.generateDescendantsTree(root, generations)];
+    const events = [root, ...generator.descendantsTreeGenerator(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
@@ -162,7 +173,7 @@ describe('data generator', () => {
   it('creates full resolver tree', () => {
     const alertAncestors = 3;
     const generations = 2;
-    const events = generator.generateFullResolverTree(alertAncestors, generations);
+    const events = [...generator.fullResolverTreeGenerator(alertAncestors, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);

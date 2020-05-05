@@ -13,7 +13,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('legacyEs');
 
   describe('Home page', function() {
-    this.tags('smoke');
     before(async () => {
       await pageObjects.common.navigateToApp('snapshotRestore');
     });

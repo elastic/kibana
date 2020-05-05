@@ -11,14 +11,19 @@ import { Provider } from 'react-redux';
 
 import { App } from './app';
 import { remoteClustersStore } from './store';
+import { AppContextProvider } from './app_context';
 
-export const renderApp = (elem, I18nContext) => {
+import './_hacks.scss';
+
+export const renderApp = (elem, I18nContext, appDependencies) => {
   render(
     <I18nContext>
       <Provider store={remoteClustersStore}>
-        <HashRouter>
-          <App />
-        </HashRouter>
+        <AppContextProvider context={appDependencies}>
+          <HashRouter>
+            <App />
+          </HashRouter>
+        </AppContextProvider>
       </Provider>
     </I18nContext>,
     elem

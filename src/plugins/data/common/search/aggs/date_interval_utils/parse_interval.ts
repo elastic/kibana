@@ -49,6 +49,13 @@ export function parseInterval(interval: string): moment.Duration | null {
       u => Math.abs(duration.as(u)) >= 1
     ) as unitOfTime.Base;
 
+    // however if we do this fhe other way around it will also fail
+    // go from 500m to hours as this will result in infinite number (dividing 500/60 = 8.3*)
+    // so we can only do this if we are changing to smaller units
+    if (dateMath.units.indexOf(selectedUnit as any) < dateMath.units.indexOf(unit as any)) {
+      return duration;
+    }
+
     return moment.duration(duration.as(selectedUnit), selectedUnit);
   } catch (e) {
     return null;

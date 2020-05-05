@@ -17,17 +17,22 @@ jest.mock('./edit_role', () => ({
 import { rolesManagementApp } from './roles_management_app';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
+import { featuresPluginMock } from '../../../../features/public/mocks';
 
 async function mountApp(basePath: string) {
   const { fatalErrors } = coreMock.createSetup();
   const container = document.createElement('div');
   const setBreadcrumbs = jest.fn();
 
+  const featuresStart = featuresPluginMock.createStart();
+
   const unmount = await rolesManagementApp
     .create({
       license: licenseMock.create(),
       fatalErrors,
-      getStartServices: jest.fn().mockResolvedValue([coreMock.createStart(), { data: {} }]),
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([coreMock.createStart(), { data: {}, features: featuresStart }]),
     })
     .mount({ basePath, element: container, setBreadcrumbs });
 

@@ -18,27 +18,38 @@
  */
 
 import { Observable, Subject } from 'rxjs';
+import { CoreStart } from '../../../../core/public';
+import { coreMock } from '../../../../core/public/mocks';
 import { IKibanaSearchRequest } from '../../common/search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { SearchInterceptor } from './search_interceptor';
 
 jest.useFakeTimers();
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 const mockSearch = jest.fn();
 let searchInterceptor: SearchInterceptor;
+let mockCoreStart: MockedKeys<CoreStart>;
 
 describe('SearchInterceptor', () => {
   beforeEach(() => {
+    mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
-    searchInterceptor = new SearchInterceptor(1000);
+    searchInterceptor = new SearchInterceptor(
+      mockCoreStart.notifications.toasts,
+      mockCoreStart.application,
+      1000
+    );
   });
 
   describe('search', () => {
     test('should invoke `search` with the request', () => {
-      mockSearch.mockReturnValue(new Observable());
+      const mockResponse = new Subject();
+      mockSearch.mockReturnValue(mockResponse.asObservable());
       const mockRequest: IKibanaSearchRequest = {};
-      searchInterceptor.search(mockSearch, mockRequest);
+      const response = searchInterceptor.search(mockSearch, mockRequest);
+      mockResponse.complete();
+
+      response.subscribe();
       expect(mockSearch.mock.calls[0][0]).toBe(mockRequest);
     });
 
@@ -89,44 +100,6 @@ describe('SearchInterceptor', () => {
 
       expect(error).toHaveBeenCalled();
       expect(error.mock.calls[0][0] instanceof RequestTimeoutError).toBe(true);
-    });
-  });
-
-  describe('cancelPending', () => {
-    test('should abort all pending requests', async () => {
-      mockSearch.mockReturnValue(new Observable());
-
-      searchInterceptor.search(mockSearch, {});
-      searchInterceptor.search(mockSearch, {});
-      searchInterceptor.cancelPending();
-
-      await flushPromises();
-
-      const areAllRequestsAborted = mockSearch.mock.calls.every(([, { signal }]) => signal.aborted);
-      expect(areAllRequestsAborted).toBe(true);
-    });
-  });
-
-  describe('runBeyondTimeout', () => {
-    test('should prevent the request from timing out', () => {
-      const mockResponse = new Subject();
-      mockSearch.mockReturnValue(mockResponse.asObservable());
-      const response = searchInterceptor.search(mockSearch, {});
-
-      setTimeout(searchInterceptor.runBeyondTimeout, 500);
-      setTimeout(() => mockResponse.next('hi'), 250);
-      setTimeout(() => mockResponse.complete(), 2000);
-
-      const next = jest.fn();
-      const complete = jest.fn();
-      const error = jest.fn();
-      response.subscribe({ next, error, complete });
-
-      jest.advanceTimersByTime(2000);
-
-      expect(next).toHaveBeenCalledWith('hi');
-      expect(error).not.toHaveBeenCalled();
-      expect(complete).toHaveBeenCalled();
     });
   });
 

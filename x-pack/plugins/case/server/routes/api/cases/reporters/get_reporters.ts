@@ -7,17 +7,19 @@
 import { UsersRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_REPORTERS_URL } from '../../../../../common/constants';
 
 export function initGetReportersApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/reporters',
+      path: CASE_REPORTERS_URL,
       validate: {},
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const reporters = await caseService.getReporters({
-          client: context.core.savedObjects.client,
+          client,
         });
         return response.ok({ body: UsersRt.encode(reporters) });
       } catch (error) {

@@ -23,7 +23,7 @@ import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migration
 export const indexPatternSavedObjectType: SavedObjectsType = {
   name: 'index-pattern',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   management: {
     icon: 'indexPatternApp',
     defaultSearchField: 'title',

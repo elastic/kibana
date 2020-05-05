@@ -1259,39 +1259,13 @@ export function getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, lates
       },
       { term: { job_id: jobId } },
     ];
-    const shouldCriteria = [];
 
     _.each(criteriaFields, criteria => {
-      if (criteria.fieldValue.length !== 0) {
-        mustCriteria.push({
-          term: {
-            [criteria.fieldName]: criteria.fieldValue,
-          },
-        });
-      } else {
-        // Add special handling for blank entity field values, checking for either
-        // an empty string or the field not existing.
-        const emptyFieldCondition = {
-          bool: {
-            must: [
-              {
-                term: {},
-              },
-            ],
-          },
-        };
-        emptyFieldCondition.bool.must[0].term[criteria.fieldName] = '';
-        shouldCriteria.push(emptyFieldCondition);
-        shouldCriteria.push({
-          bool: {
-            must_not: [
-              {
-                exists: { field: criteria.fieldName },
-              },
-            ],
-          },
-        });
-      }
+      mustCriteria.push({
+        term: {
+          [criteria.fieldName]: criteria.fieldValue,
+        },
+      });
     });
 
     ml.esSearch({

@@ -11,7 +11,7 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 export const caseConfigureSavedObjectType: SavedObjectsType = {
   name: CASE_CONFIGURE_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       created_at: {
@@ -19,6 +19,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
       created_by: {
         properties: {
+          email: {
+            type: 'keyword',
+          },
           username: {
             type: 'keyword',
           },
@@ -30,6 +33,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       connector_id: {
         type: 'keyword',
       },
+      connector_name: {
+        type: 'keyword',
+      },
       closure_type: {
         type: 'keyword',
       },
@@ -38,6 +44,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       },
       updated_by: {
         properties: {
+          email: {
+            type: 'keyword',
+          },
           username: {
             type: 'keyword',
           },

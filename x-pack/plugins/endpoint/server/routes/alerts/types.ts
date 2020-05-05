@@ -5,14 +5,15 @@
  */
 import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/server';
 import { JsonObject } from '../../../../../../src/plugins/kibana_utils/public';
-import { Direction } from '../../../common/types';
+import { AlertAPIOrdering } from '../../../common/types';
 
 /**
  * Sort parameters for alerts in ES.
  */
 export interface AlertSortParam {
   [key: string]: {
-    order: Direction;
+    order: AlertAPIOrdering;
+    missing?: UndefinedResultPosition;
   };
 }
 
@@ -37,9 +38,10 @@ export interface AlertSearchQuery {
   filters: Filter[];
   dateRange?: TimeRange;
   sort: string;
-  order: Direction;
+  order: AlertAPIOrdering;
   searchAfter?: SearchCursor;
   searchBefore?: SearchCursor;
+  emptyStringIsUndefined?: boolean;
 }
 
 /**
@@ -81,7 +83,17 @@ export interface AlertListRequestQuery {
   filters?: string;
   date_range: string;
   sort: string;
-  order: Direction;
+  order: AlertAPIOrdering;
   after?: SearchCursor;
   before?: SearchCursor;
+  empty_string_is_undefined?: boolean;
+}
+
+/**
+ * Indicates whether undefined results are sorted to the beginning (_first) or end (_last)
+ * of a result set.
+ */
+export enum UndefinedResultPosition {
+  first = '_first',
+  last = '_last',
 }

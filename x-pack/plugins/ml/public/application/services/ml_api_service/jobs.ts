@@ -17,7 +17,7 @@ import {
   CategoryFieldExample,
   FieldExampleCheck,
 } from '../../../../common/types/categories';
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../common/constants/categorization_job';
 import { Category } from '../../../../common/types/categories';
 
 export const jobs = {

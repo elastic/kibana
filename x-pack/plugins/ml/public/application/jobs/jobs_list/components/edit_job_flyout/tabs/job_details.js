@@ -105,6 +105,7 @@ export class JobDetails extends Component {
       mmlValidationError,
       groupsValidationError,
     } = this.state;
+    const { datafeedRunning } = this.props;
     return (
       <React.Fragment>
         <EuiSpacer size="m" />
@@ -152,6 +153,14 @@ export class JobDetails extends Component {
                 defaultMessage="Model memory limit"
               />
             }
+            helpText={
+              datafeedRunning ? (
+                <FormattedMessage
+                  id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabelHelp"
+                  defaultMessage="Model memory limit cannot be edited while the datafeed is running."
+                />
+              ) : null
+            }
             isInvalid={mmlValidationError !== ''}
             error={mmlValidationError}
           >
@@ -160,6 +169,7 @@ export class JobDetails extends Component {
               onChange={this.onMmlChange}
               isInvalid={mmlValidationError !== ''}
               error={mmlValidationError}
+              disabled={datafeedRunning}
             />
           </EuiFormRow>
         </EuiForm>
@@ -168,6 +178,7 @@ export class JobDetails extends Component {
   }
 }
 JobDetails.propTypes = {
+  datafeedRunning: PropTypes.bool.isRequired,
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,

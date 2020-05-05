@@ -99,9 +99,9 @@ export default function({ getService, getPageObjects }) {
       async function expectValidTableData() {
         const data = await PageObjects.visChart.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
-          '≥ 0 and < 1000',
+          '≥ 0B and < 1,000B',
           '1,351 64.7%',
-          '≥ 1000 and < 2000',
+          '≥ 1,000B and < 1.953KB',
           '737 35.3%',
         ]);
       }
@@ -144,9 +144,9 @@ export default function({ getService, getPageObjects }) {
 
       const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
-        '≥ 0 and < 1000',
+        '≥ 0B and < 1,000B',
         '344.094B',
-        '≥ 1000 and < 2000',
+        '≥ 1,000B and < 1.953KB',
         '1.697KB',
       ]);
     });
@@ -248,9 +248,9 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
-        '≥ 0 and < 1000',
+        '≥ 0B and < 1,000B',
         '1,351',
-        '≥ 1000 and < 2000',
+        '≥ 1,000B and < 1.953KB',
         '737',
       ]);
     });

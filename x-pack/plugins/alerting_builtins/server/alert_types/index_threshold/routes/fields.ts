@@ -38,7 +38,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, RequestBody, any>,
+    req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
@@ -53,8 +53,11 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
     try {
       rawFields = await getRawFields(ctx.core.elasticsearch.dataClient, req.body.indexPatterns);
     } catch (err) {
-      service.logger.debug(`route ${path} error: ${err.message}`);
-      return res.internalError({ body: 'error getting field data' });
+      const indexPatterns = req.body.indexPatterns.join(',');
+      service.logger.warn(
+        `route ${path} error getting fields from pattern "${indexPatterns}": ${err.message}`
+      );
+      return res.ok({ body: { fields: [] } });
     }
 
     const result = { fields: getFieldsFromRawFields(rawFields) };

@@ -4,29 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiFieldPassword,
   EuiText,
   EuiButton,
-  EuiCallOut,
   EuiTitle,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
-import { sendRequest, useInput, useCore } from '../../../hooks';
+import { sendRequest, useCore } from '../../../hooks';
 import { fleetSetupRouteService } from '../../../services';
+import { WithoutHeaderLayout } from '../../../layouts';
+import { GetFleetStatusResponse } from '../../../types';
 
 export const SetupPage: React.FunctionComponent<{
   refresh: () => Promise<void>;
-}> = ({ refresh }) => {
+  missingRequirements: GetFleetStatusResponse['missing_requirements'];
+}> = ({ refresh, missingRequirements }) => {
   const [isFormLoading, setIsFormLoading] = useState<boolean>(false);
   const core = useCore();
-  const usernameInput = useInput();
-  const passwordInput = useInput();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,10 +34,6 @@ export const SetupPage: React.FunctionComponent<{
       await sendRequest({
         method: 'post',
         path: fleetSetupRouteService.postFleetSetupPath(),
-        body: JSON.stringify({
-          admin_username: usernameInput.value,
-          admin_password: passwordInput.value,
-        }),
       });
       await refresh();
     } catch (error) {
@@ -47,34 +42,83 @@ export const SetupPage: React.FunctionComponent<{
     }
   };
 
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle>
-          <h1>Setup</h1>
+  const content =
+    missingRequirements.includes('tls_required') || missingRequirements.includes('api_keys') ? (
+      <>
+        <EuiSpacer size="m" />
+        <EuiIcon type="lock" color="subdued" size="xl" />
+        <EuiSpacer size="m" />
+        <EuiTitle size="l">
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestManager.setupPage.missingRequirementsTitle"
+              defaultMessage="Missing requirements"
+            />
+          </h2>
         </EuiTitle>
+        <EuiSpacer size="xl" />
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.ingestManager.setupPage.missingRequirementsDescription"
+            defaultMessage="To use Fleet, you must enable the following features:
+          {space}- Enable Elasticsearch API keys.
+          {space}- Enable TLS to secure the communication between Agents and Kibana.
+          "
+            values={{
+              space: <EuiSpacer size="m" />,
+            }}
+          />
+        </EuiText>
         <EuiSpacer size="l" />
-        <EuiCallOut title="Warning!" color="warning" iconType="help">
-          <EuiText>
-            To setup fleet and ingest you need to a enable a user that can create API Keys and write
-            to logs-* and metrics-*
-          </EuiText>
-        </EuiCallOut>
+      </>
+    ) : (
+      <>
+        <EuiSpacer size="m" />
+        <EuiIcon type="lock" color="subdued" size="xl" />
+        <EuiSpacer size="m" />
+        <EuiTitle size="l">
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestManager.setupPage.enableTitle"
+              defaultMessage="Enable Fleet"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="xl" />
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.ingestManager.setupPage.enableText"
+            defaultMessage="In order to use Fleet, you must create an Elastic user. This user can create API keys
+        and write to logs-* and metrics-*."
+          />
+        </EuiText>
         <EuiSpacer size="l" />
         <EuiForm>
           <form onSubmit={onSubmit}>
-            <EuiFormRow label="Username">
-              <EuiFieldText name="username" {...usernameInput.props} />
-            </EuiFormRow>
-            <EuiFormRow label="Password">
-              <EuiFieldPassword name="password" {...passwordInput.props} />
-            </EuiFormRow>
-            <EuiButton isLoading={isFormLoading} type="submit">
-              Submit
+            <EuiButton fill isLoading={isFormLoading} type="submit">
+              <FormattedMessage
+                id="xpack.ingestManager.setupPage.enableFleet"
+                defaultMessage="Create user and enable Fleet"
+              />
             </EuiButton>
           </form>
         </EuiForm>
-      </EuiPageContent>
-    </EuiPageBody>
+        <EuiSpacer size="m" />
+      </>
+    );
+
+  return (
+    <WithoutHeaderLayout>
+      <EuiPageBody restrictWidth={548}>
+        <EuiPageContent
+          verticalPosition="center"
+          horizontalPosition="center"
+          className="eui-textCenter"
+          paddingSize="l"
+        >
+          {content}
+        </EuiPageContent>
+      </EuiPageBody>
+    </WithoutHeaderLayout>
   );
 };

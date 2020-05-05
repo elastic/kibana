@@ -33,6 +33,7 @@ import {
   MachineLearningSecurityUIProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
+  MachineLearningTestResourcesProvider,
 } from './machine_learning';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
@@ -45,7 +46,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
     context,
-    common
+    common,
+    api
   );
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
@@ -66,6 +68,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context);
 
   return {
     anomaliesTable,
@@ -94,5 +97,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     securityUI,
     settings,
     singleMetricViewer,
+    testResources,
   };
 }

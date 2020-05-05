@@ -1,5 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Error AGENT_NAME 1`] = `"java"`;
+
+exports[`Error AGENT_VERSION 1`] = `"agent version"`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
 exports[`Error CONTAINER_ID 1`] = `undefined`;
@@ -11,6 +15,8 @@ exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Error ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
@@ -54,7 +60,7 @@ exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Error OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
@@ -62,19 +68,29 @@ exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
-
 exports[`Error SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Error SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
+
+exports[`Error SERVICE_FRAMEWORK_VERSION 1`] = `undefined`;
+
+exports[`Error SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+
+exports[`Error SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Error SERVICE_RUNTIME_NAME 1`] = `undefined`;
+
+exports[`Error SERVICE_RUNTIME_VERSION 1`] = `undefined`;
+
 exports[`Error SERVICE_VERSION 1`] = `undefined`;
 
 exports[`Error SPAN_ACTION 1`] = `undefined`;
+
+exports[`Error SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
 exports[`Error SPAN_DURATION 1`] = `undefined`;
 
@@ -110,7 +126,13 @@ exports[`Error URL_FULL 1`] = `undefined`;
 
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
+exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
+
 exports[`Error USER_ID 1`] = `undefined`;
+
+exports[`Span AGENT_NAME 1`] = `"java"`;
+
+exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -123,6 +145,8 @@ exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Span ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
@@ -166,7 +190,7 @@ exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Span OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
@@ -174,19 +198,29 @@ exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
-exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
-
 exports[`Span SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Span SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_FRAMEWORK_VERSION 1`] = `undefined`;
+
+exports[`Span SERVICE_LANGUAGE_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_LANGUAGE_VERSION 1`] = `undefined`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Span SERVICE_RUNTIME_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_RUNTIME_VERSION 1`] = `undefined`;
+
 exports[`Span SERVICE_VERSION 1`] = `undefined`;
 
 exports[`Span SPAN_ACTION 1`] = `"my action"`;
+
+exports[`Span SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
 exports[`Span SPAN_DURATION 1`] = `1337`;
 
@@ -222,7 +256,13 @@ exports[`Span URL_FULL 1`] = `undefined`;
 
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
+exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
+
 exports[`Span USER_ID 1`] = `undefined`;
+
+exports[`Transaction AGENT_NAME 1`] = `"java"`;
+
+exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
 
@@ -235,6 +275,8 @@ exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction ERROR_EXC_TYPE 1`] = `undefined`;
 
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
@@ -278,7 +320,7 @@ exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
-exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
@@ -286,19 +328,29 @@ exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
-exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
-
 exports[`Transaction SERVICE_ENVIRONMENT 1`] = `undefined`;
 
 exports[`Transaction SERVICE_FRAMEWORK_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_FRAMEWORK_VERSION 1`] = `undefined`;
+
+exports[`Transaction SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+
+exports[`Transaction SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
 
+exports[`Transaction SERVICE_RUNTIME_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_RUNTIME_VERSION 1`] = `undefined`;
+
 exports[`Transaction SERVICE_VERSION 1`] = `undefined`;
 
 exports[`Transaction SPAN_ACTION 1`] = `undefined`;
+
+exports[`Transaction SPAN_DESTINATION_SERVICE_RESOURCE 1`] = `undefined`;
 
 exports[`Transaction SPAN_DURATION 1`] = `undefined`;
 
@@ -333,5 +385,7 @@ exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
+
+exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;

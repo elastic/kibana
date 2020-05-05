@@ -23,12 +23,8 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SnapshotDetails as ISnapshotDetails } from '../../../../../../common/types';
-import {
-  SectionError,
-  SectionLoading,
-  SnapshotDeleteProvider,
-  Error,
-} from '../../../../components';
+import { SectionError, Error } from '../../../../../shared_imports';
+import { SectionLoading, SnapshotDeleteProvider } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import {
   UIM_SNAPSHOT_DETAIL_PANEL_SUMMARY_TAB,

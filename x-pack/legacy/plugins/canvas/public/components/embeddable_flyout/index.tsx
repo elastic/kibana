@@ -24,10 +24,10 @@ const allowedEmbeddables = {
   [EmbeddableTypes.lens]: (id: string) => {
     return `savedLens id="${id}" | render`;
   },
-  // FIX: Only currently allow Map embeddables
-  /* [EmbeddableTypes.visualization]: (id: string) => {
-    return `filters | savedVisualization id="${id}" | render`;
+  [EmbeddableTypes.visualization]: (id: string) => {
+    return `savedVisualization id="${id}" | render`;
   },
+  /*
   [EmbeddableTypes.search]: (id: string) => {
     return `filters | savedSearch id="${id}" | render`;
   },*/
@@ -105,6 +105,7 @@ export class EmbeddableFlyoutPortal extends React.Component<Props & WithKibanaPr
           availableEmbeddables={Object.keys(allowedEmbeddables)}
           savedObjects={this.props.kibana.services.savedObjects}
           uiSettings={this.props.kibana.services.uiSettings}
+          getEmbeddableFactories={this.props.kibana.services.embeddable.getEmbeddableFactories}
         />,
         this.el
       );

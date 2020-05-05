@@ -9,7 +9,7 @@ import { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { SimpleSavedObject } from 'kibana/public';
-import { isErrorResponse } from '../../../../../../../common/types/errors';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 import { useMlContext } from '../../../../../contexts/ml';
@@ -41,25 +41,14 @@ export interface CreateAnalyticsFormProps {
   state: State;
 }
 
-export function getErrorMessage(error: any) {
-  if (isErrorResponse(error)) {
-    return `${error.body.error}: ${error.body.message}`;
-  }
-
-  if (typeof error === 'object' && typeof error.message === 'string') {
-    return error.message;
-  }
-
-  return JSON.stringify(error);
-}
-
 export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   const mlContext = useMlContext();
   const [state, dispatch] = useReducer(reducer, getInitialState());
   const { refresh } = useRefreshAnalyticsList();
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
-  const { createIndexPattern, destinationIndex, jobId } = form;
+  const { createIndexPattern, jobId } = form;
+  let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -102,9 +91,13 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
     resetRequestMessages();
     setIsModalButtonDisabled(true);
 
-    const analyticsJobConfig = isAdvancedEditorEnabled
+    const analyticsJobConfig = (isAdvancedEditorEnabled
       ? jobConfig
-      : getJobConfigFromFormState(form);
+      : getJobConfigFromFormState(form)) as DataFrameAnalyticsConfig;
+
+    if (isAdvancedEditorEnabled) {
+      destinationIndex = analyticsJobConfig.dest.index;
+    }
 
     try {
       await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
@@ -149,6 +142,8 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       });
 
       const id = await newIndexPattern.create();
+
+      await mlContext.indexPatterns.clearCache();
 
       // id returns false if there's a duplicate index pattern.
       if (id === false) {
@@ -260,6 +255,7 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
   };
 
   const openModal = async () => {
+    await mlContext.indexPatterns.clearCache();
     resetForm();
     await prepareFormValidation();
     dispatch({ type: ACTION.OPEN_MODAL });

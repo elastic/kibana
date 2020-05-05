@@ -34,7 +34,11 @@ import {
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
-import { Alert, AlertTaskState } from '../../../../x-pack/plugins/alerting/common';
+import {
+  Alert,
+  AlertTaskState,
+  BASE_ALERT_API_PATH,
+} from '../../../../x-pack/plugins/alerting/common';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type Props = RouteComponentProps & {
@@ -51,10 +55,10 @@ export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
 
   useEffect(() => {
     if (!alert) {
-      http.get(`/api/alert/${id}`).then(setAlert);
+      http.get(`${BASE_ALERT_API_PATH}/${id}`).then(setAlert);
     }
     if (!alertState) {
-      http.get(`/api/alert/${id}/state`).then(setAlertState);
+      http.get(`${BASE_ALERT_API_PATH}/${id}/state`).then(setAlertState);
     }
   }, [alert, alertState, http, id]);
 

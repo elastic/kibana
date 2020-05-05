@@ -7,7 +7,7 @@
 import { mergeProjection } from '../../../../common/projections/util/merge_projection';
 import {
   PROCESSOR_EVENT,
-  SERVICE_AGENT_NAME,
+  AGENT_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_DURATION
 } from '../../../../common/elasticsearch_fieldnames';
@@ -41,7 +41,7 @@ export async function getServicesItems(
               avg: { field: TRANSACTION_DURATION }
             },
             agents: {
-              terms: { field: SERVICE_AGENT_NAME, size: 1 }
+              terms: { field: AGENT_NAME, size: 1 }
             },
             events: {
               terms: { field: PROCESSOR_EVENT }

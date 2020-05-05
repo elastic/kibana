@@ -37,6 +37,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'cardinality( the-f[i]e>ld )' },
             { label: 'max( the-f[i]e>ld )' },
             { label: 'min( the-f[i]e>ld )' },
+            { label: 'percentiles( the-f[i]e>ld )' },
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
           ],
@@ -66,6 +67,13 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           aggName: 'the-field.min',
           dropDownName: 'min( the-f[i]e>ld )',
+        },
+        'percentiles( the-f[i]e>ld )': {
+          agg: 'percentiles',
+          field: ' the-f[i]e>ld ',
+          aggName: 'the-field.percentiles',
+          dropDownName: 'percentiles( the-f[i]e>ld )',
+          percents: [1, 5, 25, 50, 75, 95, 99],
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',

@@ -15,6 +15,7 @@ import { Service } from './fields/service';
 import { IStackframe } from './fields/stackframe';
 import { Url } from './fields/url';
 import { User } from './fields/user';
+import { Observer } from './fields/observer';
 
 interface Processor {
   name: 'error';
@@ -61,4 +62,5 @@ export interface ErrorRaw extends APMBaseDoc {
   service: Service;
   url?: Url;
   user?: User;
+  observer?: Observer;
 }

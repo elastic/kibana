@@ -10,8 +10,10 @@
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
-// required for i18nIdDirective
+// required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 // type imports
 import {
   AppMountContext,
@@ -29,7 +31,6 @@ import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plu
 import { LicensingPluginSetup } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { createSavedWorkspacesLoader } from './services/persistence/saved_workspace_loader';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   addAppRedirectMessageToUrl,
@@ -87,15 +88,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     }
   });
 
-  const savedWorkspaceLoader = createSavedWorkspacesLoader({
-    chrome: deps.coreStart.chrome,
-    indexPatterns: deps.data.indexPatterns,
-    overlays: deps.coreStart.overlays,
-    savedObjectsClient: deps.coreStart.savedObjects.client,
-    basePath: deps.coreStart.http.basePath,
-  });
-
-  initGraphApp(graphAngularModule, { ...deps, savedWorkspaceLoader });
+  initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
   return () => {
     licenseSubscription.unsubscribe();
@@ -103,7 +96,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
   <base href="${basePath}" />
 </div>
 `;
@@ -114,14 +107,14 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.boo
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'gphAppWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   element.appendChild(mountpoint);
-  element.setAttribute('class', 'kbnLocalApplicationWrapper');
+  element.setAttribute('class', 'gphAppWrapper');
   return $injector;
 }
 

@@ -31,8 +31,8 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
 
-  describe('doc link in discover', function contextSize() {
-    this.tags('smoke');
+  // FLAKY: https://github.com/elastic/kibana/issues/62281
+  describe.skip('doc link in discover', function contextSize() {
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');

@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "events-endpoint-1",
     "mappings": {
       "_meta": {
@@ -95,7 +94,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -390,7 +389,8 @@
                   "type": "nested"
                 },
                 "file_extension": {
-                  "type": "long"
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "project_file": {
                   "properties": {
@@ -455,7 +455,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -852,7 +852,7 @@
                 }
               }
             },
-            "malware_classifier": {
+            "malware_classification": {
               "properties": {
                 "features": {
                   "properties": {
@@ -1497,7 +1497,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {
@@ -1690,7 +1690,7 @@
                     }
                   }
                 },
-                "malware_classifier": {
+                "malware_classification": {
                   "properties": {
                     "features": {
                       "properties": {

@@ -14,12 +14,17 @@ import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
 import { Dependencies, ClientConfigType } from './types';
 
-export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, any> {
+export interface RemoteClustersPluginSetup {
+  isUiEnabled: boolean;
+}
+
+export class RemoteClustersUIPlugin
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
-    { management, usageCollection }: Dependencies
+    { management, usageCollection, cloud }: Dependencies
   ) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
@@ -48,11 +53,17 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
+          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+
           const { renderApp } = await import('./application');
-          return renderApp(element, i18nContext);
+          return renderApp(element, i18nContext, { isCloudEnabled });
         },
       });
     }
+
+    return {
+      isUiEnabled: isRemoteClustersUiEnabled,
+    };
   }
 
   start({ application }: CoreStart) {

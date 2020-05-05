@@ -4,32 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MiddlewareFactory, PolicyListState } from '../../types';
+import { GetPolicyListResponse, ImmutableMiddlewareFactory, PolicyListState } from '../../types';
+import { sendGetEndpointSpecificDatasources } from './services/ingest';
+import { isOnPolicyListPage, urlSearchParams } from './selectors';
 
-export const policyListMiddlewareFactory: MiddlewareFactory<PolicyListState> = coreStart => {
+export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<PolicyListState> = coreStart => {
+  const http = coreStart.http;
+
   return ({ getState, dispatch }) => next => async action => {
     next(action);
 
-    if (
-      (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage') ||
-      action.type === 'userPaginatedPolicyListTable'
-    ) {
-      const state = getState();
-      let pageSize: number;
-      let pageIndex: number;
+    const state = getState();
 
-      if (action.type === 'userPaginatedPolicyListTable') {
-        pageSize = action.payload.pageSize;
-        pageIndex = action.payload.pageIndex;
-      } else {
-        pageSize = state.pageSize;
-        pageIndex = state.pageIndex;
+    if (action.type === 'userChangedUrl' && isOnPolicyListPage(state)) {
+      const { page_index: pageIndex, page_size: pageSize } = urlSearchParams(state);
+      let response: GetPolicyListResponse;
+
+      try {
+        response = await sendGetEndpointSpecificDatasources(http, {
+          query: {
+            perPage: pageSize,
+            page: pageIndex + 1,
+          },
+        });
+      } catch (err) {
+        dispatch({
+          type: 'serverFailedToReturnPolicyListData',
+          payload: err.body ?? err,
+        });
+        return;
       }
 
-      // Need load data from API and remove fake data below
-      // Refactor tracked via: https://github.com/elastic/endpoint-app-team/issues/150
-      const { getFakeDatasourceApiResponse } = await import('./fake_data');
-      const { items: policyItems, total } = await getFakeDatasourceApiResponse(pageIndex, pageSize);
+      const { items: policyItems, total } = response;
 
       dispatch({
         type: 'serverReturnedPolicyListData',

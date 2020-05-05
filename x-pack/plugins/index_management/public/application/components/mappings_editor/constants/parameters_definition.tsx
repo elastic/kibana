@@ -504,7 +504,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.NUMBER,
-      deserializer: (value: string | number) => +value,
+      deserializer: (value: string | number) => (value === '' ? value : +value),
       formatters: [toInt],
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
         defaultMessage: 'Scaling factor',

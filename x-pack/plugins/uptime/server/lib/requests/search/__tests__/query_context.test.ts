@@ -6,10 +6,7 @@
 
 import { QueryContext } from '../query_context';
 import { CursorPagination } from '../types';
-import {
-  CursorDirection,
-  SortOrder,
-} from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 
 describe(QueryContext, () => {
   // 10 minute range
@@ -22,7 +19,9 @@ describe(QueryContext, () => {
   };
 
   let qc: QueryContext;
-  beforeEach(() => (qc = new QueryContext({}, rangeStart, rangeEnd, pagination, null, 10)));
+  beforeEach(
+    () => (qc = new QueryContext({}, 'indexName', rangeStart, rangeEnd, pagination, null, 10))
+  );
 
   describe('dateRangeFilter()', () => {
     const expectedRange = {

@@ -9,7 +9,6 @@ import { CoreSetup, Logger } from 'src/core/server';
 import { Params } from '../typings';
 import { BehaviorSubject } from 'rxjs';
 import { APMConfig } from '../..';
-import { LegacySetup } from '../../plugin';
 
 const getCoreMock = () => {
   const get = jest.fn();
@@ -36,11 +35,12 @@ const getCoreMock = () => {
     put,
     createRouter,
     context: {
+      measure: () => undefined,
       config$: new BehaviorSubject({} as APMConfig),
       logger: ({
         error: jest.fn()
       } as unknown) as Logger,
-      __LEGACY: {} as LegacySetup
+      plugins: {}
     }
   };
 };

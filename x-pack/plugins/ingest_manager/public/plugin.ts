@@ -17,11 +17,20 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID } from '../common/constants';
 
 import { IngestManagerConfigType } from '../common/types';
+import { setupRouteService } from '../common';
 
 export { IngestManagerConfigType } from '../common/types';
 
 export type IngestManagerSetup = void;
-export type IngestManagerStart = void;
+/**
+ * Describes public IngestManager plugin contract returned at the `start` stage.
+ */
+export interface IngestManagerStart {
+  success: boolean;
+  error?: {
+    message: string;
+  };
+}
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -32,7 +41,9 @@ export interface IngestManagerStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class IngestManagerPlugin implements Plugin {
+export class IngestManagerPlugin
+  implements
+    Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -50,7 +61,8 @@ export class IngestManagerPlugin implements Plugin {
       async mount(params: AppMountParameters) {
         const [coreStart, startDeps] = (await core.getStartServices()) as [
           CoreStart,
-          IngestManagerStartDeps
+          IngestManagerStartDeps,
+          IngestManagerStart
         ];
         const { renderApp } = await import('./applications/ingest_manager');
         return renderApp(coreStart, params, deps, startDeps, config);
@@ -58,7 +70,14 @@ export class IngestManagerPlugin implements Plugin {
     });
   }
 
-  public start(core: CoreStart) {}
+  public async start(core: CoreStart): Promise<IngestManagerStart> {
+    try {
+      const { isInitialized: success } = await core.http.post(setupRouteService.getSetupPath());
+      return { success };
+    } catch (error) {
+      return { success: false, error: { message: error.body?.message || 'Unknown error' } };
+    }
+  }
 
   public stop() {}
 }

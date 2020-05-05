@@ -12,10 +12,13 @@ import {
   DropDownOption,
   EsFieldName,
   GroupByConfigWithUiSupport,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
+  PivotAggsConfigWithUiSupport,
   PivotAggsConfigWithUiSupportDict,
   pivotAggsFieldSupport,
   PivotGroupByConfigWithUiSupportDict,
   pivotGroupByFieldSupport,
+  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 
@@ -53,6 +56,31 @@ function getDefaultGroupByConfig(
         dropDownName,
         field: fieldName,
         calendar_interval: '1m',
+      };
+  }
+}
+
+function getDefaultAggregationConfig(
+  aggName: string,
+  dropDownName: string,
+  fieldName: EsFieldName,
+  agg: PIVOT_SUPPORTED_AGGS
+): PivotAggsConfigWithUiSupport {
+  switch (agg) {
+    case PIVOT_SUPPORTED_AGGS.PERCENTILES:
+      return {
+        agg,
+        aggName,
+        dropDownName,
+        field: fieldName,
+        percents: PERCENTILES_AGG_DEFAULT_PERCENTS,
+      };
+    default:
+      return {
+        agg,
+        aggName,
+        dropDownName,
+        field: fieldName,
       };
   }
 }
@@ -105,7 +133,12 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
         // Option name in the dropdown for the aggregation is in the form of `sum(fieldname)`.
         const dropDownName = `${agg}(${field.name})`;
         aggOption.options.push({ label: dropDownName });
-        aggOptionsData[dropDownName] = { agg, field: field.name, aggName, dropDownName };
+        aggOptionsData[dropDownName] = getDefaultAggregationConfig(
+          aggName,
+          dropDownName,
+          field.name,
+          agg
+        );
       });
     }
     aggOptions.push(aggOption);

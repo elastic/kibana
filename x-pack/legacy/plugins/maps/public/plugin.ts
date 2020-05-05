@@ -6,16 +6,22 @@
 
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+// @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
-import { MapListing } from './components/map_listing';
+import { MapListing } from '../../../../plugins/maps/public/components/map_listing'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 // @ts-ignore
-import { setInjectedVarFunc } from '../../../../plugins/maps/public/kibana_services'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-// @ts-ignore
-import { setLicenseId, setInspector, setFileUpload } from './kibana_services';
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -30,17 +36,15 @@ interface MapsPluginSetupDependencies {
   np: {
     licensing?: LicensingPluginSetup;
     home: HomePublicPluginSetup;
+    data: DataPublicPluginSetup;
   };
 }
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
-  const { injectedMetadata } = core;
-  if (licensing) {
-    licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
-  }
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
-};
+interface MapsPluginStartDependencies {
+  data: DataPublicPluginStart;
+  inspector: InspectorStartContract;
+  // file_upload TODO: Export type from file upload and use here
+}
 
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
@@ -51,14 +55,10 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindSetupCoreAndPlugins(core, np);
-
-    np.home.featureCatalogue.register(featureCatalogueEntry);
+    bindNpSetupCoreAndPlugins(core, np);
   }
 
-  public start(core: CoreStart, plugins: any) {
-    const { inspector, file_upload } = plugins.np;
-    setInspector(inspector);
-    setFileUpload(file_upload);
+  public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
+    bindNpStartCoreAndPlugins(core, plugins);
   }
 }

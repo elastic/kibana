@@ -6,25 +6,37 @@
 import React, { useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiTextColor,
   EuiSpacer,
   EuiButtonEmpty,
   EuiTitle,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DatasourceInput, RegistryVarsEntry } from '../../../../types';
-import { isAdvancedVar } from '../services';
+import { isAdvancedVar, DatasourceConfigValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputVarField } from './datasource_input_var_field';
 
 export const DatasourceInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
-}> = ({ packageInputVars, datasourceInput, updateDatasourceInput }) => {
+  inputVarsValidationResults: DatasourceConfigValidationResults;
+  forceShowErrors?: boolean;
+}> = ({
+  packageInputVars,
+  datasourceInput,
+  updateDatasourceInput,
+  inputVarsValidationResults,
+  forceShowErrors,
+}) => {
   // Showing advanced options toggle state
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+
+  // Errors state
+  const hasErrors = forceShowErrors && validationHasErrors(inputVarsValidationResults);
 
   const requiredVars: RegistryVarsEntry[] = [];
   const advancedVars: RegistryVarsEntry[] = [];
@@ -40,31 +52,52 @@ export const DatasourceInputConfig: React.FunctionComponent<{
   }
 
   return (
-    <EuiFlexGrid columns={2}>
-      <EuiFlexItem>
+    <EuiFlexGroup alignItems="flexStart">
+      <EuiFlexItem grow={1}>
         <EuiTitle size="s">
-          <h4>
-            <FormattedMessage
-              id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsTitle"
-              defaultMessage="Settings"
-            />
-          </h4>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <h4>
+                <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsTitle"
+                    defaultMessage="Settings"
+                  />
+                </EuiTextColor>
+              </h4>
+            </EuiFlexItem>
+            {hasErrors ? (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ingestManager.createDatasource.stepConfigure.inputConfigErrorsTooltip"
+                      defaultMessage="Fix configuration errors"
+                    />
+                  }
+                  position="right"
+                  type="alert"
+                  iconProps={{ color: 'danger' }}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText color="subdued" size="s">
           <p>
             <FormattedMessage
               id="xpack.ingestManager.createDatasource.stepConfigure.inputSettingsDescription"
-              defaultMessage="The following settings will be applied to all streams below."
+              defaultMessage="The following settings are applicable to all streams."
             />
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={1}>
         <EuiFlexGroup direction="column" gutterSize="m">
           {requiredVars.map(varDef => {
             const { name: varName, type: varType } = varDef;
-            const value = datasourceInput.streams[0].config![varName].value;
+            const value = datasourceInput.vars![varName].value;
             return (
               <EuiFlexItem key={varName}>
                 <DatasourceInputVarField
@@ -72,18 +105,17 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                   value={value}
                   onChange={(newValue: any) => {
                     updateDatasourceInput({
-                      streams: datasourceInput.streams.map(stream => ({
-                        ...stream,
-                        config: {
-                          ...stream.config,
-                          [varName]: {
-                            type: varType,
-                            value: newValue,
-                          },
+                      vars: {
+                        ...datasourceInput.vars,
+                        [varName]: {
+                          type: varType,
+                          value: newValue,
                         },
-                      })),
+                      },
                     });
                   }}
+                  errors={inputVarsValidationResults.vars![varName]}
+                  forceShowErrors={forceShowErrors}
                 />
               </EuiFlexItem>
             );
@@ -109,7 +141,7 @@ export const DatasourceInputConfig: React.FunctionComponent<{
               {isShowingAdvanced
                 ? advancedVars.map(varDef => {
                     const { name: varName, type: varType } = varDef;
-                    const value = datasourceInput.streams[0].config![varName].value;
+                    const value = datasourceInput.vars![varName].value;
                     return (
                       <EuiFlexItem key={varName}>
                         <DatasourceInputVarField
@@ -117,18 +149,17 @@ export const DatasourceInputConfig: React.FunctionComponent<{
                           value={value}
                           onChange={(newValue: any) => {
                             updateDatasourceInput({
-                              streams: datasourceInput.streams.map(stream => ({
-                                ...stream,
-                                config: {
-                                  ...stream.config,
-                                  [varName]: {
-                                    type: varType,
-                                    value: newValue,
-                                  },
+                              vars: {
+                                ...datasourceInput.vars,
+                                [varName]: {
+                                  type: varType,
+                                  value: newValue,
                                 },
-                              })),
+                              },
                             });
                           }}
+                          errors={inputVarsValidationResults.vars![varName]}
+                          forceShowErrors={forceShowErrors}
                         />
                       </EuiFlexItem>
                     );
@@ -138,6 +169,6 @@ export const DatasourceInputConfig: React.FunctionComponent<{
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 };

@@ -11,15 +11,17 @@ import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
-    name: 'alerts',
+    require: ['xpack_main', 'elasticsearch'],
+    name: 'alerts-fixture',
     init(server: any) {
+      const clusterClient = server.newPlatform.start.core.elasticsearch.legacy.client;
       server.plugins.xpack_main.registerFeature({
         id: 'alerting',
         name: 'Alerting',
         app: ['alerting', 'kibana'],
         privileges: {
           all: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: ['alert'],
               read: [],
@@ -28,6 +30,7 @@ export default function(kibana: any) {
             api: ['alerting-read', 'alerting-all'],
           },
           read: {
+            app: ['alerting', 'kibana'],
             savedObject: {
               all: [],
               read: ['alert'],
@@ -42,6 +45,7 @@ export default function(kibana: any) {
       const noopActionType: ActionType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        minimumLicenseRequired: 'gold',
         async executor() {
           return { status: 'ok', actionId: '' };
         },
@@ -49,6 +53,7 @@ export default function(kibana: any) {
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -80,6 +85,7 @@ export default function(kibana: any) {
       const failingActionType: ActionType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             index: schema.string(),
@@ -104,6 +110,7 @@ export default function(kibana: any) {
       const rateLimitedActionType: ActionType = {
         id: 'test.rate-limit',
         name: 'Test: Rate Limit',
+        minimumLicenseRequired: 'gold',
         maxAttempts: 2,
         validate: {
           params: schema.object({
@@ -133,6 +140,7 @@ export default function(kibana: any) {
       const authorizationActionType: ActionType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        minimumLicenseRequired: 'gold',
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -158,6 +166,22 @@ export default function(kibana: any) {
           } catch (e) {
             callClusterError = e;
           }
+          // Call scoped cluster
+          const callScopedCluster = services.getScopedCallCluster(clusterClient);
+          let callScopedClusterSuccess = false;
+          let callScopedClusterError;
+          try {
+            await callScopedCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callScopedClusterSuccess = true;
+          } catch (e) {
+            callScopedClusterError = e;
+          }
           // Saved objects client
           let savedObjectsClientSuccess = false;
           let savedObjectsClientError;
@@ -178,6 +202,8 @@ export default function(kibana: any) {
               state: {
                 callClusterSuccess,
                 callClusterError,
+                callScopedClusterSuccess,
+                callScopedClusterError,
                 savedObjectsClientSuccess,
                 savedObjectsClientError,
               },
@@ -369,6 +395,22 @@ export default function(kibana: any) {
           } catch (e) {
             callClusterError = e;
           }
+          // Call scoped cluster
+          const callScopedCluster = services.getScopedCallCluster(clusterClient);
+          let callScopedClusterSuccess = false;
+          let callScopedClusterError;
+          try {
+            await callScopedCluster('index', {
+              index: params.callClusterAuthorizationIndex,
+              refresh: 'wait_for',
+              body: {
+                param1: 'test',
+              },
+            });
+            callScopedClusterSuccess = true;
+          } catch (e) {
+            callScopedClusterError = e;
+          }
           // Saved objects client
           let savedObjectsClientSuccess = false;
           let savedObjectsClientError;
@@ -389,6 +431,8 @@ export default function(kibana: any) {
               state: {
                 callClusterSuccess,
                 callClusterError,
+                callScopedClusterSuccess,
+                callScopedClusterError,
                 savedObjectsClientSuccess,
                 savedObjectsClientError,
               },

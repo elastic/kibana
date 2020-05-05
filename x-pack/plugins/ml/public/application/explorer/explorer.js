@@ -36,10 +36,8 @@ import {
   ExplorerNoJobsFound,
   ExplorerNoResultsFound,
 } from './components';
-import { ChartTooltip } from '../components/chart_tooltip';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { KqlFilterBar } from '../components/kql_filter_bar';
-import { TimeBuckets } from '../util/time_buckets';
+import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { InfluencersList } from '../components/influencers_list';
 import {
   ALLOW_CELL_RANGE_SELECTION,
@@ -54,14 +52,17 @@ import { SelectInterval } from '../components/controls/select_interval/select_in
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
 import {
+  ExplorerQueryBar,
   getKqlQueryValues,
+  DEFAULT_QUERY_LANG,
+} from './components/explorer_query_bar/explorer_query_bar';
+import {
+  getDateFormatTz,
   removeFilterFromQueryString,
   getQueryPattern,
   escapeParens,
   escapeDoubleQuotes,
-} from '../components/kql_filter_bar/utils';
-
-import { getDateFormatTz } from './explorer_utils';
+} from './explorer_utils';
 import { getSwimlaneContainerWidth } from './legacy_utils';
 
 import {
@@ -79,6 +80,7 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+import { MlTooltipComponent } from '../components/chart_tooltip';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -86,7 +88,6 @@ function mapSwimlaneOptionsToEuiOptions(options) {
     text: option,
   }));
 }
-
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
   <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
@@ -111,6 +112,8 @@ export class Explorer extends React.Component {
     severity: PropTypes.number.isRequired,
     showCharts: PropTypes.bool.isRequired,
   };
+
+  state = { filterIconTriggeredQuery: undefined, language: DEFAULT_QUERY_LANG };
 
   _unsubscribeAll = new Subject();
   // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
@@ -176,6 +179,8 @@ export class Explorer extends React.Component {
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', this.resizeHandler);
+
+    this.timeBuckets = getTimeBucketsFromCache();
   }
 
   componentWillUnmount() {
@@ -221,7 +226,6 @@ export class Explorer extends React.Component {
   // and will cause a syntax error when called with getKqlQueryValues
   applyFilter = (fieldName, fieldValue, action) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
-
     let newQueryString = '';
     const operator = 'and ';
     const sanitizedFieldName = escapeParens(fieldName);
@@ -248,11 +252,22 @@ export class Explorer extends React.Component {
       }
     }
 
+    this.setState({ filterIconTriggeredQuery: `${newQueryString}` });
+
     try {
-      const queryValues = getKqlQueryValues(`${newQueryString}`, indexPattern);
-      this.applyInfluencersFilterQuery(queryValues);
+      const { clearSettings, settings } = getKqlQueryValues({
+        inputString: `${newQueryString}`,
+        queryLanguage: this.state.language,
+        indexPattern,
+      });
+
+      if (clearSettings === true) {
+        explorerService.clearInfluencerFilterSettings();
+      } else {
+        explorerService.setInfluencerFilterSettings(settings);
+      }
     } catch (e) {
-      console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+      console.log('Invalid query syntax from table', e); // eslint-disable-line no-console
 
       const toastNotifications = getToastNotifications();
       toastNotifications.addDanger(
@@ -264,18 +279,7 @@ export class Explorer extends React.Component {
     }
   };
 
-  applyInfluencersFilterQuery = payload => {
-    const { filterQuery: influencersFilterQuery } = payload;
-
-    if (
-      influencersFilterQuery.match_all &&
-      Object.keys(influencersFilterQuery.match_all).length === 0
-    ) {
-      explorerService.clearInfluencerFilterSettings();
-    } else {
-      explorerService.setInfluencerFilterSettings(payload);
-    }
-  };
+  updateLanguage = language => this.setState({ language });
 
   render() {
     const { showCharts, severity } = this.props;
@@ -296,7 +300,6 @@ export class Explorer extends React.Component {
       selectedJobs,
       swimlaneContainerWidth,
       tableData,
-      tableQueryString,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneData,
       viewBySwimlaneDataLoading,
@@ -357,17 +360,15 @@ export class Explorer extends React.Component {
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
-          {/* Make sure ChartTooltip is inside wrapping div with 0px left/right padding so positioning can be inferred correctly. */}
-          <ChartTooltip />
-
           {noInfluencersConfigured === false && influencers !== undefined && (
             <div className="mlAnomalyExplorer__filterBar">
-              <KqlFilterBar
+              <ExplorerQueryBar
+                filterActive={filterActive}
+                filterPlaceHolder={filterPlaceHolder}
                 indexPattern={indexPattern}
-                onSubmit={this.applyInfluencersFilterQuery}
-                initialValue={queryString}
-                placeholder={filterPlaceHolder}
-                valueExternal={tableQueryString}
+                queryString={queryString}
+                filterIconTriggeredQuery={this.state.filterIconTriggeredQuery}
+                updateLanguage={this.updateLanguage}
               />
             </div>
           )}
@@ -416,17 +417,22 @@ export class Explorer extends React.Component {
               data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             >
               {showOverallSwimlane && (
-                <ExplorerSwimlane
-                  chartWidth={swimlaneContainerWidth}
-                  filterActive={filterActive}
-                  maskAll={maskAll}
-                  TimeBuckets={TimeBuckets}
-                  swimlaneCellClick={this.swimlaneCellClick}
-                  swimlaneData={overallSwimlaneData}
-                  swimlaneType={SWIMLANE_TYPE.OVERALL}
-                  selection={selectedCells}
-                  swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                />
+                <MlTooltipComponent>
+                  {tooltipService => (
+                    <ExplorerSwimlane
+                      chartWidth={swimlaneContainerWidth}
+                      filterActive={filterActive}
+                      maskAll={maskAll}
+                      timeBuckets={this.timeBuckets}
+                      swimlaneCellClick={this.swimlaneCellClick}
+                      swimlaneData={overallSwimlaneData}
+                      swimlaneType={SWIMLANE_TYPE.OVERALL}
+                      selection={selectedCells}
+                      swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                      tooltipService={tooltipService}
+                    />
+                  )}
+                </MlTooltipComponent>
               )}
             </div>
 
@@ -492,17 +498,22 @@ export class Explorer extends React.Component {
                       onMouseLeave={this.onSwimlaneLeaveHandler}
                       data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
                     >
-                      <ExplorerSwimlane
-                        chartWidth={swimlaneContainerWidth}
-                        filterActive={filterActive}
-                        maskAll={maskAll}
-                        TimeBuckets={TimeBuckets}
-                        swimlaneCellClick={this.swimlaneCellClick}
-                        swimlaneData={viewBySwimlaneData}
-                        swimlaneType={SWIMLANE_TYPE.VIEW_BY}
-                        selection={selectedCells}
-                        swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
-                      />
+                      <MlTooltipComponent>
+                        {tooltipService => (
+                          <ExplorerSwimlane
+                            chartWidth={swimlaneContainerWidth}
+                            filterActive={filterActive}
+                            maskAll={maskAll}
+                            timeBuckets={this.timeBuckets}
+                            swimlaneCellClick={this.swimlaneCellClick}
+                            swimlaneData={viewBySwimlaneData}
+                            swimlaneType={SWIMLANE_TYPE.VIEW_BY}
+                            selection={selectedCells}
+                            swimlaneRenderDoneListener={this.swimlaneRenderDoneListener}
+                            tooltipService={tooltipService}
+                          />
+                        )}
+                      </MlTooltipComponent>
                     </div>
                   </>
                 )}

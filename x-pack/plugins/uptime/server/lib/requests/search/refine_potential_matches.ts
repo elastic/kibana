@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_NAMES } from '../../../../../../legacy/plugins/uptime/common/constants';
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 /**
@@ -69,7 +68,8 @@ const fullyMatchingIds = async (
       const status = topSource.summary.down > 0 ? 'down' : 'up';
 
       // This monitor doesn't match, so just skip ahead and don't add it to the output
-      if (queryContext.statusFilter && queryContext.statusFilter !== status) {
+      // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
+      if (queryContext?.statusFilter === 'up' && queryContext.statusFilter !== status) {
         continue MonitorLoop;
       }
 
@@ -96,7 +96,7 @@ export const mostRecentCheckGroups = async (
   potentialMatchMonitorIDs: string[]
 ): Promise<any> => {
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: queryContext.heartbeatIndices,
     body: {
       size: 0,
       query: {

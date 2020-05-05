@@ -18,7 +18,7 @@ export interface IRouter
 |  --- | --- | --- |
 |  [delete](./kibana-plugin-core-server.irouter.delete.md) | <code>RouteRegistrar&lt;'delete'&gt;</code> | Register a route handler for <code>DELETE</code> request. |
 |  [get](./kibana-plugin-core-server.irouter.get.md) | <code>RouteRegistrar&lt;'get'&gt;</code> | Register a route handler for <code>GET</code> request. |
-|  [handleLegacyErrors](./kibana-plugin-core-server.irouter.handlelegacyerrors.md) | <code>&lt;P, Q, B&gt;(handler: RequestHandler&lt;P, Q, B&gt;) =&gt; RequestHandler&lt;P, Q, B&gt;</code> | Wrap a router handler to catch and converts legacy boom errors to proper custom errors. |
+|  [handleLegacyErrors](./kibana-plugin-core-server.irouter.handlelegacyerrors.md) | <code>RequestHandlerWrapper</code> | Wrap a router handler to catch and converts legacy boom errors to proper custom errors. |
 |  [patch](./kibana-plugin-core-server.irouter.patch.md) | <code>RouteRegistrar&lt;'patch'&gt;</code> | Register a route handler for <code>PATCH</code> request. |
 |  [post](./kibana-plugin-core-server.irouter.post.md) | <code>RouteRegistrar&lt;'post'&gt;</code> | Register a route handler for <code>POST</code> request. |
 |  [put](./kibana-plugin-core-server.irouter.put.md) | <code>RouteRegistrar&lt;'put'&gt;</code> | Register a route handler for <code>PUT</code> request. |

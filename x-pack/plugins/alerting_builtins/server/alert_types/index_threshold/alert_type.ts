@@ -22,7 +22,7 @@ export function getAlertType(service: Service): AlertType {
   const { logger } = service;
 
   const alertTypeName = i18n.translate('xpack.alertingBuiltins.indexThreshold.alertTypeTitle', {
-    defaultMessage: 'Index Threshold',
+    defaultMessage: 'Index threshold',
   });
 
   const actionGroupName = i18n.translate(
@@ -113,6 +113,7 @@ export function getAlertType(service: Service): AlertType {
       timeWindowUnit: params.timeWindowUnit,
       interval: undefined,
     };
+    // console.log(`index_threshold: query: ${JSON.stringify(queryParams, null, 4)}`);
     const result = await service.indexThreshold.timeSeriesQuery({
       logger,
       callCluster,
@@ -121,6 +122,7 @@ export function getAlertType(service: Service): AlertType {
     logger.debug(`alert ${ID}:${alertId} "${name}" query result: ${JSON.stringify(result)}`);
 
     const groupResults = result.results || [];
+    // console.log(`index_threshold: response: ${JSON.stringify(groupResults, null, 4)}`);
     for (const groupResult of groupResults) {
       const instanceId = groupResult.group;
       const value = groupResult.metrics[0][1];

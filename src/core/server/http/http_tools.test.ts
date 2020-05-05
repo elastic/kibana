@@ -18,6 +18,8 @@
  */
 
 jest.mock('fs', () => ({
+  // Hapi Inert patches native methods
+  ...jest.requireActual('fs'),
   readFileSync: jest.fn(),
 }));
 

@@ -21,6 +21,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import classNames from 'classnames';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 import { StatefulSearchBarProps, DataPublicPluginStart } from '../../../data/public';
@@ -29,6 +30,7 @@ export type TopNavMenuProps = StatefulSearchBarProps & {
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
   data?: DataPublicPluginStart;
+  className?: string;
 };
 
 /*
@@ -46,7 +48,11 @@ export function TopNavMenu(props: TopNavMenuProps) {
     if (!config) return;
     return config.map((menuItem: TopNavMenuData, i: number) => {
       return (
-        <EuiFlexItem grow={false} key={`nav-menu-${i}`}>
+        <EuiFlexItem
+          grow={false}
+          key={`nav-menu-${i}`}
+          className={menuItem.emphasize ? 'kbnTopNavItemEmphasized' : ''}
+        >
           <TopNavMenuItem {...menuItem} />
         </EuiFlexItem>
       );
@@ -61,13 +67,15 @@ export function TopNavMenu(props: TopNavMenuProps) {
   }
 
   function renderLayout() {
+    const className = classNames('kbnTopNavMenu', props.className);
     return (
       <span className="kbnTopNavMenu__wrapper">
         <EuiFlexGroup
           data-test-subj="top-nav"
           justifyContent="flexStart"
+          alignItems="center"
           gutterSize="none"
-          className="kbnTopNavMenu"
+          className={className}
           responsive={false}
         >
           {renderItems()}

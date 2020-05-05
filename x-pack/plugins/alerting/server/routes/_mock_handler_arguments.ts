@@ -4,19 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import {
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
+  IClusterClient,
+} from 'kibana/server';
 import { identity } from 'lodash';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { alertsClientMock } from '../alerts_client.mock';
+import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
+import { AlertType } from '../../common';
+import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 export function mockHandlerArguments(
-  { alertsClient, listTypes: listTypesRes = [] }: any,
-  req: any,
+  {
+    alertsClient = alertsClientMock.create(),
+    listTypes: listTypesRes = [],
+    elasticsearch = elasticsearchServiceMock.createSetup(),
+  }: {
+    alertsClient?: AlertsClientMock;
+    listTypes?: AlertType[];
+    elasticsearch?: jest.Mocked<{
+      adminClient: jest.Mocked<IClusterClient>;
+    }>;
+  },
+  req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
-): [RequestHandlerContext, KibanaRequest<any, any, any, any>, KibanaResponseFactory] {
+): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
+      core: { elasticsearch },
       alerting: {
         listTypes,
         getAlertsClient() {
@@ -24,7 +42,7 @@ export function mockHandlerArguments(
         },
       },
     } as unknown) as RequestHandlerContext,
-    req as KibanaRequest<any, any, any, any>,
+    req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
 }

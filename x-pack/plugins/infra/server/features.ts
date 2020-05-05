@@ -11,26 +11,49 @@ export const METRICS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
     defaultMessage: 'Metrics',
   }),
+  order: 700,
   icon: 'metricsApp',
   navLinkId: 'metrics',
   app: ['infra', 'kibana'],
   catalogue: ['infraops'],
   privileges: {
     all: {
-      api: ['infra'],
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
+      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
       savedObject: {
-        all: ['infrastructure-ui-source'],
+        all: ['infrastructure-ui-source', 'alert', 'action', 'action_task_params'],
         read: ['index-pattern'],
       },
-      ui: ['show', 'configureSource', 'save'],
+      ui: [
+        'show',
+        'configureSource',
+        'save',
+        'alerting:show',
+        'actions:show',
+        'alerting:save',
+        'actions:save',
+        'alerting:delete',
+        'actions:delete',
+      ],
     },
     read: {
-      api: ['infra'],
+      app: ['infra', 'kibana'],
+      catalogue: ['infraops'],
+      api: ['infra', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
       savedObject: {
-        all: [],
+        all: ['alert', 'action', 'action_task_params'],
         read: ['infrastructure-ui-source', 'index-pattern'],
       },
-      ui: ['show'],
+      ui: [
+        'show',
+        'alerting:show',
+        'actions:show',
+        'alerting:save',
+        'actions:save',
+        'alerting:delete',
+        'actions:delete',
+      ],
     },
   },
 };
@@ -40,12 +63,15 @@ export const LOGS_FEATURE = {
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
     defaultMessage: 'Logs',
   }),
+  order: 800,
   icon: 'logsApp',
   navLinkId: 'logs',
   app: ['infra', 'kibana'],
   catalogue: ['infralogging'],
   privileges: {
     all: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: ['infrastructure-ui-source'],
@@ -54,6 +80,8 @@ export const LOGS_FEATURE = {
       ui: ['show', 'configureSource', 'save'],
     },
     read: {
+      app: ['infra', 'kibana'],
+      catalogue: ['infralogging'],
       api: ['infra'],
       savedObject: {
         all: [],

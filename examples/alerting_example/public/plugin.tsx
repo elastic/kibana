@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { PluginSetupContract as AlertingSetup } from '../../../x-pack/plugins/alerting/public';
 import { ChartsPluginStart } from '../../../src/plugins/charts/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../x-pack/plugins/triggers_actions_ui/public';
@@ -43,17 +43,14 @@ export interface AlertingExamplePublicStartDeps {
 
 export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
   public setup(
-    core: CoreSetup<AlertingExamplePublicStartDeps>,
+    core: CoreSetup<AlertingExamplePublicStartDeps, Start>,
     { alerting, triggers_actions_ui }: AlertingExamplePublicSetupDeps
   ) {
     core.application.register({
       id: 'AlertingExample',
       title: 'Alerting Example',
       async mount(params: AppMountParameters) {
-        const [coreStart, depsStart]: [
-          CoreStart,
-          AlertingExamplePublicStartDeps
-        ] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
         return renderApp(coreStart, depsStart, params);
       },

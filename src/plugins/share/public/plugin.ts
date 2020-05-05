@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './index.scss';
+
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';

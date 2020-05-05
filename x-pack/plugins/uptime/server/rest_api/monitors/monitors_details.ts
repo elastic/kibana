@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants/rest_api';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -19,15 +19,13 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
       dateEnd: schema.maybe(schema.string()),
     }),
   },
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
     return response.ok({
       body: {
         ...(await libs.requests.getMonitorDetails({
           callES,
+          dynamicSettings,
           monitorId,
           dateStart,
           dateEnd,

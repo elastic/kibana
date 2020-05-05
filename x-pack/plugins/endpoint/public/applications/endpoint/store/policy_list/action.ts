@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData } from '../../types';
+import { ServerApiError } from '../../types';
+import { PolicyData } from '../../../../../common/types';
 
 interface ServerReturnedPolicyListData {
   type: 'serverReturnedPolicyListData';
@@ -16,12 +17,9 @@ interface ServerReturnedPolicyListData {
   };
 }
 
-interface UserPaginatedPolicyListTable {
-  type: 'userPaginatedPolicyListTable';
-  payload: {
-    pageSize: number;
-    pageIndex: number;
-  };
+interface ServerFailedToReturnPolicyListData {
+  type: 'serverFailedToReturnPolicyListData';
+  payload: ServerApiError;
 }
 
-export type PolicyListAction = ServerReturnedPolicyListData | UserPaginatedPolicyListTable;
+export type PolicyListAction = ServerReturnedPolicyListData | ServerFailedToReturnPolicyListData;

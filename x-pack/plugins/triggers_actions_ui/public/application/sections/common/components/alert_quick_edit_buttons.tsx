@@ -5,9 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, Fragment } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { Alert } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
@@ -15,11 +15,13 @@ import {
   withBulkAlertOperations,
   ComponentOpts as BulkOperationsComponentOpts,
 } from './with_bulk_alert_api_operations';
+import './alert_quick_edit_buttons.scss';
 
 export type ComponentOpts = {
   selectedItems: Alert[];
   onPerformingAction?: () => void;
   onActionPerformed?: () => void;
+  setAlertsToDelete: React.Dispatch<React.SetStateAction<string[]>>;
 } & BulkOperationsComponentOpts;
 
 export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
@@ -30,7 +32,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   unmuteAlerts,
   enableAlerts,
   disableAlerts,
-  deleteAlerts,
+  setAlertsToDelete,
 }: ComponentOpts) => {
   const { toastNotifications } = useAppDependencies();
 
@@ -129,7 +131,7 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
     onPerformingAction();
     setIsDeletingAlerts(true);
     try {
-      await deleteAlerts(selectedItems);
+      setAlertsToDelete(selectedItems.map((selected: any) => selected.id));
     } catch (e) {
       toastNotifications.addDanger({
         title: i18n.translate(
@@ -146,72 +148,84 @@ export const AlertQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
   }
 
   return (
-    <Fragment>
+    <EuiFlexGroup alignItems="baseline" direction="column" gutterSize="none">
       {!allAlertsMuted && (
-        <EuiButtonEmpty
-          onClick={onmMuteAllClick}
-          isLoading={isMutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="muteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
-            defaultMessage="Mute"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onmMuteAllClick}
+            isLoading={isMutingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="muteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
+              defaultMessage="Mute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsMuted && (
-        <EuiButtonEmpty
-          onClick={onUnmuteAllClick}
-          isLoading={isUnmutingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="unmuteAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
-            defaultMessage="Unmute"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onUnmuteAllClick}
+            isLoading={isUnmutingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="unmuteAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
+              defaultMessage="Unmute"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {allAlertsDisabled && (
-        <EuiButtonEmpty
-          onClick={onEnableAllClick}
-          isLoading={isEnablingAlerts}
-          isDisabled={isPerformingAction}
-          data-test-subj="enableAll"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
-            defaultMessage="Enable"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onEnableAllClick}
+            isLoading={isEnablingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="enableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
+              defaultMessage="Enable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
       {!allAlertsDisabled && (
+        <EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={onDisableAllClick}
+            isLoading={isDisablingAlerts}
+            isDisabled={isPerformingAction}
+            data-test-subj="disableAll"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
+              defaultMessage="Disable"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>
         <EuiButtonEmpty
-          onClick={onDisableAllClick}
-          isLoading={isDisablingAlerts}
+          onClick={deleteSelectedItems}
+          isLoading={isDeletingAlerts}
+          iconType="trash"
+          color="danger"
           isDisabled={isPerformingAction}
-          data-test-subj="disableAll"
+          data-test-subj="deleteAll"
+          className="actBulkActionPopover__deleteAll"
         >
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
-            defaultMessage="Disable"
+            id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
+            defaultMessage="Delete"
           />
         </EuiButtonEmpty>
-      )}
-
-      <EuiButtonEmpty
-        onClick={deleteSelectedItems}
-        isLoading={isDeletingAlerts}
-        isDisabled={isPerformingAction}
-        data-test-subj="deleteAll"
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
-          defaultMessage="Delete"
-        />
-      </EuiButtonEmpty>
-    </Fragment>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

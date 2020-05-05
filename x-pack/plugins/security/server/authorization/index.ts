@@ -29,12 +29,14 @@ import { initAppAuthorization } from './app_authorization';
 import { initAPIAuthorization } from './api_authorization';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
+import { validateReservedPrivileges } from './validate_reserved_privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { APPLICATION_PREFIX } from '../../common/constants';
 import { SecurityLicense } from '../../common/licensing';
 
 export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
+export { featurePrivilegeIterator } from './privileges';
 
 interface SetupAuthorizationParams {
   packageVersion: string;
@@ -80,7 +82,7 @@ export function setupAuthorization({
     clusterClient,
     applicationName
   );
-  const privileges = privilegesFactory(actions, featuresService);
+  const privileges = privilegesFactory(actions, featuresService, license);
   const logger = loggers.get('authorization');
 
   const authz = {
@@ -120,7 +122,9 @@ export function setupAuthorization({
     },
 
     registerPrivilegesWithCluster: async () => {
-      validateFeaturePrivileges(actions, featuresService.getFeatures());
+      const features = featuresService.getFeatures();
+      validateFeaturePrivileges(features);
+      validateReservedPrivileges(features);
 
       await registerPrivilegesWithCluster(logger, privileges, applicationName, clusterClient);
     },

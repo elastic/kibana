@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointAppConstants } from '../../../../common/types';
+
 import { LifecycleQuery } from './lifecycle';
+import { fakeEventIndexPattern } from './children.test';
+import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 describe('lifecycle query', () => {
   it('generates the correct legacy queries', () => {
-    expect(new LifecycleQuery('awesome-id').build('5')).toStrictEqual({
+    expect(new LifecycleQuery(legacyEventIndexPattern, 'awesome-id').build('5')).toStrictEqual({
       body: {
         query: {
           bool: {
@@ -20,34 +22,32 @@ describe('lifecycle query', () => {
                 term: { 'agent.id': 'awesome-id' },
               },
               {
+                term: { 'event.kind': 'event' },
+              },
+              {
                 term: { 'event.category': 'process' },
               },
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
-      index: EndpointAppConstants.LEGACY_EVENT_INDEX_NAME,
+      index: legacyEventIndexPattern,
     });
   });
 
   it('generates the correct non-legacy queries', () => {
-    expect(new LifecycleQuery().build('baz')).toStrictEqual({
+    expect(new LifecycleQuery(fakeEventIndexPattern).build('baz')).toStrictEqual({
       body: {
         query: {
           bool: {
             filter: [
               {
-                bool: {
-                  should: [
-                    {
-                      terms: { 'endpoint.process.entity_id': ['baz'] },
-                    },
-                    {
-                      terms: { 'process.entity_id': ['baz'] },
-                    },
-                  ],
-                },
+                terms: { 'process.entity_id': ['baz'] },
+              },
+              {
+                term: { 'event.kind': 'event' },
               },
               {
                 term: { 'event.category': 'process' },
@@ -55,9 +55,10 @@ describe('lifecycle query', () => {
             ],
           },
         },
+        size: 10000,
         sort: [{ '@timestamp': 'asc' }],
       },
-      index: EndpointAppConstants.EVENT_INDEX_NAME,
+      index: fakeEventIndexPattern,
     });
   });
 });

@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Capabilities, HttpStart, NotificationsStart } from 'src/core/public';
-import { Feature } from '../../../../features/public';
+import { Capabilities, NotificationsStart } from 'src/core/public';
+import { Feature, FeaturesPluginStart } from '../../../../features/public';
 import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
@@ -36,7 +36,7 @@ import { getEnabledFeatures } from '../lib/feature_utils';
 interface Props {
   spacesManager: SpacesManager;
   notifications: NotificationsStart;
-  http: HttpStart;
+  getFeatures: FeaturesPluginStart['getFeatures'];
   capabilities: Capabilities;
   securityEnabled: boolean;
 }
@@ -47,7 +47,6 @@ interface State {
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
-  error: Error | null;
 }
 
 export class SpacesGridPage extends Component<Props, State> {
@@ -59,7 +58,6 @@ export class SpacesGridPage extends Component<Props, State> {
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
-      error: null,
     };
   }
 
@@ -178,10 +176,14 @@ export class SpacesGridPage extends Component<Props, State> {
       return;
     }
 
+    this.setState({
+      showConfirmDeleteModal: false,
+    });
+
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
-      const { message: errorMessage = '' } = error.data || {};
+      const { message: errorMessage = '' } = error.data || error.body || {};
 
       this.props.notifications.toasts.addDanger(
         i18n.translate('xpack.spaces.management.spacesGridPage.errorDeletingSpaceErrorMessage', {
@@ -191,11 +193,8 @@ export class SpacesGridPage extends Component<Props, State> {
           },
         })
       );
+      return;
     }
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
 
     this.loadGrid();
 
@@ -211,7 +210,7 @@ export class SpacesGridPage extends Component<Props, State> {
   };
 
   public loadGrid = async () => {
-    const { spacesManager, http } = this.props;
+    const { spacesManager, getFeatures, notifications } = this.props;
 
     this.setState({
       loading: true,
@@ -220,10 +219,9 @@ export class SpacesGridPage extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = http.get('/api/features');
 
     try {
-      const [spaces, features] = await Promise.all([getSpaces, getFeatures]);
+      const [spaces, features] = await Promise.all([getSpaces, getFeatures()]);
       this.setState({
         loading: false,
         spaces,
@@ -232,7 +230,11 @@ export class SpacesGridPage extends Component<Props, State> {
     } catch (error) {
       this.setState({
         loading: false,
-        error,
+      });
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.spaces.management.spacesGridPage.errorTitle', {
+          defaultMessage: 'Error loading spaces',
+        }),
       });
     }
   };

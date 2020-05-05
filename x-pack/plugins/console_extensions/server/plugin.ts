@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '
 
 import { ConsoleSetup, ConsoleStart } from '../../../../src/plugins/console/server';
 
-import { processors } from './spec/ingest/index';
+import { processors } from './lib/spec_definitions/js';
 
 interface SetupDependencies {
   console: ConsoleSetup;
@@ -18,7 +18,7 @@ interface StartDependencies {
   console: ConsoleStart;
 }
 
-const CONSOLE_XPACK_JSON_SPEC_PATH = join(__dirname, 'spec/');
+const CONSOLE_XPACK_JSON_SPEC_PATH = join(__dirname, 'lib/spec_definitions/json');
 
 export class ConsoleExtensionsServerPlugin implements Plugin<void, void, SetupDependencies> {
   log: Logger;

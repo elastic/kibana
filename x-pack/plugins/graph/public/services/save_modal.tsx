@@ -5,10 +5,15 @@
  */
 
 import React from 'react';
-import { I18nStart } from 'src/core/public';
+import { I18nStart, OverlayStart, SavedObjectsClientContract } from 'src/core/public';
 import { SaveResult } from 'src/plugins/saved_objects/public';
 import { GraphWorkspaceSavedObject, GraphSavePolicy } from '../types';
 import { SaveModal, OnSaveGraphProps } from '../components/save_modal';
+
+export interface SaveWorkspaceServices {
+  overlays: OverlayStart;
+  savedObjectsClient: SavedObjectsClientContract;
+}
 
 export type SaveWorkspaceHandler = (
   saveOptions: {
@@ -16,7 +21,8 @@ export type SaveWorkspaceHandler = (
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   },
-  dataConsent: boolean
+  dataConsent: boolean,
+  services: SaveWorkspaceServices
 ) => Promise<SaveResult>;
 
 export function openSaveModal({
@@ -26,6 +32,7 @@ export function openSaveModal({
   saveWorkspace,
   showSaveModal,
   I18nContext,
+  services,
 }: {
   savePolicy: GraphSavePolicy;
   hasData: boolean;
@@ -33,6 +40,7 @@ export function openSaveModal({
   saveWorkspace: SaveWorkspaceHandler;
   showSaveModal: (el: React.ReactNode, I18nContext: I18nStart['Context']) => void;
   I18nContext: I18nStart['Context'];
+  services: SaveWorkspaceServices;
 }) {
   const currentTitle = workspace.title;
   const currentDescription = workspace.description;
@@ -52,7 +60,7 @@ export function openSaveModal({
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     };
-    return saveWorkspace(saveOptions, dataConsent).then(response => {
+    return saveWorkspace(saveOptions, dataConsent, services).then(response => {
       // If the save wasn't successful, put the original values back.
       if (!('id' in response) || !Boolean(response.id)) {
         workspace.title = currentTitle;

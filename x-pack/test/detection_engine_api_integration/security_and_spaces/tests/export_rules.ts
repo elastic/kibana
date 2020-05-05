@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .send()
-          .query()
           .expect(200)
           .expect('Content-Type', 'application/ndjson')
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
@@ -62,7 +61,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .send()
-          .query()
           .expect(200)
           .parse(binaryToString);
 
@@ -83,7 +81,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .send()
-          .query()
           .expect(200)
           .parse(binaryToString);
 
@@ -115,7 +112,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
           .set('kbn-xsrf', 'true')
           .send()
-          .query()
           .expect(200)
           .parse(binaryToString);
 

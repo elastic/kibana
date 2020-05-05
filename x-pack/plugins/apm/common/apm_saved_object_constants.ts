@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// APM Services telemetry
-export const APM_SERVICES_TELEMETRY_SAVED_OBJECT_TYPE =
-  'apm-services-telemetry';
-export const APM_SERVICES_TELEMETRY_SAVED_OBJECT_ID = 'apm-services-telemetry';
+// the types have to match the names of the saved object mappings
+// in /x-pack/plugins/apm/mappings.json
 
 // APM indices
 export const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
+
+// APM telemetry
+export const APM_TELEMETRY_SAVED_OBJECT_TYPE = 'apm-telemetry';
+export const APM_TELEMETRY_SAVED_OBJECT_ID = 'apm-telemetry';

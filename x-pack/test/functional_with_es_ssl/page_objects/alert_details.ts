@@ -102,15 +102,28 @@ export function AlertDetailsPageProvider({ getService }: FtrProviderContext) {
       const nextButton = await testSubjects.find(`pagination-button-next`);
       nextButton.click();
     },
-    async isViewInAppEnabled() {
-      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
-      return (await viewInAppButton.getAttribute('disabled')) !== 'disabled';
+    async isViewInAppDisabled() {
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
+      });
+      return true;
     },
-    async clickViewInAppEnabled() {
-      const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
-      return viewInAppButton.click();
+    async isViewInAppEnabled() {
+      await retry.try(async () => {
+        const viewInAppButton = await testSubjects.find(`alertDetails-viewInApp`);
+        expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
+      });
+      return true;
+    },
+    async clickViewInApp() {
+      return await testSubjects.click('alertDetails-viewInApp');
     },
     async getNoOpAppTitle() {
+      await retry.try(async () => {
+        const title = await testSubjects.find('noop-title');
+        expect(title.isDisplayed()).to.eql(true);
+      });
       return await testSubjects.getVisibleText('noop-title');
     },
   };

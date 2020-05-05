@@ -22,7 +22,9 @@ interface ReturnValue {
 const extractProfilerErrorMessage = (e: any): string | undefined => {
   if (e.body?.attributes?.error?.reason) {
     const { reason, line, col } = e.body.attributes.error;
-    return `${reason} at line: ${line - 1} col: ${col}`;
+    if (typeof line === 'number' && typeof col === 'number') {
+      return `${reason} at line: ${line - 1} col: ${col}`;
+    }
   }
 
   if (e.body?.message) {

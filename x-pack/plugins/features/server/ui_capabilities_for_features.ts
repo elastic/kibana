@@ -39,7 +39,17 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
     };
   }
 
-  Object.values(feature.privileges).forEach(privilege => {
+  const featurePrivileges = Object.values(feature.privileges ?? {});
+  if (feature.subFeatures) {
+    featurePrivileges.push(
+      ...feature.subFeatures.map(sf => sf.privilegeGroups.map(pg => pg.privileges)).flat(2)
+    );
+  }
+  if (feature.reserved?.privileges) {
+    featurePrivileges.push(...feature.reserved.privileges.map(rp => rp.privilege));
+  }
+
+  featurePrivileges.forEach(privilege => {
     UIFeatureCapabilities[feature.id] = {
       ...UIFeatureCapabilities[feature.id],
       ...privilege.ui.reduce(

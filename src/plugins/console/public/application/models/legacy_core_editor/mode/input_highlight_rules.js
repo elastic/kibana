@@ -18,7 +18,7 @@
  */
 
 const ace = require('brace');
-import { addXJsonToRules } from '../../../../../../es_ui_shared/console_lang';
+import { addXJsonToRules } from '../../../../../../es_ui_shared/public';
 
 export function addEOL(tokens, reg, nextIfEOL, normalNext) {
   if (typeof reg === 'object') {

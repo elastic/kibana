@@ -13,11 +13,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getService }: FtrProviderContext) {
   const client = getService('legacyEs');
   const index = 'test-index';
-  const baseParams = {
-    metric: 'test.metric',
-    timeUnit: 'm',
-    timeSize: 5,
-  };
+  const getSearchParams = (aggType: string) =>
+    ({
+      aggType,
+      timeUnit: 'm',
+      timeSize: 5,
+      ...(aggType !== 'count' ? { metric: 'test.metric' } : {}),
+    } as MetricExpressionParams);
   describe('Metrics Threshold Alerts', () => {
     before(async () => {
       await client.index({
@@ -30,24 +32,20 @@ export default function({ getService }: FtrProviderContext) {
     describe('querying the entire infrastructure', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
-          const searchBody = getElasticsearchMetricQuery({
-            ...baseParams,
-            aggType,
-          } as MetricExpressionParams);
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), '@timestamp');
           const result = await client.search({
             index,
             body: searchBody,
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
         const searchBody = getElasticsearchMetricQuery(
-          {
-            ...baseParams,
-            aggType: 'avg',
-          } as MetricExpressionParams,
+          getSearchParams('avg'),
+          '@timestamp',
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -57,16 +55,30 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
+      });
+      it('should work with a filterQuery in KQL format', async () => {
+        const searchBody = getElasticsearchMetricQuery(
+          getSearchParams('avg'),
+          '@timestamp',
+          undefined,
+          '"agent.hostname":"foo"'
+        );
+        const result = await client.search({
+          index,
+          body: searchBody,
+        });
+        expect(result.error).to.not.be.ok();
+        expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
     describe('querying with a groupBy parameter', () => {
       for (const aggType of aggs) {
         it(`should work with the ${aggType} aggregator`, async () => {
           const searchBody = getElasticsearchMetricQuery(
-            {
-              ...baseParams,
-              aggType,
-            } as MetricExpressionParams,
+            getSearchParams(aggType),
+            '@timestamp',
             'agent.id'
           );
           const result = await client.search({
@@ -75,14 +87,13 @@ export default function({ getService }: FtrProviderContext) {
           });
           expect(result.error).to.not.be.ok();
           expect(result.hits).to.be.ok();
+          expect(result.aggregations).to.be.ok();
         });
       }
       it('should work with a filterQuery', async () => {
         const searchBody = getElasticsearchMetricQuery(
-          {
-            ...baseParams,
-            aggType: 'avg',
-          } as MetricExpressionParams,
+          getSearchParams('avg'),
+          '@timestamp',
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
         );
@@ -92,6 +103,7 @@ export default function({ getService }: FtrProviderContext) {
         });
         expect(result.error).to.not.be.ok();
         expect(result.hits).to.be.ok();
+        expect(result.aggregations).to.be.ok();
       });
     });
   });

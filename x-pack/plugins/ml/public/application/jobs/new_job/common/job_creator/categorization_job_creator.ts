@@ -16,8 +16,8 @@ import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
-  CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '../../../../../../common/constants/new_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '../../../../../../common/constants/categorization_job';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
 import {
   CategorizationAnalyzer,
@@ -118,6 +118,9 @@ export class CategorizationJobCreator extends JobCreator {
     this._categoryFieldExamples = examples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
+
+    this._wizardInitialized$.next(true);
+
     return { examples, sampleSize, overallValidStatus, validationChecks };
   }
 

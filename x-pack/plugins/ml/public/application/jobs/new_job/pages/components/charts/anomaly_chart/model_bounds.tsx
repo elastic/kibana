@@ -44,7 +44,7 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       yScaleToDataExtent={false}
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
-      customSeriesColors={[MODEL_COLOR]}
+      color={MODEL_COLOR}
     />
   );
 };

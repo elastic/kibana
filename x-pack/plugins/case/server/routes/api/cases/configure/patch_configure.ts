@@ -16,11 +16,12 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
     {
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       validate: {
         body: escapeHatch,
       },
@@ -38,7 +39,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
 
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
-            'You can not patch this configuration since you did not created first with a post'
+            'You can not patch this configuration since you did not created first with a post.'
           );
         }
 
@@ -48,8 +49,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
           );
         }
 
-        const updatedBy = await caseService.getUser({ request, response });
-        const { email, full_name, username } = updatedBy;
+        const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const updateDate = new Date().toISOString();
         const patch = await caseConfigureService.patch({

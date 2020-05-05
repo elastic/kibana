@@ -187,7 +187,7 @@ describe('POST /internal/saved_objects/_import', () => {
           references: [],
           error: {
             statusCode: 409,
-            message: 'version conflict, document already exists',
+            message: 'Saved object [index-pattern/my-pattern] conflict',
           },
         },
         {

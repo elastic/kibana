@@ -19,7 +19,7 @@ import {
 import { AgentConfig, Datasource } from '../../../../../types';
 import { TableRowActions } from '../../../components/table_row_actions';
 import { DangerEuiContextMenuItem } from '../../../components/danger_eui_context_menu_item';
-import { useCapabilities } from '../../../../../hooks';
+import { useCapabilities, useLink } from '../../../../../hooks';
 import { useAgentConfigLink } from '../../hooks/use_details_uri';
 import { DatasourceDeleteProvider } from '../../../components/datasource_delete_provider';
 import { useConfigRefresh } from '../../hooks/use_config';
@@ -56,6 +56,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
 }) => {
   const hasWriteCapabilities = useCapabilities().write;
   const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
+  const editDatasourceLink = useLink(`/configs/${config.id}/edit-datasource`);
   const refreshConfig = useConfigRefresh();
 
   // With the datasources provided on input, generate the list of datasources
@@ -138,7 +139,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         name: i18n.translate(
           'xpack.ingestManager.configDetails.datasourcesTable.packageNameColumnTitle',
           {
-            defaultMessage: 'Package',
+            defaultMessage: 'Integration',
           }
         ),
         render(packageTitle: string, datasource: InMemoryDatasource) {
@@ -150,6 +151,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                     packageName={datasource.package.name}
                     version={datasource.package.version}
                     size="m"
+                    tryApi={true}
                   />
                 </EuiFlexItem>
               )}
@@ -200,22 +202,21 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
               <TableRowActions
                 items={[
                   // FIXME: implement View datasource action
+                  // <EuiContextMenuItem
+                  //   disabled
+                  //   icon="inspect"
+                  //   onClick={() => {}}
+                  //   key="datasourceView"
+                  // >
+                  //   <FormattedMessage
+                  //     id="xpack.ingestManager.configDetails.datasourcesTable.viewActionTitle"
+                  //     defaultMessage="View data source"
+                  //   />
+                  // </EuiContextMenuItem>,
                   <EuiContextMenuItem
-                    disabled
-                    icon="inspect"
-                    onClick={() => {}}
-                    key="datasourceView"
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.datasourcesTable.viewActionTitle"
-                      defaultMessage="View data source"
-                    />
-                  </EuiContextMenuItem>,
-                  // FIXME: implement Edit datasource action
-                  <EuiContextMenuItem
-                    disabled
+                    disabled={!hasWriteCapabilities}
                     icon="pencil"
-                    onClick={() => {}}
+                    href={`${editDatasourceLink}/${datasource.id}`}
                     key="datasourceEdit"
                   >
                     <FormattedMessage
@@ -224,12 +225,12 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
                     />
                   </EuiContextMenuItem>,
                   // FIXME: implement Copy datasource action
-                  <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="datasourceCopy">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle"
-                      defaultMessage="Copy data source"
-                    />
-                  </EuiContextMenuItem>,
+                  // <EuiContextMenuItem disabled icon="copy" onClick={() => {}} key="datasourceCopy">
+                  //   <FormattedMessage
+                  //     id="xpack.ingestManager.configDetails.datasourcesTable.copyActionTitle"
+                  //     defaultMessage="Copy data source"
+                  //   />
+                  // </EuiContextMenuItem>,
                   <DatasourceDeleteProvider agentConfig={config} key="datasourceDelete">
                     {deleteDatasourcePrompt => {
                       return (
@@ -255,7 +256,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [config, hasWriteCapabilities, refreshConfig]
+    [config, editDatasourceLink, hasWriteCapabilities, refreshConfig]
   );
 
   return (

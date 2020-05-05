@@ -61,8 +61,8 @@ For more information, see {ref}/monitoring-settings.html[Monitoring settings in 
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. Verify that `xpack.monitoring.enabled` and
-`xpack.monitoring.kibana.collection.enabled` are set to `true` in the 
+. Verify that `monitoring.enabled` and
+`monitoring.kibana.collection.enabled` are set to `true` in the 
 `kibana.yml` file. These are the default values. For 
 more information, see <<monitoring-settings-kb,Monitoring settings in {kib}>>.
 

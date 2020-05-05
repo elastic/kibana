@@ -38,8 +38,7 @@ describe('loginApp', () => {
   it('properly renders application', async () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
-    coreStartMock.injectedMetadata.getInjectedVar.mockReturnValue(true);
-    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}]);
+    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const containerMock = document.createElement('div');
 
     loginApp.create({
@@ -55,16 +54,13 @@ describe('loginApp', () => {
       history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     });
 
-    expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledTimes(1);
-    expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledWith('secureCookies');
-
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
       http: coreStartMock.http,
+      notifications: coreStartMock.notifications,
       fatalErrors: coreStartMock.fatalErrors,
       loginAssistanceMessage: 'some-message',
-      requiresSecureConnection: true,
     });
   });
 });

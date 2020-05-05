@@ -25,6 +25,8 @@ import { monaco } from '@kbn/ui-shared-deps/monaco';
 
 import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
+import './editor.scss';
+
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;

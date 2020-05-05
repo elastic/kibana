@@ -5,8 +5,8 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
 import { WhenExpression } from './when';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 describe('when expression', () => {
   it('renders with builtin aggregation types', () => {
@@ -100,6 +100,13 @@ describe('when expression', () => {
     );
     wrapper.simulate('click');
     expect(wrapper.find('[value="avg"]').length > 0).toBeTruthy();
-    expect(wrapper.contains(<EuiPopoverTitle>when</EuiPopoverTitle>)).toBeTruthy();
+    expect(
+      wrapper.contains(
+        <FormattedMessage
+          id="xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle"
+          defaultMessage="when"
+        />
+      )
+    ).toBeTruthy();
   });
 });

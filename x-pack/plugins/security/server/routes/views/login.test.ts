@@ -7,36 +7,45 @@
 import { URL } from 'url';
 import { Type } from '@kbn/config-schema';
 import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
+  HttpResources,
+  HttpResourcesRequestHandler,
   IRouter,
+  RequestHandler,
+  kibanaResponseFactory,
+  RouteConfig,
 } from '../../../../../../src/core/server';
 import { SecurityLicense } from '../../../common/licensing';
-import { Authentication } from '../../authentication';
+import { LoginSelectorProvider } from '../../../common/login_state';
+import { ConfigType } from '../../config';
 import { defineLoginRoutes } from './login';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  httpResourcesMock,
+} from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Login view routes', () => {
-  let authc: jest.Mocked<Authentication>;
+  let httpResources: jest.Mocked<HttpResources>;
   let router: jest.Mocked<IRouter>;
   let license: jest.Mocked<SecurityLicense>;
+  let config: ConfigType;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    authc = routeParamsMock.authc;
     router = routeParamsMock.router;
+    httpResources = routeParamsMock.httpResources;
     license = routeParamsMock.license;
+    config = routeParamsMock.config;
 
     defineLoginRoutes(routeParamsMock);
   });
 
   describe('View route', () => {
-    let routeHandler: RequestHandler<any, any, any, 'get'>;
+    let routeHandler: HttpResourcesRequestHandler<any, any, any>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
-      const [loginRouteConfig, loginRouteHandler] = router.get.mock.calls.find(
+      const [loginRouteConfig, loginRouteHandler] = httpResources.register.mock.calls.find(
         ([{ path }]) => path === '/login'
       )!;
 
@@ -45,7 +54,7 @@ describe('Login view routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({ authRequired: 'optional' });
 
       expect(routeConfig.validate).toEqual({
         body: undefined,
@@ -73,7 +82,7 @@ describe('Login view routes', () => {
       );
     });
 
-    it('redirects user to the root page if they have a session already or login is disabled.', async () => {
+    it('redirects user to the root page if they are authenticated or login is disabled.', async () => {
       for (const { query, expectedLocation } of [
         { query: {}, expectedLocation: '/mock-server-basepath/' },
         {
@@ -85,60 +94,57 @@ describe('Login view routes', () => {
           expectedLocation: '/mock-server-basepath/',
         },
       ]) {
-        const request = httpServerMock.createKibanaRequest({ query });
+        // Redirect if user is authenticated even if `showLogin` is `true`.
+        let request = httpServerMock.createKibanaRequest({
+          query,
+          auth: { isAuthenticated: true },
+        });
         (request as any).url = new URL(
           `${request.url.path}${request.url.search}`,
           'https://kibana.co'
         );
-
-        // Redirect if user has an active session even if `showLogin` is `true`.
-        authc.getSessionInfo.mockResolvedValue({
-          provider: 'basic',
-          now: 0,
-          idleTimeoutExpiration: null,
-          lifespanExpiration: null,
-        });
         license.getFeatures.mockReturnValue({ showLogin: true } as any);
-        await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-          options: { headers: { location: `${expectedLocation}` } },
-          status: 302,
+        const responseFactory = httpResourcesMock.createResponseFactory();
+
+        await routeHandler({} as any, request, responseFactory);
+        expect(responseFactory.redirected).toHaveBeenCalledWith({
+          headers: { location: `${expectedLocation}` },
         });
 
-        // Redirect if `showLogin` is `false` even if user doesn't have an active session even.
-        authc.getSessionInfo.mockResolvedValue(null);
+        // Redirect if `showLogin` is `false` even if user is not authenticated.
+        request = httpServerMock.createKibanaRequest({ query, auth: { isAuthenticated: false } });
+        (request as any).url = new URL(
+          `${request.url.path}${request.url.search}`,
+          'https://kibana.co'
+        );
         license.getFeatures.mockReturnValue({ showLogin: false } as any);
-        await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-          options: { headers: { location: `${expectedLocation}` } },
-          status: 302,
+        responseFactory.redirected.mockClear();
+
+        await routeHandler({} as any, request, responseFactory);
+
+        expect(responseFactory.redirected).toHaveBeenCalledWith({
+          headers: { location: `${expectedLocation}` },
         });
       }
     });
 
-    it('renders view if user does not have an active session and login page can be shown.', async () => {
-      authc.getSessionInfo.mockResolvedValue(null);
+    it('renders view if user is not authenticated and login page can be shown.', async () => {
       license.getFeatures.mockReturnValue({ showLogin: true } as any);
 
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: false } });
       const contextMock = coreMock.createRequestHandlerContext();
 
-      await expect(
-        routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
-      ).resolves.toEqual({
-        options: {
-          headers: {
-            'content-security-policy':
-              "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-          },
-        },
-        status: 200,
-      });
-
-      expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
-      expect(contextMock.rendering.render).toHaveBeenCalledWith({ includeUserSettings: false });
+      const responseFactory = httpResourcesMock.createResponseFactory();
+      await routeHandler({ core: contextMock } as any, request, responseFactory);
+      expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
     });
   });
 
   describe('Login state route', () => {
+    function getAuthcConfig(authcConfig: Record<string, unknown> = {}) {
+      return routeDefinitionParamsMock.create({ authc: { ...authcConfig } }).config.authc;
+    }
+
     let routeHandler: RequestHandler<any, any, any, 'get'>;
     let routeConfig: RouteConfig<any, any, any, 'get'>;
     beforeEach(() => {
@@ -157,6 +163,7 @@ describe('Login view routes', () => {
 
     it('returns only required license features.', async () => {
       license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
         allowLogin: true,
         allowRbac: false,
         allowRoleDocumentLevelSecurity: true,
@@ -164,17 +171,27 @@ describe('Login view routes', () => {
         layout: 'error-es-unavailable',
         showLinks: false,
         showRoleMappingsManagement: true,
+        allowSubFeaturePrivileges: true,
         showLogin: true,
       });
 
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
+      const expectedPayload = {
+        allowLogin: true,
+        layout: 'error-es-unavailable',
+        requiresSecureConnection: false,
+        selector: {
+          enabled: false,
+          providers: [{ name: 'basic', type: 'basic', usesLoginForm: true }],
+        },
+      };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
-        options: { body: { allowLogin: true, layout: 'error-es-unavailable', showLogin: true } },
-        payload: { allowLogin: true, layout: 'error-es-unavailable', showLogin: true },
+        options: { body: expectedPayload },
+        payload: expectedPayload,
         status: 200,
       });
     });
@@ -185,13 +202,243 @@ describe('Login view routes', () => {
       const request = httpServerMock.createKibanaRequest();
       const contextMock = coreMock.createRequestHandlerContext();
 
+      const expectedPayload = {
+        allowLogin: true,
+        layout: 'form',
+        requiresSecureConnection: false,
+        selector: {
+          enabled: false,
+          providers: [{ name: 'basic', type: 'basic', usesLoginForm: true }],
+        },
+      };
       await expect(
         routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
       ).resolves.toEqual({
-        options: { body: { allowLogin: true, layout: 'form', showLogin: true } },
-        payload: { allowLogin: true, layout: 'form', showLogin: true },
+        options: { body: expectedPayload },
+        payload: expectedPayload,
         status: 200,
       });
+    });
+
+    it('returns `requiresSecureConnection: true` if `secureCookies` is enabled in config.', async () => {
+      license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
+
+      const request = httpServerMock.createKibanaRequest();
+      const contextMock = coreMock.createRequestHandlerContext();
+
+      config.secureCookies = true;
+
+      const expectedPayload = expect.objectContaining({ requiresSecureConnection: true });
+      await expect(
+        routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+      ).resolves.toEqual({
+        options: { body: expectedPayload },
+        payload: expectedPayload,
+        status: 200,
+      });
+    });
+
+    it('returns `useLoginForm: true` for `basic` and `token` providers.', async () => {
+      license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
+
+      const request = httpServerMock.createKibanaRequest();
+      const contextMock = coreMock.createRequestHandlerContext();
+
+      const cases: Array<[LoginSelectorProvider[], ConfigType['authc']]> = [
+        [[], getAuthcConfig({ providers: { basic: { basic1: { order: 0, enabled: false } } } })],
+        [
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({ providers: { basic: { basic1: { order: 0 } } } }),
+        ],
+        [
+          [
+            {
+              name: 'token1',
+              type: 'token',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+          getAuthcConfig({ providers: { token: { token1: { order: 0 } } } }),
+        ],
+      ];
+
+      for (const [providers, authcConfig] of cases) {
+        config.authc = authcConfig;
+
+        const expectedPayload = expect.objectContaining({
+          selector: { enabled: false, providers },
+        });
+        await expect(
+          routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+        ).resolves.toEqual({
+          options: { body: expectedPayload },
+          payload: expectedPayload,
+          status: 200,
+        });
+      }
+    });
+
+    it('correctly returns `selector` information.', async () => {
+      license.getFeatures.mockReturnValue({ allowLogin: true, showLogin: true } as any);
+
+      const request = httpServerMock.createKibanaRequest();
+      const contextMock = coreMock.createRequestHandlerContext();
+
+      const cases: Array<[ConfigType['authc'], LoginSelectorProvider[]]> = [
+        // selector is disabled, multiple providers, but only basic provider should be returned.
+        [
+          getAuthcConfig({
+            selector: { enabled: false },
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'realm1' } },
+            },
+          }),
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+        ],
+        // selector is enabled, but only basic/token is available and should be returned.
+        [
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: { basic: { basic1: { order: 0 } } },
+          }),
+          [
+            {
+              name: 'basic1',
+              type: 'basic',
+              usesLoginForm: true,
+              icon: 'logoElastic',
+              description: 'Log in with Elasticsearch',
+            },
+          ],
+        ],
+        // selector is enabled, all providers should be returned
+        [
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: {
+                basic1: {
+                  order: 0,
+                  description: 'some-desc1',
+                  hint: 'some-hint1',
+                  icon: 'logoElastic',
+                },
+              },
+              saml: {
+                saml1: { order: 1, description: 'some-desc2', realm: 'realm1', icon: 'some-icon2' },
+                saml2: { order: 2, description: 'some-desc3', hint: 'some-hint3', realm: 'realm2' },
+              },
+            },
+          }),
+          [
+            {
+              type: 'basic',
+              name: 'basic1',
+              description: 'some-desc1',
+              hint: 'some-hint1',
+              icon: 'logoElastic',
+              usesLoginForm: true,
+            },
+            {
+              type: 'saml',
+              name: 'saml1',
+              description: 'some-desc2',
+              icon: 'some-icon2',
+              usesLoginForm: false,
+            },
+            {
+              type: 'saml',
+              name: 'saml2',
+              description: 'some-desc3',
+              hint: 'some-hint3',
+              usesLoginForm: false,
+            },
+          ],
+        ],
+        // selector is enabled, only providers that are enabled should be returned.
+        [
+          getAuthcConfig({
+            selector: { enabled: true },
+            providers: {
+              basic: {
+                basic1: {
+                  order: 0,
+                  description: 'some-desc1',
+                  hint: 'some-hint1',
+                  icon: 'some-icon1',
+                },
+              },
+              saml: {
+                saml1: {
+                  order: 1,
+                  description: 'some-desc2',
+                  realm: 'realm1',
+                  showInSelector: false,
+                },
+                saml2: {
+                  order: 2,
+                  description: 'some-desc3',
+                  hint: 'some-hint3',
+                  icon: 'some-icon3',
+                  realm: 'realm2',
+                },
+              },
+            },
+          }),
+          [
+            {
+              type: 'basic',
+              name: 'basic1',
+              description: 'some-desc1',
+              hint: 'some-hint1',
+              icon: 'some-icon1',
+              usesLoginForm: true,
+            },
+            {
+              type: 'saml',
+              name: 'saml2',
+              description: 'some-desc3',
+              hint: 'some-hint3',
+              icon: 'some-icon3',
+              usesLoginForm: false,
+            },
+          ],
+        ],
+      ];
+
+      for (const [authcConfig, expectedProviders] of cases) {
+        config.authc = authcConfig;
+
+        const expectedPayload = expect.objectContaining({
+          selector: { enabled: authcConfig.selector.enabled, providers: expectedProviders },
+        });
+        await expect(
+          routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
+        ).resolves.toEqual({
+          options: { body: expectedPayload },
+          payload: expectedPayload,
+          status: 200,
+        });
+      }
     });
   });
 });

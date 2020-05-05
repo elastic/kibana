@@ -14,15 +14,27 @@ export type AgentType =
 
 export type AgentStatus = 'offline' | 'error' | 'online' | 'inactive' | 'warning';
 
-export interface AgentAction extends SavedObjectAttributes {
+export interface NewAgentAction {
   type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
-  id: string;
-  created_at: string;
-  data?: string;
+  data?: any;
   sent_at?: string;
 }
 
-export interface AgentEvent {
+export interface AgentAction extends NewAgentAction {
+  id: string;
+  agent_id: string;
+  created_at: string;
+}
+
+export interface AgentActionSOAttributes extends SavedObjectAttributes {
+  type: 'CONFIG_CHANGE' | 'DATA_DUMP' | 'RESUME' | 'PAUSE';
+  sent_at?: string;
+  created_at: string;
+  agent_id: string;
+  data?: string;
+}
+
+export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
   subtype: // State
   | 'RUNNING'
@@ -46,8 +58,17 @@ export interface AgentEvent {
   stream_id?: string;
 }
 
-export interface AgentEventSOAttributes extends AgentEvent, SavedObjectAttributes {}
+export interface AgentEvent extends NewAgentEvent {
+  id: string;
+}
 
+export interface AgentEventSOAttributes extends NewAgentEvent, SavedObjectAttributes {}
+
+type MetadataValue = string | AgentMetadata;
+
+export interface AgentMetadata {
+  [x: string]: MetadataValue;
+}
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -55,24 +76,22 @@ interface AgentBase {
   shared_id?: string;
   access_api_key_id?: string;
   default_api_key?: string;
+  default_api_key_id?: string;
   config_id?: string;
-  config_revision?: number;
+  config_revision?: number | null;
   config_newest_revision?: number;
   last_checkin?: string;
-  actions: AgentAction[];
+  user_provided_metadata: AgentMetadata;
+  local_metadata: AgentMetadata;
 }
 
 export interface Agent extends AgentBase {
   id: string;
   current_error_events: AgentEvent[];
-  user_provided_metadata: Record<string, string>;
-  local_metadata: Record<string, string>;
   access_api_key?: string;
   status?: string;
 }
 
 export interface AgentSOAttributes extends AgentBase, SavedObjectAttributes {
-  user_provided_metadata: string;
-  local_metadata: string;
   current_error_events?: string;
 }

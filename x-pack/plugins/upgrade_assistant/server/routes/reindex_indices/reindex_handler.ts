@@ -8,7 +8,7 @@ import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { ReindexOperation, ReindexOptions, ReindexStatus } from '../../../common/types';
+import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../../lib/reindexing';
@@ -53,17 +53,11 @@ export const reindexHandler = async ({
 
   const existingOp = await reindexService.findReindexOperation(indexName);
 
-  const opts: ReindexOptions | undefined = reindexOptions
-    ? {
-        queueSettings: reindexOptions.enqueue ? { queuedAt: Date.now() } : undefined,
-      }
-    : undefined;
-
   // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
-      ? await reindexService.resumeReindexOperation(indexName, opts)
-      : await reindexService.createReindexOperation(indexName, opts);
+      ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
+      : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
   credentialStore.set(reindexOp, headers);

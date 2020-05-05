@@ -20,6 +20,7 @@ APIs to their New Platform equivalents.
   - [Chromeless Applications](#chromeless-applications)
   - [Render HTML Content](#render-html-content)
   - [Saved Objects types](#saved-objects-types)
+  - [UiSettings](#uisettings)
 
 ## Configuration
 
@@ -699,21 +700,15 @@ application.register({
 ## Render HTML Content
 
 You can return a blank HTML page bootstrapped with the core application bundle from an HTTP route handler
-via the `rendering` context. You may wish to do this if you are rendering a chromeless application with a
+via the `httpResources` service. You may wish to do this if you are rendering a chromeless application with a
 custom application route or have other custom rendering needs.
 
-```ts
-router.get(
+```typescript
+httpResources.register(
   { path: '/chromeless', validate: false },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render(), // generates an HTML document
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderCoreApp();
   }
 );
 ```
@@ -723,18 +718,12 @@ comprises all UI Settings that are *user provided*, then injected into the page.
 You may wish to exclude fetching this data if not authorized or to slim the page
 size.
 
-```ts
-router.get(
-  { path: '/', validate: false },
+```typescript
+httpResources.register(
+  { path: '/', validate: false, options: { authRequired: false } },
   (context, request, response) => {
-    const { http, rendering } = context.core;
-
-    return response.ok({
-      body: await rendering.render({ includeUserSettings: false }),
-      headers: {
-        'content-security-policy': http.csp.header,
-      },
-    });
+    //... some logic
+    return response.renderAnonymousCoreApp();
   }
 );
 ```
@@ -968,7 +957,7 @@ const migration = (doc, log) => {...}
 Would be converted to:
 
 ```typescript
-const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
+const migration: SavedObjectMigrationFn<OldAttributes, MigratedAttributes> = (doc, { log }) => {...}
 ```
 
 ### Remarks
@@ -976,3 +965,36 @@ const migration: SavedObjectMigrationFn = (doc, { log }) => {...}
 The `registerType` API will throw if called after the service has started, and therefor cannot be used from 
 legacy plugin code. Legacy plugins should use the legacy savedObjects service and the legacy way to register
 saved object types until migrated.
+
+## UiSettings
+UiSettings defaults registration performed during `setup` phase via `core.uiSettings.register` API.
+
+```js
+// Before:
+uiExports: {
+  uiSettingDefaults: {
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+    },
+  }
+}
+```
+
+```ts
+// After:
+// src/plugins/my-plugin/server/plugin.ts
+setup(core: CoreSetup){
+  core.uiSettings.register({
+    'my-plugin:my-setting': {
+      name: 'just-work',
+      value: true,
+      description: 'make it work',
+      category: ['my-category'],
+      schema: schema.boolean(),
+    },
+  })
+}
+```

@@ -5,7 +5,11 @@
  */
 
 export { AggName, isAggName } from './aggregations';
-export { euiDataGridStyle, euiDataGridToolbarSettings } from './data_grid';
+export {
+  getIndexDevConsoleStatement,
+  getPivotPreviewDevConsoleStatement,
+  INIT_MAX_COLUMNS,
+} from './data_grid';
 export {
   getDefaultSelectableFields,
   getFlattenedFields,
@@ -36,9 +40,12 @@ export {
   TRANSFORM_MODE,
 } from './transform_stats';
 export { getDiscoverUrl } from './navigation';
+export { GetTransformsResponse, PreviewData, PreviewMappings } from './pivot_preview';
 export {
   getEsAggFromAggConfig,
   isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigPercentiles,
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAgg,
   PivotAggDict,
   PivotAggsConfig,

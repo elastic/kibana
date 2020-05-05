@@ -36,7 +36,14 @@
         "nanos"
       ],
       "v": "__flag__",
-      "include_unloaded_segments": "__flag__"
+      "include_unloaded_segments": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ]
     },
     "methods": [
       "GET"

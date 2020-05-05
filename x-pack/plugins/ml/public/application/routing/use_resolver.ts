@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { IUiSettingsClient } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   getIndexPatternById,
   getIndexPatternsContract,
@@ -14,6 +15,7 @@ import {
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
 import { MlContextValue } from '../contexts/ml';
+import { useNotifications } from '../contexts/kibana';
 
 export const useResolver = (
   indexPatternId: string | undefined,
@@ -21,6 +23,8 @@ export const useResolver = (
   config: IUiSettingsClient,
   resolvers: Resolvers
 ): { context: MlContextValue; results: ResolverResults } => {
+  const notifications = useNotifications();
+
   const funcNames = Object.keys(resolvers); // Object.entries gets this wrong?!
   const funcs = Object.values(resolvers); // Object.entries gets this wrong?!
   const tempResults = funcNames.reduce((p, c) => {
@@ -37,8 +41,14 @@ export const useResolver = (
         const res = await Promise.all(funcs.map(r => r()));
         res.forEach((r, i) => (tempResults[funcNames[i]] = r));
         setResults(tempResults);
+      } catch (error) {
+        // quietly fail. Errors being thrown here are expected as a way to handle privilege or license check failures.
+        // The user will be redirected by the failed resolver.
+        return;
+      }
 
-        if (indexPatternId !== undefined || savedSearchId !== undefined) {
+      if (indexPatternId !== undefined || savedSearchId !== undefined) {
+        try {
           // note, currently we're using our own kibana context that requires a current index pattern to be set
           // this means, if the page uses this context, useResolver must be passed a string for the index pattern id
           // and loadIndexPatterns must be part of the resolvers.
@@ -56,11 +66,17 @@ export const useResolver = (
             indexPatterns: getIndexPatternsContract()!,
             kibanaConfig: config,
           });
-        } else {
-          setContext({});
+        } catch (error) {
+          // an unexpected error has occurred. This could be caused by an incorrect index pattern or saved search ID
+          notifications.toasts.addError(new Error(error), {
+            title: i18n.translate('xpack.ml.useResolver.errorTitle', {
+              defaultMessage: 'An error has occurred',
+            }),
+          });
+          window.location.href = '#/';
         }
-      } catch (error) {
-        // quietly fail. Let the resolvers handle the redirection if any fail to resolve
+      } else {
+        setContext({});
       }
     })();
   }, []);

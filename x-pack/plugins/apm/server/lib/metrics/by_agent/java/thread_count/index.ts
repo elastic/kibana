@@ -8,7 +8,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import {
   METRIC_JAVA_THREAD_COUNT,
-  SERVICE_AGENT_NAME
+  AGENT_NAME
 } from '../../../../../../common/elasticsearch_fieldnames';
 import {
   Setup,
@@ -57,6 +57,6 @@ export async function getThreadCountChart(
       threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
       threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } }
     },
-    additionalFilters: [{ term: { [SERVICE_AGENT_NAME]: 'java' } }]
+    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }]
   });
 }

@@ -89,7 +89,7 @@ export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
               isValueContainedInElement: false,
               showValueLabel: true,
             }}
-            customSeriesColors={['rgba(230, 194, 32, 0.5)', 'rgba(224, 187, 20, 0.71)']}
+            color={['rgba(230, 194, 32, 0.5)', 'rgba(224, 187, 20, 0.71)']}
             splitSeriesAccessors={['x']}
             stackAccessors={['x']}
             xAccessor="x"

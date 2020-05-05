@@ -63,7 +63,7 @@ export default function({ getService }) {
       const stats = body[0];
 
       expect(stats.collection).to.be('local');
-      expect(stats.license.issuer).to.be('elasticsearch');
+      expect(stats.license.issuer).to.be.a('string');
       expect(stats.license.status).to.be('active');
 
       expect(stats.stack_stats.kibana.count).to.be(1);

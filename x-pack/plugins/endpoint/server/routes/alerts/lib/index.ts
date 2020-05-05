@@ -7,17 +7,19 @@ import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { esQuery } from '../../../../../../../src/plugins/data/server';
-import { AlertEvent, Direction, EndpointAppConstants } from '../../../../common/types';
+import { AlertEvent, AlertAPIOrdering } from '../../../../common/types';
+import { AlertConstants } from '../../../../common/alert_constants';
 import {
   AlertSearchQuery,
   AlertSearchRequest,
   AlertSearchRequestWrapper,
   AlertSort,
+  UndefinedResultPosition,
 } from '../types';
 
 export { Pagination } from './pagination';
 
-function reverseSortDirection(order: Direction): Direction {
+function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {
     return 'desc';
   }
@@ -68,6 +70,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     {
       [query.sort]: {
         order: query.order,
+        missing:
+          query.order === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first,
       },
     },
     // Secondary sort for tie-breaking
@@ -82,6 +86,8 @@ function buildSort(query: AlertSearchQuery): AlertSort {
     // Reverse sort order for search_before functionality
     const newDirection = reverseSortDirection(query.order);
     sort[0][query.sort].order = newDirection;
+    sort[0][query.sort].missing =
+      newDirection === 'asc' ? UndefinedResultPosition.last : UndefinedResultPosition.first;
     sort[1]['event.id'].order = newDirection;
   }
 
@@ -92,15 +98,16 @@ function buildSort(query: AlertSearchQuery): AlertSort {
  * Builds a request body for Elasticsearch, given a set of query params.
  **/
 const buildAlertSearchQuery = async (
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<AlertSearchRequestWrapper> => {
-  let totalHitsMin: number = EndpointAppConstants.DEFAULT_TOTAL_HITS;
+  let totalHitsMin: number = AlertConstants.DEFAULT_TOTAL_HITS;
 
   // Calculate minimum total hits set to indicate there's a next page
   if (query.fromIndex) {
     totalHitsMin = Math.max(
       query.fromIndex + query.pageSize * 2,
-      EndpointAppConstants.DEFAULT_TOTAL_HITS
+      AlertConstants.DEFAULT_TOTAL_HITS
     );
   }
 
@@ -120,7 +127,7 @@ const buildAlertSearchQuery = async (
 
   const reqWrapper: AlertSearchRequestWrapper = {
     size: query.pageSize,
-    index: EndpointAppConstants.ALERT_INDEX_NAME,
+    index: indexPattern,
     body: reqBody,
   };
 
@@ -136,9 +143,10 @@ const buildAlertSearchQuery = async (
  **/
 export const searchESForAlerts = async (
   dataClient: IScopedClusterClient,
-  query: AlertSearchQuery
+  query: AlertSearchQuery,
+  indexPattern: string
 ): Promise<SearchResponse<AlertEvent>> => {
-  const reqWrapper = await buildAlertSearchQuery(query);
+  const reqWrapper = await buildAlertSearchQuery(query, indexPattern);
   const response = (await dataClient.callAsCurrentUser('search', reqWrapper)) as SearchResponse<
     AlertEvent
   >;

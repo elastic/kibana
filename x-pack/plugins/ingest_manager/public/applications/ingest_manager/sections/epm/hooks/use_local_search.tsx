@@ -15,8 +15,6 @@ export function useLocalSearch(packageList: PackageList) {
   const localSearchRef = useRef<LocalSearch | null>(null);
 
   useEffect(() => {
-    if (!packageList.length) return;
-
     const localSearch = new LocalSearch(searchIdField);
     fieldsToSearch.forEach(field => localSearch.addIndex(field));
     localSearch.addDocuments(packageList);

@@ -12,6 +12,7 @@ import {
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
+import { MlApi } from './api';
 
 enum ANALYSIS_CONFIG_TYPE {
   OUTLIER_DETECTION = 'outlier_detection',
@@ -31,7 +32,8 @@ const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon
+  mlCommon: MlCommon,
+  mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -333,12 +335,13 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       return !isEnabled;
     },
 
-    async createAnalyticsJob() {
+    async createAnalyticsJob(analyticsId: string) {
       await testSubjects.click('mlAnalyticsCreateJobFlyoutCreateButton');
       await retry.tryForTime(5000, async () => {
         await this.assertCreateButtonMissing();
         await this.assertStartButtonExists();
       });
+      await mlApi.waitForDataFrameAnalyticsJobToExist(analyticsId);
     },
 
     async assertStartButtonExists() {
@@ -362,8 +365,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async closeCreateAnalyticsJobFlyout() {
-      await testSubjects.click('mlAnalyticsCreateJobFlyoutCloseButton');
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('mlAnalyticsCreateJobFlyoutCloseButton');
         await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyout');
       });
     },

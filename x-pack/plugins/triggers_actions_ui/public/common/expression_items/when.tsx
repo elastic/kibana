@@ -6,9 +6,11 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelect } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { ClosablePopoverTitle } from './components';
 
 interface WhenExpressionProps {
   aggType: string;
@@ -64,11 +66,12 @@ export const WhenExpression = ({
       anchorPosition={popupPosition ?? 'downLeft'}
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle', {
-            defaultMessage: 'when',
-          })}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle"
+            defaultMessage="when"
+          />
+        </ClosablePopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
           value={aggType}

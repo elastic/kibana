@@ -45,7 +45,7 @@ interface Props {
 
 interface SearchBarQuery {
   queryText: string;
-  error?: { message: string };
+  error?: { message: string } | null;
 }
 
 export const FieldsPanel: FC<Props> = ({

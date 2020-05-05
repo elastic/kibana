@@ -38,7 +38,9 @@ export function isStartable(jobs) {
 }
 
 export function isStoppable(jobs) {
-  return jobs.some(j => j.datafeedState === DATAFEED_STATE.STARTED);
+  return jobs.some(
+    j => j.datafeedState === DATAFEED_STATE.STARTED || j.datafeedState === DATAFEED_STATE.STARTING
+  );
 }
 
 export function isClosable(jobs) {
@@ -386,17 +388,23 @@ function getUrlVars(url) {
 }
 
 export function getSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string' && url.includes('mlManagement') && url.includes('jobId')) {
-    const urlParams = getUrlVars(url);
-    const decodedJson = rison.decode(urlParams.mlManagement);
-    return decodedJson.jobId;
+  if (typeof url === 'string') {
+    url = decodeURIComponent(url);
+    if (url.includes('mlManagement') && url.includes('jobId')) {
+      const urlParams = getUrlVars(url);
+      const decodedJson = rison.decode(urlParams.mlManagement);
+      return decodedJson.jobId;
+    }
   }
 }
 
 export function clearSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string' && url.includes('mlManagement') && url.includes('jobId')) {
-    const urlParams = getUrlVars(url);
-    const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
-    window.history.replaceState({}, document.title, clearedParams);
+  if (typeof url === 'string') {
+    url = decodeURIComponent(url);
+    if (url.includes('mlManagement') && url.includes('jobId')) {
+      const urlParams = getUrlVars(url);
+      const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
+      window.history.replaceState({}, document.title, clearedParams);
+    }
   }
 }

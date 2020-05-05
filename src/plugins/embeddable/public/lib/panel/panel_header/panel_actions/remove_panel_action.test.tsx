@@ -19,7 +19,6 @@
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import { EmbeddableFactory } from '../../../embeddables';
 import { EmbeddableStart } from '../../../../plugin';
 import {
   FILTERABLE_EMBEDDABLE,
@@ -31,11 +30,11 @@ import { FilterableContainer } from '../../../test_samples/embeddables/filterabl
 import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { esFilters, Filter } from '../../../../../../../plugins/data/public';
+import { embeddablePluginMock } from '../../../../mocks';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory = (id: string) => embeddableFactories.get(id);
-
+const { setup, doStart } = embeddablePluginMock.createInstance();
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory = doStart().getEmbeddableFactory;
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
 

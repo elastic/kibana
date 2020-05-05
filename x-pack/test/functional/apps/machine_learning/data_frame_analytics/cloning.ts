@@ -13,13 +13,11 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // failing test, see https://github.com/elastic/kibana/issues/60389
-  describe.skip('jobs cloning supported by UI form', function() {
-    this.tags(['smoke']);
-
+  describe('jobs cloning supported by UI form', function() {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
+      indexPattern: { name: string; timeField: string };
       job: DeepPartial<DataFrameAnalyticsConfig>;
     }> = (() => {
       const timestamp = Date.now();
@@ -28,12 +26,13 @@ export default function({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'classification job supported by the form',
           archive: 'ml/bm_classification',
+          indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
           job: {
             id: `bm_1_${timestamp}`,
             description:
-              "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
             source: {
-              index: ['bank-marketing*'],
+              index: ['ft_bank_marketing'],
               query: {
                 match_all: {},
               },
@@ -61,11 +60,12 @@ export default function({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'outlier detection job supported by the form',
           archive: 'ml/ihp_outlier',
+          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_1_${timestamp}`,
             description: 'This is the job description',
             source: {
-              index: ['ihp_outlier'],
+              index: ['ft_ihp_outlier'],
               query: {
                 match_all: {},
               },
@@ -89,11 +89,12 @@ export default function({ getService }: FtrProviderContext) {
         {
           suiteTitle: 'regression job supported by the form',
           archive: 'ml/egs_regression',
+          indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_1_${timestamp}`,
             description: 'This is the job description',
             source: {
-              index: ['egs_regression'],
+              index: ['ft_egs_regression'],
               query: {
                 match_all: {},
               },
@@ -121,6 +122,7 @@ export default function({ getService }: FtrProviderContext) {
     })();
 
     before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
@@ -134,7 +136,11 @@ export default function({ getService }: FtrProviderContext) {
         const cloneDestIndex = `${testData.job!.dest!.index}_clone`;
 
         before(async () => {
-          await esArchiver.load(testData.archive);
+          await esArchiver.loadIfNeeded(testData.archive);
+          await ml.testResources.createIndexPatternIfNeeded(
+            testData.indexPattern.name,
+            testData.indexPattern.timeField
+          );
           await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
 
           await ml.navigation.navigateToMl();
@@ -147,7 +153,7 @@ export default function({ getService }: FtrProviderContext) {
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await esArchiver.unload(testData.archive);
+          await ml.testResources.deleteIndexPattern(testData.job.dest!.index as string);
         });
 
         it('should open the flyout with a proper header', async () => {
@@ -173,7 +179,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('should create a clone job', async () => {
-          await ml.dataFrameAnalyticsCreation.createAnalyticsJob();
+          await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
         });
 
         it('should start the clone analytics job', async () => {
@@ -184,6 +190,10 @@ export default function({ getService }: FtrProviderContext) {
         it('should close the create job flyout', async () => {
           await ml.dataFrameAnalyticsCreation.assertCloseButtonExists();
           await ml.dataFrameAnalyticsCreation.closeCreateAnalyticsJobFlyout();
+        });
+
+        it('finishes analytics processing', async () => {
+          await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
         });
 
         it('displays the created job in the analytics table', async () => {

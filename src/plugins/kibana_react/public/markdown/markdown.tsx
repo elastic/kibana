@@ -23,6 +23,7 @@ import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
 
+import './index.scss';
 /**
  * Return a memoized markdown rendering function that use the specified
  * whiteListedRules and openLinksInNewTab configurations.

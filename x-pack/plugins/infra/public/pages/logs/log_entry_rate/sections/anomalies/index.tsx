@@ -20,7 +20,7 @@ import React, { useMemo } from 'react';
 import { euiStyled } from '../../../../../../../observability/public';
 import { LogEntryRateResults } from '../../use_log_entry_rate_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
-import { formatAnomalyScore, JobStatus, SetupStatus } from '../../../../../../common/log_analysis';
+import { formatAnomalyScore } from '../../../../../../common/log_analysis';
 import {
   getAnnotationsForAll,
   getLogEntryRateCombinedSeries,
@@ -28,34 +28,18 @@ import {
 } from '../helpers/data_formatters';
 import { AnomaliesChart } from './chart';
 import { AnomaliesTable } from './table';
-import {
-  LogAnalysisJobProblemIndicator,
-  RecreateJobButton,
-} from '../../../../../components/logging/log_analysis_job_status';
+import { RecreateJobButton } from '../../../../../components/logging/log_analysis_job_status';
 import { AnalyzeInMlButton } from '../../../../../components/logging/log_analysis_results';
 import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 export const AnomaliesResults: React.FunctionComponent<{
   isLoading: boolean;
-  jobStatus: JobStatus;
   results: LogEntryRateResults | null;
   setTimeRange: (timeRange: TimeRange) => void;
-  setupStatus: SetupStatus;
   timeRange: TimeRange;
   viewSetupForReconfiguration: () => void;
-  viewSetupForUpdate: () => void;
   jobId: string;
-}> = ({
-  isLoading,
-  jobStatus,
-  results,
-  setTimeRange,
-  setupStatus,
-  timeRange,
-  viewSetupForReconfiguration,
-  viewSetupForUpdate,
-  jobId,
-}) => {
+}> = ({ isLoading, results, setTimeRange, timeRange, viewSetupForReconfiguration, jobId }) => {
   const hasAnomalies = useMemo(() => {
     return results && results.histogramBuckets
       ? results.histogramBuckets.some(bucket => {
@@ -100,19 +84,12 @@ export const AnomaliesResults: React.FunctionComponent<{
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RecreateJobButton onClick={viewSetupForUpdate} size="s" />
+          <RecreateJobButton onClick={viewSetupForReconfiguration} size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <LogAnalysisJobProblemIndicator
-        jobStatus={jobStatus}
-        setupStatus={setupStatus}
-        onRecreateMlJobForReconfiguration={viewSetupForReconfiguration}
-        onRecreateMlJobForUpdate={viewSetupForUpdate}
-      />
       <EuiSpacer size="m" />
       <LoadingOverlayWrapper isLoading={isLoading} loadingChildren={<LoadingOverlayContent />}>
         {!results || (results && results.histogramBuckets && !results.histogramBuckets.length) ? (

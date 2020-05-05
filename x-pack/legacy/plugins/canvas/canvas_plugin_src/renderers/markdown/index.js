@@ -7,7 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RendererStrings } from '../../../i18n';
-import { Markdown } from '../../../../../../../src/legacy/core_plugins/kibana_react/public';
+import { Markdown } from '../../../../../../../src/plugins/kibana_react/public';
 
 const { markdown: strings } = RendererStrings;
 

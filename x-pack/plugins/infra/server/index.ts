@@ -5,10 +5,10 @@
  */
 
 import { PluginInitializerContext } from 'src/core/server';
-import { config, InfraConfig, InfraServerPlugin } from './plugin';
+import { config, InfraConfig, InfraServerPlugin, InfraPluginSetup } from './plugin';
 import { savedObjectMappings } from './saved_objects';
 
-export { config, InfraConfig, savedObjectMappings };
+export { config, InfraConfig, savedObjectMappings, InfraPluginSetup };
 
 export function plugin(context: PluginInitializerContext) {
   return new InfraServerPlugin(context);

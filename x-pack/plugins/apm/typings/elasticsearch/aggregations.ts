@@ -86,6 +86,7 @@ export interface AggregationOptionsByType {
   percentiles: {
     field: string;
     percents?: number[];
+    hdr?: { number_of_significant_value_digits: number };
   };
   extended_stats: {
     field: string;
@@ -126,6 +127,16 @@ export interface AggregationOptionsByType {
     combine_script: Script;
     reduce_script: Script;
   };
+  date_range: {
+    field: string;
+    format?: string;
+    ranges: Array<
+      | { from: string | number }
+      | { to: string | number }
+      | { from: string | number; to: string | number }
+    >;
+    keyed?: boolean;
+  };
 }
 
 type AggregationType = keyof AggregationOptionsByType;
@@ -135,6 +146,15 @@ type AggregationOptionsMap = Unionize<
     [TAggregationType in AggregationType]: AggregationOptionsByType[TAggregationType];
   }
 > & { aggs?: AggregationInputMap };
+
+interface DateRangeBucket {
+  key: string;
+  to?: number;
+  from?: number;
+  to_as_string?: string;
+  from_as_string?: string;
+  doc_count: number;
+}
 
 export interface AggregationInputMap {
   [key: string]: AggregationOptionsMap;
@@ -276,6 +296,11 @@ interface AggregationResponsePart<
   scripted_metric: {
     value: unknown;
   };
+  date_range: {
+    buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
+      ? Record<string, DateRangeBucket>
+      : { buckets: DateRangeBucket[] };
+  };
 }
 
 // Type for debugging purposes. If you see an error in AggregationResponseMap
@@ -285,7 +310,7 @@ interface AggregationResponsePart<
 
 // type MissingAggregationResponseTypes = Exclude<
 //   AggregationType,
-//   keyof AggregationResponsePart<{}>
+//   keyof AggregationResponsePart<{}, unknown>
 // >;
 
 export type AggregationResponseMap<

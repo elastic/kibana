@@ -18,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
+  EuiSearchBarProps,
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
@@ -39,7 +40,7 @@ import { DeleteAction } from './action_delete';
 import { StartAction } from './action_start';
 import { StopAction } from './action_stop';
 
-import { ItemIdToExpandedRowMap, Query, Clause } from './common';
+import { ItemIdToExpandedRowMap, Clause, TermClause, FieldClause, Value } from './common';
 import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 
@@ -56,7 +57,7 @@ function getItemIdToExpandedRowMap(
   }, {} as ItemIdToExpandedRowMap);
 }
 
-function stringMatch(str: string | undefined, substr: string) {
+function stringMatch(str: string | undefined, substr: any) {
   return (
     typeof str === 'string' &&
     typeof substr === 'string' &&
@@ -104,7 +105,10 @@ export const TransformList: FC<Props> = ({
     !capabilities.canPreviewTransform ||
     !capabilities.canStartStopTransform;
 
-  const onQueryChange = ({ query, error }: { query: Query; error: any }) => {
+  const onQueryChange = ({
+    query,
+    error,
+  }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]) => {
     if (error) {
       setSearchError(error.message);
     } else {
@@ -114,7 +118,7 @@ export const TransformList: FC<Props> = ({
       }
       if (clauses.length > 0) {
         setFilterActive(true);
-        filterTransforms(clauses);
+        filterTransforms(clauses as Array<TermClause | FieldClause>);
       } else {
         setFilterActive(false);
       }
@@ -122,7 +126,7 @@ export const TransformList: FC<Props> = ({
     }
   };
 
-  const filterTransforms = (clauses: Clause[]) => {
+  const filterTransforms = (clauses: Array<TermClause | FieldClause>) => {
     setIsLoading(true);
     // keep count of the number of matches we make as we're looping over the clauses
     // we only want to return transforms which match all clauses, i.e. each search term is ANDed
@@ -161,7 +165,7 @@ export const TransformList: FC<Props> = ({
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
           // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = transforms.filter(transform => c.value.includes(transform.stats.state));
+          ts = transforms.filter(transform => (c.value as Value[]).includes(transform.stats.state));
         } else {
           ts = transforms.filter(transform => transform.mode === c.value);
         }

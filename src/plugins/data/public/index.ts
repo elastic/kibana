@@ -59,6 +59,7 @@ import {
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  convertRangeFilterToTimeRangeString,
 } from './query';
 
 // Filter helpers namespace:
@@ -96,6 +97,7 @@ export const esFilters = {
   onlyDisabledFiltersChanged,
 
   changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
 };
@@ -204,11 +206,13 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
 
 /*
@@ -250,11 +254,13 @@ export const indexPatterns = {
 export {
   IndexPatternsContract,
   IndexPattern,
+  IIndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
+  getIndexPatternFieldListCreator,
+  Field,
 } from './index_patterns';
 
 export {
@@ -285,14 +291,10 @@ export {
 
 import {
   // aggs
-  AggConfigs,
-  aggTypeFilters,
-  aggGroupNamesMap,
   CidrMask,
-  convertDateRangeToString,
-  convertIPRangeToString,
-  intervalOptions, // only used in Discover
+  intervalOptions,
   isDateHistogramBucketAggConfig,
+  isNumberType,
   isStringType,
   isType,
   parentPipelineType,
@@ -322,25 +324,22 @@ export { ParsedInterval } from '../common';
 
 export {
   // aggs
+  AggGroupLabels,
+  AggGroupName,
   AggGroupNames,
-  AggParam, // only the type is used externally, only in vis editor
-  AggParamOption, // only the type is used externally
+  AggParam,
+  AggParamOption,
   AggParamType,
-  AggTypeFieldFilters, // TODO convert to interface
-  AggTypeFilters, // TODO convert to interface
+  AggConfigOptions,
   BUCKET_TYPES,
-  DateRangeKey, // only used in field formatter deserialization, which will live in data
   IAggConfig,
   IAggConfigs,
-  IAggGroupNames,
   IAggType,
   IFieldParamType,
   IMetricAggType,
-  IpRangeKey, // only used in field formatter deserialization, which will live in data
   METRIC_TYPES,
-  OptionedParamEditorProps, // only type is used externally
   OptionedParamType,
-  OptionedValueProp, // only type is used externally
+  OptionedValueProp,
   // search
   ES_SEARCH_STRATEGY,
   SYNC_SEARCH_STRATEGY,
@@ -362,9 +361,7 @@ export {
   SearchRequest,
   SearchResponse,
   SearchError,
-  SearchStrategyProvider,
   ISearchSource,
-  SearchSource,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
@@ -373,22 +370,20 @@ export {
   TabbedAggColumn,
   TabbedAggRow,
   TabbedTable,
+  SearchInterceptor,
+  RequestTimeoutError,
 } from './search';
 
 // Search namespace
 export const search = {
   aggs: {
-    AggConfigs,
-    aggGroupNamesMap,
-    aggTypeFilters,
     CidrMask,
-    convertDateRangeToString,
-    convertIPRangeToString,
     dateHistogramInterval,
-    intervalOptions, // only used in Discover
+    intervalOptions,
     InvalidEsCalendarIntervalError,
     InvalidEsIntervalFormatError,
-    isDateHistogramBucketAggConfig,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
+    isNumberType,
     isStringType,
     isType,
     isValidEsInterval,

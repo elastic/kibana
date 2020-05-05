@@ -44,7 +44,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await button.click();
   };
 
-  describe('TOTO saved objects edition page', () => {
+  describe('saved objects edition page', () => {
     beforeEach(async () => {
       await esArchiver.load('saved_objects_management/edit_saved_object');
     });

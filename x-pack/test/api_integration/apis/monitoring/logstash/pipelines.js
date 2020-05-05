@@ -58,5 +58,27 @@ export default function({ getService }) {
       const ids = [...(await getIds(0)), ...(await getIds(1)), ...(await getIds(2))];
       expect(ids.length).to.be(26);
     });
+
+    it('should not error out if there is missing data for part of the time series', async () => {
+      const customTimeRange = {
+        ...timeRange,
+        max: '2019-11-04T15:59:38.667Z',
+      };
+
+      const customSort = {
+        ...sort,
+        field: 'logstash_cluster_pipeline_throughput',
+      };
+
+      await supertest
+        .post('/api/monitoring/v1/clusters/TUjQLdHNTh2SB9Wy0gOtWg/logstash/pipelines')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          timeRange: customTimeRange,
+          pagination: { ...pagination, index: 1 },
+          sort: customSort,
+        })
+        .expect(200);
+    });
   });
 }

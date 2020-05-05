@@ -24,6 +24,7 @@ import { mlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
+import { getErrorMessage } from '../../../../../../../common/util/errors';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
 import { DatafeedDetails } from './components/datafeed_details';
@@ -75,7 +76,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),
-        text: error.message,
+        text: getErrorMessage(error),
       });
       setCreatingJob(false);
     }
@@ -94,7 +95,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
         title: i18n.translate('xpack.ml.newJob.wizard.summaryStep.createJobError', {
           defaultMessage: `Job creation error`,
         }),
-        text: error.message,
+        text: getErrorMessage(error),
       });
       setCreatingJob(false);
     }

@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_TEST_INDEX_NAME = '.kibaka-alerting-test-data';
+export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
 
 export class ESTestIndexTool {
-  private readonly es: any;
-  private readonly retry: any;
-
-  constructor(es: any, retry: any) {
-    this.es = es;
-    this.retry = retry;
-  }
+  constructor(
+    private readonly es: any,
+    private readonly retry: any,
+    private readonly index: string = ES_TEST_INDEX_NAME
+  ) {}
 
   async setup() {
     return await this.es.indices.create({
-      index: ES_TEST_INDEX_NAME,
+      index: this.index,
       body: {
         mappings: {
           properties: {
@@ -43,6 +41,10 @@ export class ESTestIndexTool {
               type: 'date',
               format: 'strict_date_time',
             },
+            date_epoch_millis: {
+              type: 'date',
+              format: 'epoch_millis',
+            },
             testedValue: {
               type: 'long',
             },
@@ -56,12 +58,13 @@ export class ESTestIndexTool {
   }
 
   async destroy() {
-    return await this.es.indices.delete({ index: ES_TEST_INDEX_NAME, ignore: [404] });
+    return await this.es.indices.delete({ index: this.index, ignore: [404] });
   }
 
   async search(source: string, reference: string) {
     return await this.es.search({
-      index: ES_TEST_INDEX_NAME,
+      index: this.index,
+      size: 1000,
       body: {
         query: {
           bool: {
@@ -86,7 +89,7 @@ export class ESTestIndexTool {
   async waitForDocs(source: string, reference: string, numDocs: number = 1) {
     return await this.retry.try(async () => {
       const searchResult = await this.search(source, reference);
-      if (searchResult.hits.total.value !== numDocs) {
+      if (searchResult.hits.total.value < numDocs) {
         throw new Error(`Expected ${numDocs} but received ${searchResult.hits.total.value}.`);
       }
       return searchResult.hits.hits;

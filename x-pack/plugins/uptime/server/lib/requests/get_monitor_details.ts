@@ -5,11 +5,7 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  MonitorDetails,
-  MonitorError,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+import { MonitorDetails, MonitorError } from '../../../common/runtime_types';
 
 export interface GetMonitorDetailsParams {
   monitorId: string;
@@ -20,7 +16,7 @@ export interface GetMonitorDetailsParams {
 export const getMonitorDetails: UMElasticsearchQueryFn<
   GetMonitorDetailsParams,
   MonitorDetails
-> = async ({ callES, monitorId, dateStart, dateEnd }) => {
+> = async ({ callES, dynamicSettings, monitorId, dateStart, dateEnd }) => {
   const queryFilters: any = [
     {
       range: {
@@ -38,7 +34,7 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   ];
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       size: 1,
       _source: ['error', '@timestamp'],
@@ -69,11 +65,11 @@ export const getMonitorDetails: UMElasticsearchQueryFn<
   const data = result.hits.hits[0]?._source;
 
   const monitorError: MonitorError | undefined = data?.error;
-  const errorTimeStamp: string | undefined = data?.['@timestamp'];
+  const errorTimestamp: string | undefined = data?.['@timestamp'];
 
   return {
     monitorId,
     error: monitorError,
-    timestamp: errorTimeStamp,
+    timestamp: errorTimestamp,
   };
 };
