@@ -19,6 +19,7 @@
 
 // @ts-ignore
 import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+// @ts-ignore
 import { L } from './leaflet';
 // @ts-ignore
 import { KibanaMap } from './map/kibana_map';
