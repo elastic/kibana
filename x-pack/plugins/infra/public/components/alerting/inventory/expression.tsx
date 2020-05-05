@@ -52,6 +52,8 @@ import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
+const FILTER_TYPING_DEBOUNCE_MS = 500;
+
 interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
@@ -135,7 +137,9 @@ export const Expressions: React.FC<Props> = props => {
     [derivedIndexPattern, setAlertParams]
   );
 
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 500), [onFilterChange]);
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
 
   const emptyError = useMemo(() => {
     return {

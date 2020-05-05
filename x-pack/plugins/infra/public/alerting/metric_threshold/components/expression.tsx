@@ -41,6 +41,8 @@ import { ExpressionRow } from './expression_row';
 import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 
+const FILTER_TYPING_DEBOUNCE_MS = 500;
+
 interface Props {
   errors: IErrorObject[];
   alertParams: {
@@ -126,7 +128,9 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, derivedIndexPattern]
   );
 
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, 250), [onFilterChange]);
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
