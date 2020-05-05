@@ -17,13 +17,16 @@ import {
 } from '@elastic/eui';
 import { AgentConfig, PackageInfo, Datasource, NewDatasource } from '../../../types';
 import { packageToConfigDatasourceInputs } from '../../../services';
+import { Loading } from '../../../components';
+import { DatasourceValidationResults } from './services';
 
 export const StepDefineDatasource: React.FunctionComponent<{
   agentConfig: AgentConfig;
   packageInfo: PackageInfo;
   datasource: NewDatasource;
   updateDatasource: (fields: Partial<NewDatasource>) => void;
-}> = ({ agentConfig, packageInfo, datasource, updateDatasource }) => {
+  validationResults: DatasourceValidationResults;
+}> = ({ agentConfig, packageInfo, datasource, updateDatasource, validationResults }) => {
   // Form show/hide states
   const [isShowingAdvancedDefine, setIsShowingAdvancedDefine] = useState<boolean>(false);
 
@@ -64,11 +67,13 @@ export const StepDefineDatasource: React.FunctionComponent<{
     }
   }, [datasource.package, datasource.config_id, agentConfig, packageInfo, updateDatasource]);
 
-  return (
+  return validationResults ? (
     <>
       <EuiFlexGrid columns={2}>
         <EuiFlexItem>
           <EuiFormRow
+            isInvalid={!!validationResults.name}
+            error={validationResults.name}
             label={
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepConfigure.datasourceNameInputLabel"
@@ -102,6 +107,8 @@ export const StepDefineDatasource: React.FunctionComponent<{
                 />
               </EuiText>
             }
+            isInvalid={!!validationResults.description}
+            error={validationResults.description}
           >
             <EuiFieldText
               value={datasource.description}
@@ -161,5 +168,7 @@ export const StepDefineDatasource: React.FunctionComponent<{
         </Fragment>
       ) : null}
     </>
+  ) : (
+    <Loading />
   );
 };

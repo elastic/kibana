@@ -9,7 +9,6 @@ import {
   IScopedClusterClient,
   KibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
   RouteConfig,
   SavedObjectsClientContract,
 } from 'kibana/server';
@@ -25,7 +24,11 @@ import { SearchResponse } from 'elasticsearch';
 import { registerEndpointRoutes } from './index';
 import { EndpointConfigSchema } from '../../config';
 import * as data from '../../test_data/all_metadata_data.json';
-import { createMockAgentService, createMockMetadataIndexPatternRetriever } from '../../mocks';
+import {
+  createMockAgentService,
+  createMockMetadataIndexPatternRetriever,
+  createRouteHandlerContext,
+} from '../../mocks';
 import { AgentService } from '../../../../ingest_manager/server';
 import Boom from 'boom';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -65,27 +68,6 @@ describe('test endpoint route', () => {
   });
 
   afterEach(() => endpointAppContextService.stop());
-
-  function createRouteHandlerContext(
-    dataClient: jest.Mocked<IScopedClusterClient>,
-    savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
-  ) {
-    return ({
-      core: {
-        elasticsearch: {
-          dataClient,
-        },
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-      /**
-       * Using unknown here because the object defined is not a full `RequestHandlerContext`. We don't
-       * need all of the fields required to run the tests, but the `routeHandler` function requires a
-       * `RequestHandlerContext`.
-       */
-    } as unknown) as RequestHandlerContext;
-  }
 
   it('test find the latest of all endpoints', async () => {
     const mockRequest = httpServerMock.createKibanaRequest({});

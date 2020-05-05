@@ -20,16 +20,15 @@ import {
   ESSearchResponse
 } from '../../../typings/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { pickKeys } from '../../../../../legacy/plugins/apm/public/utils/pickKeys';
+import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
-interface IndexPrivileges {
+export interface IndexPrivileges {
   has_all_requested: boolean;
-  username: string;
   index: Record<string, { read: boolean }>;
 }
 

@@ -13,6 +13,8 @@ import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
 
+export const SAVED_OBJECT_REL_PRIMARY = 'primary';
+
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   logEntries: schema.boolean({ defaultValue: false }),
