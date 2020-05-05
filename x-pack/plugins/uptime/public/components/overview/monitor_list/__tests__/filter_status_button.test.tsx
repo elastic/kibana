@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import {
-  FilterStatusButton,
-  FilterStatusButtonProps,
-} from '../../monitor_list/filter_status_button';
-import { shallowWithRouter } from '../../../../lib';
+import { FilterStatusButton, FilterStatusButtonProps } from '../filter_status_button';
+import { renderWithRouter, shallowWithRouter } from '../../../../lib';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;
@@ -19,11 +16,17 @@ describe('FilterStatusButton', () => {
       dataTestSubj: 'foo',
       value: 'up',
       withNext: true,
+      isActive: true,
     };
   });
 
-  it('renders without errors for valid props', () => {
+  it('shallow renders without errors for valid props', () => {
     const wrapper = shallowWithRouter(<FilterStatusButton {...props} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders without errors for valid props', () => {
+    const wrapper = renderWithRouter(<FilterStatusButton {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

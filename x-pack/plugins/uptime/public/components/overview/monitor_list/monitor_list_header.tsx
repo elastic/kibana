@@ -16,11 +16,7 @@ const TitleStyle = styled(EuiTitle)`
   margin-left: auto;
 `;
 
-interface Props {
-  statusFilter: string;
-}
-
-export const MonitorListHeader: React.FC<Props> = ({ statusFilter }) => {
+export const MonitorListHeader: React.FC<Props> = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
@@ -34,7 +30,7 @@ export const MonitorListHeader: React.FC<Props> = ({ statusFilter }) => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <StatusFilter statusFilter={statusFilter} />
+        <StatusFilter />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         <TitleStyle size="xs">

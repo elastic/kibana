@@ -8,12 +8,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFilterGroup, EuiTextColor } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
+import { useGetUrlParams } from '../../../hooks';
 
-interface Props {
-  statusFilter: string;
-}
+export const StatusFilter: React.FC = () => {
+  const { statusFilter } = useGetUrlParams();
 
-export const StatusFilter: React.FC<Props> = ({ statusFilter }) => {
   return (
     <EuiFilterGroup>
       <FilterStatusButton

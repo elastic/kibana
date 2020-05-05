@@ -187,7 +187,7 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   return (
     <EuiPanel>
-      <MonitorListHeader statusFilter={statusFilter} />
+      <MonitorListHeader />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
