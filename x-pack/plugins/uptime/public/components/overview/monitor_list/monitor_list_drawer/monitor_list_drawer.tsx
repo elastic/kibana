@@ -11,7 +11,6 @@ import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
-import { Redirects } from './redirects';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -61,7 +60,6 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
           timestamp={monitorDetails.timestamp}
         />
       )}
-      <Redirects monitorUrl={monitorUrl} />
     </ContainerDiv>
   ) : null;
 }

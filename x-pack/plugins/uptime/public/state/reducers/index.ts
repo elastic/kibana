@@ -19,7 +19,6 @@ import { monitorDurationReducer } from './monitor_duration';
 import { indexStatusReducer } from './index_status';
 import { mlJobsReducer } from './ml_anomaly';
 import { certificatesReducer } from '../certificates/certificates';
-import { redirectsReducer } from './redirects';
 
 export const rootReducer = combineReducers({
   monitor: monitorReducer,
@@ -36,5 +35,4 @@ export const rootReducer = combineReducers({
   monitorDuration: monitorDurationReducer,
   indexStatus: indexStatusReducer,
   certificates: certificatesReducer,
-  redirects: redirectsReducer,
 });
