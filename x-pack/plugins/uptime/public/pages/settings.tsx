@@ -100,12 +100,6 @@ export const SettingsPage = () => {
       setFormFields({
         ...formFields,
         ...changedField,
-        // heartbeatIndices: changedField.heartbeatIndices ?? formFields.heartbeatIndices,
-        // certThresholds: Object.assign(
-        //   {},
-        //   formFields.certThresholds,
-        //   changedField?.certThresholds ?? null
-        // ),
       });
     }
   };
