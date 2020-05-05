@@ -45,6 +45,17 @@ describe('data generator', () => {
     expect(metadata.host).not.toBeNull();
   });
 
+  it('creates policy response documents', () => {
+    const timestamp = new Date().getTime();
+    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
+    expect(hostPolicyResponse.event.created).toEqual(timestamp);
+    expect(hostPolicyResponse.endpoint).not.toBeNull();
+    expect(hostPolicyResponse.agent).not.toBeNull();
+    expect(hostPolicyResponse.host).not.toBeNull();
+    expect(hostPolicyResponse.endpoint.policy.applied).not.toBeNull();
+  });
+
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
     const alert = generator.generateAlert(timestamp);
