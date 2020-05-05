@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum AnnotationType {
-  VERSION = 'version'
-}
-
-export interface Annotation {
-  type: AnnotationType;
-  id: string;
-  '@timestamp': number;
-  text: string;
-}
+export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
+  ? Value
+  : Func;
