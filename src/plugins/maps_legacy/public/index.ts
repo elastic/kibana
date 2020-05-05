@@ -17,15 +17,11 @@
  * under the License.
  */
 
-let KibanaMap: any;
 // @ts-ignore
-import('./leaflet.js').then(() => {
-  // @ts-ignore
-  import('./map/kibana_map').then(km => {
-    KibanaMap = km.KibanaMap;
-  });
-});
+import './leaflet';
 import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+// @ts-ignore
+import { KibanaMap } from './map/kibana_map';
 import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';

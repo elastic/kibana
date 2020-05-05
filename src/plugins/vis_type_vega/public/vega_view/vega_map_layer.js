@@ -26,6 +26,7 @@ export class VegaMapLayer extends KibanaMapLayer {
     // Used by super.getAttributions()
     this._attribution = options.attribution;
     delete options.attribution;
+    // eslint-disable-next-line no-undef
     this._leafletLayer = L.vega(spec, options);
   }
 
