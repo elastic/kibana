@@ -49,6 +49,7 @@ app.config(($routeProvider: any) => {
     })
     // the new route, es 7 deprecated types, es 8 removed them
     .when('/doc/:indexPattern/:index', {
+      // have to be written as function expression, because it's not compiled in dev mode
       // eslint-disable-next-line object-shorthand
       controller: function($scope: LazyScope, $route: any, es: any) {
         timefilter.disableAutoRefreshSelector();

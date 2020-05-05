@@ -12,7 +12,6 @@ import { LicensingPluginSetup } from '../../../licensing/public';
 import { checkLicense } from '../lib/license_check';
 
 import { ViewMode, IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-
 import {
   ISearchEmbeddable,
   SEARCH_EMBEDDABLE_TYPE,

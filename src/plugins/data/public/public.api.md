@@ -664,7 +664,7 @@ export function getEsPreference(uiSettings: IUiSettingsClient_2, sessionId?: str
 // Warning: (ae-missing-release-tag) "getIndexPatternFieldListCreator" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const getIndexPatternFieldListCreator: (dependencies: FieldListDependencies) => CreateIndexPatternFieldList;
+export const getIndexPatternFieldListCreator: ({ fieldFormats, toastNotifications, }: FieldListDependencies) => CreateIndexPatternFieldList;
 
 // Warning: (ae-missing-release-tag) "getKbnTypeNames" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -49,7 +49,6 @@ import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
-  getHistory,
   setDocViewsRegistry,
   setUrlTracker,
   setAngularModule,
@@ -264,7 +263,7 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = await buildServices(core, plugins, getHistory, this.initializerContext);
+      const services = await buildServices(core, plugins, this.initializerContext);
       setServices(services);
       this.servicesInitialized = true;
 

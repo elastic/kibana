@@ -27,9 +27,8 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
 
-interface IndexPrivileges {
+export interface IndexPrivileges {
   has_all_requested: boolean;
-  username: string;
   index: Record<string, { read: boolean }>;
 }
 

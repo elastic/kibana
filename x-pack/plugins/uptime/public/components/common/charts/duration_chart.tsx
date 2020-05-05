@@ -8,7 +8,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Axis, Chart, Position, timeFormatter, Settings, SeriesIdentifier } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  Position,
+  timeFormatter,
+  Settings,
+  SeriesIdentifier,
+  BrushEndListener,
+} from '@elastic/charts';
 import { getChartDateLabel } from '../../../lib/helper';
 import { LocationDurationLine } from '../../../../common/types';
 import { DurationLineSeriesList } from './duration_line_series_list';
@@ -51,7 +59,11 @@ export const DurationChartComponent = ({
 
   const [hiddenLegends, setHiddenLegends] = useState<string[]>([]);
 
-  const onBrushEnd = (minX: number, maxX: number) => {
+  const onBrushEnd: BrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [minX, maxX] = x;
     updateUrlParams({
       dateRangeStart: moment(minX).toISOString(),
       dateRangeEnd: moment(maxX).toISOString(),

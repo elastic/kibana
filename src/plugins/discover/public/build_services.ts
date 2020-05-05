@@ -41,6 +41,7 @@ import { SavedObjectKibanaServices } from 'src/plugins/saved_objects/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { getHistory } from './kibana_services';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -67,7 +68,6 @@ export interface DiscoverServices {
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  getHistory: () => History,
   context: PluginInitializerContext
 ): Promise<DiscoverServices> {
   const services: SavedObjectKibanaServices = {

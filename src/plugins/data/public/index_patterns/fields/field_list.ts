@@ -45,11 +45,10 @@ export type CreateIndexPatternFieldList = (
   shortDotsEnable?: boolean
 ) => IIndexPatternFieldList;
 
-export const getIndexPatternFieldListCreator: (
-  dependencies: FieldListDependencies
-) => CreateIndexPatternFieldList = ({ fieldFormats, toastNotifications }) => (
-  ...fieldListParams
-) => {
+export const getIndexPatternFieldListCreator = ({
+  fieldFormats,
+  toastNotifications,
+}: FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
   class FieldList extends Array<Field> implements IIndexPatternFieldList {
     private byName: FieldMap = new Map();
     private groups: Map<Field['type'], FieldMap> = new Map();
