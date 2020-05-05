@@ -118,15 +118,19 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',
     }),
-    new CompressionPlugin({
-      algorithm: 'brotliCompress',
-      filename: '[path].br',
-      test: /\.(js|css)$/,
-    }),
-    new CompressionPlugin({
-      algorithm: 'gzip',
-      filename: '[path].gz',
-      test: /\.(js|css)$/,
-    }),
+    ...(dev
+      ? []
+      : [
+          new CompressionPlugin({
+            algorithm: 'brotliCompress',
+            filename: '[path].br',
+            test: /\.(js|css)$/,
+          }),
+          new CompressionPlugin({
+            algorithm: 'gzip',
+            filename: '[path].gz',
+            test: /\.(js|css)$/,
+          }),
+        ]),
   ],
 });
