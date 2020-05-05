@@ -26,7 +26,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
@@ -235,7 +235,7 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   // and the max bucket span for the jobs shown in the chart.
   const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
 

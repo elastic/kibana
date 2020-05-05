@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineModel } from './model';
-import { Direction } from '../../graphql/types';
-import { convertTimelineAsInput } from './epic';
-
 import { Filter, esFilters } from '../../../../../../src/plugins/data/public';
+
+import { TimelineType } from '../../../common/types/timeline';
+
+import { Direction } from '../../graphql/types';
+
+import { TimelineModel } from './model';
+import { convertTimelineAsInput } from './epic';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -135,6 +138,9 @@ describe('Epic Timeline', () => {
         },
         loadingEventIds: [],
         title: 'saved',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
@@ -283,6 +289,9 @@ describe('Epic Timeline', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+        timelineType: TimelineType.default,
         title: 'saved',
       });
     });

@@ -43,6 +43,7 @@ export interface Case {
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
+  connectorId: string;
   createdAt: string;
   createdBy: ElasticUser;
   description: string;

@@ -19,6 +19,7 @@ import {
   CasesFindResponse,
 } from '../../../../case/common/api/cases';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
 const basicCommentId = 'basic-comment-id';
@@ -29,6 +30,11 @@ export const elasticUser = {
   fullName: 'Leslie Knope',
   username: 'lknope',
   email: 'leslie.knope@elastic.co',
+};
+
+export const serviceConnectorUser = {
+  fullName: 'Leslie Knope',
+  username: 'lknope',
 };
 
 export const tags: string[] = ['coke', 'pepsi'];
@@ -52,6 +58,7 @@ export const basicCase: Case = {
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
+  connectorId: '123',
   description: 'Security banana Issue',
   externalService: null,
   status: 'open',
@@ -87,8 +94,8 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
 };
 
-const basicPush = {
-  connectorId: 'connector_id',
+export const basicPush = {
+  connectorId: '123',
   connectorName: 'connector name',
   externalId: 'external_id',
   externalTitle: 'external title',
@@ -192,6 +199,7 @@ export const basicCaseSnake: CaseResponse = {
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
+  connector_id: '123',
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
   external_service: null,
@@ -205,13 +213,13 @@ export const casesStatusSnake: CasesStatusResponse = {
 };
 
 export const pushSnake = {
-  connector_id: 'connector_id',
+  connector_id: '123',
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
 };
-const basicPushSnake = {
+export const basicPushSnake = {
   ...pushSnake,
   pushed_at: basicUpdatedAt,
   pushed_by: elasticUserSnake,
