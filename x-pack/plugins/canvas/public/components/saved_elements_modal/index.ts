@@ -11,7 +11,7 @@ import { camelCase } from 'lodash';
 // @ts-ignore Untyped local
 import { cloneSubgraphs } from '../../lib/clone_subgraphs';
 import * as customElementService from '../../lib/custom_element_service';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WithKibanaProps } from '../../';
 // @ts-ignore Untyped local
 import { selectToplevelNodes } from '../../state/actions/transient';

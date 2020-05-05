@@ -15,7 +15,7 @@ import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
 import { WithKibanaProps } from '../../index';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 const allowedEmbeddables = {
   [EmbeddableTypes.map]: (id: string) => {

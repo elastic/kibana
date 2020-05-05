@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../../../src/plugins/expressions/common';
+export * from '../../../../src/plugins/expressions/common';
 export * from './assets';
 export * from './canvas';
 export * from './elements';

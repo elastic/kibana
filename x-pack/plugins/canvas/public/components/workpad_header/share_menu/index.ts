@@ -6,14 +6,14 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../../../../plugins/reporting/public';
+import { jobCompletionNotifications } from '../../../../../../plugins/reporting/public';
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 import { getWindow } from '../../../lib/get_window';
 import { downloadWorkpad } from '../../../lib/download_workpad';
 import { ShareMenu as Component, Props as ComponentProps } from './share_menu';
 import { getPdfUrl, createPdf } from './utils';
 import { State, CanvasWorkpad } from '../../../../types';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public/';
 import { WithKibanaProps } from '../../../index';
 
 import { ComponentStrings } from '../../../../i18n';

@@ -25,7 +25,7 @@ import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
 import { ComponentStrings } from '../../../../../i18n/components';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public/';
+import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { OnCloseFn } from '../share_menu';
 import { WithKibanaProps } from '../../../../index';
 const { WorkpadHeaderShareMenu: strings } = ComponentStrings;

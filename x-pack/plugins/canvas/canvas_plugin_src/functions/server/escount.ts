@@ -10,7 +10,7 @@ import {
 } from 'src/plugins/expressions/common';
 /* eslint-disable */
 // @ts-ignore untyped local
-import { buildESRequest } from '../../../../../../plugins/canvas/server/lib/build_es_request';
+import { buildESRequest } from '../../../server/lib/build_es_request';
 /* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
 

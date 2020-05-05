@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/ui-shared-deps/monaco';
-import { ExpressionFunction } from '../../../../../../../src/plugins/expressions';
-import { CodeEditor } from '../../../../../../../src/plugins/kibana_react/public';
+import { ExpressionFunction } from '../../../types';
+import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
 import {
   AutocompleteSuggestion,
   getAutocompleteSuggestions,

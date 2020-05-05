@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npSetup } from 'ui/new_platform';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
+import uuid from 'uuid/v4';
 
-const {
-  plugins: { home },
-} = npSetup;
-
-home.featureCatalogue.register(featureCatalogueEntry);
+export function getId(type: string): string {
+  return `${type}-${uuid()}`;
+}

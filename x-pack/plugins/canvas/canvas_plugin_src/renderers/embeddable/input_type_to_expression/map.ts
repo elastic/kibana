@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapEmbeddableInput } from '../../../../../maps/public';
+import { MapEmbeddableInput } from '../../../../../../legacy/plugins/maps/public';
 
 export function toExpression(input: MapEmbeddableInput): string {
   const expressionParts = [] as string[];

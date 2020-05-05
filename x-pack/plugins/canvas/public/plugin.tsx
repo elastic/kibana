@@ -10,20 +10,19 @@ import {
   Plugin,
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../../src/core/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+} from '../../../../src/core/public';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
-import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
+import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
+import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
-import { legacyRegistries } from './legacy_plugin_support';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { initFunctions } from './functions';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
@@ -94,11 +93,6 @@ export class CanvasPlugin
     });
 
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
-
-    // Register Legacy plugin stuff
-    canvasApi.addFunctions(legacyRegistries.browserFunctions.getOriginalFns());
-    canvasApi.addElements(legacyRegistries.elements.getOriginalFns());
-    canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
 
     // Register core canvas stuff
     canvasApi.addFunctions(

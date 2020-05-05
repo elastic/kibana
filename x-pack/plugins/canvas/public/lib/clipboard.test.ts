@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('../../../../../../src/plugins/kibana_utils/public');
+jest.mock('../../../../../src/plugins/kibana_utils/public');
 
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { setClipboardData, getClipboardData } from './clipboard';
 import { LOCALSTORAGE_CLIPBOARD } from '../../common/lib/constants';
 import { elements } from '../../__tests__/fixtures/workpads';

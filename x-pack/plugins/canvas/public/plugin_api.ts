@@ -9,7 +9,7 @@ import {
   RendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';
-import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
 type AddToRegistry<T extends any> = (add: T[]) => void;
 

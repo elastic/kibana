@@ -9,7 +9,7 @@ import rison from 'rison-node';
 import { IBasePath } from 'kibana/public';
 import { fetch } from '../../../../common/lib/fetch';
 import { CanvasWorkpad } from '../../../../types';
-import { url } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';

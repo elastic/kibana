@@ -5,6 +5,6 @@
  */
 
 import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
-import { ExpressionFunction } from '../../../../../../src/plugins/expressions';
+import { ExpressionFunction } from '../../../../../src/plugins/expressions';
 
 export const functionSpecs = browserFns.map(fn => new ExpressionFunction(fn()));

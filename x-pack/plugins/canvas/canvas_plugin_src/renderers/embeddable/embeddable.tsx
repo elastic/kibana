@@ -6,17 +6,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { CoreStart } from '../../../../../../../src/core/public';
+import { CoreStart } from '../../../../../../src/core/public';
 import { StartDeps } from '../../plugin';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
-import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
+import { getSavedObjectFinder } from '../../../../../../src/plugins/saved_objects/public';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';

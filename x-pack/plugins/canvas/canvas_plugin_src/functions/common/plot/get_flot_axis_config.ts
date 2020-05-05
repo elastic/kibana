@@ -6,7 +6,7 @@
 
 import { get, map } from 'lodash';
 import { Ticks, AxisConfig, isAxisConfig } from '../../../../types';
-import { Style, PointSeriesColumns } from '../../../../../../../../src/plugins/expressions/common';
+import { Style, PointSeriesColumns } from '../../../../../../../src/plugins/expressions/common';
 
 type Position = 'bottom' | 'top' | 'left' | 'right';
 interface Config {

@@ -7,11 +7,7 @@
 import { ExpressionValueFilter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
-import {
-  TimeRange,
-  esFilters,
-  Filter as DataFilter,
-} from '../../../../../../src/plugins/data/public';
+import { TimeRange, esFilters, Filter as DataFilter } from '../../../../../src/plugins/data/public';
 
 export interface EmbeddableFilterInput {
   filters: DataFilter[];

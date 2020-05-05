@@ -15,7 +15,7 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { ElementNotSelected } from './element_not_selected';

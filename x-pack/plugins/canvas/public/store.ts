@@ -9,7 +9,7 @@ import { createStore as createReduxStore, destroyStore as destroy } from './stat
 // @ts-ignore Untyped local
 import { getInitialState } from './state/initial_state';
 
-import { CoreSetup } from '../../../../../src/core/public';
+import { CoreSetup } from '../../../../src/core/public';
 import { CanvasSetupDeps } from './plugin';
 
 export async function createStore(core: CoreSetup, plugins: CanvasSetupDeps) {

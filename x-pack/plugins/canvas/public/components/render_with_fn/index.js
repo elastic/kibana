@@ -7,7 +7,7 @@
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { RenderWithFn as Component } from './render_with_fn';
 import { ElementHandlers } from './lib/handlers';
 

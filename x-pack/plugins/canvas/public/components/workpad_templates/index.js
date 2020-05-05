@@ -9,7 +9,7 @@ import { compose, getContext, withHandlers, withProps } from 'recompose';
 import * as workpadService from '../../lib/workpad_service';
 import { getId } from '../../lib/get_id';
 import { templatesRegistry } from '../../lib/templates_registry';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WorkpadTemplates as Component } from './workpad_templates';
 
 export const WorkpadTemplates = compose(

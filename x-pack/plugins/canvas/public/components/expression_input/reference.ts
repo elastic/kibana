@@ -8,7 +8,7 @@ import { ComponentStrings } from '../../../i18n';
 import {
   ExpressionFunction,
   ExpressionFunctionParameter,
-} from '../../../../../../../src/plugins/expressions';
+} from '../../../../../../src/plugins/expressions';
 
 const { ExpressionInput: strings } = ComponentStrings;
 

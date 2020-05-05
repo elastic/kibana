@@ -21,7 +21,7 @@ import { getId } from '../../lib/get_id';
 // @ts-ignore Untyped Local
 import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WithKibanaProps } from '../../';
 import { AssetManager as Component, Props as AssetManagerProps } from './asset_manager';
 

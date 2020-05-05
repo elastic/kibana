@@ -16,7 +16,7 @@ import { AppMountParameters, CoreStart, CoreSetup } from 'kibana/public';
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
 import { App } from './components/app';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { initInterpreter, resetInterpreter } from './lib/run_interpreter';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
@@ -26,9 +26,9 @@ import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore, destroyStore } from './store';
 
-import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui_actions/public';
+import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../src/plugins/ui_actions/public';
 /* eslint-disable */
-import { ACTION_VALUE_CLICK } from '../../../../../src/plugins/data/public/actions/value_click_action';
+import { ACTION_VALUE_CLICK } from '../../../../src/plugins/data/public/actions/value_click_action';
 /* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 

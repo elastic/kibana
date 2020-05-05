@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ElementContent as Component } from './element_content';
 
 const mapStateToProps = state => ({

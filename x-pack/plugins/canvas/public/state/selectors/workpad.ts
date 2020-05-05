@@ -16,12 +16,10 @@ import {
   CanvasGroup,
   PositionedElement,
   CanvasWorkpadBoundingBox,
-} from '../../../types';
-import {
   ExpressionAstArgument,
   ExpressionAstFunction,
   ExpressionAstExpression,
-} from '../../../../../../../src/plugins/expressions/common';
+} from '../../../types';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
