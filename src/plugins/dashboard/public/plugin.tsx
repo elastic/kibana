@@ -153,7 +153,7 @@ export class DashboardPlugin
         createDirectAccessDashboardLinkGenerator(async () => {
           const [coreStart, , selfStart] = await startServices;
           return {
-            appBasePath: coreStart.application.getUrlForApp('dashboard'),
+            appBasePath: coreStart.application.getUrlForApp('dashboards'),
             useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
             savedDashboardLoader: selfStart.getSavedDashboardLoader(),
           };

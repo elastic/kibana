@@ -147,7 +147,9 @@ const getEsUrl = (newPlatform: CoreStart) => {
 const digestOnHashChange = (getHistory?: () => History) => ($rootScope: IRootScopeService) => {
   if (!getHistory) return;
   const unlisten = getHistory().listen(() => {
-    $rootScope.$applyAsync();
+    // dispatch synthetic hash change event to update hash history objects and angular routing
+    // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
   $rootScope.$on('$destroy', unlisten);
 };

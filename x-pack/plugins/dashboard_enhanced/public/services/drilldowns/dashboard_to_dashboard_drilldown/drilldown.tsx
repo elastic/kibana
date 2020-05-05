@@ -61,7 +61,7 @@ export class DashboardToDashboardDrilldown
     const dashboardPath = await this.getDestinationUrl(config, context);
     const dashboardHash = dashboardPath.split('#')[1];
 
-    return this.params.start().core.application.getUrlForApp('kibana', {
+    return this.params.start().core.application.getUrlForApp('dashboards', {
       path: `#${dashboardHash}`,
     });
   };
@@ -73,7 +73,7 @@ export class DashboardToDashboardDrilldown
     const dashboardPath = await this.getDestinationUrl(config, context);
     const dashboardHash = dashboardPath.split('#')[1];
 
-    await this.params.start().core.application.navigateToApp('kibana', {
+    await this.params.start().core.application.navigateToApp('dashboards', {
       path: `#${dashboardHash}`,
     });
   };
