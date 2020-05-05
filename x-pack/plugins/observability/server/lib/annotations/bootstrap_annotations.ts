@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
-import { PromiseReturnType } from '../../../../apm/typings/common';
+import { PromiseReturnType } from '../../../typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 

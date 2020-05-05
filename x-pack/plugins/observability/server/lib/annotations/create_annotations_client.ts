@@ -13,7 +13,7 @@ import {
   Annotation,
   getAnnotationByIdRt,
 } from '../../../common/annotations';
-import { PromiseReturnType } from '../../../../apm/typings/common';
+import { PromiseReturnType } from '../../../typings/common';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { mappings } from './mappings';
 
