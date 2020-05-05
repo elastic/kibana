@@ -3,5 +3,15 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data"]
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "embeddable",
+    "inspector",
+    "kibanaLegacy",
+    "navigation",
+    "uiActions",
+    "visualizations"
+  ],
+  "optionalPlugins": ["home", "share"]
 }

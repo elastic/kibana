@@ -18,7 +18,7 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { SearchAggsSetup, SearchAggsStart, SearchAggsStartLegacy } from './aggs';
+import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
@@ -85,5 +85,5 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
-  __LEGACY: ISearchStartLegacy & SearchAggsStartLegacy;
+  __LEGACY: ISearchStartLegacy;
 }

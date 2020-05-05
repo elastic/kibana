@@ -160,6 +160,14 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
+            // This delay is needed to prevent some navigation issues in Firefox/Safari.
+            // see https://github.com/elastic/kibana/issues/65161
+            const delay = res => {
+              return new Promise(resolve => {
+                setTimeout(() => resolve(res), 0);
+              });
+            };
+
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
@@ -168,7 +176,7 @@ export function initVisualizeApp(app, deps) {
                 return savedVis;
               })
               .then(getResolvedResults(deps))
-
+              .then(delay)
               .catch(
                 redirectWhenMissing({
                   history,
