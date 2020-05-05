@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 
 export const getDocumentationLinks = () => ({
-  canvas: `${getCoreStart().docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
-    getCoreStart().docLinks.DOC_LINK_VERSION
+  canvas: `${platformService.getService().coreStart.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
+    platformService.getService().coreStart.docLinks.DOC_LINK_VERSION
   }/canvas.html`,
-  numeral: `${getCoreStart().docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
-    getCoreStart().docLinks.DOC_LINK_VERSION
+  numeral: `${platformService.getService().coreStart.docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${
+    platformService.getService().coreStart.docLinks.DOC_LINK_VERSION
   }/guide/numeral.html`,
 });

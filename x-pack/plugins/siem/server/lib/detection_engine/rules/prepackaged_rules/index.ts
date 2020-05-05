@@ -118,25 +118,23 @@ import rule108 from './windows_execution_msbuild_started_renamed.json';
 import rule109 from './windows_execution_msbuild_started_unusal_process.json';
 import rule110 from './windows_execution_via_compiled_html_file.json';
 import rule111 from './windows_execution_via_net_com_assemblies.json';
-import rule112 from './windows_execution_via_regsvr32.json';
-import rule113 from './windows_execution_via_trusted_developer_utilities.json';
-import rule114 from './windows_html_help_executable_program_connecting_to_the_internet.json';
-import rule115 from './windows_injection_msbuild.json';
-import rule116 from './windows_misc_lolbin_connecting_to_the_internet.json';
-import rule117 from './windows_modification_of_boot_config.json';
-import rule118 from './windows_msxsl_network.json';
-import rule119 from './windows_net_command_system_account.json';
-import rule120 from './windows_persistence_via_application_shimming.json';
-import rule121 from './windows_priv_escalation_via_accessibility_features.json';
-import rule122 from './windows_process_discovery_via_tasklist_command.json';
-import rule123 from './windows_rare_user_runas_event.json';
-import rule124 from './windows_rare_user_type10_remote_login.json';
-import rule125 from './windows_register_server_program_connecting_to_the_internet.json';
-import rule126 from './windows_signed_binary_proxy_execution.json';
-import rule127 from './windows_suspicious_pdf_reader.json';
-import rule128 from './windows_suspicious_process_started_by_a_script.json';
-import rule129 from './windows_uac_bypass_event_viewer.json';
-import rule130 from './windows_whoami_command_activity.json';
+import rule112 from './windows_execution_via_trusted_developer_utilities.json';
+import rule113 from './windows_html_help_executable_program_connecting_to_the_internet.json';
+import rule114 from './windows_injection_msbuild.json';
+import rule115 from './windows_misc_lolbin_connecting_to_the_internet.json';
+import rule116 from './windows_modification_of_boot_config.json';
+import rule117 from './windows_msxsl_network.json';
+import rule118 from './windows_net_command_system_account.json';
+import rule119 from './windows_persistence_via_application_shimming.json';
+import rule120 from './windows_priv_escalation_via_accessibility_features.json';
+import rule121 from './windows_process_discovery_via_tasklist_command.json';
+import rule122 from './windows_rare_user_runas_event.json';
+import rule123 from './windows_rare_user_type10_remote_login.json';
+import rule124 from './windows_register_server_program_connecting_to_the_internet.json';
+import rule125 from './windows_suspicious_pdf_reader.json';
+import rule126 from './windows_uac_bypass_event_viewer.json';
+import rule127 from './windows_whoami_command_activity.json';
+
 export const rawRules = [
   rule1,
   rule2,
@@ -265,7 +263,4 @@ export const rawRules = [
   rule125,
   rule126,
   rule127,
-  rule128,
-  rule129,
-  rule130,
 ];

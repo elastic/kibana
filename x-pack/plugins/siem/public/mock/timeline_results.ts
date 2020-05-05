@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FilterStateStore } from '../../../../../src/plugins/data/common/es_query/filters/meta_filter';
+
+import { TimelineType } from '../../common/types/timeline';
 
 import { OpenTimelineResult } from '../components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
@@ -10,7 +13,6 @@ import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
 import { CreateTimelineProps } from '../pages/detection_engine/components/signals/types';
 import { TimelineModel } from '../store/timeline/model';
 import { timelineDefaults } from '../store/timeline/defaults';
-import { FilterStateStore } from '../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;
@@ -168,6 +170,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 1',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -294,6 +299,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 2',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -420,6 +428,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 2',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -546,6 +557,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 3',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -672,6 +686,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 4',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -798,6 +815,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 5',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -924,6 +944,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 6',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1050,6 +1073,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1176,6 +1202,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1302,6 +1331,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1428,6 +1460,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1554,6 +1589,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -1680,6 +1718,9 @@ export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
                 'ZF0W12oB9v5HJNSHwY6L',
               ],
               title: 'test 7',
+              timelineType: TimelineType.default,
+              templateTimelineId: null,
+              templateTimelineVersion: null,
               created: 1558386787614,
               createdBy: 'elastic',
               updated: 1558390951234,
@@ -2102,6 +2143,9 @@ export const mockTimelineModel: TimelineModel = {
     sortDirection: Direction.desc,
   },
   title: 'Test rule',
+  timelineType: TimelineType.default,
+  templateTimelineId: null,
+  templateTimelineVersion: null,
   version: '1',
   width: 1100,
 };
@@ -2125,6 +2169,9 @@ export const mockTimelineResult: TimelineResult = {
   ],
   kqlMode: 'filter',
   title: 'Test rule',
+  timelineType: TimelineType.default,
+  templateTimelineId: null,
+  templateTimelineVersion: null,
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
   version: '1',
@@ -2196,6 +2243,9 @@ export const defaultTimelineProps: CreateTimelineProps = {
     showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     title: '',
+    timelineType: TimelineType.default,
+    templateTimelineVersion: null,
+    templateTimelineId: null,
     version: null,
     width: 1100,
   },
