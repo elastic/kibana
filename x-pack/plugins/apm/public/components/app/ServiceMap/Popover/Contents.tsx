@@ -165,7 +165,9 @@ export function Contents({
             </EuiFlexGroup>
           </ContentLine>
           <ContentLine>
-            <MLJobLink jobId={jobId}>{ANOMALY_DETECTION_LINK}</MLJobLink>
+            <MLJobLink external jobId={jobId}>
+              {ANOMALY_DETECTION_LINK}
+            </MLJobLink>
           </ContentLine>
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>

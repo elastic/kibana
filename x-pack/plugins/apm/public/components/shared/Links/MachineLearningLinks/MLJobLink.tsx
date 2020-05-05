@@ -16,7 +16,9 @@ interface PropsJobId {
   jobId: string;
 }
 
-type Props = PropsServiceName | PropsJobId;
+type Props = (PropsServiceName | PropsJobId) & {
+  external?: boolean;
+};
 
 export const MLJobLink: React.FC<Props> = props => {
   const jobId =
@@ -32,6 +34,7 @@ export const MLJobLink: React.FC<Props> = props => {
       children={props.children}
       query={query}
       path="/timeseriesexplorer"
+      external={props.external}
     />
   );
 };
