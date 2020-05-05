@@ -89,7 +89,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 365,
               "certExpirationThreshold": 30,
-              "heartbeatIndices": "heartbeat-8*",
+              "heartbeatIndices": "heartbeat-7*",
             },
             "locations": Array [],
             "numTimes": 5,
@@ -134,7 +134,7 @@ describe('status check alert', () => {
             "dynamicSettings": Object {
               "certAgeThreshold": 365,
               "certExpirationThreshold": 30,
-              "heartbeatIndices": "heartbeat-8*",
+              "heartbeatIndices": "heartbeat-7*",
             },
             "locations": Array [],
             "numTimes": 5,
