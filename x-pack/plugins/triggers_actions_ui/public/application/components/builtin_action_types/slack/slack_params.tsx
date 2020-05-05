@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, useEffect } from 'react';
-import { EuiTextArea, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionParamsProps } from '../../../../types';
 import { SlackActionParams } from '../types';

@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
@@ -12,10 +11,7 @@ import { PagerDutyActionParams, PagerDutyActionConnector } from '.././types';
 import pagerDutySvg from './pagerduty.svg';
 import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
-const PagerDutyActionConnectorFields = lazy(() => import('./pagerduty_connectors'));
-const PagerDutyParamsFields = lazy(() => import('./pagerduty_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<PagerDutyActionConnector, PagerDutyActionParams> {
   return {
     id: '.pagerduty',
     iconClass: pagerDutySvg,
@@ -86,16 +82,8 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <PagerDutyActionConnectorFields {...props} />
-      </Suspense>
-    ),
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <PagerDutyParamsFields {...props} />
-      </Suspense>
-    ),
+    actionConnectorFields: lazy(() => import('./pagerduty_connectors')),
+    actionParamsFields: lazy(() => import('./pagerduty_params')),
   };
 }
 

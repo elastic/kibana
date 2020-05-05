@@ -17,12 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 
-export const EmailActionConnectorFields = ({
-  action,
-  editActionConfig,
-  editActionSecrets,
-  errors,
-}: ActionConnectorFieldsProps<EmailActionConnector>) => {
+export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EmailActionConnector
+>> = ({ action, editActionConfig, editActionSecrets, errors }) => {
   const { from, host, port, secure } = action.config;
   const { user, password } = action.secrets;
 

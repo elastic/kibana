@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, Suspense } from 'react';
 import {
   EuiForm,
   EuiCallOut,
@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -146,13 +147,15 @@ export const ActionConnectorForm = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
-        <FieldsComponent
-          action={connector}
-          errors={errors}
-          editActionConfig={setActionConfigProperty}
-          editActionSecrets={setActionSecretsProperty}
-          http={http}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <FieldsComponent
+            action={connector}
+            errors={errors}
+            editActionConfig={setActionConfigProperty}
+            editActionSecrets={setActionSecretsProperty}
+            http={http}
+          />
+        </Suspense>
       ) : null}
     </EuiForm>
   );

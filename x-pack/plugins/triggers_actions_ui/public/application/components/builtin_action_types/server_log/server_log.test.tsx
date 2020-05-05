@@ -3,12 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
-import { ActionTypeModel, ActionConnector, ActionParamsProps } from '../../../../types';
-import { ServerLogActionParams, ServerLogLevelOptions } from '../types';
+import { ActionTypeModel, ActionConnector } from '../../../../types';
 
 const ACTION_TYPE_ID = '.server-log';
 let actionTypeModel: ActionTypeModel;

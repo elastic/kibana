@@ -3,17 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
+import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '.././index';
-import { ActionTypeModel, ActionParamsProps } from '../../../../types';
-import {
-  PagerDutyActionParams,
-  EventActionOptions,
-  SeverityActionOptions,
-  PagerDutyActionConnector,
-} from '.././types';
+import { EventActionOptions, SeverityActionOptions } from '.././types';
 import PagerDutyParamsFields from './pagerduty_params';
 
 describe('PagerDutyParamsFields renders', () => {

@@ -3,16 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { WebhookActionParams, WebhookActionConnector } from '../types';
 
-const WebhookActionConnectorFields = lazy(() => import('./webhook_connectors'));
-const WebhookParamsFields = lazy(() => import('./webhook_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<WebhookActionConnector, WebhookActionParams> {
   return {
     id: '.webhook',
     iconClass: 'logoWebhook',
@@ -97,15 +93,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <WebhookActionConnectorFields {...props} />
-      </Suspense>
-    ),
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <WebhookParamsFields {...props} />
-      </Suspense>
-    ),
+    actionConnectorFields: lazy(() => import('./webhook_connectors')),
+    actionParamsFields: lazy(() => import('./webhook_params')),
   };
 }

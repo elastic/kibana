@@ -4,27 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import {
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
-import {
-  ActionTypeModel,
-  ActionConnectorFieldsProps,
-  ValidationResult,
-  ActionParamsProps,
-} from '../../../../types';
-import { PagerDutyActionParams, PagerDutyActionConnector } from '.././types';
-import pagerDutySvg from '.././pagerduty.svg';
+import { ActionParamsProps } from '../../../../types';
+import { PagerDutyActionParams } from '.././types';
 import { AddMessageVariables } from '../../add_message_variables';
-import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,

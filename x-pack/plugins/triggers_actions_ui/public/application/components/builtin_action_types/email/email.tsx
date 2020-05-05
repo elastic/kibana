@@ -3,16 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { EmailActionParams, EmailActionConnector } from '../types';
 
-const EmailActionConnectorFields = lazy(() => import('./email_connector'));
-const EmailParamsFields = lazy(() => import('./email_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<EmailActionConnector, EmailActionParams> {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
   return {
     id: '.email',
@@ -148,15 +144,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <EmailActionConnectorFields {...props} />
-      </Suspense>
-    ),
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <EmailParamsFields {...props} />
-      </Suspense>
-    ),
+    actionConnectorFields: lazy(() => import('./email_connector')),
+    actionParamsFields: lazy(() => import('./email_params')),
   };
 }

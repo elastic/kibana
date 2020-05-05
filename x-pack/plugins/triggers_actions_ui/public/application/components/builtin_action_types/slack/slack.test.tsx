@@ -3,12 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '.././index';
-import { ActionTypeModel, ActionParamsProps } from '../../../../types';
-import { SlackActionParams, SlackActionConnector } from '../types';
+import { ActionTypeModel } from '../../../../types';
+import { SlackActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;

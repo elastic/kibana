@@ -3,15 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { ServerLogActionParams } from '../types';
 
-const ServerLogParamsFields = lazy(() => import('./server_log_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<unknown, ServerLogActionParams> {
   return {
     id: '.server-log',
     iconClass: 'logsApp',
@@ -49,10 +46,6 @@ export function getActionType(): ActionTypeModel {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <ServerLogParamsFields {...props} />
-      </Suspense>
-    ),
+    actionParamsFields: lazy(() => import('./server_log_params')),
   };
 }

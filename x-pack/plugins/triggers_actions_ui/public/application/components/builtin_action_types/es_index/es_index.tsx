@@ -3,16 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { EsIndexActionConnector } from '.././types';
+import { EsIndexActionConnector, IndexActionParams } from '../types';
 
-const IndexActionConnectorFields = lazy(() => import('./es_index_connector'));
-const IndexParamsFields = lazy(() => import('./es_index_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<EsIndexActionConnector, IndexActionParams> {
   return {
     id: '.index',
     iconClass: 'indexOpen',
@@ -46,16 +42,8 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <IndexActionConnectorFields {...props} />
-      </Suspense>
-    ),
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <IndexParamsFields {...props} />
-      </Suspense>
-    ),
+    actionConnectorFields: lazy(() => import('./es_index_connector')),
+    actionParamsFields: lazy(() => import('./es_index_params')),
     validateParams: (): ValidationResult => {
       return { errors: {} };
     },

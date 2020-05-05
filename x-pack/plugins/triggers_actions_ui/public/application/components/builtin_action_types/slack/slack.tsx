@@ -3,16 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { SlackActionParams, SlackActionConnector } from '../types';
 
-const SlackActionFields = lazy(() => import('./slack_connectors'));
-const SlackParamsFields = lazy(() => import('./slack_params'));
-
-export function getActionType(): ActionTypeModel {
+export function getActionType(): ActionTypeModel<SlackActionConnector, SlackActionParams> {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
@@ -64,15 +60,7 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <SlackActionFields {...props} />
-      </Suspense>
-    ),
-    actionParamsFields: (props: any) => (
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <SlackParamsFields {...props} />
-      </Suspense>
-    ),
+    actionConnectorFields: lazy(() => import('./slack_connectors')),
+    actionParamsFields: lazy(() => import('./slack_params')),
   };
 }
