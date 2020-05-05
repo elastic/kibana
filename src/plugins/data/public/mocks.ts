@@ -57,6 +57,8 @@ const createStartContract = (): Start => {
       SearchBar: jest.fn(),
     },
     indexPatterns: ({
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
       ensureDefaultIndexPattern: jest.fn(),
       make: () => ({
         fieldsFetcher: {
