@@ -12,7 +12,6 @@ import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
-import { BuildRuleMessage } from './rule_messages';
 import { filterEventsAgainstList } from './filter_events_with_list';
 
 interface SearchAfterAndBulkCreateParams {
@@ -21,7 +20,6 @@ interface SearchAfterAndBulkCreateParams {
   listClient: ListClientType; // for now....
   listValueType: string;
   logger: Logger;
-  buildRuleMessage: BuildRuleMessage;
   id: string;
   inputIndexPattern: string[];
   signalsIndex: string;
@@ -54,7 +52,6 @@ export const searchAfterAndBulkCreate = async ({
   services,
   listClient,
   logger,
-  buildRuleMessage,
   listValueType,
   id,
   inputIndexPattern,

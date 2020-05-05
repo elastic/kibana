@@ -227,7 +227,6 @@ export const signalRulesAlertType = ({
             services,
             logger,
             listValueType: 'ip',
-            buildRuleMessage,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,

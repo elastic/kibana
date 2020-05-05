@@ -12,12 +12,12 @@ import {
   repeatedSearchResultsWithSortId,
   sampleBulkCreateDuplicateResult,
   sampleDocSearchResultsNoSortId,
-  sampleDocSearchResultsNoSortIdNoHits,
 } from './__mocks__/es_results';
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
+import { ListClient } from '../../../../../lists/server/services/lists/client';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: AlertServicesMock;
@@ -33,7 +33,8 @@ describe('searchAfterAndBulkCreate', () => {
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       ruleParams: sampleParams,
       services: mockService,
-      listClient: () => undefined,
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       logger: mockLogger,
       id: sampleRuleGuid,
       inputIndexPattern,
@@ -107,8 +108,9 @@ describe('searchAfterAndBulkCreate', () => {
         ],
       });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: repeatedSearchResultsWithSortId(3, 1, someGuids.slice(6, 9)),
       ruleParams: sampleParams,
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -135,11 +137,11 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('if unsuccessful first bulk create', async () => {
-    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster.mockResolvedValue(sampleBulkCreateDuplicateResult);
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -183,7 +185,8 @@ describe('searchAfterAndBulkCreate', () => {
       ],
     });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: sampleDocSearchResultsNoSortId(),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -227,7 +230,8 @@ describe('searchAfterAndBulkCreate', () => {
       ],
     });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: sampleDocSearchResultsNoSortIdNoHits(),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -255,7 +259,6 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful iteration of while loop with maxDocs and search after returns results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -273,7 +276,8 @@ describe('searchAfterAndBulkCreate', () => {
       })
       .mockResolvedValueOnce(sampleDocSearchResultsNoSortId());
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -301,7 +305,6 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if successful iteration of while loop with maxDocs and search after returns empty results with no sort ids', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -319,7 +322,8 @@ describe('searchAfterAndBulkCreate', () => {
       })
       .mockResolvedValueOnce(sampleEmptyDocSearchResults());
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -347,7 +351,6 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
     const sampleParams = sampleRuleAlertParams(10);
-    const someGuids = Array.from({ length: 4 }).map((x) => uuid.v4());
     mockService.callCluster
       .mockResolvedValueOnce({
         took: 100,
@@ -367,7 +370,8 @@ describe('searchAfterAndBulkCreate', () => {
         throw Error('Fake Error');
       });
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
-      someResult: repeatedSearchResultsWithSortId(4, 1, someGuids),
+      listClient: ((() => []) as unknown) as ListClient,
+      listValueType: 'ip',
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
