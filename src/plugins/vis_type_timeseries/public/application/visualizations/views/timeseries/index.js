@@ -100,13 +100,21 @@ export const TimeSeries = ({
   const { colors } = getChartsSetup();
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
 
+  const onBrushEndListener = ({ x }) => {
+    if (!x) {
+      return;
+    }
+    const [min, max] = x;
+    onBrush(min, max);
+  };
+
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
         showLegendExtra={true}
         legendPosition={legendPosition}
-        onBrushEnd={onBrush}
+        onBrushEnd={onBrushEndListener}
         animateData={false}
         onPointerUpdate={handleCursorUpdate}
         theme={

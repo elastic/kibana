@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Chrome } from 'ui/chrome';
-import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -40,12 +45,7 @@ export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   inspector: InspectorStart;
-
   uiActions: UiActionsStart;
-  __LEGACY: {
-    absoluteToParsedUrl: (url: string, basePath: string) => any;
-    trackSubUrlForApp: Chrome['trackSubUrlForApp'];
-  };
 }
 
 /**
@@ -63,7 +63,6 @@ export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
-  private startPlugins: CanvasStartDeps | undefined;
 
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
@@ -71,28 +70,19 @@ export class CanvasPlugin
     this.srcPlugin.setup(core, { canvas: canvasApi });
 
     core.application.register({
+      category: DEFAULT_APP_CATEGORIES.analyze,
       id: 'canvas',
-      title: 'Canvas App',
-      mount: async (context, params) => {
+      title: 'Canvas',
+      euiIconType: 'canvasApp',
+      order: 0, // need to figure out if this is the proper order for us
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        // TODO: We only need this to get the __LEGACY stuff that isn't coming from getStartSevices.
-        // We won't need this as soon as we move over to NP Completely
-        if (!this.startPlugins) {
-          throw new Error('Start Plugins not ready at mount time');
-        }
-
-        const canvasStore = await initializeCanvas(
-          core,
-          coreStart,
-          plugins,
-          this.startPlugins,
-          registries
-        );
+        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 
@@ -127,7 +117,6 @@ export class CanvasPlugin
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
-    this.startPlugins = plugins;
     this.srcPlugin.start(core, plugins);
     initLoadingIndicator(core.http.addLoadingCountSource);
   }
