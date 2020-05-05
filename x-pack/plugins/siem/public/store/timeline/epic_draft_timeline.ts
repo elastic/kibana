@@ -32,8 +32,7 @@ export const epicDraftTimeline = (
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,
   clean: boolean
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Observable<any> =>
+) =>
   from(clean ? cleanDraftTimeline() : getDraftTimeline()).pipe(
     withLatestFrom(timeline$),
     mergeMap(([result, recentTimelines]) => {
@@ -65,7 +64,8 @@ export const epicDraftTimeline = (
             id: timelineModel.savedObjectId!,
             savedObjectId: timelineModel.savedObjectId!,
             version: timelineModel.version,
-            show: savedTimeline.show ?? false,
+            // @ts-ignore
+            show: action.payload.show ?? savedTimeline.show,
           },
           to: savedTimeline?.dateRange.end ?? settingsTo,
         }),

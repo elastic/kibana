@@ -164,10 +164,10 @@ export const TimelineComponent: React.FC<Props> = ({
   const timelineQueryFields = useMemo(() => columnsHeader.map(c => c.id), [columnsHeader]);
   const timelineQuerySortField = useMemo(
     () => ({
-      sortFieldId: sort?.columnId,
-      direction: sort?.sortDirection as Direction,
+      sortFieldId: sort.columnId,
+      direction: sort.sortDirection as Direction,
     }),
-    [sort]
+    [sort.columnId, sort.sortDirection]
   );
 
   return (

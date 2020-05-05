@@ -16,6 +16,7 @@ import {
   SubsetTimelineModel,
   TimelineModel,
 } from '../../store/timeline/model';
+import { getNewTimeline } from '../../store/timeline/helpers';
 import { OnChangeItemsPerPage } from '../timeline/events';
 import { Filter } from '../../../../../../src/plugins/data/public';
 import { useUiSetting } from '../../lib/kibana';
@@ -44,7 +45,7 @@ const defaultTimelineTypeContext = {
 };
 
 const StatefulEventsViewerComponent: React.FC<Props> = ({
-  createTimeline,
+  addTimeline,
   columns,
   dataProviders,
   deletedEventIds,
@@ -75,8 +76,18 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (createTimeline != null) {
-      createTimeline({ id, columns, sort, itemsPerPage, showCheckboxes, showRowRenderers });
+    if (addTimeline != null) {
+      addTimeline({
+        id,
+        timeline: getNewTimeline({
+          id,
+          columns,
+          sort,
+          itemsPerPage,
+          showCheckboxes,
+          showRowRenderers,
+        }),
+      });
     }
     return () => {
       deleteEventQuery({ id, inputId: 'global' });
@@ -180,7 +191,7 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  createTimeline: timelineActions.createTimeline,
+  addTimeline: timelineActions.addTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   removeColumn: timelineActions.removeColumn,

@@ -263,7 +263,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
-  createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,
