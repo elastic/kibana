@@ -302,10 +302,13 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       },
       run() {
         const inspectorSession = embeddableHandler.openInspector();
-        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-        const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
-        // Remove that watch in case the user closes the inspector session herself.
-        inspectorSession.onClose.finally(removeWatch);
+
+        if (inspectorSession) {
+          // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+          const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
+          // Remove that watch in case the user closes the inspector session herself.
+          inspectorSession.onClose.finally(removeWatch);
+        }
       },
       tooltip() {
         if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
