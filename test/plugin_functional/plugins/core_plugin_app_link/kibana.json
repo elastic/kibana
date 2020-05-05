@@ -1,0 +1,7 @@
+{
+  "id": "core_plugin_app_link",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true
+}
