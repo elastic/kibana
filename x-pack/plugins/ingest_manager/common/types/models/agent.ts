@@ -34,7 +34,7 @@ export interface AgentActionSOAttributes extends SavedObjectAttributes {
   data?: string;
 }
 
-export interface AgentEvent {
+export interface NewAgentEvent {
   type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
   subtype: // State
   | 'RUNNING'
@@ -58,7 +58,11 @@ export interface AgentEvent {
   stream_id?: string;
 }
 
-export interface AgentEventSOAttributes extends AgentEvent, SavedObjectAttributes {}
+export interface AgentEvent extends NewAgentEvent {
+  id: string;
+}
+
+export interface AgentEventSOAttributes extends NewAgentEvent, SavedObjectAttributes {}
 
 type MetadataValue = string | AgentMetadata;
 

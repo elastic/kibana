@@ -15,11 +15,15 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../../types';
 import { APIKeySelection } from './key_selection';
 import { EnrollmentInstructions } from './instructions';
+import { useFleetStatus } from '../../../../../hooks/use_fleet_status';
+import { useLink } from '../../../../../hooks';
+import { FLEET_PATH } from '../../../../../constants';
 
 interface Props {
   onClose: () => void;
@@ -30,7 +34,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
+  const fleetStatus = useFleetStatus();
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+
+  const fleetLink = useLink(FLEET_PATH);
 
   return (
     <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
@@ -45,12 +52,33 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <APIKeySelection
-          agentConfigs={agentConfigs}
-          onKeyChange={keyId => setSelectedAPIKeyId(keyId)}
-        />
-        <EuiSpacer size="l" />
-        <EnrollmentInstructions selectedAPIKeyId={selectedAPIKeyId} />
+        {fleetStatus.isReady ? (
+          <>
+            <APIKeySelection
+              agentConfigs={agentConfigs}
+              onKeyChange={keyId => setSelectedAPIKeyId(keyId)}
+            />
+            <EuiSpacer size="l" />
+            <EnrollmentInstructions selectedAPIKeyId={selectedAPIKeyId} />
+          </>
+        ) : (
+          <>
+            <FormattedMessage
+              id="xpack.ingestManager.agentEnrollment.fleetNotInitializedText"
+              defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
+              values={{
+                link: (
+                  <EuiLink href={fleetLink}>
+                    <FormattedMessage
+                      id="xpack.ingestManager.agentEnrollment.goToFleetButton"
+                      defaultMessage="Go to Fleet."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -62,14 +90,16 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onClose}>
-              <FormattedMessage
-                id="xpack.ingestManager.agentEnrollment.continueButtonLabel"
-                defaultMessage="Continue"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {fleetStatus.isReady && (
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={onClose}>
+                <FormattedMessage
+                  id="xpack.ingestManager.agentEnrollment.continueButtonLabel"
+                  defaultMessage="Continue"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

@@ -16,7 +16,6 @@ import {
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
 import { Alert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
-import { ActionsClient } from '../../../../../actions/server';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
 export type PatchRuleAlertParamsRest = Partial<RuleAlertParamsRest> & {
@@ -139,7 +138,6 @@ export interface FindRulesStatusesRequestParams {
 
 export interface Clients {
   alertsClient: AlertsClient;
-  actionsClient: ActionsClient;
 }
 
 export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'throttle'>> & {

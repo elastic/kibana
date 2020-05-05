@@ -17,6 +17,7 @@ import { Server } from 'hapi';
 import { ObservabilityPluginSetup } from '../../../observability/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FetchOptions } from '../../public/services/rest/callApi';
+import { SecurityPluginSetup } from '../../../security/public';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -65,6 +66,7 @@ export type APMRequestHandlerContext<
   logger: Logger;
   plugins: {
     observability?: ObservabilityPluginSetup;
+    security?: SecurityPluginSetup;
   };
 };
 
@@ -111,6 +113,7 @@ export interface ServerAPI<TRouteState extends RouteState> {
       logger: Logger;
       plugins: {
         observability?: ObservabilityPluginSetup;
+        security?: SecurityPluginSetup;
       };
     }
   ) => void;

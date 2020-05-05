@@ -16,7 +16,8 @@
     "taskManager",
     "actions",
     "alerting",
-    "observability"
+    "observability",
+    "security"
   ],
   "server": true,
   "ui": true,

@@ -6,7 +6,7 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
-import { Filter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
+import { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -32,7 +32,7 @@ type Output = EmbeddableExpression<MapEmbeddableInput>;
 
 export function savedMap(): ExpressionFunctionDefinition<
   'savedMap',
-  Filter | null,
+  ExpressionValueFilter | null,
   Arguments,
   Output
 > {

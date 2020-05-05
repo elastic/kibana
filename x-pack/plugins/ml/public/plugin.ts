@@ -12,6 +12,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
+import { EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { initManagementSection } from './application/management';
@@ -19,6 +20,9 @@ import { LicenseManagementUIPluginSetup } from '../../license_management/public'
 import { setDependencyCache } from './application/util/dependency_cache';
 import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
 import { registerFeature } from './register_feature';
+import { registerEmbeddables } from './embeddables';
+import { UiActionsSetup } from '../../../../src/plugins/ui_actions/public';
+import { registerMlUiActions } from './ui_actions';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -31,6 +35,8 @@ export interface MlSetupDependencies {
   usageCollection: UsageCollectionSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   home: HomePublicPluginSetup;
+  embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
@@ -57,6 +63,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             usageCollection: pluginsSetup.usageCollection,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
+            embeddable: pluginsSetup.embeddable,
+            uiActions: pluginsSetup.uiActions,
           },
           {
             element: params.element,
@@ -71,6 +79,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     registerFeature(pluginsSetup.home);
 
     initManagementSection(pluginsSetup, core);
+
+    registerMlUiActions(pluginsSetup.uiActions, core);
+
+    registerEmbeddables(pluginsSetup.embeddable, core);
+
     return {};
   }
 

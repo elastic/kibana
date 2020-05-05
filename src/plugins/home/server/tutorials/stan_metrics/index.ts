@@ -48,7 +48,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-stan.html',
       },
     }),
-    euiIconType: '/plugins/kibana/home/tutorial_resources/logos/stan.svg',
+    euiIconType: '/plugins/home/assets/logos/stan.svg',
     artifacts: {
       dashboards: [
         {
@@ -64,7 +64,7 @@ export function stanMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/stan_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/stan_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
