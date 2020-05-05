@@ -13,17 +13,21 @@ def getGitChanges() {
     changeSet.items.each { changes << it }
   }
 
-  def message = ["<div><strong>Changes</strong></div>"]
-
-  message << changes.reverse().take(10).collect {
-    "<div><a href=\"https://github.com/elastic/kibana/commit/${it.commitId}\">${it.msg}</a></div>\n<ul>"
-  }.join("\n")
-
-  if (changes.size() > 10) {
-    message << "<li>...and ${changes.size()-10} more</li>"
+  if (changes.size() < 1) {
+    return ""
   }
 
+  def message = ["<div><strong>Changes</strong></div><ul>"]
+
+  message << changes.reverse().take(10).collect {
+    "<li><a href=\"https://github.com/elastic/kibana/commit/${it.commitId}\">${it.msg}</a></li>"
+  }.join("\n")
+
   message << "</ul>"
+
+  if (changes.size() > 10) {
+    message << "<div>...and ${changes.size()-10} more</div>"
+  }
 
   return message.join("\n")
 }
