@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
 import { createDashboardModeRequestInterceptor } from './server';
 

@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { DEFAULT_QUERY_LANGUAGE } from '../../../plugins/data/common';
-import { isRelativeUrl } from '../../../core/utils';
+import { isRelativeUrl } from '../../../../core/server';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../../plugins/data/common';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();

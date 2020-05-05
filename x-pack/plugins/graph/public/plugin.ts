@@ -21,7 +21,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
 
 export interface GraphPluginSetupDependencies {

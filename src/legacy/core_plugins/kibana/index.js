@@ -24,11 +24,11 @@ import { promisify } from 'util';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import mappings from './mappings.json';
-import { getUiSettingDefaults } from './ui_setting_defaults';
+import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
