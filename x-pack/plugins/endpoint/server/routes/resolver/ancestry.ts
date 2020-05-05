@@ -6,27 +6,27 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateChildren } from '../../../common/schema/resolver';
+import { validateAncestry } from '../../../common/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
 
-export function handleChildren(
+export function handleAncestry(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateChildren.params>, TypeOf<typeof validateChildren.query>> {
+): RequestHandler<TypeOf<typeof validateAncestry.params>, TypeOf<typeof validateAncestry.query>> {
   return async (context, req, res) => {
     const {
       params: { id },
-      query: { children, generations, afterChild, legacyEndpointID: endpointID },
+      query: { ancestors, legacyEndpointID: endpointID },
     } = req;
     try {
       const indexRetriever = endpointAppContext.service.getIndexPatternRetriever();
-      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const client = context.core.elasticsearch.dataClient;
+      const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.children(children, generations, afterChild);
+      const tree = await fetcher.ancestors(ancestors + 1);
 
       return res.ok({
         body: tree.render(),
