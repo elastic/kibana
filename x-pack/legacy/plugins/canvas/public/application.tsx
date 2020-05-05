@@ -24,7 +24,7 @@ import { initRegistries, populateRegistries, destroyRegistries } from './registr
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore } from './store';
+import { createStore, destroyStore } from './store';
 
 import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui_actions/public';
 /* eslint-disable */
@@ -35,6 +35,12 @@ import { init as initStatsReporter } from './lib/ui_metric';
 import { CapabilitiesStrings } from '../i18n';
 
 import { startServices, stopServices, services } from './services';
+// @ts-ignore Untyped local
+import { destroyHistory } from './lib/history_provider';
+// @ts-ignore Untyped local
+import { stopRouter } from './lib/router_provider';
+
+import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
@@ -54,6 +60,8 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  element.classList.add('canvas');
+  element.classList.add('canvasContainerWrapper');
   const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
     reduction[key] = provider.getService();
 
@@ -70,7 +78,9 @@ export const renderApp = (
     </KibanaContextProvider>,
     element
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };
 
 export const initializeCanvas = async (
@@ -130,7 +140,7 @@ export const initializeCanvas = async (
     restoreAction = action;
 
     startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, action.id);
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, emptyAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, emptyAction);
   }
 
   if (setupPlugins.usageCollection) {
@@ -144,13 +154,17 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
   stopServices();
   destroyRegistries();
   resetInterpreter();
+  destroyStore();
 
   startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
   if (restoreAction) {
-    startPlugins.uiActions.attachAction(VALUE_CLICK_TRIGGER, restoreAction);
+    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, restoreAction);
     restoreAction = undefined;
   }
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);
+
+  destroyHistory();
+  stopRouter();
 };

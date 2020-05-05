@@ -314,10 +314,12 @@ class AgentConfigService {
     if (!config) {
       return null;
     }
-    const defaultOutput = await outputService.get(
-      soClient,
-      await outputService.getDefaultOutputId(soClient)
-    );
+
+    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      throw new Error('Default output is not setup');
+    }
+    const defaultOutput = await outputService.get(soClient, defaultOutputId);
 
     const agentConfig: FullAgentConfig = {
       id: config.id,
