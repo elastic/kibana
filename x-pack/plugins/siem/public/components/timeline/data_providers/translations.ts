@@ -83,7 +83,7 @@ export const INCLUDE_DATA_PROVIDER = i18n.translate(
 );
 
 export const NOT = i18n.translate('xpack.siem.dataProviders.not', {
-  defaultMessage: 'not',
+  defaultMessage: 'NOT',
 });
 
 export const OR = i18n.translate('xpack.siem.dataProviders.or', {

@@ -26,8 +26,6 @@ describe('DataProviders', () => {
           browserFields={{}}
           id="foo"
           dataProviders={mockDataProviders}
-          onChangeDataProviderKqlQuery={jest.fn()}
-          onChangeDroppableAndProvider={jest.fn()}
           onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
@@ -47,29 +45,6 @@ describe('DataProviders', () => {
             browserFields={{}}
             id="foo"
             dataProviders={dataProviders}
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-            show={true}
-          />
-        </TestProviders>
-      );
-
-      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
-    });
-
-    test('it should STILL render a placeholder given a non-empty collection of data providers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <DataProviders
-            browserFields={{}}
-            id="foo"
-            dataProviders={mockDataProviders}
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
@@ -89,8 +64,6 @@ describe('DataProviders', () => {
             browserFields={{}}
             id="foo"
             dataProviders={mockDataProviders}
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
             onDataProviderEdited={jest.fn()}
             onDataProviderRemoved={jest.fn()}
             onToggleDataProviderEnabled={jest.fn()}
