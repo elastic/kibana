@@ -22,4 +22,5 @@ export const plugin: PluginInitializer<
   MlStartDependencies
 > = () => new MlPlugin();
 
-export { MlPluginSetup, MlPluginStart, getMetricChangeDescription };
+export { MlPluginSetup, MlPluginStart };
+export * from './shared';
