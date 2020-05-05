@@ -15,10 +15,16 @@ def getHeader() {
     ["Status", buildUtils.getBuildStatus()],
     ["Duration", currentBuild.durationString.replace(' and counting', '')],
     ["Build URL", "<a href=\"${env.BUILD_URL}\">${env.BUILD_URL}</a>"],
-    ["Pipelines UI", "<a href=\"${pipelinesUrl}\">${pipelinesUrl}</a>"]
+    ["Pipelines UI", "<a href=\"${pipelinesUrl}\">${pipelinesUrl}</a>"],
+    ["Build Cause", currentBuild.getBuildCauses().collect { "<div>${it.shortDescription}</div>" } ]
   ]
 
-  def rows = info.collect { "<tr><td>${it[0]}</td><td>${it[1]}</td></tr>" }
+  catchErrors {
+    print "Changesets"
+    print currentBuild.changeSets
+  }
+
+  def rows = info.collect { "<tr><td><strong>${it[0]}</strong>:&nbsp;</td><td>${it[1]}</td></tr>" }
 
   return """<table><tbody>
     ${rows.join("\n")}
