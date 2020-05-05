@@ -12,6 +12,7 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiLink,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Stats } from '../../beats';
 import { formatMetric } from '../../../lib/format_number';
@@ -21,6 +22,7 @@ import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class Listing extends PureComponent {
   getColumns() {
@@ -141,6 +143,14 @@ export class Listing extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.beats.listing.heading"
+                defaultMessage="Beats listing"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPageContent>
             <Stats stats={stats} />
             <EuiSpacer size="m" />
