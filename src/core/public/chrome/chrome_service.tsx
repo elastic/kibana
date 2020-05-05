@@ -38,7 +38,6 @@ import { LoadingIndicator, Header } from './ui';
 import { DocLinksStart } from '../doc_links';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
-import { IUiSettingsClient } from '../ui_settings';
 import { NavType } from './ui/header';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -86,14 +85,12 @@ interface StartDeps {
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
-  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
-  private appHidden$!: Observable<boolean>;
-  private toggleHidden$!: BehaviorSubject<boolean>;
+  private isForceHidden$!: BehaviorSubject<boolean>;
   private readonly stop$ = new ReplaySubject(1);
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
@@ -112,13 +109,12 @@ export class ChromeService {
   private initVisibility(application: StartDeps['application']) {
     // Start off the chrome service hidden if "embed" is in the hash query string.
     const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+    this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
-    this.toggleHidden$ = new BehaviorSubject(isEmbedded);
-    this.appHidden$ = merge(
-      // Default the app being hidden to the same value initial value as the chrome visibility
-      // in case the application service has not emitted an app ID yet, since we want to trigger
-      // combineLatest below regardless of having an application value yet.
-      of(isEmbedded),
+    const appHidden$ = merge(
+      // For the isVisible$ logic, having no mounted app is equivalent to having a hidden app
+      // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
+      of(true),
       application.currentAppId$.pipe(
         flatMap(appId =>
           application.applications$.pipe(
@@ -129,8 +125,8 @@ export class ChromeService {
         )
       )
     );
-    this.isVisible$ = combineLatest([this.appHidden$, this.toggleHidden$]).pipe(
-      map(([appHidden, toggleHidden]) => !(appHidden || toggleHidden)),
+    this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$]).pipe(
+      map(([appHidden, forceHidden]) => !appHidden && !forceHidden),
       takeUntil(this.stop$)
     );
   }
@@ -141,7 +137,6 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
-    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -227,7 +222,7 @@ export class ChromeService {
 
       getIsVisible$: () => this.isVisible$,
 
-      setIsVisible: (isVisible: boolean) => this.toggleHidden$.next(!isVisible),
+      setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
