@@ -16,7 +16,7 @@ def getGitChanges() {
   def message = ["<div><strong>Changes</strong></div>"]
 
   message << changes.take(10).collect {
-    "<div><a href=\"https://github.com/elastic/kibana/commit/${it.id}\">${it.title}</a></div>"
+    "<div><a href=\"https://github.com/elastic/kibana/commit/${it.commitId}\">${it.msg}</a></div>"
   }.join("\n")
 
   if (changes.size() > 10) {
