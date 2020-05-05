@@ -24,12 +24,14 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsErrorHelpers,
 } from '../../../../../src/core/server';
+import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 
 interface EncryptedSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   baseTypeRegistry: ISavedObjectTypeRegistry;
   service: Readonly<EncryptedSavedObjectsService>;
+  getCurrentUser: () => AuthenticatedUser | undefined;
 }
 
 /**
@@ -75,7 +77,8 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         type,
         (await this.options.service.encryptAttributes(
           { type, id, namespace },
-          attributes as Record<string, unknown>
+          attributes as Record<string, unknown>,
+          { user: this.options.getCurrentUser() }
         )) as T,
         { ...options, id }
       ),
@@ -113,7 +116,8 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           id,
           attributes: await this.options.service.encryptAttributes(
             { type: object.type, id, namespace },
-            object.attributes as Record<string, unknown>
+            object.attributes as Record<string, unknown>,
+            { user: this.options.getCurrentUser() }
           ),
         } as SavedObjectsBulkCreateObject<T>;
       })
@@ -144,7 +148,8 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           ...object,
           attributes: await this.options.service.encryptAttributes(
             { type, id, namespace },
-            attributes
+            attributes,
+            { user: this.options.getCurrentUser() }
           ),
         };
       })
@@ -202,7 +207,9 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       await this.options.baseClient.update(
         type,
         id,
-        await this.options.service.encryptAttributes({ type, id, namespace }, attributes),
+        await this.options.service.encryptAttributes({ type, id, namespace }, attributes, {
+          user: this.options.getCurrentUser(),
+        }),
         options
       ),
       attributes,
@@ -246,7 +253,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
         originalAttributes as Record<string, unknown>,
         // If we cannot decrypt encrypted attributes let's strip them off and record the error to
         // let consumer decide whether to fail or handle recovery gracefully.
-        { stripOnDecryptionError: true }
+        { stripOnDecryptionError: true, user: this.options.getCurrentUser() }
       );
 
       response.attributes = attributes as T;

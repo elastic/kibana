@@ -11,6 +11,7 @@ import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
@@ -34,6 +35,7 @@ beforeEach(() => {
     service: encryptedSavedObjectsServiceMockInstance,
     baseClient: mockBaseClient,
     baseTypeRegistry: mockBaseTypeRegistry,
+    getCurrentUser: () => mockAuthenticatedUser(),
   } as any);
 });
 
@@ -96,7 +98,13 @@ describe('#create', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
     );
 
     expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
@@ -137,7 +145,8 @@ describe('#create', () => {
           id: 'uuid-v4-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
-        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+        { user: mockAuthenticatedUser() }
       );
 
       expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
@@ -283,7 +292,13 @@ describe('#bulkCreate', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'uuid-v4-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
     );
 
     expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -332,7 +347,8 @@ describe('#bulkCreate', () => {
           id: 'uuid-v4-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
-        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+        { user: mockAuthenticatedUser() }
       );
 
       expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
@@ -477,7 +493,13 @@ describe('#bulkUpdate', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(2);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
     );
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id-2' },
@@ -486,7 +508,8 @@ describe('#bulkUpdate', () => {
         attrSecret: 'secret 2',
         attrNotSoSecret: 'not-so-secret 2',
         attrThree: 'three 2',
-      }
+      },
+      { user: mockAuthenticatedUser() }
     );
 
     expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -559,7 +582,8 @@ describe('#bulkUpdate', () => {
           id: 'some-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
-        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+        { user: mockAuthenticatedUser() }
       );
 
       expect(mockBaseClient.bulkUpdate).toHaveBeenCalledTimes(1);
@@ -739,6 +763,21 @@ describe('#find', () => {
     });
     expect(mockBaseClient.find).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.find).toHaveBeenCalledWith(options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id-2' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+    );
   });
 
   it('fails if base client fails', async () => {
@@ -858,6 +897,21 @@ describe('#bulkGet', () => {
     });
     expect(mockBaseClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(bulkGetParams, options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id-2', namespace: 'some-ns' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+    );
   });
 
   it('fails if base client fails', async () => {
@@ -894,11 +948,7 @@ describe('#bulkGet', () => {
     const options = { namespace: 'some-ns' };
     await expect(wrapper.bulkGet(bulkGetParams, options)).resolves.toEqual({
       ...mockedResponse,
-      saved_objects: [
-        {
-          ...mockedResponse.saved_objects[0],
-        },
-      ],
+      saved_objects: [{ ...mockedResponse.saved_objects[0] }],
     });
     expect(mockBaseClient.bulkGet).toHaveBeenCalledTimes(1);
   });
@@ -946,6 +996,21 @@ describe('#get', () => {
     });
     expect(mockBaseClient.get).toHaveBeenCalledTimes(1);
     expect(mockBaseClient.get).toHaveBeenCalledWith('known-type', 'some-id', options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id', namespace: 'some-ns' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+    );
   });
 
   it('fails if base client fails', async () => {
@@ -1009,7 +1074,13 @@ describe('#update', () => {
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMockInstance.encryptAttributes).toHaveBeenCalledWith(
       { type: 'known-type', id: 'some-id' },
-      { attrOne: 'one', attrSecret: 'secret', attrNotSoSecret: 'not-so-secret', attrThree: 'three' }
+      {
+        attrOne: 'one',
+        attrSecret: 'secret',
+        attrNotSoSecret: 'not-so-secret',
+        attrThree: 'three',
+      },
+      { user: mockAuthenticatedUser() }
     );
 
     expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
@@ -1046,7 +1117,8 @@ describe('#update', () => {
           id: 'some-id',
           namespace: expectNamespaceInDescriptor ? namespace : undefined,
         },
-        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+        { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' },
+        { user: mockAuthenticatedUser() }
       );
 
       expect(mockBaseClient.update).toHaveBeenCalledTimes(1);

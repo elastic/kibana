@@ -7,12 +7,14 @@
 import { Plugin } from './plugin';
 
 import { coreMock } from 'src/core/server/mocks';
+import { securityMock } from '../../security/server/mocks';
 
 describe('EncryptedSavedObjects Plugin', () => {
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const plugin = new Plugin(coreMock.createPluginInitializerContext());
-      await expect(plugin.setup(coreMock.createSetup())).resolves.toMatchInlineSnapshot(`
+      await expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
+        .resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
                   "registerLegacyAPI": [Function],
@@ -27,7 +29,7 @@ describe('EncryptedSavedObjects Plugin', () => {
   describe('start()', () => {
     it('exposes proper contract', async () => {
       const plugin = new Plugin(coreMock.createPluginInitializerContext());
-      await plugin.setup(coreMock.createSetup());
+      await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
       await expect(plugin.start()).toMatchInlineSnapshot(`
               Object {
                 "getDecryptedAsInternalUser": [Function],

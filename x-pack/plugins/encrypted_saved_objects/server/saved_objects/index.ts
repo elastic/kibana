@@ -12,12 +12,14 @@ import {
   ISavedObjectsRepository,
   ISavedObjectTypeRegistry,
 } from 'src/core/server';
+import { SecurityPluginSetup } from '../../../security/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
   savedObjects: SavedObjectsServiceSetup;
+  security?: SecurityPluginSetup;
   getStartServices: StartServicesAccessor;
 }
 
@@ -32,6 +34,7 @@ export interface SavedObjectsSetup {
 export function setupSavedObjects({
   service,
   savedObjects,
+  security,
   getStartServices,
 }: SetupSavedObjectsParams): SavedObjectsSetup {
   // Register custom saved object client that will encrypt, decrypt and strip saved object
@@ -42,8 +45,13 @@ export function setupSavedObjects({
   savedObjects.addClientWrapper(
     Number.MAX_SAFE_INTEGER,
     'encryptedSavedObjects',
-    ({ client: baseClient, typeRegistry: baseTypeRegistry }) =>
-      new EncryptedSavedObjectsClientWrapper({ baseClient, baseTypeRegistry, service })
+    ({ client: baseClient, typeRegistry: baseTypeRegistry, request }) =>
+      new EncryptedSavedObjectsClientWrapper({
+        baseClient,
+        baseTypeRegistry,
+        service,
+        getCurrentUser: () => security?.authc.getCurrentUser(request) ?? undefined,
+      })
   );
 
   const internalRepositoryAndTypeRegistryPromise = getStartServices().then(

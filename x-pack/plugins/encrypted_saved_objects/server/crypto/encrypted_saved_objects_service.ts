@@ -8,6 +8,7 @@ import nodeCrypto, { Crypto } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
+import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptionError } from './encryption_error';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
@@ -39,6 +40,16 @@ export interface SavedObjectDescriptor {
   readonly id: string;
   readonly type: string;
   readonly namespace?: string;
+}
+
+/**
+ * Describes parameters that are common for all EncryptedSavedObjectsService public methods.
+ */
+interface CommonParameters {
+  /**
+   * User on behalf of the method is called if determined.
+   */
+  user?: AuthenticatedUser;
 }
 
 /**
@@ -122,8 +133,8 @@ export class EncryptedSavedObjectsService {
    * in Elasticsearch.
    * @param [originalAttributes] An optional dictionary of __ALL__ saved object original attributes
    * that were used to create that saved object (i.e. values are NOT encrypted).
-   * @param [options] Options that control the way encrypted attributes are handled.
-   * @param [options.stripOnDecryptionError] If this flag is set then this method won't throw if
+   * @param [params] Parameters that control the way encrypted attributes are handled.
+   * @param [params.stripOnDecryptionError] If this flag is set then this method won't throw if
    * decryption of encrypted attributes fails for whatever reason (e.g. changed AAD or encryption key).
    * All encrypted attributes will be stripped instead.
    */
@@ -131,14 +142,14 @@ export class EncryptedSavedObjectsService {
     descriptor: SavedObjectDescriptor,
     attributes: T,
     originalAttributes?: T,
-    options?: { stripOnDecryptionError: boolean }
+    params?: { stripOnDecryptionError: boolean } & CommonParameters
   ) {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return { attributes };
     }
 
-    const stripOnDecryptionFailure = options?.stripOnDecryptionError ?? false;
+    const stripOnDecryptionFailure = params?.stripOnDecryptionError ?? false;
     let decryptedAttributes: T | null = null;
     let decryptionError: Error | undefined;
     const clonedAttributes: Record<string, unknown> = {};
@@ -164,7 +175,9 @@ export class EncryptedSavedObjectsService {
         // reuse for any other attributes.
         if (decryptedAttributes === null) {
           try {
-            decryptedAttributes = await this.decryptAttributes(descriptor, attributes);
+            decryptedAttributes = await this.decryptAttributes(descriptor, attributes, {
+              user: params?.user,
+            });
           } catch (err) {
             if (!stripOnDecryptionFailure) {
               throw err;
@@ -188,11 +201,13 @@ export class EncryptedSavedObjectsService {
    * attributes were encrypted original attributes dictionary is returned.
    * @param descriptor Descriptor of the saved object to encrypt attributes for.
    * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
    * @throws Will throw if encryption fails for whatever reason.
    */
   public async encryptAttributes<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
-    attributes: T
+    attributes: T,
+    params?: CommonParameters
   ): Promise<T> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
@@ -213,7 +228,7 @@ export class EncryptedSavedObjectsService {
           this.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
           );
-          this.audit.encryptAttributeFailure(attributeName, descriptor);
+          this.audit.encryptAttributeFailure(attributeName, descriptor, params?.user);
 
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
@@ -241,7 +256,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor);
+    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,
@@ -255,12 +270,14 @@ export class EncryptedSavedObjectsService {
    * attributes were decrypted original attributes dictionary is returned.
    * @param descriptor Descriptor of the saved object to decrypt attributes for.
    * @param attributes Dictionary of __ALL__ saved object attributes.
+   * @param [params] Additional parameters.
    * @throws Will throw if decryption fails for whatever reason.
    * @throws Will throw if any of the attributes to decrypt is not a string.
    */
   public async decryptAttributes<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
-    attributes: T
+    attributes: T,
+    params?: CommonParameters
   ): Promise<T> {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
@@ -276,7 +293,7 @@ export class EncryptedSavedObjectsService {
       }
 
       if (typeof attributeValue !== 'string') {
-        this.audit.decryptAttributeFailure(attributeName, descriptor);
+        this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -291,7 +308,7 @@ export class EncryptedSavedObjectsService {
         )) as string;
       } catch (err) {
         this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
-        this.audit.decryptAttributeFailure(attributeName, descriptor);
+        this.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -318,7 +335,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor);
+    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,

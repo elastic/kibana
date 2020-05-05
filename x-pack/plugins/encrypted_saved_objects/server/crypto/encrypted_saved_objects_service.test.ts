@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
+
 jest.mock('@elastic/node-crypto', () => jest.fn());
 
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
@@ -81,14 +83,6 @@ describe('#stripOrDecryptAttributes', () => {
     ).resolves.toEqual({ attributes: { attrOne: 'one', attrTwo: 'two', attrThree: 'three' } });
   });
 
-  it('does not strip attributes from known, but not registered types', async () => {
-    const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
-
-    await expect(
-      service.stripOrDecryptAttributes({ id: 'known-id', type: 'known-type-1' }, attributes)
-    ).resolves.toEqual({ attributes: { attrOne: 'one', attrTwo: 'two', attrThree: 'three' } });
-  });
-
   it('does not strip any attributes if none of them are supposed to be encrypted', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
@@ -128,17 +122,21 @@ describe('#stripOrDecryptAttributes', () => {
         attributes
       );
 
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.stripOrDecryptAttributes(
           { type: 'known-type-1', id: 'object-id' },
-          encryptedAttributes
+          encryptedAttributes,
+          undefined,
+          { stripOnDecryptionError: false, user: mockUser }
         )
       ).resolves.toEqual({ attributes: { attrTwo: 'two', attrThree: 'three' } });
 
       expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
         ['attrOne', 'attrThree'],
-        { type: 'known-type-1', id: 'object-id' }
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
       );
     });
 
@@ -187,18 +185,22 @@ describe('#stripOrDecryptAttributes', () => {
 
       encryptedAttributes.attrThree = 'some-undecryptable-value';
 
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.stripOrDecryptAttributes(
           { type: 'known-type-1', id: 'object-id' },
-          encryptedAttributes
+          encryptedAttributes,
+          undefined,
+          { stripOnDecryptionError: false, user: mockUser }
         )
       ).rejects.toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('strips attributes with `dangerouslyExposeValue` set to `true` if failed to decrypt and `stripOnDecryptionError` is set', async () => {
@@ -218,21 +220,23 @@ describe('#stripOrDecryptAttributes', () => {
 
       encryptedAttributes.attrThree = 'some-undecryptable-value';
 
+      const mockUser = mockAuthenticatedUser();
       const { attributes: decryptedAttributes, error } = await service.stripOrDecryptAttributes(
         { type: 'known-type-1', id: 'object-id' },
         encryptedAttributes,
         undefined,
-        { stripOnDecryptionError: true }
+        { stripOnDecryptionError: true, user: mockUser }
       );
 
       expect(decryptedAttributes).toEqual({ attrTwo: 'two' });
       expect(error).toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
   });
 });
@@ -301,8 +305,11 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes)
+      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrOne: '|one|["known-type-1","object-id",{"attrTwo":"two"}]|',
       attrTwo: 'two',
@@ -312,7 +319,8 @@ describe('#encryptAttributes', () => {
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(
       ['attrOne', 'attrThree'],
-      { type: 'known-type-1', id: 'object-id' }
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
     );
   });
 
@@ -324,17 +332,21 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes)
+      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: '|three|["known-type-1","object-id",{"attrTwo":"two"}]|',
     });
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-    });
+    expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
+    );
   });
 
   it('includes `namespace` into AAD if provided', async () => {
@@ -345,21 +357,23 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
       service.encryptAttributes(
         { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-        attributes
+        attributes,
+        { user: mockUser }
       )
     ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: '|three|["object-ns","known-type-1","object-id",{"attrTwo":"two"}]|',
     });
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-      namespace: 'object-ns',
-    });
+    expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      mockUser
+    );
   });
 
   it('does not include specified attributes to AAD', async () => {
@@ -418,8 +432,11 @@ describe('#encryptAttributes', () => {
       .mockResolvedValueOnce('Successfully encrypted attrOne')
       .mockRejectedValueOnce(new Error('Something went wrong with attrThree...'));
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes)
+      service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
+        user: mockUser,
+      })
     ).rejects.toThrowError(EncryptionError);
 
     expect(attributes).toEqual({
@@ -429,10 +446,11 @@ describe('#encryptAttributes', () => {
     });
     expect(mockAuditLogger.encryptAttributesSuccess).not.toHaveBeenCalled();
     expect(mockAuditLogger.encryptAttributeFailure).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.encryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-      type: 'known-type-1',
-      id: 'object-id',
-    });
+    expect(mockAuditLogger.encryptAttributeFailure).toHaveBeenCalledWith(
+      'attrThree',
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
+    );
   });
 });
 
@@ -497,8 +515,11 @@ describe('#decryptAttributes', () => {
       attrFour: null,
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
@@ -508,7 +529,8 @@ describe('#decryptAttributes', () => {
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
       ['attrOne', 'attrThree'],
-      { type: 'known-type-1', id: 'object-id' }
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
     );
   });
 
@@ -529,17 +551,21 @@ describe('#decryptAttributes', () => {
       attrThree: expect.not.stringMatching(/^three$/),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-    });
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
+    );
   });
 
   it('decrypts if all attributes that contribute to AAD are present', async () => {
@@ -563,17 +589,21 @@ describe('#decryptAttributes', () => {
 
     const attributesWithoutAttr = { attrTwo: 'two', attrThree: encryptedAttributes.attrThree };
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributesWithoutAttr)
+      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributesWithoutAttr, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-    });
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
+    );
   });
 
   it('decrypts even if attributes in AAD are defined in a different order', async () => {
@@ -600,10 +630,12 @@ describe('#decryptAttributes', () => {
       attrOne: 'one',
     };
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
       service.decryptAttributes(
         { type: 'known-type-1', id: 'object-id' },
-        attributesInDifferentOrder
+        attributesInDifferentOrder,
+        { user: mockUser }
       )
     ).resolves.toEqual({
       attrOne: 'one',
@@ -611,10 +643,11 @@ describe('#decryptAttributes', () => {
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-    });
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
+    );
   });
 
   it('decrypts if correct namespace is provided', async () => {
@@ -635,10 +668,12 @@ describe('#decryptAttributes', () => {
       attrThree: expect.not.stringMatching(/^three$/),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
       service.decryptAttributes(
         { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
-        encryptedAttributes
+        encryptedAttributes,
+        { user: mockUser }
       )
     ).resolves.toEqual({
       attrOne: 'one',
@@ -646,11 +681,11 @@ describe('#decryptAttributes', () => {
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
-    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(['attrThree'], {
-      type: 'known-type-1',
-      id: 'object-id',
-      namespace: 'object-ns',
-    });
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrThree'],
+      { type: 'known-type-1', id: 'object-id', namespace: 'object-ns' },
+      mockUser
+    );
   });
 
   it('decrypts even if no attributes are included into AAD', async () => {
@@ -669,8 +704,11 @@ describe('#decryptAttributes', () => {
       attrThree: expect.not.stringMatching(/^three$/),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrOne: 'one',
       attrThree: 'three',
@@ -678,7 +716,8 @@ describe('#decryptAttributes', () => {
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
       ['attrOne', 'attrThree'],
-      { type: 'known-type-1', id: 'object-id' }
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
     );
   });
 
@@ -710,8 +749,11 @@ describe('#decryptAttributes', () => {
       attrSix: expect.any(String),
     });
 
+    const mockUser = mockAuthenticatedUser();
     await expect(
-      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+      service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+        user: mockUser,
+      })
     ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
@@ -723,7 +765,8 @@ describe('#decryptAttributes', () => {
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
       ['attrOne', 'attrThree', 'attrFive', 'attrSix'],
-      { type: 'known-type-1', id: 'object-id' }
+      { type: 'known-type-1', id: 'object-id' },
+      mockUser
     );
   });
 
@@ -750,39 +793,53 @@ describe('#decryptAttributes', () => {
 
     it('fails to decrypt if not all attributes that contribute to AAD are present', async () => {
       const attributesWithoutAttr = { attrTwo: 'two', attrThree: encryptedAttributes.attrThree };
+      const mockUser = mockAuthenticatedUser();
       await expect(
-        service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributesWithoutAttr)
+        service.decryptAttributes(
+          { type: 'known-type-1', id: 'object-id' },
+          attributesWithoutAttr,
+          { user: mockUser }
+        )
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if ID does not match', async () => {
+      const mockUser = mockAuthenticatedUser();
       await expect(
-        service.decryptAttributes({ type: 'known-type-1', id: 'object-id*' }, encryptedAttributes)
+        service.decryptAttributes({ type: 'known-type-1', id: 'object-id*' }, encryptedAttributes, {
+          user: mockUser,
+        })
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id*',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id*' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if type does not match', async () => {
+      const mockUser = mockAuthenticatedUser();
       await expect(
-        service.decryptAttributes({ type: 'known-type-2', id: 'object-id' }, encryptedAttributes)
+        service.decryptAttributes({ type: 'known-type-2', id: 'object-id' }, encryptedAttributes, {
+          user: mockUser,
+        })
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-2',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-2', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if namespace does not match', async () => {
@@ -791,19 +848,21 @@ describe('#decryptAttributes', () => {
         { attrOne: 'one', attrTwo: 'two', attrThree: 'three' }
       );
 
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.decryptAttributes(
           { type: 'known-type-1', id: 'object-id', namespace: 'object-NS' },
-          encryptedAttributes
+          encryptedAttributes,
+          { user: mockUser }
         )
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-        namespace: 'object-NS',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id', namespace: 'object-NS' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if namespace is expected, but is not provided', async () => {
@@ -812,71 +871,75 @@ describe('#decryptAttributes', () => {
         { attrOne: 'one', attrTwo: 'two', attrThree: 'three' }
       );
 
+      const mockUser = mockAuthenticatedUser();
       await expect(
-        service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+        service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+          user: mockUser,
+        })
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if encrypted attribute is defined, but not a string', async () => {
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.decryptAttributes(
           { type: 'known-type-1', id: 'object-id' },
-          {
-            ...encryptedAttributes,
-            attrThree: 2,
-          }
+          { ...encryptedAttributes, attrThree: 2 },
+          { user: mockUser }
         )
       ).rejects.toThrowError(
         'Encrypted "attrThree" attribute should be a string, but found number'
       );
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if encrypted attribute is not correct', async () => {
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.decryptAttributes(
           { type: 'known-type-1', id: 'object-id' },
-          {
-            ...encryptedAttributes,
-            attrThree: 'some-unknown-string',
-          }
+          { ...encryptedAttributes, attrThree: 'some-unknown-string' },
+          { user: mockUser }
         )
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails to decrypt if the AAD attribute has changed', async () => {
+      const mockUser = mockAuthenticatedUser();
       await expect(
         service.decryptAttributes(
           { type: 'known-type-1', id: 'object-id' },
-          {
-            ...encryptedAttributes,
-            attrOne: 'oNe',
-          }
+          { ...encryptedAttributes, attrOne: 'oNe' },
+          { user: mockUser }
         )
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
 
     it('fails if encrypted with another encryption key', async () => {
@@ -891,15 +954,19 @@ describe('#decryptAttributes', () => {
         attributesToEncrypt: new Set(['attrThree']),
       });
 
+      const mockUser = mockAuthenticatedUser();
       await expect(
-        service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes)
+        service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
+          user: mockUser,
+        })
       ).rejects.toThrowError(EncryptionError);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith('attrThree', {
-        type: 'known-type-1',
-        id: 'object-id',
-      });
+      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
+        'attrThree',
+        { type: 'known-type-1', id: 'object-id' },
+        mockUser
+      );
     });
   });
 });

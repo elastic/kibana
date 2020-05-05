@@ -11,6 +11,7 @@ import {
   CoreSetup,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
+import { SecurityPluginSetup } from '../../security/server';
 import { createConfig$ } from './config';
 import {
   EncryptedSavedObjectsService,
@@ -19,6 +20,10 @@ import {
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
+
+export interface PluginsSetup {
+  security?: SecurityPluginSetup;
+}
 
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
@@ -59,7 +64,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup): Promise<EncryptedSavedObjectsPluginSetup> {
+  public async setup(
+    core: CoreSetup,
+    deps: PluginsSetup
+  ): Promise<EncryptedSavedObjectsPluginSetup> {
     const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
@@ -75,6 +83,7 @@ export class Plugin {
     this.savedObjectsSetup = setupSavedObjects({
       service,
       savedObjects: core.savedObjects,
+      security: deps.security,
       getStartServices: core.getStartServices,
     });
 
