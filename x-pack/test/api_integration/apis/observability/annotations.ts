@@ -110,6 +110,10 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           _index,
           _id,
+          _primary_term: 1,
+          _seq_no: 0,
+          _version: 1,
+          found: true,
           _source: {
             annotation: {
               type: 'deployment',
