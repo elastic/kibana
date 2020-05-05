@@ -6,13 +6,12 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import { EuiIcon, EuiLink, EuiPopover, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import { Ping } from '../../../../../common/runtime_types/ping';
+import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import { Ping } from '../../../../../common/runtime_types';
 import { PingRedirects } from '../../ping_list/ping_redirects';
 
 interface Props {
-  monitorStatus: Ping;
+  monitorStatus: Ping | null;
 }
 
 export const MonitorRedirects: React.FC<Props> = ({ monitorStatus }) => {

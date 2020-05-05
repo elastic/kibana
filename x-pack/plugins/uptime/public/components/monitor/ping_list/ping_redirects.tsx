@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiIcon, EuiLink, EuiPopover, EuiSpacer, EuiText, EuiButtonEmpty } from '@elastic/eui';
-import { Ping } from '../../../../../common/runtime_types/ping';
+import { EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { Ping } from '../../../../common/runtime_types/ping';
 
 const StyledLink = styled(EuiLink)`
   margin-right: 5px;
@@ -16,7 +16,7 @@ const StyledLink = styled(EuiLink)`
 `;
 
 interface Props {
-  monitorStatus: Ping;
+  monitorStatus: Ping | null;
   showDescription?: boolean;
 }
 
@@ -47,7 +47,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showDescription 
       )}
       <EuiSpacer size="s" />
       <StyledLink href={monitorUrl}>{monitorUrl}</StyledLink>
-      {list.map(url => {
+      {list?.map((url: string) => {
         return (
           <div>
             <div>

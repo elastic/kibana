@@ -33,7 +33,7 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
     </div>
   </div>
   <div
-    class="euiFlexItem"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <span
       class="euiTextColor euiTextColor--subdued euiTitle euiTitle--xsmall"
@@ -45,6 +45,9 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
       </h1>
     </span>
   </div>
+  <div
+    class="euiFlexItem"
+  />
   <div
     class="euiSpacer euiSpacer--l"
   />

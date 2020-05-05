@@ -50,5 +50,4 @@ export interface UptimeRequests {
   getPingHistogram: ESQ<GetPingHistogramParams, HistogramResult>;
   getSnapshotCount: ESQ<GetSnapshotCountParams, Snapshot>;
   getIndexStatus: ESQ<{}, StatesIndexStatus>;
-  getMonitorRedirects: ESQ<GetMonitorDetailsParams, MonitorDetails>;
 }

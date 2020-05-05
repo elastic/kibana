@@ -13,7 +13,6 @@ import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
-import { getRedirectsAction } from '../../../../state/actions';
 
 interface ContainerProps {
   summary: MonitorSummary;
@@ -34,7 +33,6 @@ const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, moni
       dateEnd,
       monitorId,
     });
-    dispatch(getRedirectsAction.get({ dateStart, dateEnd, monitorId }));
   }, [dateStart, dateEnd, monitorId, loadMonitorDetails, dispatch]);
   return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
 };
