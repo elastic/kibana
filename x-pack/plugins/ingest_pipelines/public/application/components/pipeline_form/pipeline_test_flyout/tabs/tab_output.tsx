@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiIconTip,
 } from '@elastic/eui';
 import { useTestConfigContext } from '../../test_config_context';
 
