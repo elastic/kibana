@@ -31,13 +31,13 @@ import { SecurityPluginSetup } from '../../security/public';
 import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
 import { initTelemetry } from './lib/telemetry';
 import { KibanaServices } from './lib/kibana/services';
-import { serviceNowActionType } from './lib/connectors';
+import { serviceNowActionType, jiraActionType } from './lib/connectors';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
@@ -59,14 +59,14 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export class Plugin implements IPlugin<PluginSetup, PluginStart> {
+export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, APP_ID);
 
     plugins.home.featureCatalogue.register({
@@ -84,6 +84,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
     });
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     core.application.register({
       id: APP_ID,
