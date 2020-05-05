@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { InfraWaffleMapDataFormat } from '../../lib/lib';
 import { formatNumber } from './number';
-import { InfraWaffleMapDataFormat } from './types';
 
 /**
  * The labels are derived from these two Wikipedia articles.
