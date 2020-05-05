@@ -22,11 +22,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
     // Get all matching indices and info about each
     // This returns the top 100,000 indices (as buckets) by last activity
-    const {
-      aggregations: {
-        index: { buckets: indexResults },
-      },
-    } = await callCluster('search', {
+    const { aggregations } = await callCluster('search', {
       index: DATA_STREAM_INDEX_PATTERN,
       body: {
         size: 0,
@@ -91,8 +87,21 @@ export const getListHandler: RequestHandler = async (context, request, response)
       },
     });
 
-    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
+    const body: GetDataStreamsResponse = {
+      data_streams: [],
+    };
 
+    if (!(aggregations && aggregations.index && aggregations.index.buckets)) {
+      return response.ok({
+        body,
+      });
+    }
+
+    const {
+      index: { buckets: indexResults },
+    } = aggregations;
+
+    const packageSavedObjects = await getPackageSavedObjects(context.core.savedObjects.client);
     const packageMetadata: any = {};
 
     const dataStreams: DataStream[] = (indexResults as any[]).map(result => {
@@ -132,9 +141,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
       };
     });
 
-    const body: GetDataStreamsResponse = {
-      data_streams: dataStreams,
-    };
+    body.data_streams = dataStreams;
+
     return response.ok({
       body,
     });
