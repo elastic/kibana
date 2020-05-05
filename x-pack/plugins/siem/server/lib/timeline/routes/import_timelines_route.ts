@@ -119,35 +119,35 @@ export const importTimelinesRoute = (
                       return null;
                     }
                     const {
-                      savedObjectId,
+                      savedObjectId = null,
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
                       templateTimelineId,
                       templateTimelineVersion,
                       timelineType,
+                      version = null,
                     } = parsedTimeline;
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
+
                     let newTimeline = null;
                     try {
                       const templateTimeline =
                         templateTimelineId != null
                           ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
                           : null;
+
                       const timeline =
-                        templateTimeline?.savedObjectId != null || savedObjectId != null
-                          ? await getTimeline(
-                              frameworkRequest,
-                              templateTimeline?.savedObjectId ?? savedObjectId
-                            )
-                          : null;
+                        savedObjectId != null &&
+                        (await getTimeline(frameworkRequest, savedObjectId));
                       const isHandlingTemplateTimeline = timelineType === TimelineType.template;
+
                       if (
                         (timeline == null && !isHandlingTemplateTimeline) ||
-                        (templateTimeline == null && isHandlingTemplateTimeline)
+                        (timeline == null && templateTimeline == null && isHandlingTemplateTimeline)
                       ) {
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
@@ -165,6 +165,7 @@ export const importTimelinesRoute = (
                           status_code: 200,
                         });
                       } else if (
+                        timeline &&
                         timeline != null &&
                         templateTimeline != null &&
                         isHandlingTemplateTimeline
@@ -172,8 +173,8 @@ export const importTimelinesRoute = (
                         // update template timeline
                         const errorObj = checkIsFailureCases(
                           isHandlingTemplateTimeline,
-                          timeline.version,
-                          templateTimeline.templateTimelineVersion ?? null,
+                          version,
+                          templateTimelineVersion ?? null,
                           timeline,
                           templateTimeline
                         );
@@ -198,16 +199,16 @@ export const importTimelinesRoute = (
                       } else {
                         resolve(
                           createBulkErrorObject({
-                            id: savedObjectId,
+                            id: savedObjectId ?? 'unknown',
                             statusCode: 409,
-                            message: `timeline_id: "${timeline?.savedObjectId}" already exists`,
+                            message: `timeline_id: "${savedObjectId}" already exists`,
                           })
                         );
                       }
                     } catch (err) {
                       resolve(
                         createBulkErrorObject({
-                          id: savedObjectId,
+                          id: savedObjectId ?? 'unknown',
                           statusCode: 400,
                           message: err.message,
                         })

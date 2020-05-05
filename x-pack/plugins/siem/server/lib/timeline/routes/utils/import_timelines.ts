@@ -18,7 +18,8 @@ export interface ImportTimelinesSchema {
 }
 
 export type ImportedTimeline = SavedTimeline & {
-  savedObjectId: string;
+  savedObjectId: string | null;
+  version: string | null;
   pinnedEventIds: string[];
   globalNotes: NoteResult[];
   eventNotes: NoteResult[];
@@ -90,12 +91,10 @@ export const timelineSavedObjectOmittedFields = [
   'globalNotes',
   'eventNotes',
   'pinnedEventIds',
-  'version',
   'savedObjectId',
   'created',
   'createdBy',
   'updated',
   'updatedBy',
-  'templateTimelineId',
-  'templateTimelineVersion',
+  'version',
 ];

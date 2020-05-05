@@ -27,7 +27,7 @@ export const useTimelineTypes = (): {
     tabName === TimelineType.default || tabName === TimelineType.template ? tabName : null
   );
 
-  const getTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
+  const getFilterOrTabs: (timelineTabsStyle: TimelineTabsStyle) => TimelineTab[] = (
     timelineTabsStyle: TimelineTabsStyle
   ) => [
     {
@@ -65,7 +65,7 @@ export const useTimelineTypes = (): {
     return (
       <>
         <EuiTabs>
-          {getTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
+          {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
             <EuiTab
               isSelected={tab.id === tabName}
               disabled={tab.disabled}
@@ -80,12 +80,12 @@ export const useTimelineTypes = (): {
         <EuiSpacer size="m" />
       </>
     );
-  }, [getTabs, tabName]);
+  }, [tabName]);
 
   const timelineFilters = useMemo(() => {
     return (
       <>
-        {getTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
+        {getFilterOrTabs(TimelineTabsStyle.tab).map((tab: TimelineTab) => (
           <EuiFilterButton
             hasActiveFilters={tab.id === timelineTypes}
             key={`timeline-${TimelineTabsStyle.filter}-${tab.id}`}
@@ -96,7 +96,7 @@ export const useTimelineTypes = (): {
         ))}
       </>
     );
-  }, [getTabs, timelineTypes]);
+  }, [timelineTypes]);
 
   return {
     timelineTypes,
