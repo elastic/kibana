@@ -35,6 +35,12 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
     background-color: ${props => props.theme.eui.euiColorDanger};
     color: ${props => props.theme.eui.euiColorEmptyShade};
   }
+  .euiAccordion__button {
+    :hover,
+    :focus {
+      text-decoration: none;
+    }
+  }
   :hover:not(.euiAccordion-isOpen) {
     background-color: ${props => props.theme.eui.euiColorLightestShade};
   }

@@ -9,8 +9,9 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiLoadingContent,
+  EuiTitle,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -132,14 +133,14 @@ const PolicyResponseFlyoutPanel = memo<{
         backButton={backButtonProp}
         data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
       >
-        <EuiTitle size="xxs" data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
-          <h3>
+        <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
+          <h4>
             <FormattedMessage
               id="xpack.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
-          </h3>
-        </EuiTitle>
+          </h4>
+        </EuiText>
       </FlyoutSubHeader>
       <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
         {responseConfig !== undefined && responseActionStatus !== undefined ? (
@@ -149,7 +150,10 @@ const PolicyResponseFlyoutPanel = memo<{
             responseAttentionCount={responseAttentionCount}
           />
         ) : (
-          <p>No Policy Response Available</p>
+          <FormattedMessage
+            id="xpack.endpoint.hostDetails.noPolicyResponse"
+            defaultMessage="No Policy Response Available"
+          />
         )}
       </EuiFlyoutBody>
     </>

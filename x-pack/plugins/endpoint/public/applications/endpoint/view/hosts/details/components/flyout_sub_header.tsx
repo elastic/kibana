@@ -48,7 +48,7 @@ const BUTTON_TEXT_PROPS = Object.freeze({ className: 'back-button-content-text' 
 export const FlyoutSubHeader = memo<FlyoutSubHeaderProps>(
   ({ children, backButton, ...otherProps }) => {
     return (
-      <StyledEuiFlyoutHeader hasBorder {...otherProps} className={backButton && `hasButtons`}>
+      <StyledEuiFlyoutHeader {...otherProps} className={backButton && `hasButtons`}>
         {backButton && (
           <div className="buttons">
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
