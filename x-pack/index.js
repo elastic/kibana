@@ -12,7 +12,6 @@ import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
 import { maps } from './legacy/plugins/maps';
 import { spaces } from './legacy/plugins/spaces';
-import { canvas } from './legacy/plugins/canvas';
 import { infra } from './legacy/plugins/infra';
 import { taskManager } from './legacy/plugins/task_manager';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
@@ -28,7 +27,6 @@ module.exports = function(kibana) {
     dashboardMode(kibana),
     beats(kibana),
     maps(kibana),
-    canvas(kibana),
     infra(kibana),
     taskManager(kibana),
     encryptedSavedObjects(kibana),

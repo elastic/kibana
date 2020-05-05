@@ -82,7 +82,7 @@ export class RollupPlugin implements Plugin {
       esSection.registerApp({
         id: 'rollup_jobs',
         title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-        order: 3,
+        order: 5,
         async mount(params) {
           params.setBreadcrumbs([
             {

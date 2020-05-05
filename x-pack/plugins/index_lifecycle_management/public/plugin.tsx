@@ -40,7 +40,7 @@ export class IndexLifecycleManagementPlugin {
       management.sections.getSection('elasticsearch')!.registerApp({
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
-        order: 2,
+        order: 3,
         mount: async ({ element }) => {
           const [coreStart] = await getStartServices();
           const {
