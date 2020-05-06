@@ -38,6 +38,7 @@ import { Executor } from 'selenium-webdriver/lib/http';
 import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -51,7 +52,7 @@ const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as strin
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
-const downloadDir = resolve(__dirname, '../../../../target/functional-tests/downloads');
+const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
 const chromiumDownloadPrefs = {
   prefs: {
     'download.default_directory': downloadDir,
