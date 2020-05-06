@@ -76,14 +76,16 @@ function renderNotifications(
       </EuiNotificationBadge>
     );
 
-    const tooltip = notification.getDisplayNameTooltip!(context);
+    if (notification.getDisplayNameTooltip) {
+      const tooltip = notification.getDisplayNameTooltip(context);
 
-    if (tooltip) {
-      badge = (
-        <EuiToolTip position="top" delay="regular" content={tooltip}>
-          {badge}
-        </EuiToolTip>
-      );
+      if (tooltip) {
+        badge = (
+          <EuiToolTip position="top" delay="regular" content={tooltip}>
+            {badge}
+          </EuiToolTip>
+        );
+      }
     }
 
     return badge;
