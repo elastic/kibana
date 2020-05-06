@@ -6,21 +6,19 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
 import { patchRulesSchema } from '../schemas/patch_rules_schema';
-import {
-  buildRouteValidation,
-  transformError,
-  buildSiemResponse,
-  validateLicenseForRuleType,
-} from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const patchRulesRoute = (router: IRouter) => {
+export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -68,15 +66,16 @@ export const patchRulesRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        if (type) {
-          validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
-        }
-
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
 
         if (!alertsClient) {
           return siemResponse.error({ statusCode: 404 });
+        }
+
+        if (type) {
+          const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
+          throwHttpError(mlAuthz.validateRuleType(type));
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);

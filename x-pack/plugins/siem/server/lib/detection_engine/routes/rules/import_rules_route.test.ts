@@ -21,8 +21,8 @@ import {
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
-import { importRulesRoute } from './import_rules_route';
 import { buildMlAuthz } from '../../../machine_learning/authz';
+import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
@@ -40,8 +40,8 @@ describe('import_rules_route', () => {
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let ml: ReturnType<typeof mlServicesMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.create>;
 
   beforeEach(() => {
     server = serverMock.create();

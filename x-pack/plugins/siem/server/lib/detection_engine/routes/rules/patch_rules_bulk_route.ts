@@ -6,13 +6,11 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { PatchRuleAlertParamsRest } from '../../rules/types';
-import {
-  transformBulkError,
-  buildRouteValidation,
-  buildSiemResponse,
-  validateLicenseForRuleType,
-} from '../utils';
+import { transformBulkError, buildRouteValidation, buildSiemResponse } from '../utils';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
 import { patchRulesBulkSchema } from '../schemas/patch_rules_bulk_schema';
@@ -21,7 +19,7 @@ import { patchRules } from '../../rules/patch_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const patchRulesBulkRoute = (router: IRouter) => {
+export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -42,6 +40,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
@@ -81,7 +80,7 @@ export const patchRulesBulkRoute = (router: IRouter) => {
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             if (type) {
-              validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+              throwHttpError(mlAuthz.validateRuleType(type));
             }
 
             const rule = await patchRules({

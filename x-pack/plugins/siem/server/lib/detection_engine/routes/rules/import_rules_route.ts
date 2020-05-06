@@ -12,6 +12,8 @@ import { createPromiseFromStreams } from '../../../../../../../../src/legacy/uti
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
@@ -33,8 +35,6 @@ import { ImportRulesSchema, importRulesSchema } from '../schemas/response/import
 import { getTupleDuplicateErrorsAndUniqueRules } from './utils';
 import { validate } from './validate';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
-import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
 
 type PromiseFromStreams = ImportRuleAlertRest | Error;
 
@@ -58,7 +58,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
@@ -69,6 +68,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
 
         const { filename } = request.body.file.hapi;
         const fileExtension = extname(filename).toLowerCase();
