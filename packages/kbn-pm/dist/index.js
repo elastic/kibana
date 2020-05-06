@@ -43934,10 +43934,14 @@ class CiStatsReporter {
         return !!this.config;
     }
     async metrics(metrics) {
+        if (!this.config) {
+            return;
+        }
         await this.request({
             method: 'POST',
             path: '/v1/metrics',
             body: {
+                buildId: this.config.buildId,
                 metrics,
             },
             bodySummary: metrics.map(({ group, id, value }) => `[${group}/${id}=${value}]`).join(' '),
@@ -43958,9 +43962,6 @@ class CiStatsReporter {
                     method,
                     url: path,
                     baseURL: this.config.apiUrl,
-                    params: {
-                        buildId: this.config.buildId,
-                    },
                     headers: {
                         Authorization: `token ${this.config.apiToken}`,
                     },
