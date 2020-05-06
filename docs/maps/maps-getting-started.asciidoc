@@ -62,7 +62,7 @@ The first layer you'll add is a choropleth layer to shade world countries
 by web log traffic. Darker shades symbolize countries with more web log traffic,
 and lighter shades symbolize countries with less traffic.
 
-==== Add a vector layer from the Elastic Maps Service source
+==== Add a vector layer to display world country boundaries
 
 . Click *Add layer*.
 . Select the *EMS Boundaries* layer card.

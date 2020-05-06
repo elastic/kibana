@@ -69,7 +69,7 @@ then accumulates the most relevant documents based on sort order for each entry 
 
 To enable top hits:
 
-. Click *Add layer* button and select *Documents* source.
+. Click *Add layer*, then select *Documents* layer card.
 . Configure *Index pattern* and *Geospatial field*.
 . In *Scaling*, select *Show top hits per entity*.
 . Set *Entity* to the field that identifies entities in your documents.
@@ -99,7 +99,7 @@ image::maps/images/point_to_point.png[]
 
 Use term joins to augment vector features with properties for <<maps-vector-style-data-driven, data driven styling>> and richer tooltip content.
 
-Term joins are available for <<vector-layer, vector layers>> with the following sources:
+Term joins are available for the following <<vector-layer, vector layers>>:
 
 * Configured GeoJSON
 * Documents

@@ -10,9 +10,9 @@ You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents layer
+** Documents
 
-** Clusters and grid layer
+** Clusters and grid
 
 ** <<terms-join>>
 
