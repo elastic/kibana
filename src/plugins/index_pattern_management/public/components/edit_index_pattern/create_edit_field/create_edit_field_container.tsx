@@ -45,6 +45,7 @@ export interface CreateEditFieldContainerProps
     SearchBar: DataPublicPluginStart['ui']['SearchBar'];
     toasts: NotificationsStart['toasts'];
     fieldFormats: DataPublicPluginStart['fieldFormats'];
+    indexPatterns: DataPublicPluginStart['indexPatterns'];
   };
 }
 
@@ -70,6 +71,7 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
           toasts: props.services.toasts,
           fieldFormats: props.services.fieldFormats,
           docTitle: props.services.docTitle,
+          indexPatterns: props.services.indexPatterns,
         }}
       />
     );

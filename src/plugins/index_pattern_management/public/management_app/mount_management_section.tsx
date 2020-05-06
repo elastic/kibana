@@ -154,6 +154,7 @@ export async function mountManagementSection(
                 toasts: notifications.toasts,
                 fieldFormats: data.fieldFormats,
                 SearchBar: data.ui.SearchBar,
+                indexPatterns: data.indexPatterns,
               }}
             />
           </Route>

@@ -119,6 +119,7 @@ describe('FieldEditor', () => {
     http: coreStartServices.http,
     uiSettings: coreStartServices.uiSettings,
     SearchBar: dataStartServices.ui.SearchBar,
+    indexPatterns: dataStartServices.indexPatterns,
   } as unknown) as FieldEdiorProps['helpers'];
 
   beforeEach(() => {

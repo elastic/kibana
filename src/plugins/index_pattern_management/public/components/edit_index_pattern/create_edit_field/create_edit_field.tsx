@@ -36,13 +36,13 @@ interface CreateEditFieldProps extends RouteComponentProps {
   fieldFormatEditors: any;
   services: {
     uiSettings: IUiSettingsClient;
-    dataStart: DataPublicPluginStart;
     docTitle: ChromeDocTitle;
     http: HttpStart;
     docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
     SearchBar: DataPublicPluginStart['ui']['SearchBar'];
     toasts: NotificationsStart['toasts'];
     fieldFormats: DataPublicPluginStart['fieldFormats'];
+    indexPatterns: DataPublicPluginStart['indexPatterns'];
   };
 }
 
@@ -65,7 +65,7 @@ export const CreateEditField = withRouter(
     const field =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
-        : services.dataStart.indexPatterns.createField(
+        : services.indexPatterns.createField(
             indexPattern,
             {
               scripted: true,
@@ -120,6 +120,7 @@ export const CreateEditField = withRouter(
                   SearchBar: services.SearchBar,
                   toasts: services.toasts,
                   fieldFormats: services.fieldFormats,
+                  indexPatterns: services.indexPatterns,
                 }}
               />
             </EuiFlexItem>
