@@ -8,7 +8,7 @@
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-import { mockKibanaContext } from './mock_kibana_context';
+import { mockKibanaContext } from './kibana_context.mock';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),

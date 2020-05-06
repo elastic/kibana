@@ -8,8 +8,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiLink, EuiButton } from '@elastic/eui';
 
-import '../../test_utils/mock_rr_usehistory';
-import { mockHistory } from '../../test_utils';
+import '../../__mocks__/react_router_history.mock';
+import { mockHistory } from '../../__mocks__';
 
 import { EuiReactRouterLink, EuiReactRouterButton } from './eui_link';
 
