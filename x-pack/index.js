@@ -12,7 +12,6 @@ import { dashboardMode } from './legacy/plugins/dashboard_mode';
 import { beats } from './legacy/plugins/beats_management';
 import { maps } from './legacy/plugins/maps';
 import { spaces } from './legacy/plugins/spaces';
-import { infra } from './legacy/plugins/infra';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
@@ -26,7 +25,6 @@ module.exports = function(kibana) {
     dashboardMode(kibana),
     beats(kibana),
     maps(kibana),
-    infra(kibana),
     encryptedSavedObjects(kibana),
     ingestManager(kibana),
   ];
