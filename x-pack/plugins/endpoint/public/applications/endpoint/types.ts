@@ -110,6 +110,8 @@ export interface HostState {
   detailsError?: ServerApiError;
   /** Holds the Policy Response for the Host currently being displayed in the details */
   policyResponse?: HostPolicyResponse;
+  /** api error from retrieving the policy response */
+  policyResponseError?: ServerApiError;
   /** current location info */
   location?: Immutable<EndpointAppLocation>;
 }

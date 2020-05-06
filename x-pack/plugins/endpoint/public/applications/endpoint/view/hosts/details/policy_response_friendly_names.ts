@@ -26,6 +26,18 @@ responseMap.set(
   })
 );
 responseMap.set(
+  'logging',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.logging', {
+    defaultMessage: 'Logging',
+  })
+);
+responseMap.set(
+  'streaming',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.streaming', {
+    defaultMessage: 'Streaming',
+  })
+);
+responseMap.set(
   'malware',
   i18n.translate('xpack.endpoint.hostDetails.policyResponse.malware', {
     defaultMessage: 'Malware',

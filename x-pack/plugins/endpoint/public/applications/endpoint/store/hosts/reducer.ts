@@ -21,6 +21,7 @@ const initialState = (): HostState => {
     detailsLoading: false,
     detailsError: undefined,
     policyResponse: undefined,
+    policyResponseError: undefined,
     location: undefined,
   };
 };
@@ -68,6 +69,11 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       policyResponse: action.payload.policy_response,
+    };
+  } else if (action.type === 'serverFailedToReturnHostPolicyResponse') {
+    return {
+      ...state,
+      policyResponseError: action.payload,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
