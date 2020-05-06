@@ -30,8 +30,7 @@ function shouldReadKeys(value: unknown): value is Record<string, any> {
  *    getFlattenedObject({ a: { b: 1, c: [2,3] } })
  *    // => { 'a.b': 1, 'a.c': [2,3] }
  *
- *  @param {Object} rootValue
- *  @returns {Object}
+ *  @public
  */
 export function getFlattenedObject(rootValue: Record<string, any>) {
   if (!shouldReadKeys(rootValue)) {

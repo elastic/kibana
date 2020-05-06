@@ -35,7 +35,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   return {
     id: 'natsLogs',
     name: i18n.translate('home.tutorials.natsLogs.nameTitle', {
-      defaultMessage: 'Nats logs',
+      defaultMessage: 'NATS logs',
     }),
     category: TutorialsCategory.LOGGING,
     isBeta: true,
@@ -50,13 +50,13 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    // euiIconType: 'logoNats',
+    euiIconType: '/plugins/home/assets/logos/nats.svg',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-nats-overview-ecs',
           linkLabel: i18n.translate('home.tutorials.natsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats logs dashboard',
+            defaultMessage: 'NATS logs dashboard',
           }),
           isOverview: true,
         },
@@ -66,7 +66,7 @@ export function natsLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nats_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

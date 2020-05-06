@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { CSSProperties } from 'styled-components';
-import { AgentEnrollmentFlyout } from './components';
+import { AgentEnrollmentFlyout } from '../components';
 import { Agent } from '../../../types';
 import {
   usePagination,
@@ -146,6 +146,13 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
   }
 );
 
+function safeMetadata(val: any) {
+  if (typeof val !== 'string') {
+    return '-';
+  }
+  return val;
+}
+
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
@@ -244,7 +251,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       }),
       render: (host: string, agent: Agent) => (
         <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
-          {host}
+          {safeMetadata(host)}
         </ConnectedLink>
       ),
     },
@@ -308,11 +315,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       },
     },
     {
-      field: 'local_metadata.agent_version',
+      field: 'local_metadata.elastic.agent.version',
       width: '100px',
       name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
+      render: (version: string, agent: Agent) => safeMetadata(version),
     },
     {
       field: 'last_checkin',
@@ -503,7 +511,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         loading={isLoading && agentsRequest.isInitialRequest}
         hasActions={true}
         noItemsMessage={
-          isLoading ? (
+          isLoading && agentsRequest.isInitialRequest ? (
             <FormattedMessage
               id="xpack.ingestManager.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"

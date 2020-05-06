@@ -59,12 +59,11 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -165,7 +164,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                     if (rule == null) {
                       await createRules({
                         alertsClient,
-                        actionsClient,
                         anomalyThreshold,
                         description,
                         enabled,
@@ -202,7 +200,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                     } else if (rule != null && request.query.overwrite) {
                       await patchRules({
                         alertsClient,
-                        actionsClient,
                         savedObjectsClient,
                         description,
                         enabled,

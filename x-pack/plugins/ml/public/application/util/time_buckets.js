@@ -18,15 +18,25 @@ const largeMax = unitsDesc.indexOf('w'); // Multiple units of week or longer con
 
 const calcAuto = timeBucketsCalcAutoIntervalProvider();
 
+export function getTimeBucketsFromCache() {
+  const uiSettings = getUiSettings();
+  return new TimeBuckets({
+    'histogram:maxBars': uiSettings.get('histogram:maxBars'),
+    'histogram:barTarget': uiSettings.get('histogram:barTarget'),
+    dateFormat: uiSettings.get('dateFormat'),
+    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+  });
+}
+
 /**
  * Helper object for wrapping the concept of an "Interval", which
  * describes a timespan that will separate buckets of time,
  * for example the interval between points on a time series chart.
  */
-export function TimeBuckets() {
-  const uiSettings = getUiSettings();
-  this.barTarget = uiSettings.get('histogram:barTarget');
-  this.maxBars = uiSettings.get('histogram:maxBars');
+export function TimeBuckets(timeBucketsConfig) {
+  this._timeBucketsConfig = timeBucketsConfig;
+  this.barTarget = this._timeBucketsConfig['histogram:barTarget'];
+  this.maxBars = this._timeBucketsConfig['histogram:maxBars'];
 }
 
 /**
@@ -297,9 +307,8 @@ TimeBuckets.prototype.getIntervalToNearestMultiple = function(divisorSecs) {
  * @return {string}
  */
 TimeBuckets.prototype.getScaledDateFormat = function() {
-  const uiSettings = getUiSettings();
   const interval = this.getInterval();
-  const rules = uiSettings.get('dateFormat:scaled');
+  const rules = this._timeBucketsConfig['dateFormat:scaled'];
 
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
@@ -308,19 +317,18 @@ TimeBuckets.prototype.getScaledDateFormat = function() {
     }
   }
 
-  return uiSettings.get('dateFormat');
+  return this._timeBucketsConfig.dateFormat;
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function() {
   const fieldFormats = getFieldFormats();
-  const uiSettings = getUiSettings();
   const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
   return new DateFieldFormat(
     {
       pattern: this.getScaledDateFormat(),
     },
     // getConfig
-    uiSettings.get
+    this._timeBucketsConfig
   );
 };
 
