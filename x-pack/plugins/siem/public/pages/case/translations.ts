@@ -195,3 +195,11 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
     defaultMessage: 'View documentation',
   }
 );
+
+export const CONNECTORS = i18n.translate('xpack.siem.case.caseView.connectors', {
+  defaultMessage: 'External incident management system',
+});
+
+export const EDIT_CONNECTOR = i18n.translate('xpack.siem.case.caseView.editConnector', {
+  defaultMessage: 'Change external incident management system',
+});

@@ -34,6 +34,7 @@ import {
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
 // eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { applicationServiceMock } from '../../../../../../core/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -50,7 +51,7 @@ function getProps(
 
   const start = doStart();
   const options: DashboardContainerOptions = {
-    application: {} as any,
+    application: applicationServiceMock.createStartContract(),
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddableFactories: start.getEmbeddableFactories,

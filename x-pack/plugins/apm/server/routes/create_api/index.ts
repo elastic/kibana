@@ -30,7 +30,7 @@ export function createApi() {
       factoryFns.push(fn);
       return this as any;
     },
-    init(core, { config$, logger }) {
+    init(core, { config$, logger, plugins }) {
       const router = core.http.createRouter();
 
       let config = {} as APMConfig;
@@ -136,6 +136,7 @@ export function createApi() {
                 request,
                 context: {
                   ...context,
+                  plugins,
                   // Only return values for parameters that have runtime types,
                   // but always include query as _debug is always set even if
                   // it's not defined in the route.

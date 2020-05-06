@@ -1374,7 +1374,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1406,6 +1406,7 @@ const connector = {
           toastNotifications: toastNotifications,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           capabilities: capabilities,
+          docLinks, 
         }}
       >
         <ConnectorAddFlyout
@@ -1447,6 +1448,7 @@ export interface ActionsConnectorsContextValue {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   capabilities: ApplicationStart['capabilities'];
+  docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
 }
 ```
