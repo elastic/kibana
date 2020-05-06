@@ -19,6 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isEqual } from 'lodash';
 import { Link } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -35,10 +36,8 @@ import * as Translations from './translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: 'May not be blank' | '';
-  certificatesThresholds: {
-    expirationThresholdError: string | null;
-    ageThresholdError: string | null;
-  } | null;
+  expirationThresholdError: string | null;
+  ageThresholdError: string | null;
 }
 
 export interface SettingsFormProps {
@@ -49,22 +48,28 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
+const isValidCertVal = (val: string | number) => {
+  if (val === '') {
+    return Translations.BLANK_STR;
+  }
+  if (val === 0) {
+    return Translations.VALID_STR;
+  }
+};
+
 const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
   if (formFields) {
-    const blankStr = 'May not be blank';
     const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
-    const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
-    const expirationThresholdError = certExpirationThreshold ? null : blankStr;
-    const ageThresholdError = certAgeThreshold ? null : blankStr;
+
+    const indError = heartbeatIndices.match(/^\S+$/) ? '' : Translations.BLANK_STR;
+
+    const expError = isValidCertVal(certExpirationThreshold);
+    const ageError = isValidCertVal(certAgeThreshold);
+
     return {
-      heartbeatIndices: heartbeatIndErr,
-      certificatesThresholds:
-        expirationThresholdError || ageThresholdError
-          ? {
-              expirationThresholdError,
-              ageThresholdError,
-            }
-          : null,
+      heartbeatIndices: indError,
+      expirationThresholdError: expError,
+      ageThresholdError: ageError,
     };
   }
   return null;
