@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { LegacyPluginApi, LegacyPluginInitializer } from 'src/legacy/plugin_discovery/types';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/server';
 
 const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
