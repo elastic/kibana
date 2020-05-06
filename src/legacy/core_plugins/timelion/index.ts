@@ -54,11 +54,11 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
     uiExports: {
       app: {
         title: 'Timelion',
-        order: -1000,
+        order: 8000,
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
-        category: DEFAULT_APP_CATEGORIES.analyze,
+        category: DEFAULT_APP_CATEGORIES.kibana,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
