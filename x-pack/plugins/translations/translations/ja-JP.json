@@ -4389,7 +4389,6 @@
     "xpack.apm.serviceMap.emptyBanner.title": "単一のサービスしかないようです。",
     "xpack.apm.serviceMap.focusMapButtonText": "焦点マップ",
     "xpack.apm.serviceMap.invalidLicenseMessage": "サービスマップを利用するには、Elastic Platinum ライセンスが必要です。これにより、APM データとともにアプリケーションスタック全てを可視化することができるようになります。",
-    "xpack.apm.serviceMap.numInstancesMetric": "{numInstances}インスタンス",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "サービス詳細",
     "xpack.apm.serviceMap.subtypePopoverMetric": "サブタイプ",
     "xpack.apm.serviceMap.typePopoverMetric": "タイプ",
