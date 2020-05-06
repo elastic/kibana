@@ -14,7 +14,7 @@ import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
 
-interface CaseService extends CaseExternalService {
+export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
   lastPushIndex: number;
   commentsToUpdate: string[];
