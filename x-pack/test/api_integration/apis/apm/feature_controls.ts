@@ -42,7 +42,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     {
       // this doubles as a smoke test for the _debug query parameter
       req: {
-        url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D_debug=true`,
+        url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D&_debug=true`,
       },
       expectForbidden: expect404,
       expectResponse: expect200,
