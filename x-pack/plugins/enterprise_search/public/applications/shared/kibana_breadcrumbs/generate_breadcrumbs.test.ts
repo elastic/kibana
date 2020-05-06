@@ -7,7 +7,7 @@
 import { generateBreadcrumb } from './generate_breadcrumbs';
 import { appSearchBreadcrumbs, enterpriseSearchBreadcrumbs } from './';
 
-import { mockHistory } from '../../test_utils';
+import { mockHistory } from '../../__mocks__';
 
 jest.mock('../react_router_helpers', () => ({ letBrowserHandleEvent: jest.fn(() => false) }));
 import { letBrowserHandleEvent } from '../react_router_helpers';
