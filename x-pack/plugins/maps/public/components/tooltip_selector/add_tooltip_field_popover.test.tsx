@@ -18,12 +18,12 @@ const defaultProps = {
     },
     {
       name: 'prop2',
-      label: 'prop2',
+      label: 'prop2-label',
       type: 'string',
     },
     {
       name: '@timestamp',
-      label: '@timestamp',
+      label: '@timestamp-label',
       type: 'date',
     },
   ],
@@ -42,8 +42,8 @@ test('Should remove selected fields from selectable', () => {
     <AddTooltipFieldPopover
       {...defaultProps}
       selectedFields={[
-        { name: 'prop2', label: 'prop2', type: 'string' },
-        { name: 'prop1', label: 'prop1', type: 'string' },
+        { name: 'prop2', label: 'prop2-label', type: 'string' },
+        { name: 'prop1', label: 'prop1-label', type: 'string' },
       ]}
     />
   );
