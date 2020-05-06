@@ -165,9 +165,13 @@ export const CaseComponent = React.memo<CaseProps>(
       [connectors, caseData.connectorId]
     );
 
-    const currentExternalIncident = useMemo(() => {
-      return caseServices[caseData.connectorId];
-    }, [caseServices, caseData.connectorId]);
+    const currentExternalIncident = useMemo(
+      () =>
+        caseServices != null && caseServices[caseData.connectorId] != null
+          ? caseServices[caseData.connectorId]
+          : null,
+      [caseServices, caseData.connectorId]
+    );
 
     const { pushButton, pushCallouts } = usePushToService({
       caseConnectorId: caseData.connectorId,
