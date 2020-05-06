@@ -7,8 +7,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import { PipelineFormTestBed } from './helpers/pipeline_form.helpers';
-import { PIPELINE_TO_CLONE } from './helpers/pipelines_clone.helpers';
+import { PIPELINE_TO_CLONE, PipelinesCloneTestBed } from './helpers/pipelines_clone.helpers';
 
 const { setup } = pageHelpers.pipelinesClone;
 
@@ -26,7 +25,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 describe('<PipelinesClone />', () => {
-  let testBed: PipelineFormTestBed;
+  let testBed: PipelinesCloneTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 

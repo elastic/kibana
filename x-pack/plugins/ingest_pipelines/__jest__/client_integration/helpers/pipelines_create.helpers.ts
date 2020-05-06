@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { formSetup, PipelineFormTestSubjects } from './pipeline_form.helpers';
+import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+
+export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
+  actions: ReturnType<typeof getFormActions>;
+};
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -18,9 +22,13 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed<PipelineFormTestSubjects>(
-  WithAppDependencies(PipelinesCreate),
-  testBedConfig
-);
+const initTestBed = registerTestBed(WithAppDependencies(PipelinesCreate), testBedConfig);
 
-export const setup = formSetup.bind(null, initTestBed);
+export const setup = async (): Promise<PipelinesCreateTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
+    ...testBed,
+    actions: getFormActions(testBed),
+  };
+};

@@ -41,9 +41,9 @@ describe('<PipelinesList />', () => {
 
     const pipelines = [pipeline1, pipeline2];
 
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
+    httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
 
+    beforeEach(async () => {
       testBed = await setup();
 
       await act(async () => {

@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
+import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
 import { BASE_PATH } from '../../../common/constants';
 import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-import { formSetup } from './pipeline_form.helpers';
+import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+
+export type PipelinesEditTestBed = TestBed<PipelineFormTestSubjects> & {
+  actions: ReturnType<typeof getFormActions>;
+};
 
 export const PIPELINE_TO_EDIT = {
   name: 'my_pipeline',
@@ -33,4 +37,11 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(PipelinesEdit), testBedConfig);
 
-export const setup = formSetup.bind(null, initTestBed);
+export const setup = async (): Promise<PipelinesEditTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
+    ...testBed,
+    actions: getFormActions(testBed),
+  };
+};

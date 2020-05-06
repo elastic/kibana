@@ -27,17 +27,11 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(PipelinesList), testBedConfig);
 
-export interface PipelineListTestBed extends TestBed<PipelineListTestSubjects> {
-  actions: {
-    clickReloadButton: () => void;
-    clickPipelineAt: (index: number) => Promise<void>;
-    clickPipelineAction: (name: string, action: 'edit' | 'clone' | 'delete') => void;
-    clickActionMenu: (name: string) => void;
-  };
-}
+export type PipelineListTestBed = TestBed<PipelineListTestSubjects> & {
+  actions: ReturnType<typeof createActions>;
+};
 
-export const setup = async (): Promise<PipelineListTestBed> => {
-  const testBed = await initTestBed();
+const createActions = (testBed: TestBed) => {
   const { find } = testBed;
 
   /**
@@ -80,13 +74,19 @@ export const setup = async (): Promise<PipelineListTestBed> => {
   };
 
   return {
+    clickReloadButton,
+    clickPipelineAt,
+    clickPipelineAction,
+    clickActionMenu,
+  };
+};
+
+export const setup = async (): Promise<PipelineListTestBed> => {
+  const testBed = await initTestBed();
+
+  return {
     ...testBed,
-    actions: {
-      clickReloadButton,
-      clickPipelineAt,
-      clickPipelineAction,
-      clickActionMenu,
-    },
+    actions: createActions(testBed),
   };
 };
 

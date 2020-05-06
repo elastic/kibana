@@ -3,44 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
+import { TestBed } from '../../../../../test_utils';
 
-export type PipelineFormTestBed = TestBed<PipelineFormTestSubjects> &
-  UnwrapPromise<ReturnType<typeof formSetup>>;
-
-export const formSetup = async (initTestBed: SetupFunc<PipelineFormTestSubjects>) => {
-  const testBed = await initTestBed();
+export const getFormActions = (testBed: TestBed) => {
+  const { find, form } = testBed;
 
   // User actions
   const clickSubmitButton = () => {
-    testBed.find('submitButton').simulate('click');
+    find('submitButton').simulate('click');
   };
 
   const clickTestPipelineButton = () => {
-    testBed.find('testPipelineButton').simulate('click');
+    find('testPipelineButton').simulate('click');
   };
 
   const clickShowRequestLink = () => {
-    testBed.find('showRequestLink').simulate('click');
+    find('showRequestLink').simulate('click');
   };
 
   const toggleVersionSwitch = () => {
-    testBed.form.toggleEuiSwitch('versionToggle');
+    form.toggleEuiSwitch('versionToggle');
   };
 
   const toggleOnFailureSwitch = () => {
-    testBed.form.toggleEuiSwitch('onFailureToggle');
+    form.toggleEuiSwitch('onFailureToggle');
   };
 
   return {
-    ...testBed,
-    actions: {
-      clickSubmitButton,
-      clickShowRequestLink,
-      toggleVersionSwitch,
-      toggleOnFailureSwitch,
-      clickTestPipelineButton,
-    },
+    clickSubmitButton,
+    clickShowRequestLink,
+    toggleVersionSwitch,
+    toggleOnFailureSwitch,
+    clickTestPipelineButton,
   };
 };
 
