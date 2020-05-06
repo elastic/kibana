@@ -6590,7 +6590,6 @@
     "xpack.graph.sidebar.selectionsTitle": "選択項目",
     "xpack.graph.sidebar.styleVerticesTitle": "スタイルが選択された頂点",
     "xpack.graph.sidebar.topMenu.addLinksButtonTooltip": "既存の用語の間にリンクを追加します",
-    "xpack.graph.sidebar.topMenu.blacklistButtonTooltip": "選択項目がワークスペースに戻らないようブラックリストに追加します",
     "xpack.graph.sidebar.topMenu.customStyleButtonTooltip": "選択された頂点のカスタムスタイル",
     "xpack.graph.sidebar.topMenu.drillDownButtonTooltip": "ドリルダウン",
     "xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip": "選択項目を拡張",
