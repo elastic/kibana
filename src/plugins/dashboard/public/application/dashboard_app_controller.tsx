@@ -308,7 +308,7 @@ export class DashboardAppController {
     };
 
     const updateState = () => {
-      searchService.searchSource.startSession();
+      searchService.startSession();
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {

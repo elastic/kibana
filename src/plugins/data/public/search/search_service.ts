@@ -172,12 +172,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search,
+      getSessionId: () => this.sessionId,
+      startSession: () => (this.sessionId = uuidV4()),
+      clearSession: () => (this.sessionId = uuidV4()),
       searchSource: {
         create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
         fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
-        getSessionId: () => this.sessionId,
-        startSession: () => (this.sessionId = uuidV4()),
-        clearSession: () => (this.sessionId = uuidV4()),
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an interceptor have a destroy method?

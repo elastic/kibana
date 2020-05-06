@@ -13,8 +13,12 @@ import {
 } from '../../../../src/core/server';
 import { ES_SEARCH_STRATEGY } from '../../../../src/plugins/data/common';
 import { PluginSetup as DataPluginSetup } from '../../../../src/plugins/data/server';
-import { enhancedEsSearchStrategyProvider } from './search';
-import { BackgroundSearchService } from './background_search';
+import { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './search';
+import {
+  BackgroundSessionService,
+  backgroundSession,
+  registerBackgroundSessionRoute,
+} from './background_session';
 import { SecurityPluginSetup } from '../../security/server';
 
 interface SetupDependencies {
@@ -22,29 +26,24 @@ interface SetupDependencies {
   security: SecurityPluginSetup;
 }
 
-export interface EnhancedDataPluginSetup {
-  backgroundSearch: BackgroundSearchService;
-}
-
 export interface EnhancedDataPluginStart {
-  backgroundSearch: BackgroundSearchService;
+  backgroundSearch: BackgroundSessionService;
 }
 
 export class EnhancedDataServerPlugin
-  implements Plugin<EnhancedDataPluginSetup, EnhancedDataPluginStart, SetupDependencies> {
-  private readonly backgroundSearchService!: BackgroundSearchService;
+  implements Plugin<void, EnhancedDataPluginStart, SetupDependencies> {
+  private backgroundSessionService!: BackgroundSessionService;
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('enhanced-data');
-    this.backgroundSearchService = new BackgroundSearchService(this.logger);
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     deps.data.search.registerSearchStrategyContext(
       this.initializerContext.opaqueId,
       'backgroundSearchService',
-      () => this.backgroundSearchService
+      () => this.backgroundSessionService
     );
     deps.data.search.registerSearchStrategyContext(
       this.initializerContext.opaqueId,
@@ -57,14 +56,26 @@ export class EnhancedDataServerPlugin
       enhancedEsSearchStrategyProvider
     );
 
-    return {
-      backgroundSearch: this.backgroundSearchService,
-    };
+    // Background session registrations
+    core.savedObjects.registerType(backgroundSession);
+    core.http.registerRouteHandlerContext<'backgroundSession'>('backgroundSession', () => {
+      return this.backgroundSessionService;
+    });
+    const router = core.http.createRouter();
+    registerBackgroundSessionRoute(router);
   }
 
   public start(core: CoreStart) {
+    const internalApiCaller = core.elasticsearch.legacy.client.callAsInternalUser;
+    const updateExpirationHandler = updateExpirationProvider(internalApiCaller);
+    this.backgroundSessionService = new BackgroundSessionService(
+      core.savedObjects,
+      updateExpirationHandler,
+      this.logger
+    );
+
     return {
-      backgroundSearch: this.backgroundSearchService,
+      backgroundSearch: this.backgroundSessionService,
     };
   }
 

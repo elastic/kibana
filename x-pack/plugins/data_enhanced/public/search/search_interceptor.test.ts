@@ -8,6 +8,7 @@ import { Observable, Subject } from 'rxjs';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreStart } from 'kibana/public';
+import { BackgroundSessionService } from '../background_session';
 
 jest.useFakeTimers();
 
@@ -15,12 +16,17 @@ const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 const mockSearch = jest.fn();
 let searchInterceptor: EnhancedSearchInterceptor;
 let mockCoreStart: MockedKeys<CoreStart>;
+let mockBackgroundSearch: BackgroundSessionService;
 
 describe('EnhancedSearchInterceptor', () => {
   beforeEach(() => {
     mockCoreStart = coreMock.createStart();
     mockSearch.mockClear();
+    mockBackgroundSearch = {
+      store: () => Promise.resolve(),
+    } as BackgroundSessionService;
     searchInterceptor = new EnhancedSearchInterceptor(
+      mockBackgroundSearch,
       mockCoreStart.notifications.toasts,
       mockCoreStart.application,
       1000

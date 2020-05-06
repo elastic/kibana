@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { BackgroundSearchService } from './bg_search_service';
+export { BackgroundSessionService } from './background_session_service';
+export { backgroundSession, BACKGROUND_SESSION_TYPE } from './saved_object';
+export { registerBackgroundSessionRoute } from './routes';

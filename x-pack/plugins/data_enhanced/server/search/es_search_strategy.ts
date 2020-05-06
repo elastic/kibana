@@ -18,9 +18,9 @@ import {
   getDefaultSearchParams,
   getTotalLoaded,
 } from '../../../../../src/plugins/data/server';
-import { IEnhancedEsSearchRequest } from '../../common';
+import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
-import { BackgroundSearchService } from '../background_search';
+import { BackgroundSessionService } from '../background_session';
 import { SecurityPluginSetup } from '../../../security/server';
 
 export interface AsyncSearchResponse<T> {
@@ -31,7 +31,7 @@ export interface AsyncSearchResponse<T> {
 }
 
 export interface IEnhancedSearchContext extends ISearchContext {
-  backgroundSearchService?: BackgroundSearchService;
+  backgroundSearchService?: BackgroundSessionService;
   security?: SecurityPluginSetup;
 }
 
@@ -88,6 +88,25 @@ function trackBackgroundSearch(
   }
 }
 
+export function updateExpirationProvider(caller: APICaller) {
+  return async (searchId: string) => {
+    const path = encodeURI(`/_async_search/${searchId}`);
+
+    // Wait up to 1s for the response to return
+    const query = toSnakeCase({
+      waitForCompletionTimeout: '1ms',
+      keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
+    });
+
+    // const { id, response, is_partial, is_running } =
+    await caller('transport.request', {
+      method: 'GET',
+      path,
+      query,
+    });
+  };
+}
+
 async function asyncSearch(
   caller: APICaller,
   request: IEnhancedEsSearchRequest,
@@ -106,6 +125,7 @@ async function asyncSearch(
   const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
+  // TODO: DONT MERGE WITH 1ms!!!!!!!!!!!!!!!!!!!!!!!
   const query = toSnakeCase({ waitForCompletionTimeout: '1ms', ...queryParams });
 
   const { id, response, is_partial, is_running } = (await caller(

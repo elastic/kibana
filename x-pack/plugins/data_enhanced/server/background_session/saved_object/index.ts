@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './es_search_strategy';
+export { BACKGROUND_SESSION_TYPE, backgroundSession } from './background_session';

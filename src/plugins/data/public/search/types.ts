@@ -81,15 +81,15 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
+  getSessionId: () => string;
+  startSession: () => void;
+  clearSession: () => void;
   searchSource: {
     create: (fields?: SearchSourceFields) => ISearchSource;
     fromJSON: (
       searchSourceJson: string,
       references: SavedObjectReference[]
     ) => Promise<ISearchSource>;
-    getSessionId: () => string;
-    startSession: () => void;
-    clearSession: () => void;
   };
   __LEGACY: ISearchStartLegacy;
 }

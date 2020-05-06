@@ -18,6 +18,7 @@ import {
   enhancedEsSearchStrategyProvider,
 } from './search';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
+import { BackgroundSessionService } from './background_session';
 
 export interface DataEnhancedSetupDependencies {
   data: DataPublicPluginSetup;
@@ -30,6 +31,7 @@ export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
 export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 
 export class DataEnhancedPlugin implements Plugin {
+  private backgroundSessionService!: BackgroundSessionService;
   constructor() {}
 
   public setup(core: CoreSetup, { data }: DataEnhancedSetupDependencies) {
@@ -46,11 +48,22 @@ export class DataEnhancedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
+    this.backgroundSessionService = new BackgroundSessionService(core.http, plugins.data.search);
+
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
+      this.backgroundSessionService,
       core.notifications.toasts,
       core.application,
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
     );
     plugins.data.search.setInterceptor(enhancedSearchInterceptor);
+
+    /*
+      Clear any open sessions upon navigation to make sure they are not used mistakenly by
+      another application.
+     */
+    core.application.currentAppId$.subscribe(() => {
+      plugins.data.search.clearSession();
+    });
   }
 }

@@ -6,6 +6,7 @@
 
 import { ApplicationStart, ToastsStart } from 'kibana/public';
 import { getLongQueryNotification } from './long_query_notification';
+import { BackgroundSessionService } from '../background_session';
 import { SearchInterceptor } from '../../../../../src/plugins/data/public';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
@@ -15,8 +16,14 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    * @param toasts The `core.notifications.toasts` service
    * @param application The `core.application` service
    * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @param backgroundSessionService Used to submit sessions to background upon request
    */
-  constructor(toasts: ToastsStart, application: ApplicationStart, requestTimeout?: number) {
+  constructor(
+    private readonly backgroundSessionService: BackgroundSessionService,
+    toasts: ToastsStart,
+    application: ApplicationStart,
+    requestTimeout?: number
+  ) {
     super(toasts, application, requestTimeout);
   }
 
@@ -36,6 +43,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.hideToast();
     this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
     this.timeoutSubscriptions.clear();
+    this.backgroundSessionService.store();
   };
 
   protected showToast = () => {

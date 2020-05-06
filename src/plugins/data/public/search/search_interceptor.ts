@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent } from 'rxjs';
-import { takeUntil, finalize, filter, mergeMapTo } from 'rxjs/operators';
+import { takeUntil, finalize, mergeMapTo } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';

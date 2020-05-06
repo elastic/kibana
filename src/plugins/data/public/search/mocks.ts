@@ -31,6 +31,9 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   aggs: searchAggsStartMock(),
   setInterceptor: jest.fn(),
   search: jest.fn(),
+  getSessionId: jest.fn().mockReturnValue(''),
+  startSession: jest.fn(),
+  clearSession: jest.fn(),
   searchSource: searchSourceMock,
   __LEGACY: {
     esClient: {
