@@ -74,7 +74,6 @@ export class ListPlugin {
             new ListClient({
               callCluster: callAsCurrentUser,
               config,
-              request,
               security,
               spaceId,
               user,
