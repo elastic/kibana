@@ -33,7 +33,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setDeletePipelineResponse = (response?: object) => {
-    server.respondWith('DELETE', API_BASE_PATH, [
+    server.respondWith('DELETE', `${API_BASE_PATH}/:name`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
