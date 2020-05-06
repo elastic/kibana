@@ -9,11 +9,9 @@ import { EMSFileSource } from './ems_file_source';
 jest.mock('ui/new_platform');
 jest.mock('../../vector_layer', () => {});
 
-function makeEMSFileSource(tooltipProperties) {
-  const emsFileSource = new EMSFileSource({
-    tooltipProperties: tooltipProperties,
-  });
-  emsFileSource.getEMSFileLayer = () => {
+function makeEMSFileSource(tooltipProperties: string[]) {
+  const emsFileSource = new EMSFileSource({ tooltipProperties });
+  emsFileSource.getEMSFileLayer = async () => {
     return {
       getFieldsInLanguage() {
         return [

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, Fragment } from 'react';
 import {
@@ -11,19 +12,26 @@ import {
   EuiPopoverTitle,
   EuiButtonEmpty,
   EuiSelectable,
+  EuiSelectableOption,
   EuiButton,
   EuiSpacer,
   EuiTextAlign,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../src/plugins/kibana_react/public';
 
-const sortByLabel = (a, b) => {
-  return a.label.localeCompare(b.label);
+export type FieldProps = {
+  label: string;
+  type: string;
+  name: string;
 };
 
-function getOptions(fields, selectedFields) {
+function sortByLabel(a: EuiSelectableOption, b: EuiSelectableOption): number {
+  return a.label.localeCompare(b.label);
+}
+
+function getOptions(fields: FieldProps[], selectedFields: FieldProps[]): EuiSelectableOption[] {
   if (!fields) {
     return [];
   }
@@ -43,19 +51,33 @@ function getOptions(fields, selectedFields) {
           'type' in field ? (
             <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />
           ) : null,
-        label: 'label' in field ? field.label : field.name,
+        label: field.label,
       };
     })
     .sort(sortByLabel);
 }
 
-export class AddTooltipFieldPopover extends Component {
-  state = {
+interface Props {
+  onAdd: (checkedFieldNames: string[]) => void;
+  fields: FieldProps[];
+  selectedFields: FieldProps[];
+}
+
+interface State {
+  isPopoverOpen: boolean;
+  checkedFields: string[];
+  options?: EuiSelectableOption[];
+  prevFields?: FieldProps[];
+  prevSelectedFields?: FieldProps[];
+}
+
+export class AddTooltipFieldPopover extends Component<Props, State> {
+  state: State = {
     isPopoverOpen: false,
     checkedFields: [],
   };
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (
       nextProps.fields !== prevState.prevFields ||
       nextProps.selectedFields !== prevState.prevSelectedFields
@@ -83,13 +105,13 @@ export class AddTooltipFieldPopover extends Component {
     });
   };
 
-  _onSelect = options => {
-    const checkedFields = options
+  _onSelect = (options: EuiSelectableOption[]) => {
+    const checkedFields: string[] = options
       .filter(option => {
         return option.checked === 'on';
       })
       .map(option => {
-        return option.value;
+        return option.value as string;
       });
 
     this.setState({

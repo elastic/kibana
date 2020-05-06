@@ -8,24 +8,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { TooltipSelector } from './tooltip_selector';
+import { AbstractField } from '../../layers/fields/field';
+import { FIELD_ORIGIN } from '../../../common/constants';
 
-class MockField {
-  constructor({ name, label, type }) {
-    this._name = name;
+class MockField extends AbstractField {
+  private _label?: string;
+  constructor({ name, label }: { name: string; label?: string }) {
+    super({ fieldName: name, origin: FIELD_ORIGIN.SOURCE });
     this._label = label;
-    this._type = type;
-  }
-
-  getName() {
-    return this._name;
   }
 
   async getLabel() {
     return this._label || 'foobar_label';
-  }
-
-  async getDataType() {
-    return this._type || 'foobar_type';
   }
 }
 
@@ -36,11 +30,9 @@ const defaultProps = {
     new MockField({
       name: 'iso2',
       label: 'ISO 3166-1 alpha-2 code',
-      type: 'string',
     }),
     new MockField({
       name: 'iso3',
-      type: 'string',
     }),
   ],
 };
