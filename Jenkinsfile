@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library@use-ci-stats-v1'
+library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
