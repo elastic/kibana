@@ -22,7 +22,6 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
-import { licensingMock } from '../../../../../licensing/server/mocks';
 
 describe('utils', () => {
   beforeAll(() => {

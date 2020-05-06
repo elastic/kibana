@@ -44,18 +44,18 @@ export const initRoutes = (
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router);
+  createRulesRoute(router, ml);
   readRulesRoute(router);
-  updateRulesRoute(router);
-  patchRulesRoute(router);
+  updateRulesRoute(router, ml);
+  patchRulesRoute(router, ml);
   deleteRulesRoute(router);
   findRulesRoute(router);
 
   addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router);
-  createRulesBulkRoute(router);
-  updateRulesBulkRoute(router);
-  patchRulesBulkRoute(router);
+  createRulesBulkRoute(router, ml);
+  updateRulesBulkRoute(router, ml);
+  patchRulesBulkRoute(router, ml);
   deleteRulesBulkRoute(router);
 
   createTimelinesRoute(router, config, security);
