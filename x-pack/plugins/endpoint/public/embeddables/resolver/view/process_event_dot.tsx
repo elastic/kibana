@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, ReactNode } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -83,20 +83,25 @@ const subMenuAssets = {
   },
 };
 
-type ResolverSubmenuOptionList = Array<{
+type ResolverSubmenuOption = {
   optionTitle: string;
   action: () => unknown;
   prefix?: number | JSX.Element;
-}>;
+}
+type ResolverSubmenuOptionList = Array<ResolverSubmenuOption>;
 
 const OptionList = React.memo(
   ({ subMenuOptions }: { subMenuOptions: ResolverSubmenuOptionList }) => {
-    const selectableOptions = subMenuOptions.map((opt, index) => {
+    const selectableOptions = subMenuOptions.map((opt: ResolverSubmenuOption): {
+      label: string;
+      prepend?: ReactNode;
+    } => {
       return opt.prefix ? {
         label: opt.optionTitle,
         prepend: (<span>{opt.prefix}</span>),
       } : {
         label: opt.optionTitle,
+        prepend: (<span></span>),
       };
     })
     const [options, setOptions] = useState(selectableOptions);
