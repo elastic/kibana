@@ -185,18 +185,18 @@ describe('ServerMetricsCollector', () => {
     let metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
 
-    sendGet('/').end(() => null);
+    const res1 = sendGet('/').then(res => res);
     await waitForHits(1);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(1);
 
-    sendGet('/').end(() => null);
+    const res2 = sendGet('/').then(res => res);
     await waitForHits(2);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(2);
 
     waitSubject.next('go');
-    await delay(requestWaitDelay);
+    await Promise.all([res1, res2]);
     metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
   });
