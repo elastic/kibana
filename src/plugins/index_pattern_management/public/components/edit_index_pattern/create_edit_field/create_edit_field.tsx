@@ -23,11 +23,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, DocLinksStart } from 'src/core/public';
 import { ChromeDocTitle, NotificationsStart, IUiSettingsClient } from 'src/core/public';
-import {
-  IndexPattern,
-  IndexPatternField,
-  DataPublicPluginStart,
-} from '../../../../../../plugins/data/public';
+import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
 import { IndexHeader } from '../index_header';
 import { TAB_SCRIPTED_FIELDS, TAB_INDEXED_FIELDS } from '../constants';
 
@@ -40,6 +36,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
   fieldFormatEditors: any;
   services: {
     uiSettings: IUiSettingsClient;
+    dataStart: DataPublicPluginStart;
     docTitle: ChromeDocTitle;
     http: HttpStart;
     docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
@@ -68,10 +65,14 @@ export const CreateEditField = withRouter(
     const field =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)
-        : new IndexPatternField(indexPattern, {
-            scripted: true,
-            type: 'number',
-          });
+        : services.dataStart.indexPatterns.createField(
+            indexPattern,
+            {
+              scripted: true,
+              type: 'number',
+            },
+            false
+          );
 
     const url = `/patterns/${indexPattern.id}`;
 

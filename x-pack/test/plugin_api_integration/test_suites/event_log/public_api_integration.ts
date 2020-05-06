@@ -82,21 +82,15 @@ export default function({ getService }: FtrProviderContext) {
     it('should support sorting by event end', async () => {
       const id = uuid.v4();
 
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
-      // run one first to create the SO and avoid clashes
-      await logTestEvent(id, firstExpectedEvent);
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      const expectedEvents = await logFakeEvents(id, 6);
 
       await retry.try(async () => {
         const {
           body: { data: foundEvents },
         } = await findEvents(id, { sort_field: 'event.end', sort_order: 'desc' });
 
-        expect(foundEvents.length).to.be(6);
-        assertEventsFromApiMatchCreatedEvents(
-          foundEvents,
-          [firstExpectedEvent, ...expectedEvents].reverse()
-        );
+        expect(foundEvents.length).to.be(expectedEvents.length);
+        assertEventsFromApiMatchCreatedEvents(foundEvents, expectedEvents.reverse());
       });
     });
 
@@ -112,8 +106,7 @@ export default function({ getService }: FtrProviderContext) {
       const start = new Date().toISOString();
 
       // write the documents that we should be found in the date range searches
-      const expectedEvents = times(6, () => fakeEvent(id));
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      const expectedEvents = await logFakeEvents(id, 6);
 
       // get the end time for the date range search
       const end = new Date().toISOString();
@@ -176,7 +169,9 @@ export default function({ getService }: FtrProviderContext) {
   ) {
     try {
       foundEvents.forEach((foundEvent: IValidatedEvent, index: number) => {
-        expect(foundEvent!.event).to.eql(expectedEvents[index]!.event);
+        expect(omit(foundEvent!.event ?? {}, 'start', 'end', 'duration')).to.eql(
+          expectedEvents[index]!.event
+        );
         expect(omit(foundEvent!.kibana ?? {}, 'server_uuid')).to.eql(expectedEvents[index]!.kibana);
         expect(foundEvent!.message).to.eql(expectedEvents[index]!.message);
       });
@@ -216,5 +211,15 @@ export default function({ getService }: FtrProviderContext) {
       },
       overrides
     );
+  }
+
+  async function logFakeEvents(savedObjectId: string, eventsToLog: number): Promise<IEvent[]> {
+    const expectedEvents: IEvent[] = [];
+    for (let index = 0; index < eventsToLog; index++) {
+      const event = fakeEvent(savedObjectId);
+      await logTestEvent(savedObjectId, event);
+      expectedEvents.push(event);
+    }
+    return expectedEvents;
   }
 }

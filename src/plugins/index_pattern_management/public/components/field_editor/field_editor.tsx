@@ -52,14 +52,14 @@ import {
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
+  IndexPatternField,
+  FieldFormatInstanceType,
   IndexPattern,
   IFieldType,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { FieldFormatInstanceType } from '../../../../../plugins/data/common';
-import { Field } from '../../../../../plugins/data/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -108,7 +108,7 @@ interface InitialFieldTypeFormat extends FieldTypeFormat {
   defaultFieldFormat: FieldFormatInstanceType;
 }
 
-interface FieldClone extends Field {
+interface FieldClone extends IndexPatternField {
   format: any;
 }
 
@@ -133,7 +133,7 @@ export interface FieldEditorState {
 
 export interface FieldEdiorProps {
   indexPattern: IndexPattern;
-  field: Field;
+  field: IndexPatternField;
   helpers: {
     http: HttpStart;
     fieldFormatEditors: IndexPatternManagementStart['fieldFormatEditors'];
