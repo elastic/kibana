@@ -1,6 +1,7 @@
 {
   "include": [
     "./plugins/apm/**/*",
+    "./plugins/observability/**/*",
     "./typings/**/*"
   ],
   "exclude": [
