@@ -125,7 +125,7 @@ export const addTimelineToStore = ({
   ...timelineById,
   [id]: {
     ...timeline,
-    isLoading: timelineById[id]?.isLoading ?? timeline.isSaving,
+    isLoading: timelineById[id].isLoading,
   },
 });
 
@@ -147,10 +147,11 @@ interface AddNewTimelineParams {
   sort?: Sort;
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
+  timelineById: TimelineById;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
-export const getNewTimeline = ({
+export const addNewTimeline = ({
   columns,
   dataProviders = [],
   dateRange = { start: 0, end: 0 },
@@ -162,19 +163,27 @@ export const getNewTimeline = ({
   show = false,
   showCheckboxes = false,
   showRowRenderers = true,
-}: AddNewTimelineParams): TimelineModel => ({
-  id,
-  ...timelineDefaults,
-  columns,
-  dataProviders,
-  dateRange,
-  filters,
-  itemsPerPage,
-  kqlQuery,
-  sort,
-  show,
-  showCheckboxes,
-  showRowRenderers,
+  timelineById,
+}: AddNewTimelineParams): TimelineById => ({
+  ...timelineById,
+  [id]: {
+    id,
+    ...timelineDefaults,
+    columns,
+    dataProviders,
+    dateRange,
+    filters,
+    itemsPerPage,
+    kqlQuery,
+    sort,
+    show,
+    savedObjectId: null,
+    version: null,
+    isSaving: false,
+    isLoading: false,
+    showCheckboxes,
+    showRowRenderers,
+  },
 });
 
 interface PinTimelineEventParams {

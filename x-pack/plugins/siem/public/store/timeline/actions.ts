@@ -69,10 +69,6 @@ export const createTimeline = actionCreator<{
   showRowRenderers?: boolean;
 }>('CREATE_TIMELINE');
 
-export const getDraftTimeline = actionCreator<{ id: string }>('GET_DRAFT_TIMELINE');
-
-export const cleanDraftTimeline = actionCreator<{ id: string }>('CLEAN_DRAFT_TIMELINE');
-
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
 export const removeColumn = actionCreator<{

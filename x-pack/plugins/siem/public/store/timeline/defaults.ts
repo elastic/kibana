@@ -35,7 +35,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
   },
   loadingEventIds: [],
   title: '',
-  timelineType: TimelineType.draft,
+  timelineType: TimelineType.default,
   templateTimelineId: null,
   templateTimelineVersion: null,
   noteIds: [],

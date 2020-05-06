@@ -127,7 +127,6 @@ export const timelineSchema = gql`
 
   enum TimelineType {
     default
-    draft
     template
   }
 
