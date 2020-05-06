@@ -251,6 +251,10 @@ export const queryTimelineById = <TCache>({
   }
 };
 
+export const epicUpdateTimeline = ({ id, timeline }: UpdateTimeline) => [
+  dispatchAddTimeline({ id, timeline }),
+];
+
 export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeline => ({
   duplicate,
   id,

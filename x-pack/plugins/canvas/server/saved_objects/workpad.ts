@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { CANVAS_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../common/lib/constants';
 import { removeAttributesId } from './migrations/remove_attributes_id';
 
 export const workpadType: SavedObjectsType = {

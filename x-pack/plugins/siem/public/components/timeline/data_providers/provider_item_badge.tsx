@@ -5,14 +5,16 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../containers/source';
 
 import { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
-import { QueryOperator } from './data_provider';
+import { DataProvidersAnd, QueryOperator } from './data_provider';
+import { dragAndDropActions } from '../../../store/drag_and_drop';
 import { TimelineContext } from '../timeline_context';
 
 interface ProviderItemBadgeProps {
@@ -26,6 +28,7 @@ interface ProviderItemBadgeProps {
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
+  register?: DataProvidersAnd;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
@@ -44,6 +47,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     onDataProviderEdited,
     operator,
     providerId,
+    register,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
@@ -68,6 +72,31 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       toggleExcludedProvider();
       closePopover();
     }, [toggleExcludedProvider]);
+
+    const [providerRegistered, setProviderRegistered] = useState(false);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+      // optionally register the provider if provided
+      if (!providerRegistered && register != null) {
+        dispatch(dragAndDropActions.registerProvider({ provider: { ...register, and: [] } }));
+        setProviderRegistered(true);
+      }
+    }, [providerRegistered, dispatch, register, setProviderRegistered]);
+
+    const unRegisterProvider = useCallback(() => {
+      if (providerRegistered && register != null) {
+        dispatch(dragAndDropActions.unRegisterProvider({ id: register.id }));
+      }
+    }, [providerRegistered, dispatch, register]);
+
+    useEffect(
+      () => () => {
+        unRegisterProvider();
+      },
+      []
+    );
 
     return (
       <TimelineContext.Consumer>

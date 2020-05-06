@@ -114,6 +114,10 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     if (this.props.disableMsg) {
       return (
         <EuiFieldText
+          aria-label={intl.formatMessage({
+            id: 'inputControl.vis.listControl.selectTextPlaceholder',
+            defaultMessage: 'Select...',
+          })}
           placeholder={intl.formatMessage({
             id: 'inputControl.vis.listControl.selectTextPlaceholder',
             defaultMessage: 'Select...',
