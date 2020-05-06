@@ -14,13 +14,6 @@ export interface TestCase {
   reporter: string;
 }
 
-export interface Connector {
-  connectorName: string;
-  URL: string;
-  username: string;
-  password: string;
-}
-
 const caseTimeline: Timeline = {
   title: 'SIEM test',
   description: 'description',
@@ -33,11 +26,4 @@ export const case1: TestCase = {
   description: 'This is the case description',
   timeline: caseTimeline,
   reporter: 'elastic',
-};
-
-export const serviceNowConnector: Connector = {
-  connectorName: 'New connector',
-  URL: 'https://www.test.service-now.com',
-  username: 'Username Name',
-  password: 'password',
 };

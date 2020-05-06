@@ -62,7 +62,7 @@ const providersConfigSchema = schema.object(
           defaultMessage: 'Log in with Elasticsearch',
         }),
       }),
-      icon: schema.string({ defaultValue: 'logoElastic' }),
+      icon: schema.string({ defaultValue: 'logoElasticsearch' }),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {
@@ -78,7 +78,7 @@ const providersConfigSchema = schema.object(
           defaultMessage: 'Log in with Elasticsearch',
         }),
       }),
-      icon: schema.string({ defaultValue: 'logoElastic' }),
+      icon: schema.string({ defaultValue: 'logoElasticsearch' }),
       showInSelector: schema.boolean({
         defaultValue: true,
         validate: value => {

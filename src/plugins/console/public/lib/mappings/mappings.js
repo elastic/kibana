@@ -17,9 +17,9 @@
  * under the License.
  */
 
-const $ = require('jquery');
-const _ = require('lodash');
-const es = require('../es/es');
+import $ from 'jquery';
+import _ from 'lodash';
+import * as es from '../es/es';
 
 // NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
 // due to timing issues in our app.js tests.
@@ -32,7 +32,7 @@ let templates = [];
 
 const mappingObj = {};
 
-function expandAliases(indicesOrAliases) {
+export function expandAliases(indicesOrAliases) {
   // takes a list of indices or aliases or a string which may be either and returns a list of indices
   // returns a list for multiple values or a string for a single.
 
@@ -60,11 +60,11 @@ function expandAliases(indicesOrAliases) {
   return ret.length > 1 ? ret : ret[0];
 }
 
-function getTemplates() {
+export function getTemplates() {
   return [...templates];
 }
 
-function getFields(indices, types) {
+export function getFields(indices, types) {
   // get fields for indices and types. Both can be a list, a string or null (meaning all).
   let ret = [];
   indices = expandAliases(indices);
@@ -103,7 +103,7 @@ function getFields(indices, types) {
   });
 }
 
-function getTypes(indices) {
+export function getTypes(indices) {
   let ret = [];
   indices = expandAliases(indices);
   if (typeof indices === 'string') {
@@ -129,7 +129,7 @@ function getTypes(indices) {
   return _.uniq(ret);
 }
 
-function getIndices(includeAliases) {
+export function getIndices(includeAliases) {
   const ret = [];
   $.each(perIndexTypes, function(index) {
     ret.push(index);
@@ -200,7 +200,7 @@ function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
-function loadMappings(mappings) {
+export function loadMappings(mappings) {
   perIndexTypes = {};
 
   $.each(mappings, function(index, indexMapping) {
@@ -224,7 +224,7 @@ function loadMappings(mappings) {
   });
 }
 
-function loadAliases(aliases) {
+export function loadAliases(aliases) {
   perAliasIndexes = {};
   $.each(aliases || {}, function(index, omdexAliases) {
     // verify we have an index defined. useful when mapping loading is disabled
@@ -246,7 +246,7 @@ function loadAliases(aliases) {
   perAliasIndexes._all = getIndices(false);
 }
 
-function clear() {
+export function clear() {
   perIndexTypes = {};
   perAliasIndexes = {};
   templates = [];
@@ -285,7 +285,7 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 //      unchanged alone (both selected and unselected).
 //   3. Poll: Use saved. Fetch selected. Ignore unselected.
 
-function clearSubscriptions() {
+export function clearSubscriptions() {
   if (pollTimeoutId) {
     clearTimeout(pollTimeoutId);
   }
@@ -296,7 +296,7 @@ function clearSubscriptions() {
  * @param settings Settings A way to retrieve the current settings
  * @param settingsToRetrieve any
  */
-function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
+export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
   clearSubscriptions();
 
   const mappingPromise = retrieveSettings('fields', settingsToRetrieve);
@@ -341,16 +341,3 @@ function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
     }, POLL_INTERVAL);
   });
 }
-
-export default {
-  getFields,
-  getTemplates,
-  getIndices,
-  getTypes,
-  loadMappings,
-  loadAliases,
-  expandAliases,
-  clear,
-  retrieveAutoCompleteInfo,
-  clearSubscriptions,
-};

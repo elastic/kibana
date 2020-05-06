@@ -27,7 +27,7 @@ export class LegacyManagementAdapter {
       'management',
       {
         display: i18n.translate('management.displayName', {
-          defaultMessage: 'Management',
+          defaultMessage: 'Stack Management',
         }),
       },
       capabilities
