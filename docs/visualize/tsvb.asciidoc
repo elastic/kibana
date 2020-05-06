@@ -11,38 +11,29 @@ NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer 
 [[tsvb-visualization-types]]
 === Types of TSVB visualizations
 
-TSVB comes with these types of visualizations:
+TSVB comes with several types of visualizations that you can easily switch between.
 
-Time Series:: A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
+[cols="2*<"]
+|===
 
-[role="screenshot"]
-image:images/tsvb-screenshot.png["Time series visualization"]
+| *Time Series*
+ | A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
 
-Metric:: A metric that displays the latest number in a data series.
+| *Metric*
+ | A metric that displays the latest number in a data series.
 
-[role="screenshot"]
-image:images/tsvb-metric.png["Metric visualization"]
+| *Top N*
+ | A horizontal bar chart where the y-axis is based on a series of metrics, and the x-axis is the latest value in the series.
 
-Top N:: A horizontal bar chart where the y-axis is based on a series of metrics, and the x-axis is the latest value in the series.
+| *Gauge*
+ | A single value gauge visualization based on the latest value in a series.
 
-[role="screenshot"]
-image:images/tsvb-top-n.png["Top N visualization"]
+| *Markdown*
+ | Edit the data using using Markdown text and Mustache template syntax.
 
-Gauge:: A single value gauge visualization based on the latest value in a series.
-
-[role="screenshot"]
-image:images/tsvb-gauge.png["Gauge visualization"]
-
-Markdown:: Edit the data using using Markdown text and Mustache template syntax.
-
-[role="screenshot"]
-image:images/tsvb-markdown.png["Markdown visualization"]
-
-Table:: Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
-
-[role="screenshot"]
-image:images/tsvb-table.png["Table visualization"]
-
+| *Table*
+ | Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
+ 
 [float]
 [[create-tsvb-visualization]]
 === Create TSVB visualizations

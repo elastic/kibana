@@ -3,26 +3,50 @@
 
 [partintro]
 --
-_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to <<dashboards,dashboard>> for analysis.
+_Visualize_ enables you to create visualizations of the data from your {es} indices, which you can then add to <<dashboard,dashboards>> and <<canvas,Canvas>> for analysis.
 
 {kib} visualizations are based on {es} queries. By using a series of {es} {ref}/search-aggregations.html[aggregations] to extract and process your data, you can create visualizations that show you the trends, spikes, and dips you need to know about.
 
-With *Visualize*, you can:
+[float]
+[[visualize-create-tools]]
+== Visualize tools
 
-* Simply drag and drop data fields into Lens to get an immediate view of your data. Use the smart suggestions to see new ways of visualizing your data. Quickly switch between chart types and index patterns.
+[cols="50, 50"]
+|===
 
-* Classic chart.
+a| <<lens, *Lens*>>
 
-* TSVB.
+Simply drag and drop data fields into Lens to get an immediate view of your data. Use the smart suggestions to see new ways of visualizing your data. Quickly switch between chart types and index patterns.
 
-* Timelion.
+| <<most-frequent,*Classic visualizations*>>
 
-* Maps.
+Create classic visualizations with your Elasticsearch data, including charts, progress monitors, heat map, and more.
 
-* Dashboard tools.
+a| <<TSVB,*TSVB*>>
 
-* Vega.
+Combine an infinite number of aggregations to display complex time series data in a meaningful way with TSVB.
 
+| <<timelion,*Timelion*>>
+
+Create two-dimensional graphs with your time series data using Timelion and the Timelion-specific syntax.
+
+a| <<maps,*Elastic Maps*>>
+
+Use your geospatial data to create maps with multiple layers and indicies.
+
+| <<for-dashboard, *Dashboard tools*>>
+
+Build tools that enable you to interact with your dashboards.
+
+a| <<vega-graph,*Vega*>>
+
+Create custom visualizations with multiple data sources that are available from the Vega library.
+
+|
+
+
+
+|===
 
 To begin, open *Visualize*, then click *Create new visualization*.
 
@@ -63,7 +87,7 @@ dropdown.
 [float]
 [[save-visualize]]
 == Save visualizations
-To use your visualizations in <<dashboard, dashboards>>, you must save them.
+To use your visualizations in <<dashboard, dashboards>> and <<canvas,Canvas>>, you must save them.
 
 . From the {kib} toolbar, click *Save*.
 . Enter the visualization *Title* and optional *Description*, then *Save* the visualization.
@@ -72,7 +96,7 @@ To access the saved visualization, go to *Management > {kib} > Saved Objects*.
 
 [float]
 [[save-visualization-read-only-access]]
-==== Read only access
+=== Read only access
 When you have insufficient privileges to save visualizations, the following indicator is
 displayed and the *Save* button is not visible.
 
