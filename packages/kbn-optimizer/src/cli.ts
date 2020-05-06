@@ -82,9 +82,9 @@ run(
       throw createFlagError('expected --scan-dir to be a string');
     }
 
-    const reportStatsName = flags['report-stats'];
-    if (reportStatsName !== undefined && typeof reportStatsName !== 'string') {
-      throw createFlagError('expected --report-stats to be a string');
+    const reportStats = flags['report-stats'] ?? false;
+    if (typeof reportStats !== 'boolean') {
+      throw createFlagError('expected --report-stats to have no value');
     }
 
     const config = OptimizerConfig.create({
@@ -103,22 +103,32 @@ run(
 
     let update$ = runOptimizer(config);
 
-    if (reportStatsName) {
+    if (reportStats) {
       const reporter = CiStatsReporter.fromEnv(log);
 
       if (!reporter.isEnabled()) {
-        throw createFailError('Unable to initialize CiStatsReporter from env');
+        log.warning('Unable to initialize CiStatsReporter from env');
       }
 
-      update$ = update$.pipe(reportOptimizerStats(reporter, reportStatsName, config));
+      update$ = update$.pipe(reportOptimizerStats(reporter, config));
     }
 
     await update$.pipe(logOptimizerState(log, config)).toPromise();
   },
   {
     flags: {
-      boolean: ['core', 'watch', 'oss', 'examples', 'dist', 'cache', 'profile', 'inspect-workers'],
-      string: ['workers', 'scan-dir', 'report-stats'],
+      boolean: [
+        'core',
+        'watch',
+        'oss',
+        'examples',
+        'dist',
+        'cache',
+        'profile',
+        'inspect-workers',
+        'report-stats',
+      ],
+      string: ['workers', 'scan-dir'],
       default: {
         core: true,
         examples: true,
@@ -136,7 +146,7 @@ run(
         --dist             create bundles that are suitable for inclusion in the Kibana distributable
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)
         --no-inspect-workers  when inspecting the parent process, don't inspect the workers
-        --report-stats=[name] attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
+        --report-stats     attempt to report stats about this execution of the build to the kibana-ci-stats service using this name
       `,
     },
   }

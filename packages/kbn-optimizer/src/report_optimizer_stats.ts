@@ -24,11 +24,7 @@ import { OptimizerUpdate$ } from './run_optimizer';
 import { OptimizerState, OptimizerConfig } from './optimizer';
 import { pipeClosure } from './common';
 
-export function reportOptimizerStats(
-  reporter: CiStatsReporter,
-  name: string,
-  config: OptimizerConfig
-) {
+export function reportOptimizerStats(reporter: CiStatsReporter, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     let lastState: OptimizerState | undefined;
     return update$.pipe(
@@ -39,23 +35,18 @@ export function reportOptimizerStats(
         }
 
         if (n.kind === 'C' && lastState) {
-          await reporter.metrics([
-            {
-              name: '@kbn/optimizer build time',
-              subName: name,
-              value: lastState.durSec,
-            },
-            ...config.bundles.map(bundle => {
+          await reporter.metrics(
+            config.bundles.map(bundle => {
               // make the cache read from the cache file since it was likely updated by the worker
               bundle.cache.refresh();
 
               return {
-                name: `@kbn/optimizer bundle module count`,
-                subName: bundle.id,
+                group: `@kbn/optimizer bundle module count`,
+                id: bundle.id,
                 value: bundle.cache.getModuleCount() || 0,
               };
-            }),
-          ]);
+            })
+          );
         }
 
         return n;

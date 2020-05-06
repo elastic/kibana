@@ -88,8 +88,8 @@ export const CreateArchivesTask = {
         await Promise.all(
           files.map(async path => {
             return {
-              name: 'distributable size',
-              subName: Path.basename(path),
+              group: 'distributable size',
+              id: Path.basename(path),
               value: (await asyncStat(path)).size,
             };
           })
