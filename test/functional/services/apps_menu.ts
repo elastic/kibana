@@ -22,16 +22,34 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const find = getService('find');
 
   return new (class AppsMenu {
+    /**
+     * Close the collapsible nav
+     * TODO #64541 can replace with a data-test-subj
+     */
+    public async closeCollapsibleNav() {
+      const CLOSE_BUTTON = '[data-test-subj=collapsibleNav] > button';
+      if (await find.existsByCssSelector(CLOSE_BUTTON)) {
+        (await find.byCssSelector(CLOSE_BUTTON)).click();
+      }
+    }
+
+    public async openCollapsibleNav() {
+      if (!(await testSubjects.exists('collapsibleNav'))) {
+        await testSubjects.click('toggleNavButton');
+      }
+    }
+
     /**
      * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
-      const appMenu = await testSubjects.find('navDrawer');
+      await this.openCollapsibleNav();
+      const appMenu = await testSubjects.find('collapsibleNav');
       const $ = await appMenu.parseDomContent();
-
-      const links = $.findTestSubjects('navDrawerAppsMenuLink')
+      const links = $.findTestSubjects('collapsibleNavAppLink')
         .toArray()
         .map(link => {
           return {
@@ -40,6 +58,8 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
             disabled: $(link).attr('disabled') != null,
           };
         });
+
+      await this.closeCollapsibleNav();
 
       return links;
     }
@@ -63,14 +83,32 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     /**
      * Click the app link within the app menu that has the given name
      * @param name
+     * @param options.closeCollapsibleNav
+     * @param options.category - optional field to ensure that a link is clicked in a particular category
+     *                           helpful when there may be a recent link with the same name as an app
      */
-    public async clickLink(name: string) {
+    public async clickLink(
+      name: string,
+      {
+        closeCollapsibleNav = true,
+        category,
+      }: { closeCollapsibleNav?: boolean; category?: string } = {}
+    ) {
       try {
         log.debug(`click "${name}" app link`);
-        const container = await testSubjects.find('navDrawer');
-        // Text content is not visible or selectable (0px width) so we use an attr with th same value
-        const link = await container.findByCssSelector(`[aria-label='${name}']`);
+        await this.openCollapsibleNav();
+        let nav;
+        if (typeof category === 'string') {
+          nav = await testSubjects.find(`collapsibleNavGroup-${category}`);
+        } else {
+          nav = await testSubjects.find('collapsibleNav');
+        }
+        const link = await nav.findByPartialLinkText(name);
         await link.click();
+
+        if (closeCollapsibleNav) {
+          await this.closeCollapsibleNav();
+        }
       } finally {
         // Intentionally empty
       }

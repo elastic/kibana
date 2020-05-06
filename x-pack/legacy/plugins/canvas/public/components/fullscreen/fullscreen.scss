@@ -5,6 +5,8 @@ body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
   }
 
   // remove space for global nav elements
+  // TODO #64541
+  // Can delete this block
   .chrHeaderWrapper ~ .app-wrapper {
     // Override locked nav at all breakpoints
     left: 0 !important; // sass-lint:disable-line no-important

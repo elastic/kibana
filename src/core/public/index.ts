@@ -54,6 +54,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -355,4 +356,5 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };
