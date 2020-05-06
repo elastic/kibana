@@ -102,6 +102,9 @@ export class HomePublicPlugin
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
+        // Initially navigate to default app set by `kibana.defaultAppId`.
+        // This doesn't do anything as along as the default settings are kept.
+        kibanaLegacyStart.navigateToDefaultApp({ overwriteHash: false });
         const { renderApp } = await import('./application');
         return await renderApp(params.element);
       },

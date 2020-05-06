@@ -25,7 +25,8 @@ export function navigateToDefaultApp(
   forwards: ForwardDefinition[],
   application: ApplicationStart,
   basePath: IBasePath,
-  currentAppId: string | undefined
+  currentAppId: string | undefined,
+  overwriteHash: boolean
 ) {
   // navigate to the respective path in the legacy kibana plugin by default (for unmigrated plugins)
   let targetAppId = 'kibana';
@@ -48,7 +49,7 @@ export function navigateToDefaultApp(
     } else {
       application.navigateToApp(targetAppId, { path: targetAppPath });
     }
-  } else {
+  } else if (overwriteHash) {
     window.location.hash = targetAppPath;
   }
 }

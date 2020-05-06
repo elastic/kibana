@@ -204,13 +204,16 @@ export class KibanaLegacyPlugin {
        * Navigates to the app defined as kibana.defaultAppId.
        * This takes redirects into account and uses the right mechanism to navigate.
        */
-      navigateToDefaultApp: () => {
+      navigateToDefaultApp: (
+        { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
+      ) => {
         navigateToDefaultApp(
           this.initializerContext.config.get().defaultAppId,
           this.forwardDefinitions,
           application,
           basePath,
-          this.currentAppId
+          this.currentAppId,
+          overwriteHash
         );
       },
     };
