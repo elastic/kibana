@@ -13288,8 +13288,6 @@
     "xpack.siem.containers.anomalies.stackByJobId": "作业",
     "xpack.siem.containers.anomalies.title": "异常",
     "xpack.siem.containers.case.errorTitle": "提取数据时出错",
-    "xpack.siem.containers.case.pushToExterService": "已成功发送到 ServiceNow",
-    "xpack.siem.containers.case.tagFetchFailDescription": "无法提取标记",
     "xpack.siem.containers.detectionEngine.addRuleFailDescription": "无法添加规则",
     "xpack.siem.containers.detectionEngine.createPrePackagedRuleFailDescription": "无法安装 elastic 的预打包规则",
     "xpack.siem.containers.detectionEngine.createPrePackagedRuleSuccesDescription": "已安装 elastic 的预打包规则",
