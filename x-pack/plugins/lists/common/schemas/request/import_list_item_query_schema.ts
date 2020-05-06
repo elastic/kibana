@@ -9,9 +9,13 @@
 import * as t from 'io-ts';
 
 import { list_idOrUndefined, typeOrUndefined } from '../common/schemas';
+import { Identity, RequiredKeepUndefined } from '../../types';
 
 export const importListItemQuerySchema = t.exact(
-  t.type({ list_id: list_idOrUndefined, type: typeOrUndefined })
+  t.partial({ list_id: list_idOrUndefined, type: typeOrUndefined })
 );
 
-export type ImportListItemQuerySchema = t.TypeOf<typeof importListItemQuerySchema>;
+export type ImportListItemQuerySchemaPartial = Identity<t.TypeOf<typeof importListItemQuerySchema>>;
+export type ImportListItemQuerySchema = RequiredKeepUndefined<
+  t.TypeOf<typeof importListItemQuerySchema>
+>;
