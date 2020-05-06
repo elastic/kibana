@@ -19,6 +19,9 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { managementPluginMock } from '../../../plugins/management/public/mocks';
+import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -32,6 +35,10 @@ const createSetupContract = (): IndexPatternManagementSetup => ({
   list: {
     addListConfig: jest.fn(),
   } as any,
+  fieldFormatEditors: {
+    getAll: jest.fn(),
+    getById: jest.fn(),
+  } as any,
 });
 
 const createStartContract = (): IndexPatternManagementStart => ({
@@ -44,13 +51,22 @@ const createStartContract = (): IndexPatternManagementStart => ({
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
   } as any,
+  fieldFormatEditors: {
+    getAll: jest.fn(),
+    getById: jest.fn(),
+  } as any,
 });
 
 const createInstance = async () => {
   const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
 
-  const setup = plugin.setup(coreMock.createSetup());
-  const doStart = () => plugin.start(coreMock.createStart(), {});
+  const setup = plugin.setup(coreMock.createSetup(), {
+    management: managementPluginMock.createSetupContract(),
+  });
+  const doStart = () =>
+    plugin.start(coreMock.createStart(), {
+      data: dataPluginMock.createStartContract(),
+    });
 
   return {
     plugin,

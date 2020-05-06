@@ -29,11 +29,17 @@ import { IndexPattern } from '../../../../../../data/public';
 
 import { ExecuteScript } from '../../types';
 
+import { coreMock } from '../../../../../../../core/public/mocks';
+import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
+
 jest.mock('./test_script', () => ({
   TestScript: () => {
     return `<div>mockTestScript</div>`;
   },
 }));
+
+const { uiSettings } = coreMock.createStart();
+const { ui } = dataPluginMock.createStartContract();
 
 const indexPatternMock = {} as IndexPattern;
 
@@ -49,6 +55,8 @@ describe('ScriptingHelpFlyout', () => {
         onClose={() => {}}
         http={({} as unknown) as HttpStart}
         docLinksScriptedFields={{} as typeof docLinksScriptedFields}
+        uiSettings={uiSettings}
+        SearchBar={ui.SearchBar}
       />
     );
 
@@ -65,6 +73,8 @@ describe('ScriptingHelpFlyout', () => {
         onClose={() => {}}
         http={({} as unknown) as HttpStart}
         docLinksScriptedFields={{} as typeof docLinksScriptedFields}
+        uiSettings={uiSettings}
+        SearchBar={ui.SearchBar}
       />
     );
 

@@ -30,10 +30,28 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           },
           Object {
             "content": <TestScript
+              SearchBar={[MockFunction]}
               executeScript={[Function]}
               http={Object {}}
               indexPattern={Object {}}
               lang="painless"
+              uiSettings={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getSaved$": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "overrideLocalDefault": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
             />,
             "data-test-subj": "testTab",
             "id": "test",
@@ -76,10 +94,28 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
           },
           Object {
             "content": <TestScript
+              SearchBar={[MockFunction]}
               executeScript={[Function]}
               http={Object {}}
               indexPattern={Object {}}
               lang="painless"
+              uiSettings={
+                Object {
+                  "get": [MockFunction],
+                  "get$": [MockFunction],
+                  "getAll": [MockFunction],
+                  "getSaved$": [MockFunction],
+                  "getUpdate$": [MockFunction],
+                  "getUpdateErrors$": [MockFunction],
+                  "isCustom": [MockFunction],
+                  "isDeclared": [MockFunction],
+                  "isDefault": [MockFunction],
+                  "isOverridden": [MockFunction],
+                  "overrideLocalDefault": [MockFunction],
+                  "remove": [MockFunction],
+                  "set": [MockFunction],
+                }
+              }
             />,
             "data-test-subj": "testTab",
             "id": "test",

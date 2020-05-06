@@ -17,7 +17,9 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
       </h3>
       <p>
         <FormattedMessage
-          defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
+          defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as
+ a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values.
+ The following values can be accessed:"
           id="indexPatternManagement.urlTemplateLabel.fieldDetail"
           values={
             Object {
