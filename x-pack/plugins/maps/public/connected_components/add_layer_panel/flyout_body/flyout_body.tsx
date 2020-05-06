@@ -8,20 +8,17 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
-import { ImportEditor } from './import_editor';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { LayerWizard } from '../../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
+import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-interface Props {
+type Props = RenderWizardArguments & {
   importView: boolean;
-  isIndexingTriggered: boolean;
-  layerWizard: LayerWizard;
-  mapColors: string[];
+  layerWizard: LayerWizard | null;
   onClear: () => void;
-  onRemove: () => void;
   onWizardSelect: (layerWizard: LayerWizard) => void;
-  previewLayer: (layerDescriptor: LayerDescriptor, isIndexingSource: boolean) => void;
-}
+};
 
 export const FlyoutBody = (props: Props) => {
   function renderContent() {
@@ -41,15 +38,23 @@ export const FlyoutBody = (props: Props) => {
       </Fragment>
     );
 
+    const renderWizardArgs = {
+      previewLayer: props.previewLayer,
+      mapColors: props.mapColors,
+      isIndexingTriggered: props.isIndexingTriggered,
+      onRemove: props.onRemove,
+      onIndexReady: props.onIndexReady,
+      importSuccessHandler: props.importSuccessHandler,
+      importErrorHandler: props.importErrorHandler,
+    };
+
     if (props.importView) {
       return (
         <Fragment>
           {backButton}
-          <ImportEditor
-            previewLayer={props.previewLayer}
-            mapColors={props.mapColors}
-            onRemove={props.onRemove}
-          />
+          <EuiPanel style={{ position: 'relative' }}>
+            {uploadLayerWizardConfig.renderWizard(renderWizardArgs)}
+          </EuiPanel>
         </Fragment>
       );
     }
@@ -57,12 +62,7 @@ export const FlyoutBody = (props: Props) => {
     return (
       <Fragment>
         {backButton}
-        <EuiPanel>
-          {props.layerWizard.renderWizard({
-            previewLayer: props.previewLayer,
-            mapColors: props.mapColors,
-          })}
-        </EuiPanel>
+        <EuiPanel>{props.layerWizard.renderWizard(renderWizardArgs)}</EuiPanel>
       </Fragment>
     );
   }

@@ -17,7 +17,6 @@ interface Props {
   isIndexingReady: boolean;
   isIndexingSuccess: boolean;
   isIndexingTriggered: boolean;
-  mapColors: string[];
   previewLayer: (layerDescriptor: LayerDescriptor) => void;
   removeTransientLayer: () => void;
   resetIndexing: () => void;
@@ -58,7 +57,7 @@ export class AddLayerPanel extends Component<Props, State> {
     }
   }
 
-  _previewLayer = (layerDescriptor: LayerDescriptor, isIndexingSource: boolean) => {
+  _previewLayer = (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => {
     if (!this._isMounted) {
       return;
     }
@@ -138,10 +137,8 @@ export class AddLayerPanel extends Component<Props, State> {
 
         <FlyoutBody
           importView={this.state.importView}
-          isIndexingTriggered={this.props.isIndexingTriggered}
           layerWizard={this.state.layerWizard}
-          mapColors={this.props.mapColors}
-          onClear={this._clearLayerData}
+          onClear={() => this._clearLayerData({ keepSourceType: false })}
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
           onWizardSelect={this._onWizardSelect}
           previewLayer={this._previewLayer}

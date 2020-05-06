@@ -67,7 +67,7 @@ export function hideViewControl(): AnyAction;
 
 export function setHiddenLayers(hiddenLayerIds: string[]): AnyAction;
 
-export function addLayerWithoutDataSync(layerDescriptor: LayerDescriptor): AnyAction;
+export function addLayerWithoutDataSync(layerDescriptor: unknown): AnyAction;
 
 export function setMapSettings(settings: MapSettings): AnyAction;
 
@@ -90,10 +90,10 @@ export function toggleLayerVisible(layerId: string): AnyAction;
 
 export function clearTransientLayerStateAndCloseFlyout(): AnyAction;
 
-export function setTransientLayer(layerId: string): AnyAction;
+export function setTransientLayer(layerId: string | null): AnyAction;
 
 export function removeTransientLayer(): AnyAction;
 
 export function addLayer(layerDescriptor: LayerDescriptor): AnyAction;
 
-export function setSelectedLayer(layerId: string): AnyAction;
+export function setSelectedLayer(layerId: string | null): AnyAction;

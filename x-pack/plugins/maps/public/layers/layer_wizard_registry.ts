@@ -14,7 +14,7 @@ export type RenderWizardArguments = {
   // upload arguments
   isIndexingTriggered: boolean;
   onRemove: () => void;
-  onIndexReady: () => void;
+  onIndexReady: (indexReady: boolean) => void;
   importSuccessHandler: (indexResponses: unknown) => void;
   importErrorHandler: (indexResponses: unknown) => void;
 };

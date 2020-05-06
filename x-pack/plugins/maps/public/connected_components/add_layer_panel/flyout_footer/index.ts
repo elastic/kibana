@@ -13,9 +13,10 @@ import { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
+  const hasLayerSelected = !!selectedLayer;
   return {
-    hasLayerSelected: !!selectedLayer,
-    isLoading: selectedLayer && selectedLayer.isLayerLoading(),
+    hasLayerSelected,
+    isLoading: hasLayerSelected && selectedLayer.isLayerLoading(),
   };
 }
 

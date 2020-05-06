@@ -10,7 +10,6 @@ import { AddLayerPanel } from './view';
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
 import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
-import { getMapColors } from '../../selectors/map_selectors';
 import {
   setTransientLayer,
   addLayer,
@@ -24,7 +23,6 @@ function mapStateToProps(state: MapStoreState) {
   const indexingStage = getIndexingStage(state);
   return {
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    mapColors: getMapColors(state),
     isIndexingTriggered: indexingStage === INDEXING_STAGE.TRIGGERED,
     isIndexingSuccess: indexingStage === INDEXING_STAGE.SUCCESS,
     isIndexingReady: indexingStage === INDEXING_STAGE.READY,
