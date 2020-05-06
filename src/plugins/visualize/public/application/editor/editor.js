@@ -25,10 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { makeStateful, useVisualizeAppState, addEmbeddableToDashboardUrl } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
+
+import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { unhashUrl, removeQueryParam } from '../../../../kibana_utils/public';
@@ -38,9 +39,8 @@ import {
   subscribeWithScope,
   migrateLegacyQuery,
 } from '../../../../kibana_legacy/public';
-import { SavedObjectSaveModal, showSaveModal } from '../../../../saved_objects/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '../../../../saved_objects/public';
 import { esFilters, connectToQueryState, syncQueryStateWithUrl } from '../../../../data/public';
-import { DashboardConstants } from '../../../../dashboard/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -110,6 +110,11 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
+  const originatingApp = $route.current.params[EMBEDDABLE_ORIGINATING_APP_PARAM];
+  removeQueryParam(history, EMBEDDABLE_ORIGINATING_APP_PARAM);
+
+  $scope.getOriginatingApp = () => originatingApp;
+
   const visStateToEditorState = () => {
     const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
     return {
@@ -144,13 +149,58 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
   $scope.embeddableHandler = embeddableHandler;
 
   $scope.topNavMenu = [
+    ...($scope.getOriginatingApp() && savedVis.id
+      ? [
+          {
+            id: 'saveAndReturn',
+            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+              defaultMessage: 'Save and return',
+            }),
+            emphasize: true,
+            iconType: 'check',
+            description: i18n.translate(
+              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Finish editing visualization and return to the last app',
+              }
+            ),
+            testId: 'visualizesaveAndReturnButton',
+            disableButton() {
+              return Boolean($scope.dirty);
+            },
+            tooltip() {
+              if ($scope.dirty) {
+                return i18n.translate(
+                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before finishing',
+                  }
+                );
+              }
+            },
+            run: async () => {
+              const saveOptions = {
+                confirmOverwrite: false,
+                returnToOrigin: true,
+              };
+              return doSave(saveOptions);
+            },
+          },
+        ]
+      : []),
     ...(visualizeCapabilities.save
       ? [
           {
             id: 'save',
-            label: i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
-              defaultMessage: 'save',
-            }),
+            label:
+              savedVis.id && $scope.getOriginatingApp()
+                ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
+                    defaultMessage: 'save as',
+                  })
+                : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
+                    defaultMessage: 'save',
+                  }),
+            emphasize: !savedVis.id || !$scope.getOriginatingApp(),
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -175,6 +225,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                 isTitleDuplicateConfirmed,
                 onTitleDuplicate,
                 newDescription,
+                returnToOrigin,
               }) => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
@@ -184,6 +235,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
+                  returnToOrigin,
                 };
                 return doSave(saveOptions).then(response => {
                   // If the save wasn't successful, put the original values back.
@@ -194,23 +246,13 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                 });
               };
 
-              const confirmButtonLabel = $scope.isAddToDashMode() ? (
-                <FormattedMessage
-                  id="visualize.saveDialog.saveAndAddToDashboardButtonLabel"
-                  defaultMessage="Save and add to dashboard"
-                />
-              ) : null;
-
               const saveModal = (
-                <SavedObjectSaveModal
+                <SavedObjectSaveModalOrigin
+                  documentInfo={savedVis}
                   onSave={onSave}
+                  objectType={'visualization'}
                   onClose={() => {}}
-                  title={savedVis.title}
-                  showCopyOnSave={savedVis.id ? true : false}
-                  objectType="visualization"
-                  confirmButtonLabel={confirmButtonLabel}
-                  description={savedVis.description}
-                  showDescription={true}
+                  originatingApp={$scope.getOriginatingApp()}
                 />
               );
               showSaveModal(saveModal, I18nContext);
@@ -397,12 +439,6 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     $scope.searchSource = searchSource;
     $scope.refreshInterval = timefilter.getRefreshInterval();
     handleLinkedSearch(initialState.linked);
-
-    const addToDashMode =
-      $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
-    removeQueryParam(history, DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
-
-    $scope.isAddToDashMode = () => addToDashMode;
 
     $scope.showFilterBar = () => {
       return vis.type.options.showFilterBar;
@@ -604,6 +640,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
    */
   function doSave(saveOptions) {
     // vis.title was not bound and it's needed to reflect title into visState
+    const firstSave = !Boolean(savedVis.id);
     stateContainer.transitions.setVis({
       title: savedVis.title,
       type: savedVis.type || stateContainer.getState().vis.type,
@@ -631,15 +668,23 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
-            if ($scope.isAddToDashMode()) {
+            if ($scope.getOriginatingApp() && saveOptions.returnToOrigin) {
               const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(savedVis.id)}`;
+
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(appPath);
               setActiveUrl(appPath);
+              const lastAppType = $scope.getOriginatingApp();
+              let href = chrome.navLinks.get(lastAppType).url;
 
-              const lastDashboardUrl = chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardUrl = addEmbeddableToDashboardUrl(lastDashboardUrl, savedVis.id);
-              history.push(dashboardUrl);
+              // TODO: Remove this and use application.redirectTo after https://github.com/elastic/kibana/pull/63443
+              if (lastAppType === 'kibana:dashboard') {
+                const savedVisId = firstSave || savedVis.copyOnSave ? savedVis.id : '';
+                href = addEmbeddableToDashboardUrl(href, savedVisId);
+                history.push(href);
+              } else {
+                window.location.href = href;
+              }
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

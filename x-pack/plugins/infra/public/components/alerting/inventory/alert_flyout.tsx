@@ -33,6 +33,7 @@ export const AlertFlyout = (props: Props) => {
             metadata: { options: props.options, nodeType: props.nodeType, filter: props.filter },
             toastNotifications: services.notifications?.toasts,
             http: services.http,
+            capabilities: services.application.capabilities,
             docLinks: services.docLinks,
             actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
             alertTypeRegistry: triggersActionsUI.alertTypeRegistry,

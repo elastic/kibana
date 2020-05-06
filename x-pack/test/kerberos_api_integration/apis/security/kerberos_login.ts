@@ -100,9 +100,7 @@ export default function({ getService }: FtrProviderContext) {
       });
     });
 
-    // Preventing ES Snapshot to be promoted
-    // https://github.com/elastic/kibana/issues/65114
-    describe.skip('finishing SPNEGO', () => {
+    describe('finishing SPNEGO', () => {
       it('should properly set cookie and authenticate user', async () => {
         const response = await supertest
           .get('/internal/security/me')
@@ -120,13 +118,22 @@ export default function({ getService }: FtrProviderContext) {
         const sessionCookie = request.cookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
+        const isAnonymousAccessEnabled = (config.get(
+          'esTestCluster.serverArgs'
+        ) as string[]).some(setting => setting.startsWith('xpack.security.authc.anonymous'));
+
+        // `superuser_anonymous` role is derived from the enabled anonymous access.
+        const expectedUserRoles = isAnonymousAccessEnabled
+          ? ['kibana_admin', 'superuser_anonymous']
+          : ['kibana_admin'];
+
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200, {
             username: 'tester@TEST.ELASTIC.CO',
-            roles: ['kibana_admin'],
+            roles: expectedUserRoles,
             full_name: null,
             email: null,
             metadata: {

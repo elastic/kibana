@@ -13,6 +13,7 @@ import { useLink, useConfig } from '../hooks';
 import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from '../constants';
 
 interface Props {
+  showSettings?: boolean;
   section?: Section;
   children?: React.ReactNode;
 }
@@ -33,7 +34,11 @@ const Nav = styled.nav`
   }
 `;
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({
+  showSettings = true,
+  section,
+  children,
+}) => {
   const { epm, fleet } = useConfig();
 
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
@@ -109,14 +114,16 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
-                    <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.settingsButton"
-                      defaultMessage="Settings"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {showSettings ? (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
+                      <FormattedMessage
+                        id="xpack.ingestManager.appNavigation.settingsButton"
+                        defaultMessage="Settings"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
