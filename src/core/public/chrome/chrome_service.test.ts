@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 import React from 'react';
-
+import * as Rx from 'rxjs';
+import { take, toArray } from 'rxjs/operators';
+import { App } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { ChromeService } from './chrome_service';
-import { App } from '../application';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
+import { ChromeService } from './chrome_service';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -163,7 +162,7 @@ describe('start', () => {
   });
 
   describe('visibility', () => {
-    it('updates/emits the visibility', async () => {
+    it('emits false when no application is mounted', async () => {
       const { chrome, service } = await start();
       const promise = chrome
         .getIsVisible$()
@@ -177,33 +176,37 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
-          true,
           false,
-          true,
+          false,
+          false,
+          false,
         ]
       `);
     });
 
-    it('always emits false if embed query string is preset when set up', async () => {
+    it('emits false until manually overridden when in embed mode', async () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
+      const startDeps = defaultStartDeps([new FakeApp('alpha')]);
+      const { navigateToApp } = startDeps.application;
+      const { chrome, service } = await start({ startDeps });
 
-      const { chrome, service } = await start();
       const promise = chrome
         .getIsVisible$()
         .pipe(toArray())
         .toPromise();
 
+      await navigateToApp('alpha');
+
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
-      chrome.setIsVisible(true);
+
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
           false,
           false,
-          false,
+          true,
           false,
         ]
       `);
@@ -228,7 +231,7 @@ describe('start', () => {
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
+          false,
           true,
           false,
           true,
@@ -245,13 +248,13 @@ describe('start', () => {
         .pipe(toArray())
         .toPromise();
 
-      navigateToApp('alpha');
+      await navigateToApp('alpha');
       chrome.setIsVisible(true);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
         Array [
-          true,
+          false,
           false,
           false,
         ]

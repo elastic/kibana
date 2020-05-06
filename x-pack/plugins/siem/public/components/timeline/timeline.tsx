@@ -20,8 +20,6 @@ import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
 import {
-  OnChangeDataProviderKqlQuery,
-  OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
   OnDataProviderEdited,
@@ -99,8 +97,6 @@ export interface Props {
   kqlMode: KqlMode;
   kqlQueryExpression: string;
   loadingIndexName: boolean;
-  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
-  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onClose: () => void;
   onDataProviderEdited: OnDataProviderEdited;
@@ -132,8 +128,6 @@ export const TimelineComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   loadingIndexName,
-  onChangeDataProviderKqlQuery,
-  onChangeDroppableAndProvider,
   onChangeItemsPerPage,
   onClose,
   onDataProviderEdited,
@@ -185,8 +179,6 @@ export const TimelineComponent: React.FC<Props> = ({
             indexPattern={indexPattern}
             dataProviders={dataProviders}
             filterManager={filterManager}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onDataProviderEdited={onDataProviderEdited}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}

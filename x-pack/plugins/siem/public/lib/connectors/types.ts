@@ -10,8 +10,20 @@
 import { ActionType } from '../../../../triggers_actions_ui/public';
 import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
-export interface Connector extends ActionType {
+import { ActionType as ThirdPartySupportedActions, CaseField } from '../../../../case/common/api';
+
+export { ThirdPartyField as AllThirdPartyFields } from '../../../../case/common/api';
+
+export interface ThirdPartyField {
+  label: string;
+  validSourceFields: CaseField[];
+  defaultSourceField: CaseField;
+  defaultActionType: ThirdPartySupportedActions;
+}
+
+export interface ConnectorConfiguration extends ActionType {
   logo: string;
+  fields: Record<string, ThirdPartyField>;
 }
 
 export interface ActionConnector {
@@ -40,6 +52,7 @@ export interface ConnectorFlyoutFormProps<T> {
 
 export interface ConnectorFlyoutHOCProps<T> {
   ConnectorFormComponent: React.FC<ConnectorFlyoutFormProps<T>>;
+  connectorActionTypeId: string;
   configKeys?: string[];
   secretKeys?: string[];
 }

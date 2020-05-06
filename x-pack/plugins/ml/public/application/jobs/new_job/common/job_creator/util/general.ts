@@ -298,7 +298,7 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       });
     case JOB_TYPE.MULTI_METRIC:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.multiMetric', {
-        defaultMessage: 'Multi metric',
+        defaultMessage: 'Multi-metric',
       });
     case JOB_TYPE.POPULATION:
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.population', {

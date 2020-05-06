@@ -6,6 +6,8 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
+import { TimelineType } from '../../../common/types/timeline';
+
 import {
   IS_OPERATOR,
   DataProvider,
@@ -80,6 +82,9 @@ const timelineByIdMock: TimelineById = {
     kqlQuery: { filterQuery: null, filterQueryDraft: null },
     loadingEventIds: [],
     title: '',
+    timelineType: TimelineType.default,
+    templateTimelineVersion: null,
+    templateTimelineId: null,
     noteIds: [],
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
@@ -1110,6 +1115,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1202,6 +1210,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1400,6 +1411,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1492,6 +1506,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineId: null,
+          templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1679,6 +1696,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1755,6 +1775,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1855,6 +1878,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
