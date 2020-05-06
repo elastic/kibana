@@ -11,13 +11,11 @@ import { ConfigureCases } from './';
 import { TestProviders } from '../../../../mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import { Mapping } from './mapping';
 import {
   ActionsConnectorsContextProvider,
   ConnectorAddFlyout,
   ConnectorEditFlyout,
 } from '../../../../../../triggers_actions_ui/public';
-import { EuiBottomBar } from '@elastic/eui';
 
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
@@ -55,17 +53,11 @@ describe('ConfigureCases', () => {
     });
 
     test('it renders the Connectors', () => {
-      expect(wrapper.find('[data-test-subj="case-connectors-form-group"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="dropdown-connectors"]').exists()).toBeTruthy();
     });
 
     test('it renders the ClosureType', () => {
-      expect(
-        wrapper.find('[data-test-subj="case-closure-options-form-group"]').exists()
-      ).toBeTruthy();
-    });
-
-    test('it renders the Mapping', () => {
-      expect(wrapper.find('[data-test-subj="case-mapping-form-group"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="closure-options-radio-group"]').exists()).toBeTruthy();
     });
 
     test('it renders the ActionsConnectorsContextProvider', () => {
@@ -127,8 +119,12 @@ describe('ConfigureCases', () => {
       ).toBeTruthy();
     });
 
-    test('it disables the update connector button when the connectorId is invalid', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+    test('it hides the update connector button when the connectorId is invalid', () => {
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .exists()
+      ).toBeFalsy();
     });
   });
 
@@ -171,14 +167,6 @@ describe('ConfigureCases', () => {
       expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(false);
       expect(wrapper.find(ClosureOptions).prop('closureTypeSelected')).toBe('close-by-user');
 
-      // Mapping
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-      expect(wrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(false);
-      expect(wrapper.find(Mapping).prop('connectorActionTypeId')).toBe('.servicenow');
-      expect(wrapper.find(Mapping).prop('mapping')).toEqual(
-        connectors[0].config.casesConfiguration.mapping
-      );
-
       // Flyouts
       expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(false);
       expect(wrapper.find(ConnectorAddFlyout).prop('actionTypes')).toEqual([
@@ -200,28 +188,41 @@ describe('ConfigureCases', () => {
       ).toBeFalsy();
     });
 
-    test('it disables the mapping permanently', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-    });
-
-    test('it sets the mapping of a connector correctly', () => {
-      expect(wrapper.find(Mapping).prop('mapping')).toEqual(
-        connectors[0].config.casesConfiguration.mapping
-      );
-    });
-
-    // TODO: When mapping is enabled the test.todo should be implemented.
-    test.todo('it disables the update connector button when loading the configuration');
-
     test('it disables correctly when the user cannot crud', () => {
       const newWrapper = mount(<ConfigureCases userCanCrud={false} />, {
         wrappingComponent: TestProviders,
       });
 
-      expect(newWrapper.find(Connectors).prop('disabled')).toBe(true);
-      expect(newWrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-      expect(newWrapper.find(Mapping).prop('disabled')).toBe(true);
-      expect(newWrapper.find(Mapping).prop('updateConnectorDisabled')).toBe(true);
+      expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
+        true
+      );
+
+      expect(
+        newWrapper
+          .find('button[data-test-subj="case-configure-add-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        newWrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+
+      // Two closure options
+      expect(
+        newWrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        newWrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .at(1)
+          .prop('disabled')
+      ).toBe(true);
     });
   });
 
@@ -232,32 +233,6 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       jest.restoreAllMocks();
       jest.clearAllMocks();
-      useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
-      useConnectorsMock.mockImplementation(() => ({
-        ...useConnectorsResponse,
-        loading: true,
-      }));
-      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
-      useGetUrlSearchMock.mockImplementation(() => searchURL);
-      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-    });
-
-    test('it disables correctly Connector when loading connectors', () => {
-      expect(wrapper.find(Connectors).prop('disabled')).toBe(true);
-    });
-
-    test('it pass the correct value to isLoading attribute on Connector', () => {
-      expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
-    });
-
-    test('it disables correctly ClosureOptions when loading connectors', () => {
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
-    });
-
-    test('it disables the update connector button when loading the connectors', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
-    });
-    test('it disables the buttons of action bar when loading connectors', () => {
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         mapping: connectors[1].config.casesConfiguration.mapping,
@@ -270,22 +245,54 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
         },
       }));
+      useConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        loading: true,
+      }));
+      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+      useGetUrlSearchMock.mockImplementation(() => searchURL);
+      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    });
+
+    test('it disables correctly Connector when loading connectors', () => {
+      expect(
+        wrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')
+      ).toBeTruthy();
+    });
+
+    test('it pass the correct value to isLoading attribute on Connector', () => {
+      expect(wrapper.find(Connectors).prop('isLoading')).toBe(true);
+    });
+
+    test('it disables correctly ClosureOptions when loading connectors', () => {
+      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+    });
+
+    test('it hides the update connector button when loading the connectors', () => {
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
+    });
+
+    test('it disables the buttons of action bar when loading connectors', () => {
       const newWrapper = mount(<ConfigureCases userCanCrud />, {
         wrappingComponent: TestProviders,
       });
 
       expect(
         newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
+          .find('button[data-test-subj="case-configure-action-bottom-bar-cancel-button"]')
           .first()
-          .prop('isDisabled')
+          .prop('disabled')
       ).toBe(true);
 
       expect(
         newWrapper
-          .find('[data-test-subj="case-configure-action-bottom-bar-save-button"]')
+          .find('button[data-test-subj="case-configure-action-bottom-bar-save-button"]')
           .first()
-          .prop('isDisabled')
+          .prop('disabled')
       ).toBe(true);
     });
   });
@@ -297,6 +304,7 @@ describe('ConfigureCases', () => {
       jest.resetAllMocks();
       useCaseConfigureMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
+        connectorId: 'servicenow-1',
         persistLoading: true,
       }));
 
@@ -311,11 +319,27 @@ describe('ConfigureCases', () => {
     });
 
     test('it disables correctly ClosureOptions when saving configuration', () => {
-      expect(wrapper.find(ClosureOptions).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .first()
+          .prop('disabled')
+      ).toBe(true);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="closure-options-radio-group"] input')
+          .at(1)
+          .prop('disabled')
+      ).toBe(true);
     });
 
     test('it disables the update connector button when saving the configuration', () => {
-      expect(wrapper.find(Mapping).prop('disabled')).toBe(true);
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .prop('disabled')
+      ).toBe(true);
     });
 
     test('it disables the buttons of action bar when saving configuration', () => {
@@ -384,6 +408,32 @@ describe('ConfigureCases', () => {
           .first()
           .prop('isLoading')
       ).toBe(true);
+    });
+  });
+
+  describe('loading configuration', () => {
+    let wrapper: ReactWrapper;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        loading: true,
+      }));
+      useConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+      }));
+      useKibanaMock.mockImplementation(() => kibanaMockImplementationArgs);
+      useGetUrlSearchMock.mockImplementation(() => searchURL);
+      wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
+    });
+
+    test('it hides the update connector button when loading the configuration', () => {
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .exists()
+      ).toBeFalsy();
     });
   });
 
@@ -500,18 +550,22 @@ describe('ConfigureCases', () => {
       wrapper.update();
 
       expect(wrapper.find(ConnectorAddFlyout).prop('addFlyoutVisible')).toBe(true);
-      expect(wrapper.find(EuiBottomBar).exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeFalsy();
     });
 
     test('it show the edit flyout when pressing the update connector button', () => {
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
       wrapper
-        .find('button[data-test-subj="case-mapping-update-connector-button"]')
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .simulate('click');
       wrapper.update();
 
       expect(wrapper.find(ConnectorEditFlyout).prop('editFlyoutVisible')).toBe(true);
-      expect(wrapper.find(EuiBottomBar).exists()).toBeFalsy();
+      expect(
+        wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
+      ).toBeFalsy();
     });
 
     test('it tracks the changes successfully', () => {
@@ -681,7 +735,7 @@ describe('ConfigureCases', () => {
 
       // Press update connector button
       wrapper
-        .find('button[data-test-subj="case-mapping-update-connector-button"]')
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .simulate('click');
       wrapper.update();
 
@@ -778,29 +832,29 @@ describe('ConfigureCases', () => {
       ).toBeFalsy();
     });
 
-    test('it sets the mapping correctly when changing connector types', () => {
-      useCaseConfigureMock.mockImplementation(() => ({
-        ...useCaseConfigureResponse,
-        mapping: connectors[2].config.casesConfiguration.mapping,
-        closureType: 'close-by-user',
-        connectorId: 'jira-1',
-        connectorName: 'unchanged',
-        currentConfiguration: {
-          connectorName: 'unchanged',
+    test('the text of the update button is changed successfully', () => {
+      useCaseConfigureMock
+        .mockImplementationOnce(() => ({
+          ...useCaseConfigureResponse,
           connectorId: 'servicenow-1',
-          closureType: 'close-by-user',
-        },
-        persistLoading: false,
-      }));
+        }))
+        .mockImplementation(() => ({
+          ...useCaseConfigureResponse,
+          connectorId: 'servicenow-2',
+        }));
 
       const wrapper = mount(<ConfigureCases userCanCrud />, { wrappingComponent: TestProviders });
-      expect(
-        wrapper.find('button[data-test-subj="case-configure-third-party-select-title"]').text()
-      ).toBe('Summary');
-    });
 
-    // TODO: When mapping is enabled the test.todo should be implemented.
-    test.todo('the mapping is changed successfully when changing the third party');
-    test.todo('the mapping is changed successfully when changing the action type');
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+          .text()
+      ).toBe('Update My Connector 2');
+    });
   });
 });

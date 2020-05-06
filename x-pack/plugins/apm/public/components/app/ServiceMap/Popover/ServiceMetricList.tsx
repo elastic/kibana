@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
@@ -29,10 +24,6 @@ function LoadingSpinner() {
     </EuiFlexGroup>
   );
 }
-
-const BadgeRow = styled(EuiFlexItem)`
-  padding-bottom: ${lightTheme.gutterTypes.gutterSmall};
-`;
 
 export const ItemRow = styled('tr')`
   line-height: 2;
@@ -57,7 +48,6 @@ export function ServiceMetricList({
   avgErrorsPerMinute,
   avgCpuUsage,
   avgMemoryUsage,
-  numInstances,
   isLoading
 }: ServiceMetricListProps) {
   const listItems = [
@@ -110,39 +100,22 @@ export function ServiceMetricList({
         : null
     }
   ];
-  const showBadgeRow = numInstances > 1;
 
   return isLoading ? (
     <LoadingSpinner />
   ) : (
-    <>
-      {showBadgeRow && (
-        <BadgeRow>
-          <EuiFlexGroup gutterSize="none">
-            {numInstances > 1 && (
-              <EuiBadge iconType="apps" color="hollow">
-                {i18n.translate('xpack.apm.serviceMap.numInstancesMetric', {
-                  values: { numInstances },
-                  defaultMessage: '{numInstances} instances'
-                })}
-              </EuiBadge>
-            )}
-          </EuiFlexGroup>
-        </BadgeRow>
-      )}
-      <table>
-        <tbody>
-          {listItems.map(
-            ({ title, description }) =>
-              description && (
-                <ItemRow key={title}>
-                  <ItemTitle>{title}</ItemTitle>
-                  <ItemDescription>{description}</ItemDescription>
-                </ItemRow>
-              )
-          )}
-        </tbody>
-      </table>
-    </>
+    <table>
+      <tbody>
+        {listItems.map(
+          ({ title, description }) =>
+            description && (
+              <ItemRow key={title}>
+                <ItemTitle>{title}</ItemTitle>
+                <ItemDescription>{description}</ItemDescription>
+              </ItemRow>
+            )
+        )}
+      </tbody>
+    </table>
   );
 }
