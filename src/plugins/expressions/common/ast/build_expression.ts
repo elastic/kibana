@@ -27,6 +27,11 @@ export function isExpressionBuilder(arg: any): arg is ExpressionAstExpressionBui
   return arg?.type === 'expression_builder';
 }
 
+/** @internal */
+export function isExpressionAst(arg: any): arg is ExpressionAstExpression {
+  return arg?.type === 'expression';
+}
+
 export interface ExpressionAstExpressionBuilder {
   /**
    * Used to identify expression builder objects.
@@ -110,9 +115,9 @@ export function buildExpression(
       return fns.reduce((found, currFn) => {
         Object.values(currFn.arguments).forEach(values => {
           values.forEach(value => {
-            if (typeof value === 'object' && value.chain.length > 0) {
+            if (isExpressionBuilder(value)) {
               // `value` is a subexpression, recurse and continue searching
-              found = found.concat(buildExpression(value).findFunction(fnName));
+              found = found.concat(value.findFunction(fnName));
             }
           });
         });

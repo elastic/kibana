@@ -18,7 +18,7 @@
  */
 
 import { ExpressionAstExpression } from './types';
-import { buildExpression } from './build_expression';
+import { buildExpression, isExpressionBuilder } from './build_expression';
 import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_function';
 import { format } from './format';
 
@@ -32,6 +32,7 @@ describe('buildExpression()', () => {
       chain: [
         {
           type: 'function',
+          function: 'foo',
           arguments: {
             bar: ['baz'],
             subexp: [
@@ -49,7 +50,6 @@ describe('buildExpression()', () => {
               },
             ],
           },
-          function: 'foo',
         },
       ],
     };
@@ -57,8 +57,25 @@ describe('buildExpression()', () => {
   });
 
   test('accepts an expression AST as input', () => {
+    ast = {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'foo',
+          arguments: {
+            bar: ['baz'],
+          },
+        },
+      ],
+    };
     const exp = buildExpression(ast);
     expect(exp.toAst()).toEqual(ast);
+  });
+
+  test('converts subexpressions in provided AST to expression builder instances', () => {
+    const exp = buildExpression(ast);
+    expect(isExpressionBuilder(exp.functions[0].getArgument('subexp')![0])).toBe(true);
   });
 
   test('accepts an expresssion string as input', () => {
@@ -298,6 +315,17 @@ describe('buildExpression()', () => {
         | bar a=1 a=2 b=3
         | baz sub={bar a=1 a=2 sub={bar a=1 a=2 b=3} b=3}"
       `);
+    });
+
+    test('returns any subexpressions as expression builder instances', () => {
+      const exp = buildExpression(
+        `miss | miss sub={miss} | miss sub={hit sub={miss sub={hit sub={hit}}}} sub={miss}`
+      );
+      const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('hit');
+      const subexpressionArgs = fns.map(fn =>
+        fn.getArgument('sub')?.map(arg => isExpressionBuilder(arg))
+      );
+      expect(subexpressionArgs).toEqual([undefined, [true], [true]]);
     });
   });
 });

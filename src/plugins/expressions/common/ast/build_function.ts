@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { ExpressionAstArgument, ExpressionAstFunction } from './types';
+import { ExpressionAstFunction } from './types';
 import {
   ExpressionFunctionDefinition,
   ExpressionFunctionDefinitions,
 } from '../expression_functions/types';
-import { ExpressionAstExpressionBuilder, isExpressionBuilder } from './build_expression';
+import {
+  buildExpression,
+  ExpressionAstExpressionBuilder,
+  isExpressionBuilder,
+  isExpressionAst,
+} from './build_expression';
 import { format } from './format';
 
 // Infers the types from an ExpressionFunctionDefinition.
@@ -51,6 +56,12 @@ type OptionalKeys<T> = {
   [K in keyof T]-?: {} extends Pick<T, K> ? (K extends string ? K : never) : never;
 }[keyof T];
 
+type ExpressionAstFunctionBuilderArgument =
+  | string
+  | number
+  | boolean
+  | ExpressionAstExpressionBuilder;
+
 export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
   /**
    * Used to identify expression function builder objects.
@@ -61,9 +72,12 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    */
   name: Fn;
   /**
-   * AST representation of all args currently added to the function.
+   * Object of all args currently added to the function. This is
+   * structured similarly to `ExpressionAstFunction['arguments']`,
+   * however any subexpressions are returned as expression builder
+   * instances instead of expression ASTs.
    */
-  arguments: ExpressionAstFunction['arguments'];
+  arguments: Record<string, ExpressionAstFunctionBuilderArgument[]>;
   /**
    * Adds an additional argument to the function. For multi-args,
    * this should be called once for each new arg. Note that TS
@@ -77,18 +91,20 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    */
   addArgument: <A extends FunctionArgName<Fn>>(
     name: A,
-    // TODO: Try to find a way to enforce multi-args in TS.
     value: FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder
   ) => this;
   /**
    * Retrieves an existing argument by name.
    * Useful when you want to retrieve the current array of args and add
-   * something to it before calling `replaceArgument`.
+   * something to it before calling `replaceArgument`. Any subexpression
+   * arguments will be returned as expression builder instances.
    *
    * @param name The name of the argument to retrieve.
-   * @return `ExpressionAstArgument[]`
+   * @return `ExpressionAstFunctionBuilderArgument[]`
    */
-  getArgument: <A extends FunctionArgName<Fn>>(name: A) => ExpressionAstArgument[] | undefined;
+  getArgument: <A extends FunctionArgName<Fn>>(
+    name: A
+  ) => ExpressionAstFunctionBuilderArgument[] | undefined;
   /**
    * Overwrites an existing argument with a new value.
    * In order to support multi-args, the value given must always be
@@ -158,13 +174,13 @@ export function buildExpressionFunction<F extends string>(
   const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {
     if (Array.isArray(value)) {
       acc[key] = value.map(v => {
-        return isExpressionBuilder(v) ? v.toAst() : v;
+        return isExpressionAst(v) ? buildExpression(v) : v;
       });
     } else {
-      acc[key] = isExpressionBuilder(value) ? [value.toAst()] : [value];
+      acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
     }
     return acc;
-  }, initialArgs as ExpressionAstFunction['arguments']);
+  }, initialArgs as Record<string, ExpressionAstFunctionBuilderArgument[]>);
 
   return {
     type: 'expression_function_builder',
@@ -175,7 +191,7 @@ export function buildExpressionFunction<F extends string>(
       if (!args.hasOwnProperty(key)) {
         args[key] = [];
       }
-      args[key].push(isExpressionBuilder(value) ? value.toAst() : value);
+      args[key].push(value);
       return this;
     },
 
@@ -207,10 +223,16 @@ export function buildExpressionFunction<F extends string>(
     },
 
     toAst() {
+      const ast: ExpressionAstFunction['arguments'] = {};
       return {
         type: 'function',
         function: fnName,
-        arguments: args,
+        arguments: Object.entries(args).reduce((acc, [key, values]) => {
+          acc[key] = values.map(val => {
+            return isExpressionBuilder(val) ? val.toAst() : val;
+          });
+          return acc;
+        }, ast),
       };
     },
 
