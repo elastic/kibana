@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { InfraWaffleMapDataFormat } from '../../lib/lib';
+import { InfraWaffleMapDataFormat } from './types';
 import { createBytesFormatter } from './bytes';
+
 describe('createDataFormatter', () => {
   it('should format bytes as bytesDecimal', () => {
     const formatter = createBytesFormatter(InfraWaffleMapDataFormat.bytesDecimal);
