@@ -62,7 +62,7 @@ export function EditorFrame(props: EditorFrameProps) {
   // Initialize current datasource and all active datasources
   useEffect(() => {
     // prevents executing dispatch on unmounted component
-    let isUnmounted = true;
+    let isUnmounted = false;
     if (!allLoaded) {
       Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
         if (
