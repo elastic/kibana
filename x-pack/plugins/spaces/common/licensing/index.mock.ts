@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { initEnterSpaceView } from './enter_space';
+import { SpacesLicense } from '.';
+
+export const licenseMock = {
+  create: (): jest.Mocked<SpacesLicense> => ({
+    isEnabled: jest.fn().mockReturnValue(true),
+  }),
+};
