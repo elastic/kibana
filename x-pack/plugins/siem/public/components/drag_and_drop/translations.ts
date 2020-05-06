@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_TO_TIMELINE = i18n.translate('xpack.siem.dragAndDrop.addToTimeline', {
+  defaultMessage: 'Add to timeline investigation',
+});
+
 export const COPY_TO_CLIPBOARD = i18n.translate('xpack.siem.dragAndDrop.copyToClipboardTooltip', {
   defaultMessage: 'Copy to Clipboard',
 });

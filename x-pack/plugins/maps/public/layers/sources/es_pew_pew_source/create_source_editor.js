@@ -14,10 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFormRow, EuiCallOut } from '@elastic/eui';
-import {
-  AGGREGATABLE_GEO_FIELD_TYPES,
-  getAggregatableGeoFields,
-} from '../../../index_pattern_util';
+import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 
 export class CreateSourceEditor extends Component {
   static propTypes = {
@@ -86,7 +83,7 @@ export class CreateSourceEditor extends Component {
       return;
     }
 
-    const geoFields = getAggregatableGeoFields(indexPattern.fields);
+    const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
     this.setState({
       isLoadingIndexPattern: false,
       indexPattern: indexPattern,
@@ -128,7 +125,7 @@ export class CreateSourceEditor extends Component {
     }
 
     const fields = this.state.indexPattern
-      ? getAggregatableGeoFields(this.state.indexPattern.fields)
+      ? getFieldsWithGeoTileAgg(this.state.indexPattern.fields)
       : undefined;
     return (
       <Fragment>
