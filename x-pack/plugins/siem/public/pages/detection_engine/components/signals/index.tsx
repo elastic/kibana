@@ -8,7 +8,6 @@ import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import { Dispatch } from 'redux';
 
 import { Filter, esQuery } from '../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../containers/detection_engine/rules/fetch_index_patterns';
@@ -45,7 +44,6 @@ import {
   UpdateSignalsStatusCallback,
   UpdateSignalsStatusProps,
 } from './types';
-import { dispatchUpdateTimeline } from '../../../../components/open_timeline/helpers';
 
 export const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 
@@ -66,6 +64,7 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
+  createTimeline,
   defaultFilters,
   from,
   globalFilters,
@@ -79,7 +78,6 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
   setEventsLoading,
   signalsIndex,
   to,
-  updateTimeline,
   updateTimelineIsLoading,
 }) => {
   const [selectAll, setSelectAll] = useState(false);
@@ -114,22 +112,13 @@ export const SignalsTableComponent: React.FC<SignalsTableComponentProps> = ({
 
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
-      updateTimeline({
-        duplicate: true,
-        from: fromTimeline,
+    ({ timeline }: CreateTimelineProps) =>
+      createTimeline({
         id: 'timeline-1',
-        notes: [],
-        timeline: {
-          ...timeline,
-          show: true,
-        },
-        to: toTimeline,
-        ruleNote,
-      })();
-    },
-    [updateTimeline, updateTimelineIsLoading]
+        ...timeline,
+        show: true,
+      }),
+    [createTimeline]
   );
 
   const setEventsLoadingCallback = useCallback(
@@ -333,37 +322,18 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
-  setEventsLoading: ({
-    id,
-    eventIds,
-    isLoading,
-  }: {
-    id: string;
-    eventIds: string[];
-    isLoading: boolean;
-  }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
-  setEventsDeleted: ({
-    id,
-    eventIds,
-    isDeleted,
-  }: {
-    id: string;
-    eventIds: string[];
-    isDeleted: boolean;
-  }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-  updateTimeline: dispatchUpdateTimeline(dispatch),
-});
+const mapDispatchToProps = {
+  clearSelected: timelineActions.clearSelected,
+  setEventsLoading: timelineActions.setEventsLoading,
+  clearEventsLoading: timelineActions.clearEventsLoading,
+  setEventsDeleted: timelineActions.setEventsDeleted,
+  clearEventsDeleted: timelineActions.clearEventsDeleted,
+  updateTimelineIsLoading: timelineActions.updateIsLoading,
+  createTimeline: timelineActions.createTimeline,
+};
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
+export type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export const SignalsTable = connector(React.memo(SignalsTableComponent));

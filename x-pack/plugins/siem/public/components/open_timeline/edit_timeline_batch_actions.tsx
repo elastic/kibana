@@ -20,7 +20,7 @@ const getExportedIds = (selectedTimelines: OpenTimelineResult[]) => {
   );
 };
 
-export const useEditTimelinBatchActions = ({
+export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
   tableRef,

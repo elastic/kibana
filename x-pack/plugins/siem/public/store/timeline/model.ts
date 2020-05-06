@@ -80,7 +80,7 @@ export interface TimelineModel {
   };
   /** Title */
   title: string;
-  /** timelineTypes: default | template */
+  /** timelineType: default | template */
   timelineType: TimelineTypeLiteralWithNull;
   /** an unique id for template timeline */
   templateTimelineId: string | null;
@@ -152,6 +152,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isLoading'
     | 'savedObjectId'
     | 'version'
+    | 'timelineType'
   >
 >;
 
