@@ -151,43 +151,47 @@ interface ClusterState {
 }
 
 export async function getIngestSolutions(callCluster: APICaller) {
-  const index = INGEST_SOLUTIONS.map(({ pattern }) => pattern);
-  const [state, indexStats]: [ClusterState, IndexStats] = await Promise.all([
-    // GET _cluster/state/metadata/<index>?filter_path=metadata.indices.*.version
-    callCluster<ClusterState>('cluster.state', {
-      index,
-      metric: 'metadata',
-      filterPath: [
-        // The payload is huge and we are only after the name (no other useful stuff so far)
-        'metadata.indices.*.version',
-        // Does it have `ecs.version` in the mappings?
-        'metadata.indices.*.mappings._doc.properties.ecs.properties.version.type',
-      ],
-    }),
-    // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
-    callCluster<IndexStats>('indices.stats', {
-      index,
-      level: 'indices',
-      metric: ['docs', 'store'],
-      filterPath: ['indices.*.total'],
-    }),
-  ]);
+  try {
+    const index = INGEST_SOLUTIONS.map(({ pattern }) => pattern);
+    const [state, indexStats]: [ClusterState, IndexStats] = await Promise.all([
+      // GET _cluster/state/metadata/<index>?filter_path=metadata.indices.*.version
+      callCluster<ClusterState>('cluster.state', {
+        index,
+        metric: 'metadata',
+        filterPath: [
+          // The payload is huge and we are only after the name (no other useful stuff so far)
+          'metadata.indices.*.version',
+          // Does it have `ecs.version` in the mappings?
+          'metadata.indices.*.mappings._doc.properties.ecs.properties.version.type',
+        ],
+      }),
+      // GET <index>/_stats/docs,store?level=indices&filter_path=indices.*.total
+      callCluster<IndexStats>('indices.stats', {
+        index,
+        level: 'indices',
+        metric: ['docs', 'store'],
+        filterPath: ['indices.*.total'],
+      }),
+    ]);
 
-  const stateIndices = state?.metadata?.indices || {};
-  const indexNames = Object.keys(stateIndices);
-  const indices = indexNames.map(name => {
-    const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
+    const stateIndices = state?.metadata?.indices || {};
+    const indexNames = Object.keys(stateIndices);
+    const indices = indexNames.map(name => {
+      const isECS = !!stateIndices[name]?.mappings?._doc?.properties.ecs?.properties.version?.type;
 
-    const stats = (indexStats?.indices || {})[name];
-    if (stats) {
-      return {
-        name,
-        isECS,
-        docCount: stats.total?.docs?.count,
-        sizeInBytes: stats.total?.store?.size_in_bytes,
-      };
-    }
-    return { name, isECS };
-  });
-  return buildIngestSolutionsPayload(indices);
+      const stats = (indexStats?.indices || {})[name];
+      if (stats) {
+        return {
+          name,
+          isECS,
+          docCount: stats.total?.docs?.count,
+          sizeInBytes: stats.total?.store?.size_in_bytes,
+        };
+      }
+      return { name, isECS };
+    });
+    return buildIngestSolutionsPayload(indices);
+  } catch (e) {
+    return {};
+  }
 }
