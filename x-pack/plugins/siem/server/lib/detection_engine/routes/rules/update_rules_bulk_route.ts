@@ -36,11 +36,10 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       const alertsClient = context.alerting?.getAlertsClient();
-      const actionsClient = context.actions?.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem?.getSiemClient();
 
-      if (!siemClient || !actionsClient || !alertsClient) {
+      if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -88,7 +87,6 @@ export const updateRulesBulkRoute = (router: IRouter) => {
 
             const rule = await updateRules({
               alertsClient,
-              actionsClient,
               anomalyThreshold,
               description,
               enabled,

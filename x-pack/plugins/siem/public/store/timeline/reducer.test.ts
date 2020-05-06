@@ -6,6 +6,8 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
+import { TimelineType } from '../../../common/types/timeline';
+
 import {
   IS_OPERATOR,
   DataProvider,
@@ -21,10 +23,10 @@ import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
 import {
-  addNewTimeline,
   addTimelineProvider,
   addTimelineToStore,
   applyDeltaToTimelineColumnWidth,
+  getNewTimeline,
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
@@ -80,6 +82,9 @@ const timelineByIdMock: TimelineById = {
     kqlQuery: { filterQuery: null, filterQueryDraft: null },
     loadingEventIds: [],
     title: '',
+    timelineType: TimelineType.default,
+    templateTimelineVersion: null,
+    templateTimelineId: null,
     noteIds: [],
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
@@ -127,41 +132,32 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#addNewTimeline', () => {
+  describe('#getNewTimeline', () => {
     test('should return a new reference and not the same reference', () => {
-      const update = addNewTimeline({
+      const update = getNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        timelineById: timelineByIdMock,
       });
-      expect(update).not.toBe(timelineByIdMock);
+      expect(update).not.toBe(timelineByIdMock.foo);
     });
 
-    test('should add a new timeline', () => {
-      const update = addNewTimeline({
+    test('should return a new timeline', () => {
+      const update = getNewTimeline({
         id: 'bar',
         columns: timelineDefaults.columns,
-        timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
-        foo: timelineByIdMock.foo,
-        bar: set('id', 'bar', timelineDefaults),
-      });
+      expect(update).toEqual(set('id', 'bar', timelineDefaults));
     });
 
     test('should add the specified columns to the timeline', () => {
       const barWithEmptyColumns = set('id', 'bar', timelineDefaults);
       const barWithPopulatedColumns = set('columns', defaultHeaders, barWithEmptyColumns);
 
-      const update = addNewTimeline({
+      const update = getNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
-        foo: timelineByIdMock.foo,
-        bar: barWithPopulatedColumns,
-      });
+      expect(update).toEqual(barWithPopulatedColumns);
     });
   });
 
@@ -1110,6 +1106,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1202,6 +1201,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1400,6 +1402,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1492,6 +1497,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineId: null,
+          templateTimelineVersion: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1679,6 +1687,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1755,6 +1766,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,
@@ -1855,6 +1869,9 @@ describe('Timeline', () => {
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           loadingEventIds: [],
           title: '',
+          timelineType: TimelineType.default,
+          templateTimelineVersion: null,
+          templateTimelineId: null,
           noteIds: [],
           dateRange: {
             start: 0,

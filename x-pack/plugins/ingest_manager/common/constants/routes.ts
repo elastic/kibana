@@ -61,6 +61,11 @@ export const SETTINGS_API_ROUTES = {
   UPDATE_PATTERN: `${API_ROOT}/settings`,
 };
 
+// App API routes
+export const APP_API_ROUTES = {
+  CHECK_PERMISSIONS_PATTERN: `${API_ROOT}/check-permissions`,
+};
+
 // Agent API routes
 export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${FLEET_API_ROOT}/agents`,

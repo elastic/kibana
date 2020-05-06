@@ -14,7 +14,6 @@ import {
   applyDeltaToColumnWidth,
   applyDeltaToWidth,
   applyKqlFilterQuery,
-  createTimeline,
   dataProviderEdited,
   endTimelineSaving,
   pinEvent,
@@ -56,7 +55,6 @@ import {
   updateEventType,
 } from './actions';
 import {
-  addNewTimeline,
   addTimelineHistory,
   addTimelineNote,
   addTimelineNoteToEvent,
@@ -114,41 +112,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineToStore({ id, timeline, timelineById: state.timelineById }),
   }))
-  .case(
-    createTimeline,
-    (
-      state,
-      {
-        id,
-        dataProviders,
-        dateRange,
-        show,
-        columns,
-        itemsPerPage,
-        kqlQuery,
-        sort,
-        showCheckboxes,
-        showRowRenderers,
-        filters,
-      }
-    ) => ({
-      ...state,
-      timelineById: addNewTimeline({
-        columns,
-        dataProviders,
-        dateRange,
-        filters,
-        id,
-        itemsPerPage,
-        kqlQuery,
-        sort,
-        show,
-        showCheckboxes,
-        showRowRenderers,
-        timelineById: state.timelineById,
-      }),
-    })
-  )
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
     timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
