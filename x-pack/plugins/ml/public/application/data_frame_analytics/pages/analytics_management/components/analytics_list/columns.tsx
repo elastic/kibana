@@ -66,15 +66,21 @@ export const getTaskStateBadge = (
 
 export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
-    defaultMessage: 'Progress',
+    defaultMessage: 'Progress per Step',
   }),
   sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
-    const progress = getDataFrameAnalyticsProgress(item.stats);
+    const totalSteps = item.stats.progress.length;
+    let step = 0;
+    let progress = 0;
 
-    if (progress === undefined) {
-      return null;
+    for (const progressStep of item.stats.progress) {
+      step++;
+      progress = progressStep.progress_percent;
+      if (progressStep.progress_percent < 100) {
+        break;
+      }
     }
 
     // For now all analytics jobs are batch jobs.
@@ -98,6 +104,11 @@ export const progressColumn = {
             <EuiFlexItem style={{ width: '35px' }} grow={false}>
               <EuiText size="xs">{`${progress}%`}</EuiText>
             </EuiFlexItem>
+            <EuiFlexItem style={{ width: '21px' }} grow={false}>
+              <EuiText size="xs">
+                {step}/{totalSteps}
+              </EuiText>
+            </EuiFlexItem>
           </Fragment>
         )}
         {!isBatchTransform && (
@@ -118,7 +129,7 @@ export const progressColumn = {
       </EuiFlexGroup>
     );
   },
-  width: '100px',
+  width: '130px',
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 

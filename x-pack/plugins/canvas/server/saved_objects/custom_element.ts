@@ -30,4 +30,12 @@ export const customElementType: SavedObjectsType = {
     },
   },
   migrations: {},
+  management: {
+    icon: 'canvasApp',
+    defaultSearchField: 'name',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.displayName;
+    },
+  },
 };

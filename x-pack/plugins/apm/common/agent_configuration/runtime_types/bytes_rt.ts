@@ -7,27 +7,50 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { amountAndUnitToObject } from '../amount_and_unit';
+import { getRangeTypeMessage } from './get_range_type_message';
 
-export const BYTE_UNITS = ['b', 'kb', 'mb'];
+function toBytes(amount: number, unit: string) {
+  switch (unit) {
+    case 'b':
+      return amount;
+    case 'kb':
+      return amount * 2 ** 10;
+    case 'mb':
+      return amount * 2 ** 20;
+  }
+}
 
-export const bytesRt = new t.Type<string, string, unknown>(
-  'bytesRt',
-  t.string.is,
-  (input, context) => {
-    return either.chain(t.string.validate(input, context), inputAsString => {
-      const { amount, unit } = amountAndUnitToObject(inputAsString);
-      const amountAsInt = parseInt(amount, 10);
-      const isValidUnit = BYTE_UNITS.includes(unit);
-      const isValid = amountAsInt > 0 && isValidUnit;
+function amountAndUnitToBytes(value?: string): number | undefined {
+  if (value) {
+    const { amount, unit } = amountAndUnitToObject(value);
+    if (isFinite(amount) && unit) {
+      return toBytes(amount, unit);
+    }
+  }
+}
 
-      return isValid
-        ? t.success(inputAsString)
-        : t.failure(
-            input,
-            context,
-            `Must have numeric amount and a valid unit (${BYTE_UNITS})`
-          );
-    });
-  },
-  t.identity
-);
+export function getBytesRt({ min, max }: { min?: string; max?: string }) {
+  const minAsBytes = amountAndUnitToBytes(min) ?? -Infinity;
+  const maxAsBytes = amountAndUnitToBytes(max) ?? Infinity;
+  const message = getRangeTypeMessage(min, max);
+
+  return new t.Type<string, string, unknown>(
+    'bytesRt',
+    t.string.is,
+    (input, context) => {
+      return either.chain(t.string.validate(input, context), inputAsString => {
+        const inputAsBytes = amountAndUnitToBytes(inputAsString);
+
+        const isValidAmount =
+          inputAsBytes !== undefined &&
+          inputAsBytes >= minAsBytes &&
+          inputAsBytes <= maxAsBytes;
+
+        return isValidAmount
+          ? t.success(inputAsString)
+          : t.failure(input, context, message);
+      });
+    },
+    t.identity
+  );
+}

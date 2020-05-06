@@ -16,13 +16,17 @@ describe('Connectors', () => {
   let wrapper: ReactWrapper;
   const onChangeConnector = jest.fn();
   const handleShowAddFlyout = jest.fn();
+  const handleShowEditFlyout = jest.fn();
+
   const props: Props = {
     disabled: false,
+    updateConnectorDisabled: false,
     connectors,
     selectedConnector: 'none',
     isLoading: false,
     onChangeConnector,
     handleShowAddFlyout,
+    handleShowEditFlyout,
   };
 
   beforeAll(() => {
@@ -69,15 +73,15 @@ describe('Connectors', () => {
 
   test('the connector is changed successfully', () => {
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-    wrapper.find('button[data-test-subj="dropdown-connector-456"]').simulate('click');
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
 
     expect(onChangeConnector).toHaveBeenCalled();
-    expect(onChangeConnector).toHaveBeenCalledWith('456');
+    expect(onChangeConnector).toHaveBeenCalledWith('servicenow-2');
   });
 
   test('the connector is changed successfully to none', () => {
     onChangeConnector.mockClear();
-    const newWrapper = mount(<Connectors {...props} selectedConnector={'123'} />, {
+    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -86,5 +90,17 @@ describe('Connectors', () => {
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');
+  });
+
+  test('the text of the update button is shown correctly', () => {
+    const newWrapper = mount(<Connectors {...props} selectedConnector={'servicenow-1'} />, {
+      wrappingComponent: TestProviders,
+    });
+
+    expect(
+      newWrapper
+        .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
+        .text()
+    ).toBe('Update My Connector');
   });
 });

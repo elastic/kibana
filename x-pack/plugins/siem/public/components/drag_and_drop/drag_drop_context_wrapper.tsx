@@ -12,9 +12,15 @@ import { Dispatch } from 'redux';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
-import { dragAndDropModel, dragAndDropSelectors } from '../../store';
+import { dragAndDropModel, dragAndDropSelectors, timelineSelectors } from '../../store';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { State } from '../../store/reducer';
+import { DataProvider } from '../timeline/data_providers/data_provider';
+import { reArrangeProviders } from '../timeline/data_providers/helpers';
+import { ACTIVE_TIMELINE_REDUX_ID } from '../top_n';
+import { ADDED_TO_TIMELINE_MESSAGE } from '../../hooks/translations';
+import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
+import { displaySuccessToast, useStateToaster } from '../toasters';
 
 import {
   addFieldToTimelineColumns,
@@ -23,8 +29,8 @@ import {
   IS_DRAGGING_CLASS_NAME,
   IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
   providerWasDroppedOnTimeline,
-  providerWasDroppedOnTimelineButton,
   draggableIsField,
+  userIsReArrangingProviders,
 } from './helpers';
 
 // @ts-ignore
@@ -37,58 +43,92 @@ interface Props {
 }
 
 interface OnDragEndHandlerParams {
+  activeTimelineDataProviders: DataProvider[];
   browserFields: BrowserFields;
   dataProviders: IdToDataProvider;
   dispatch: Dispatch;
+  onAddedToTimeline: (fieldOrValue: string) => void;
   result: DropResult;
 }
 
 const onDragEndHandler = ({
+  activeTimelineDataProviders,
   browserFields,
   dataProviders,
   dispatch,
+  onAddedToTimeline,
   result,
 }: OnDragEndHandlerParams) => {
-  if (providerWasDroppedOnTimeline(result)) {
-    addProviderToTimeline({ dataProviders, result, dispatch });
-  } else if (providerWasDroppedOnTimelineButton(result)) {
-    addProviderToTimeline({ dataProviders, result, dispatch });
+  if (userIsReArrangingProviders(result)) {
+    reArrangeProviders({
+      dataProviders: activeTimelineDataProviders,
+      destination: result.destination,
+      dispatch,
+      source: result.source,
+      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+    });
+  } else if (providerWasDroppedOnTimeline(result)) {
+    addProviderToTimeline({
+      activeTimelineDataProviders,
+      dataProviders,
+      dispatch,
+      onAddedToTimeline,
+      result,
+      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+    });
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
-    addFieldToTimelineColumns({ browserFields, dispatch, result });
+    addFieldToTimelineColumns({
+      browserFields,
+      dispatch,
+      result,
+      timelineId: ACTIVE_TIMELINE_REDUX_ID,
+    });
   }
 };
+
+const sensors = [useAddToTimelineSensor];
 
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
 export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux>(
-  ({ browserFields, children, dataProviders, dispatch }) => {
+  ({ activeTimelineDataProviders, browserFields, children, dataProviders, dispatch }) => {
+    const [, dispatchToaster] = useStateToaster();
+    const onAddedToTimeline = useCallback(
+      (fieldOrValue: string) => {
+        displaySuccessToast(ADDED_TO_TIMELINE_MESSAGE(fieldOrValue), dispatchToaster);
+      },
+      [dispatchToaster]
+    );
+
     const onDragEnd = useCallback(
       (result: DropResult) => {
-        enableScrolling();
+        try {
+          enableScrolling();
 
-        if (dataProviders != null) {
-          onDragEndHandler({
-            browserFields,
-            result,
-            dataProviders,
-            dispatch,
-          });
-        }
-
-        if (!draggableIsField(result)) {
+          if (dataProviders != null) {
+            onDragEndHandler({
+              activeTimelineDataProviders,
+              browserFields,
+              dataProviders,
+              dispatch,
+              onAddedToTimeline,
+              result,
+            });
+          }
+        } finally {
           document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-        }
 
-        if (draggableIsField(result)) {
-          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+          if (draggableIsField(result)) {
+            document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+          }
         }
       },
-      [browserFields, dataProviders]
+      [dataProviders, activeTimelineDataProviders, browserFields]
     );
     return (
       // @ts-ignore
-      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
+      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture} sensors={sensors}>
         {children}
       </DragDropContext>
     );
@@ -96,7 +136,8 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
   (prevProps, nextProps) => {
     return (
       prevProps.children === nextProps.children &&
-      prevProps.dataProviders === nextProps.dataProviders
+      prevProps.dataProviders === nextProps.dataProviders &&
+      prevProps.activeTimelineDataProviders === nextProps.activeTimelineDataProviders
     ); // prevent re-renders when data providers are added or removed, but all other props are the same
   }
 );
@@ -104,11 +145,15 @@ export const DragDropContextWrapperComponent = React.memo<Props & PropsFromRedux
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
 const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
+const emptyActiveTimelineDataProviders: DataProvider[] = []; // stable reference
 
 const mapStateToProps = (state: State) => {
+  const activeTimelineDataProviders =
+    timelineSelectors.getTimelineByIdSelector()(state, ACTIVE_TIMELINE_REDUX_ID)?.dataProviders ??
+    emptyActiveTimelineDataProviders;
   const dataProviders = dragAndDropSelectors.dataProvidersSelector(state) ?? emptyDataProviders;
 
-  return { dataProviders };
+  return { activeTimelineDataProviders, dataProviders };
 };
 
 const connector = connect(mapStateToProps);

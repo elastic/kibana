@@ -52,10 +52,10 @@ export interface SettingsFormProps {
 const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
   if (formFields) {
     const blankStr = 'May not be blank';
-    const { certThresholds: certificatesThresholds, heartbeatIndices } = formFields;
+    const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
     const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
-    const expirationThresholdError = certificatesThresholds?.expiration ? null : blankStr;
-    const ageThresholdError = certificatesThresholds?.age ? null : blankStr;
+    const expirationThresholdError = certExpirationThreshold ? null : blankStr;
+    const ageThresholdError = certAgeThreshold ? null : blankStr;
     return {
       heartbeatIndices: heartbeatIndErr,
       certificatesThresholds:
@@ -98,12 +98,8 @@ export const SettingsPage = () => {
   const onChangeFormField: OnFieldChangeType = changedField => {
     if (formFields) {
       setFormFields({
-        heartbeatIndices: changedField.heartbeatIndices ?? formFields.heartbeatIndices,
-        certThresholds: Object.assign(
-          {},
-          formFields.certThresholds,
-          changedField?.certThresholds ?? null
-        ),
+        ...formFields,
+        ...changedField,
       });
     }
   };

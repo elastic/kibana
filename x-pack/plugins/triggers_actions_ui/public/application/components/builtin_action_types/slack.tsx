@@ -15,6 +15,7 @@ import {
 } from '../../../types';
 import { SlackActionParams, SlackActionConnector } from './types';
 import { AddMessageVariables } from '../add_message_variables';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -76,6 +77,7 @@ export function getActionType(): ActionTypeModel {
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
 >> = ({ action, editActionSecrets, errors }) => {
+  const { docLinks } = useActionsConnectorsContext();
   const { webhookUrl } = action.secrets;
 
   return (
@@ -85,7 +87,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-slack.html#configuring-slack"
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
             target="_blank"
           >
             <FormattedMessage

@@ -12,6 +12,7 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import {
   HomePublicPluginSetup,
@@ -37,7 +38,7 @@ export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
@@ -59,14 +60,14 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export class Plugin implements IPlugin<PluginSetup, PluginStart> {
+export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, APP_ID);
 
     plugins.home.featureCatalogue.register({
@@ -91,6 +92,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
       title: APP_NAME,
       order: 9000,
       euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { renderApp } = await import('./app');
