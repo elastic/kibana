@@ -24,7 +24,7 @@ export const defaultLimit = limitOptions[1];
 export const limit$ = new BehaviorSubject<number>(defaultLimit);
 
 export const useSwimlaneLimit = (): [number, (newLimit: number) => void] => {
-  const limit = useObservable(limit$);
+  const limit = useObservable(limit$, defaultLimit);
 
   return [limit!, (newLimit: number) => limit$.next(newLimit)];
 };
