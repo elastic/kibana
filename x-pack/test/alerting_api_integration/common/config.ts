@@ -5,10 +5,11 @@
  */
 
 import path from 'path';
+import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -48,6 +49,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
+    // Find all folders in ./plugins since we treat all them as plugin folder
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
+    const plugins = allFiles.filter(file =>
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
+    );
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -123,10 +129,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             },
           ])}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions_simulators')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'task_manager')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'aad')}`,
+          ...plugins.map(
+            pluginDir =>
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
+          ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [
