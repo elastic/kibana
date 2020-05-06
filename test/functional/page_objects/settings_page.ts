@@ -326,7 +326,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     ) {
       log.debug(`createIndexPattern expectWildcard = ${expectWildcard}`);
       await retry.try(async () => {
-        await this.navigateTo();
+        // await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
