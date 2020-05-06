@@ -17,13 +17,22 @@
  * under the License.
  */
 
-import path from 'path';
+import Path from 'path';
+import Fs from 'fs';
+import { promisify } from 'util';
+
+import { CiStatsReporter } from '@kbn/dev-utils';
+
 import { mkdirp, compress } from '../lib';
+
+const asyncStat = promisify(Fs.stat);
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
+    const files = [];
+
     // archive one at a time, parallel causes OOM sometimes
     for (const platform of config.getTargetPlatforms()) {
       const source = build.resolvePathForPlatform(platform, '.');
@@ -31,9 +40,10 @@ export const CreateArchivesTask = {
 
       log.info('archiving', source, 'to', destination);
 
-      await mkdirp(path.dirname(destination));
+      await mkdirp(Path.dirname(destination));
+      files.push(destination);
 
-      switch (path.extname(destination)) {
+      switch (Path.extname(destination)) {
         case '.zip':
           await compress(
             'zip',
@@ -70,6 +80,21 @@ export const CreateArchivesTask = {
         default:
           throw new Error(`Unexpected extension for archive destination: ${destination}`);
       }
+    }
+
+    const reporter = CiStatsReporter.fromEnv(log);
+    if (reporter.isEnabled()) {
+      await reporter.metrics(
+        await Promise.all(
+          files.map(async path => {
+            return {
+              name: 'distributable size',
+              subName: Path.basename(path),
+              value: (await asyncStat(path)).size,
+            };
+          })
+        )
+      );
     }
   },
 };
