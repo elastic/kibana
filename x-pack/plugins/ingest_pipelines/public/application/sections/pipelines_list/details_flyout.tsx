@@ -142,7 +142,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           {/* Processors JSON */}
           <EuiDescriptionListTitle>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-              defaultMessage: 'Processors JSON',
+              defaultMessage: 'Processors',
             })}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -156,7 +156,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 {i18n.translate(
                   'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
                   {
-                    defaultMessage: 'On failure processors JSON',
+                    defaultMessage: 'Failure processors',
                   }
                 )}
               </EuiDescriptionListTitle>
