@@ -700,23 +700,28 @@ export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
-    analyze: {
+    kibana: {
+        id: string;
         label: string;
+        euiIconType: string;
         order: number;
     };
     observability: {
+        id: string;
         label: string;
         euiIconType: string;
         order: number;
     };
     security: {
+        id: string;
         label: string;
         order: number;
         euiIconType: string;
     };
     management: {
+        id: string;
         label: string;
-        euiIconType: string;
+        order: number;
     };
 }>;
 

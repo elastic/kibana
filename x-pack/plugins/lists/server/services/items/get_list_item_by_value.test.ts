@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getListItemByValueOptionsMocks, getListItemResponseMock } from '../mocks';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
 import { getListItemByValues } from './get_list_item_by_values';
 import { getListItemByValue } from './get_list_item_by_value';
+import { getListItemByValueOptionsMocks } from './get_list_item_by_value.mock';
 
 jest.mock('./get_list_item_by_values', () => ({
   getListItemByValues: jest.fn(),

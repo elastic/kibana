@@ -64,7 +64,7 @@ export class Plugin
         defaultMessage: 'Logs',
       }),
       euiIconType: 'logsApp',
-      order: 8001,
+      order: 8000,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
@@ -89,7 +89,7 @@ export class Plugin
         defaultMessage: 'Metrics',
       }),
       euiIconType: 'metricsApp',
-      order: 8000,
+      order: 8001,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {

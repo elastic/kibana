@@ -158,6 +158,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextProvider](./kibana-plugin-core-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
+|  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
