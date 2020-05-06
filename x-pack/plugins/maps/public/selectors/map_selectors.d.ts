@@ -7,8 +7,8 @@
 import { MapCenter } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
-import { IVectorLayer } from '../layers/vector_layer';
-import { ILayer } from '../layers/layer';
+import { IVectorLayer } from '../classes/vector_layer';
+import { ILayer } from '../classes/layer';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 

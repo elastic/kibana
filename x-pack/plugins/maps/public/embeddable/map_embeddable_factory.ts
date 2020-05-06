@@ -18,7 +18,7 @@ import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/con
 import { MapStore, MapStoreState } from '../reducers/store';
 import { MapEmbeddableConfig, MapEmbeddableInput } from './types';
 import { MapEmbeddableOutput } from './map_embeddable';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { EventHandlers } from '../reducers/non_serializable_instances';
 
 let whenModulesLoadedPromise: Promise<boolean>;
