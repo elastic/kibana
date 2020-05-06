@@ -37,6 +37,7 @@ const formatEditors = {
     ip: TestEditor,
     number: TestEditor,
   },
+  getById: jest.fn(() => TestEditor),
 };
 
 describe('FieldFormatEditor', () => {

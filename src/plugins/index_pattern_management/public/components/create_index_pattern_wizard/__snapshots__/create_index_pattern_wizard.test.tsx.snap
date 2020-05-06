@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -18,11 +20,13 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;
 
 exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -57,7 +61,6 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
           "type": "default",
         }
       }
-      initialQuery=""
       isIncludingSystemIndices={false}
       savedObjectsClient={
         Object {
@@ -95,11 +98,13 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;
 
 exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -118,11 +123,13 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;
 
 exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -163,11 +170,13 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;
 
 exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -196,7 +205,6 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
           "type": "default",
         }
       }
-      initialQuery=""
       isIncludingSystemIndices={false}
       savedObjectsClient={
         Object {
@@ -234,11 +242,13 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;
 
 exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
-<Fragment>
+<EuiPanel
+  paddingSize="l"
+>
   <div>
     <Header
       indexPatternName="name"
@@ -273,7 +283,6 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
           "type": "default",
         }
       }
-      initialQuery=""
       isIncludingSystemIndices={true}
       savedObjectsClient={
         Object {
@@ -311,5 +320,5 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
     toastLifeTimeMs={6000}
     toasts={Array []}
   />
-</Fragment>
+</EuiPanel>
 `;

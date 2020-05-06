@@ -20,12 +20,15 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { CreateIndexPatternWizard } from './create_index_pattern_wizard';
+import {
+  CreateIndexPatternWizard,
+  CreateIndexPatternWizardProps,
+} from './create_index_pattern_wizard';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../plugins/data/public/mocks';
-import { IndexPatternCreationConfig } from '../../../../../plugins/index_pattern_management/public';
 import { IndexPattern } from '../../../../../plugins/data/public';
 import { SavedObjectsClient } from '../../../../../core/public';
+import { IndexPatternCreationConfig } from '../../service/creation';
 
 jest.mock('./components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('./components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
@@ -43,26 +46,36 @@ jest.mock('ui/chrome', () => ({
 
 const { savedObjects, overlays, uiSettings } = coreMock.createStart();
 const { indexPatterns, search } = dataPluginMock.createStartContract();
+
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',
   name: 'name',
 });
 
-const initialQuery = '';
-const services = {
+const services = ({
+  indexPatternCreation: {
+    getType: jest.fn(() => mockIndexPatternCreationType),
+  },
   es: search.__LEGACY.esClient,
   indexPatterns,
   savedObjectsClient: savedObjects.client as SavedObjectsClient,
   uiSettings,
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
-  indexPatternCreationType: mockIndexPatternCreationType,
+} as unknown) as CreateIndexPatternWizardProps['services'];
+
+const routeComponentPropsMock = {
+  history: {
+    push: jest.fn(),
+  } as any,
+  location: {} as any,
+  match: {} as any,
 };
 
 describe('CreateIndexPatternWizard', () => {
   test(`defaults to the loading state`, () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     expect(component).toMatchSnapshot();
@@ -70,7 +83,7 @@ describe('CreateIndexPatternWizard', () => {
 
   test('renders the empty state when there are no indices', async () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({
@@ -85,7 +98,7 @@ describe('CreateIndexPatternWizard', () => {
 
   test('renders when there are no indices but there are remote clusters', async () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({
@@ -100,7 +113,7 @@ describe('CreateIndexPatternWizard', () => {
 
   test('shows system indices even if there are no other indices if the include system indices is toggled', async () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({
@@ -115,7 +128,7 @@ describe('CreateIndexPatternWizard', () => {
 
   test('renders index pattern step when there are indices', async () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({
@@ -129,7 +142,7 @@ describe('CreateIndexPatternWizard', () => {
 
   test('renders time field step when step is set to 2', async () => {
     const component = shallow(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({
@@ -158,7 +171,7 @@ describe('CreateIndexPatternWizard', () => {
     };
 
     const component = shallow<CreateIndexPatternWizard>(
-      <CreateIndexPatternWizard initialQuery={initialQuery} services={services} />
+      <CreateIndexPatternWizard {...routeComponentPropsMock} services={services} />
     );
 
     component.setState({ indexPattern: 'foo' });
@@ -166,6 +179,7 @@ describe('CreateIndexPatternWizard', () => {
     expect(services.uiSettings.get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
-    expect(services.changeUrl).toBeCalledWith(`/management/kibana/indexPatterns/patterns/id`);
+    // todo:
+    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/id`);
   });
 });

@@ -81,10 +81,9 @@ export async function mountManagementSection(
             const title = pattern.get('title');
             const isDefault = defaultIndex === id;
 
-            // TODO: we should not use the runtime contract of the plugin in which we work
-            // list.getIndexPatternTags should be passed as dependencies
             const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-              pattern,
+              // todo: temporary cast SimpleSavedObject<IIndexPattern> -> IIndexPattern
+              (pattern as unknown) as IIndexPattern,
               isDefault
             );
 
