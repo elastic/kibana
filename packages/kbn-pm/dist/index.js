@@ -43934,38 +43934,29 @@ class CiStatsReporter {
         return !!this.config;
     }
     async metrics(metrics) {
-        if (!this.config) {
-            return;
-        }
-        await this.request({
-            method: 'POST',
-            path: '/v1/metrics',
-            body: {
-                buildId: this.config.buildId,
-                metrics,
-            },
-            bodySummary: metrics.map(({ group, id, value }) => `[${group}/${id}=${value}]`).join(' '),
-        });
-    }
-    async request(options) {
         var _a, _b, _c, _d;
         if (!this.config) {
             return;
         }
-        const { method, path, body, bodySummary } = options;
         let attempt = 0;
         const maxAttempts = 5;
+        const bodySummary = metrics
+            .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
+            .join(' ');
         while (true) {
             attempt += 1;
             try {
                 await axios_1.default.request({
-                    method,
-                    url: path,
+                    method: 'POST',
+                    url: '/v1/metrics',
                     baseURL: this.config.apiUrl,
                     headers: {
                         Authorization: `token ${this.config.apiToken}`,
                     },
-                    data: body,
+                    data: {
+                        buildId: this.config.buildId,
+                        metrics,
+                    },
                 });
                 return;
             }
