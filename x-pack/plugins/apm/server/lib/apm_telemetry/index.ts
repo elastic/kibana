@@ -38,6 +38,21 @@ export async function createApmTelemetry({
   taskManager: TaskManagerSetupContract;
   logger: Logger;
 }) {
+  taskManager.registerTaskDefinitions({
+    [APM_TELEMETRY_TASK_NAME]: {
+      title: 'Collect APM telemetry',
+      type: APM_TELEMETRY_TASK_NAME,
+      createTaskRunner: () => {
+        return {
+          run: async () => {
+            await collectAndStore();
+          },
+          cancel: async () => {}
+        };
+      }
+    }
+  });
+
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
 
   const collectAndStore = async () => {
@@ -78,20 +93,6 @@ export async function createApmTelemetry({
       { id: APM_TELEMETRY_SAVED_OBJECT_TYPE, overwrite: true }
     );
   };
-
-  taskManager.registerTaskDefinitions({
-    [APM_TELEMETRY_TASK_NAME]: {
-      title: 'Collect APM telemetry',
-      type: APM_TELEMETRY_TASK_NAME,
-      createTaskRunner: () => {
-        return {
-          run: async () => {
-            await collectAndStore();
-          }
-        };
-      }
-    }
-  });
 
   const collector = usageCollector.makeUsageCollector({
     type: 'apm',

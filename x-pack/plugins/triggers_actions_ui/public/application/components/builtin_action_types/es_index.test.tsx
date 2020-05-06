@@ -4,23 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { IndexActionParams, EsIndexActionConnector } from './types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
+jest.mock('../../../common/index_controls', () => ({
+  firstFieldOption: jest.fn(),
+  getFields: jest.fn(),
+  getIndexOptions: jest.fn(),
+  getIndexPatterns: jest.fn(),
+}));
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
+let deps: any;
 
-beforeAll(() => {
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  const mocks = coreMock.createSetup();
+  const [
+    {
+      application: { capabilities },
+    },
+  ] = await mocks.getStartServices();
+  deps = {
+    toastNotifications: mocks.notifications.toasts,
+    http: mocks.http,
+    capabilities: {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    },
+    actionTypeRegistry: actionTypeRegistry as any,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -91,13 +120,38 @@ describe('action params validation', () => {
 });
 
 describe('IndexActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
-    const mocks = coreMock.createSetup();
-
+  test('all connector fields is rendered', async () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
     }
+
+    const { getIndexPatterns } = jest.requireMock('../../../common/index_controls');
+    getIndexPatterns.mockResolvedValueOnce([
+      {
+        id: 'indexPattern1',
+        attributes: {
+          title: 'indexPattern1',
+        },
+      },
+      {
+        id: 'indexPattern2',
+        attributes: {
+          title: 'indexPattern2',
+        },
+      },
+    ]);
+    const { getFields } = jest.requireMock('../../../common/index_controls');
+    getFields.mockResolvedValueOnce([
+      {
+        type: 'date',
+        name: 'test1',
+      },
+      {
+        type: 'text',
+        name: 'test2',
+      },
+    ]);
     const ConnectorFields = actionTypeModel.actionConnectorFields;
     const actionConnector = {
       secrets: {},
@@ -111,16 +165,58 @@ describe('IndexActionConnectorFields renders', () => {
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ index: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        http={mocks.http}
-      />
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+          docLinks: deps!.docLinks,
+        }}
+      >
+        <ConnectorFields
+          action={actionConnector}
+          errors={{ index: [] }}
+          editActionConfig={() => {}}
+          editActionSecrets={() => {}}
+        />
+      </ActionsConnectorsContextProvider>
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').length > 0).toBeTruthy();
+
+    const indexSearchBoxValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
+    expect(indexSearchBoxValue.first().props().value).toEqual('');
+
+    const indexComboBox = wrapper.find('#indexConnectorSelectSearchBox');
+    indexComboBox.first().simulate('click');
+    const event = { target: { value: 'indexPattern1' } };
+    indexComboBox
+      .find('input')
+      .first()
+      .simulate('change', event);
+
+    const indexSearchBoxValueBeforeEnterData = wrapper.find(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    expect(indexSearchBoxValueBeforeEnterData.first().props().value).toEqual('indexPattern1');
+
+    const indexComboBoxClear = wrapper.find('[data-test-subj="comboBoxClearButton"]');
+    indexComboBoxClear.first().simulate('click');
+
+    const indexSearchBoxValueAfterEnterData = wrapper.find(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    expect(indexSearchBoxValueAfterEnterData.first().props().value).toEqual('indexPattern1');
   });
 });
 

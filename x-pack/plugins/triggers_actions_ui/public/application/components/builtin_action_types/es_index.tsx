@@ -33,6 +33,7 @@ import {
   getIndexPatterns,
 } from '../../../common/index_controls';
 import { AddMessageVariables } from '../add_message_variables';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -78,7 +79,8 @@ export function getActionType(): ActionTypeModel {
 
 const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http }) => {
+>> = ({ action, editActionConfig, errors }) => {
+  const { http } = useActionsConnectorsContext();
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null
@@ -86,7 +88,9 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
 
   const [indexPatterns, setIndexPatterns] = useState([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>([
+    firstFieldOption,
+  ]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -151,7 +155,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
               : []
           }
           onChange={async (selected: EuiComboBoxOptionOption[]) => {
-            editActionConfig('index', selected[0].value);
+            editActionConfig('index', selected.length > 0 ? selected[0].value : '');
             const indices = selected.map(s => s.value as string);
 
             // reset time field and expression fields if indices are deleted

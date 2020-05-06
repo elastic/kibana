@@ -1,7 +1,8 @@
 .dshAppContainer {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100%; // TODO #64541 - can delete this
+  flex: 1;
 }
 
 .dshStartScreen {
@@ -19,18 +20,10 @@
 
 .dshEmptyWidget {
   border: $euiBorderThin;
-  border-style:  dashed;
+  border-style: dashed;
   border-radius: $euiBorderRadius;
   padding: $euiSizeXXL * 2;
   max-width: 400px;
   margin-left: $euiSizeS;
-  text-align: center;
-}
-
-.dshEmptyWidget {
-  border: 2px dashed $euiColorLightShade;
-  padding: 4 * $euiSize;
-  max-width: 20em;
-  margin-left: 10px;
   text-align: center;
 }

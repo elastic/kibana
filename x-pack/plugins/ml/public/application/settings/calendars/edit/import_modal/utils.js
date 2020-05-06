@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const icalendar = require('icalendar');
+import icalendar from 'icalendar';
 import moment from 'moment';
 import { generateTempId } from '../utils';
 

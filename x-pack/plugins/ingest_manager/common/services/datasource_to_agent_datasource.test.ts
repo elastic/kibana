@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NewDatasource, DatasourceInput } from '../types';
+import { Datasource, DatasourceInput } from '../types';
 import { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
 
 describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
-  const mockDatasource: NewDatasource = {
+  const mockDatasource: Datasource = {
+    id: 'some-uuid',
     name: 'mock-datasource',
     description: '',
     config_id: '',
@@ -15,12 +16,13 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
     output_id: '',
     namespace: 'default',
     inputs: [],
+    revision: 1,
   };
 
   const mockInput: DatasourceInput = {
     type: 'test-logs',
     enabled: true,
-    config: {
+    vars: {
       inputVar: { value: 'input-value' },
       inputVar2: { value: undefined },
       inputVar3: {
@@ -34,16 +36,20 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         id: 'test-logs-foo',
         enabled: true,
         dataset: 'foo',
-        config: {
+        vars: {
           fooVar: { value: 'foo-value' },
           fooVar2: { value: [1, 2] },
+        },
+        agent_stream: {
+          fooKey: 'fooValue1',
+          fooKey2: ['fooValue2'],
         },
       },
       {
         id: 'test-logs-bar',
         enabled: true,
         dataset: 'bar',
-        config: {
+        vars: {
           barVar: { value: 'bar-value' },
           barVar2: { value: [1, 2] },
           barVar3: {
@@ -66,7 +72,8 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
 
   it('returns agent datasource config for datasource with no inputs', () => {
     expect(storedDatasourceToAgentDatasource(mockDatasource)).toEqual({
-      id: 'mock-datasource',
+      id: 'some-uuid',
+      name: 'mock-datasource',
       namespace: 'default',
       enabled: true,
       use_output: 'default',
@@ -83,7 +90,8 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         },
       })
     ).toEqual({
-      id: 'mock-datasource',
+      id: 'some-uuid',
+      name: 'mock-datasource',
       namespace: 'default',
       enabled: true,
       use_output: 'default',
@@ -95,9 +103,10 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
     });
   });
 
-  it('returns agent datasource config with flattened input and stream configs', () => {
+  it('returns agent datasource config with flattened input and package stream', () => {
     expect(storedDatasourceToAgentDatasource({ ...mockDatasource, inputs: [mockInput] })).toEqual({
-      id: 'mock-datasource',
+      id: 'some-uuid',
+      name: 'mock-datasource',
       namespace: 'default',
       enabled: true,
       use_output: 'default',
@@ -105,34 +114,18 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',
               enabled: true,
               dataset: 'foo',
-              fooVar: 'foo-value',
-              fooVar2: [1, 2],
+              fooKey: 'fooValue1',
+              fooKey2: ['fooValue2'],
             },
             {
               id: 'test-logs-bar',
               enabled: true,
               dataset: 'bar',
-              barVar: 'bar-value',
-              barVar2: [1, 2],
-              barVar3: [
-                {
-                  namespace: 'mockNamespace',
-                  anotherProp: 'test',
-                },
-                {
-                  namespace: 'mockNamespace2',
-                  anotherProp: 'test2',
-                },
-              ],
             },
           ],
         },
@@ -152,7 +145,8 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         ],
       })
     ).toEqual({
-      id: 'mock-datasource',
+      id: 'some-uuid',
+      name: 'mock-datasource',
       namespace: 'default',
       enabled: true,
       use_output: 'default',
@@ -160,17 +154,13 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         {
           type: 'test-logs',
           enabled: true,
-          inputVar: 'input-value',
-          inputVar3: {
-            testField: 'test',
-          },
           streams: [
             {
               id: 'test-logs-foo',
               enabled: true,
               dataset: 'foo',
-              fooVar: 'foo-value',
-              fooVar2: [1, 2],
+              fooKey: 'fooValue1',
+              fooKey2: ['fooValue2'],
             },
           ],
         },
@@ -185,7 +175,8 @@ describe('Ingest Manager - storedDatasourceToAgentDatasource', () => {
         inputs: [{ ...mockInput, enabled: false }],
       })
     ).toEqual({
-      id: 'mock-datasource',
+      id: 'some-uuid',
+      name: 'mock-datasource',
       namespace: 'default',
       enabled: true,
       use_output: 'default',

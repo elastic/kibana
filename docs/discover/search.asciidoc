@@ -1,25 +1,53 @@
 [[search]]
 == Searching your data
-You can search the indices that match the current <<index-patterns, index pattern>> by entering
-your search criteria in the Query bar. By default you can use Kibana's <<kuery-query, standard query language>>
-which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
-language (based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax])
-is still available for the time being under the options menu in the Query Bar. When this
-legacy query language is selected, the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]
-can also be used.
+Many Kibana apps embed a query bar for real-time search, including
+*Discover*, *Visualize*, and *Dashboard*.
 
-When you submit a search request, the histogram, Documents table, and Fields
-list are updated to reflect the search results. The total number of hits
-(matching documents) is shown in the toolbar. The Documents table shows the
-first five hundred hits. By default, the hits are listed in reverse
-chronological order, with the newest documents shown first. You can reverse
-the sort order by clicking the Time column header. You can also sort the table
-by the values in any indexed field. For more information, see <<sorting,
-Sorting the Documents Table>>.
+[float]
+=== Search your data
 
-To search your data, enter your search criteria in the Query bar and
-press *Enter* or click *Search* image:images/search-button.jpg[] to submit
-the request to Elasticsearch.
+To search the indices that match the current <<index-patterns, index pattern>>,
+enter your search criteria in the query bar. By default, you'll use
+{kib}'s <<kuery-query, standard query language>> (KQL), which
+features autocomplete and a simple, easy-to-use syntax. If you prefer to use
+{kib}'s legacy query
+language, based on the
+Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax],
+you can switch to it from the KQL popup in the query bar. When you enable the
+legacy query language, you can use the full
+JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL].
+
+
+[float]
+[[autorefresh]]
+=== Refresh search results
+As more documents are added to the indices you're searching, the search results
+shown in *Discover*, and used to display visualizations, get stale. Using the
+time filter, you can
+configure a refresh interval to periodically resubmit your searches to
+retrieve the latest results.
+
+[role="screenshot"]
+image::images/autorefresh-interval.png[]
+
+You can also manually refresh the search results by
+clicking the *Refresh* button.
+
+[float]
+=== Searching large amounts of data
+
+Sometimes you want to search through large amounts of data no matter how long
+the search takes.  While this might not happen often, there are times
+that long-running queries are required.  Consider a threat hunting scenario
+where you need to search through years of data.
+
+If you run a query, and the run time gets close to the
+timeout, you're presented the option to ignore the timeout.  This enables you to
+run queries with large amounts of data to completion.
+
+By default, a query times out after 30 seconds.
+The timeout is in place to avoid unintentional load on the cluster.
+
 
 include::kuery.asciidoc[]
 
@@ -160,31 +188,3 @@ To completely delete a query:
 image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
 
 You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
-
-[[select-pattern]]
-=== Change the indices you're searching
-When you submit a search request, the indices that match the currently-selected
-index pattern are searched.
-To change the indices you are searching, click the index pattern and select a
-different <<settings-create-pattern, index pattern>>.
-
-[[autorefresh]]
-=== Refresh the search results
-As more documents are added to the indices you're searching, the search results
-shown in Discover and used to display visualizations get stale. You can
-configure a refresh interval to periodically resubmit your searches to
-retrieve the latest results.
-
-. Click image:images/time-filter-calendar.png[].
-
-. In the *Refresh every* field, enter the refresh rate, then select the interval
-  from the dropdown.
-
-. Click *Start*.
-+
-image::images/autorefresh-intervals.png[]
-
-To disable auto refresh, click *Stop*.
-
-If auto refresh is not enabled, click *Refresh* to manually refresh the search
-results.

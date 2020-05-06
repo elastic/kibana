@@ -21,7 +21,6 @@ import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
-  mockLoadPluginBundle,
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
@@ -32,6 +31,7 @@ import {
   PluginsServiceStartDeps,
   PluginsServiceSetupDeps,
 } from './plugins_service';
+
 import { InjectedPluginMetadata } from '../injected_metadata';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
@@ -152,10 +152,6 @@ describe('PluginsService', () => {
     ] as unknown) as [[PluginName, any]]);
   });
 
-  afterEach(() => {
-    mockLoadPluginBundle.mockClear();
-  });
-
   describe('#getOpaqueIds()', () => {
     it('returns dependency tree of symbols', () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
@@ -174,39 +170,11 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
-    it('fails if any bundle cannot be loaded', async () => {
-      mockLoadPluginBundle.mockRejectedValueOnce(new Error('Could not load bundle'));
-
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Could not load bundle"`
-      );
-    });
-
     it('fails if any plugin instance does not have a setup function', async () => {
       mockPluginInitializers.set('pluginA', (() => ({})) as any);
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Instance of plugin \\"pluginA\\" does not define \\"setup\\" function."`
-      );
-    });
-
-    it('calls loadPluginBundles with http and plugins', async () => {
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await pluginsService.setup(mockSetupDeps);
-
-      expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginA'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginB'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginC'
       );
     });
 
@@ -302,7 +270,6 @@ describe('PluginsService', () => {
         const pluginsService = new PluginsService(mockCoreContext, plugins);
         const promise = pluginsService.setup(mockSetupDeps);
 
-        jest.runAllTimers(); // load plugin bundles
         await flushPromises();
         jest.runAllTimers(); // setup plugins
 

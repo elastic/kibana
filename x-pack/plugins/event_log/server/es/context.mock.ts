@@ -19,6 +19,7 @@ const createContextMock = () => {
     initialize: jest.fn(),
     waitTillReady: jest.fn(),
     esAdapter: clusterClientAdapterMock.create(),
+    initialized: true,
   };
   return mock;
 };

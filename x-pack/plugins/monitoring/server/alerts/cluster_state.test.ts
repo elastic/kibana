@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { getClusterState } from './cluster_state';
-import { AlertServices } from '../../../alerting/server';
 import { ALERT_TYPE_CLUSTER_STATE } from '../../common/constants';
 import { AlertCommonParams, AlertCommonState, AlertClusterStatePerClusterState } from './types';
 import { getPreparedAlert } from '../lib/alerts/get_prepared_alert';
 import { executeActions } from '../lib/alerts/cluster_state.lib';
 import { AlertClusterStateState } from './enums';
+import { alertsMock, AlertServicesMock } from '../../../alerting/server/mocks';
 
 jest.mock('../lib/alerts/cluster_state.lib', () => ({
   executeActions: jest.fn(),
@@ -26,18 +25,8 @@ jest.mock('../lib/alerts/get_prepared_alert', () => ({
   }),
 }));
 
-interface MockServices {
-  callCluster: jest.Mock;
-  alertInstanceFactory: jest.Mock;
-  savedObjectsClient: jest.Mock;
-}
-
 describe('getClusterState', () => {
-  const services: MockServices | AlertServices = {
-    callCluster: jest.fn(),
-    alertInstanceFactory: jest.fn(),
-    savedObjectsClient: savedObjectsClientMock.create(),
-  };
+  const services: AlertServicesMock = alertsMock.createAlertServices();
 
   const params: AlertCommonParams = {
     dateFormat: 'YYYY',
@@ -107,7 +96,7 @@ describe('getClusterState', () => {
   it('should alert if green -> yellow', async () => {
     const result = await setupAlert(AlertClusterStateState.Green, AlertClusterStateState.Yellow);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Yellow,
       emailAddress
@@ -121,7 +110,7 @@ describe('getClusterState', () => {
   it('should alert if yellow -> green', async () => {
     const result = await setupAlert(AlertClusterStateState.Yellow, AlertClusterStateState.Green);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Green,
       emailAddress,
@@ -135,7 +124,7 @@ describe('getClusterState', () => {
   it('should alert if green -> red', async () => {
     const result = await setupAlert(AlertClusterStateState.Green, AlertClusterStateState.Red);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Red,
       emailAddress
@@ -149,7 +138,7 @@ describe('getClusterState', () => {
   it('should alert if red -> green', async () => {
     const result = await setupAlert(AlertClusterStateState.Red, AlertClusterStateState.Green);
     expect(executeActions).toHaveBeenCalledWith(
-      undefined,
+      services.alertInstanceFactory(ALERT_TYPE_CLUSTER_STATE),
       cluster,
       AlertClusterStateState.Green,
       emailAddress,

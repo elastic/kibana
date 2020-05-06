@@ -69,10 +69,6 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
               .findTestSubject('connectorsTableCell-actionType')
               .find('.euiTableCellContent')
               .text(),
-            referencedByCount: $(row)
-              .findTestSubject('connectorsTableCell-referencedByCount')
-              .find('.euiTableCellContent')
-              .text(),
           };
         });
     },

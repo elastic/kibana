@@ -19,10 +19,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
+import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { PanelsContainer, Panel } from '../../kibana_react/public';
 
-import './vis_type_agg_filter';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';

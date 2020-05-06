@@ -6,7 +6,8 @@
 
 import {
   staticIndexPatternRoute,
-  dynamicIndexPatternRoute
+  dynamicIndexPatternRoute,
+  apmIndexPatternTitleRoute
 } from './index_pattern';
 import {
   errorDistributionRoute,
@@ -18,7 +19,8 @@ import {
   serviceTransactionTypesRoute,
   servicesRoute,
   serviceNodeMetadataRoute,
-  serviceAnnotationsRoute
+  serviceAnnotationsRoute,
+  serviceAnnotationsCreateRoute
 } from './services';
 import {
   agentConfigurationRoute,
@@ -73,6 +75,7 @@ const createApmApi = () => {
     // index pattern
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
+    .add(apmIndexPatternTitleRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -85,6 +88,7 @@ const createApmApi = () => {
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
+    .add(serviceAnnotationsCreateRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)

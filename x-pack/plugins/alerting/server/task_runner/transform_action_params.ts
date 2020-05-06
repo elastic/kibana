@@ -29,7 +29,7 @@ export function transformActionParams({
   actionParams,
   state,
 }: TransformActionParamsOptions): AlertActionParams {
-  const result = cloneDeep(actionParams, (value: any) => {
+  const result = cloneDeep(actionParams, (value: unknown) => {
     if (!isString(value)) return;
 
     // when the list of variables we pass in here changes,

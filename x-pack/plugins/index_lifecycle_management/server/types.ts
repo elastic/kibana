@@ -14,7 +14,7 @@ import { isEsError } from './lib/is_es_error';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
-  indexManagement: IndexManagementPluginSetup;
+  indexManagement?: IndexManagementPluginSetup;
 }
 
 export interface RouteDependencies {

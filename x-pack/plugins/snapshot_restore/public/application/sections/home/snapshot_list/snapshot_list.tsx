@@ -10,10 +10,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
 
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { WithPrivileges } from '../../../lib/authorization';
 import { documentationLinksService } from '../../../services/documentation';
 import { useLoadSnapshots } from '../../../services/http';
 import {

@@ -16,6 +16,7 @@ export { ActionTypeExecutorResult } from '../../../../actions/server/types';
 const StatusRt = rt.union([rt.literal('open'), rt.literal('closed')]);
 
 const CaseBasicRt = rt.type({
+  connector_id: rt.string,
   description: rt.string,
   status: StatusRt,
   tags: rt.array(rt.string),
@@ -127,35 +128,34 @@ export const ServiceConnectorCommentParamsRt = rt.type({
   updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
 });
 
-export const ServiceConnectorCaseParamsRt = rt.intersection([
-  rt.type({
-    caseId: rt.string,
-    createdAt: rt.string,
-    createdBy: ServiceConnectorUserParams,
-    incidentId: rt.union([rt.string, rt.null]),
-    title: rt.string,
-    updatedAt: rt.union([rt.string, rt.null]),
-    updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
-  }),
-  rt.partial({
-    description: rt.string,
-    comments: rt.array(ServiceConnectorCommentParamsRt),
-  }),
-]);
+export const ServiceConnectorCaseParamsRt = rt.type({
+  caseId: rt.string,
+  createdAt: rt.string,
+  createdBy: ServiceConnectorUserParams,
+  externalId: rt.union([rt.string, rt.null]),
+  title: rt.string,
+  updatedAt: rt.union([rt.string, rt.null]),
+  updatedBy: rt.union([ServiceConnectorUserParams, rt.null]),
+  description: rt.union([rt.string, rt.null]),
+  comments: rt.union([rt.array(ServiceConnectorCommentParamsRt), rt.null]),
+});
 
 export const ServiceConnectorCaseResponseRt = rt.intersection([
   rt.type({
-    number: rt.string,
-    incidentId: rt.string,
+    title: rt.string,
+    id: rt.string,
     pushedDate: rt.string,
     url: rt.string,
   }),
   rt.partial({
     comments: rt.array(
-      rt.type({
-        commentId: rt.string,
-        pushedDate: rt.string,
-      })
+      rt.intersection([
+        rt.type({
+          commentId: rt.string,
+          pushedDate: rt.string,
+        }),
+        rt.partial({ externalCommentId: rt.string }),
+      ])
     ),
   }),
 ]);
@@ -167,6 +167,7 @@ export type CasesResponse = rt.TypeOf<typeof CasesResponseRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
+export type Status = rt.TypeOf<typeof StatusRt>;
 export type CaseExternalServiceRequest = rt.TypeOf<typeof CaseExternalServiceRequestRt>;
 export type ServiceConnectorCaseParams = rt.TypeOf<typeof ServiceConnectorCaseParamsRt>;
 export type ServiceConnectorCaseResponse = rt.TypeOf<typeof ServiceConnectorCaseResponseRt>;

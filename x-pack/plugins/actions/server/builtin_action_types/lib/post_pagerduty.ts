@@ -9,7 +9,7 @@ import { Services } from '../../types';
 
 interface PostPagerdutyOptions {
   apiUrl: string;
-  data: any;
+  data: unknown;
   headers: Record<string, string>;
   services: Services;
 }

@@ -38,7 +38,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, RequestBody, any>,
+    req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);

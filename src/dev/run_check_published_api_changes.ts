@@ -250,7 +250,7 @@ async function run(
         Options:
           --accept    {dim Accepts all changes by updating the API Review files and documentation}
           --docs      {dim Updates the Core API documentation}
-          --only      {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
+          --filter    {dim RegExp that folder names must match, folders: [${folders.join(', ')}]}
           --help      {dim Show this message}
       `)
     );

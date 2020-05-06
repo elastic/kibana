@@ -115,10 +115,8 @@ export class Plugin {
     const savedObjectsService = new SpacesSavedObjectsService();
     savedObjectsService.setup({ core, spacesService });
 
-    const viewRouter = core.http.createRouter();
     initSpacesViewsRoutes({
-      viewRouter,
-      cspHeader: core.http.csp.header,
+      httpResources: core.http.resources,
     });
 
     const externalRouter = core.http.createRouter();

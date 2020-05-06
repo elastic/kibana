@@ -75,7 +75,7 @@ export class IndexLifecycleManagementServerPlugin implements Plugin<void, void, 
     });
 
     if (config.ui.enabled) {
-      if (indexManagement.indexDataEnricher) {
+      if (indexManagement && indexManagement.indexDataEnricher) {
         indexManagement.indexDataEnricher.add(indexLifecycleDataEnricher);
       }
     }

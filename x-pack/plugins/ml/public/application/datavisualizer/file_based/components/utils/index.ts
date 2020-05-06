@@ -9,7 +9,6 @@ export {
   hasImportPermission,
   processResults,
   readFile,
-  reduceData,
   getMaxBytes,
   getMaxBytesFormatted,
 } from './utils';

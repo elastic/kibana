@@ -7,6 +7,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
@@ -18,26 +19,27 @@ import {
   registerDeleteRoute,
 } from './routes/api';
 
-export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> {
+export interface RemoteClustersPluginSetup {
+  isUiEnabled: boolean;
+}
+
+export class RemoteClustersServerPlugin
+  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
   licenseStatus: LicenseStatus;
   log: Logger;
-  config: Observable<ConfigType>;
+  config$: Observable<ConfigType>;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();
-    this.config = config.create();
+    this.config$ = config.create();
     this.licenseStatus = { valid: false };
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing, cloud }: Dependencies
-  ) {
-    const elasticsearch = await elasticsearchService.adminClient;
+  async setup({ http }: CoreSetup, { licensing, cloud }: Dependencies) {
     const router = http.createRouter();
+    const config = await this.config$.pipe(first()).toPromise();
+
     const routeDependencies: RouteDependencies = {
-      elasticsearch,
-      elasticsearchService,
       router,
       getLicenseStatus: () => this.licenseStatus,
       config: {
@@ -70,6 +72,10 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
         }
       }
     });
+
+    return {
+      isUiEnabled: config.ui.enabled,
+    };
   }
 
   start() {}

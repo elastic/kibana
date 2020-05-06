@@ -7,15 +7,24 @@
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { SavedObjectAttributes, SavedObjectsClientContract } from '../../../../src/core/server';
 import { Alert, AlertActionParams, ActionGroup } from '../common';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectAttributes,
+  SavedObjectsClientContract,
+} from '../../../../src/core/server';
 
+// This will have to remain `any` until we can extend Alert Executors with generics
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type State = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Context = Record<string, any>;
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: any) => Services;
+export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -29,8 +38,9 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
-  callCluster(path: string, opts: any): Promise<any>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
 
 export interface AlertServices extends Services {
@@ -42,6 +52,8 @@ export interface AlertExecutorOptions {
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices;
+  // This will have to remain `any` until we can extend Alert Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   state: State;
   spaceId: string;
@@ -61,7 +73,7 @@ export interface AlertType {
   id: string;
   name: string;
   validate?: {
-    params?: { validate: (object: any) => any };
+    params?: { validate: (object: unknown) => AlertExecutorOptions['params'] };
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];

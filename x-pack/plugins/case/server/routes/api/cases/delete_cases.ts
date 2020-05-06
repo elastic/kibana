@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
+import { CASES_URL } from '../../../../common/constants';
 
 export function initDeleteCasesApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         query: schema.object({
           ids: schema.arrayOf(schema.string()),

@@ -1,12 +1,16 @@
 [role="xpack"]
 [[agent-configuration]]
-=== APM Agent configuration
+=== APM Agent central configuration
 
-APM Agent configuration allows you to fine-tune your agent configuration directly in Kibana.
-Best of all, changes are automatically propagated to your APM agents so there's no need to redeploy.
+++++
+<titleabbrev>Configure APM agents with central config</titleabbrev>
+++++
 
-To get started, simply choose the services and environments you wish to configure.
-The APM app will let you know when your configurations have been applied by your agents.
+APM Agent configuration allows you to fine-tune your agent configuration from within the APM app.
+Changes are automatically propagated to your APM agents, so there's no need to redeploy.
+
+To get started, choose the services and environments you wish to configure.
+The APM app will let you know when your agents have applied your configurations.
 
 [role="screenshot"]
 image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
@@ -14,29 +18,28 @@ image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
 [float]
 ==== Precedence
 
-Configurations set with APM Agent configuration take precedence over configurations set locally in the Agent.
+Configurations set from the APM app take precedence over configurations set locally in each Agent.
 However, if APM Server is slow to respond, is offline, reports an error, etc.,
 APM agents will use local defaults until they're able to update the configuration.
-For this reason, it is still important to set custom default configurations locally in each of your agents.
+For this reason, it is still essential to set custom default configurations locally in each of your agents.
 
 [float]
 ==== APM Server setup
 
 This feature requires {apm-server-ref}/setup-kibana-endpoint.html[Kibana endpoint configuration] in APM Server.
 
-Why is additional configuration needed in APM Server?
-That's because APM Server acts as a proxy between the agents and Kibana.
+APM Server acts as a proxy between the agents and Kibana.
 Kibana communicates any changed settings to APM Server so that your agents only need to poll APM Server to determine which settings have changed.
 
 [float]
 ==== Supported configurations
 
-Each Agent has its own list of supported configurations.
+Each Agent has a list of supported configurations.
 After selecting a Service name and environment in the APM app,
-a list of all available configuration options,
+a list of all supported configuration options,
 including descriptions and default values, will be displayed.
 
-Supported configurations are also marked in each Agent's configuration documentation:
+Supported configurations are also tagged with the image:./images/dynamic-config.svg[] badge in each Agent's configuration reference:
 
 [horizontal]
 Go Agent:: {apm-go-ref}/configuration.html[Configuration reference]

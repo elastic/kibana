@@ -22,6 +22,7 @@ import { RefreshInterval, TimefilterContract } from 'src/plugins/data/public';
 import { FilterUtils } from './filter_utils';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { DashboardAppState } from '../../types';
+import { esFilters } from '../../../../data/public';
 
 export function updateSavedDashboard(
   savedDashboard: SavedObjectDashboard,
@@ -48,4 +49,10 @@ export function updateSavedDashboard(
     'value',
   ]);
   savedDashboard.refreshInterval = savedDashboard.timeRestore ? timeRestoreObj : undefined;
+
+  // save only unpinned filters
+  const unpinnedFilters = savedDashboard
+    .getFilters()
+    .filter(filter => !esFilters.isFilterPinned(filter));
+  savedDashboard.searchSource.setField('filter', unpinnedFilters);
 }

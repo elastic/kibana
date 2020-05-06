@@ -4,28 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/layer_wizard_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/sources/source_registry';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import '../../../../plugins/maps/public/layers/load_layer_wizards';
-
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
-// @ts-ignore
-import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 // @ts-ignore
-import { MapListing } from './components/map_listing';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import {
-  setInspector,
-  setIndexPatternSelect,
-  setTimeFilter,
-  setInjectedVarFunc,
-  setIndexPatternService,
-} from './kibana_services';
+import { wrapInI18nContext } from 'ui/i18n';
+// @ts-ignore
+import { MapListing } from '../../../../plugins/maps/public/components/map_listing'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 // @ts-ignore
 import {
   bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
@@ -33,7 +18,6 @@ import {
 } from '../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -62,20 +46,6 @@ interface MapsPluginStartDependencies {
   // file_upload TODO: Export type from file upload and use here
 }
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { injectedMetadata } = core;
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
-  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
-};
-
-export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
-  const { data, inspector } = plugins;
-  setInspector(inspector);
-  setIndexPatternSelect(data.ui.IndexPatternSelect);
-  setTimeFilter(data.query.timefilter.timefilter);
-  setIndexPatternService(data.indexPatterns);
-};
-
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
   public setup(core: CoreSetup, { __LEGACY: { uiModules }, np }: MapsPluginSetupDependencies) {
@@ -85,14 +55,10 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindSetupCoreAndPlugins(core, np);
     bindNpSetupCoreAndPlugins(core, np);
-
-    np.home.featureCatalogue.register(featureCatalogueEntry);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
-    bindStartCoreAndPlugins(core, plugins);
     bindNpStartCoreAndPlugins(core, plugins);
   }
 }

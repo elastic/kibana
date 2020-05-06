@@ -92,7 +92,7 @@ describe('health check', () => {
 
     const description = queryByRole(/banner/i);
     expect(description!.textContent).toMatchInlineSnapshot(
-      `"To create an alert, set a value for xpack.encrypted_saved_objects.encryptionKey in your kibana.yml file. Learn how."`
+      `"To create an alert, set a value for xpack.encryptedSavedObjects.encryptionKey in your kibana.yml file. Learn how."`
     );
 
     const action = queryByText(/Learn/i);

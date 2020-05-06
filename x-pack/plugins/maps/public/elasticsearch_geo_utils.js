@@ -18,6 +18,7 @@ import {
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
 import { SPATIAL_FILTER_TYPE } from './kibana_services';
+import turfCircle from '@turf/circle';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -64,7 +65,7 @@ function ensureGeometryType(type, expectedTypes) {
  * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
  * @returns {number}
  */
-export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epochMillisFields) {
   const features = [];
   const tmpGeometriesAccumulator = [];
 
@@ -78,6 +79,16 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else {
       geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
+    }
+
+    // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
+    // https://github.com/elastic/elasticsearch/issues/50622
+    // Convert these field values to integers.
+    for (let i = 0; i < epochMillisFields.length; i++) {
+      const fieldName = epochMillisFields[i];
+      if (typeof properties[fieldName] === 'string') {
+        properties[fieldName] = parseInt(properties[fieldName]);
+      }
     }
 
     // don't include geometry field value in properties
@@ -231,28 +242,16 @@ function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
   };
 }
 
-function createGeoPolygonFilter(polygonCoordinates, geoFieldName, filterProps = {}) {
-  return {
-    geo_polygon: {
-      ignore_unmapped: true,
-      [geoFieldName]: {
-        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
-          return {
-            lon: coordinatePair[LON_INDEX],
-            lat: coordinatePair[LAT_INDEX],
-          };
-        }),
-      },
-    },
-    ...filterProps,
-  };
-}
-
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   ensureGeoField(geoFieldType);
 
   const safePolygon = convertMapExtentToPolygon(mapExtent);
 
+  // Extent filters are used to dynamically filter data for the current map view port.
+  // Continue to use geo_bounding_box queries for extent filters
+  // 1) geo_bounding_box queries are faster than polygon queries
+  // 2) geo_shape benefits of pre-indexed shapes and
+  // compatability across multi-indices with geo_point and geo_shape do not apply to this use case.
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
     return createGeoBoundBoxFilter(safePolygon, geoFieldName);
   }
@@ -267,15 +266,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   };
 }
 
-export function createSpatialFilterWithBoundingBox(options) {
-  return createGeometryFilterWithMeta({ ...options, isBoundingBox: true });
-}
-
-export function createSpatialFilterWithGeometry(options) {
-  return createGeometryFilterWithMeta(options);
-}
-
-function createGeometryFilterWithMeta({
+export function createSpatialFilterWithGeometry({
   preIndexedShape,
   geometry,
   geometryLabel,
@@ -283,16 +274,16 @@ function createGeometryFilterWithMeta({
   geoFieldName,
   geoFieldType,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
-  isBoundingBox = false,
 }) {
   ensureGeoField(geoFieldType);
 
-  const relationLabel =
-    geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT
-      ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
-          defaultMessage: 'in',
-        })
-      : getEsSpatialRelationLabel(relation);
+  const isGeoPoint = geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT;
+
+  const relationLabel = isGeoPoint
+    ? i18n.translate('xpack.maps.es_geo_utils.shapeFilter.geoPointRelationLabel', {
+        defaultMessage: 'in',
+      })
+    : getEsSpatialRelationLabel(relation);
   const meta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
@@ -301,47 +292,24 @@ function createGeometryFilterWithMeta({
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
   };
 
-  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-    const shapeQuery = {
-      relation,
-    };
+  const shapeQuery = {
+    // geo_shape query with geo_point field only supports intersects relation
+    relation: isGeoPoint ? ES_SPATIAL_RELATIONS.INTERSECTS : relation,
+  };
 
-    if (preIndexedShape) {
-      shapeQuery.indexed_shape = preIndexedShape;
-    } else {
-      shapeQuery.shape = geometry;
-    }
-
-    return {
-      meta,
-      geo_shape: {
-        ignore_unmapped: true,
-        [geoFieldName]: shapeQuery,
-      },
-    };
+  if (preIndexedShape) {
+    shapeQuery.indexed_shape = preIndexedShape;
+  } else {
+    shapeQuery.shape = geometry;
   }
 
-  // geo_points supports limited geometry types
-  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON]);
-
-  if (geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
-    return {
-      meta,
-      query: {
-        bool: {
-          should: geometry.coordinates.map(polygonCoordinates => {
-            return createGeoPolygonFilter(polygonCoordinates, geoFieldName);
-          }),
-        },
-      },
-    };
-  }
-
-  if (isBoundingBox) {
-    return createGeoBoundBoxFilter(geometry, geoFieldName, { meta });
-  }
-
-  return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
+  return {
+    meta,
+    geo_shape: {
+      ignore_unmapped: true,
+      [geoFieldName]: shapeQuery,
+    },
+  };
 }
 
 export function createDistanceFilterWithMeta({
@@ -363,7 +331,7 @@ export function createDistanceFilterWithMeta({
           values: {
             distanceKm,
             geoFieldName,
-            pointLabel: point.join(','),
+            pointLabel: point.join(', '),
           },
         }),
   };
@@ -483,4 +451,41 @@ export function clamp(val, min, max) {
   } else {
     return val;
   }
+}
+
+export function extractFeaturesFromFilters(filters) {
+  const features = [];
+  filters
+    .filter(filter => {
+      return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
+    })
+    .forEach(filter => {
+      let geometry;
+      if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
+        const distanceSplit = filter.geo_distance.distance.split('km');
+        const distance = parseFloat(distanceSplit[0]);
+        const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
+        geometry = circleFeature.geometry;
+      } else if (
+        filter.geo_shape &&
+        filter.geo_shape[filter.meta.key] &&
+        filter.geo_shape[filter.meta.key].shape
+      ) {
+        geometry = filter.geo_shape[filter.meta.key].shape;
+      } else {
+        // do not know how to convert spatial filter to geometry
+        // this includes pre-indexed shapes
+        return;
+      }
+
+      features.push({
+        type: 'Feature',
+        geometry,
+        properties: {
+          filter: filter.meta.alias,
+        },
+      });
+    });
+
+  return features;
 }

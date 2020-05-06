@@ -26,7 +26,6 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     docViews: {
       addDocView: jest.fn(),
-      setAngularInjectorGetter: jest.fn(),
     },
   };
   return setupContract;
@@ -34,8 +33,8 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    docViews: {
-      DocViewer: jest.fn(() => null),
+    savedSearches: {
+      createLoader: jest.fn(),
     },
   };
   return startContract;

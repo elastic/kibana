@@ -17,7 +17,7 @@ import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ScalingForm } from './scaling_form';
-import { getTermsFields } from '../../../index_pattern_util';
+import { getTermsFields, supportsGeoTileAgg } from '../../../index_pattern_util';
 
 function getGeoFields(fields) {
   return fields.filter(field => {
@@ -28,13 +28,8 @@ function getGeoFields(fields) {
   });
 }
 
-function isGeoFieldAggregatable(indexPattern, geoFieldName) {
-  if (!indexPattern) {
-    return false;
-  }
-
-  const geoField = indexPattern.fields.getByName(geoFieldName);
-  return geoField && geoField.aggregatable;
+function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
+  return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
 }
 
 const RESET_INDEX_PATTERN_STATE = {
@@ -133,7 +128,7 @@ export class CreateSourceEditor extends Component {
     // Respect previous scaling type selection unless newly selected geo field does not support clustering.
     const scalingType =
       this.state.scalingType === SCALING_TYPES.CLUSTERS &&
-      !isGeoFieldAggregatable(this.state.indexPattern, geoFieldName)
+      !doesGeoFieldSupportGeoTileAgg(this.state.indexPattern, geoFieldName)
         ? SCALING_TYPES.LIMIT
         : this.state.scalingType;
     this.setState(
@@ -218,7 +213,7 @@ export class CreateSourceEditor extends Component {
           indexPatternId={this.state.indexPatternId}
           onChange={this._onScalingPropChange}
           scalingType={this.state.scalingType}
-          supportsClustering={isGeoFieldAggregatable(
+          supportsClustering={doesGeoFieldSupportGeoTileAgg(
             this.state.indexPattern,
             this.state.geoFieldName
           )}

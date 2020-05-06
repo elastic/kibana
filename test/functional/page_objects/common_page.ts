@@ -44,6 +44,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     ensureCurrentUrl: boolean;
     shouldLoginIfPrompted: boolean;
     useActualUrl: boolean;
+    insertTimestamp: boolean;
   }
 
   class CommonPage {
@@ -65,7 +66,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
      */
-    private async loginIfPrompted(appUrl: string) {
+    private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
       let currentUrl = await browser.getCurrentUrl();
       log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
       await testSubjects.find('kibanaChrome', 6 * defaultFindTimeout); // 60 sec waiting
@@ -87,7 +88,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
           6 * defaultFindTimeout
         );
-        await browser.get(appUrl);
+        await browser.get(appUrl, insertTimestamp);
         currentUrl = await browser.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }
@@ -95,7 +96,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async navigate(navigateProps: NavigateProps) {
-      const { appConfig, ensureCurrentUrl, shouldLoginIfPrompted, useActualUrl } = navigateProps;
+      const {
+        appConfig,
+        ensureCurrentUrl,
+        shouldLoginIfPrompted,
+        useActualUrl,
+        insertTimestamp,
+      } = navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
 
       await retry.try(async () => {
@@ -111,7 +118,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         }
 
         const currentUrl = shouldLoginIfPrompted
-          ? await this.loginIfPrompted(appUrl)
+          ? await this.loginIfPrompted(appUrl, insertTimestamp)
           : await browser.getCurrentUrl();
 
         if (ensureCurrentUrl && !currentUrl.includes(appUrl)) {
@@ -134,6 +141,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
         useActualUrl = false,
+        insertTimestamp = true,
       } = {}
     ) {
       const appConfig = {
@@ -146,6 +154,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         ensureCurrentUrl,
         shouldLoginIfPrompted,
         useActualUrl,
+        insertTimestamp,
       });
     }
 
@@ -165,6 +174,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         ensureCurrentUrl = true,
         shouldLoginIfPrompted = true,
         useActualUrl = true,
+        insertTimestamp = true,
       } = {}
     ) {
       const appConfig = {
@@ -178,6 +188,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         ensureCurrentUrl,
         shouldLoginIfPrompted,
         useActualUrl,
+        insertTimestamp,
       });
     }
 
@@ -208,7 +219,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async navigateToApp(
       appName: string,
-      { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}
+      { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
     ) {
       let appUrl: string;
       if (config.has(['apps', appName])) {
@@ -239,7 +250,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           log.debug('returned from get, calling refresh');
           await browser.refresh();
           let currentUrl = shouldLoginIfPrompted
-            ? await this.loginIfPrompted(appUrl)
+            ? await this.loginIfPrompted(appUrl, insertTimestamp)
             : await browser.getCurrentUrl();
 
           if (currentUrl.includes('app/kibana')) {
@@ -247,25 +258,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           }
 
           currentUrl = (await browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
-          const maxAdditionalLengthOnNavUrl = 230;
 
-          // On several test failures at the end of the TileMap test we try to navigate back to
-          // Visualize so we can create the next Vertical Bar Chart, but we can see from the
-          // logging and the screenshot that it's still on the TileMap page. Why didn't the "get"
-          // with a new timestamped URL go? I thought that sleep(700) between the get and the
-          // refresh would solve the problem but didn't seem to always work.
-          // So this hack fails the navSuccessful check if the currentUrl doesn't match the
-          // appUrl plus up to 230 other chars.
-          // Navigating to Settings when there is a default index pattern has a URL length of 196
-          // (from debug output). Some other tabs may also be long. But a rather simple configured
-          // visualization is about 1000 chars long. So at least we catch that case.
-
-          // Browsers don't show the ':port' if it's 80 or 443 so we have to
-          // remove that part so we can get a match in the tests.
-          const navSuccessful = new RegExp(
-            appUrl.replace(':80/', '/').replace(':443/', '/') +
-              `.{0,${maxAdditionalLengthOnNavUrl}}$`
-          ).test(currentUrl);
+          const navSuccessful = currentUrl
+            .replace(':80/', '/')
+            .replace(':443/', '/')
+            .startsWith(appUrl);
 
           if (!navSuccessful) {
             const msg = `App failed to load: ${appName} in ${defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;

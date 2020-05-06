@@ -1,0 +1,24 @@
+{
+  "description": "This is an example of how to detect an unwanted web client user agent. This search matches the user agent for sqlmap 1.3.11, which is a popular FOSS tool for testing web applications for SQL injection vulnerabilities.",
+  "false_positives": [
+    "This rule does not indicate that a SQL injection attack occurred, only that the `sqlmap` tool was used. Security scans and tests may result in these errors. If the source is not an authorized security tester, this is generally suspicious or malicious activity."
+  ],
+  "index": [
+    "apm-*-transaction*"
+  ],
+  "language": "kuery",
+  "name": "Web Application Suspicious Activity: sqlmap User Agent",
+  "query": "user_agent.original:\"sqlmap/1.3.11#stable (http://sqlmap.org)\"",
+  "references": [
+    "http://sqlmap.org/"
+  ],
+  "risk_score": 47,
+  "rule_id": "d49cc73f-7a16-4def-89ce-9fc7127d7820",
+  "severity": "medium",
+  "tags": [
+    "APM",
+    "Elastic"
+  ],
+  "type": "query",
+  "version": 2
+}

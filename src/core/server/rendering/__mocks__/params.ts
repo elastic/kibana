@@ -24,12 +24,12 @@ import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 
 const context = mockCoreContext.create();
 const http = httpServiceMock.createSetupContract();
-const plugins = pluginServiceMock.createSetupContract();
+const uiPlugins = pluginServiceMock.createUiPlugins();
 const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingSetupDeps = {
   http,
   legacyPlugins,
-  plugins,
+  uiPlugins,
 };

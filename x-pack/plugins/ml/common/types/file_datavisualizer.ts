@@ -67,12 +67,14 @@ export interface ImportResponse {
 export interface ImportFailure {
   item: number;
   reason: string;
-  doc: Doc;
+  doc: ImportDoc;
 }
 
 export interface Doc {
   message: string;
 }
+
+export type ImportDoc = Doc | string;
 
 export interface Settings {
   pipeline?: string;

@@ -118,6 +118,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           getAllEmbeddableFactories={this.getEmbeddableFactories}
           overlays={core.overlays}
           notifications={core.notifications}
+          application={core.application}
           inspector={inspector}
           SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
         />

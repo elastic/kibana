@@ -7,13 +7,14 @@
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../../src/core/server';
-import {
-  SIGNALS_INDEX_KEY,
-  DEFAULT_SIGNALS_INDEX,
-} from '../../../legacy/plugins/siem/common/constants';
+import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
+  maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
+  maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
+  maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 });
 

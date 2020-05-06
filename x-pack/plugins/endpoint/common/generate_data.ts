@@ -6,12 +6,18 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, HostMetadata, OSFields, HostFields } from './types';
-// FIXME: move types/model to top-level
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PolicyData } from '../public/applications/endpoint/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { generatePolicy } from '../public/applications/endpoint/models/policy';
+import {
+  AlertEvent,
+  EndpointEvent,
+  Host,
+  HostMetadata,
+  HostOS,
+  HostPolicyResponse,
+  HostPolicyResponseActions,
+  HostPolicyResponseActionStatus,
+  PolicyData,
+} from './types';
+import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -24,7 +30,7 @@ interface EventOptions {
   processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -51,11 +57,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -97,7 +103,7 @@ interface HostInfo {
     version: string;
     id: string;
   };
-  host: HostFields;
+  host: Host;
   endpoint: {
     policy: {
       id: string;
@@ -129,6 +135,13 @@ export class EndpointDocGenerator {
    */
   public updateHostData() {
     this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
+  }
+
+  /**
+   * Creates new random policy id for the host to simulate new policy application
+   */
+  public updatePolicyId() {
+    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
   }
 
   private createHostData(): HostInfo {
@@ -302,7 +315,7 @@ export class EndpointDocGenerator {
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
-        name: options.processName ? options.processName : 'powershell.exe',
+        name: options.processName ? options.processName : randomProcessName(),
       },
     };
   }
@@ -326,13 +339,17 @@ export class EndpointDocGenerator {
     percentNodesWithRelated?: number,
     percentChildrenTerminated?: number
   ) {
-    const ancestry = this.createAlertEventAncestry(alertAncestors);
+    const ancestry = this.createAlertEventAncestry(
+      alertAncestors,
+      relatedEventsPerNode,
+      percentNodesWithRelated
+    );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
     }
-    // ancestry will always have at least 2 elements, and the second to last element will be the process associated with the alert
+    // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
-      ancestry[ancestry.length - 2],
+      ancestry[ancestry.length - 1],
       childGenerations,
       maxChildrenPerNode,
       relatedEventsPerNode,
@@ -345,18 +362,44 @@ export class EndpointDocGenerator {
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
    */
-  public createAlertEventAncestry(alertAncestors = 3): Event[] {
+  public createAlertEventAncestry(
+    alertAncestors = 3,
+    relatedEventsPerNode = 5,
+    pctWithRelated = 30
+  ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
+    // generate related alerts for root
+    const processDuration: number = 6 * 3600;
+    if (this.randomN(100) < pctWithRelated) {
+      for (const relatedEvent of this.relatedEventsGenerator(
+        ancestor,
+        relatedEventsPerNode,
+        processDuration
+      )) {
+        events.push(relatedEvent);
+      }
+    }
     for (let i = 0; i < alertAncestors; i++) {
       ancestor = this.generateEvent({
         timestamp: startDate + 1000 * (i + 1),
         parentEntityID: ancestor.process.entity_id,
       });
       events.push(ancestor);
+
+      // generate related alerts for ancestor
+      if (this.randomN(100) < pctWithRelated) {
+        for (const relatedEvent of this.relatedEventsGenerator(
+          ancestor,
+          relatedEventsPerNode,
+          processDuration
+        )) {
+          events.push(relatedEvent);
+        }
+      }
     }
     events.push(
       this.generateAlert(
@@ -475,7 +518,7 @@ export class EndpointDocGenerator {
           streams: [],
           config: {
             policy: {
-              value: generatePolicy(),
+              value: policyFactory(),
             },
           },
         },
@@ -487,6 +530,151 @@ export class EndpointDocGenerator {
         version: '1.0.0',
       },
       revision: 1,
+    };
+  }
+
+  /**
+   * Generates a Host Policy response message
+   */
+  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+    const policyVersion = this.seededUUIDv4();
+    return {
+      '@timestamp': ts,
+      agent: {
+        id: this.commonInfo.agent.id,
+        version: '1.0.0-local.20200416.0',
+      },
+      elastic: {
+        agent: {
+          id: this.commonInfo.elastic.agent.id,
+        },
+      },
+      ecs: {
+        version: '1.4.0',
+      },
+      host: {
+        id: this.commonInfo.host.id,
+      },
+      endpoint: {
+        policy: {
+          applied: {
+            actions: {
+              configure_elasticsearch_connection: {
+                message: 'elasticsearch comes configured successfully',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              configure_kernel: {
+                message: 'Failed to configure kernel',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              configure_logging: {
+                message: 'Successfully configured logging',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              configure_malware: {
+                message: 'Unexpected error configuring malware',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              connect_kernel: {
+                message: 'Successfully initialized minifilter',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_file_open_events: {
+                message: 'Successfully stopped file open event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_file_write_events: {
+                message: 'Failed to stop file write event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_image_load_events: {
+                message: 'Successfuly started image load event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_process_events: {
+                message: 'Successfully started process event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              download_global_artifacts: {
+                message: 'Failed to download EXE model',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              load_config: {
+                message: 'successfully parsed configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              load_malware_model: {
+                message: 'Error deserializing EXE model; no valid malware model installed',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_elasticsearch_config: {
+                message: 'Successfully read Elasticsearch configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_events_config: {
+                message: 'Successfully read events configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_kernel_config: {
+                message: 'Succesfully read kernel configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_logging_config: {
+                message: 'field (logging.debugview) not found in config',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_malware_config: {
+                message: 'Successfully read malware detect configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              workflow: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              download_model: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              ingest_events_config: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+            },
+            id: this.commonInfo.endpoint.policy.id,
+            policy: {
+              id: this.commonInfo.endpoint.policy.id,
+              version: policyVersion,
+            },
+            response: {
+              configurations: {
+                events: {
+                  concerned_actions: ['download_model'],
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                logging: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                malware: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                streaming: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+              },
+            },
+            status: this.randomHostPolicyResponseActionStatus(),
+            version: policyVersion,
+          },
+        },
+      },
+      event: {
+        created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'policy_response',
+      },
     };
   }
 
@@ -533,4 +721,45 @@ export class EndpointDocGenerator {
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
+
+  private randomHostPolicyResponseActions(): Array<keyof HostPolicyResponseActions> {
+    return this.randomArray(this.randomN(8), () =>
+      this.randomChoice([
+        'load_config',
+        'workflow',
+        'download_global_artifacts',
+        'configure_malware',
+        'read_malware_config',
+        'load_malware_model',
+        'read_kernel_config',
+        'configure_kernel',
+        'detect_process_events',
+        'detect_file_write_events',
+        'detect_file_open_events',
+        'detect_image_load_events',
+        'connect_kernel',
+      ])
+    );
+  }
+
+  private randomHostPolicyResponseActionStatus(): HostPolicyResponseActionStatus {
+    return this.randomChoice([
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.warning,
+    ]);
+  }
+}
+
+const fakeProcessNames = [
+  'lsass.exe',
+  'notepad.exe',
+  'mimikatz.exe',
+  'powershell.exe',
+  'iexlorer.exe',
+  'explorer.exe',
+];
+/** Return a random fake process name */
+function randomProcessName(): string {
+  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
 }

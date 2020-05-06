@@ -9,6 +9,7 @@ import contentDisposition from 'content-disposition';
 import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 import { ExportTypeDefinition, ExportTypesRegistry, JobDocOutput, JobSource } from '../../../types';
+import { statuses } from '../../lib/esqueue/constants/statuses';
 
 interface ICustomHeaders {
   [x: string]: any;
@@ -99,11 +100,11 @@ export function getDocumentPayloadFactory(exportTypesRegistry: ExportTypesRegist
     const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
     const { output } = doc._source;
 
-    if (status === 'completed') {
+    if (status === statuses.JOB_STATUS_COMPLETED || status === statuses.JOB_STATUS_WARNINGS) {
       return getCompleted(output, jobType, title);
     }
 
-    if (status === 'failed') {
+    if (status === statuses.JOB_STATUS_FAILED) {
       return getFailure(output);
     }
 

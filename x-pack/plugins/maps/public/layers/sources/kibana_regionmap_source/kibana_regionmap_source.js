@@ -5,21 +5,19 @@
  */
 
 import { AbstractVectorSource } from '../vector_source';
-import React from 'react';
-import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FIELD_ORIGIN, REGIONMAP_FILE } from '../../../../common/constants';
+import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
 
-const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
 });
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
-  static type = REGIONMAP_FILE;
+  static type = SOURCE_TYPES.REGIONMAP_FILE;
 
   static createDescriptor({ name }) {
     return {
@@ -99,22 +97,5 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
 registerSource({
   ConstructorFunction: KibanaRegionmapSource,
-  type: REGIONMAP_FILE,
+  type: SOURCE_TYPES.REGIONMAP_FILE,
 });
-
-export const kibanaRegionMapLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
-    defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',
-  }),
-  icon: 'logoKibana',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      const sourceDescriptor = KibanaRegionmapSource.createDescriptor(sourceConfig);
-      const source = new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

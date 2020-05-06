@@ -25,7 +25,7 @@ export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'home']);
 
   describe('Kibana takes you home', function describeIndexTests() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
 
     it('clicking on kibana logo should take you to home page', async () => {
       await PageObjects.common.navigateToApp('settings');

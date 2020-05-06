@@ -17,9 +17,15 @@
  * under the License.
  */
 
-import { ISearchSource } from './search_source';
+import {
+  injectedMetadataServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../core/public/mocks';
 
-export const searchSourceMock: MockedKeys<ISearchSource> = {
+import { ISearchSource, SearchSource } from './search_source';
+import { SearchSourceFields } from './types';
+
+export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   setPreferredSearchStrategyId: jest.fn(),
   setFields: jest.fn().mockReturnThis(),
   setField: jest.fn().mockReturnThis(),
@@ -39,3 +45,21 @@ export const searchSourceMock: MockedKeys<ISearchSource> = {
   history: [],
   serialize: jest.fn(),
 };
+
+export const searchSourceMock = {
+  create: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  fromJSON: jest.fn().mockReturnValue(searchSourceInstanceMock),
+};
+
+export const createSearchSourceMock = (fields?: SearchSourceFields) =>
+  new SearchSource(fields, {
+    search: jest.fn(),
+    legacySearch: {
+      esClient: {
+        search: jest.fn(),
+        msearch: jest.fn(),
+      },
+    },
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+  });

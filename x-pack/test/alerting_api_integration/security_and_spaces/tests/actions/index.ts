@@ -11,9 +11,11 @@ export default function actionsTests({ loadTestFile }: FtrProviderContext) {
   describe('Actions', () => {
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
+    loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
     loadTestFile(require.resolve('./builtin_action_types/pagerduty'));
     loadTestFile(require.resolve('./builtin_action_types/server_log'));
     loadTestFile(require.resolve('./builtin_action_types/servicenow'));
+    loadTestFile(require.resolve('./builtin_action_types/jira'));
     loadTestFile(require.resolve('./builtin_action_types/slack'));
     loadTestFile(require.resolve('./builtin_action_types/webhook'));
     loadTestFile(require.resolve('./create'));

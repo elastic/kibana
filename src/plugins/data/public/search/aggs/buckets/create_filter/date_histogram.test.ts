@@ -32,6 +32,7 @@ import { RangeFilter } from '../../../../../common';
 import { coreMock, notificationServiceMock } from '../../../../../../../core/public/mocks';
 import { queryServiceMock } from '../../../../query/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/mocks';
+import { InternalStartServices } from '../../../../types';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {
@@ -47,10 +48,11 @@ describe('AggConfig Filters', () => {
       aggTypesDependencies = {
         uiSettings,
         query: queryServiceMock.createSetupContract(),
-        getInternalStartServices: () => ({
-          fieldFormats: fieldFormatsServiceMock.createStartContract(),
-          notifications: notificationServiceMock.createStartContract(),
-        }),
+        getInternalStartServices: () =>
+          (({
+            fieldFormats: fieldFormatsServiceMock.createStartContract(),
+            notifications: notificationServiceMock.createStartContract(),
+          } as unknown) as InternalStartServices),
       };
 
       mockDataServices();
@@ -78,7 +80,10 @@ describe('AggConfig Filters', () => {
             params: { field: field.name, interval, customInterval: '5d' },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]) }
+        {
+          typesRegistry: mockAggTypesRegistry([getDateHistogramBucketAgg(aggTypesDependencies)]),
+          fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats,
+        }
       );
       const bucketKey = 1422579600000;
 

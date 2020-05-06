@@ -25,15 +25,17 @@ import { IMetricAggConfig } from './metric_agg_type';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('Top hit metric', () => {
   let aggDsl: Record<string, any>;
   let aggConfig: IMetricAggConfig;
   const aggTypesDependencies: TopHitMetricAggDependencies = {
-    getInternalStartServices: () => ({
-      fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      notifications: notificationServiceMock.createStartContract(),
-    }),
+    getInternalStartServices: () =>
+      (({
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
+        notifications: notificationServiceMock.createStartContract(),
+      } as unknown) as InternalStartServices),
   };
 
   const init = ({
@@ -89,7 +91,7 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)

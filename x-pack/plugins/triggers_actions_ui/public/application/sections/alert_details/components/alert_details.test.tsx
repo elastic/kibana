@@ -7,22 +7,52 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType } from '../../../../types';
-import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiBetaBadge } from '@elastic/eui';
-import { times, random } from 'lodash';
+import { Alert, ActionType, AlertTypeRegistryContract } from '../../../../types';
+import {
+  EuiTitle,
+  EuiBadge,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
+import { coreMock } from 'src/core/public/mocks';
+const mockes = coreMock.createSetup();
 
 jest.mock('../../../app_context', () => ({
   useAppDependencies: jest.fn(() => ({
     http: jest.fn(),
-    legacy: {
-      capabilities: {
-        get: jest.fn(() => ({})),
-      },
+    capabilities: {
+      get: jest.fn(() => ({})),
     },
+    actionTypeRegistry: jest.fn(),
+    alertTypeRegistry: jest.fn(() => {
+      const mocked: jest.Mocked<AlertTypeRegistryContract> = {
+        has: jest.fn(),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      };
+      return mocked;
+    }),
+    toastNotifications: mockes.notifications.toasts,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+    uiSettings: mockes.uiSettings,
+    dataPlugin: jest.fn(),
+    charts: jest.fn(),
   })),
+}));
+
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+  useLocation: () => ({
+    pathname: '/triggersActions/alerts/',
+  }),
 }));
 
 jest.mock('../../../lib/capabilities', () => ({
@@ -144,7 +174,6 @@ describe('alert_details', () => {
     });
 
     it('renders a counter for multiple alert action', () => {
-      const actionCount = random(1, 10);
       const alert = mockAlert({
         actions: [
           {
@@ -153,12 +182,12 @@ describe('alert_details', () => {
             params: {},
             actionTypeId: '.server-log',
           },
-          ...times(actionCount, () => ({
+          {
             group: 'default',
             id: uuid.v4(),
             params: {},
             actionTypeId: '.email',
-          })),
+          },
         ],
       });
       const alertType = {
@@ -207,7 +236,7 @@ describe('alert_details', () => {
       expect(
         details.containsMatchingElement(
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{`+${actionCount}`}</EuiBadge>
+            <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
           </EuiFlexItem>
         )
       ).toBeTruthy();
@@ -232,11 +261,33 @@ describe('alert_details', () => {
         ).containsMatchingElement(<ViewInApp alert={alert} />)
       ).toBeTruthy();
     });
+
+    it('links to the Edit flyout', () => {
+      const alert = mockAlert();
+
+      const alertType = {
+        id: '.noop',
+        name: 'No Op',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
+      };
+
+      expect(
+        shallow(
+          <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
+        )
+          .find(EuiButtonEmpty)
+          .find('[data-test-subj="openEditAlertFlyoutButton"]')
+          .first()
+          .exists()
+      ).toBeTruthy();
+    });
   });
 });
 
-describe('enable button', () => {
-  it('should render an enable button when alert is enabled', () => {
+describe('disable button', () => {
+  it('should render a disable button when alert is enabled', () => {
     const alert = mockAlert({
       enabled: true,
     });
@@ -253,16 +304,16 @@ describe('enable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: true,
+      checked: false,
       disabled: false,
     });
   });
 
-  it('should render an enable button when alert is disabled', () => {
+  it('should render a disable button when alert is disabled', () => {
     const alert = mockAlert({
       enabled: false,
     });
@@ -279,11 +330,11 @@ describe('enable button', () => {
       <AlertDetails alert={alert} alertType={alertType} actionTypes={[]} {...mockAlertApis} />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     expect(enableButton.props()).toMatchObject({
-      checked: false,
+      checked: true,
       disabled: false,
     });
   });
@@ -312,7 +363,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');
@@ -347,7 +398,7 @@ describe('enable button', () => {
       />
     )
       .find(EuiSwitch)
-      .find('[name="enable"]')
+      .find('[name="disable"]')
       .first();
 
     enableButton.simulate('click');

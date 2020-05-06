@@ -82,8 +82,8 @@ export const convertTypesToLegacySchema = (
     return {
       ...schema,
       [type.name]: {
-        isNamespaceAgnostic: type.namespaceAgnostic || type.namespaceType === 'agnostic',
-        multiNamespace: !type.namespaceAgnostic && type.namespaceType === 'multiple',
+        isNamespaceAgnostic: type.namespaceType === 'agnostic',
+        multiNamespace: type.namespaceType === 'multiple',
         hidden: type.hidden,
         indexPattern: type.indexPattern,
         convertToAliasScript: type.convertToAliasScript,

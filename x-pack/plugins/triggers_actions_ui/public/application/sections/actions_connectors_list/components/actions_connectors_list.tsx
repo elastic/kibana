@@ -6,7 +6,6 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import {
-  EuiBadge,
   EuiInMemoryTable,
   EuiSpacer,
   EuiButton,
@@ -15,6 +14,9 @@ import {
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBetaBadge,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,7 +32,13 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
+    docLinks,
+  } = useAppDependencies();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -183,48 +191,58 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       truncateText: true,
     },
     {
-      field: 'referencedByCount',
-      'data-test-subj': 'connectorsTableCell-referencedByCount',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.referencedByCountTitle',
-        { defaultMessage: 'Actions' }
-      ),
-      sortable: false,
-      truncateText: true,
+      field: 'isPreconfigured',
+      name: '',
       render: (value: number, item: ActionConnectorTableItem) => {
+        if (item.isPreconfigured) {
+          return (
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  data-test-subj="preConfiguredTitleMessage"
+                  label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertForm.preconfiguredTitleMessage',
+                    {
+                      defaultMessage: 'Preconfigured',
+                    }
+                  )}
+                  tooltipContent="This connector can't be deleted."
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
         return (
-          <EuiBadge color="hollow" key={item.id}>
-            {value}
-          </EuiBadge>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  canDelete
+                    ? i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
+                        { defaultMessage: 'Delete this connector' }
+                      )
+                    : i18n.translate(
+                        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
+                        { defaultMessage: 'Unable to delete connectors' }
+                      )
+                }
+              >
+                <EuiButtonIcon
+                  isDisabled={!canDelete}
+                  data-test-subj="deleteConnector"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
+                    { defaultMessage: 'Delete' }
+                  )}
+                  onClick={() => setConnectorsToDelete([item.id])}
+                  iconType={'trash'}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       },
-    },
-    {
-      field: '',
-      name: '',
-      actions: [
-        {
-          enabled: () => canDelete,
-          'data-test-subj': 'deleteConnector',
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionName',
-            { defaultMessage: 'Delete' }
-          ),
-          description: canDelete
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription',
-                { defaultMessage: 'Delete this connector' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDisabledDescription',
-                { defaultMessage: 'Unable to delete connectors' }
-              ),
-          type: 'icon',
-          icon: 'trash',
-          color: 'danger',
-          onClick: (item: ActionConnectorTableItem) => setConnectorsToDelete([item.id]),
-        },
-      ],
     },
   ];
 
@@ -308,8 +326,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             data-test-subj="createActionButton"
             key="create-action"
             fill
-            iconType="plusInCircle"
-            iconSide="left"
             onClick={() => setAddFlyoutVisibility(true)}
           >
             <FormattedMessage
@@ -384,6 +400,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           capabilities,
           toastNotifications,
           reloadConnectors: loadActions,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout

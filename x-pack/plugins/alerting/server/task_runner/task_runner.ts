@@ -5,7 +5,7 @@
  */
 
 import { pick, mapValues, omit, without } from 'lodash';
-import { Logger, SavedObject } from '../../../../../src/core/server';
+import { Logger, SavedObject, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
@@ -25,13 +25,14 @@ import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { AlertInstances } from '../alert_instance/alert_instance';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
+import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 
 const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
-  runAt: Date;
+  runAt: Date | undefined;
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -92,7 +93,7 @@ export class TaskRunner {
       },
     };
 
-    return this.context.getServices(fakeRequest);
+    return this.context.getServices((fakeRequest as unknown) as KibanaRequest);
   }
 
   private getExecutionHandler(
@@ -173,11 +174,20 @@ export class TaskRunner {
     const alertLabel = `${this.alertType.id}:${alertId}: '${name}'`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { namespace, saved_objects: [{ type: 'alert', id: alertId }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: alertId,
+            namespace,
+          },
+        ],
+      },
     };
     eventLogger.startTiming(event);
 
-    let updatedAlertTypeState: void | Record<string, any>;
+    let updatedAlertTypeState: void | Record<string, unknown>;
     try {
       updatedAlertTypeState = await this.alertType.executor({
         alertId,
@@ -201,12 +211,16 @@ export class TaskRunner {
       event.message = `alert execution failure: ${alertLabel}`;
       event.error = event.error || {};
       event.error.message = err.message;
+      event.event = event.event || {};
+      event.event.outcome = 'failure';
       eventLogger.logEvent(event);
       throw err;
     }
 
     eventLogger.stopTiming(event);
     event.message = `alert executed: ${alertLabel}`;
+    event.event = event.event || {};
+    event.event.outcome = 'success';
     eventLogger.logEvent(event);
 
     // Cleanup alert instances that are no longer scheduling actions to avoid over populating the alertInstances object
@@ -328,22 +342,29 @@ export class TaskRunner {
           };
         },
         (err: Error) => {
-          this.logger.error(`Executing Alert "${alertId}" has resulted in Error: ${err.message}`);
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
+          if (isAlertSavedObjectNotFoundError(err, alertId)) {
+            this.logger.debug(message);
+          } else {
+            this.logger.error(message);
+          }
           return {
             ...originalState,
             previousStartedAt,
           };
         }
       ),
-      runAt: resolveErr<Date, Error>(runAt, () =>
-        getNextRunAt(
-          new Date(),
-          // if we fail at this point we wish to recover but don't have access to the Alert's
-          // attributes, so we'll use a default interval to prevent the underlying task from
-          // falling into a failed state
-          FALLBACK_RETRY_INTERVAL
-        )
-      ),
+      runAt: resolveErr<Date | undefined, Error>(runAt, err => {
+        return isAlertSavedObjectNotFoundError(err, alertId)
+          ? undefined
+          : getNextRunAt(
+              new Date(),
+              // if we fail at this point we wish to recover but don't have access to the Alert's
+              // attributes, so we'll use a default interval to prevent the underlying task from
+              // falling into a failed state
+              FALLBACK_RETRY_INTERVAL
+            );
+      }),
     };
   }
 }
@@ -378,11 +399,17 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
         action,
       },
       kibana: {
-        namespace: params.namespace,
         alerting: {
           instance_id: id,
         },
-        saved_objects: [{ type: 'alert', id: params.alertId }],
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'alert',
+            id: params.alertId,
+            namespace: params.namespace,
+          },
+        ],
       },
       message,
     };

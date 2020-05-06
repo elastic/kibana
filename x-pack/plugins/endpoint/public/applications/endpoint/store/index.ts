@@ -4,44 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  createStore,
-  compose,
-  applyMiddleware,
-  Store,
-  MiddlewareAPI,
-  Dispatch,
-  Middleware,
-} from 'redux';
+import { createStore, compose, applyMiddleware, Store } from 'redux';
 import { CoreStart } from 'kibana/public';
 import { appReducer } from './reducer';
 import { alertMiddlewareFactory } from './alerts/middleware';
 import { hostMiddlewareFactory } from './hosts';
 import { policyListMiddlewareFactory } from './policy_list';
 import { policyDetailsMiddlewareFactory } from './policy_details';
-import { GlobalState } from '../types';
-import { AppAction } from './action';
+import { ImmutableMiddlewareFactory, SubstateMiddlewareFactory } from '../types';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 
 const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
   ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
   : compose;
 
-export type Selector<S, R> = (state: S) => R;
-
-/**
- * Wrap Redux Middleware and adjust 'getState()' to return the namespace from 'GlobalState that applies to the given Middleware concern.
- *
- * @param selector
- * @param middleware
- */
-export const substateMiddlewareFactory = <Substate>(
-  selector: Selector<GlobalState, Substate>,
-  middleware: Middleware<{}, Substate, Dispatch<AppAction>>
-): Middleware<{}, GlobalState, Dispatch<AppAction>> => {
+export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, middleware) => {
   return api => {
-    const substateAPI: MiddlewareAPI<Dispatch<AppAction>, Substate> = {
+    const substateAPI = {
       ...api,
+      // Return just the substate instead of global state.
       getState() {
         return selector(api.getState());
       },
@@ -62,10 +43,15 @@ export const appStoreFactory: (middlewareDeps?: {
    * Give middleware access to plugin start dependencies.
    */
   depsStart: EndpointPluginStartDependencies;
+  /**
+   * Any additional Redux Middlewares
+   * (should only be used for testing - example: to inject the action spy middleware)
+   */
+  additionalMiddleware?: Array<ReturnType<ImmutableMiddlewareFactory>>;
 }) => Store = middlewareDeps => {
   let middleware;
   if (middlewareDeps) {
-    const { coreStart, depsStart } = middlewareDeps;
+    const { coreStart, depsStart, additionalMiddleware = [] } = middlewareDeps;
     middleware = composeWithReduxDevTools(
       applyMiddleware(
         substateMiddlewareFactory(
@@ -83,7 +69,9 @@ export const appStoreFactory: (middlewareDeps?: {
         substateMiddlewareFactory(
           globalState => globalState.alertList,
           alertMiddlewareFactory(coreStart, depsStart)
-        )
+        ),
+        // Additional Middleware should go last
+        ...additionalMiddleware
       )
     );
   } else {

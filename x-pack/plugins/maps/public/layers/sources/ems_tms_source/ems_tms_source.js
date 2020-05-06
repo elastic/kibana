@@ -7,23 +7,21 @@
 import _ from 'lodash';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
-import { VectorTileLayer } from '../../vector_tile_layer';
 
 import { getEMSClient } from '../../../meta';
-import { TileServiceSelect } from './tile_service_select';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { EMS_TMS } from '../../../../common/constants';
+import { SOURCE_TYPES } from '../../../../common/constants';
 import { getInjectedVarFunc, getUiSettings } from '../../../kibana_services';
 import { registerSource } from '../source_registry';
 
-const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
+export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
   defaultMessage: 'EMS Basemaps',
 });
 
 export class EMSTMSSource extends AbstractTMSSource {
-  static type = EMS_TMS;
+  static type = SOURCE_TYPES.EMS_TMS;
 
   static createDescriptor(sourceConfig) {
     return {
@@ -84,20 +82,6 @@ export class EMSTMSSource extends AbstractTMSSource {
     return tmsService;
   }
 
-  _createDefaultLayerDescriptor(options) {
-    return VectorTileLayer.createDescriptor({
-      sourceDescriptor: this._descriptor,
-      ...options,
-    });
-  }
-
-  createDefaultLayer(options) {
-    return new VectorTileLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this,
-    });
-  }
-
   async getDisplayName() {
     try {
       const emsTMSService = await this._getEMSTMSService();
@@ -148,22 +132,5 @@ export class EMSTMSSource extends AbstractTMSSource {
 
 registerSource({
   ConstructorFunction: EMSTMSSource,
-  type: EMS_TMS,
+  type: SOURCE_TYPES.EMS_TMS,
 });
-
-export const emsBaseMapLayerWizardConfig = {
-  description: i18n.translate('xpack.maps.source.emsTileDescription', {
-    defaultMessage: 'Tile map service from Elastic Maps Service',
-  }),
-  icon: 'emsApp',
-  renderWizard: ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = sourceConfig => {
-      const descriptor = EMSTMSSource.createDescriptor(sourceConfig);
-      const source = new EMSTMSSource(descriptor, inspectorAdapters);
-      onPreviewSource(source);
-    };
-
-    return <TileServiceSelect onTileSelect={onSourceConfigChange} />;
-  },
-  title: sourceTitle,
-};

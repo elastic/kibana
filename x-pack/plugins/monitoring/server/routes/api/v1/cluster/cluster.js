@@ -46,9 +46,13 @@ export function clusterRoute(server) {
         codePaths: req.payload.codePaths,
       };
 
-      return getClustersFromRequest(req, indexPatterns, options).catch(err =>
-        handleError(err, req)
-      );
+      let clusters = [];
+      try {
+        clusters = await getClustersFromRequest(req, indexPatterns, options);
+      } catch (err) {
+        throw handleError(err, req);
+      }
+      return clusters;
     },
   });
 }

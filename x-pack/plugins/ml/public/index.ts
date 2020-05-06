@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
+import { PluginInitializer } from 'kibana/public';
 import './index.scss';
 import {
   MlPlugin,
@@ -13,12 +13,13 @@ import {
   MlSetupDependencies,
   MlStartDependencies,
 } from './plugin';
+import { getMetricChangeDescription } from './application/formatters/metric_change_description';
 
 export const plugin: PluginInitializer<
   MlPluginSetup,
   MlPluginStart,
   MlSetupDependencies,
   MlStartDependencies
-> = (context: PluginInitializerContext) => new MlPlugin(context);
+> = () => new MlPlugin();
 
-export { MlPluginSetup, MlPluginStart };
+export { MlPluginSetup, MlPluginStart, getMetricChangeDescription };

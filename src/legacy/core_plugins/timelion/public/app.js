@@ -18,6 +18,8 @@
  */
 
 import _ from 'lodash';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 
 import { i18n } from '@kbn/i18n';
 
@@ -27,10 +29,11 @@ import { fatalError, toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
-import { getTimezone } from '../../vis_type_timelion/public';
+import { getTimezone } from '../../../../plugins/vis_type_timelion/public';
 
 import 'uiExports/savedObjectTypes';
 
+require('ui/i18n');
 require('ui/autoload/all');
 
 // TODO: remove ui imports completely (move to plugins)
@@ -57,7 +60,7 @@ require('plugins/timelion/directives/timelion_options_sheet');
 
 document.title = 'Timelion - Kibana';
 
-const app = require('ui/modules').get('apps/timelion', []);
+const app = require('ui/modules').get('apps/timelion', ['i18n', 'ngSanitize']);
 
 require('ui/routes').enable();
 

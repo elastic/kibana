@@ -1,5 +1,10 @@
+[role="xpack"]
 [[custom-links]]
 === Custom links
+
+++++
+<titleabbrev>Create custom links</titleabbrev>
+++++
 
 Elastic's custom link feature allows you to easily create up to 500 dynamic links
 based on your specific APM data.
@@ -12,7 +17,7 @@ Ready to dive in? Jump straight to the <<custom-links-examples,examples>>.
 [[custom-links-create]]
 === Create a link
 
-Each custom link consists of a label, url, and optional filter.
+Each custom link consists of a label, URL, and optional filter.
 The easiest way to create a custom link is from within the actions dropdown in the transaction detail page.
 This method will automatically apply filters, scoping the link to that specific service,
 environment, transaction type, and transaction name.
@@ -25,8 +30,7 @@ and selecting **Create custom link**.
 ==== Label
 
 The name of your custom link.
-This text will be shown in the actions context menu,
-so keep it as short as possible.
+The actions context menu displays this text, so keep it as short as possible.
 
 TIP: Custom links are displayed alphabetically in the actions menu.
 
@@ -39,8 +43,8 @@ URLs support dynamic field name variables, encapsulated in double curly brackets
 These variables will be replaced with transaction metadata when the link is clicked.
 
 Because everyone's data is different,
-you'll need to examine your own traces to see what metadata is available for use.
-The easiest way to do this is to select a trace in the APM app, and click **Metadata** in the **Trace Sample** table.
+you'll need to examine your traces to see what metadata is available for use.
+To do this, select a trace in the APM app, and click **Metadata** in the **Trace Sample** table.
 
 [role="screenshot"]
 image::apm/images/example-metadata.png[Example metadata]
@@ -49,7 +53,7 @@ image::apm/images/example-metadata.png[Example metadata]
 [[custom-links-filters]]
 ==== Filters
 
-Filter each link to only appear so it only appears for specific services or transactions.
+Filter each link to only appear for specific services or transactions.
 You can filter on the following fields:
 
 * `service.name`
@@ -57,7 +61,7 @@ You can filter on the following fields:
 * `transaction.type`
 * `transaction.name`
 
-Multiple values are allowed when comma separated.
+Multiple values are allowed when comma-separated.
 
 [float]
 [[custom-links-examples]]
@@ -68,7 +72,7 @@ Multiple values are allowed when comma separated.
 :github-query-params: https://help.github.com/en/github/managing-your-work-on-github/about-automation-for-issues-and-pull-requests-with-query-parameters
 
 Not sure where to start with custom links?
-Take a look at the examples below, and customize them to your liking!
+Take a look at the examples below and customize them to your liking!
 
 [float]
 [[custom-links-examples-email]]

@@ -8,7 +8,7 @@ import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { listsEnvFeatureFlagName } from '../../../legacy/plugins/siem/server/lib/detection_engine/feature_flags';
+import { listsEnvFeatureFlagName } from '../../../plugins/siem/server/lib/detection_engine/feature_flags';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -78,7 +78,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'some.non.existent.com',
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.alerting.enabled=true',
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,

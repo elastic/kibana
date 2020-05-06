@@ -53,6 +53,7 @@ const createLicenseMock = () => {
   };
   mock.check.mockReturnValue({ state: 'valid' });
   mock.hasAtLeast.mockReturnValue(true);
+  mock.getFeature.mockReturnValue({ isAvailable: true, isEnabled: true });
   return mock;
 };
 export const licenseMock = {

@@ -5,20 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
-import { docTitle } from 'ui/doc_title';
-import listingTemplate from './angular/listing_ng_wrapper.html';
-import mapTemplate from './angular/map.html';
-import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import listingTemplate from '../../../../plugins/maps/public/angular/listing_ng_wrapper.html';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import mapTemplate from '../../../../plugins/maps/public/angular/map.html';
+import {
+  getSavedObjectsClient,
+  getCoreChrome,
+  getMapsCapabilities,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../plugins/maps/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getMapsSavedObjectLoader } from '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
 
 routes.enable();
 
 routes
   .defaults(/.*/, {
-    badge: uiCapabilities => {
-      if (uiCapabilities.maps.save) {
+    badge: () => {
+      if (getMapsCapabilities().save) {
         return undefined;
       }
 
@@ -35,7 +41,8 @@ routes
   })
   .when('/', {
     template: listingTemplate,
-    controller($scope, gisMapSavedObjectLoader, config) {
+    controller($scope, config) {
+      const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.find = search => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
@@ -43,19 +50,17 @@ routes
       $scope.delete = ids => {
         return gisMapSavedObjectLoader.delete(ids);
       };
-      $scope.readOnly = !capabilities.get().maps.save;
+      $scope.readOnly = !getMapsCapabilities().save;
     },
     resolve: {
       hasMaps: function(kbnUrl) {
-        chrome
-          .getSavedObjectsClient()
+        getSavedObjectsClient()
           .find({ type: 'map', perPage: 1 })
           .then(resp => {
             // Do not show empty listing page, just redirect to a new map
             if (resp.savedObjects.length === 0) {
               kbnUrl.redirect('/map');
             }
-
             return true;
           });
       },
@@ -65,7 +70,8 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing) {
+      map: function(redirectWhenMissing) {
+        const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
         return gisMapSavedObjectLoader.get().catch(
           redirectWhenMissing({
             map: '/',
@@ -78,13 +84,14 @@ routes
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function(gisMapSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function(redirectWhenMissing, $route) {
+        const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
         const id = $route.current.params.id;
         return gisMapSavedObjectLoader
           .get(id)
           .then(savedMap => {
-            npStart.core.chrome.recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
-            docTitle.change(savedMap.title);
+            getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
+            getCoreChrome().docTitle.change(savedMap.title);
             return savedMap;
           })
           .catch(

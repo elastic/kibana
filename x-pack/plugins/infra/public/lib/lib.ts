@@ -136,18 +136,13 @@ export interface InfraWaffleMapGradientRule {
   color: string;
 }
 
-export enum InfraWaffleMapLegendMode {
-  step = 'step',
-  gradient = 'gradient',
-}
-
 export interface InfraWaffleMapStepLegend {
-  type: InfraWaffleMapLegendMode.step;
+  type: 'step';
   rules: InfraWaffleMapStepRule[];
 }
 
 export interface InfraWaffleMapGradientLegend {
-  type: InfraWaffleMapLegendMode.gradient;
+  type: 'gradient';
   rules: InfraWaffleMapGradientRule[];
 }
 
@@ -189,12 +184,6 @@ export enum InfraFormatterType {
   bytes = 'bytes',
   bits = 'bits',
   percent = 'percent',
-}
-
-export enum InfraWaffleMapDataFormat {
-  bytesDecimal = 'bytesDecimal',
-  bitsDecimal = 'bitsDecimal',
-  abbreviatedNumber = 'abbreviatedNumber',
 }
 
 export interface InfraGroupByOptions {

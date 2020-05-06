@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Importer, ImportConfig } from './importer';
+import { Importer, ImportConfig, CreateDocsResponse } from './importer';
 import {
   Doc,
   FindFileStructureResponse,
@@ -33,54 +33,54 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  read(text: string) {
+  protected _createDocs(text: string): CreateDocsResponse {
+    let remainder = 0;
     try {
-      const data: Doc[] = [];
+      const docs: Doc[] = [];
 
       let message = '';
       let line = '';
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
         if (char === '\n') {
-          message = this.processLine(data, message, line);
+          message = this._processLine(docs, message, line);
           line = '';
         } else {
           line += char;
         }
       }
 
-      // the last line may have been missing a newline ending
-      if (line !== '') {
-        message = this.processLine(data, message, line);
-      }
+      remainder = line.length;
 
-      // add the last message to the list if not already done
+      // // add the last message to the list if not already done
       if (message !== '') {
-        this.addMessage(data, message);
+        this._addMessage(docs, message);
       }
 
       // remove first line if it is blank
-      if (data[0] && data[0].message === '') {
-        data.shift();
+      if (docs[0] && docs[0].message === '') {
+        docs.shift();
       }
-
-      this._docArray = data;
 
       return {
         success: true,
+        docs,
+        remainder,
       };
     } catch (error) {
       return {
         success: false,
+        docs: [],
+        remainder,
         error,
       };
     }
   }
 
-  processLine(data: Doc[], message: string, line: string) {
+  private _processLine(data: Doc[], message: string, line: string) {
     if (this._excludeLinesRegex === null || line.match(this._excludeLinesRegex) === null) {
       if (this._multilineStartRegex === null || line.match(this._multilineStartRegex) !== null) {
-        this.addMessage(data, message);
+        this._addMessage(data, message);
         message = '';
       } else if (data.length === 0) {
         // discard everything before the first line that is considered the first line of a message
@@ -95,7 +95,7 @@ export class MessageImporter extends Importer {
     return message;
   }
 
-  addMessage(data: Doc[], message: string) {
+  private _addMessage(data: Doc[], message: string) {
     // if the message ended \r\n (Windows line endings)
     // then omit the \r as well as the \n for consistency
     message = message.replace(/\r$/, '');

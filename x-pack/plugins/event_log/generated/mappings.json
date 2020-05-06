@@ -41,6 +41,10 @@
                 },
                 "end": {
                     "type": "date"
+                },
+                "outcome": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
                 }
             }
         },
@@ -72,10 +76,6 @@
                     "type": "keyword",
                     "ignore_above": 1024
                 },
-                "namespace": {
-                    "type": "keyword",
-                    "ignore_above": 1024
-                },
                 "alerting": {
                     "properties": {
                         "instance_id": {
@@ -86,7 +86,11 @@
                 },
                 "saved_objects": {
                     "properties": {
-                        "store": {
+                        "rel": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
+                        "namespace": {
                             "type": "keyword",
                             "ignore_above": 1024
                         },
