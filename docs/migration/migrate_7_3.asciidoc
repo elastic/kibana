@@ -17,7 +17,7 @@ The following section is re-used in the Installation and Upgrade Guide
 [[breaking_70_notable]]
 === Notable breaking changes
 ////
-// tag::notable-breaking-changes[]
+//tag::notable-breaking-changes[]
 
 [float]
 === Visibility of features after configuring a term join in Maps
