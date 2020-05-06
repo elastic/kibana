@@ -5,18 +5,28 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { TooltipSelector } from '../../../components/tooltip_selector';
-import { getEMSClient } from '../../../meta';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { TooltipSelector } from '../../../components/tooltip_selector';
+// @ts-ignore
+import { getEMSClient } from '../../../meta';
+import { IEmsFileSource } from './ems_file_source';
+import { IField } from '../../fields/field';
+import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
 
-export class UpdateSourceEditor extends Component {
-  static propTypes = {
-    onChange: PropTypes.func.isRequired,
-    tooltipFields: PropTypes.arrayOf(PropTypes.object).isRequired,
-    source: PropTypes.object,
-  };
+interface Props {
+  layerId: string;
+  onChange: (args: OnSourceChangeArgs) => void;
+  source: IEmsFileSource;
+  tooltipFields: IField[];
+}
+
+interface State {
+  fields: IField[] | null;
+}
+
+export class UpdateSourceEditor extends Component<Props, State> {
+  private _isMounted: boolean = false;
 
   state = {
     fields: null,
@@ -34,23 +44,29 @@ export class UpdateSourceEditor extends Component {
   async loadFields() {
     let fields;
     try {
+      // @ts-ignore
       const emsClient = getEMSClient();
+      // @ts-ignore
       const emsFiles = await emsClient.getFileLayers();
-      const emsFile = emsFiles.find(emsFile => emsFile.getId() === this.props.layerId);
-      const emsFields = emsFile.getFieldsInLanguage();
+      // @ts-ignore
+      const taregetEmsFile = emsFiles.find(emsFile => emsFile.getId() === this.props.layerId);
+      // @ts-ignore
+      const emsFields = taregetEmsFile.getFieldsInLanguage();
+      // @ts-ignore
       fields = emsFields.map(field => this.props.source.createField({ fieldName: field.name }));
     } catch (e) {
-      //swallow this error. when a matching EMS-config cannot be found, the source already will have thrown errors during the data request. This will propagate to the vector-layer and be displayed in the UX
+      // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
+      // This will propagate to the vector-layer and be displayed in the UX
       fields = [];
     }
 
     if (this._isMounted) {
-      this.setState({ fields: fields });
+      this.setState({ fields });
     }
   }
 
-  _onTooltipPropertiesSelect = propertyNames => {
-    this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
+  _onTooltipPropertiesSelect = (selectedFieldNames: string[]) => {
+    this.props.onChange({ propName: 'tooltipProperties', value: selectedFieldNames });
   };
 
   render() {

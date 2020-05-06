@@ -4,40 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from '../vector_source';
-import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import React from 'react';
-import { SOURCE_TYPES, FIELD_ORIGIN } from '../../../../common/constants';
-import { getEMSClient } from '../../../meta';
+import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Feature } from 'geojson';
+import { Adapters } from 'src/plugins/inspector/public';
+import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
+import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { SOURCE_TYPES, FIELD_ORIGIN } from '../../../../common/constants';
+// @ts-ignore
+import { getEMSClient } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 import { registerSource } from '../source_registry';
+import { IField } from '../../fields/field';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
+
+export interface IEmsFileSource extends IVectorSource {
+  getEMSFileLayer(): Promise<unknown>;
+  createField({ fieldName }: { fieldName: string }): IField;
+}
 
 export const sourceTitle = i18n.translate('xpack.maps.source.emsFileTitle', {
   defaultMessage: 'EMS Boundaries',
 });
 
-export class EMSFileSource extends AbstractVectorSource {
+export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
   static type = SOURCE_TYPES.EMS_FILE;
 
-  static createDescriptor({ id, tooltipProperties = [] }) {
+  static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
     return {
       type: EMSFileSource.type,
-      id,
+      id: id!,
       tooltipProperties,
     };
   }
 
-  constructor(descriptor, inspectorAdapters) {
+  private readonly _tooltipFields: IField[];
+  readonly _descriptor: EMSFileSourceDescriptor;
+
+  constructor(descriptor: Partial<EMSFileSourceDescriptor>, inspectorAdapters?: Adapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
+    this._descriptor = EMSFileSource.createDescriptor(descriptor);
     this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey =>
       this.createField({ fieldName: propertyKey })
     );
   }
 
-  createField({ fieldName }) {
+  createField({ fieldName }: { fieldName: string }): IField {
     return new EMSFileField({
       fieldName,
       source: this,
@@ -45,7 +61,7 @@ export class EMSFileSource extends AbstractVectorSource {
     });
   }
 
-  renderSourceSettingsEditor({ onChange }) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
     return (
       <UpdateSourceEditor
         onChange={onChange}
@@ -56,9 +72,12 @@ export class EMSFileSource extends AbstractVectorSource {
     );
   }
 
-  async getEMSFileLayer() {
+  async getEMSFileLayer(): Promise<unknown> {
+    // @ts-ignore
     const emsClient = getEMSClient();
+    // @ts-ignore
     const emsFileLayers = await emsClient.getFileLayers();
+    // @ts-ignore
     const emsFileLayer = emsFileLayers.find(fileLayer => fileLayer.getId() === this._descriptor.id);
     if (!emsFileLayer) {
       throw new Error(
@@ -73,19 +92,23 @@ export class EMSFileSource extends AbstractVectorSource {
     return emsFileLayer;
   }
 
-  async getGeoJsonWithMeta() {
+  async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const emsFileLayer = await this.getEMSFileLayer();
+    // @ts-ignore
     const featureCollection = await AbstractVectorSource.getGeoJson({
+      // @ts-ignore
       format: emsFileLayer.getDefaultFormatType(),
       featureCollectionPath: 'data',
+      // @ts-ignore
       fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });
 
+    // @ts-ignore
     const emsIdField = emsFileLayer._config.fields.find(field => {
       return field.type === 'id';
     });
-    featureCollection.features.forEach((feature, index) => {
-      feature.id = emsIdField ? feature.properties[emsIdField.id] : index;
+    featureCollection.features.forEach((feature: Feature, index: number) => {
+      feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
     });
 
     return {
@@ -94,10 +117,11 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  async getImmutableProperties() {
+  async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     let emsLink;
     try {
       const emsFileLayer = await this.getEMSFileLayer();
+      // @ts-ignore
       emsLink = emsFileLayer.getEMSHotLink();
     } catch (error) {
       // ignore error if EMS layer id could not be found
@@ -118,23 +142,27 @@ export class EMSFileSource extends AbstractVectorSource {
     ];
   }
 
-  async getDisplayName() {
+  async getDisplayName(): Promise<string> {
     try {
       const emsFileLayer = await this.getEMSFileLayer();
+      // @ts-ignore
       return emsFileLayer.getDisplayName();
     } catch (error) {
       return this._descriptor.id;
     }
   }
 
-  async getAttributions() {
+  async getAttributions(): Promise<Attribution[]> {
     const emsFileLayer = await this.getEMSFileLayer();
+    // @ts-ignore
     return emsFileLayer.getAttributions();
   }
 
   async getLeftJoinFields() {
     const emsFileLayer = await this.getEMSFileLayer();
+    // @ts-ignore
     const fields = emsFileLayer.getFieldsInLanguage();
+    // @ts-ignore
     return fields.map(f => this.createField({ fieldName: f.name }));
   }
 
@@ -142,16 +170,17 @@ export class EMSFileSource extends AbstractVectorSource {
     return this._tooltipFields.length > 0;
   }
 
-  async filterAndFormatPropertiesToHtml(properties) {
-    const tooltipProperties = this._tooltipFields.map(field => {
+  async filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]> {
+    const promises = this._tooltipFields.map(field => {
+      // @ts-ignore
       const value = properties[field.getName()];
       return field.createTooltipProperty(value);
     });
 
-    return Promise.all(tooltipProperties);
+    return Promise.all(promises);
   }
 
-  async getSupportedShapeTypes() {
+  async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPES[]> {
     return [VECTOR_SHAPE_TYPES.POLYGON];
   }
 }
