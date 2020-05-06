@@ -18,11 +18,11 @@ const bucketsA = [
 const bucketsB = [
   {
     doc_count: 4,
-    aggregatedValue: { value: 2.5 },
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
   },
   {
     doc_count: 5,
-    aggregatedValue: { value: 3.5 },
+    aggregatedValue: { value: 3.5, values: [{ key: 99.0, value: 3.5 }] },
   },
 ];
 
