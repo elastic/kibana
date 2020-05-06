@@ -22,7 +22,7 @@ image::images/alert-flyout-sections.png[The three sections of an alert definitio
 All alert share the following four properties in common:
 
 [role="screenshot"]
-image::images/alert-flyout-general-details.png[All alerts have name, tags, check every, and notify every properties in common]
+image::images/alert-flyout-general-details.png[alt='All alerts have name, tags, check every, and notify every properties in common']
 
 Name::      The name of the alert. While this name does not have to be unique, the name can be referenced in actions and also appears in the searchable alert listing in the management UI. A distinctive name can help identify and find an alert.
 Tags::      A list of tag names that can be applied to an alert. Tags can help you organize and find alerts, because tags appear in the alert listing in the management UI which is searchable by tag.
