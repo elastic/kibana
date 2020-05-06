@@ -23,7 +23,7 @@ import { npStart } from 'ui/new_platform';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
   IndexPattern,
-  IndexPatternFieldList,
+  IIndexPatternFieldList,
   IndexPatternField,
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
@@ -114,7 +114,7 @@ describe('FieldEditor', () => {
 
   beforeEach(() => {
     indexPattern = ({
-      fields: fields as IndexPatternFieldList,
+      fields: fields as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
 
     npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(
