@@ -48,7 +48,12 @@ import {
 } from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
-const requiredFieldsErrorText = 'At least one field must be included in the analysis.';
+const requiredFieldsErrorText = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.requiredFieldsErrorMessage',
+  {
+    defaultMessage: 'At least one field must be included in the analysis.',
+  }
+);
 
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const {
@@ -390,6 +395,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     forceInput.current.dispatchEvent(evt);
   }, []);
 
+  const noSupportetdAnalysisFields =
+    excludesOptions.length === 0 && fieldOptionsFetchFail === false && !sourceIndexNameEmpty;
+
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
       <Messages messages={requestMessages} />
@@ -587,9 +595,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             <Fragment>
               <EuiFormRow
                 fullWidth
-                isInvalid={
-                  maxDistinctValuesError !== undefined || requiredFieldsError !== undefined
-                }
+                isInvalid={maxDistinctValuesError !== undefined}
                 error={[
                   ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
                     ? [
@@ -602,14 +608,6 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
                             }
                           )}
                         </Fragment>,
-                      ]
-                    : []),
-                  ...(requiredFieldsError !== undefined
-                    ? [
-                        i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
-                          defaultMessage: 'Invalid. {message}',
-                          values: { message: requiredFieldsError },
-                        }),
                       ]
                     : []),
                 ]}
@@ -748,17 +746,30 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             </Fragment>
           )}
           <EuiFormRow
+            fullWidth
+            isInvalid={requiredFieldsError !== undefined}
+            error={
+              requiredFieldsError !== undefined && [
+                i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: requiredFieldsError },
+                }),
+              ]
+            }
+          >
+            <Fragment />
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
               defaultMessage: 'Excluded fields',
             })}
+            isInvalid={noSupportetdAnalysisFields}
             helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
               defaultMessage:
                 'Select fields to exclude from analysis. All other supported fields are included.',
             })}
             error={
-              excludesOptions.length === 0 &&
-              fieldOptionsFetchFail === false &&
-              !sourceIndexNameEmpty && [
+              noSupportetdAnalysisFields && [
                 i18n.translate(
                   'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
                   {
