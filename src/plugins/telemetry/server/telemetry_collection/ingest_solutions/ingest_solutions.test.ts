@@ -44,7 +44,7 @@ describe('ingest_solutions', () => {
           { name: 'my_logs_custom', docCount: 1000, sizeInBytes: 10 },
           { name: 'my_logs', docCount: 100, sizeInBytes: 10, isECS: true },
           { name: 'logs_custom' },
-          { name: '.ent-search-1234', docCount: 0 },
+          { name: '.app-search-1234', docCount: 0 },
         ])
       ).toStrictEqual({
         data_providers: {
