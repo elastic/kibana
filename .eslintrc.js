@@ -190,6 +190,11 @@ module.exports = {
             basePath: __dirname,
             zones: [
               {
+                target: ['(src|x-pack)/**/*', '!src/core/**/*'],
+                from: ['src/core/utils/**/*'],
+                errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
