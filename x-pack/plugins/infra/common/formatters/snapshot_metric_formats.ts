@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { InfraFormatterType } from '../../../../lib/lib';
-import {
-  SnapshotMetricInput,
-  SnapshotCustomMetricInputRT,
-} from '../../../../../common/http_api/snapshot_api';
-import { createFormatterForMetric } from '../../metrics_explorer/components/helpers/create_formatter_for_metric';
-import { createFormatter } from '../../../../../common/formatters';
+enum InfraFormatterType {
+  number = 'number',
+  abbreviatedNumber = 'abbreviatedNumber',
+  bytes = 'bytes',
+  bits = 'bits',
+  percent = 'percent',
+}
 
 interface MetricFormatter {
   formatter: InfraFormatterType;
@@ -23,7 +22,7 @@ interface MetricFormatters {
   [key: string]: MetricFormatter;
 }
 
-const METRIC_FORMATTERS: MetricFormatters = {
+export const METRIC_FORMATTERS: MetricFormatters = {
   ['count']: { formatter: InfraFormatterType.number, template: '{{value}}' },
   ['cpu']: {
     formatter: InfraFormatterType.percent,
@@ -71,19 +70,4 @@ const METRIC_FORMATTERS: MetricFormatters = {
     formatter: InfraFormatterType.number,
     template: '{{value}} seconds',
   },
-};
-
-export const createInventoryMetricFormatter = (metric: SnapshotMetricInput) => (
-  val: string | number
-) => {
-  if (SnapshotCustomMetricInputRT.is(metric)) {
-    const formatter = createFormatterForMetric(metric);
-    return formatter(val);
-  }
-  const metricFormatter = get(METRIC_FORMATTERS, metric.type, METRIC_FORMATTERS.count);
-  if (val == null) {
-    return '';
-  }
-  const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
-  return formatter(val);
 };
