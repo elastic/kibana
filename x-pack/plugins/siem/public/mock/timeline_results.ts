@@ -2243,7 +2243,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     showRowRenderers: true,
     sort: { columnId: '@timestamp', sortDirection: Direction.desc },
     title: '',
-    timelineType: TimelineType.draft,
+    timelineType: TimelineType.default,
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
