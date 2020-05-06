@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
-import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 import { App as Component } from './app';
 
