@@ -19,10 +19,10 @@
 import '../sense_editor.test.mocks';
 import { create } from '../create';
 import _ from 'lodash';
-const $ = require('jquery');
+import $ from 'jquery';
 
-const kb = require('../../../../lib/kb/kb');
-const mappings = require('../../../../lib/mappings/mappings');
+import * as kb from '../../../../lib/kb/kb';
+import * as mappings from '../../../../lib/mappings/mappings';
 
 describe('Integration', () => {
   let senseEditor;

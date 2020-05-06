@@ -19,16 +19,14 @@ interface Props {
 }
 
 export const Snapshot: React.FC<Props> = ({ height }: Props) => {
-  const { dateRangeStart, dateRangeEnd, statusFilter } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const { count, lastRefresh, loading, esKuery } = useSelector(snapshotDataSelector);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(
-      getSnapshotCountAction({ dateRangeStart, dateRangeEnd, filters: esKuery, statusFilter })
-    );
-  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, statusFilter, dispatch]);
+    dispatch(getSnapshotCountAction({ dateRangeStart, dateRangeEnd, filters: esKuery }));
+  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch]);
   return <SnapshotComponent count={count} height={height} loading={loading} />;
 };

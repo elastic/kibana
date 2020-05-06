@@ -39,7 +39,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
     const ccrApp = esSection!.registerApp({
       id: MANAGEMENT_ID,
       title: PLUGIN.TITLE,
-      order: 4,
+      order: 6,
       mount: async ({ element, setBreadcrumbs }) => {
         const { mountApp } = await import('./app');
 

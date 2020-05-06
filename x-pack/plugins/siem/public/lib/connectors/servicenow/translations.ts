@@ -21,3 +21,10 @@ export const SERVICENOW_TITLE = i18n.translate(
     defaultMessage: 'ServiceNow',
   }
 );
+
+export const MAPPING_FIELD_SHORT_DESC = i18n.translate(
+  'xpack.siem.case.configureCases.mappingFieldShortDescription',
+  {
+    defaultMessage: 'Short Description',
+  }
+);

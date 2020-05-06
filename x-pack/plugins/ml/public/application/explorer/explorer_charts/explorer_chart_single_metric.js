@@ -38,10 +38,9 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { TimeBuckets } from '../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlEscape } from '../../util/string_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
 
 import { i18n } from '@kbn/i18n';
 
@@ -53,6 +52,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
     severity: PropTypes.number.isRequired,
+    tooltipService: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -64,7 +64,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets } = this.props;
+    const { tooManyBuckets, tooltipService } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -191,7 +191,7 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     function drawLineChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = new TimeBuckets();
+      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
@@ -309,7 +309,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .on('mouseover', function(d) {
           showLineChartTooltip(d, this);
         })
-        .on('mouseout', () => mlChartTooltipService.hide());
+        .on('mouseout', () => tooltipService.hide());
 
       const isAnomalyVisible = d => _.has(d, 'anomalyScore') && Number(d.anomalyScore) >= severity;
 
@@ -354,7 +354,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .on('mouseover', function(d) {
           showLineChartTooltip(d, this);
         })
-        .on('mouseout', () => mlChartTooltipService.hide());
+        .on('mouseout', () => tooltipService.hide());
 
       // Add rectangular markers for any scheduled events.
       const scheduledEventMarkers = lineChartGroup
@@ -503,7 +503,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         });
       }
 
-      mlChartTooltipService.show(tooltipData, circle, {
+      tooltipService.show(tooltipData, circle, {
         x: LINE_CHART_ANOMALY_RADIUS * 3,
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
