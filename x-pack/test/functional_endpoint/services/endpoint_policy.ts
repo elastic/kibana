@@ -113,7 +113,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           await supertest
             .post(INGEST_API_AGENT_CONFIGS_DELETE)
             .set('kbn-xsrf', 'xxx')
-            .send({ agentConfigIds: [agentConfig.id] })
+            .send({ agentConfigId: agentConfig.id })
             .expect(200);
         },
       };
