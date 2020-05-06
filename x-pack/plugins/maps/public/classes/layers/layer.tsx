@@ -12,25 +12,25 @@ import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
-import { DataRequest } from './util/data_request';
+import { DataRequest } from '../util/data_request';
 import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
-} from '../../common/constants';
+} from '../../../common/constants';
 // @ts-ignore
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { copyPersistentState } from '../reducers/util.js';
+import { copyPersistentState } from '../../reducers/util.js';
 import {
   LayerDescriptor,
   MapExtent,
   MapFilters,
   StyleDescriptor,
-} from '../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';
-import { SyncContext } from '../actions/map_actions';
-import { IStyle } from './styles/style';
+} from '../../../common/descriptor_types';
+import { Attribution, ImmutableSourceProperty, ISource } from '../sources/source';
+import { SyncContext } from '../../actions/map_actions';
+import { IStyle } from '../styles/style';
 
 export interface ILayer {
   getBounds(mapFilters: MapFilters): Promise<MapExtent>;

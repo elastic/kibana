@@ -6,12 +6,12 @@
 
 import { TileLayer } from './tile_layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../common/constants';
-import { isRetina } from '../meta';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../common/constants';
+import { isRetina } from '../../meta';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
-} from '../connected_components/map/mb/utils'; //todo move this implementation
+} from '../../connected_components/map/mb/utils'; //todo move this implementation
 
 const MB_STYLE_TYPE_TO_OPACITY = {
   fill: ['fill-opacity'],

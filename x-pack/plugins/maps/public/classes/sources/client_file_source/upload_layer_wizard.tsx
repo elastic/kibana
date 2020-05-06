@@ -19,7 +19,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry'
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 // @ts-ignore
 import { GeojsonFileSource } from './geojson_file_source';
-import { VectorLayer } from '../../vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.geojsonFileDescription', {

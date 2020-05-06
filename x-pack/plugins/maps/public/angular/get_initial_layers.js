@@ -13,9 +13,9 @@ import '../classes/sources/kibana_regionmap_source';
 import '../classes/sources/es_geo_grid_source';
 import '../classes/sources/xyz_tms_source';
 import { KibanaTilemapSource } from '../classes/sources/kibana_tilemap_source';
-import { TileLayer } from '../classes/tile_layer';
+import { TileLayer } from '../classes/layers/tile_layer';
 import { EMSTMSSource } from '../classes/sources/ems_tms_source';
-import { VectorTileLayer } from '../classes/vector_tile_layer';
+import { VectorTileLayer } from '../classes/layers/vector_tile_layer';
 import { getInjectedVarFunc } from '../kibana_services';
 import { getKibanaTileMap } from '../meta';
 

@@ -6,27 +6,27 @@
 
 import { registerLayerWizard } from './layer_wizard_registry';
 // @ts-ignore
-import { uploadLayerWizardConfig } from './sources/client_file_source';
+import { uploadLayerWizardConfig } from '../sources/client_file_source';
 // @ts-ignore
-import { esDocumentsLayerWizardConfig } from './sources/es_search_source';
+import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
 // @ts-ignore
-import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from './sources/es_geo_grid_source';
+import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
 // @ts-ignore
-import { point2PointLayerWizardConfig } from './sources/es_pew_pew_source';
+import { point2PointLayerWizardConfig } from '../sources/es_pew_pew_source';
 // @ts-ignore
-import { emsBoundariesLayerWizardConfig } from './sources/ems_file_source';
+import { emsBoundariesLayerWizardConfig } from '../sources/ems_file_source';
 // @ts-ignore
-import { emsBaseMapLayerWizardConfig } from './sources/ems_tms_source';
+import { emsBaseMapLayerWizardConfig } from '../sources/ems_tms_source';
 // @ts-ignore
-import { kibanaRegionMapLayerWizardConfig } from './sources/kibana_regionmap_source';
+import { kibanaRegionMapLayerWizardConfig } from '../sources/kibana_regionmap_source';
 // @ts-ignore
-import { kibanaBasemapLayerWizardConfig } from './sources/kibana_tilemap_source';
-import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
+import { kibanaBasemapLayerWizardConfig } from '../sources/kibana_tilemap_source';
+import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 // @ts-ignore
-import { wmsLayerWizardConfig } from './sources/wms_source';
-import { mvtVectorSourceWizardConfig } from './sources/mvt_single_layer_vector_source';
-import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
-import { getInjectedVarFunc } from '../kibana_services';
+import { wmsLayerWizardConfig } from '../sources/wms_source';
+import { mvtVectorSourceWizardConfig } from '../sources/mvt_single_layer_vector_source';
+import { ObservabilityLayerWizardConfig } from '../solution_layers/observability';
+import { getInjectedVarFunc } from '../../kibana_services';
 
 let registered = false;
 export function registerLayerWizards() {

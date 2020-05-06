@@ -12,7 +12,7 @@ import {
 } from './mvt_single_layer_vector_source_editor';
 import { MVTSingleLayerVectorSource, sourceTitle } from './mvt_single_layer_vector_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-import { TiledVectorLayer } from '../../tiled_vector_layer';
+import { TiledVectorLayer } from '../../layers/tiled_vector_layer';
 
 export const mvtVectorSourceWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.mvtVectorSourceWizard', {

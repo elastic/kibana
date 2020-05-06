@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { AbstractLayer, ILayer } from '../../../../../../classes/layer';
+import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
 import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
 

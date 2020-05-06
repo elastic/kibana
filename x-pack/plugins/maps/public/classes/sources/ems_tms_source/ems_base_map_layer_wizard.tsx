@@ -9,7 +9,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry'
 // @ts-ignore
 import { EMSTMSSource, sourceTitle } from './ems_tms_source';
 // @ts-ignore
-import { VectorTileLayer } from '../../vector_tile_layer';
+import { VectorTileLayer } from '../../layers/vector_tile_layer';
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
 // @ts-ignore

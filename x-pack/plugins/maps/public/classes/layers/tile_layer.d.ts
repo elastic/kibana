@@ -5,8 +5,8 @@
  */
 
 import { AbstractLayer } from './layer';
-import { ITMSSource } from './sources/tms_source';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { ITMSSource } from '../sources/tms_source';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 
 interface ITileLayerArguments {
   source: ITMSSource;

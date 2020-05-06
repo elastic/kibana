@@ -6,7 +6,7 @@
 
 import { ReactElement } from 'react';
 import { StyleDescriptor, StyleMetaDescriptor } from '../../../common/descriptor_types';
-import { ILayer } from '../layer';
+import { ILayer } from '../layers/layer';
 import { IField } from '../fields/field';
 import { DataRequest } from '../util/data_request';
 

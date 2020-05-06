@@ -7,7 +7,7 @@
 import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from './layer';
-import { VectorStyle } from './styles/vector/vector_style';
+import { VectorStyle } from '../styles/vector/vector_style';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
@@ -18,23 +18,23 @@ import {
   LAYER_TYPE,
   FIELD_ORIGIN,
   LAYER_STYLE_TYPE,
-} from '../../common/constants';
+} from '../../../common/constants';
 import _ from 'lodash';
-import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { JoinTooltipProperty } from '../tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataRequestAbortError } from './util/data_request';
+import { DataRequestAbortError } from '../util/data_request';
 import {
   canSkipSourceUpdate,
   canSkipStyleMetaUpdate,
   canSkipFormattersUpdate,
-} from './util/can_skip_fetch';
-import { assignFeatureIds } from './util/assign_feature_ids';
+} from '../util/can_skip_fetch';
+import { assignFeatureIds } from '../util/assign_feature_ids';
 import {
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
-} from './util/mb_filter_expressions';
+} from '../util/mb_filter_expressions';
 
 export class VectorLayer extends AbstractLayer {
   static type = LAYER_TYPE.VECTOR;

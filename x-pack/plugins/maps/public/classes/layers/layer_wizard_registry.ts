@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 
 export type RenderWizardArguments = {
   previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;

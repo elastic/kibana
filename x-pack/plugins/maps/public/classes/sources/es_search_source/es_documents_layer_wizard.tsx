@@ -11,8 +11,8 @@ import { CreateSourceEditor } from './create_source_editor';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 // @ts-ignore
 import { ESSearchSource, sourceTitle } from './es_search_source';
-import { BlendedVectorLayer } from '../../blended_vector_layer';
-import { VectorLayer } from '../../vector_layer';
+import { BlendedVectorLayer } from '../../layers/blended_vector_layer';
+import { VectorLayer } from '../../layers/vector_layer';
 import { SCALING_TYPES } from '../../../../common/constants';
 
 export function createDefaultLayerDescriptor(sourceConfig: unknown, mapColors: string[]) {

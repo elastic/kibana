@@ -6,15 +6,15 @@
 
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { VectorStyle } from './styles/vector/vector_style';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../common/constants';
+import { VectorStyle } from '../styles/vector/vector_style';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from './vector_layer';
-import { canSkipSourceUpdate } from './util/can_skip_fetch';
-import { ITiledSingleLayerVectorSource } from './sources/vector_source';
-import { SyncContext } from '../actions/map_actions';
-import { ISource } from './sources/source';
-import { VectorLayerDescriptor, VectorSourceRequestMeta } from '../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from './sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';
+import { canSkipSourceUpdate } from '../util/can_skip_fetch';
+import { ITiledSingleLayerVectorSource } from '../sources/vector_source';
+import { SyncContext } from '../../actions/map_actions';
+import { ISource } from '../sources/source';
+import { VectorLayerDescriptor, VectorSourceRequestMeta } from '../../../common/descriptor_types';
+import { MVTSingleLayerVectorSourceConfig } from '../sources/mvt_single_layer_vector_source/mvt_single_layer_vector_source_editor';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
