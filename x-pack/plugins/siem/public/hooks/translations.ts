@@ -6,6 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string) =>
+  i18n.translate('xpack.siem.hooks.useAddToTimeline.addedFieldMessage', {
+    values: { fieldOrValue },
+    defaultMessage: `Added {fieldOrValue} to timeline`,
+  });
+
 export const STATUS_CODE = i18n.translate(
   'xpack.siem.components.ml.api.errors.statusCodeFailureTitle',
   {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
 import {
   IRouter,
@@ -18,8 +18,8 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { workpadWithGroupAsElement } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { workpadWithGroupAsElement } from '../../../__tests__/fixtures/workpads';
+import { CanvasWorkpad } from '../../../types';
 
 const mockRouteContext = ({
   core: {

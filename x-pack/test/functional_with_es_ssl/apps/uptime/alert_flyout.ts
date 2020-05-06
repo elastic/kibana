@@ -14,20 +14,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
+    let alerts: any;
 
-    it('posts an alert, verfies its presence, and deletes the alert', async () => {
+    before(async () => {
+      alerts = getService('uptime').alerts;
+    });
+
+    it('can open alert flyout', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await alerts.openFlyout();
+    });
 
-      await pageObjects.uptime.openAlertFlyoutAndCreateMonitorStatusAlert({
-        alertInterval: '11',
-        alertName: 'uptime-test',
-        alertNumTimes: '3',
-        alertTags: ['uptime', 'another'],
-        alertThrottleInterval: '30',
-        alertTimerangeSelection: '1',
-        filters: 'monitor.id: "0001-up"',
-      });
+    it('can set alert name', async () => {
+      await alerts.setAlertName('uptime-test');
+    });
 
+    it('can set alert tags', async () => {
+      await alerts.setAlertTags(['uptime', 'another']);
+    });
+
+    it('can set alert interval', async () => {
+      await alerts.setAlertInterval('11');
+    });
+
+    it('can set alert throttle interval', async () => {
+      await alerts.setAlertThrottleInterval('30');
+    });
+
+    it('can set alert status number of time', async () => {
+      await alerts.setAlertStatusNumTimes('3');
+    });
+    it('can set alert time range', async () => {
+      await alerts.setAlertTimerangeSelection('1');
+    });
+    it('can set monitor hours', async () => {
+      await alerts.setMonitorStatusSelectableToHours();
+    });
+
+    it('can set kuery bar filters', async () => {
+      await pageObjects.uptime.setAlertKueryBarText('monitor.id: "0001-up"');
+    });
+
+    it('can select location filter', async () => {
+      await alerts.clickAddFilterLocation();
+      await alerts.clickLocationExpression('mpls');
+    });
+
+    it('can select port filter', async () => {
+      await alerts.clickAddFilterPort();
+      await alerts.clickPortExpression('5678');
+    });
+
+    it('can select type/scheme filter', async () => {
+      await alerts.clickAddFilterType();
+      await alerts.clickTypeExpression('http');
+    });
+
+    it('can save alert', async () => {
+      await alerts.clickSaveAlertButton();
+    });
+
+    it('posts an alert, verifies its presence, and deletes the alert', async () => {
       // The creation of the alert could take some time, so the first few times we query after
       // the previous line resolves, the API may not be done creating the alert yet, so we
       // put the fetch code in a retry block with a timeout.
@@ -67,7 +114,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(timerange.to).to.be('now');
         expect(locations).to.eql(['mpls']);
         expect(filters).to.eql(
-          '{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],"minimum_should_match":1}}'
+          '{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"monitor.id":"0001-up"}}],' +
+            '"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match":{"observer.geo.name":"mpls"}}],' +
+            '"minimum_should_match":1}},{"bool":{"filter":[{"bool":{"should":[{"match":{"url.port":5678}}],' +
+            '"minimum_should_match":1}},{"bool":{"should":[{"match":{"monitor.type":"http"}}],"minimum_should_match":1}}]}}]}}]}}'
         );
       } finally {
         await supertest
