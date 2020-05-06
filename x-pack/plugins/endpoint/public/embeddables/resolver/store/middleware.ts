@@ -10,6 +10,7 @@ import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction, RelatedEventDataEntry, RelatedEventType } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
+import { HttpHandler } from 'kibana/public';
 
 type MiddlewareFactory<S = ResolverState> = (
   context?: KibanaReactContextValue<EndpointPluginServices>
@@ -28,6 +29,18 @@ function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): 
       return flattenedEvents;
     }
   }, events);
+}
+
+async function* getEachRelatedEventsResult(eventsToFetch: ResolverEvent[], httpGetter: HttpHandler) {
+  for (const eventToQueryForRelateds of eventsToFetch){
+    const id = event.entityId(eventToQueryForRelateds);
+    yield [eventToQueryForRelateds, await Promise.all([
+      httpGetter(`/api/endpoint/resolver/${id}/events`, {
+        query: {events: 100},
+      }),
+    ])
+    ]
+  }
 }
 
 export const resolverMiddlewareFactory: MiddlewareFactory = context => {
@@ -83,22 +96,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      * When this data is inlined with results, there won't be a need for this.
      */
     if (action.type === 'appRequestedRelatedEventData') {
-      //An array, but assume it has a length of 1 
-      const id = event.entityId(action.payload);
-      if(typeof context !== 'undefined') {
-        const httpGetter = context.services.http.get;
-        async function* getEachRelatedEventsResult(eventsToFetch: ResolverEvent[]) {
-          for (const eventToRqueryForRelateds of eventsToFetch){
-            //Tried with generic event.entityId() : no joy on results
-            yield [eventToRqueryForRelateds, await Promise.all([
-              httpGetter(`/api/endpoint/resolver/${id}/events`, {
-                query: {events: 100},
-              }),
-            ])
-            ]
-          }
-        }
-        for await (const results of getEachRelatedEventsResult([action.payload])){
+      if(typeof context !== 'undefined') { 
+        for await (const results of getEachRelatedEventsResult([action.payload], context.services.http.get)){
             const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
             const baseEvent = results[0] as unknown as ResolverEvent;
             const fetchedResults = (results[1] as unknown as {events: ResolverEvent[]}[])
