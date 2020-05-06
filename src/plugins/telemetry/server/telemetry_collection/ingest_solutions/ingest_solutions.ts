@@ -22,14 +22,16 @@ import { INGEST_SOLUTIONS } from './constants';
 
 type TechnologyDataProviders = typeof INGEST_SOLUTIONS[number]['name'];
 
+export interface IngestSolutionProviderPayload {
+  index_count: number;
+  ecs_index_count?: number;
+  doc_count?: number;
+  size_in_bytes?: number;
+}
+
 export interface IngestSolutionsPayload {
   data_providers: {
-    [key in TechnologyDataProviders]?: {
-      index_count: number;
-      ecs_index_count?: number;
-      doc_count?: number;
-      size_in_bytes?: number;
-    };
+    [key in TechnologyDataProviders]?: IngestSolutionProviderPayload;
   };
 }
 
@@ -43,27 +45,55 @@ export interface IngestSolutionsIndex {
   sizeInBytes?: number;
 }
 
+function findMatchingTechnology(indexName: string) {
+  return INGEST_SOLUTIONS.find(({ pattern }) => {
+    if (!pattern.startsWith('.') && indexName.startsWith('.')) {
+      // avoid system indices caught by very fuzzy index patters (i.e.: *log* would catch `.kibana-log-...`)
+      return false;
+    }
+    return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(indexName);
+  });
+}
+
+function increaseCounters(
+  previousValue: IngestSolutionProviderPayload = { index_count: 0 },
+  { isECS, docCount, sizeInBytes }: IngestSolutionsIndex
+) {
+  return {
+    ...previousValue,
+    index_count: previousValue.index_count + 1,
+    ...(typeof isECS === 'boolean'
+      ? {
+          ecs_index_count: (previousValue.ecs_index_count || 0) + (isECS ? 1 : 0),
+        }
+      : {}),
+    ...(typeof docCount === 'number'
+      ? { doc_count: (previousValue.doc_count || 0) + docCount }
+      : {}),
+    ...(typeof sizeInBytes === 'number'
+      ? { size_in_bytes: (previousValue.size_in_bytes || 0) + sizeInBytes }
+      : {}),
+  };
+}
+
 export function buildIngestSolutionsPayload(
   indices: IngestSolutionsIndex[]
 ): IngestSolutionsPayload {
   const startingDotPatternsUntilTheFirstAsterisk = INGEST_SOLUTIONS.map(({ pattern }) =>
     pattern.replace(/^\.(.+)\*.*$/g, '.$1')
   ).filter(Boolean);
-  return indices.reduce((acc, { name: indexName, isECS, docCount, sizeInBytes }) => {
-    // Filter out the system indices unless they are required by the patterns
-    if (
-      indexName.startsWith('.') &&
-      !startingDotPatternsUntilTheFirstAsterisk.find(pattern => indexName.startsWith(pattern))
-    ) {
-      return acc;
-    }
-    const matchingTechnology = INGEST_SOLUTIONS.find(({ pattern }) => {
-      if (!pattern.startsWith('.') && indexName.startsWith('.')) {
-        // avoid system indices caught by very fuzzy index patters (i.e.: *log* would catch `.kibana-log-...`)
-        return false;
-      }
-      return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`).test(indexName);
-    });
+
+  // Filter out the system indices unless they are required by the patterns
+  const indexCandidates = indices.filter(
+    ({ name }) =>
+      !(
+        name.startsWith('.') &&
+        !startingDotPatternsUntilTheFirstAsterisk.find(pattern => name.startsWith(pattern))
+      )
+  );
+
+  return indexCandidates.reduce((acc, indexCandidate) => {
+    const matchingTechnology = findMatchingTechnology(indexCandidate.name);
 
     if (!matchingTechnology) {
       return acc;
@@ -74,21 +104,7 @@ export function buildIngestSolutionsPayload(
       ...acc,
       data_providers: {
         ...dataProviders,
-        [name]: {
-          ...dataProviders[name],
-          index_count: (dataProviders[name]?.index_count || 0) + 1,
-          ...(typeof isECS === 'boolean'
-            ? {
-                ecs_index_count: (dataProviders[name]?.ecs_index_count || 0) + (isECS ? 1 : 0),
-              }
-            : {}),
-          ...(typeof docCount === 'number'
-            ? { doc_count: (dataProviders[name]?.doc_count || 0) + docCount }
-            : {}),
-          ...(typeof sizeInBytes === 'number'
-            ? { size_in_bytes: (dataProviders[name]?.size_in_bytes || 0) + sizeInBytes }
-            : {}),
-        },
+        [name]: increaseCounters(dataProviders[name], indexCandidate),
       },
     };
   }, {} as IngestSolutionsPayload);
