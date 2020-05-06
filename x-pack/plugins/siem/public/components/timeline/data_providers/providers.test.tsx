@@ -14,7 +14,7 @@ import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { TimelineContext } from '../timeline_context';
 
 import { mockDataProviders } from './mock/mock_data_providers';
-import { getDraggableId, Providers } from './providers';
+import { Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 import { useMountAppended } from '../../../utils/use_mount_appended';
 
@@ -32,8 +32,6 @@ describe('Providers', () => {
           browserFields={{}}
           dataProviders={mockDataProviders}
           id="foo"
-          onChangeDataProviderKqlQuery={jest.fn()}
-          onChangeDroppableAndProvider={jest.fn()}
           onDataProviderEdited={jest.fn()}
           onDataProviderRemoved={jest.fn()}
           onToggleDataProviderEnabled={jest.fn()}
@@ -51,8 +49,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
@@ -80,8 +76,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
@@ -107,8 +101,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={mockDataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
@@ -136,8 +128,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
@@ -170,8 +160,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={mockDataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
@@ -197,14 +185,6 @@ describe('Providers', () => {
     });
   });
 
-  describe('#getDraggableId', () => {
-    test('it returns the expected id', () => {
-      expect(getDraggableId({ id: 'timeline1', dataProviderId: 'abcd' })).toEqual(
-        'draggableId.timeline.timeline1.dataProvider.abcd'
-      );
-    });
-  });
-
   describe('#onToggleDataProviderEnabled', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
@@ -215,8 +195,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
@@ -252,8 +230,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={mockDataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
@@ -290,8 +266,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
@@ -330,8 +304,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={mockDataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}
@@ -370,8 +342,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={dataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
@@ -403,8 +373,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={mockDataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onToggleDataProviderEnabled={jest.fn()}
@@ -439,8 +407,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={mockDataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onToggleDataProviderEnabled={jest.fn()}
@@ -475,8 +441,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={dataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
@@ -520,8 +484,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={dataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
@@ -561,8 +523,6 @@ describe('Providers', () => {
               browserFields={{}}
               dataProviders={dataProviders}
               id="foo"
-              onChangeDataProviderKqlQuery={jest.fn()}
-              onChangeDroppableAndProvider={jest.fn()}
               onDataProviderEdited={jest.fn()}
               onDataProviderRemoved={jest.fn()}
               onToggleDataProviderEnabled={jest.fn()}
@@ -606,8 +566,6 @@ describe('Providers', () => {
                 browserFields={{}}
                 dataProviders={dataProviders}
                 id="foo"
-                onChangeDataProviderKqlQuery={jest.fn()}
-                onChangeDroppableAndProvider={jest.fn()}
                 onDataProviderEdited={jest.fn()}
                 onDataProviderRemoved={jest.fn()}
                 onToggleDataProviderEnabled={jest.fn()}

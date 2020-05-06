@@ -46,14 +46,20 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const mockes = coreMock.createSetup();
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
       deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
-        uiSettings: mockes.uiSettings,
+        toastNotifications: mocks.notifications.toasts,
+        http: mocks.http,
+        uiSettings: mocks.uiSettings,
         actionTypeRegistry: actionTypeRegistry as any,
         alertTypeRegistry: alertTypeRegistry as any,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+        capabilities,
       };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -86,6 +92,7 @@ describe('alert_form', () => {
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
           }}
         >
           <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
@@ -166,6 +173,7 @@ describe('alert_form', () => {
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
           }}
         >
           <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />

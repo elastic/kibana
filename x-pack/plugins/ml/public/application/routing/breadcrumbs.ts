@@ -37,7 +37,7 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.createJobsBreadcrumbLabel', {
-    defaultMessage: 'Create jobs',
+    defaultMessage: 'Create job',
   }),
   href: '#/jobs/new_job',
 });

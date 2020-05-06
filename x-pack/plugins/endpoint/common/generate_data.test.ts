@@ -101,20 +101,38 @@ describe('data generator', () => {
     });
 
     it('with n-1 process events', () => {
-      for (let i = 1; i < events.length - 1; i++) {
-        expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
-        expect(events[i].event.kind).toEqual('event');
-        expect(events[i].event.category).toEqual('process');
+      for (let i = events.length - 2; i > 0; ) {
+        const parentEntityIdOfChild = events[i].process.parent?.entity_id;
+        for (
+          ;
+          --i >= -1 && (events[i].event.kind !== 'event' || events[i].event.category !== 'process');
+
+        ) {
+          // related event - skip it
+        }
+        expect(i).toBeGreaterThanOrEqual(0);
+        expect(parentEntityIdOfChild).toEqual(events[i].process.entity_id);
       }
     });
 
     it('with a corresponding alert at the end', () => {
+      let previousProcessEventIndex = events.length - 2;
+      for (
+        ;
+        previousProcessEventIndex >= -1 &&
+        (events[previousProcessEventIndex].event.kind !== 'event' ||
+          events[previousProcessEventIndex].event.category !== 'process');
+        previousProcessEventIndex--
+      ) {
+        // related event - skip it
+      }
+      expect(previousProcessEventIndex).toBeGreaterThanOrEqual(0);
       // The alert should be last and have the same entity_id as the previous process event
       expect(events[events.length - 1].process.entity_id).toEqual(
-        events[events.length - 2].process.entity_id
+        events[previousProcessEventIndex].process.entity_id
       );
       expect(events[events.length - 1].process.parent?.entity_id).toEqual(
-        events[events.length - 2].process.parent?.entity_id
+        events[previousProcessEventIndex].process.parent?.entity_id
       );
       expect(events[events.length - 1].event.kind).toEqual('alert');
       expect(events[events.length - 1].event.category).toEqual('malware');

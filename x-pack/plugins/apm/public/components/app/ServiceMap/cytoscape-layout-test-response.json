@@ -3,38 +3,19 @@
     {
       "data": {
         "source": "apm-server",
-        "target": ">172.17.0.1",
-        "id": "apm-server~>172.17.0.1",
+        "target": ">elasticsearch",
+        "id": "apm-server~>elasticsearch",
         "sourceData": {
-          "service.environment": null,
+          "id": "apm-server",
           "service.name": "apm-server",
-          "agent.name": "go",
-          "id": "apm-server"
+          "agent.name": "go"
         },
         "targetData": {
-          "destination.address": "172.17.0.1",
-          "span.subtype": "http",
-          "span.type": "external",
-          "id": ">172.17.0.1"
-        }
-      }
-    },
-    {
-      "data": {
-        "source": "client",
-        "target": ">opbeans-node",
-        "id": "client~>opbeans-node",
-        "sourceData": {
-          "service.environment": null,
-          "service.name": "client",
-          "agent.name": "js-base",
-          "id": "client"
-        },
-        "targetData": {
-          "destination.address": "opbeans-node",
-          "span.subtype": null,
-          "span.type": "resource",
-          "id": ">opbeans-node"
+          "span.subtype": "elasticsearch",
+          "span.destination.service.resource": "elasticsearch",
+          "span.type": "db",
+          "id": ">elasticsearch",
+          "label": "elasticsearch"
         }
       }
     },
@@ -44,135 +25,39 @@
         "target": "opbeans-node",
         "id": "client~opbeans-node",
         "sourceData": {
-          "service.environment": null,
+          "id": "client",
           "service.name": "client",
-          "agent.name": "js-base",
-          "id": "client"
+          "agent.name": "rum-js"
         },
         "targetData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         }
       }
     },
     {
       "data": {
-        "source": "opbeans-dotnet",
-        "target": "opbeans-go",
-        "id": "opbeans-dotnet~opbeans-go",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-go",
-          "agent.name": "go",
-          "id": "opbeans-go"
-        },
-        "bidirectional": true
-      }
-    },
-    {
-      "data": {
-        "source": "opbeans-dotnet",
-        "target": "opbeans-java",
-        "id": "opbeans-dotnet~opbeans-java",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-java",
-          "agent.name": "java",
-          "id": "opbeans-java"
-        },
-        "bidirectional": true
-      }
-    },
-    {
-      "data": {
-        "source": "opbeans-dotnet",
-        "target": "opbeans-node",
-        "id": "opbeans-dotnet~opbeans-node",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-node",
-          "agent.name": "nodejs",
-          "id": "opbeans-node"
-        },
-        "bidirectional": true
-      }
-    },
-    {
-      "data": {
-        "source": "opbeans-dotnet",
-        "target": "opbeans-python",
-        "id": "opbeans-dotnet~opbeans-python",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-python",
-          "agent.name": "python",
-          "id": "opbeans-python"
-        },
-        "bidirectional": true
-      }
-    },
-    {
-      "data": {
-        "source": "opbeans-dotnet",
-        "target": "opbeans-ruby",
-        "id": "opbeans-dotnet~opbeans-ruby",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-ruby",
-          "agent.name": "ruby",
-          "id": "opbeans-ruby"
-        },
-        "bidirectional": true
-      }
-    },
-    {
-      "data": {
         "source": "opbeans-go",
-        "target": ">postgres",
-        "id": "opbeans-go~>postgres",
+        "target": ">postgresql",
+        "id": "opbeans-go~>postgresql",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
-          "destination.address": "postgres",
           "span.subtype": "postgresql",
+          "span.destination.service.resource": "postgresql",
           "span.type": "db",
-          "id": ">postgres"
+          "id": ">postgresql",
+          "label": "postgresql"
         }
       }
     },
@@ -182,18 +67,22 @@
         "target": "opbeans-dotnet",
         "id": "opbeans-go~opbeans-dotnet",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
-          "service.environment": "production",
+          "id": "opbeans-dotnet",
           "service.name": "opbeans-dotnet",
           "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "isInverseEdge": true
+          "service.framework.name": "ASP.NET Core",
+          "max_score": 43.63972429875661,
+          "severity": "minor"
+        }
       }
     },
     {
@@ -202,16 +91,21 @@
         "target": "opbeans-java",
         "id": "opbeans-go~opbeans-java",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "bidirectional": true
       }
@@ -222,16 +116,20 @@
         "target": "opbeans-node",
         "id": "opbeans-go~opbeans-node",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "bidirectional": true
       }
@@ -242,16 +140,22 @@
         "target": "opbeans-python",
         "id": "opbeans-go~opbeans-python",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "bidirectional": true
       }
@@ -262,16 +166,20 @@
         "target": "opbeans-ruby",
         "id": "opbeans-go~opbeans-ruby",
         "sourceData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "bidirectional": true
       }
@@ -279,19 +187,22 @@
     {
       "data": {
         "source": "opbeans-java",
-        "target": ">postgres",
-        "id": "opbeans-java~>postgres",
+        "target": ">postgresql",
+        "id": "opbeans-java~>postgresql",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
-          "destination.address": "postgres",
           "span.subtype": "postgresql",
+          "span.destination.service.resource": "postgresql",
           "span.type": "db",
-          "id": ">postgres"
+          "id": ">postgresql",
+          "label": "postgresql"
         }
       }
     },
@@ -301,18 +212,21 @@
         "target": "opbeans-dotnet",
         "id": "opbeans-java~opbeans-dotnet",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
-          "service.environment": "production",
+          "id": "opbeans-dotnet",
           "service.name": "opbeans-dotnet",
           "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "isInverseEdge": true
+          "service.framework.name": "ASP.NET Core",
+          "max_score": 43.63972429875661,
+          "severity": "minor"
+        }
       }
     },
     {
@@ -321,16 +235,21 @@
         "target": "opbeans-go",
         "id": "opbeans-java~opbeans-go",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "isInverseEdge": true
       }
@@ -341,16 +260,19 @@
         "target": "opbeans-node",
         "id": "opbeans-java~opbeans-node",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "bidirectional": true
       }
@@ -361,16 +283,21 @@
         "target": "opbeans-python",
         "id": "opbeans-java~opbeans-python",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "bidirectional": true
       }
@@ -381,38 +308,21 @@
         "target": "opbeans-ruby",
         "id": "opbeans-java~opbeans-ruby",
         "sourceData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "targetData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "bidirectional": true
-      }
-    },
-    {
-      "data": {
-        "source": "opbeans-node",
-        "target": "opbeans-dotnet",
-        "id": "opbeans-node~opbeans-dotnet",
-        "sourceData": {
-          "service.environment": "production",
-          "service.name": "opbeans-node",
-          "agent.name": "nodejs",
-          "id": "opbeans-node"
-        },
-        "targetData": {
-          "service.environment": "production",
-          "service.name": "opbeans-dotnet",
-          "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "isInverseEdge": true
       }
     },
     {
@@ -421,16 +331,20 @@
         "target": "opbeans-go",
         "id": "opbeans-node~opbeans-go",
         "sourceData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "targetData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "isInverseEdge": true
       }
@@ -441,16 +355,19 @@
         "target": "opbeans-java",
         "id": "opbeans-node~opbeans-java",
         "sourceData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "targetData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "isInverseEdge": true
       }
@@ -461,16 +378,20 @@
         "target": "opbeans-python",
         "id": "opbeans-node~opbeans-python",
         "sourceData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "targetData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "bidirectional": true
       }
@@ -481,18 +402,89 @@
         "target": "opbeans-ruby",
         "id": "opbeans-node~opbeans-ruby",
         "sourceData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "targetData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "bidirectional": true
+      }
+    },
+    {
+      "data": {
+        "source": "opbeans-python",
+        "target": ">elasticsearch",
+        "id": "opbeans-python~>elasticsearch",
+        "sourceData": {
+          "id": "opbeans-python",
+          "service.environment": "production",
+          "service.name": "opbeans-python",
+          "agent.name": "python",
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
+        },
+        "targetData": {
+          "span.subtype": "elasticsearch",
+          "span.destination.service.resource": "elasticsearch",
+          "span.type": "db",
+          "id": ">elasticsearch",
+          "label": "elasticsearch"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "opbeans-python",
+        "target": ">postgresql",
+        "id": "opbeans-python~>postgresql",
+        "sourceData": {
+          "id": "opbeans-python",
+          "service.environment": "production",
+          "service.name": "opbeans-python",
+          "agent.name": "python",
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
+        },
+        "targetData": {
+          "span.subtype": "postgresql",
+          "span.destination.service.resource": "postgresql",
+          "span.type": "db",
+          "id": ">postgresql",
+          "label": "postgresql"
+        }
+      }
+    },
+    {
+      "data": {
+        "source": "opbeans-python",
+        "target": ">redis",
+        "id": "opbeans-python~>redis",
+        "sourceData": {
+          "id": "opbeans-python",
+          "service.environment": "production",
+          "service.name": "opbeans-python",
+          "agent.name": "python",
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
+        },
+        "targetData": {
+          "span.subtype": "redis",
+          "span.destination.service.resource": "redis",
+          "span.type": "db",
+          "id": ">redis",
+          "label": "redis"
+        }
       }
     },
     {
@@ -501,18 +493,22 @@
         "target": "opbeans-dotnet",
         "id": "opbeans-python~opbeans-dotnet",
         "sourceData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "targetData": {
-          "service.environment": "production",
+          "id": "opbeans-dotnet",
           "service.name": "opbeans-dotnet",
           "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "isInverseEdge": true
+          "service.framework.name": "ASP.NET Core",
+          "max_score": 43.63972429875661,
+          "severity": "minor"
+        }
       }
     },
     {
@@ -521,16 +517,22 @@
         "target": "opbeans-go",
         "id": "opbeans-python~opbeans-go",
         "sourceData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "isInverseEdge": true
       }
@@ -541,16 +543,21 @@
         "target": "opbeans-java",
         "id": "opbeans-python~opbeans-java",
         "sourceData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "isInverseEdge": true
       }
@@ -561,16 +568,20 @@
         "target": "opbeans-node",
         "id": "opbeans-python~opbeans-node",
         "sourceData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "isInverseEdge": true
       }
@@ -581,18 +592,43 @@
         "target": "opbeans-ruby",
         "id": "opbeans-python~opbeans-ruby",
         "sourceData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "targetData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "bidirectional": true
+      }
+    },
+    {
+      "data": {
+        "source": "opbeans-ruby",
+        "target": ">postgresql",
+        "id": "opbeans-ruby~>postgresql",
+        "sourceData": {
+          "id": "opbeans-ruby",
+          "service.environment": "production",
+          "service.name": "opbeans-ruby",
+          "agent.name": "ruby",
+          "service.framework.name": "Ruby on Rails"
+        },
+        "targetData": {
+          "span.subtype": "postgresql",
+          "span.destination.service.resource": "postgresql",
+          "span.type": "db",
+          "id": ">postgresql",
+          "label": "postgresql"
+        }
       }
     },
     {
@@ -601,18 +637,20 @@
         "target": "opbeans-dotnet",
         "id": "opbeans-ruby~opbeans-dotnet",
         "sourceData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "targetData": {
-          "service.environment": "production",
+          "id": "opbeans-dotnet",
           "service.name": "opbeans-dotnet",
           "agent.name": "dotnet",
-          "id": "opbeans-dotnet"
-        },
-        "isInverseEdge": true
+          "service.framework.name": "ASP.NET Core",
+          "max_score": 43.63972429875661,
+          "severity": "minor"
+        }
       }
     },
     {
@@ -621,16 +659,20 @@
         "target": "opbeans-go",
         "id": "opbeans-ruby~opbeans-go",
         "sourceData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "targetData": {
+          "id": "opbeans-go",
           "service.environment": "production",
           "service.name": "opbeans-go",
           "agent.name": "go",
-          "id": "opbeans-go"
+          "service.framework.name": "gin",
+          "max_score": 92.40731,
+          "severity": "critical"
         },
         "isInverseEdge": true
       }
@@ -641,16 +683,19 @@
         "target": "opbeans-java",
         "id": "opbeans-ruby~opbeans-java",
         "sourceData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "targetData": {
+          "id": "opbeans-java",
           "service.environment": "production",
           "service.name": "opbeans-java",
           "agent.name": "java",
-          "id": "opbeans-java"
+          "max_score": 31.374423806075157,
+          "severity": "minor"
         },
         "isInverseEdge": true
       }
@@ -661,16 +706,18 @@
         "target": "opbeans-node",
         "id": "opbeans-ruby~opbeans-node",
         "sourceData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "targetData": {
+          "id": "opbeans-node",
           "service.environment": "production",
           "service.name": "opbeans-node",
           "agent.name": "nodejs",
-          "id": "opbeans-node"
+          "service.framework.name": "express"
         },
         "isInverseEdge": true
       }
@@ -681,178 +728,123 @@
         "target": "opbeans-python",
         "id": "opbeans-ruby~opbeans-python",
         "sourceData": {
+          "id": "opbeans-ruby",
           "service.environment": "production",
           "service.name": "opbeans-ruby",
           "agent.name": "ruby",
-          "id": "opbeans-ruby"
+          "service.framework.name": "Ruby on Rails"
         },
         "targetData": {
+          "id": "opbeans-python",
           "service.environment": "production",
           "service.name": "opbeans-python",
           "agent.name": "python",
-          "id": "opbeans-python"
+          "service.framework.name": "django",
+          "max_score": 92.48735,
+          "severity": "critical"
         },
         "isInverseEdge": true
       }
     },
     {
       "data": {
-        "service.environment": null,
-        "service.name": "client",
-        "agent.name": "js-base",
-        "id": "client"
-      }
-    },
-    {
-      "data": {
-        "service.environment": "production",
-        "service.name": "opbeans-node",
-        "agent.name": "nodejs",
-        "id": "opbeans-node"
-      }
-    },
-    {
-      "data": {
-        "service.environment": "production",
-        "service.name": "opbeans-go",
-        "agent.name": "go",
-        "id": "opbeans-go"
-      }
-    },
-    {
-      "data": {
+        "id": "opbeans-java",
         "service.environment": "production",
         "service.name": "opbeans-java",
         "agent.name": "java",
-        "id": "opbeans-java"
+        "max_score": 31.374423806075157,
+        "severity": "minor"
       }
     },
     {
       "data": {
-        "destination.address": "postgres",
-        "span.subtype": "postgresql",
-        "span.type": "db",
-        "id": ">postgres"
-      }
-    },
-    {
-      "data": {
-        "service.environment": "production",
-        "service.name": "opbeans-ruby",
-        "agent.name": "ruby",
-        "id": "opbeans-ruby"
-      }
-    },
-    {
-      "data": {
-        "service.environment": "production",
-        "service.name": "opbeans-dotnet",
-        "agent.name": "dotnet",
-        "id": "opbeans-dotnet"
-      }
-    },
-    {
-      "data": {
+        "id": "opbeans-python",
         "service.environment": "production",
         "service.name": "opbeans-python",
         "agent.name": "python",
-        "id": "opbeans-python"
-      }
-    },
-    {
-      "data": {
-        "destination.address": "opbeans-node",
-        "span.subtype": null,
-        "span.type": "resource",
-        "id": ">opbeans-node"
-      }
-    },
-    {
-      "data": {
-        "service.environment": null,
-        "service.name": "apm-server",
-        "agent.name": "go",
-        "id": "apm-server"
-      }
-    },
-    {
-      "data": {
-        "destination.address": "172.17.0.1",
-        "span.subtype": "http",
-        "span.type": "external",
-        "id": ">172.17.0.1"
-      }
-    },
-    {
-      "data": {
-        "service.name": "apm-server",
-        "agent.name": "go",
-        "service.environment": null,
-        "service.framework.name": null,
-        "id": "apm-server"
-      }
-    },
-    {
-      "data": {
-        "service.name": "opbeans-python",
-        "agent.name": "python",
-        "service.environment": null,
         "service.framework.name": "django",
-        "id": "opbeans-python"
+        "max_score": 92.48735,
+        "severity": "critical"
       }
     },
     {
       "data": {
+        "span.subtype": "postgresql",
+        "span.destination.service.resource": "postgresql",
+        "span.type": "db",
+        "id": ">postgresql",
+        "label": "postgresql"
+      }
+    },
+    {
+      "data": {
+        "id": "opbeans-ruby",
+        "service.environment": "production",
         "service.name": "opbeans-ruby",
         "agent.name": "ruby",
-        "service.environment": null,
-        "service.framework.name": "Ruby on Rails",
-        "id": "opbeans-ruby"
+        "service.framework.name": "Ruby on Rails"
       }
     },
     {
       "data": {
-        "service.name": "opbeans-node",
-        "agent.name": "nodejs",
-        "service.environment": null,
-        "service.framework.name": "express",
-        "id": "opbeans-node"
-      }
-    },
-    {
-      "data": {
+        "id": "opbeans-go",
+        "service.environment": "production",
         "service.name": "opbeans-go",
         "agent.name": "go",
-        "service.environment": null,
         "service.framework.name": "gin",
-        "id": "opbeans-go"
+        "max_score": 92.40731,
+        "severity": "critical"
       }
     },
     {
       "data": {
-        "service.name": "opbeans-java",
-        "agent.name": "java",
-        "service.environment": null,
-        "service.framework.name": null,
-        "id": "opbeans-java"
+        "id": "apm-server",
+        "service.name": "apm-server",
+        "agent.name": "go"
       }
     },
     {
       "data": {
+        "span.subtype": "elasticsearch",
+        "span.destination.service.resource": "elasticsearch",
+        "span.type": "db",
+        "id": ">elasticsearch",
+        "label": "elasticsearch"
+      }
+    },
+    {
+      "data": {
+        "id": "opbeans-node",
+        "service.environment": "production",
+        "service.name": "opbeans-node",
+        "agent.name": "nodejs",
+        "service.framework.name": "express"
+      }
+    },
+    {
+      "data": {
+        "id": "opbeans-dotnet",
         "service.name": "opbeans-dotnet",
         "agent.name": "dotnet",
-        "service.environment": null,
         "service.framework.name": "ASP.NET Core",
-        "id": "opbeans-dotnet"
+        "max_score": 43.63972429875661,
+        "severity": "minor"
       }
     },
     {
       "data": {
+        "span.subtype": "redis",
+        "span.destination.service.resource": "redis",
+        "span.type": "db",
+        "id": ">redis",
+        "label": "redis"
+      }
+    },
+    {
+      "data": {
+        "id": "client",
         "service.name": "client",
-        "agent.name": "js-base",
-        "service.environment": null,
-        "service.framework.name": null,
-        "id": "client"
+        "agent.name": "rum-js"
       }
     }
   ]

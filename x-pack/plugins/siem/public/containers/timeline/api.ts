@@ -13,7 +13,13 @@ import {
   TimelineResponse,
   TimelineResponseType,
 } from '../../../common/types/timeline';
-import { TIMELINE_URL, TIMELINE_IMPORT_URL, TIMELINE_EXPORT_URL } from '../../../common/constants';
+import {
+  TIMELINE_URL,
+  TIMELINE_DRAFT_CLEAN_URL,
+  TIMELINE_DRAFT_URL,
+  TIMELINE_IMPORT_URL,
+  TIMELINE_EXPORT_URL,
+} from '../../../common/constants';
 
 import { KibanaServices } from '../../lib/kibana';
 import { ExportSelectedData } from '../../components/generic_downloader';
@@ -112,4 +118,16 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
   });
 
   return response.body!;
+};
+
+export const getDraftTimeline = async (): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_DRAFT_URL);
+
+  return decodeTimelineResponse(response);
+};
+
+export const cleanDraftTimeline = async (): Promise<TimelineResponse> => {
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_CLEAN_URL);
+
+  return decodeTimelineResponse(response);
 };
