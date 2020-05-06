@@ -95,7 +95,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.{js,ts,tsx}'],
+      files: ['x-pack/plugins/canvas/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'jsx-a11y/click-events-have-key-events': 'off',
@@ -154,6 +154,16 @@ module.exports = {
             licenses: [ELASTIC_LICENSE_HEADER],
           },
         ],
+      },
+    },
+
+    /**
+     * New Platform client-side
+     */
+    {
+      files: ['{src,x-pack}/plugins/*/public/**/*.{js,ts,tsx}'],
+      rules: {
+        'import/no-commonjs': 'error',
       },
     },
 
@@ -887,7 +897,7 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/legacy/plugins/canvas/**/*.js'],
+      files: ['x-pack/plugins/canvas/**/*.js'],
       rules: {
         radix: 'error',
 
@@ -931,12 +941,12 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/legacy/plugins/canvas/gulpfile.js',
-        'x-pack/legacy/plugins/canvas/scripts/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/*.js',
-        'x-pack/legacy/plugins/canvas/tasks/**/*.js',
-        'x-pack/legacy/plugins/canvas/__tests__/**/*.js',
-        'x-pack/legacy/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
+        'x-pack/plugins/canvas/tasks/*.js',
+        'x-pack/plugins/canvas/tasks/**/*.js',
+        'x-pack/plugins/canvas/__tests__/**/*.js',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
       ],
       rules: {
         'import/no-extraneous-dependencies': [
@@ -949,7 +959,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
       globals: { canvas: true, $: true },
       rules: {
         'import/no-unresolved': [
@@ -961,13 +971,13 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/public/**/*.js'],
+      files: ['x-pack/plugins/canvas/public/**/*.js'],
       env: {
         browser: true,
       },
     },
     {
-      files: ['x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
       env: {
         jquery: true,
       },
