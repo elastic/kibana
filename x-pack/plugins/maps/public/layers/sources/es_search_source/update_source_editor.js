@@ -12,7 +12,7 @@ import { TooltipSelector } from '../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { getTermsFields, getSourceFields } from '../../../index_pattern_util';
+import { getTermsFields, getSourceFields, supportsGeoTileAgg } from '../../../index_pattern_util';
 import { SORT_ORDER } from '../../../../common/constants';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -90,7 +90,7 @@ export class UpdateSourceEditor extends Component {
     });
 
     this.setState({
-      supportsClustering: geoField.aggregatable,
+      supportsClustering: supportsGeoTileAgg(geoField),
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(

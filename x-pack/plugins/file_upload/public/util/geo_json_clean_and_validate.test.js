@@ -5,7 +5,7 @@
  */
 
 import { cleanGeometry, geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
-const jsts = require('jsts');
+import * as jsts from 'jsts';
 
 describe('geo_json_clean_and_validate', () => {
   const reader = new jsts.io.GeoJSONReader();

@@ -19,17 +19,11 @@ import {
   EuiSelect,
   EuiFormRow,
   EuiText,
-  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Datasource, Agent } from '../../../../types';
-import {
-  useGetOneAgentConfig,
-  sendPutAgentReassign,
-  useCore,
-  useGetAgentConfigs,
-} from '../../../../hooks';
-import { PackageIcon } from '../../../../components/package_icon';
+import { Agent } from '../../../../types';
+import { sendPutAgentReassign, useCore, useGetAgentConfigs } from '../../../../hooks';
+import { AgentConfigDatasourceBadges } from '../agent_config_datasource_badges';
 
 interface Props {
   onClose: () => void;
@@ -44,9 +38,6 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
 
   const agentConfigsRequest = useGetAgentConfigs();
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
-
-  const agentConfigRequest = useGetOneAgentConfig(selectedAgentConfigId);
-  const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -121,40 +112,9 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
         </EuiFlexGroup>
         <EuiSpacer size="l" />
 
-        {agentConfig && (
-          <EuiText>
-            <FormattedMessage
-              id="xpack.ingestManager.agentReassignConfig.configDescription"
-              defaultMessage="The selected agent configuration will collect data for {count, plural, one {{countValue} data source} other {{countValue} data sources}}:"
-              values={{
-                count: agentConfig.datasources.length,
-                countValue: <b>{agentConfig.datasources.length}</b>,
-              }}
-            />
-          </EuiText>
+        {selectedAgentConfigId && (
+          <AgentConfigDatasourceBadges agentConfigId={selectedAgentConfigId} />
         )}
-        <EuiSpacer size="s" />
-        {agentConfig &&
-          (agentConfig.datasources as Datasource[]).map((datasource, idx) => {
-            if (!datasource.package) {
-              return null;
-            }
-            return (
-              <EuiBadge key={idx} color="hollow">
-                <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <PackageIcon
-                      packageName={datasource.package.name}
-                      version={datasource.package.version}
-                      size="s"
-                      tryApi={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{datasource.package.title}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiBadge>
-            );
-          })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -168,7 +128,7 @@ export const AgentReassignConfigFlyout: React.FunctionComponent<Props> = ({ onCl
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={!agentConfig || agentConfig.id === agent.config_id}
+              disabled={selectedAgentConfigId === agent.config_id}
               fill
               onClick={onSubmit}
               isLoading={isSubmitting}
