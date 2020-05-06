@@ -15,8 +15,6 @@ import { timelineActions } from '../../store/actions';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import {
-  OnChangeDataProviderKqlQuery,
-  OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
   OnDataProviderEdited,
@@ -56,8 +54,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     start,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
-    updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -118,18 +114,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       [id]
     );
 
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
-      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
-      [id]
-    );
-
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
-    );
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
-      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
       [id]
     );
 
@@ -174,8 +160,6 @@ const StatefulTimelineComponent = React.memo<Props>(
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
             loadingIndexName={loading}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onClose={onClose}
             onDataProviderEdited={onDataProviderEditedLocal}

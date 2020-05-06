@@ -15,6 +15,7 @@ import {
   SETUP_API_ROUTE,
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
+  APP_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -124,6 +125,10 @@ export const outputRoutesService = {
 export const settingsRoutesService = {
   getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
+};
+
+export const appRoutesService = {
+  getCheckPermissionsPath: () => APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
 };
 
 export const enrollmentAPIKeyRouteService = {

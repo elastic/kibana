@@ -15,8 +15,6 @@ import {
   IS_DRAGGING_CLASS_NAME,
 } from '../../drag_and_drop/helpers';
 import {
-  OnChangeDataProviderKqlQuery,
-  OnChangeDroppableAndProvider,
   OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
@@ -32,8 +30,6 @@ interface Props {
   browserFields: BrowserFields;
   id: string;
   dataProviders: DataProvider[];
-  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
-  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -42,6 +38,8 @@ interface Props {
 }
 
 const DropTargetDataProvidersContainer = styled.div`
+  padding: 2px 0 4px 0;
+
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
     background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
     border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
@@ -60,9 +58,6 @@ const DropTargetDataProviders = styled.div`
   position: relative;
   border: 0.2rem dashed ${props => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   margin: 5px 0 5px 0;
   min-height: 100px;
   overflow-y: auto;
@@ -95,43 +90,46 @@ export const DataProviders = React.memo<Props>(
     browserFields,
     id,
     dataProviders,
-    onChangeDataProviderKqlQuery,
-    onChangeDroppableAndProvider,
     onDataProviderEdited,
     onDataProviderRemoved,
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
-  }) => (
-    <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
-      <DropTargetDataProviders
-        className="drop-target-data-providers"
-        data-test-subj="dataProviders"
-      >
-        <TimelineContext.Consumer>
-          {({ isLoading }) => (
-            <DroppableWrapper isDropDisabled={!show || isLoading} droppableId={getDroppableId(id)}>
-              {dataProviders != null && dataProviders.length ? (
-                <Providers
-                  browserFields={browserFields}
-                  id={id}
-                  dataProviders={dataProviders}
-                  onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-                  onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-                  onDataProviderEdited={onDataProviderEdited}
-                  onDataProviderRemoved={onDataProviderRemoved}
-                  onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-                  onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-                />
-              ) : (
-                <Empty />
-              )}
-            </DroppableWrapper>
-          )}
-        </TimelineContext.Consumer>
-      </DropTargetDataProviders>
-    </DropTargetDataProvidersContainer>
-  )
+  }) => {
+    return (
+      <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
+        <DropTargetDataProviders
+          className="drop-target-data-providers"
+          data-test-subj="dataProviders"
+        >
+          <TimelineContext.Consumer>
+            {({ isLoading }) => (
+              <>
+                {dataProviders != null && dataProviders.length ? (
+                  <Providers
+                    browserFields={browserFields}
+                    id={id}
+                    dataProviders={dataProviders}
+                    onDataProviderEdited={onDataProviderEdited}
+                    onDataProviderRemoved={onDataProviderRemoved}
+                    onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                    onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+                  />
+                ) : (
+                  <DroppableWrapper
+                    isDropDisabled={!show || isLoading}
+                    droppableId={getDroppableId(id)}
+                  >
+                    <Empty />
+                  </DroppableWrapper>
+                )}
+              </>
+            )}
+          </TimelineContext.Consumer>
+        </DropTargetDataProviders>
+      </DropTargetDataProvidersContainer>
+    );
+  }
 );
 
 DataProviders.displayName = 'DataProviders';
