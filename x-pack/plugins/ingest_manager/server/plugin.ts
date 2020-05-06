@@ -170,6 +170,7 @@ export class IngestManagerPlugin
 
     // Register rest of routes only if security is enabled
     if (this.security) {
+      registerSetupRoutes(router, config);
       registerAgentConfigRoutes(router);
       registerDatasourceRoutes(router);
       registerOutputRoutes(router);
@@ -182,7 +183,6 @@ export class IngestManagerPlugin
       }
 
       if (config.fleet.enabled) {
-        registerSetupRoutes(router);
         registerAgentRoutes(router);
         registerEnrollmentApiKeyRoutes(router);
         registerInstallScriptRoutes({

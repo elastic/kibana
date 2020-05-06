@@ -5,12 +5,12 @@
  */
 
 import Mustache from 'mustache';
-import { InfraWaffleMapDataFormat } from '../../lib/lib';
 import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
-import { InventoryFormatterType } from '../../../common/inventory_models/types';
+import { InventoryFormatterType } from '../inventory_models/types';
 import { formatHighPercision } from './high_precision';
+import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {
   number: formatNumber,
