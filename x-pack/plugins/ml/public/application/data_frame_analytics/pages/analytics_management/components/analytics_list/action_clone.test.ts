@@ -92,6 +92,7 @@ describe('Analytics job clone action', () => {
             training_percent: 20,
             randomize_seed: -2228827740028660200,
             num_top_feature_importance_values: 4,
+            loss_function: 'mse',
           },
         },
         analyzed_fields: {
@@ -192,6 +193,7 @@ describe('Analytics job clone action', () => {
             training_percent: 20,
             randomize_seed: -2228827740028660200,
             num_top_feature_importance_values: 4,
+            loss_function: 'mse',
           },
         },
         analyzed_fields: {
