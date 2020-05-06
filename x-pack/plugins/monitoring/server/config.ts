@@ -119,7 +119,7 @@ export const configSchema = schema.object({
               if (rawConfig === 'elastic') {
                 return (
                   'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-                  'privilege-related issues. You should use the "kibana" user instead.'
+                  'privilege-related issues. You should use the "kibana_system" user instead.'
                 );
               }
             },

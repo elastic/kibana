@@ -15,9 +15,14 @@
     "usageCollection",
     "taskManager",
     "actions",
-    "alerting"
+    "alerting",
+    "observability",
+    "security"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"]
+  "configPath": [
+    "xpack",
+    "apm"
+  ]
 }

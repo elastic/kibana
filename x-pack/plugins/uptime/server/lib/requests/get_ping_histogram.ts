@@ -18,14 +18,12 @@ export interface GetPingHistogramParams {
   filters?: string | null;
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
-  /** @member statusFilter special filter targeting the latest status of each monitor */
-  statusFilter?: string | null;
 }
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, dynamicSettings, from, to, filters, monitorId, statusFilter }) => {
+> = async ({ callES, dynamicSettings, from, to, filters, monitorId }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -81,8 +79,8 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     const upCount: number = bucket.up.doc_count;
     return {
       x,
-      downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
-      upCount: statusFilter && statusFilter !== 'up' ? 0 : upCount,
+      downCount,
+      upCount,
       y: 1,
     };
   });

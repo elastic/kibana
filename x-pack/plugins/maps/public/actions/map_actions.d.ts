@@ -13,6 +13,7 @@ import {
   MapFilters,
   MapCenterAndZoom,
   MapRefreshConfig,
+  MapExtent,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
 
@@ -34,6 +35,9 @@ export function updateSourceProp(
 ): void;
 
 export function setGotoWithCenter(config: MapCenterAndZoom): AnyAction;
+export function setGotoWithBounds(config: MapExtent): AnyAction;
+
+export function fitToDataBounds(): AnyAction;
 
 export function replaceLayerList(layerList: unknown[]): AnyAction;
 
@@ -72,7 +76,7 @@ export function trackMapSettings(): AnyAction;
 
 export function updateMapSetting(
   settingKey: string,
-  settingValue: string | boolean | number
+  settingValue: string | boolean | number | object
 ): AnyAction;
 
 export function cloneLayer(layerId: string): AnyAction;

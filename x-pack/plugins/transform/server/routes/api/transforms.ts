@@ -148,6 +148,29 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
   router.post(
     {
+      path: addBasePath('transforms/{transformId}/_update'),
+      validate: {
+        ...schemaTransformId,
+        body: schema.maybe(schema.any()),
+      },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { transformId } = req.params as SchemaTransformId;
+
+      try {
+        return res.ok({
+          body: await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
+            body: req.body,
+            transformId,
+          }),
+        });
+      } catch (e) {
+        return res.customError(wrapError(e));
+      }
+    })
+  );
+  router.post(
+    {
       path: addBasePath('delete_transforms'),
       validate: {
         body: schema.maybe(schema.any()),
