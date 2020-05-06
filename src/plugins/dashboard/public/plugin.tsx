@@ -136,7 +136,7 @@ export class DashboardPlugin
   ): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
     const startServices = core.getStartServices();
 
     if (share) {
@@ -310,11 +310,11 @@ export class DashboardPlugin
       plugins.embeddable.getEmbeddableFactories
     );
     uiActions.registerAction(changeViewAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
     const clonePanelAction = new ClonePanelAction(core);
     uiActions.registerAction(clonePanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,

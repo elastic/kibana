@@ -28,6 +28,7 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
+import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../embeddable/public';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -143,8 +144,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     let params;
     if ('aliasUrl' in visType) {
       params = this.props.addBasePath(visType.aliasUrl);
-      if (this.props.editorParams && this.props.editorParams.includes('addToDashboard')) {
-        params = `${params}?addToDashboard`;
+      if (this.props.editorParams) {
+        const originatingAppParam = this.props.editorParams?.find((param: string) =>
+          param.startsWith(EMBEDDABLE_ORIGINATING_APP_PARAM)
+        );
+        params = originatingAppParam ? `${params}?${originatingAppParam}` : params;
       }
       this.props.onClose();
       window.location.assign(params);

@@ -62,10 +62,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const newFieldValues: DynamicSettings = {
         heartbeatIndices: 'new*',
-        certThresholds: {
-          age: 365,
-          expiration: 30,
-        },
+        certAgeThreshold: 365,
+        certExpirationThreshold: 30,
       };
       await settings.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
       await settings.apply();
@@ -86,8 +84,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await settings.go();
 
-      const newErrorThreshold = '5';
-      await settings.changeErrorThresholdInput(newErrorThreshold);
+      const newExpirationThreshold = '5';
+      await settings.changeErrorThresholdInput(newExpirationThreshold);
       await settings.apply();
 
       await uptimePage.goToRoot();
@@ -95,16 +93,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certThresholds?.expiration).to.eql(newErrorThreshold);
+      expect(fields.certExpirationThreshold).to.eql(newExpirationThreshold);
     });
 
-    it('changing certificate expiration warning threshold is reflected in settings page', async () => {
+    it('changing certificate expiration threshold is reflected in settings page', async () => {
       const settings = uptimeService.settings;
 
       await settings.go();
 
-      const newWarningThreshold = '15';
-      await settings.changeWarningThresholdInput(newWarningThreshold);
+      const newAgeThreshold = '15';
+      await settings.changeWarningThresholdInput(newAgeThreshold);
       await settings.apply();
 
       await uptimePage.goToRoot();
@@ -112,7 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certThresholds?.age).to.eql(newWarningThreshold);
+      expect(fields.certAgeThreshold).to.eql(newAgeThreshold);
     });
   });
 };
