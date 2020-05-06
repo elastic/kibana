@@ -6,9 +6,8 @@
 
 import { PassThrough, Readable } from 'stream';
 
-import { APICaller, KibanaRequest } from 'kibana/server';
+import { APICaller } from 'kibana/server';
 
-import { SecurityPluginSetup } from '../../../../security/server';
 import {
   Description,
   DescriptionOrUndefined,
@@ -24,10 +23,8 @@ import { ConfigType } from '../../config';
 export interface ConstructorOptions {
   callCluster: APICaller;
   config: ConfigType;
-  request: KibanaRequest;
   spaceId: string;
   user: string;
-  security: SecurityPluginSetup | undefined | null;
 }
 
 export interface GetListOptions {

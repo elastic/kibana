@@ -19,13 +19,8 @@
 
 import { get } from 'lodash';
 import { GeohashLayer } from './geohash_layer';
-import { npStart } from 'ui/new_platform';
-import { getFormat } from '../../../ui/public/visualize/loader/pipeline_helpers/utilities';
-import {
-  scaleBounds,
-  geoContains,
-  mapTooltipProvider,
-} from '../../../../plugins/maps_legacy/public';
+import { getFormatService, getQueryService } from './services';
+import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
 
 export const createTileMapVisualization = dependencies => {
@@ -183,7 +178,9 @@ export const createTileMapVisualization = dependencies => {
       const newParams = this._getMapsParams();
       const metricDimension = this._params.dimensions.metric;
       const metricLabel = metricDimension ? metricDimension.label : '';
-      const metricFormat = getFormat(metricDimension && metricDimension.format);
+      const metricFormat = getFormatService().deserialize(
+        metricDimension && metricDimension.format
+      );
 
       return {
         label: metricLabel,
@@ -213,7 +210,7 @@ export const createTileMapVisualization = dependencies => {
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
 
-      const { filterManager } = npStart.plugins.data.query;
+      const { filterManager } = getQueryService();
       filterManager.addFilters([filter]);
 
       this.vis.updateState();

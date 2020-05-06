@@ -17,9 +17,20 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { TileMapPlugin as Plugin } from './plugin';
+import { ScaledCirclesMarkers } from './scaled_circles';
+import { L } from '../../../maps_legacy/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
+export class GeohashGridMarkers extends ScaledCirclesMarkers {
+  getMarkerFunction() {
+    return function(feature) {
+      const geohashRect = feature.properties.geohash_meta.rectangle;
+      // get bounds from northEast[3] and southWest[1]
+      // corners in geohash rectangle
+      const corners = [
+        [geohashRect[3][0], geohashRect[3][1]],
+        [geohashRect[1][0], geohashRect[1][1]],
+      ];
+      return L.rectangle(corners);
+    };
+  }
 }

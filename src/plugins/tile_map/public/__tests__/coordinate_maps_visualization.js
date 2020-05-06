@@ -23,37 +23,37 @@ import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
 import blues from './blues.png';
-import shadedGeohashGrid from './shadedGeohashGrid.png';
+import shadedGeohashGrid from './shaded_geohash_grid.png';
 import heatmapRaw from './heatmap_raw.png';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
+import EMS_CATALOGUE from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
+import EMS_FILES from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
+import EMS_TILES from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
+import EMS_STYLE_DARK_MAP from '../../../maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+import { ExprVis } from '../../../visualizations/public/expressions/vis';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import { BaseVisType } from '../../../visualizations/public/vis_types/base_vis_type';
 import {
   getPrecision,
   getZoomPrecision,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps_legacy/public/map/precision';
+} from '../../../maps_legacy/public/map/precision';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { ServiceSettings } from '../../../maps_legacy/public/map/service_settings';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
-import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
+import { setInjectedVarFunc } from '../../../maps_legacy/public/kibana_services';
+import { getBaseMapsVis } from '../../../maps_legacy/public';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -91,24 +91,22 @@ describe('CoordinateMapsVisualizationTest', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
+      const mapConfig = {
+        emsFileApiUrl: '',
+        emsTileApiUrl: '',
+        emsLandingPageUrl: '',
+      };
+      const tilemapsConfig = {
+        deprecated: {
+          config: {
+            options: {
+              attribution: '123',
+            },
+          },
+        },
+      };
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
           case 'version':
             return '123';
           default:
@@ -125,7 +123,7 @@ describe('CoordinateMapsVisualizationTest', function() {
           getInjectedVar: () => {},
         },
       };
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
       const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
       const uiSettings = $injector.get('config');
 

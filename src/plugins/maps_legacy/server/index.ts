@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import L from 'leaflet';
-import { ScaledCirclesMarkers } from './scaled_circles';
+import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/public';
+import { configSchema, ConfigSchema } from '../config';
 
-export class GeohashGridMarkers extends ScaledCirclesMarkers {
-  getMarkerFunction() {
-    return function(feature) {
-      const geohashRect = feature.properties.geohash_meta.rectangle;
-      // get bounds from northEast[3] and southWest[1]
-      // corners in geohash rectangle
-      const corners = [
-        [geohashRect[3][0], geohashRect[3][1]],
-        [geohashRect[1][0], geohashRect[1][1]],
-      ];
-      return L.rectangle(corners);
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    includeElasticMapsService: true,
+    proxyElasticMapsServiceInMaps: true,
+    tilemap: true,
+    regionmap: true,
+    manifestServiceUrl: true,
+    emsFileApiUrl: true,
+    emsTileApiUrl: true,
+    emsLandingPageUrl: true,
+    emsFontLibraryUrl: true,
+    emsTileLayerId: true,
+  },
+  schema: configSchema,
+};
+
+export const plugin = (initializerContext: PluginInitializerContext) => ({
+  setup() {
+    // @ts-ignore
+    const config$ = initializerContext.config.create();
+    return {
+      config: config$,
     };
-  }
-}
+  },
+  start() {},
+});

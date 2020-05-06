@@ -17,23 +17,13 @@
  * under the License.
  */
 
-import { KibanaMapLayer, L } from '../../../maps_legacy/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export class VegaMapLayer extends KibanaMapLayer {
-  constructor(spec, options) {
-    super();
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('vislib data.fieldFormats');
 
-    // Used by super.getAttributions()
-    this._attribution = options.attribution;
-    delete options.attribution;
-    this._leafletLayer = L.vega(spec, options);
-  }
-
-  getVegaView() {
-    return this._leafletLayer._view;
-  }
-
-  getVegaSpec() {
-    return this._leafletLayer._spec;
-  }
-}
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');

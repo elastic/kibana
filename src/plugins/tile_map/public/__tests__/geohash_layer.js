@@ -20,12 +20,12 @@
 import expect from '@kbn/expect';
 import { GeohashLayer } from '../geohash_layer';
 // import heatmapPng from './heatmap.png';
-import scaledCircleMarkersPng from './scaledCircleMarkers.png';
+import scaledCircleMarkersPng from './scaled_circle_markers.png';
 // import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import { ImageComparator } from 'test_utils/image_comparator';
 import GeoHashSampleData from './dummy_es_response.json';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaMap } from '../../../../../plugins/maps_legacy/public/map/kibana_map';
+import { KibanaMap } from '../../../maps_legacy/public/map/kibana_map';
 
 describe('geohash_layer', function() {
   let domNode;
