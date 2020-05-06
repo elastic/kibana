@@ -1,0 +1,527 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hits counter HitsCounter not renders a button when the showResetButton property is false 1`] = `
+<HitsCounter
+  hits={2}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  onResetQuery={[MockFunction]}
+  showResetButton={false}
+>
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
+    >
+      <PseudoLocaleWrapper>
+        <EuiFlexGroup
+          alignItems="center"
+          className="dscResultCount"
+          gutterSize="s"
+          justifyContent="center"
+          responsive={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
+          >
+            <EuiFlexItem
+              component="span"
+              data-test-subj="discoverQueryHits"
+              grow={false}
+            >
+              <span
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="discoverQueryHits"
+              >
+                <strong>
+                  2
+                </strong>
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <FormattedMessage
+                  defaultMessage="{hits, plural, one {hit} other {hits}}"
+                  id="discover.hitsPluralTitle"
+                  values={
+                    Object {
+                      "hits": 2,
+                    }
+                  }
+                >
+                  hits
+                </FormattedMessage>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
+</HitsCounter>
+`;
+
+exports[`hits counter HitsCounter renders a button by providing the showResetButton property 1`] = `
+<HitsCounter
+  hits={2}
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  onResetQuery={[MockFunction]}
+  showResetButton={true}
+>
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
+    >
+      <PseudoLocaleWrapper>
+        <EuiFlexGroup
+          alignItems="center"
+          className="dscResultCount"
+          gutterSize="s"
+          justifyContent="center"
+          responsive={false}
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
+          >
+            <EuiFlexItem
+              component="span"
+              data-test-subj="discoverQueryHits"
+              grow={false}
+            >
+              <span
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+                data-test-subj="discoverQueryHits"
+              >
+                <strong>
+                  2
+                </strong>
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <FormattedMessage
+                  defaultMessage="{hits, plural, one {hit} other {hits}}"
+                  id="discover.hitsPluralTitle"
+                  values={
+                    Object {
+                      "hits": 2,
+                    }
+                  }
+                >
+                  hits
+                </FormattedMessage>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiButtonEmpty
+                  data-test-subj="resetSavedSearch"
+                  onClick={[MockFunction]}
+                  size="s"
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+                    data-test-subj="resetSavedSearch"
+                    onClick={[MockFunction]}
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Reset search"
+                          id="discover.reloadSavedSearchButton"
+                          values={Object {}}
+                        >
+                          Reset search
+                        </FormattedMessage>
+                      </span>
+                    </span>
+                  </button>
+                </EuiButtonEmpty>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
+</HitsCounter>
+`;
