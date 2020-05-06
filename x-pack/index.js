@@ -13,7 +13,6 @@ import { beats } from './legacy/plugins/beats_management';
 import { maps } from './legacy/plugins/maps';
 import { spaces } from './legacy/plugins/spaces';
 import { infra } from './legacy/plugins/infra';
-import { taskManager } from './legacy/plugins/task_manager';
 import { encryptedSavedObjects } from './legacy/plugins/encrypted_saved_objects';
 import { ingestManager } from './legacy/plugins/ingest_manager';
 
@@ -28,7 +27,6 @@ module.exports = function(kibana) {
     beats(kibana),
     maps(kibana),
     infra(kibana),
-    taskManager(kibana),
     encryptedSavedObjects(kibana),
     ingestManager(kibana),
   ];
