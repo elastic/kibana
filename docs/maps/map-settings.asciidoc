@@ -1,0 +1,38 @@
+[role="xpack"]
+[[maps-settings]]
+== Map settings
+
+To configure map settings, click *Map settings* in the application toolbar.
+
+[float]
+[[maps-settings-navigation]]
+=== Navigation
+
+*Zoom range*::
+Constrain the map to the defined zoom range.
+
+*Initial map location*::
+Configure the initial map center and zoom.
+* *Map location at save*: Use the map center and zoom from the map position at the time of the latest save.
+* *Fixed location*: Lock the map center and zoom to fixed values.
+* *Browser location*: Set the initial map center to the browser location.
+
+[float]
+[[maps-settings-spatial-filters]]
+=== Spatial filters
+
+Use spatial filter settings to configure how <<maps-spatial-filters, spatial filters>> are displayed.
+
+image::maps/images/spatial_filters.png[]
+
+*Show spatial filters on map*::
+Clear the checkbox to not show <<maps-spatial-filters, spatial filters>> on the map.
+
+*Opacity*::
+Set the opacity of spatial filters.
+
+*Fill color*::
+Set the fill color of spatial filters.
+
+*Border color*::
+Set the border color of spatial filters.
