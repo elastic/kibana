@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
-import { ResolverState, ResolverAction, RelatedEventDataEntry } from '../types';
+import { ResolverState, ResolverAction, RelatedEventDataEntry, RelatedEventType } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
 
@@ -84,31 +84,48 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      */
     if (action.type === 'appRequestedRelatedEventData') {
       console.log('middleware handling related request');
-      const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
+
+      
       //An array, but assume it has a length of 1 
-      const idsToFetchRelatedEventsFor = action.payload;
+      const id = event.entityId(action.payload[0]);
       if(typeof context !== 'undefined') {
         const httpGetter = context.services.http.get;
-        async function* getEachRelatedEventsResult(idsToFetch: string[]) {
-          for (const id of idsToFetch){
-            yield await Promise.all([
+        async function* getEachRelatedEventsResult(eventsToFetch: ResolverEvent[]) {
+          for (const evt of eventsToFetch){
+            //Tried with generic event.entityId() : no joy on results
+            yield [evt, await Promise.all([
               httpGetter(`/api/endpoint/resolver/${id}/events`, {
                 query: {events: 100},
               }),
-            ]);
+            ])
+            ]
           }
         }
-        for await (const result of getEachRelatedEventsResult(idsToFetchRelatedEventsFor)){
-          //pack up the results into response
-          for (const relatedEvent of result){
-            console.log('related Event: %o', relatedEvent)
+        for await (const results of getEachRelatedEventsResult([action.payload[0]])){
+            const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
+            const baseEvent = results[0] as unknown as ResolverEvent;
+            const fetchedResults = (results[1] as unknown as {events: ResolverEvent[]}[])
+              //pack up the results into response
+            for (const relatedEventResult of fetchedResults) {
+              console.log('related Event result: %o', relatedEventResult)
+              //help figure out how to type the Async Generator above
+              const relatedEventsFromResult = relatedEventResult.events;
+              const relatedEventEntry = relatedEventsFromResult.map(related_event => {
+                return {
+                  related_event,
+                  related_event_type: event.eventCategoryDisplayName(related_event) as RelatedEventType
+                }
+              })
+              response.set(baseEvent, {related_events: relatedEventEntry});
+              console.log('setResponse')
+            }
+            console.log('response: %o', response);
+            api.dispatch({
+              type: 'serverReturnedRelatedEventData',
+              payload: response,
+            });
           }
-        }
       }
-      // return api.dispatch({
-      //   type: 'serverReturnedRelatedEventData',
-      //   payload: response,
-      // });
     }
   };
 };

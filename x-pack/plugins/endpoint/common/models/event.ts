@@ -5,6 +5,7 @@
  */
 
 import { LegacyEndpointEvent, ResolverEvent } from '../types';
+import { EventCategory } from '../../public/embeddables/resolver/types';
 
 export function isLegacyEvent(event: ResolverEvent): event is LegacyEndpointEvent {
   return (event as LegacyEndpointEvent).endgame !== undefined;
@@ -45,4 +46,45 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
     return event.endgame.unique_ppid ? String(event.endgame.unique_ppid) : undefined;
   }
   return event.process.parent?.entity_id;
+}
+
+export function eventCategoryDisplayName(event: ResolverEvent): EventCategory {
+  //This was transcribed from the Endgame app:
+  const eventTypeToNameMap = new Map<string, EventCategory | undefined>([
+    ['process', 'Process'],
+    ['alert', 'Alert'],
+    ['security', 'Security'],
+    ['file', 'File'],
+    ['network', 'Network'],
+    ['registry', 'Registry'],
+    ['dns', 'DNS'],
+    ['clr', 'CLR'],
+    ['image_load', 'Image Load'],
+    ['powershell', 'Powershell'],
+    //these did *not* have corresponding entries in the Endgame map
+    ['wmi','WMI'],
+    ['api','API'],
+    ['user','User'],
+  ])
+
+  //Returning "Security" as a catch-all because it seems pretty general
+  let eventCategoryToReturn: EventCategory = 'Security'
+  if (isLegacyEvent(event)) {
+    const legacyFullType = event.endgame.event_type_full;
+    if(legacyFullType){
+      const mappedLegacyCategory = eventTypeToNameMap.get( legacyFullType )
+      if (mappedLegacyCategory) {
+        eventCategoryToReturn = mappedLegacyCategory;
+      }
+    }
+  }
+  else {
+    const eventCategories = event.event.category;
+    const eventCategory = typeof eventCategories === 'string' ? eventCategories : (eventCategories[0] || '');
+    const mappedCategoryValue = eventTypeToNameMap.get(eventCategory);
+    if(mappedCategoryValue){
+      eventCategoryToReturn = mappedCategoryValue;
+    }
+  }
+  return eventCategoryToReturn
 }

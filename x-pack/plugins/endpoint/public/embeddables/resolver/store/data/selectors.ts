@@ -15,7 +15,8 @@ import {
   Matrix3,
   AdjacentProcessMap,
   RelatedEventData,
-  RelatedEventType,
+  resultsEnrichedWithRelatedEventInfo,
+  waitingForRelatedEventData,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
@@ -407,21 +408,28 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
   return indexedProcessTreeFactory(graphableProcesses);
 });
 
-export const relatedEvents = createSelector(graphableProcesses, function getRelatedEvents(
+/**
+ * Process events that will be graphed.
+ */
+export const relatedEventStats = createSelector(
+  (data: DataState) => data,
+  function(data) {
+    return data[resultsEnrichedWithRelatedEventInfo]
+  }
+);
+
+export const relatedEvents = createSelector(graphableProcesses, relatedEventStats, function getRelatedEvents(
   /* eslint-disable no-shadow */
-  graphableProcesses
+  graphableProcesses,
+  relatedEventStats,
   /* eslint-enable no-shadow */
 ) {
-  const tempType: RelatedEventType = 'DNS';
   const eventsRelatedByProcess: RelatedEventData = new WeakMap();
   /* eslint-disable no-shadow */
   return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
     /* eslint-enable no-shadow */
-    const tempEntry = {
-      related_events: [{ related_event: graphableProcess, related_event_type: tempType }],
-      stats: { DNS: 23 },
-    };
-    relatedEvents.set(graphableProcess, tempEntry);
+    const relatedEventDataEntry = relatedEventStats?.get(graphableProcess) || waitingForRelatedEventData;
+    relatedEvents.set(graphableProcess, relatedEventDataEntry);
     return relatedEvents;
   }, eventsRelatedByProcess);
 });

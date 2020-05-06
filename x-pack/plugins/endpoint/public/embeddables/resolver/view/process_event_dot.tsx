@@ -347,10 +347,10 @@ export const ProcessEventDot = styled(
           console.log('in dispatch')
           dispatch({
             type: 'appRequestedRelatedEventData',
-            payload: [selfId]
+            payload: [event, selfId]
           });
         },
-        [dispatch, selfId]
+        [dispatch, event, selfId]
       );
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
