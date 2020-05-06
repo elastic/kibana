@@ -24,6 +24,7 @@ import {
 import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { Annotation } from '../../../../common/types/annotations';
+import { EntityField } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -45,7 +46,7 @@ export function getFocusData(
   focusAggregationInterval: Interval,
   forecastId: string,
   modelPlotEnabled: boolean,
-  nonBlankEntities: any[],
+  nonBlankEntities: EntityField[],
   searchBounds: any,
   selectedJob: Job
 ): Observable<FocusData> {
@@ -84,6 +85,7 @@ export function getFocusData(
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        partitionFields: nonBlankEntities,
       })
       .pipe(
         catchError(() => {

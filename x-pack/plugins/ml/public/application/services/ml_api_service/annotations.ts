@@ -7,6 +7,7 @@
 import { Annotation } from '../../../../common/types/annotations';
 import { http, http$ } from '../http_service';
 import { basePath } from './index';
+import { EntityField } from '../../../../common/util/anomaly_utils';
 
 export const annotations = {
   getAnnotations(obj: {
@@ -14,6 +15,7 @@ export const annotations = {
     earliestMs: number;
     latestMs: number;
     maxAnnotations: number;
+    partitionFields?: EntityField[];
   }) {
     const body = JSON.stringify(obj);
     return http$<{ annotations: Record<string, Annotation[]> }>({

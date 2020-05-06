@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const criteriaFieldSchema = schema.object({
+export const criteriaFieldSchema = schema.object({
   fieldType: schema.maybe(schema.string()),
   fieldName: schema.string(),
   fieldValue: schema.any(),

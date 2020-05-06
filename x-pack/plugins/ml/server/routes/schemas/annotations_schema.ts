@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { criteriaFieldSchema } from './results_service_schema';
 
 export const indexAnnotationSchema = schema.object({
   timestamp: schema.number(),
@@ -26,6 +27,7 @@ export const getAnnotationsSchema = schema.object({
   earliestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   latestMs: schema.oneOf([schema.nullable(schema.number()), schema.maybe(schema.number())]),
   maxAnnotations: schema.number(),
+  partitionFields: schema.maybe(schema.arrayOf(criteriaFieldSchema)),
 });
 
 export const deleteAnnotationSchema = schema.object({ annotationId: schema.string() });

@@ -8,6 +8,7 @@ import Boom from 'boom';
 import _ from 'lodash';
 import { APICaller } from 'kibana/server';
 
+import { TypeOf } from '@kbn/config-schema';
 import { ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
@@ -20,6 +21,7 @@ import {
   isAnnotation,
   isAnnotations,
 } from '../../../common/types/annotations';
+import { getAnnotationsSchema } from '../../routes/schemas/annotations_schema';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -103,7 +105,11 @@ export function annotationProvider(callAsCurrentUser: APICaller) {
     earliestMs,
     latestMs,
     maxAnnotations,
-  }: IndexAnnotationArgs) {
+    partitionFields,
+  }: TypeOf<typeof getAnnotationsSchema>) {
+    // eslint-disable-next-line no-console
+    console.log('Partition fields: ', JSON.stringify(partitionFields, null, 2));
+
     const obj: GetResponse = {
       success: true,
       annotations: {},
