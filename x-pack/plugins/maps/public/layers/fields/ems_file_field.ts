@@ -7,7 +7,7 @@
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { IField, AbstractField } from './field';
 import { IVectorSource } from '../sources/vector_source';
-import { IEmsFileSource } from '../sources/ems_file_source/ems_file_source';
+import { IEmsFileSource } from '../sources/ems_file_source';
 
 export class EMSFileField extends AbstractField implements IField {
   private readonly _source: IEmsFileSource;
