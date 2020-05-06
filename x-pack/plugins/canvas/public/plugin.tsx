@@ -69,7 +69,7 @@ export class CanvasPlugin
     this.srcPlugin.setup(core, { canvas: canvasApi });
 
     core.application.register({
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
       euiIconType: 'canvasApp',
