@@ -28,6 +28,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
       await PageObjects.reporting.verifyDownloadCSVButton('embeddablePanelHeading-EcommerceData');
+
+      // TODO test that the click action of the button is doing the correct actions
     });
   });
 }
