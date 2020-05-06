@@ -71,7 +71,8 @@ export default function({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('single metric', function() {
+  // Breaking latest ES snapshots: https://github.com/elastic/kibana/issues/65377
+  describe.skip('single metric', function() {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
@@ -325,8 +326,7 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.advanceToValidationSection();
     });
 
-    // https://github.com/elastic/kibana/issues/65377
-    it.skip('job cloning displays the summary step', async () => {
+    it('job cloning displays the summary step', async () => {
       await ml.jobWizardCommon.advanceToSummarySection();
     });
 
