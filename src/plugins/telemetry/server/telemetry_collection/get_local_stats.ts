@@ -39,7 +39,7 @@ export function handleLocalStats(
   { cluster_name, cluster_uuid, version }: ESClusterInfo,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats,
-  ingestSolutions: DataTelemetryPayload,
+  dataTelemetry: DataTelemetryPayload,
   context: StatsCollectionContext
 ) {
   return {
@@ -50,7 +50,7 @@ export function handleLocalStats(
     cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {
-      [DATA_TELEMETRY_ID]: ingestSolutions,
+      [DATA_TELEMETRY_ID]: dataTelemetry,
       kibana: handleKibanaStats(context, kibana),
     },
   };
@@ -70,13 +70,13 @@ export const getLocalStats: StatsGetter<{}, TelemetryLocalStats> = async (
 
   return await Promise.all(
     clustersDetails.map(async clustersDetail => {
-      const [clusterInfo, clusterStats, kibana, ingestSolutions] = await Promise.all([
+      const [clusterInfo, clusterStats, kibana, dataTelemetry] = await Promise.all([
         getClusterInfo(callCluster), // cluster info
         getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
         getKibana(usageCollection, callCluster),
         getDataTelemetry(callCluster),
       ]);
-      return handleLocalStats(clusterInfo, clusterStats, kibana, ingestSolutions, context);
+      return handleLocalStats(clusterInfo, clusterStats, kibana, dataTelemetry, context);
     })
   );
 };

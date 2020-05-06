@@ -142,7 +142,7 @@ describe('get_local_stats', () => {
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
-      expect(result.stack_stats).to.eql({ kibana: undefined, ingest_solutions: undefined });
+      expect(result.stack_stats).to.eql({ kibana: undefined, data: undefined });
     });
 
     it('returns expected object with xpack', () => {
@@ -152,7 +152,7 @@ describe('get_local_stats', () => {
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).to.be(combinedStatsResult.cluster_name);
       expect(stack.kibana).to.be(undefined); // not mocked for this test
-      expect(stack.ingest_solutions).to.be(undefined); // not mocked for this test
+      expect(stack.data).to.be(undefined); // not mocked for this test
 
       expect(cluster.version).to.eql(combinedStatsResult.version);
       expect(cluster.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
