@@ -43,7 +43,7 @@ export const BuildKibanaPlatformPluginsTask = {
 
     await runOptimizer(optimizerConfig)
       .pipe(
-        reportOptimizerStats(reporter, reportStatsName),
+        reportOptimizerStats(reporter, reportStatsName, optimizerConfig),
         logOptimizerState(log, optimizerConfig)
       )
       .toPromise();

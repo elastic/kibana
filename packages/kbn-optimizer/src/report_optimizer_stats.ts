@@ -21,10 +21,14 @@ import { materialize, mergeMap, dematerialize } from 'rxjs/operators';
 import { CiStatsReporter } from '@kbn/dev-utils';
 
 import { OptimizerUpdate$ } from './run_optimizer';
-import { OptimizerState } from './optimizer';
+import { OptimizerState, OptimizerConfig } from './optimizer';
 import { pipeClosure } from './common';
 
-export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
+export function reportOptimizerStats(
+  reporter: CiStatsReporter,
+  name: string,
+  config: OptimizerConfig
+) {
   return pipeClosure((update$: OptimizerUpdate$) => {
     let lastState: OptimizerState | undefined;
     return update$.pipe(
@@ -35,7 +39,23 @@ export function reportOptimizerStats(reporter: CiStatsReporter, name: string) {
         }
 
         if (n.kind === 'C' && lastState) {
-          await reporter.metric('@kbn/optimizer build time', name, lastState.durSec);
+          await reporter.metrics([
+            {
+              name: '@kbn/optimizer build time',
+              subName: name,
+              value: lastState.durSec,
+            },
+            ...config.bundles.map(bundle => {
+              // make the cache read from the cache file since it was likely updated by the worker
+              bundle.cache.refresh();
+
+              return {
+                name: `@kbn/optimizer bundle module count`,
+                subName: bundle.id,
+                value: bundle.cache.getModuleCount() || 0,
+              };
+            }),
+          ]);
         }
 
         return n;

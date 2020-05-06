@@ -110,7 +110,7 @@ run(
         throw createFailError('Unable to initialize CiStatsReporter from env');
       }
 
-      update$ = update$.pipe(reportOptimizerStats(reporter, reportStatsName));
+      update$ = update$.pipe(reportOptimizerStats(reporter, reportStatsName, config));
     }
 
     await update$.pipe(logOptimizerState(log, config)).toPromise();
