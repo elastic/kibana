@@ -28,7 +28,7 @@ import {
   MapFilters,
   StyleDescriptor,
 } from '../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';
+import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from './sources/source';
 import { SyncContext } from '../actions/map_actions';
 import { IStyle } from './styles/style';
 
@@ -58,7 +58,7 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }): ReactElement<any> | null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
   hasErrors(): boolean;
   getErrors(): string;
@@ -368,7 +368,7 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     const source = this.getSourceForEditing();
     return source.renderSourceSettingsEditor({ onChange });
   }
