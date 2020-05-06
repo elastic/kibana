@@ -23,10 +23,10 @@ import { Direction } from '../../graphql/types';
 import { defaultHeaders } from '../../mock';
 
 import {
-  addNewTimeline,
   addTimelineProvider,
   addTimelineToStore,
   applyDeltaToTimelineColumnWidth,
+  getNewTimeline,
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
@@ -132,41 +132,32 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#addNewTimeline', () => {
+  describe('#getNewTimeline', () => {
     test('should return a new reference and not the same reference', () => {
-      const update = addNewTimeline({
+      const update = getNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        timelineById: timelineByIdMock,
       });
-      expect(update).not.toBe(timelineByIdMock);
+      expect(update).not.toBe(timelineByIdMock.foo);
     });
 
-    test('should add a new timeline', () => {
-      const update = addNewTimeline({
+    test('should return a new timeline', () => {
+      const update = getNewTimeline({
         id: 'bar',
         columns: timelineDefaults.columns,
-        timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
-        foo: timelineByIdMock.foo,
-        bar: set('id', 'bar', timelineDefaults),
-      });
+      expect(update).toEqual(set('id', 'bar', timelineDefaults));
     });
 
     test('should add the specified columns to the timeline', () => {
       const barWithEmptyColumns = set('id', 'bar', timelineDefaults);
       const barWithPopulatedColumns = set('columns', defaultHeaders, barWithEmptyColumns);
 
-      const update = addNewTimeline({
+      const update = getNewTimeline({
         id: 'bar',
         columns: defaultHeaders,
-        timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
-        foo: timelineByIdMock.foo,
-        bar: barWithPopulatedColumns,
-      });
+      expect(update).toEqual(barWithPopulatedColumns);
     });
   });
 
