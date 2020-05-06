@@ -127,11 +127,25 @@ describe('action_form', () => {
           isPreconfigured: false,
         },
       ]);
-      const mockes = coreMock.createSetup();
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
       deps = {
-        toastNotifications: mockes.notifications.toasts,
-        http: mockes.http,
+        toastNotifications: mocks.notifications.toasts,
+        http: mocks.http,
+        capabilities: {
+          ...capabilities,
+          actions: {
+            delete: true,
+            save: true,
+            show: true,
+          },
+        },
         actionTypeRegistry: actionTypeRegistry as any,
+        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       actionTypeRegistry.list.mockReturnValue([
         actionType,
@@ -224,6 +238,8 @@ describe('action_form', () => {
             },
           ]}
           toastNotifications={deps!.toastNotifications}
+          docLinks={deps.docLinks}
+          capabilities={deps.capabilities}
         />
       );
 

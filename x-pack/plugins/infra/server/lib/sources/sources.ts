@@ -12,7 +12,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { defaultSourceConfiguration } from './defaults';
 import { NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
@@ -108,7 +108,7 @@ export class InfraSources {
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await savedObjectsClient.create(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         pickSavedSourceConfiguration(newSourceConfiguration) as any,
         { id: sourceId }
       )
@@ -127,7 +127,7 @@ export class InfraSources {
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
   ) {
-    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectType, sourceId);
+    await savedObjectsClient.delete(infraSourceConfigurationSavedObjectName, sourceId);
   }
 
   public async updateSourceConfiguration(
@@ -149,7 +149,7 @@ export class InfraSources {
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       await savedObjectsClient.update(
-        infraSourceConfigurationSavedObjectType,
+        infraSourceConfigurationSavedObjectName,
         sourceId,
         pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
         {
@@ -207,7 +207,7 @@ export class InfraSources {
     sourceId: string
   ) {
     const savedObject = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
+      infraSourceConfigurationSavedObjectName,
       sourceId
     );
 
@@ -216,7 +216,7 @@ export class InfraSources {
 
   private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
     const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectType,
+      type: infraSourceConfigurationSavedObjectName,
     });
 
     return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);

@@ -14,7 +14,9 @@ exports[`Empty rendering renders correctly against snapshot 1`] = `
       Drop anything
     </Text>
     <HighlightedBackground>
-      <BadgeHighlighted>
+      <BadgeHighlighted
+        className="highlighted-drop-target"
+      >
         highlighted
       </BadgeHighlighted>
     </HighlightedBackground>

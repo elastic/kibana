@@ -23,7 +23,7 @@ import _ from 'lodash';
 
 import { create } from '../create';
 import { collapseLiteralStrings } from '../../../../../../es_ui_shared/public';
-const editorInput1 = require('./editor_input1.txt');
+import editorInput1 from './editor_input1.txt';
 
 describe('Editor', () => {
   let input;

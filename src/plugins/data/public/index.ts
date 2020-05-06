@@ -260,7 +260,6 @@ export {
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   getIndexPatternFieldListCreator,
-  Field,
 } from './index_patterns';
 
 export {

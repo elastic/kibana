@@ -17,7 +17,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,

@@ -27,7 +27,6 @@ import { CustomLink } from './CustomLink';
 import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
 import { useLicense } from '../../../hooks/useLicense';
-import { px } from '../../../style/variables';
 import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
@@ -124,7 +123,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
         }
       >
-        <div style={{ maxHeight: px(600), width: px(335) }}>
+        <div>
           {isCustomLinksPopoverOpen ? (
             <CustomLinkPopover
               customLinks={customLinks.slice(3, customLinks.length)}
