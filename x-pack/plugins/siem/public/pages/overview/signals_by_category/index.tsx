@@ -14,6 +14,7 @@ import { Filter, IIndexPattern, Query } from '../../../../../../../src/plugins/d
 import { inputsModel } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
 import * as i18n from '../translations';
+import { UpdateDateRange } from '../../../components/charts/common';
 
 const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'signal.rule.threat.tactic.name';
@@ -52,8 +53,12 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   to,
 }) => {
   const { signalIndexName } = useSignalIndex();
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
+  const updateDateRangeCallback = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

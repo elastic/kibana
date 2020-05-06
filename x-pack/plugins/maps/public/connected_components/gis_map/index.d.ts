@@ -9,7 +9,11 @@ import { Filter } from 'src/plugins/data/public';
 
 import { RenderToolTipContent } from '../../layers/tooltips/tooltip_property';
 
-export const GisMap: React.ComponentType<{
+declare const GisMap: React.ComponentType<{
   addFilters: ((filters: Filter[]) => void) | null;
   renderTooltipContent?: RenderToolTipContent;
 }>;
+
+export { GisMap };
+// eslint-disable-next-line import/no-default-export
+export default GisMap;

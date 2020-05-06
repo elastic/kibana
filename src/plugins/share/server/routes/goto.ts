@@ -23,7 +23,7 @@ import { schema } from '@kbn/config-schema';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 import { getGotoPath } from '../../common/short_url_routes';
-import { modifyUrl } from '../../../../core/utils';
+import { modifyUrl } from '../../../../core/server';
 
 export const createGotoRoute = ({
   router,
