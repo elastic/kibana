@@ -104,7 +104,7 @@ const getTimelineTypeFilter = (timelineType: string | null) => {
     : /** Show me every timeline whose timelineType is not "template".
        * which includes timelineType === 'default' and
        * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template} and not siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`;
 };
 
 export const getAllTimeline = async (
@@ -135,6 +135,8 @@ export const getDraftTimeline = async (request: FrameworkRequest): Promise<Respo
     type: timelineSavedObjectType,
     perPage: 1,
     filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`,
+    sortField: 'created',
+    sortOrder: 'desc',
   };
   return getAllSavedTimeline(request, options);
 };
