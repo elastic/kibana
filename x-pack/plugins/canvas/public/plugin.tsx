@@ -15,6 +15,7 @@ import {
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
+import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
@@ -70,6 +71,14 @@ export class CanvasPlugin
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
 
     this.srcPlugin.setup(core, { canvas: canvasApi });
+
+    // Set the nav link to the last saved url if we have one in storage
+    const lastUrl = sessionStorage.getItem(SESSIONSTORAGE_LASTPATH);
+    if (lastUrl) {
+      this.appUpdater.next(() => ({
+        defaultPath: `#${lastUrl}`,
+      }));
+    }
 
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,

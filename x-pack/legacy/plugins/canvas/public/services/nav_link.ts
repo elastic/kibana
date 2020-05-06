@@ -6,6 +6,7 @@
 
 import { CanvasServiceFactory } from '.';
 import { CoreStart, CoreSetup, CanvasSetupDeps, CanvasStartDeps } from '../plugin';
+import { SESSIONSTORAGE_LASTPATH } from '../../common/lib/constants';
 
 interface NavLinkService {
   updatePath: (path: string) => void;
@@ -23,6 +24,8 @@ export const navLinkServiceFactory: CanvasServiceFactory<NavLinkService> = (
       appUpdater.next(() => ({
         defaultPath: `#${path}`,
       }));
+
+      sessionStorage.setItem(SESSIONSTORAGE_LASTPATH, path);
     },
   };
 };
