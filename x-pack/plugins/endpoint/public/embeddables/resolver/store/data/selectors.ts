@@ -16,7 +16,6 @@ import {
   AdjacentProcessMap,
   RelatedEventData,
   resultsEnrichedWithRelatedEventInfo,
-  waitingForRelatedEventData,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
