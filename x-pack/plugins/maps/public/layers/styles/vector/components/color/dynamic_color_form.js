@@ -129,15 +129,13 @@ export function DynamicColorForm({
   return (
     <Fragment>
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-        <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
-          {staticDynamicSelect}
-        </EuiFlexItem>
         <EuiFlexItem>
           <FieldSelect
             styleName={styleProperty.getStyleName()}
             fields={fields}
             selectedFieldName={styleProperty.getFieldName()}
             onChange={onFieldChange}
+            staticDynamicSelect={staticDynamicSelect}
             compressed
           />
         </EuiFlexItem>

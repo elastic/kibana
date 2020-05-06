@@ -40,6 +40,7 @@ export class MbValidatedColorPicker extends Component<Props, State> {
   render() {
     return (
       <EuiColorPicker
+        prepend={this.props.staticDynamicSelect}
         onChange={this._onColorChange}
         color={this.state.colorInputValue}
         swatches={this.props.swatches}

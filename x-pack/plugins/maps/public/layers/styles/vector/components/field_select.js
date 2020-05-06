@@ -72,7 +72,14 @@ function groupFieldsByOrigin(fields) {
   return optionGroups;
 }
 
-export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ...rest }) {
+export function FieldSelect({
+  fields,
+  selectedFieldName,
+  onChange,
+  styleName,
+  staticDynamicSelect,
+  ...rest
+}) {
   const onFieldChange = selectedFields => {
     onChange({
       field: selectedFields.length > 0 ? selectedFields[0].value : null,
@@ -88,6 +95,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
 
   return (
     <EuiComboBox
+      prepend={staticDynamicSelect}
       selectedOptions={selectedOption ? [selectedOption] : []}
       options={groupFieldsByOrigin(fields)}
       onChange={onFieldChange}

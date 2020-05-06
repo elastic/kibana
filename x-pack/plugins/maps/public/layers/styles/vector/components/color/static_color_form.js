@@ -20,14 +20,12 @@ export function StaticColorForm({
 
   return (
     <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
-      <EuiFlexItem grow={false} className="mapStyleSettings__fixedBox">
-        {staticDynamicSelect}
-      </EuiFlexItem>
       <EuiFlexItem>
         <MbValidatedColorPicker
           onChange={onColorChange}
           color={styleProperty.getOptions().color}
           swatches={swatches}
+          staticDynamicSelect={staticDynamicSelect}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
