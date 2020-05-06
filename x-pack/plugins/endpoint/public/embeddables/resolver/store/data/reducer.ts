@@ -48,7 +48,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
      * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
      * When this data is inlined with results, there won't be a need for this.
      */
-    console.log('payload received by reducer: %o', action.payload);
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     
     if (statsMap && typeof statsMap?.set === 'function') {

@@ -92,10 +92,13 @@ type ResolverSubmenuOptionList = Array<{
 const OptionList = React.memo(
   ({ subMenuOptions }: { subMenuOptions: ResolverSubmenuOptionList }) => {
     const selectableOptions = subMenuOptions.map((opt, index) => {
-      return {
+      return opt.prefix ? {
+        label: opt.optionTitle,
+        prepend: (<span>{opt.prefix}</span>),
+      } : {
         label: opt.optionTitle,
       };
-    });
+    })
     const [options, setOptions] = useState(selectableOptions);
     return useMemo(
       () => (
@@ -145,12 +148,13 @@ const NodeSubMenu = styled(
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
           if (typeof menuAction === 'function') menuAction();
+          setMenuOpen(true);
         },
         [menuAction]
       );
       const isMenuDataAvailable = useMemo(()=>{
         return typeof optionsWithActions === 'object'; 
-      }, [])
+      }, [optionsWithActions])
 
       if (!optionsWithActions) {
         /**
@@ -175,13 +179,13 @@ const NodeSubMenu = styled(
             onClick={isMenuDataAvailable ? handleMenuOpenClick : handleMenuActionClick}
             color="ghost"
             size="s"
-            iconType="arrowUp"
+            iconType={(menuIsOpen ? 'arrowUp' : 'arrowDown')}
             iconSide="right"
             tabIndex={-1}
           >
             {menuTitle}
           </EuiButton>
-          {menuIsOpen &&
+          {menuIsOpen && isMenuDataAvailable &&
             (typeof optionsWithActions === 'symbol' ? (
               'loading'
             ) : (
@@ -200,6 +204,9 @@ const NodeSubMenu = styled(
   &.is-open .euiButton {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
+  }
+  &.is-open .euiSelectableListItem__prepend {
+    color: white;
   }
 `;
 
@@ -255,7 +262,6 @@ export const ProcessEventDot = styled(
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
       const relatedEventOptions = useMemo(()=>{
-        console.log('rememo on %o', relatedEvents);
         if(!relatedEvents){
           return subMenuAssets.initialMenuStatus
         }
@@ -264,7 +270,8 @@ export const ProcessEventDot = styled(
         }
         return Object.entries(relatedEvents.stats).map((k,v) => {
           return {
-            optionTitle: `${v} ${k}`,
+            prefix: k[1],
+            optionTitle: `${k[0]}`,
             action: () => {
               /**
                * COMING SOON TO A THEATER NEAR YOU:
@@ -349,6 +356,7 @@ export const ProcessEventDot = styled(
 
       const handleClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+          
           if (animationTarget.current !== null) {
             (animationTarget.current as any).beginElement();
           }
@@ -364,7 +372,6 @@ export const ProcessEventDot = styled(
 
       const handleRelatedEventRequest = useCallback(
         () => {
-          console.log('in dispatch')
           dispatch({
             type: 'appRequestedRelatedEventData',
             payload: [event, selfId]
@@ -500,7 +507,7 @@ export const ProcessEventDot = styled(
               </div>
               {magFactorX >= 2 && (
                 <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} className="related-dropdown">
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedEvents.title}
                       optionsWithActions={relatedEventOptions}
@@ -533,9 +540,10 @@ export const ProcessEventDot = styled(
   padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
-  contain: strict;
+  contain: layout;
   min-width: 280px;
   min-height: 90px;
+  overflow-y: visible;
 
   //dasharray & dashoffset should be equal to "pull" the stroke back
   //when it is transitioned.
@@ -551,6 +559,9 @@ export const ProcessEventDot = styled(
     stroke-dashoffset: 0;
   }
 
+  & .related-dropdown {
+    width: 4.5em;
+  } 
   & .euiSelectableList-bordered {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;

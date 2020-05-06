@@ -83,9 +83,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      * When this data is inlined with results, there won't be a need for this.
      */
     if (action.type === 'appRequestedRelatedEventData') {
-      console.log('middleware handling related request');
-
-      
       //An array, but assume it has a length of 1 
       const id = event.entityId(action.payload[0]);
       if(typeof context !== 'undefined') {
@@ -107,7 +104,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             const fetchedResults = (results[1] as unknown as {events: ResolverEvent[]}[])
               //pack up the results into response
             for (const relatedEventResult of fetchedResults) {
-              console.log('related Event result: %o', relatedEventResult)
               //help figure out how to type the Async Generator above
               const relatedEventsFromResult = relatedEventResult.events;
               const relatedEventEntry = relatedEventsFromResult.map(related_event => {
@@ -117,9 +113,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
                 }
               })
               response.set(baseEvent, {related_events: relatedEventEntry});
-              console.log('setResponse')
             }
-            console.log('response: %o', response);
             api.dispatch({
               type: 'serverReturnedRelatedEventData',
               payload: response,
