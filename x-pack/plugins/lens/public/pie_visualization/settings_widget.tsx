@@ -73,7 +73,7 @@ const categoryOptionsTreemap: Array<{
   {
     value: 'default',
     inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
-      defaultMessage: 'Show',
+      defaultMessage: 'Show labels',
     }),
   },
   {
