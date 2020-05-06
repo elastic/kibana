@@ -5,11 +5,11 @@
  */
 
 import { ImmutableReducer } from '../../types';
-import { AlertListState } from '../../../../../common/alerts/types';
+import { AlertingState } from '../../../../../common/alerts/types';
 import { AppAction } from '../../store/action';
 import { Immutable } from '../../../../../common/types';
 
-const initialState = (): Immutable<AlertListState> => {
+const initialState = (): Immutable<AlertingState> => {
   return {
     alerts: [],
     alertDetails: undefined,
@@ -23,7 +23,7 @@ const initialState = (): Immutable<AlertListState> => {
   };
 };
 
-export const alertListReducer: ImmutableReducer<AlertListState, AppAction> = (
+export const alertingReducer: ImmutableReducer<AlertingState, AppAction> = (
   state = initialState(),
   action
 ) => {

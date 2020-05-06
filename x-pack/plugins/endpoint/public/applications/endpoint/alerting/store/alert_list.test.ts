@@ -6,8 +6,8 @@
 
 import { Store, createStore, applyMiddleware } from 'redux';
 import { History } from 'history';
-import { alertListReducer } from './reducer';
-import { AlertListState } from '../../../../../common/alerts/types';
+import { alertingReducer } from './reducer';
+import { AlertingState } from '../../../../../common/alerts/types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';
@@ -18,20 +18,20 @@ import { createBrowserHistory } from 'history';
 import { mockAlertResultList } from './mock_alert_result_list';
 
 describe('alert list tests', () => {
-  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
+  let store: Store<Immutable<AlertingState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;
   /**
    * A function that waits until a selector returns true.
    */
-  let selectorIsTrue: (selector: (state: Immutable<AlertListState>) => boolean) => Promise<void>;
+  let selectorIsTrue: (selector: (state: Immutable<AlertingState>) => boolean) => Promise<void>;
   beforeEach(() => {
     coreStart = coreMock.createStart();
     depsStart = depsStartMock();
     history = createBrowserHistory();
     const middleware = alertMiddlewareFactory(coreStart, depsStart);
-    store = createStore(alertListReducer, applyMiddleware(middleware));
+    store = createStore(alertingReducer, applyMiddleware(middleware));
 
     selectorIsTrue = async selector => {
       // If the selector returns true, we're done

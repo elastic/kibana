@@ -20,10 +20,10 @@ import {
   HostPolicyResponse,
   HostInfo,
 } from '../../../common/types';
-import { AlertListState } from '../../../common/alerts/types';
+import { AlertingState } from '../../../common/alerts/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
-import { CoreStart } from '../../../../../../src/core/public';
+import { CoreStart, AppMountParameters } from '../../../../../../src/core/public';
 import {
   GetAgentStatusResponse,
   GetDatasourcesResponse,
@@ -83,8 +83,12 @@ type Selector<S, R> = (state: S) => R;
  */
 export type SubstateMiddlewareFactory = <Substate>(
   selector: Selector<GlobalState, Immutable<Substate>>,
-  middleware: ImmutableMiddleware<Substate, AppAction>
-) => Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
+  middleware: SubstateMiddleware<Substate>
+) => AppMiddleware;
+
+export type AppMiddleware = Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
+
+type SubstateMiddleware<Substate> = ImmutableMiddleware<Substate, AppAction>;
 
 export interface HostState {
   /** list of host **/
@@ -275,7 +279,7 @@ export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malwar
 
 export interface GlobalState {
   readonly hostList: HostState;
-  readonly alertList: AlertListState;
+  readonly alerting: AlertingState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;
 }
@@ -335,4 +339,47 @@ export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyActio
  */
 type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
   [K in keyof S]: ImmutableReducer<S[K], A>;
+};
+
+export interface Subplugin<State> {
+  middleware: SubstateMiddleware<State>;
+  reducer: ImmutableReducer<State, AppAction>;
+  Routes: React.FC | React.ComponentClass;
+  SelectorContextProvider: React.Provider<Immutable<State> | undefined>;
+}
+
+export interface SubpluginProviderDefinition<State> {
+  reducer: Subplugin<State>['reducer'];
+  middleware: (
+    coreStart: CoreStart,
+    depsStart: EndpointPluginStartDependencies,
+    params: AppMountParameters
+  ) => Subplugin<State>['middleware'];
+  Routes: (
+    coreStart: CoreStart,
+    depsStart: EndpointPluginStartDependencies,
+    params: AppMountParameters
+  ) => Subplugin<State>['Routes'];
+  SelectorContextProvider: Subplugin<State>['SelectorContextProvider'];
+}
+
+export interface EndpointAppSubplugins {
+  alerting: Subplugin<AlertingState>;
+}
+
+export type EndpointAppSubpluginMiddlewares = {
+  [Key in keyof EndpointAppSubplugins]: EndpointAppSubplugins[Key]['middleware'];
+} & {
+  spyMiddleware?: AppMiddleware;
+  hostList: SubstateMiddleware<HostState>;
+  policyList: SubstateMiddleware<PolicyListState>;
+  policyDetails: SubstateMiddleware<PolicyDetailsState>;
+};
+
+export type EndpointAppSubpluginReducers = {
+  [Key in keyof EndpointAppSubplugins]: EndpointAppSubplugins[Key]['reducer'];
+} & {
+  hostList: ImmutableReducer<HostState, AppAction>;
+  policyList: ImmutableReducer<PolicyListState, AppAction>;
+  policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
 };

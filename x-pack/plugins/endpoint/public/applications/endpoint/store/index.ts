@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore, compose, applyMiddleware, Store } from 'redux';
-import { CoreStart } from 'kibana/public';
-import { appReducer } from './reducer';
-import { alertMiddlewareFactory } from '../alerts/store/middleware';
-import { hostMiddlewareFactory } from './hosts';
-import { policyListMiddlewareFactory } from './policy_list';
-import { policyDetailsMiddlewareFactory } from './policy_details';
-import { ImmutableMiddlewareFactory, SubstateMiddlewareFactory } from '../types';
-import { EndpointPluginStartDependencies } from '../../../plugin';
+import { applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { StoreEnhancer } from 'redux';
+import { SubstateMiddlewareFactory, EndpointAppSubpluginMiddlewares } from '../types';
 
-const composeWithReduxDevTools = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-  ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({ name: 'EndpointApp' })
-  : compose;
+const composeWithReduxDevTools = composeWithDevTools({ name: 'EndpointApp' });
 
 export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, middleware) => {
   return api => {
@@ -31,54 +24,23 @@ export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, m
   };
 };
 
-/**
- * @param middlewareDeps Optionally create the store without any middleware. This is useful for testing the store w/o side effects.
- */
-export const appStoreFactory: (middlewareDeps?: {
-  /**
-   * Allow middleware to communicate with Kibana core.
-   */
-  coreStart: CoreStart;
-  /**
-   * Give middleware access to plugin start dependencies.
-   */
-  depsStart: EndpointPluginStartDependencies;
-  /**
-   * Any additional Redux Middlewares
-   * (should only be used for testing - example: to inject the action spy middleware)
-   */
-  additionalMiddleware?: Array<ReturnType<ImmutableMiddlewareFactory>>;
-}) => Store = middlewareDeps => {
-  let middleware;
-  if (middlewareDeps) {
-    const { coreStart, depsStart, additionalMiddleware = [] } = middlewareDeps;
-    middleware = composeWithReduxDevTools(
-      applyMiddleware(
-        substateMiddlewareFactory(
-          globalState => globalState.hostList,
-          hostMiddlewareFactory(coreStart, depsStart)
-        ),
-        substateMiddlewareFactory(
-          globalState => globalState.policyList,
-          policyListMiddlewareFactory(coreStart, depsStart)
-        ),
-        substateMiddlewareFactory(
-          globalState => globalState.policyDetails,
-          policyDetailsMiddlewareFactory(coreStart, depsStart)
-        ),
-        substateMiddlewareFactory(
-          globalState => globalState.alertList,
-          alertMiddlewareFactory(coreStart, depsStart)
-        ),
-        // Additional Middleware should go last
-        ...additionalMiddleware
-      )
-    );
-  } else {
-    // Create the store without any middleware. This is useful for testing the store w/o side effects.
-    middleware = undefined;
-  }
-  const store = createStore(appReducer, middleware);
-
-  return store;
+export const appStoreEnhancerFactory: (
+  subpluginMiddlewares: EndpointAppSubpluginMiddlewares
+) => StoreEnhancer = subpluginMiddlewares => {
+  return composeWithReduxDevTools(
+    applyMiddleware(
+      substateMiddlewareFactory(globalState => globalState.hostList, subpluginMiddlewares.hostList),
+      substateMiddlewareFactory(
+        globalState => globalState.policyList,
+        subpluginMiddlewares.policyList
+      ),
+      substateMiddlewareFactory(
+        globalState => globalState.policyDetails,
+        subpluginMiddlewares.policyDetails
+      ),
+      substateMiddlewareFactory(globalState => globalState.alerting, subpluginMiddlewares.alerting),
+      // Additional Middleware should go last
+      ...(subpluginMiddlewares.spyMiddleware ? [subpluginMiddlewares.spyMiddleware] : [])
+    )
+  );
 };

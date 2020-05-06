@@ -9,11 +9,12 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { createStore } from 'redux';
 import { AlertIndex } from '../index';
-import { appStoreFactory } from '../../../store';
 import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from '../../../view/route_capture';
 import { depsStartMock } from '../../../mocks';
+import { alertingReducer } from '../../store/reducer';
 
 export const alertPageTestRender = () => {
   /**
@@ -23,7 +24,7 @@ export const alertPageTestRender = () => {
   /**
    * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
    */
-  const store = appStoreFactory();
+  const store = createStore(alertingReducer);
 
   const depsStart = depsStartMock();
   depsStart.data.ui.SearchBar.mockImplementation(() => <div />);

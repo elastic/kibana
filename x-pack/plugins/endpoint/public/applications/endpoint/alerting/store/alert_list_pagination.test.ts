@@ -6,8 +6,8 @@
 
 import { Store, createStore, applyMiddleware } from 'redux';
 import { History } from 'history';
-import { alertListReducer } from './reducer';
-import { AlertListState, AlertingIndexUIQueryParams } from '../../../../../common/alerts/types';
+import { alertingReducer } from './reducer';
+import { AlertingState, AlertingIndexUIQueryParams } from '../../../../../common/alerts/types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';
@@ -18,7 +18,7 @@ import { urlFromQueryParams } from '../view/url_from_query_params';
 import { Immutable } from '../../../../../common/types';
 
 describe('alert list pagination', () => {
-  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
+  let store: Store<Immutable<AlertingState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;
@@ -33,7 +33,7 @@ describe('alert list pagination', () => {
     history = createBrowserHistory();
 
     const middleware = alertMiddlewareFactory(coreStart, depsStart);
-    store = createStore(alertListReducer, applyMiddleware(middleware));
+    store = createStore(alertingReducer, applyMiddleware(middleware));
 
     history.listen(location => {
       store.dispatch({ type: 'userChangedUrl', payload: location });

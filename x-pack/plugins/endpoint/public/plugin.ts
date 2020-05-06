@@ -10,6 +10,11 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
 import { IngestManagerStart } from '../../ingest_manager/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
+import {
+  EndpointAppSubplugins,
+  SubpluginProviderDefinition,
+  Subplugin,
+} from './applications/endpoint/types';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
@@ -32,6 +37,20 @@ export interface EndpointPluginServices extends Partial<CoreStart> {
   data: DataPublicPluginStart;
 }
 
+const instantiatedSubplugin = <State>(
+  provider: SubpluginProviderDefinition<State>,
+  coreStart: CoreStart,
+  depsStart: EndpointPluginStartDependencies,
+  params: AppMountParameters
+): Subplugin<State> => {
+  return {
+    reducer: provider.reducer,
+    middleware: provider.middleware(coreStart, depsStart, params),
+    Routes: provider.Routes(coreStart, depsStart, params),
+    SelectorContextProvider: provider.SelectorContextProvider,
+  };
+};
+
 export class EndpointPlugin
   implements
     Plugin<
@@ -52,8 +71,16 @@ export class EndpointPlugin
       euiIconType: 'securityApp',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./applications/endpoint');
-        return renderApp(coreStart, depsStart, params);
+        const [{ renderApp }, { alertingSubprovider: alertsSubprovider }] = await Promise.all([
+          import('./applications/endpoint'),
+          import('./applications/endpoint/alerting'),
+        ]);
+
+        const subplugins: EndpointAppSubplugins = {
+          alerting: instantiatedSubplugin(alertsSubprovider, coreStart, depsStart, params),
+        };
+
+        return renderApp(coreStart, depsStart, params, subplugins);
       },
     });
 

@@ -6,15 +6,17 @@
 
 import { hostListReducer } from './hosts';
 import { AppAction } from './action';
-import { alertListReducer } from '../alerts/store';
-import { GlobalState, ImmutableReducer } from '../types';
+import { GlobalState, ImmutableReducer, EndpointAppSubpluginReducers } from '../types';
 import { policyListReducer } from './policy_list';
 import { policyDetailsReducer } from './policy_details';
 import { immutableCombineReducers } from './immutable_combine_reducers';
 
-export const appReducer: ImmutableReducer<GlobalState, AppAction> = immutableCombineReducers({
-  hostList: hostListReducer,
-  alertList: alertListReducer,
-  policyList: policyListReducer,
-  policyDetails: policyDetailsReducer,
-});
+export const appReducerFactory: (
+  subpluginReducers: EndpointAppSubpluginReducers
+) => ImmutableReducer<GlobalState, AppAction> = ({ alerting }) =>
+  immutableCombineReducers({
+    hostList: hostListReducer,
+    alerting,
+    policyList: policyListReducer,
+    policyDetails: policyDetailsReducer,
+  });

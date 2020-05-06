@@ -132,7 +132,7 @@ interface AlertsSearchBarState {
 
 export type AlertListData = AlertResultList;
 
-export interface AlertListState {
+export interface AlertingState {
   /** Array of alert items. */
   readonly alerts: Immutable<AlertData[]>;
 
