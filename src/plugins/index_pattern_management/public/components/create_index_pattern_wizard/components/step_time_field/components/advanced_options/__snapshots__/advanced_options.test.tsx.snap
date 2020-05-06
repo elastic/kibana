@@ -42,8 +42,7 @@ exports[`AdvancedOptions should render normally 1`] = `
       hasEmptyLabelSpace={false}
       helpText={
         <FormattedMessage
-          defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID,
- enter a custom one."
+          defaultMessage="Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one."
           id="indexPatternManagement.createIndexPattern.stepTime.options.patternLabel"
           values={Object {}}
         />
