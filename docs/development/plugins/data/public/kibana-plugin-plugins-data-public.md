@@ -9,10 +9,10 @@
 |  Class | Description |
 |  --- | --- |
 |  [AggParamType](./kibana-plugin-plugins-data-public.aggparamtype.md) |  |
-|  [Field](./kibana-plugin-plugins-data-public.field.md) |  |
 |  [FieldFormat](./kibana-plugin-plugins-data-public.fieldformat.md) |  |
 |  [FilterManager](./kibana-plugin-plugins-data-public.filtermanager.md) |  |
 |  [IndexPattern](./kibana-plugin-plugins-data-public.indexpattern.md) |  |
+|  [IndexPatternField](./kibana-plugin-plugins-data-public.indexpatternfield.md) |  |
 |  [IndexPatternFieldList](./kibana-plugin-plugins-data-public.indexpatternfieldlist.md) |  |
 |  [IndexPatternSelect](./kibana-plugin-plugins-data-public.indexpatternselect.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-public.optionedparamtype.md) |  |

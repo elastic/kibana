@@ -35,13 +35,14 @@ export const heatmapTitle = i18n.translate('xpack.maps.source.esGridHeatmapTitle
 export class ESGeoGridSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_GEO_GRID;
 
-  static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
+  static createDescriptor({ indexPatternId, geoField, metrics, requestType, resolution }) {
     return {
       type: ESGeoGridSource.type,
       id: uuid(),
-      indexPatternId: indexPatternId,
-      geoField: geoField,
-      requestType: requestType,
+      indexPatternId,
+      geoField,
+      metrics: metrics ? metrics : [],
+      requestType,
       resolution: resolution ? resolution : GRID_RESOLUTION.COARSE,
     };
   }
