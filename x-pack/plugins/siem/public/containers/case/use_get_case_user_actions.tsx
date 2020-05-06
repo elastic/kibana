@@ -53,20 +53,6 @@ interface CommentsAndIndex {
   commentId: string;
   commentIndex: number;
 }
-// if the comment happens after the lastUpdateToCaseIndex, it should be included in commentsToUpdate
-const buildCommentsToUpdate = (
-  commentsAndIndex: CommentsAndIndex[],
-  lastUpdateToCaseIndex: number
-) =>
-  commentsAndIndex.reduce<string[]>(
-    (bacc, currentComment) =>
-      currentComment.commentIndex > lastUpdateToCaseIndex
-        ? bacc.indexOf(currentComment.commentId) > -1
-          ? [...bacc.filter(e => e !== currentComment.commentId), currentComment.commentId]
-          : [...bacc, currentComment.commentId]
-        : bacc,
-    []
-  );
 
 export const getPushedInfo = (
   caseUserActions: CaseUserActions[],
@@ -102,7 +88,7 @@ export const getPushedInfo = (
     []
   );
 
-  const caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
+  let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
     if (cua.action !== 'push-to-service') {
       return acc;
     }
@@ -120,7 +106,7 @@ export const getPushedInfo = (
               ...acc[externalService.connectorId],
               ...externalService,
               lastPushIndex: i,
-              commentsToUpdate: buildCommentsToUpdate(commentsAndIndex, i),
+              commentsToUpdate: [],
             },
           }
         : {
@@ -129,9 +115,28 @@ export const getPushedInfo = (
               firstPushIndex: i,
               lastPushIndex: i,
               hasDataToPush: hasDataToPushForConnector(externalService.connectorId),
-              commentsToUpdate: buildCommentsToUpdate(commentsAndIndex, i),
+              commentsToUpdate: [],
             },
           }),
+    };
+  }, {});
+
+  caseServices = Object.keys(caseServices).reduce<CaseServices>((acc, key) => {
+    return {
+      ...acc,
+      [key]: {
+        ...caseServices[key],
+        // if the comment happens after the lastUpdateToCaseIndex, it should be included in commentsToUpdate
+        commentsToUpdate: commentsAndIndex.reduce<string[]>(
+          (bacc, currentComment) =>
+            currentComment.commentIndex > caseServices[key].lastPushIndex
+              ? bacc.indexOf(currentComment.commentId) > -1
+                ? [...bacc.filter(e => e !== currentComment.commentId), currentComment.commentId]
+                : [...bacc, currentComment.commentId]
+              : bacc,
+          []
+        ),
+      },
     };
   }, {});
 
