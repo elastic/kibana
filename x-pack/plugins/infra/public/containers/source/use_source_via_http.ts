@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -69,12 +69,15 @@ export const useSourceViaHttp = ({
     })();
   }, [makeRequest]);
 
-  const createDerivedIndexPattern = (indexType: 'logs' | 'metrics' | 'both' = type) => {
-    return {
-      fields: response?.source ? response.status.indexFields : [],
-      title: pickIndexPattern(response?.source, indexType),
-    };
-  };
+  const createDerivedIndexPattern = useCallback(
+    (indexType: 'logs' | 'metrics' | 'both' = type) => {
+      return {
+        fields: response?.source ? response.status.indexFields : [],
+        title: pickIndexPattern(response?.source, indexType),
+      };
+    },
+    [response, type]
+  );
 
   const source = useMemo(() => {
     return response ? { ...response.source, status: response.status } : null;
