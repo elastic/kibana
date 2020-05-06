@@ -6,8 +6,10 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { DraggableId } from 'react-beautiful-dnd';
 
 import { getAllFieldsByName, WithSource } from '../../containers/source';
+import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
 import { createFilter } from '../page/add_filter_to_global_search_bar';
@@ -18,6 +20,7 @@ import { allowTopN } from './helpers';
 import * as i18n from './translations';
 
 interface Props {
+  draggableId?: DraggableId;
   field: string;
   onFilterAdded?: () => void;
   showTopN: boolean;
@@ -26,12 +29,14 @@ interface Props {
 }
 
 const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
+  draggableId,
   field,
   onFilterAdded,
   showTopN,
   toggleTopN,
   value,
 }) => {
+  const startDragToTimeline = useAddToTimeline({ draggableId, fieldName: field });
   const kibana = useKibana();
   const { filterManager: timelineFilterManager } = useTimelineContext();
   const filterManager = useMemo(() => kibana.services.data.query.filterManager, [
@@ -88,6 +93,18 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
             data-test-subj="filter-out-value"
             iconType="magnifyWithMinus"
             onClick={filterOutValue}
+          />
+        </EuiToolTip>
+      )}
+
+      {!showTopN && value != null && draggableId != null && (
+        <EuiToolTip content={i18n.ADD_TO_TIMELINE}>
+          <EuiButtonIcon
+            aria-label={i18n.ADD_TO_TIMELINE}
+            color="text"
+            data-test-subj="add-to-timeline"
+            iconType="timeline"
+            onClick={startDragToTimeline}
           />
         </EuiToolTip>
       )}
