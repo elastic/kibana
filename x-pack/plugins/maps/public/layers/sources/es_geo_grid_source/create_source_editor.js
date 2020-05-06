@@ -14,10 +14,7 @@ import { NoIndexPatternCallout } from '../../../components/no_index_pattern_call
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
-import {
-  AGGREGATABLE_GEO_FIELD_TYPES,
-  getAggregatableGeoFields,
-} from '../../../index_pattern_util';
+import { AGGREGATABLE_GEO_FIELD_TYPES, getFieldsWithGeoTileAgg } from '../../../index_pattern_util';
 import { RenderAsSelect } from './render_as_select';
 
 export class CreateSourceEditor extends Component {
@@ -90,7 +87,7 @@ export class CreateSourceEditor extends Component {
     });
 
     //make default selection
-    const geoFields = getAggregatableGeoFields(indexPattern.fields);
+    const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
     if (geoFields[0]) {
       this._onGeoFieldSelect(geoFields[0].name);
     }
@@ -145,7 +142,7 @@ export class CreateSourceEditor extends Component {
           onChange={this._onGeoFieldSelect}
           fields={
             this.state.indexPattern
-              ? getAggregatableGeoFields(this.state.indexPattern.fields)
+              ? getFieldsWithGeoTileAgg(this.state.indexPattern.fields)
               : undefined
           }
         />

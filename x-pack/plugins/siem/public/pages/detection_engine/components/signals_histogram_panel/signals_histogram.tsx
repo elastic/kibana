@@ -15,7 +15,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useTheme } from '../../../../components/charts/common';
+import { useTheme, UpdateDateRange } from '../../../../components/charts/common';
 import { histogramDateTimeFormatter } from '../../../../components/utils';
 import { DraggableLegend } from '../../../../components/charts/draggable_legend';
 import { LegendItem } from '../../../../components/charts/draggable_legend_item';
@@ -32,7 +32,7 @@ interface HistogramSignalsProps {
   loading: boolean;
   to: number;
   data: HistogramData[];
-  updateDateRange: (min: number, max: number) => void;
+  updateDateRange: UpdateDateRange;
 }
 export const SignalsHistogram = React.memo<HistogramSignalsProps>(
   ({

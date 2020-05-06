@@ -9,3 +9,4 @@ export * from './routes';
 export { packageToConfigDatasourceInputs, packageToConfigDatasource } from './package_to_config';
 export { storedDatasourceToAgentDatasource } from './datasource_to_agent_datasource';
 export { AgentStatusKueryHelper };
+export { decodeCloudId } from './decode_cloud_id';

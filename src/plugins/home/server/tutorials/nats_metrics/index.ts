@@ -34,7 +34,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'natsMetrics',
     name: i18n.translate('home.tutorials.natsMetrics.nameTitle', {
-      defaultMessage: 'Nats metrics',
+      defaultMessage: 'NATS metrics',
     }),
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.natsMetrics.shortDescription', {
@@ -48,13 +48,13 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-nats.html',
       },
     }),
-    // euiIconType: 'logoNats',
+    euiIconType: '/plugins/home/assets/logos/nats.svg',
     artifacts: {
       dashboards: [
         {
           id: 'Metricbeat-Nats-Dashboard-ecs',
           linkLabel: i18n.translate('home.tutorials.natsMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Nats metrics dashboard',
+            defaultMessage: 'NATS metrics dashboard',
           }),
           isOverview: true,
         },
@@ -64,7 +64,7 @@ export function natsMetricsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/nats_metrics/screenshot.png',
+    previewImagePath: '/plugins/home/assets/nats_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName),
