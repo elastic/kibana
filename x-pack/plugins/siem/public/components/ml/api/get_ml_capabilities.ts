@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfluencerInput, MlCapabilities } from '../types';
+import { MlCapabilities } from '../../../../common/machine_learning/types';
+import { InfluencerInput } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {

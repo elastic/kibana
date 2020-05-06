@@ -6,9 +6,9 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { MlCapabilities } from '../types';
+import { MlCapabilities } from '../../../../common/machine_learning/types';
+import { emptyMlCapabilities } from '../../../../common/machine_learning/empty_ml_capabilities';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster, useStateToaster } from '../../toasters';
 
 import * as i18n from './translations';

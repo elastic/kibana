@@ -17,7 +17,7 @@ import {
 import { ILicense } from '../../../../../licensing/server';
 import { MINIMUM_ML_LICENSE } from '../../../../common/constants';
 import { RuleType } from '../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../common/machine_learning/helpers';
 import { BadRequestError } from '../errors/bad_request_error';
 
 export interface OutputError {

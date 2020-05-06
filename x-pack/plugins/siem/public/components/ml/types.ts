@@ -100,41 +100,6 @@ export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
   flowTarget?: FlowTarget;
 };
 
-export interface MlCapabilities {
-  capabilities: {
-    canGetJobs: boolean;
-    canCreateJob: boolean;
-    canDeleteJob: boolean;
-    canOpenJob: boolean;
-    canCloseJob: boolean;
-    canForecastJob: boolean;
-    canGetDatafeeds: boolean;
-    canStartStopDatafeed: boolean;
-    canUpdateJob: boolean;
-    canUpdateDatafeed: boolean;
-    canPreviewDatafeed: boolean;
-    canGetCalendars: boolean;
-    canCreateCalendar: boolean;
-    canDeleteCalendar: boolean;
-    canGetFilters: boolean;
-    canCreateFilter: boolean;
-    canDeleteFilter: boolean;
-    canFindFileStructure: boolean;
-    canGetDataFrame: boolean;
-    canDeleteDataFrame: boolean;
-    canPreviewDataFrame: boolean;
-    canCreateDataFrame: boolean;
-    canStartStopDataFrame: boolean;
-    canGetDataFrameAnalytics: boolean;
-    canDeleteDataFrameAnalytics: boolean;
-    canCreateDataFrameAnalytics: boolean;
-    canStartStopDataFrameAnalytics: boolean;
-  };
-  isPlatinumOrTrialLicense: boolean;
-  mlFeatureEnabledInSpace: boolean;
-  upgradeInProgress: boolean;
-}
-
 const sourceOrDestination = ['source.ip', 'destination.ip'];
 
 export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilities } from '../types';
+import { MlCapabilities } from './types';
 
 export const hasMlAdminPermissions = (capabilities: MlCapabilities): boolean =>
   getDataFeedPermissions(capabilities) &&
