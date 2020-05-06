@@ -19,7 +19,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
 import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
 import { OnIsLockedUpdate } from './';
 import { NavLink, RecentNavLink } from './nav_link';
@@ -34,7 +33,7 @@ export interface Props {
 
 function navDrawerRenderer(
   { isLocked, onIsLockedUpdate, navLinks, recentNavLinks }: Props,
-  ref: React.Ref<HTMLElement>
+  ref: React.Ref<EuiNavDrawer>
 ) {
   return (
     <EuiNavDrawer

@@ -87,7 +87,7 @@ export function createNavLink(
     key: id,
     label: tooltip ?? title,
     href, // Use href and onClick to support "open in new tab" and SPA navigation in the same link
-    onClick(event) {
+    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
