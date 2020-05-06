@@ -57,6 +57,7 @@ export enum SOURCE_TYPES {
   ES_GEO_GRID = 'ES_GEO_GRID',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
+  ES_TERM_SOURCE = 'ES_TERM_SOURCE',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. Name is a little unfortunate.
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
@@ -174,8 +175,6 @@ export const COLOR_MAP_TYPE = {
   ORDINAL: 'ORDINAL',
 };
 
-export const COLOR_PALETTE_MAX_SIZE = 10;
-
 export const CATEGORICAL_DATA_TYPES = ['string', 'ip', 'boolean'];
 export const ORDINAL_DATA_TYPES = ['number', 'date'];
 
@@ -217,3 +216,9 @@ export enum SCALING_TYPES {
 export const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export const SPATIAL_FILTERS_LAYER_ID = 'SPATIAL_FILTERS_LAYER_ID';
+
+export enum INITIAL_LOCATION {
+  LAST_SAVED_LOCATION = 'LAST_SAVED_LOCATION',
+  FIXED_LOCATION = 'FIXED_LOCATION',
+  BROWSER_LOCATION = 'BROWSER_LOCATION',
+}

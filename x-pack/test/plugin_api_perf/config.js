@@ -39,7 +39,7 @@ export default async function({ readConfigFile }) {
           '..',
           'plugin_api_integration',
           'plugins',
-          'task_manager'
+          'sample_task_plugin'
         )}`,
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`

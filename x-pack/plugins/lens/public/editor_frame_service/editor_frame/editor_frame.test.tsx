@@ -968,6 +968,7 @@ describe('editor_frame', () => {
     it('should use suggestions to switch to new visualization', async () => {
       const initialState = { suggested: true };
       mockVisualization2.initialize.mockReturnValueOnce({ initial: true });
+      mockVisualization2.getVisualizationTypeId.mockReturnValueOnce('testVis2');
       mockVisualization2.getSuggestions.mockReturnValueOnce([
         {
           title: 'Suggested vis',

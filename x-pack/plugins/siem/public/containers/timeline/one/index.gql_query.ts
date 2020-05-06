@@ -129,6 +129,9 @@ export const oneTimelineQuery = gql`
         version
       }
       title
+      timelineType
+      templateTimelineId
+      templateTimelineVersion
       savedQueryId
       sort {
         columnId

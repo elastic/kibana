@@ -65,8 +65,6 @@ describe('Timeline', () => {
       kqlMode: 'search' as TimelineComponentProps['kqlMode'],
       kqlQueryExpression: '',
       loadingIndexName: false,
-      onChangeDataProviderKqlQuery: jest.fn(),
-      onChangeDroppableAndProvider: jest.fn(),
       onChangeItemsPerPage: jest.fn(),
       onClose: jest.fn(),
       onDataProviderEdited: jest.fn(),

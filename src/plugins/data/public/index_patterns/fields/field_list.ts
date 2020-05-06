@@ -18,13 +18,20 @@
  */
 
 import { findIndex } from 'lodash';
+import { ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../index_patterns';
 import { IFieldType } from '../../../common';
 import { Field, FieldSpec } from './field';
+import { FieldFormatsStart } from '../../field_formats';
 
 type FieldMap = Map<Field['name'], Field>;
 
-export interface IFieldList extends Array<Field> {
+interface FieldListDependencies {
+  fieldFormats: FieldFormatsStart;
+  toastNotifications: ToastsStart;
+}
+
+export interface IIndexPatternFieldList extends Array<Field> {
   getByName(name: Field['name']): Field | undefined;
   getByType(type: Field['type']): Field[];
   add(field: FieldSpec): void;
@@ -32,51 +39,70 @@ export interface IFieldList extends Array<Field> {
   update(field: FieldSpec): void;
 }
 
-export class FieldList extends Array<Field> implements IFieldList {
-  private byName: FieldMap = new Map();
-  private groups: Map<Field['type'], FieldMap> = new Map();
-  private indexPattern: IndexPattern;
-  private shortDotsEnable: boolean;
-  private setByName = (field: Field) => this.byName.set(field.name, field);
-  private setByGroup = (field: Field) => {
-    if (typeof this.groups.get(field.type) === 'undefined') {
-      this.groups.set(field.type, new Map());
+export type CreateIndexPatternFieldList = (
+  indexPattern: IndexPattern,
+  specs?: FieldSpec[],
+  shortDotsEnable?: boolean
+) => IIndexPatternFieldList;
+
+export const getIndexPatternFieldListCreator = ({
+  fieldFormats,
+  toastNotifications,
+}: FieldListDependencies): CreateIndexPatternFieldList => (...fieldListParams) => {
+  class FieldList extends Array<Field> implements IIndexPatternFieldList {
+    private byName: FieldMap = new Map();
+    private groups: Map<Field['type'], FieldMap> = new Map();
+    private indexPattern: IndexPattern;
+    private shortDotsEnable: boolean;
+    private setByName = (field: Field) => this.byName.set(field.name, field);
+    private setByGroup = (field: Field) => {
+      if (typeof this.groups.get(field.type) === 'undefined') {
+        this.groups.set(field.type, new Map());
+      }
+      this.groups.get(field.type)!.set(field.name, field);
+    };
+    private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
+
+    constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
+      super();
+      this.indexPattern = indexPattern;
+      this.shortDotsEnable = shortDotsEnable;
+
+      specs.map(field => this.add(field));
     }
-    this.groups.get(field.type)!.set(field.name, field);
-  };
-  private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
 
-  constructor(indexPattern: IndexPattern, specs: FieldSpec[] = [], shortDotsEnable = false) {
-    super();
-    this.indexPattern = indexPattern;
-    this.shortDotsEnable = shortDotsEnable;
+    getByName = (name: Field['name']) => this.byName.get(name);
+    getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
+    add = (field: FieldSpec) => {
+      const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
+        fieldFormats,
+        toastNotifications,
+      });
+      this.push(newField);
+      this.setByName(newField);
+      this.setByGroup(newField);
+    };
 
-    specs.map(field => this.add(field));
+    remove = (field: IFieldType) => {
+      this.removeByGroup(field);
+      this.byName.delete(field.name);
+
+      const fieldIndex = findIndex(this, { name: field.name });
+      this.splice(fieldIndex, 1);
+    };
+
+    update = (field: FieldSpec) => {
+      const newField = new Field(this.indexPattern, field, this.shortDotsEnable, {
+        fieldFormats,
+        toastNotifications,
+      });
+      const index = this.findIndex(f => f.name === newField.name);
+      this.splice(index, 1, newField);
+      this.setByName(newField);
+      this.removeByGroup(newField);
+      this.setByGroup(newField);
+    };
   }
 
-  getByName = (name: Field['name']) => this.byName.get(name);
-  getByType = (type: Field['type']) => [...(this.groups.get(type) || new Map()).values()];
-  add = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
-    this.push(newField);
-    this.setByName(newField);
-    this.setByGroup(newField);
-  };
-
-  remove = (field: IFieldType) => {
-    this.removeByGroup(field);
-    this.byName.delete(field.name);
-
-    const fieldIndex = findIndex(this, { name: field.name });
-    this.splice(fieldIndex, 1);
-  };
-
-  update = (field: FieldSpec) => {
-    const newField = new Field(this.indexPattern, field, this.shortDotsEnable);
-    const index = this.findIndex(f => f.name === newField.name);
-    this.splice(index, 1, newField);
-    this.setByName(newField);
-    this.removeByGroup(newField);
-    this.setByGroup(newField);
-  };
-}
+  return new FieldList(...fieldListParams);
+};
