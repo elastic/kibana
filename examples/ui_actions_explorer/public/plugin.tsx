@@ -79,21 +79,21 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     const startServices = core.getStartServices();
 
-    deps.uiActions.attachAction(
+    deps.uiActions.addTriggerAction(
       USER_TRIGGER,
       createPhoneUserAction(async () => (await startServices)[1].uiActions)
     );
-    deps.uiActions.attachAction(
+    deps.uiActions.addTriggerAction(
       USER_TRIGGER,
       createEditUserAction(async () => (await startServices)[0].overlays.openModal)
     );
 
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, viewInMapsAction);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, lookUpWeatherAction);
-    deps.uiActions.attachAction(COUNTRY_TRIGGER, showcasePluggability);
-    deps.uiActions.attachAction(PHONE_TRIGGER, makePhoneCallAction);
-    deps.uiActions.attachAction(PHONE_TRIGGER, showcasePluggability);
-    deps.uiActions.attachAction(USER_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, viewInMapsAction);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, lookUpWeatherAction);
+    deps.uiActions.addTriggerAction(COUNTRY_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerAction(PHONE_TRIGGER, makePhoneCallAction);
+    deps.uiActions.addTriggerAction(PHONE_TRIGGER, showcasePluggability);
+    deps.uiActions.addTriggerAction(USER_TRIGGER, showcasePluggability);
 
     core.application.register({
       id: 'uiActionsExplorer',

@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState, Fragment } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiFieldText,
   EuiFlexGroup,
@@ -191,6 +192,22 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       'data-test-subj': 'alertsTableCell-tagsText',
+    },
+    {
+      field: 'actionsText',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        { defaultMessage: 'Actions' }
+      ),
+      render: (count: number, item: AlertTableItem) => {
+        return (
+          <EuiBadge color="hollow" key={item.id}>
+            {count}
+          </EuiBadge>
+        );
+      },
+      sortable: false,
+      'data-test-subj': 'alertsTableCell-actionsText',
     },
     {
       field: 'alertType',
@@ -418,6 +435,7 @@ export const AlertsList: React.FunctionComponent = () => {
           docLinks,
           charts,
           dataFieldsFormats: dataPlugin.fieldFormats,
+          capabilities,
         }}
       >
         <AlertAdd
@@ -437,6 +455,7 @@ function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
 function convertAlertsToTableItems(alerts: Alert[], alertTypesIndex: AlertTypeIndex) {
   return alerts.map(alert => ({
     ...alert,
+    actionsText: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex[alert.alertTypeId]?.name ?? alert.alertTypeId,
   }));
