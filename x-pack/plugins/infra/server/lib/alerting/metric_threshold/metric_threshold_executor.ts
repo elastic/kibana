@@ -315,6 +315,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
       }
       if (
         nextState === AlertStates.OK &&
+        prevState &&
         'alertState' in prevState &&
         prevState.alertState !== AlertStates.OK
       ) {
