@@ -35,8 +35,8 @@ import * as Translations from './translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
-  expirationThresholdError: string | null;
-  ageThresholdError: string | null;
+  expirationThresholdError?: string;
+  ageThresholdError?: string;
 }
 
 export interface SettingsFormProps {
