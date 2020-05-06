@@ -9,10 +9,10 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 import { createConfig$, EndpointConfigType } from './config';
 import { EndpointAppContext } from './types';
 
-import { registerAlertRoutes } from './alerts/routes';
+import { registerAlertRoutes } from './alerting/routes';
 import { registerResolverRoutes } from './routes/resolver';
 import { registerEndpointRoutes } from './routes/metadata';
-import { IngestIndexPatternRetriever } from './alerts/index_pattern';
+import { IngestIndexPatternRetriever } from './alerting/index_pattern';
 import { IngestManagerStartContract } from '../../ingest_manager/server';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import { registerPolicyRoutes } from './routes/policy';
@@ -73,7 +73,7 @@ export class EndpointPlugin
         },
       },
     });
-    const endpointContext = {
+    const endpointContext: EndpointAppContext = {
       logFactory: this.initializerContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<EndpointConfigType> => {
@@ -81,7 +81,7 @@ export class EndpointPlugin
           .pipe(first())
           .toPromise();
       },
-    } as EndpointAppContext;
+    };
     const router = core.http.createRouter();
     registerEndpointRoutes(router, endpointContext);
     registerResolverRoutes(router, endpointContext);

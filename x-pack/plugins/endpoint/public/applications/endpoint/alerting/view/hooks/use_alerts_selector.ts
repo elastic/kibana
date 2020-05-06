@@ -5,14 +5,22 @@
  */
 
 import { useSelector } from 'react-redux';
+import { useContext, useMemo } from 'react';
 import { Immutable } from '../../../../../../common/types';
-import { GlobalState } from '../../../types';
 import { AlertingState } from '../../../../../../common/alerting/types';
+import { alertingSelectorContext } from '../..';
 
 export function useAlertListSelector<TSelected>(
   selector: (
     state: Immutable<AlertingState>
   ) => TSelected extends Immutable<TSelected> ? TSelected : never
 ) {
-  return useSelector((state: Immutable<GlobalState>) => selector(state.alerting));
+  const alertingState = useContext(alertingSelectorContext);
+  const globalState = useSelector((state: AlertingState) => state);
+  return useMemo(() => {
+    if (alertingState === undefined) {
+      return selector(globalState);
+    }
+    return selector(alertingState);
+  }, [alertingState, globalState, selector]);
 }
