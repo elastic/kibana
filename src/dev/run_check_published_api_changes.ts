@@ -224,7 +224,14 @@ async function run(
     opts.help = true;
   }
 
-  const folders = ['core/public', 'core/server', 'plugins/data/server', 'plugins/data/public'];
+  const folders = [
+    'core/public',
+    'core/server',
+    'plugins/data/server',
+    'plugins/data/public',
+    'plugins/expressions/server',
+    'plugins/expressions/public',
+  ];
 
   if (opts.help) {
     process.stdout.write(
