@@ -28,6 +28,9 @@ interface Props extends OverviewPageProps {
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
     min-width: 598px;
+    @media only screen and (max-width: 1128px) {
+      min-width: 500px;
+    }
     @media only screen and (max-width: 630px) {
       min-width: initial;
     }
@@ -62,7 +65,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
       <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
       <EmptyState>
         <EuiFlexGroup gutterSize="xs" wrap responsive>
-          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
+          <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
             <KueryBar
               aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
                 defaultMessage: 'Input filter criteria for the overview page',

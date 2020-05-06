@@ -15,6 +15,14 @@ import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
 import { MonitorStatusDetails, PingList } from '../components/monitor';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
+import { Ping } from '../../common/runtime_types/ping';
+
+const getIdToDisplay = (monId: string, selectedMonitor: Ping | null) => {
+  if (monId.startsWith('auto-') && monId.length > 20) {
+    return selectedMonitor?.url?.full || monId;
+  }
+  return monId;
+};
 
 export const MonitorPage: React.FC = () => {
   const dispatch = useDispatch();
@@ -32,7 +40,8 @@ export const MonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });
 
-  const nameOrId = selectedMonitor?.monitor?.name || monitorId || '';
+  const nameOrId =
+    selectedMonitor?.monitor?.name || getIdToDisplay(monitorId, selectedMonitor) || '';
   useBreadcrumbs([{ text: nameOrId }]);
   return (
     <>

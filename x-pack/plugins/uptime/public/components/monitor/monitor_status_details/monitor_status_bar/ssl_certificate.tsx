@@ -34,11 +34,11 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
     <>
       <EuiText>
         {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificate.title', {
-          defaultMessage: 'Certificate',
+          defaultMessage: 'Certificate:',
         })}
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiText
             className="eui-displayInline"
@@ -87,7 +87,7 @@ export const MonitorSSLCertificate = ({ tls }: Props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <Link to={CERTIFICATES_ROUTE} className="eui-displayInline">
-            <EuiText>
+            <EuiText style={{ whiteSpace: 'nowrap' }}>
               {i18n.translate('xpack.uptime.monitorStatusBar.sslCertificate.overview', {
                 defaultMessage: 'Certificate overview',
               })}

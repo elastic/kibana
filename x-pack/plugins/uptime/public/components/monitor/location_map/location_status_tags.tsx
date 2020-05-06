@@ -25,7 +25,7 @@ const TextStyle = styled.div`
 const BadgeItem = styled.div`
   margin-bottom: 5px;
   white-space: nowrap;
-  @media (max-width: 830px) {
+  @media (max-width: 1042px) {
     display: inline-block;
     margin-right: 16px;
   }
