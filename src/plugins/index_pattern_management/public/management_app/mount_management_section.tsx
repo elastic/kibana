@@ -60,57 +60,11 @@ export async function mountManagementSection(
     { data },
     indexPatternManagementStart,
   ] = await getStartServices();
-  const defaultIndex = uiSettings.get('defaultIndex');
   const canSave = application.capabilities.indexPatterns.save as boolean;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
   }
-
-  const indexPatterns =
-    (await savedObjects.client
-      .find<IIndexPattern>({
-        type: 'index-pattern',
-        fields: ['title', 'type'],
-        perPage: 10000,
-      })
-      .then(response =>
-        response.savedObjects
-          .map(pattern => {
-            const id = pattern.id;
-            const title = pattern.get('title');
-            const isDefault = defaultIndex === id;
-
-            const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-              // todo: temporary cast SimpleSavedObject<IIndexPattern> -> IIndexPattern
-              (pattern as unknown) as IIndexPattern,
-              isDefault
-            );
-
-            return {
-              id,
-              title,
-              url: '',
-              // url: kbnUrl.eval('#/management/kibana/indexPatterns/create{{id}}', { id }),
-              // active: $scope.editingId === id,
-              default: isDefault,
-              tags,
-              // the prepending of 0 at the default pattern takes care of prioritization
-              // so the sorting will but the default index on top
-              // or on bottom of a the table
-              sort: `${isDefault ? '0' : '1'}${title}`,
-            };
-          })
-          .sort((a, b) => {
-            if (a.sort < b.sort) {
-              return -1;
-            } else if (a.sort > b.sort) {
-              return 1;
-            } else {
-              return 0;
-            }
-          })
-      )) || [];
 
   // todo - need new path to create index pattern
   // todo navigate to items
@@ -161,25 +115,29 @@ export async function mountManagementSection(
             <EditIndexPatternContainer
               // indexPattern={data.indexPattern}
               getIndexPattern={data.indexPatterns.get}
-              indexPatterns={indexPatterns}
               config={uiSettings}
               services={{
                 notifications,
                 docTitle: chrome.docTitle,
                 overlays,
+                savedObjectsClient: savedObjects.client,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}
             />
           </Route>
           <Route path={['/']}>
             <IndexPatternTableWithRouter
-              indexPatterns={indexPatterns}
               // navTo={kbnUrl.redirect}
               getIndexPatternCreationOptions={
                 (indexPatternManagementStart as IndexPatternManagementStart).creation
                   .getIndexPatternCreationOptions
               }
               canSave={canSave}
+              services={{
+                savedObjectsClient: savedObjects.client,
+                uiSettings,
+                indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
+              }}
             />
           </Route>
         </Switch>

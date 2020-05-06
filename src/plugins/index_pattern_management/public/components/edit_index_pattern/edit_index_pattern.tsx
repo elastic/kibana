@@ -38,21 +38,23 @@ import {
   NotificationsStart,
   OverlayStart,
   IUiSettingsClient,
+  SavedObjectsClientContract,
 } from 'src/core/public';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../..';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { IndexPatternTableItem } from '../types';
+import { getIndexPatterns } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
-  indexPatterns: IndexPatternTableItem[];
   config: IUiSettingsClient;
   services: {
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     overlays: OverlayStart;
+    savedObjectsClient: SavedObjectsClientContract;
     indexPatternManagement: IndexPatternManagementStart;
   };
 }
@@ -94,7 +96,7 @@ const confirmModalOptionsDelete = {
 };
 
 export const EditIndexPattern = withRouter(
-  ({ indexPattern, indexPatterns, config, services, history, location }: EditIndexPatternProps) => {
+  ({ indexPattern, config, services, history, location }: EditIndexPatternProps) => {
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.filter(field => field.type === 'conflict')
@@ -133,8 +135,13 @@ export const EditIndexPattern = withRouter(
     };
 
     const removePattern = () => {
-      function doRemove() {
+      async function doRemove() {
         if (indexPattern.id === defaultIndex) {
+          const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+            services.savedObjectsClient,
+            config.get('defaultIndex'),
+            services.indexPatternManagement
+          );
           config.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, pattern => {
             return pattern.id !== indexPattern.id;

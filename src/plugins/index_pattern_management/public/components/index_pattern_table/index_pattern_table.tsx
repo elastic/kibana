@@ -32,10 +32,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { IndexPatternManagementStart } from '../../plugin';
+import { getIndexPatterns } from '../utils';
 
 const columns = [
   {
@@ -92,26 +94,45 @@ const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRe
 });
 
 interface Props extends RouteComponentProps {
-  indexPatterns: IndexPatternTableItem[];
   getIndexPatternCreationOptions: IndexPatternManagementStart['creation']['getIndexPatternCreationOptions'];
   canSave: boolean;
+  services: {
+    savedObjectsClient: SavedObjectsClientContract;
+    uiSettings: IUiSettingsClient;
+    indexPatternManagement: IndexPatternManagementStart;
+  };
 }
 
 export const IndexPatternTable = ({
-  indexPatterns,
   getIndexPatternCreationOptions,
   canSave,
   history,
+  services,
 }: Props) => {
-  const [showFlyout, setShowFlyout] = useState(indexPatterns.length === 0);
+  const [showFlyout, setShowFlyout] = useState(true);
+  const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
 
   useEffect(() => {
-    // setCreationOptions(await getIndexPatternCreationOptions(history.push));
-    getIndexPatternCreationOptions(history.push).then(options => {
+    (async function() {
+      const options = await getIndexPatternCreationOptions(history.push);
+      const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
+        services.savedObjectsClient,
+        services.uiSettings.get('defaultIndex'),
+        services.indexPatternManagement
+      );
       setCreationOptions(options);
-    });
-  }, [getIndexPatternCreationOptions, history.push]);
+      setIndexPatterns(gettedIndexPatterns);
+      setShowFlyout(gettedIndexPatterns.length === 0);
+    })();
+  }, [
+    getIndexPatternCreationOptions,
+    history.push,
+    indexPatterns.length,
+    services.indexPatternManagement,
+    services.savedObjectsClient,
+    services.uiSettings,
+  ]);
 
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>
