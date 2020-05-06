@@ -28,6 +28,15 @@ jest.mock('../../../containers/timeline/all', () => {
     getAllTimeline: originalModule.getAllTimeline,
   };
 });
+jest.mock('../use_timeline_types', () => {
+  return {
+    useTimelineTypes: jest.fn().mockReturnValue({
+      timelineType: 'default',
+      timelineTabs: <div />,
+      timelineFilters: <div />,
+    }),
+  };
+});
 
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
