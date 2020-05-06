@@ -43934,6 +43934,18 @@ class CiStatsReporter {
         return !!this.config;
     }
     async metric(name, subName, value) {
+        await this._req('POST', '/metric', {
+            name,
+            subName,
+            value,
+        }, `[${name}/${subName}=${value}]`);
+    }
+    async metrics(metrics) {
+        await this._req('POST', '/metrics', {
+            metrics,
+        }, metrics.map(({ name, subName, value }) => `[${name}/${subName}=${value}]`).join(' '));
+    }
+    async _req(method, path, body, bodySummary) {
         var _a, _b, _c, _d;
         if (!this.config) {
             return;
@@ -43944,8 +43956,8 @@ class CiStatsReporter {
             attempt += 1;
             try {
                 await axios_1.default.request({
-                    method: 'POST',
-                    url: '/metric',
+                    method,
+                    url: path,
                     baseURL: this.config.apiUrl,
                     params: {
                         buildId: this.config.buildId,
@@ -43953,11 +43965,7 @@ class CiStatsReporter {
                     headers: {
                         Authorization: `token ${this.config.apiToken}`,
                     },
-                    data: {
-                        name,
-                        subName,
-                        value,
-                    },
+                    data: body,
                 });
                 return;
             }
@@ -43968,11 +43976,11 @@ class CiStatsReporter {
                 }
                 if (((_b = error) === null || _b === void 0 ? void 0 : _b.response) && error.response.status !== 502) {
                     // error response from service was received so warn the user and move on
-                    this.log.warning(`error recording metric [status=${error.response.status}] [resp=${util_1.inspect(error.response.data)}] [${name}/${subName}=${value}]`);
+                    this.log.warning(`error recording metric [status=${error.response.status}] [resp=${util_1.inspect(error.response.data)}] ${bodySummary}`);
                     return;
                 }
                 if (attempt === maxAttempts) {
-                    this.log.warning(`failed to reach kibana-ci-stats service too many times, unable to record metric [${name}/${subName}=${value}]`);
+                    this.log.warning(`failed to reach kibana-ci-stats service too many times, unable to record metric ${bodySummary}`);
                     return;
                 }
                 // we failed to reach the backend and we have remaining attempts, lets retry after a short delay

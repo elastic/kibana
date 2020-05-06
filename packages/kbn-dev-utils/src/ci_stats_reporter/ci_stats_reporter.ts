@@ -19,7 +19,7 @@
 
 import { inspect } from 'util';
 
-import Axios from 'axios';
+import Axios, { Method } from 'axios';
 
 import { ToolingLog } from '../tooling_log';
 
@@ -85,6 +85,30 @@ export class CiStatsReporter {
   }
 
   async metric(name: string, subName: string, value: number) {
+    await this._req(
+      'POST',
+      '/metric',
+      {
+        name,
+        subName,
+        value,
+      },
+      `[${name}/${subName}=${value}]`
+    );
+  }
+
+  async metrics(metrics: Array<{ name: string; subName: string; value: number }>) {
+    await this._req(
+      'POST',
+      '/metrics',
+      {
+        metrics,
+      },
+      metrics.map(({ name, subName, value }) => `[${name}/${subName}=${value}]`).join(' ')
+    );
+  }
+
+  async _req(method: Method, path: string, body: any, bodySummary: string) {
     if (!this.config) {
       return;
     }
@@ -97,8 +121,8 @@ export class CiStatsReporter {
 
       try {
         await Axios.request({
-          method: 'POST',
-          url: '/metric',
+          method,
+          url: path,
           baseURL: this.config.apiUrl,
           params: {
             buildId: this.config.buildId,
@@ -106,11 +130,7 @@ export class CiStatsReporter {
           headers: {
             Authorization: `token ${this.config.apiToken}`,
           },
-          data: {
-            name,
-            subName,
-            value,
-          },
+          data: body,
         });
 
         return;
@@ -125,14 +145,14 @@ export class CiStatsReporter {
           this.log.warning(
             `error recording metric [status=${error.response.status}] [resp=${inspect(
               error.response.data
-            )}] [${name}/${subName}=${value}]`
+            )}] ${bodySummary}`
           );
           return;
         }
 
         if (attempt === maxAttempts) {
           this.log.warning(
-            `failed to reach kibana-ci-stats service too many times, unable to record metric [${name}/${subName}=${value}]`
+            `failed to reach kibana-ci-stats service too many times, unable to record metric ${bodySummary}`
           );
           return;
         }
