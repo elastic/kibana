@@ -111,7 +111,7 @@ export function AgentConfigurationCreateEdit({
     ) {
       setPage('choose-service-step');
     }
-  }, [existingConfig, isEditMode, newConfig, pageStep]);
+  }, [isEditMode, newConfig, pageStep]);
 
   const unsavedChanges = getUnsavedChanges({ newConfig, existingConfig });
 
