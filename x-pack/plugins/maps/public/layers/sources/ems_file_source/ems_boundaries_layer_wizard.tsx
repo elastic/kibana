@@ -10,13 +10,13 @@ import { VectorLayer } from '../../vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { EMSFileSource, sourceTitle } from './ems_file_source';
-import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 // @ts-ignore
-import { isEmsEnabled } from '../../../meta';
+import { getIsEmsEnabled } from '../../../kibana_services';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   checkVisibility: () => {
-    return isEmsEnabled();
+    return getIsEmsEnabled();
   },
   description: i18n.translate('xpack.maps.source.emsFileDescription', {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
