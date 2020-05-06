@@ -8,11 +8,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { VectorLayer } from '../../vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-// @ts-ignore
 import { EMSFileCreateSourceEditor } from './create_source_editor';
-// @ts-ignore
 import { EMSFileSource, sourceTitle } from './ems_file_source';
+// @ts-ignore
 import { getIsEmsEnabled } from '../../../kibana_services';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   checkVisibility: () => {
@@ -23,8 +23,7 @@ export const emsBoundariesLayerWizardConfig: LayerWizard = {
   }),
   icon: 'emsApp',
   renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
-      // @ts-ignore
+    const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayer(layerDescriptor);

@@ -4387,7 +4387,6 @@
     "xpack.apm.serviceMap.emptyBanner.title": "似乎仅有一个服务。",
     "xpack.apm.serviceMap.focusMapButtonText": "聚焦地图",
     "xpack.apm.serviceMap.invalidLicenseMessage": "要访问服务地图，必须订阅 Elastic 白金级许可证。使用该许可证，您将能够可视化整个应用程序堆栈以及 APM 数据。",
-    "xpack.apm.serviceMap.numInstancesMetric": "{numInstances} 个实例",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "服务详情",
     "xpack.apm.serviceMap.subtypePopoverMetric": "子类型",
     "xpack.apm.serviceMap.typePopoverMetric": "类型",

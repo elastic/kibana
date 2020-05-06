@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexEsListItemSchema } from '../../../common/schemas';
-import {
-  LIST_ITEM_INDEX,
-  TIE_BREAKERS,
-  VALUE_2,
-  getCreateListItemBulkOptionsMock,
-  getIndexESListItemMock,
-} from '../mocks';
+import { getIndexESListItemMock } from '../../../common/schemas/elastic_query/index_es_list_item_schema.mock';
+import { LIST_ITEM_INDEX, TIE_BREAKERS, VALUE_2 } from '../../../common/constants.mock';
 
 import { createListItemsBulk } from './create_list_items_bulk';
+import { getCreateListItemBulkOptionsMock } from './create_list_items_bulk.mock';
 
 describe('crete_list_item_bulk', () => {
   beforeEach(() => {
@@ -27,8 +22,8 @@ describe('crete_list_item_bulk', () => {
   test('It calls "callCluster" with body, index, and the bulk items', async () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
-    const firstRecord: IndexEsListItemSchema = getIndexESListItemMock();
-    const secondRecord: IndexEsListItemSchema = getIndexESListItemMock(VALUE_2);
+    const firstRecord = getIndexESListItemMock();
+    const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
     expect(options.callCluster).toBeCalledWith('bulk', {
       body: [
