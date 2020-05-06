@@ -113,7 +113,7 @@ export default function({
           await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
 
-        // disabled because the plugin 'region-map' was not migrated to the new platform
+        // TODO: should be uncommented when the region map is migrated to the new platform
         // const regionMapExpr = `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
         // await (
         //   await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()
