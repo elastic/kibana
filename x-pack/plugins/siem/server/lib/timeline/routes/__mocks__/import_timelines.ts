@@ -138,6 +138,7 @@ export const mockGetTimelineValue = {
   kqlMode: 'filter',
   kqlQuery: { filterQuery: [] },
   title: 'My duplicate timeline',
+  timelineType: TimelineType.default,
   dateRange: { start: 1584523907294, end: 1584610307294 },
   savedQueryId: null,
   sort: { columnId: '@timestamp', sortDirection: 'desc' },
@@ -152,7 +153,7 @@ export const mockGetTimelineValue = {
 export const mockGetTemplateTimelineValue = {
   ...mockGetTimelineValue,
   timelineType: TimelineType.template,
-  templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+  templateTimelineId: '79deb4c0-6bc1-0000-0000-f5341fb7a189',
   templateTimelineVersion: 1,
 };
 

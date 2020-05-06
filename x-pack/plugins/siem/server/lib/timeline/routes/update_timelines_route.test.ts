@@ -26,7 +26,7 @@ import {
 import {
   UPDATE_TIMELINE_ERROR_MESSAGE,
   UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
-} from './utils/update_timelines';
+} from './utils/failure_cases';
 
 describe('update timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -178,7 +178,7 @@ describe('update timelines', () => {
               timeline: [mockGetTemplateTimelineValue],
             }),
             persistTimeline: mockPersistTimeline.mockReturnValue({
-              timeline: updateTimelineWithTimelineId.timeline,
+              timeline: updateTemplateTimelineWithTimelineId.timeline,
             }),
           };
         });
@@ -211,7 +211,7 @@ describe('update timelines', () => {
 
       test('should Update existing template timeline with template timelineId', async () => {
         expect(mockGetTemplateTimeline.mock.calls[0][1]).toEqual(
-          updateTemplateTimelineWithTimelineId.timelineId
+          updateTemplateTimelineWithTimelineId.timeline.templateTimelineId
         );
       });
 

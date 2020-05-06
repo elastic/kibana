@@ -12,6 +12,7 @@ import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline, TimelineSavedObject } from '../../../../../common/types/timeline';
 import { SavedNote } from '../../../../../common/types/timeline/note';
 import { NoteResult, ResponseTimeline } from '../../../../graphql/types';
+
 export const CREATE_TIMELINE_ERROR_MESSAGE =
   'UPDATE timeline with POST is not allowed, please use PATCH instead';
 export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =

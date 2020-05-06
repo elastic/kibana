@@ -15,8 +15,12 @@ export const NO_MATCH_VERSION_ERROR_MESSAGE =
 export const NO_MATCH_ID_ERROR_MESSAGE =
   "Timeline id doesn't match with existing template timeline";
 export const TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE = 'Template timelineVersion conflict';
+export const CREATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE timeline with POST is not allowed, please use PATCH instead';
+export const CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
+  'UPDATE template timeline with POST is not allowed, please use PATCH instead';
 
-export const checkIsFailureCases = (
+export const checkIsUpdateFailureCases = (
   isHandlingTemplateTimeline: boolean,
   version: string | null,
   templateTimelineVersion: number | null,
@@ -24,11 +28,13 @@ export const checkIsFailureCases = (
   existTemplateTimeline: TimelineSavedObject | null
 ) => {
   if (!isHandlingTemplateTimeline && existTimeline == null) {
+    // timeline !exists
     return {
       body: UPDATE_TIMELINE_ERROR_MESSAGE,
       statusCode: 405,
     };
   } else if (isHandlingTemplateTimeline && existTemplateTimeline == null) {
+    // template timeline !exists
     // Throw error to create template timeline in patch
     return {
       body: UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
@@ -73,6 +79,56 @@ export const checkIsFailureCases = (
     return {
       body: TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
       statusCode: 409,
+    };
+  } else {
+    return null;
+  }
+};
+
+export const checkIsCreateFailureCases = (
+  isHandlingTemplateTimeline: boolean,
+  version: string | null,
+  templateTimelineVersion: number | null,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  if (!isHandlingTemplateTimeline && existTimeline != null) {
+    return {
+      body: CREATE_TIMELINE_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  } else if (isHandlingTemplateTimeline && existTemplateTimeline != null) {
+    // Throw error to create template timeline in patch
+    return {
+      body: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
+      statusCode: 405,
+    };
+  } else {
+    return null;
+  }
+};
+
+const getImportExistingTimelineError = (id: string, timelineType: string) =>
+  `${timelineType}_id: "${id}" already exists`;
+
+export const checkIsCreateViaImportFailureCases = (
+  isHandlingTemplateTimeline: boolean,
+  version: string | null,
+  templateTimelineVersion: number | null,
+  existTimeline: TimelineSavedObject | null,
+  existTemplateTimeline: TimelineSavedObject | null
+) => {
+  const timelineType = isHandlingTemplateTimeline ? 'template_timeline' : 'timeline';
+  if (!isHandlingTemplateTimeline && existTimeline != null) {
+    return {
+      body: getImportExistingTimelineError(existTimeline.savedObjectId, timelineType),
+      statusCode: 405,
+    };
+  } else if (isHandlingTemplateTimeline && existTemplateTimeline != null) {
+    // Throw error to create template timeline in patch
+    return {
+      body: getImportExistingTimelineError(existTemplateTimeline.savedObjectId, timelineType),
+      statusCode: 405,
     };
   } else {
     return null;

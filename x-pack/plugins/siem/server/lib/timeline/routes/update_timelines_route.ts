@@ -17,9 +17,8 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { FrameworkRequest } from '../../framework';
 
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
-import { buildFrameworkRequest } from './utils/common';
-import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
-import { checkIsFailureCases } from './utils/update_timelines';
+import { buildFrameworkRequest, TimelinesStatus, TimelineStatusActions } from './utils/common';
+import { createTimelines } from './utils/create_timelines';
 
 export const updateTimelinesRoute = (
   router: IRouter,
@@ -44,37 +43,47 @@ export const updateTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
-        const isHandlingTemplateTimeline = timelineType === TimelineType.template;
-        const existTimeline =
-          timelineId != null ? await getTimeline(frameworkRequest, timelineId) : null;
 
-        const existTemplateTimeline =
-          templateTimelineId != null
-            ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
-            : null;
-        const errorObj = checkIsFailureCases(
-          isHandlingTemplateTimeline,
-          version,
-          templateTimelineVersion ?? null,
-          existTimeline,
-          existTemplateTimeline
-        );
-        if (errorObj != null) {
-          return siemResponse.error(errorObj);
-        }
-        const updatedTimeline = await createTimelines(
-          (frameworkRequest as unknown) as FrameworkRequest,
-          timeline,
-          timelineId,
-          version
-        );
-        return response.ok({
-          body: {
-            data: {
-              persistTimeline: updatedTimeline,
-            },
+        const timelineStatus = new TimelinesStatus({
+          timelineType: timelineType ?? TimelineType.default,
+          timelineInput: {
+            id: timelineId,
+            type: TimelineType.default,
+            version,
           },
+          templateTimelineInput: {
+            id: templateTimelineId ?? null,
+            type: TimelineType.template,
+            version: templateTimelineVersion ?? null,
+          },
+          frameworkRequest,
         });
+
+        await timelineStatus.setAvailableActions();
+
+        if (timelineStatus.isUpdatable) {
+          const updatedTimeline = await createTimelines(
+            (frameworkRequest as unknown) as FrameworkRequest,
+            timeline,
+            timelineId,
+            version
+          );
+          return response.ok({
+            body: {
+              data: {
+                persistTimeline: updatedTimeline,
+              },
+            },
+          });
+        } else {
+          const error = timelineStatus.checkIsFailureCases(TimelineStatusActions.update);
+          return siemResponse.error(
+            error || {
+              statusCode: 405,
+              body: 'update timeline error',
+            }
+          );
+        }
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

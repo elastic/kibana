@@ -96,7 +96,6 @@ export const createTimelineWithTimelineId = {
 export const createTemplateTimelineWithTimelineId = {
   ...createTemplateTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-  templateTimelineId: 'existing template timeline id',
 };
 
 export const updateTimelineWithTimelineId = {
@@ -108,7 +107,7 @@ export const updateTimelineWithTimelineId = {
 export const updateTemplateTimelineWithTimelineId = {
   timeline: {
     ...inputTemplateTimeline,
-    templateTimelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
+    templateTimelineId: '79deb4c0-6bc1-0000-0000-f5341fb7a189',
     templateTimelineVersion: 1,
   },
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
