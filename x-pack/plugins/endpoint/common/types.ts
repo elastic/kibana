@@ -648,7 +648,7 @@ export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['po
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
-  concerned_actions: string[];
+  concerned_actions: Array<keyof HostPolicyResponseActions>;
 }
 
 /**

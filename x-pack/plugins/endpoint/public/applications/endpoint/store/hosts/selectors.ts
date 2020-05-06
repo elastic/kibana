@@ -36,8 +36,8 @@ export const detailsError = (state: Immutable<HostState>) => state.detailsError;
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */
-const detailsPolicyResponse = (state: Immutable<HostState>) =>
-  state.policyResponse && state.policyResponse.endpoint.policy.applied.response;
+const detailsPolicyAppliedResponse = (state: Immutable<HostState>) =>
+  state.policyResponse && state.policyResponse.endpoint.policy.applied;
 
 /**
  * Returns the response configurations from the endpoint after a user modifies a policy.
@@ -45,9 +45,9 @@ const detailsPolicyResponse = (state: Immutable<HostState>) =>
 export const policyResponseConfigurations: (
   state: Immutable<HostState>
 ) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
-  detailsPolicyResponse,
-  response => {
-    return response?.configurations;
+  detailsPolicyAppliedResponse,
+  applied => {
+    return applied?.response?.configurations;
   }
 );
 
@@ -56,13 +56,13 @@ export const policyResponseConfigurations: (
  */
 export const policyResponseFailedOrWarningActionCount: (
   state: Immutable<HostState>
-) => Map<string, number> = createSelector(detailsPolicyResponse, response => {
+) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, applied => {
   const failureOrWarningByConfigType = new Map<string, number>();
-  if (response?.configurations !== undefined && response?.actions !== undefined) {
-    Object.entries(response.configurations).map(([key, val]) => {
+  if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
+    Object.entries(applied.response.configurations).map(([key, val]) => {
       let count = 0;
       for (const action of val.concerned_actions) {
-        const actionStatus = response.actions[action]?.status;
+        const actionStatus = applied.actions[action]?.status;
         if (
           actionStatus === HostPolicyResponseActionStatus.failure ||
           actionStatus === HostPolicyResponseActionStatus.warning
@@ -82,9 +82,9 @@ export const policyResponseFailedOrWarningActionCount: (
 export const policyResponseActions: (
   state: Immutable<HostState>
 ) => undefined | Partial<HostPolicyResponseActions> = createSelector(
-  detailsPolicyResponse,
-  response => {
-    return response?.actions;
+  detailsPolicyAppliedResponse,
+  applied => {
+    return applied?.actions;
   }
 );
 

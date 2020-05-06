@@ -132,7 +132,8 @@ const PolicyResponseFlyoutPanel = memo<{
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
-      >
+      />
+      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
         <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
@@ -141,8 +142,6 @@ const PolicyResponseFlyoutPanel = memo<{
             />
           </h4>
         </EuiText>
-      </FlyoutSubHeader>
-      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
         {responseConfig !== undefined && responseActionStatus !== undefined ? (
           <PolicyResponse
             responseConfig={responseConfig}

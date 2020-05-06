@@ -22,8 +22,8 @@ import { POLICY_STATUS_TO_HEALTH_COLOR } from './host_constants';
  * actions the endpoint took to apply the policy configuration.
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
-  > .euiAccordion__triggerWrapper > .euiAccordion__optionalAction {
-    margin-right: ${props => props.theme.eui.ruleMargins.marginMedium};
+  > .euiAccordion__triggerWrapper {
+    padding: ${props => props.theme.eui.paddingSizes.s};
   }
   &.euiAccordion-isOpen {
     background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
@@ -51,20 +51,20 @@ const ResponseActions = memo(
     actions,
     actionStatus,
   }: {
-    actions: ImmutableArray<string>;
+    actions: ImmutableArray<keyof HostPolicyResponseActions>;
     actionStatus: Partial<HostPolicyResponseActions>;
   }) => {
     return (
       <>
-        {actions.map(action => {
+        {actions.map((action, index) => {
           const statuses = actionStatus[action];
           if (statuses === undefined) {
             return undefined;
           }
           return (
             <EuiAccordion
-              id={useMemo(() => htmlIdGenerator()(), [])}
-              key={useMemo(() => htmlIdGenerator()(), [])}
+              id={action + index}
+              key={action + index}
               data-test-subj="hostDetailsPolicyResponseActionsAccordion"
               buttonContent={
                 <EuiText size="xs" data-test-subj="policyResponseAction">

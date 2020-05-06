@@ -38,9 +38,21 @@ responseMap.set(
   })
 );
 responseMap.set(
-  'download_model',
-  i18n.translate('xpack.endpoint.hostDetails.policyResponse.downloadModel', {
-    defaultMessage: 'Download Model',
+  'configure_elasticsearch_connection',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.configureElasticSearchConnection', {
+    defaultMessage: 'Configure Elastic Search Connection',
+  })
+);
+responseMap.set(
+  'configure_logging',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.configureLogging', {
+    defaultMessage: 'Configure Logging',
+  })
+);
+responseMap.set(
+  'configure_kernel',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.configureKernel', {
+    defaultMessage: 'Configure Kernel',
   })
 );
 responseMap.set(
@@ -50,27 +62,9 @@ responseMap.set(
   })
 );
 responseMap.set(
-  'workflow',
-  i18n.translate('xpack.endpoint.hostDetails.policyResponse.workflow', {
-    defaultMessage: 'Workflow',
-  })
-);
-responseMap.set(
-  'a_custom_future_action',
-  i18n.translate('xpack.endpoint.hostDetails.policyResponse.aCustomFutureAction', {
-    defaultMessage: 'A Custom Future Action',
-  })
-);
-responseMap.set(
-  'ingest_events_config',
-  i18n.translate('xpack.endpoint.hostDetails.policyResponse.injestEventsConfig', {
-    defaultMessage: 'Injest Events Config',
-  })
-);
-responseMap.set(
-  'configure_elasticsearch_connection',
-  i18n.translate('xpack.endpoint.hostDetails.policyResponse.configureElasticSearchConnection', {
-    defaultMessage: 'Configure Elastic Search Connection',
+  'connect_kernel',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.connectKernel', {
+    defaultMessage: 'Connect Kernel',
   })
 );
 responseMap.set(
@@ -80,9 +74,87 @@ responseMap.set(
   })
 );
 responseMap.set(
+  'detect_file_write_events',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.detectFileWriteEvents', {
+    defaultMessage: 'Detect File Write Events',
+  })
+);
+responseMap.set(
+  'detect_image_load_events',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.detectImageLoadEvents', {
+    defaultMessage: 'Detect Image Load Events',
+  })
+);
+responseMap.set(
+  'detect_process_events',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.detectProcessEvents', {
+    defaultMessage: 'Detect Process Events',
+  })
+);
+responseMap.set(
   'download_global_artifacts',
   i18n.translate('xpack.endpoint.hostDetails.policyResponse.downloadGlobalArtifacts', {
     defaultMessage: 'Download Global Artifacts',
+  })
+);
+responseMap.set(
+  'load_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.loadConfig', {
+    defaultMessage: 'Load Config',
+  })
+);
+responseMap.set(
+  'load_malware_model',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.loadMalwareModel', {
+    defaultMessage: 'Load Malware Model',
+  })
+);
+responseMap.set(
+  'read_elasticsearch_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.readElasticSearchConfig', {
+    defaultMessage: 'Read ElasticSearch Config',
+  })
+);
+responseMap.set(
+  'read_events_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.readEventsConfig', {
+    defaultMessage: 'Read Events Config',
+  })
+);
+responseMap.set(
+  'read_kernel_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.readKernelConfig', {
+    defaultMessage: 'Read Kernel Config',
+  })
+);
+responseMap.set(
+  'read_logging_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.readLoggingConfig', {
+    defaultMessage: 'Read Logging Config',
+  })
+);
+responseMap.set(
+  'read_malware_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.readMalwareConfig', {
+    defaultMessage: 'Read Malware Config',
+  })
+);
+responseMap.set(
+  'workflow',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.workflow', {
+    defaultMessage: 'Workflow',
+  })
+);
+responseMap.set(
+  'download_model',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.downloadModel', {
+    defaultMessage: 'Download Model',
+  })
+);
+responseMap.set(
+  'ingest_events_config',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.injestEventsConfig', {
+    defaultMessage: 'Injest Events Config',
   })
 );
 
