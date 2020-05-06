@@ -2,13 +2,9 @@
 
 exports[`render 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
   data-test-subj="loadSearchForm"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
   ownFocus={true}
-  size="m"
 >
   <EuiFlyoutHeader
     hasBorder={true}
