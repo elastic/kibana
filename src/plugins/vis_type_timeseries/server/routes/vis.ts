@@ -18,19 +18,38 @@
  */
 
 import { IRouter, KibanaRequest } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import { getVisData, GetVisDataOptions } from '../lib/get_vis_data';
 import { visPayloadSchema } from './post_vis_schema';
-import { Framework } from '../index';
+import { Framework, ValidationTelemetryServiceSetup } from '../index';
 
-export const visDataRoutes = (router: IRouter, framework: Framework) => {
+const escapeHatch = schema.object({}, { unknowns: 'allow' });
+
+export const visDataRoutes = (
+  router: IRouter,
+  framework: Framework,
+  { logFailedValidation }: ValidationTelemetryServiceSetup
+) => {
   router.post(
     {
       path: '/api/metrics/vis/data',
       validate: {
-        body: visPayloadSchema,
+        body: escapeHatch,
       },
     },
     async (requestContext, request, response) => {
+      try {
+        visPayloadSchema.validate(request.body);
+      } catch (error) {
+        logFailedValidation();
+        const savedObjectId =
+          (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
+          'unavailable';
+        framework.logger.warn(
+          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
+        );
+      }
+
       try {
         const results = await getVisData(
           requestContext,
