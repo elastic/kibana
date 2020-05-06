@@ -61,9 +61,10 @@ image::apm/images/service-maps-java.png[Example view of service maps with Java h
 Machine learning jobs can be created to calculate anomaly scores on APM transaction durations within the selected service.
 When these jobs are active, service maps will display a color-coded anomaly indicator based on the detected anomaly score:
 
-* **Green**: <25
-* **Yellow**: 25 - 75
-* **Red**: >75
+[horizontal]
+image:apm/images/green-service.png[APM green service]:: Max anomaly score **<=25**. Service is healthy.
+image:apm/images/yellow-service.png[APM yellow service]:: Max anomaly score **26-74**. Anomalous activity detected. Service may be degraded.
+image:apm/images/red-service.png[APM red service]:: Max anomaly score **>=75**. Anomalous activity detected. Service is unhealthy.
 
 [role="screenshot"]
 image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on service maps in the APM app]
