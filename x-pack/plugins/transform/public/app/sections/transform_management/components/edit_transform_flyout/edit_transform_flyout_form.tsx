@@ -32,14 +32,21 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
         onChange={value => dispatch({ field: 'description', value })}
         value={formFields.description.value}
       />
-      {/*
       <EditTransformFlyoutFormTextInput
-        defaultValue={config.dest.index}
-        label={i18n.translate('xpack.transform.transformList.editFlyoutFormDestinationIndexLabel', {
-          defaultMessage: 'Destination Index',
+        errorMessages={formFields.docsPerSecond.errorMessages}
+        helpText={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+          {
+            defaultMessage:
+              'To enable throttling, set a limit of documents per second of input documents.',
+          }
+        )}
+        label={i18n.translate('xpack.transform.transformList.editFlyoutFormdocsPerSecondLabel', {
+          defaultMessage: 'Documents per second',
         })}
-        onChange={onChangeDestinationIndexHandler}
-      />*/}
+        onChange={value => dispatch({ field: 'docsPerSecond', value })}
+        value={formFields.docsPerSecond.value}
+      />
       <EditTransformFlyoutFormTextInput
         errorMessages={formFields.frequency.errorMessages}
         helpText={i18n.translate('xpack.transform.transformList.editFlyoutFormFrequencyHelptext', {
