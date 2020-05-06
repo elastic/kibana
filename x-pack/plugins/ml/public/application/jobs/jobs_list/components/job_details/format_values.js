@@ -78,6 +78,9 @@ export function formatValues([key, value]) {
     case 'exponential_average_bucket_processing_time_ms':
       value = roundTo3DecimalPlace(value);
       break;
+    case 'exponential_average_bucket_processing_time_ms':
+      value = roundTo3DecimalPlace(value);
+      break;
 
     default:
       break;
