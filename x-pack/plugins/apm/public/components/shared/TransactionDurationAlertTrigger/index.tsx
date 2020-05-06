@@ -26,13 +26,15 @@ interface Params {
   transactionType: string;
 }
 
-interface Props {
+export interface TransactionDurationAlertTriggerProps {
   alertParams: Params;
   setAlertParams: (key: string, value: any) => void;
   setAlertProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAlertTrigger(props: Props) {
+export function TransactionDurationAlertTrigger(
+  props: TransactionDurationAlertTriggerProps
+) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
 
   const { urlParams } = useUrlParams();

@@ -4,41 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { ConfigSchema } from '.';
 import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext
 } from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-
-import {
-  PluginSetupContract as AlertingPluginPublicSetup,
-  PluginStartContract as AlertingPluginPublicStart
-} from '../../alerting/public';
-import { FeaturesPluginSetup } from '../../features/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart
 } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart
+} from '../../alerting/public';
+import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart
 } from '../../triggers_actions_ui/public';
-import { ConfigSchema } from '.';
-import { createCallApmApi } from './services/rest/createCallApmApi';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
-import { AlertType } from '../common/alert_types';
-import { ErrorRateAlertTrigger } from './components/shared/ErrorRateAlertTrigger';
-import { TransactionDurationAlertTrigger } from './components/shared/TransactionDurationAlertTrigger';
+import { createCallApmApi } from './services/rest/createCallApmApi';
+import { createStaticIndexPattern } from './services/rest/index_pattern';
 import { setHelpExtension } from './setHelpExtension';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { setReadonlyBadge } from './updateBadge';
-import { createStaticIndexPattern } from './services/rest/index_pattern';
+import { registerAlertTypes } from './registerAlertTypes';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
@@ -62,9 +58,11 @@ export interface ApmPluginStartDeps {
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private readonly initializerContext: PluginInitializerContext<ConfigSchema>;
+
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
+
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const config = this.initializerContext.config.get();
     const pluginSetupDeps = plugins;
@@ -101,33 +99,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       }
     });
   }
+
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     createCallApmApi(core.http);
-
     toggleAppLinkInNav(core, this.initializerContext.config.get());
-
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
-      id: AlertType.ErrorRate,
-      name: i18n.translate('xpack.apm.alertTypes.errorRate', {
-        defaultMessage: 'Error rate'
-      }),
-      iconClass: 'bell',
-      alertParamsExpression: ErrorRateAlertTrigger,
-      validate: () => ({
-        errors: []
-      })
-    });
-
-    plugins.triggers_actions_ui.alertTypeRegistry.register({
-      id: AlertType.TransactionDuration,
-      name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-        defaultMessage: 'Transaction duration'
-      }),
-      iconClass: 'bell',
-      alertParamsExpression: TransactionDurationAlertTrigger,
-      validate: () => ({
-        errors: []
-      })
-    });
+    registerAlertTypes(core, plugins);
   }
 }
