@@ -27,8 +27,8 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
+  docLinks: DocLinksStart;
   http?: HttpSetup;
-  docLinks?: DocLinksStart;
 }
 
 export interface ActionParamsProps<TParams> {

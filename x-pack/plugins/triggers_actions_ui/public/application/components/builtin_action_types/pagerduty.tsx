@@ -138,17 +138,15 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         id="routingKey"
         fullWidth
         helpText={
-          docLinks ? (
-            <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-                defaultMessage="Configure a PagerDuty account."
-              />
-            </EuiLink>
-          ) : null
+          <EuiLink
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
+              defaultMessage="Configure a PagerDuty account."
+            />
+          </EuiLink>
         }
         error={errors.routingKey}
         isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}

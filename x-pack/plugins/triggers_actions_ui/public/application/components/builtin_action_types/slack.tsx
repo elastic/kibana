@@ -84,17 +84,15 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         id="webhookUrl"
         fullWidth
         helpText={
-          docLinks ? (
-            <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
-              target="_blank"
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-                defaultMessage="Create a Slack webhook URL"
-              />
-            </EuiLink>
-          ) : null
+          <EuiLink
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
+              defaultMessage="Create a Slack webhook URL"
+            />
+          </EuiLink>
         }
         error={errors.webhookUrl}
         isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}

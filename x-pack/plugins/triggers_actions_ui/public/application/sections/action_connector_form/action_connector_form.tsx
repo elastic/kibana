@@ -62,7 +62,6 @@ export const ActionConnectorForm = ({
   actionTypeRegistry,
   docLinks,
 }: ActionConnectorProps) => {
-  // const { actionTypeRegistry, docLinks, http } = useActionsConnectorsContext();
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
