@@ -185,6 +185,10 @@ describe('ServerMetricsCollector', () => {
     let metrics = await collector.collect();
     expect(metrics.concurrent_connections).toEqual(0);
 
+    // supertest requests are executed when calling `.then` (or awaiting them).
+    // however in this test we need to send the request now and await for it later in the code.
+    // also using `.end` is not possible as it would execute the request twice.
+    // so the only option is this noop `.then`.
     const res1 = sendGet('/').then(res => res);
     await waitForHits(1);
     metrics = await collector.collect();
