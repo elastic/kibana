@@ -73,7 +73,10 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         defaultMessage: 'Delete',
       }),
       icon: <EuiIcon type="trash" />,
-      onClick: () => onDeleteClick([pipeline.name]),
+      onClick: () => {
+        setShowPopover(false);
+        onDeleteClick([pipeline.name]);
+      },
     },
   ];
 
@@ -140,7 +143,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           {/* Processors JSON */}
           <EuiDescriptionListTitle>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-              defaultMessage: 'Processors JSON',
+              defaultMessage: 'Processors',
             })}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -154,7 +157,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 {i18n.translate(
                   'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
                   {
-                    defaultMessage: 'On failure processors JSON',
+                    defaultMessage: 'Failure processors',
                   }
                 )}
               </EuiDescriptionListTitle>

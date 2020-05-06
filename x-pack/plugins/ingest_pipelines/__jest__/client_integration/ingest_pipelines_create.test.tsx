@@ -108,8 +108,8 @@ describe('<PipelinesCreate />', () => {
         });
 
         expect(form.getErrorsMessages()).toEqual([
-          'A pipeline name is required.',
-          'A pipeline description is required.',
+          'Name is required.',
+          'A description is required.',
         ]);
         expect(find('submitButton').props().disabled).toEqual(true);
 

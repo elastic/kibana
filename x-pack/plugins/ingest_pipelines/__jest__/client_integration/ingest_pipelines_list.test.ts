@@ -180,9 +180,7 @@ describe('<PipelinesList />', () => {
       const { exists, find } = testBed;
 
       expect(exists('pipelineLoadError')).toBe(true);
-      expect(find('pipelineLoadError').text()).toEqual(
-        'Cannot load pipelines, please refresh the page to try again.'
-      );
+      expect(find('pipelineLoadError').text()).toContain('Unable to load pipelines.');
     });
   });
 });

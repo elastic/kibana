@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,10 +14,7 @@ import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../st
 import { timelineActions } from '../../store/actions';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { defaultHeaders } from './body/column_headers/default_headers';
 import {
-  OnChangeDataProviderKqlQuery,
-  OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
   OnDataProviderEdited,
@@ -37,7 +34,6 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
-    createTimeline,
     dataProviders,
     eventType,
     end,
@@ -58,8 +54,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     start,
     updateDataProviderEnabled,
     updateDataProviderExcluded,
-    updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -120,18 +114,8 @@ const StatefulTimelineComponent = React.memo<Props>(
       [id]
     );
 
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
-      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
-      [id]
-    );
-
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
-    );
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
-      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
       [id]
     );
 
@@ -157,19 +141,13 @@ const StatefulTimelineComponent = React.memo<Props>(
       [columns, id]
     );
 
-    useEffect(() => {
-      if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders, show: false });
-      }
-    }, []);
-
     return (
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}
-            dataProviders={dataProviders!}
+            dataProviders={dataProviders}
             end={end}
             eventType={eventType}
             filters={filters}
@@ -182,17 +160,15 @@ const StatefulTimelineComponent = React.memo<Props>(
             kqlMode={kqlMode}
             kqlQueryExpression={kqlQueryExpression}
             loadingIndexName={loading}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onClose={onClose}
             onDataProviderEdited={onDataProviderEditedLocal}
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
+            show={show}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
+            sort={sort}
             start={start}
             toggleColumn={toggleColumn}
             usersViewing={usersViewing}
@@ -271,7 +247,6 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
-  createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,
