@@ -146,6 +146,20 @@ export const SUCCESSFULLY_EXPORTED_TIMELINES = (totalTimelines: number) =>
       'Successfully exported {totalTimelines, plural, =0 {all timelines} =1 {{totalTimelines} timeline} other {{totalTimelines} timelines}}',
   });
 
+export const FILTER_TIMELINES = (timelineType: string) =>
+  i18n.translate('xpack.siem.open.timeline.filterByTimelineTypesTitle', {
+    values: { timelineType },
+    defaultMessage: 'Only {timelineType}',
+  });
+
+export const TAB_TIMELINES = i18n.translate('xpack.siem.timelines.components.tabs.timelinesTitle', {
+  defaultMessage: 'Timelines',
+});
+
+export const TAB_TEMPLATES = i18n.translate('xpack.siem.timelines.components.tabs.templatesTitle', {
+  defaultMessage: 'Templates',
+});
+
 export const IMPORT_TIMELINE_BTN_TITLE = i18n.translate(
   'xpack.siem.timelines.components.importTimelineModal.importTimelineTitle',
   {
