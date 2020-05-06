@@ -19,7 +19,7 @@
 
 import { parse } from 'url';
 
-import { modifyUrl } from '../../../../core/utils';
+import { modifyUrl } from '../../../../core/public';
 import { prependPath } from './prepend_path';
 
 interface Options {

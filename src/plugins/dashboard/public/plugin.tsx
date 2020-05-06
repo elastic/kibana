@@ -229,7 +229,7 @@ export class DashboardPlugin
       euiIconType: 'dashboardApp',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;

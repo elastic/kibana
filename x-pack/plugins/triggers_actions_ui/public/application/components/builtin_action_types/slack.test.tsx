@@ -4,22 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { SlackActionParams, SlackActionConnector } from './types';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
 
-beforeAll(() => {
+let deps: any;
+
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  const mocks = coreMock.createSetup();
+  const [
+    {
+      application: { capabilities },
+    },
+  ] = await mocks.getStartServices();
+  deps = {
+    toastNotifications: mocks.notifications.toasts,
+    http: mocks.http,
+    capabilities: {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    },
+    actionTypeRegistry: actionTypeRegistry as any,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -78,7 +103,7 @@ describe('slack action params validation', () => {
 });
 
 describe('SlackActionFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -94,13 +119,31 @@ describe('SlackActionFields renders', () => {
       config: {},
     } as SlackActionConnector;
     const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ webhookUrl: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-      />
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+          docLinks: deps!.docLinks,
+        }}
+      >
+        <ConnectorFields
+          action={actionConnector}
+          errors={{ index: [], webhookUrl: [] }}
+          editActionConfig={() => {}}
+          editActionSecrets={() => {}}
+        />
+      </ActionsConnectorsContextProvider>
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(
       wrapper

@@ -104,7 +104,7 @@ export class VisualizePlugin
       order: -1002,
       euiIconType: 'visualizeApp',
       defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

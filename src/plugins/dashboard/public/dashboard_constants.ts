@@ -18,7 +18,6 @@
  */
 
 export const DashboardConstants = {
-  ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM: 'addToDashboard',
   LANDING_PAGE_PATH: '/list',
   CREATE_NEW_DASHBOARD_URL: '/create',
   ADD_EMBEDDABLE_ID: 'addEmbeddableId',

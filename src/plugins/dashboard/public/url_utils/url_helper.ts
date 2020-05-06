@@ -36,8 +36,10 @@ export function addEmbeddableToDashboardUrl(
 ) {
   const { url, query } = parseUrl(dashboardUrl);
 
-  query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = embeddableType;
-  query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  if (embeddableId) {
+    query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = embeddableType;
+    query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  }
 
   return `${url}?${stringify(query)}`;
 }

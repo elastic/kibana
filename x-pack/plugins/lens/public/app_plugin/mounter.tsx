@@ -10,9 +10,9 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { parse } from 'query-string';
 
-import { DashboardConstants } from '../../../../../src/plugins/dashboard/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { removeQueryParam, Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
@@ -47,29 +47,43 @@ export async function mountApp(
   );
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
-    addToDashboardMode: boolean,
-    id?: string
+    originatingApp: string,
+    id?: string,
+    returnToOrigin?: boolean,
+    newlyCreated?: boolean
   ) => {
+    if (!!originatingApp && !returnToOrigin) {
+      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
+    }
+
     if (!id) {
       routeProps.history.push('/');
-    } else if (!addToDashboardMode) {
+    } else if (!originatingApp) {
       routeProps.history.push(`/edit/${id}`);
-    } else if (addToDashboardMode && id) {
+    } else if (!!originatingApp && id && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
-      startDependencies.dashboard.addEmbeddableToDashboard({
-        embeddableId: id,
-        embeddableType: LENS_EMBEDDABLE_TYPE,
-      });
+
+      if (originatingApp === 'dashboards') {
+        const addLensId = newlyCreated ? id : '';
+        startDependencies.dashboard.addEmbeddableToDashboard({
+          embeddableId: addLensId,
+          embeddableType: LENS_EMBEDDABLE_TYPE,
+        });
+      } else {
+        const originatingAppLink = coreStart.chrome.navLinks.get(originatingApp);
+        if (!originatingAppLink || !originatingAppLink.url) {
+          throw new Error('Cannot get originating app url');
+        }
+        window.location.href = originatingAppLink.url;
+      }
     }
   };
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-    const addToDashboardMode =
-      !!routeProps.location.search &&
-      routeProps.location.search.includes(
-        DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM
-      );
+    const urlParams = parse(routeProps.location.search) as Record<string, string>;
+    const originatingApp = urlParams.embeddableOriginatingApp;
+
     return (
       <App
         core={coreStart}
@@ -79,8 +93,10 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={id => redirectTo(routeProps, addToDashboardMode, id)}
-        addToDashboardMode={addToDashboardMode}
+        redirectTo={(id, returnToOrigin, newlyCreated) =>
+          redirectTo(routeProps, originatingApp, id, returnToOrigin, newlyCreated)
+        }
+        originatingApp={originatingApp}
       />
     );
   };

@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 const dashboardName = 'Dashboard Test Time';
 
 export default function({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 
   describe('dashboard time', () => {
@@ -32,7 +32,7 @@ export default function({ getPageObjects, getService }) {
     });
 
     after(async function() {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     describe('dashboard without stored timed', () => {

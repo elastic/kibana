@@ -101,7 +101,7 @@ export function HeaderLogo({ href, forceNavigation, navLinks, navigateToApp }: P
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
-      iconType="logoKibana"
+      iconType="logoElastic"
       onClick={e => onClick(e, forceNavigation, navLinks, navigateToApp)}
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {

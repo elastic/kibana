@@ -197,7 +197,7 @@ export class DiscoverPlugin
       order: -1004,
       euiIconType: 'discoverApp',
       defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');

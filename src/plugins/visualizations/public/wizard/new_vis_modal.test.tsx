@@ -151,7 +151,7 @@ describe('NewVisModal', () => {
           isOpen={true}
           onClose={onClose}
           visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42', 'addToDashboard']}
+          editorParams={['foo=true', 'bar=42', 'embeddableOriginatingApp=notAnApp']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
@@ -160,7 +160,9 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl?addToDashboard' });
+      expect(navigateToApp).toBeCalledWith('otherApp', {
+        path: '#/aliasUrl?embeddableOriginatingApp=notAnApp',
+      });
       expect(onClose).toHaveBeenCalled();
     });
 

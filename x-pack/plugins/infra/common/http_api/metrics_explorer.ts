@@ -14,6 +14,8 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'rate',
   'count',
   'sum',
+  'p95',
+  'p99',
 ] as const;
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
