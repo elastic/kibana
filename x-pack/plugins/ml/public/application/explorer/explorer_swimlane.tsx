@@ -54,7 +54,7 @@ interface SelectedData {
 export interface ExplorerSwimlaneProps {
   chartWidth: number;
   filterActive?: boolean;
-  filteredFields: string[];
+  filteredFields?: string[];
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick?: Function;
@@ -634,7 +634,10 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
         this.highlightOverall(selectedCellTimes);
       }
       // If filtered fields includes a wildcard search maskAll only if there are no points matching the pattern
-      const wildCardFields = filteredFields.filter(field => /\@kuery-wildcard\@$/.test(field));
+      const wildCardFields =
+        filteredFields !== undefined
+          ? filteredFields.filter(field => /\@kuery-wildcard\@$/.test(field))
+          : [];
       const substring =
         wildCardFields.length > 0 ? wildCardFields[0].replace(/\@kuery-wildcard\@$/, '') : null;
       const hasMatchingPoints =
