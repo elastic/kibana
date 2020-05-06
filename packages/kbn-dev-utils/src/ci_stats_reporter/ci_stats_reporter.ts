@@ -84,27 +84,14 @@ export class CiStatsReporter {
     return !!this.config;
   }
 
-  async metric(group: string, id: string, value: number) {
-    await this.request({
-      method: 'POST',
-      path: '/metric',
-      body: {
-        name: group,
-        subName: id,
-        value,
-      },
-      bodySummary: `[${group}/${id}=${value}]`,
-    });
-  }
-
   async metrics(metrics: Array<{ group: string; id: string; value: number }>) {
     await this.request({
       method: 'POST',
-      path: '/metrics',
+      path: '/v1/metrics',
       body: {
         metrics: metrics.map(({ group, id, value }) => ({
-          name: group,
-          subName: id,
+          group,
+          id,
           value,
         })),
       },

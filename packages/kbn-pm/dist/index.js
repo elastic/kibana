@@ -43933,26 +43933,14 @@ class CiStatsReporter {
     isEnabled() {
         return !!this.config;
     }
-    async metric(group, id, value) {
-        await this.request({
-            method: 'POST',
-            path: '/metric',
-            body: {
-                name: group,
-                subName: id,
-                value,
-            },
-            bodySummary: `[${group}/${id}=${value}]`,
-        });
-    }
     async metrics(metrics) {
         await this.request({
             method: 'POST',
-            path: '/metrics',
+            path: '/v1/metrics',
             body: {
                 metrics: metrics.map(({ group, id, value }) => ({
-                    name: group,
-                    subName: id,
+                    group,
+                    id,
                     value,
                 })),
             },
