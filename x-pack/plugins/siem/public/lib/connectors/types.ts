@@ -8,7 +8,6 @@
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 
 import { ActionType } from '../../../../triggers_actions_ui/public';
-import { IErrorObject } from '../../../../triggers_actions_ui/public/types';
 import { ExternalIncidentServiceConfiguration } from '../../../../actions/server/builtin_action_types/case/types';
 
 import { ActionType as ThirdPartySupportedActions, CaseField } from '../../../../case/common/api';
@@ -43,7 +42,7 @@ export interface ActionConnectorValidationErrors {
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<T>;
 
 export interface ConnectorFlyoutFormProps<T> {
-  errors: IErrorObject;
+  errors: { [key: string]: string[] };
   action: T;
   onChangeSecret: (key: string, value: string) => void;
   onBlurSecret: (key: string) => void;

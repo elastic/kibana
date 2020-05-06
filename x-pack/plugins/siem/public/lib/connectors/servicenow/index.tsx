@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { lazy } from 'react';
 import {
   ValidationResult,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
+
 import { connector } from './config';
 import { createActionType } from '../utils';
 import logo from './logo.svg';
 import { ServiceNowActionConnector } from './types';
+import { ServiceNowConnectorFlyout } from './flyout';
 import * as i18n from './translations';
 
 interface Errors {
@@ -43,5 +44,5 @@ export const getActionType = createActionType({
   selectMessage: i18n.SERVICENOW_DESC,
   actionTypeTitle: connector.name,
   validateConnector,
-  actionConnectorFields: lazy(() => import('./flyout')),
+  actionConnectorFields: ServiceNowConnectorFlyout,
 });
