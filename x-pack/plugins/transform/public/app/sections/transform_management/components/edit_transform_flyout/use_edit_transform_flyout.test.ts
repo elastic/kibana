@@ -11,6 +11,8 @@ import {
   formReducerFactory,
   frequencyValidator,
   getDefaultState,
+  numberAboveZeroValidator,
+  FormField,
 } from './use_edit_transform_flyout';
 
 const getTransformConfigMock = (): TransformPivotConfig => ({
@@ -43,14 +45,21 @@ const getTransformConfigMock = (): TransformPivotConfig => ({
   description: 'the-description',
 });
 
-const getDescriptionFieldMock = (value = '') => ({
+const getDescriptionFieldMock = (value = ''): FormField => ({
   isOptional: true,
   value,
   errorMessages: [],
   validator: 'string',
 });
 
-const getFrequencyFieldMock = (value = '') => ({
+const getDocsPerSecondFieldMock = (value = ''): FormField => ({
+  isOptional: true,
+  value,
+  errorMessages: [],
+  validator: 'numberAboveZero',
+});
+
+const getFrequencyFieldMock = (value = ''): FormField => ({
   isOptional: true,
   value,
   errorMessages: [],
@@ -63,6 +72,7 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock(transformConfigMock.description),
+      docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });
 
@@ -70,6 +80,8 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
     // because the Update-Button will be disabled when no form field was changed.
     expect(Object.keys(updateConfig)).toHaveLength(0);
     expect(updateConfig.description).toBe(undefined);
+    // `docs_per_second` is nested under `settings` so we're just checking against that.
+    expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
   });
 
@@ -80,23 +92,28 @@ describe('Transform: applyFormFieldsToTransformConfig()', () => {
 
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-new-description'),
-      frequency: getFrequencyFieldMock(undefined),
+      docsPerSecond: getDocsPerSecondFieldMock('10'),
+      frequency: getFrequencyFieldMock('1m'),
     });
 
-    expect(Object.keys(updateConfig)).toHaveLength(1);
+    expect(Object.keys(updateConfig)).toHaveLength(3);
     expect(updateConfig.description).toBe('the-new-description');
-    expect(updateConfig.frequency).toBe(undefined);
+    expect(updateConfig.settings?.docs_per_second).toBe(10);
+    expect(updateConfig.frequency).toBe('1m');
   });
 
   test('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
     const updateConfig = applyFormFieldsToTransformConfig(transformConfigMock, {
       description: getDescriptionFieldMock('the-updated-description'),
+      docsPerSecond: getDocsPerSecondFieldMock(),
       frequency: getFrequencyFieldMock(),
     });
 
     expect(Object.keys(updateConfig)).toHaveLength(1);
     expect(updateConfig.description).toBe('the-updated-description');
+    // `docs_per_second` is nested under `settings` so we're just checking against that.
+    expect(updateConfig.settings).toBe(undefined);
     expect(updateConfig.frequency).toBe(undefined);
   });
 });
@@ -164,5 +181,23 @@ describe('Transform: frequencyValidator()', () => {
     expect(frequencyValidator('10m')).toHaveLength(0);
     expect(frequencyValidator('59s')).toHaveLength(0);
     expect(frequencyValidator('59m')).toHaveLength(0);
+  });
+});
+
+describe('Transform: numberValidator()', () => {
+  test('it should only allow numbers', () => {
+    // numberValidator() returns an array of error messages so
+    // an array with a length of 0 means a successful validation.
+
+    // invalid
+    expect(numberAboveZeroValidator('a-string')).toHaveLength(1);
+    expect(numberAboveZeroValidator('0s')).toHaveLength(1);
+    expect(numberAboveZeroValidator('1m')).toHaveLength(1);
+    expect(numberAboveZeroValidator(-1)).toHaveLength(1);
+    expect(numberAboveZeroValidator(0)).toHaveLength(1);
+
+    // valid
+    expect(numberAboveZeroValidator(1)).toHaveLength(0);
+    expect(numberAboveZeroValidator('1')).toHaveLength(0);
   });
 });

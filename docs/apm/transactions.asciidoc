@@ -95,7 +95,7 @@ It's the requests on the right, the ones taking longer than average, that we pro
 
 When you select one of these buckets,
 you're presented with up to ten trace samples.
-Each sample has a span timeline waterfall that shows what a typical request in that bucket was doing.
+Each sample has a trace timeline waterfall that shows what a typical request in that bucket was doing.
 By investigating this timeline waterfall, we can hopefully determine _why_ this request was slow and then implement a fix.
 
 [role="screenshot"]
