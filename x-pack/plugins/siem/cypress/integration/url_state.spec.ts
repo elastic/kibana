@@ -30,7 +30,7 @@ import { openAllHosts } from '../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../tasks/network/flows';
 import { clearSearchBar, kqlSearch, navigateFromHeaderTo } from '../tasks/siem_header';
-import { openTimeline } from '../tasks/siem_main';
+import { openTimeline, openTimelineIfClosed } from '../tasks/siem_main';
 import {
   addDescriptionToTimeline,
   addNameToTimeline,
@@ -246,7 +246,7 @@ describe('url state', () => {
 
   it('sets and reads the url state for timeline by id', () => {
     loginAndWaitForPage(HOSTS_PAGE);
-    openTimeline();
+    openTimelineIfClosed();
     executeTimelineKQL('host.name: *');
 
     cy.get(SERVER_SIDE_EVENT_COUNT)
