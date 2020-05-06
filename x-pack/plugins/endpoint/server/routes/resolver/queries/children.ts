@@ -12,81 +12,75 @@ import { PaginationParams } from '../utils/pagination';
 export class ChildrenQuery extends ResolverQuery<TotalsResult> {
   private readonly totalsAggs: TotalsAggregation;
   constructor(
-    indexPattern: string,
     private readonly pagination: PaginationParams,
+    indexPattern: string,
     endpointID?: string
   ) {
     super(indexPattern, endpointID);
     this.totalsAggs = new TotalsAggregation(this.pagination);
   }
 
-  protected legacyQuery(endpointID: string, uniquePIDs: string[], index: string) {
+  protected legacyQuery(endpointID: string, uniquePIDs: string[]) {
     const paginator = this.totalsAggs.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
-    return {
-      body: paginator({
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: { 'endgame.unique_ppid': uniquePIDs },
+    return paginator({
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { 'endgame.unique_ppid': uniquePIDs },
+            },
+            {
+              term: { 'agent.id': endpointID },
+            },
+            {
+              term: { 'event.category': 'process' },
+            },
+            {
+              term: { 'event.kind': 'event' },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    term: { 'event.type': 'process_start' },
+                  },
+                  {
+                    term: { 'event.action': 'fork_event' },
+                  },
+                ],
               },
-              {
-                term: { 'agent.id': endpointID },
-              },
-              {
-                term: { 'event.category': 'process' },
-              },
-              {
-                term: { 'event.kind': 'event' },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      term: { 'event.type': 'process_start' },
-                    },
-                    {
-                      term: { 'event.action': 'fork_event' },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
+            },
+          ],
         },
-      }),
-      index,
-    };
+      },
+    });
   }
 
-  protected query(entityIDs: string[], index: string) {
+  protected query(entityIDs: string[]) {
     const paginator = this.totalsAggs.paginateBy('event.id', 'process.parent.entity_id');
-    return {
-      body: paginator({
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: { 'process.parent.entity_id': entityIDs },
-              },
-              {
-                term: { 'event.category': 'process' },
-              },
-              {
-                term: { 'event.kind': 'event' },
-              },
-              {
-                term: { 'event.type': 'start' },
-              },
-            ],
-          },
+    return paginator({
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: { 'process.parent.entity_id': entityIDs },
+            },
+            {
+              term: { 'event.category': 'process' },
+            },
+            {
+              term: { 'event.kind': 'event' },
+            },
+            {
+              term: { 'event.type': 'start' },
+            },
+          ],
         },
-      }),
-      index,
-    };
+      },
+    });
   }
 
-  formatResults(response: SearchResponse<ResolverEvent>): TotalsResult {
-    return this.totalsAggs.formatResults(response);
+  formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
+    return this.totalsAggs.formatResponse(response);
   }
 }

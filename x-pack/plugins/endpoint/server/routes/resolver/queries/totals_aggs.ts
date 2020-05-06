@@ -39,7 +39,7 @@ export class TotalsAggregation {
     };
   }
 
-  public formatResults(response: SearchResponse<ResolverEvent>): TotalsResult {
+  public formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
     if (response.hits.hits.length === 0) {
       return { totals: {}, results: [] };
     }

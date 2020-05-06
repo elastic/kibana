@@ -5,37 +5,53 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { IScopedClusterClient } from 'kibana/server';
 import { ResolverEvent } from '../../../../common/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
+import { MSearchQuery } from './multi_searcher';
 
-export interface Query {
-  build(ids: string | string[]): JsonObject;
-}
-
-export abstract class ResolverQuery<T> implements Query {
+export abstract class ResolverQuery<T> implements MSearchQuery<T> {
   constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
 
   private static createIdsArray(ids: string | string[]): string[] {
     return Array.isArray(ids) ? ids : [ids];
   }
 
-  // todo make this specific to `search` and add a new method that returns the `msearch` style
-  // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
-  build(ids: string | string[]) {
-    const idsArray = ResolverQuery.createIdsArray(ids);
-    if (this.endpointID) {
-      return this.legacyQuery(this.endpointID, idsArray, legacyEventIndexPattern);
-    }
-    return this.query(idsArray, this.indexPattern);
+  private static formatBody(body: JsonObject, index: string): JsonObject {
+    return {
+      body,
+      index,
+    };
   }
 
-  protected abstract legacyQuery(
-    endpointID: string,
-    uniquePIDs: string[],
-    index: string
-  ): JsonObject;
-  protected abstract query(entityIDs: string[], index: string): JsonObject;
+  private buildQuery(ids: string | string[]): { query: JsonObject; index: string } {
+    const idsArray = ResolverQuery.createIdsArray(ids);
+    if (this.endpointID) {
+      return { query: this.legacyQuery(this.endpointID, idsArray), index: legacyEventIndexPattern };
+    }
+    return { query: this.query(idsArray), index: this.indexPattern };
+  }
 
-  public abstract formatResults(response: SearchResponse<ResolverEvent>): T;
+  private buildSearch(ids: string | string[]) {
+    const { query, index } = this.buildQuery(ids);
+    return ResolverQuery.formatBody(query, index);
+  }
+
+  buildMSearch(ids: string | string[]): JsonObject[] {
+    const { query, index } = this.buildQuery(ids);
+    return [{ index }, query];
+  }
+
+  async search(client: IScopedClusterClient, ids: string | string[]): Promise<T> {
+    const res: SearchResponse<ResolverEvent> = await client.callAsCurrentUser(
+      'search',
+      this.buildSearch(ids)
+    );
+    return this.formatResponse(res);
+  }
+
+  protected abstract legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject;
+  protected abstract query(entityIDs: string[]): JsonObject;
+  protected abstract formatResponse(response: SearchResponse<ResolverEvent>): T;
 }
