@@ -331,9 +331,7 @@ export async function initWebDriver(
   });
 
   // create browser download folder
-  if (!Fs.existsSync(downloadDir)) {
-    Fs.mkdirSync(downloadDir, { recursive: true });
-  }
+  Fs.mkdirSync(downloadDir, { recursive: true });
 
   // download Edge driver only in case of usage
   if (browserType === Browsers.ChromiumEdge) {
