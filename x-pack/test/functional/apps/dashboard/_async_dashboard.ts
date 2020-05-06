@@ -36,7 +36,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(true);
       // add the range of the sample data so we can pick it in the quick pick list
-      const SAMPLE_DATA_RANGE=`[
+      const SAMPLE_DATA_RANGE = `[
         {
           "from": "now-30d",
           "to": "now+40d",
