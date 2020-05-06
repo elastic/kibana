@@ -19,6 +19,7 @@ import {
   serviceConnectorUser,
 } from './mock';
 import * as api from './api';
+import { CaseServices } from './use_get_case_user_actions';
 
 jest.mock('./api');
 
@@ -32,6 +33,7 @@ describe('usePostPushToService', () => {
         ...basicPush,
         firstPushIndex: 1,
         lastPushIndex: 1,
+        commentsToUpdate: [basicComment.id],
         hasDataToPush: false,
       },
     },
@@ -64,6 +66,7 @@ describe('usePostPushToService', () => {
       ...basicPush,
       firstPushIndex: 1,
       lastPushIndex: 1,
+      commentsToUpdate: [basicComment.id],
       hasDataToPush: true,
     },
     '456': {
@@ -71,6 +74,7 @@ describe('usePostPushToService', () => {
       connectorId: '456',
       externalId: 'other_external_id',
       firstPushIndex: 4,
+      commentsToUpdate: [basicComment.id],
       lastPushIndex: 6,
       hasDataToPush: false,
     },
@@ -127,6 +131,31 @@ describe('usePostPushToService', () => {
       await waitForNextUpdate();
       expect(spyOnPushToService).toBeCalledWith(
         samplePush.connectorId,
+        formatServiceRequestData(basicCase, '123', sampleCaseServices as CaseServices),
+        abortCtrl.signal
+      );
+    });
+  });
+
+  it('calls pushToService with correct arguments when no push history', async () => {
+    const samplePush2 = {
+      caseId: pushedCase.id,
+      caseServices: {},
+      connectorName: 'connector name',
+      connectorId: 'none',
+      updateCase,
+    };
+    const spyOnPushToService = jest.spyOn(api, 'pushToService');
+
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UsePostPushToService>(() =>
+        usePostPushToService()
+      );
+      await waitForNextUpdate();
+      result.current.postPushToService(samplePush2);
+      await waitForNextUpdate();
+      expect(spyOnPushToService).toBeCalledWith(
+        samplePush2.connectorId,
         formatServiceRequestData(basicCase, 'none', {}),
         abortCtrl.signal
       );

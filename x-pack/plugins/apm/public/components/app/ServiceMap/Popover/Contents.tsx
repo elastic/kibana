@@ -90,11 +90,11 @@ const ANOMALY_DETECTION_TITLE = i18n.translate(
   { defaultMessage: 'Anomaly Detection' }
 );
 
-const ANOMALY_DETECTION_INFO = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverInfo',
+const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverTooltip',
   {
     defaultMessage:
-      'Display the health of your service by enabling the anomaly detection feature in Machine Learning.'
+      'Service health indicators are powered by the anomaly detection feature in machine learning'
   }
 );
 
@@ -108,11 +108,11 @@ const ANOMALY_DETECTION_LINK = i18n.translate(
   { defaultMessage: 'View anomalies' }
 );
 
-const ANOMALY_DETECTION_ENABLE_TEXT = i18n.translate(
-  'xpack.apm.serviceMap.anomalyDetectionPopoverEnable',
+const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
+  'xpack.apm.serviceMap.anomalyDetectionPopoverDisabled',
   {
     defaultMessage:
-      'Enable anomaly detection from the Integrations menu in the Service details view.'
+      'Display service health indicators by enabling anomaly detection from the Integrations menu in the Service details view.'
   }
 );
 
@@ -154,15 +154,18 @@ export function Contents({
       </FlexColumnItem>
       {isService && (
         <FlexColumnItem>
-          <section>
-            <HealthStatusTitle size="xxs">
-              <h3>{ANOMALY_DETECTION_TITLE}</h3>
-            </HealthStatusTitle>
-            &nbsp;
-            <EuiIconTip type="iInCircle" content={ANOMALY_DETECTION_INFO} />
-          </section>
           {hasAnomalyDetection ? (
             <>
+              <section>
+                <HealthStatusTitle size="xxs">
+                  <h3>{ANOMALY_DETECTION_TITLE}</h3>
+                </HealthStatusTitle>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  content={ANOMALY_DETECTION_TOOLTIP}
+                />
+              </section>
               <ContentLine>
                 <EuiFlexGroup>
                   <EuiFlexItem>
@@ -188,7 +191,12 @@ export function Contents({
               </ContentLine>
             </>
           ) : (
-            <EnableText>{ANOMALY_DETECTION_ENABLE_TEXT}</EnableText>
+            <>
+              <HealthStatusTitle size="xxs">
+                <h3>{ANOMALY_DETECTION_TITLE}</h3>
+              </HealthStatusTitle>
+              <EnableText>{ANOMALY_DETECTION_DISABLED_TEXT}</EnableText>
+            </>
           )}
           <EuiHorizontalRule margin="xs" />
         </FlexColumnItem>
