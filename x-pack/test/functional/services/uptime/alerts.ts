@@ -13,6 +13,7 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   return {
     async openFlyout() {
       await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
+      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
       await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
     },
     async openMonitorStatusAlertType(alertType: string) {
@@ -76,19 +77,37 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
         ['xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
       );
     },
-    async setLocationsSelectable() {
-      await testSubjects.click(
-        'xpack.uptime.alerts.monitorStatus.locationsSelectionExpression',
-        5000
-      );
-      await testSubjects.click('xpack.uptime.alerts.monitorStatus.locationsSelectionSwitch', 5000);
-      await testSubjects.click(
-        'xpack.uptime.alerts.monitorStatus.locationsSelectionSelectable',
-        5000
-      );
+    async clickAddFilter() {
+      await testSubjects.click('uptimeCreateAlertAddFilter');
+    },
+    async clickAddFilterLocation() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.observer.geo.name');
+    },
+    async clickAddFilterPort() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.url.port');
+    },
+    async clickAddFilterType() {
+      await this.clickAddFilter();
+      await testSubjects.click('uptimeAlertAddFilter.monitor.type');
+    },
+    async clickLocationExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_location');
+      await testSubjects.click(`filter-popover-item_${filter}`);
       return browser.pressKeys(browser.keys.ESCAPE);
     },
-    async clickSaveAlertButtion() {
+    async clickPortExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_port');
+      await testSubjects.click(`filter-popover-item_${filter}`);
+      return browser.pressKeys(browser.keys.ESCAPE);
+    },
+    async clickTypeExpression(filter: string) {
+      await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
+      await testSubjects.click(`filter-popover-item_${filter}`);
+      return browser.pressKeys(browser.keys.ESCAPE);
+    },
+    async clickSaveAlertButton() {
       return testSubjects.click('saveAlertButton');
     },
   };

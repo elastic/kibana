@@ -22,10 +22,15 @@ import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {
   defaultMessage: 'Unique Count',
 });
+
+export interface AggParamsCardinality extends BaseAggParams {
+  field: string;
+}
 
 export interface CardinalityMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;

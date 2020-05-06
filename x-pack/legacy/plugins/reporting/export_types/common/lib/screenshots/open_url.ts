@@ -9,12 +9,12 @@ import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/br
 import { LevelLogger } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
 import { ConditionalHeaders } from '../../../../types';
-import { PAGELOAD_SELECTOR } from '../../constants';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   url: string,
+  pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
@@ -23,7 +23,7 @@ export const openUrl = async (
       url,
       {
         conditionalHeaders,
-        waitForSelector: PAGELOAD_SELECTOR,
+        waitForSelector: pageLoadSelector,
         timeout: captureConfig.timeouts.openUrl,
       },
       logger

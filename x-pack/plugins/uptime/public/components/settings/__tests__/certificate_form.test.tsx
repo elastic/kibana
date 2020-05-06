@@ -17,7 +17,8 @@ describe('CertificateForm', () => {
           onChange={jest.fn()}
           formFields={{
             heartbeatIndices: 'heartbeat-8*',
-            certThresholds: { expiration: 7, age: 36 },
+            certExpirationThreshold: 7,
+            certAgeThreshold: 36,
           }}
           fieldErrors={null}
           isDisabled={false}

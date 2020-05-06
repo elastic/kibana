@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import { parse } from 'query-string';
@@ -19,9 +18,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-
-import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 import { BASE_PATH } from '../../../../common/constants';
@@ -102,7 +102,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
       />
     );
   } else {
-    content = <EmptyList />;
+    return <EmptyList />;
   }
 
   const renderFlyout = (): React.ReactNode => {
@@ -125,14 +125,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     } else {
       // Somehow we triggered show pipeline details, but do not have a pipeline.
       // We assume not found.
-      return (
-        <PipelineNotFoundFlyout
-          onClose={() => {
-            goHome();
-          }}
-          pipelineName={pipelineNameFromLocation}
-        />
-      );
+      return <PipelineNotFoundFlyout onClose={goHome} pipelineName={pipelineNameFromLocation} />;
     }
   };
 
@@ -169,7 +162,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestPipelines.list.pipelinesDescription"
-                defaultMessage="Use ingest node pipelines to pre-process documents before indexing."
+                defaultMessage="Define a pipeline for preprocessing documents before indexing."
               />
             </EuiText>
           </EuiTitle>
@@ -179,9 +172,22 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <EuiCallOut
               iconType="faceSad"
               color="danger"
-              title={i18n.translate('xpack.ingestPipelines.list.loadErrorTitle', {
-                defaultMessage: 'Cannot load pipelines, please refresh the page to try again.',
-              })}
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.loadErrorTitle"
+                  defaultMessage="Unable to load pipelines. {reloadLink}"
+                  values={{
+                    reloadLink: (
+                      <EuiLink onClick={sendRequest}>
+                        <FormattedMessage
+                          id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
+                          defaultMessage="Try again."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
             />
           ) : (
             content
@@ -195,9 +201,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             if (deleteResponse?.hasDeletedPipelines) {
               // reload pipelines list
               sendRequest();
+              setSelectedPipeline(undefined);
+              goHome();
             }
             setPipelinesToDelete([]);
-            setSelectedPipeline(undefined);
           }}
           pipelinesToDelete={pipelinesToDelete}
         />

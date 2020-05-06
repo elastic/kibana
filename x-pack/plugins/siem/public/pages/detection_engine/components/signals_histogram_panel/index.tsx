@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
+import { UpdateDateRange } from '../../../../components/charts/common';
 import { LegendItem } from '../../../../components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../components/header_section';
@@ -70,7 +71,7 @@ interface SignalsHistogramPanelProps {
   stackByOptions?: SignalsHistogramOption[];
   title?: string;
   to: number;
-  updateDateRange: (min: number, max: number) => void;
+  updateDateRange: UpdateDateRange;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({

@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, FLEET_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
 import { IngestManagerConfigType } from '../../../common';
 import {
-  getFleetSetupHandler,
+  getFleetStatusHandler,
   createFleetSetupHandler,
   ingestManagerSetupHandler,
 } from './handlers';
@@ -36,7 +37,7 @@ export const registerRoutes = (router: IRouter, config: IngestManagerConfigType)
       validate: false,
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
-    getFleetSetupHandler
+    getFleetStatusHandler
   );
 
   // Create Fleet setup

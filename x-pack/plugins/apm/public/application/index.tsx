@@ -74,6 +74,7 @@ const ApmAppRoot = ({
         value={{
           http: core.http,
           docLinks: core.docLinks,
+          capabilities: core.application.capabilities,
           toastNotifications: core.notifications.toasts,
           actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
           alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
