@@ -9,7 +9,6 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
   AGENT_NAME,
   SPAN_TYPE,
   SPAN_SUBTYPE
@@ -19,7 +18,6 @@ import { dedupeConnections } from './';
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',
   [SERVICE_ENVIRONMENT]: 'production',
-  [SERVICE_FRAMEWORK_NAME]: null,
   [AGENT_NAME]: 'nodejs'
 };
 
@@ -32,7 +30,6 @@ const nodejsExternal = {
 const javaService = {
   [SERVICE_NAME]: 'opbeans-java',
   [SERVICE_ENVIRONMENT]: 'production',
-  [SERVICE_FRAMEWORK_NAME]: null,
   [AGENT_NAME]: 'java'
 };
 

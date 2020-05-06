@@ -38,7 +38,9 @@ import {
   PromiseFromStreams,
   timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
-import { createTimelines, getTimeline } from './utils/create_timelines';
+import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
+import { TimelineType } from '../../../../common/types/timeline';
+import { checkIsFailureCases } from './utils/update_timelines';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -117,27 +119,84 @@ export const importTimelinesRoute = (
                       return null;
                     }
                     const {
-                      savedObjectId,
+                      savedObjectId = null,
                       pinnedEventIds,
                       globalNotes,
                       eventNotes,
+                      templateTimelineId,
+                      templateTimelineVersion,
+                      timelineType,
+                      version = null,
                     } = parsedTimeline;
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
                     );
+
                     let newTimeline = null;
                     try {
-                      const timeline = await getTimeline(frameworkRequest, savedObjectId);
+                      const templateTimeline =
+                        templateTimelineId != null
+                          ? await getTemplateTimeline(frameworkRequest, templateTimelineId)
+                          : null;
 
-                      if (timeline == null) {
+                      const timeline =
+                        savedObjectId != null &&
+                        (await getTimeline(frameworkRequest, savedObjectId));
+                      const isHandlingTemplateTimeline = timelineType === TimelineType.template;
+
+                      if (
+                        (timeline == null && !isHandlingTemplateTimeline) ||
+                        (timeline == null && templateTimeline == null && isHandlingTemplateTimeline)
+                      ) {
+                        // create timeline / template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
-                          parsedTimelineObject,
+                          {
+                            ...parsedTimelineObject,
+                            timelineType:
+                              parsedTimelineObject.timelineType === TimelineType.draft
+                                ? TimelineType.default
+                                : parsedTimelineObject.timelineType,
+                          },
                           null, // timelineSavedObjectId
                           null, // timelineVersion
                           pinnedEventIds,
-                          [...globalNotes, ...eventNotes],
+                          isHandlingTemplateTimeline
+                            ? globalNotes
+                            : [...globalNotes, ...eventNotes],
+                          [] // existing note ids
+                        );
+
+                        resolve({
+                          timeline_id: newTimeline.timeline.savedObjectId,
+                          status_code: 200,
+                        });
+                      } else if (
+                        timeline &&
+                        timeline != null &&
+                        templateTimeline != null &&
+                        isHandlingTemplateTimeline
+                      ) {
+                        // update template timeline
+                        const errorObj = checkIsFailureCases(
+                          isHandlingTemplateTimeline,
+                          version,
+                          templateTimelineVersion ?? null,
+                          timeline,
+                          templateTimeline
+                        );
+                        if (errorObj != null) {
+                          return siemResponse.error(errorObj);
+                        }
+
+                        newTimeline = await createTimelines(
+                          frameworkRequest,
+                          { ...parsedTimelineObject, templateTimelineId, templateTimelineVersion },
+                          timeline.savedObjectId, // timelineSavedObjectId
+                          timeline.version, // timelineVersion
+                          pinnedEventIds,
+                          globalNotes,
                           [] // existing note ids
                         );
 
@@ -148,7 +207,7 @@ export const importTimelinesRoute = (
                       } else {
                         resolve(
                           createBulkErrorObject({
-                            id: savedObjectId,
+                            id: savedObjectId ?? 'unknown',
                             statusCode: 409,
                             message: `timeline_id: "${savedObjectId}" already exists`,
                           })
@@ -157,7 +216,7 @@ export const importTimelinesRoute = (
                     } catch (err) {
                       resolve(
                         createBulkErrorObject({
-                          id: savedObjectId,
+                          id: savedObjectId ?? 'unknown',
                           statusCode: 400,
                           message: err.message,
                         })

@@ -7,12 +7,7 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import {
-  COLOR_PALETTE_MAX_SIZE,
-  STYLE_TYPE,
-  SOURCE_META_ID_ORIGIN,
-  FIELD_ORIGIN,
-} from '../../../../../common/constants';
+import { STYLE_TYPE, SOURCE_META_ID_ORIGIN, FIELD_ORIGIN } from '../../../../../common/constants';
 import React from 'react';
 import { OrdinalFieldMetaPopover } from '../components/field_meta/ordinal_field_meta_popover';
 import { CategoricalFieldMetaPopover } from '../components/field_meta/categorical_field_meta_popover';
@@ -118,6 +113,10 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     return false;
   }
 
+  getNumberOfCategories() {
+    return 0;
+  }
+
   isComplete() {
     return !!this._field;
   }
@@ -139,7 +138,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     if (this.isOrdinal()) {
       return this._field.getOrdinalFieldMetaRequest();
     } else if (this.isCategorical()) {
-      return this._field.getCategoricalFieldMetaRequest();
+      return this._field.getCategoricalFieldMetaRequest(this.getNumberOfCategories());
     } else {
       return null;
     }
@@ -180,7 +179,8 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
   }
 
   pluckCategoricalStyleMetaFromFeatures(features) {
-    if (!this.isCategorical()) {
+    const size = this.getNumberOfCategories();
+    if (!this.isCategorical() || size <= 0) {
       return null;
     }
 
@@ -207,7 +207,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     ordered.sort((a, b) => {
       return b.count - a.count;
     });
-    const truncated = ordered.slice(0, COLOR_PALETTE_MAX_SIZE);
+    const truncated = ordered.slice(0, size);
     return {
       categories: truncated,
     };

@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
 import { MetricsExplorerRequestBody } from '../../../../common/http_api/metrics_explorer';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+
+const percentileToVaue = (agg: 'p95' | 'p99') => {
+  if (agg === 'p95') {
+    return 95;
+  }
+  return 99;
+};
+
 export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
   return {
     id: 'custom',
@@ -47,6 +54,27 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
           ],
         };
       }
+
+      if (metric.aggregation === 'p95' || metric.aggregation === 'p99') {
+        return {
+          id: `metric_${index}`,
+          split_mode: 'everything',
+          metrics: [
+            {
+              field: metric.field,
+              id: `metric_${metric.aggregation}_${index}`,
+              type: 'percentile',
+              percentiles: [
+                {
+                  id: 'percentile_0',
+                  value: percentileToVaue(metric.aggregation),
+                },
+              ],
+            },
+          ],
+        };
+      }
+
       // Create a basic TSVB series with a single metric
       const aggregation = metric.aggregation || 'avg';
 
@@ -57,7 +85,7 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
           {
             field: metric.field,
             id: `metric_${aggregation}_${index}`,
-            type: InfraMetricModelMetricType[aggregation],
+            type: aggregation,
           },
         ],
       };

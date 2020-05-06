@@ -90,6 +90,11 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     return this._options.type === COLOR_MAP_TYPE.CATEGORICAL;
   }
 
+  getNumberOfCategories() {
+    const colors = getColorPalette(this._options.colorCategory);
+    return colors ? colors.length : 0;
+  }
+
   supportsMbFeatureState() {
     return true;
   }

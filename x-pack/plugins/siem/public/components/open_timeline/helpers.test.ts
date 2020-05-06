@@ -36,6 +36,7 @@ import { KueryFilterQueryKind } from '../../store/model';
 import { Note } from '../../lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
+import { TimelineType } from '../../../common/types/timeline';
 
 jest.mock('../../store/inputs/actions');
 jest.mock('../../store/timeline/actions');
@@ -299,6 +300,9 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
+        timelineType: TimelineType.draft,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         version: '1',
         width: 1100,
       });
@@ -393,10 +397,14 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
+        timelineType: TimelineType.draft,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         version: '1',
         width: 1100,
       });
     });
+
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -409,38 +417,80 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         columns: [
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: '@timestamp',
+            placeholder: undefined,
+            type: undefined,
             width: 190,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'message',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'event.category',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'host.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'source.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'destination.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'user.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
         ],
@@ -467,6 +517,9 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.draft,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
@@ -632,6 +685,9 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.draft,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},

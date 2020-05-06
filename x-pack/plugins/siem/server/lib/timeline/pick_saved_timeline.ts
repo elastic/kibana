@@ -5,6 +5,7 @@
  */
 
 import uuid from 'uuid';
+import { isEmpty } from 'lodash/fp';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
@@ -16,6 +17,7 @@ export const pickSavedTimeline = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const dateNow = new Date().valueOf();
+
   if (timelineId == null) {
     savedTimeline.created = dateNow;
     savedTimeline.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
@@ -27,16 +29,24 @@ export const pickSavedTimeline = (
   }
 
   if (savedTimeline.timelineType === TimelineType.template) {
-    savedTimeline.timelineType = TimelineType.template;
     if (savedTimeline.templateTimelineId == null) {
+      // create template timeline
       savedTimeline.templateTimelineId = uuid.v4();
-    }
-
-    if (savedTimeline.templateTimelineVersion == null) {
       savedTimeline.templateTimelineVersion = 1;
+    } else {
+      // update template timeline
+      if (savedTimeline.templateTimelineVersion != null) {
+        savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
+      }
     }
+  } else if (savedTimeline.timelineType === TimelineType.draft) {
+    savedTimeline.timelineType = !isEmpty(savedTimeline.title)
+      ? TimelineType.default
+      : TimelineType.draft;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
   } else {
-    savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.timelineType = savedTimeline.timelineType ?? TimelineType.default;
     savedTimeline.templateTimelineId = null;
     savedTimeline.templateTimelineVersion = null;
   }

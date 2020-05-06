@@ -26,3 +26,10 @@ export const JIRA_PROJECT_KEY_REQUIRED = i18n.translate(
     defaultMessage: 'Project key is required',
   }
 );
+
+export const MAPPING_FIELD_SUMMARY = i18n.translate(
+  'xpack.siem.case.configureCases.mappingFieldSummary',
+  {
+    defaultMessage: 'Summary',
+  }
+);
