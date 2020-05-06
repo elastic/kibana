@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { InfraSavedSourceConfiguration } from '../../../common/http_api/source_api';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsType } from 'src/core/server';
 
-export const infraSourceConfigurationSavedObjectType = 'infrastructure-ui-source';
+export const infraSourceConfigurationSavedObjectName = 'infrastructure-ui-source';
 
-export const infraSourceConfigurationSavedObjectMappings: {
-  [infraSourceConfigurationSavedObjectType]: ElasticsearchMappingOf<InfraSavedSourceConfiguration>;
-} = {
-  [infraSourceConfigurationSavedObjectType]: {
+export const infraSourceConfigurationSavedObjectType: SavedObjectsType = {
+  name: infraSourceConfigurationSavedObjectName,
+  hidden: false,
+  namespaceType: 'single',
+  management: {
+    importableAndExportable: true,
+  },
+  mappings: {
     properties: {
       name: {
         type: 'text',
