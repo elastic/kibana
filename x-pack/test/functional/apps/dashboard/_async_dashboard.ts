@@ -5,17 +5,16 @@
  */
 
 import expect from '@kbn/expect';
-// import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  // const find = getService('find');
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
-  // const security = getService('security');
   const pieChart = getService('pieChart');
+  const find = getService('find');
   const renderable = getService('renderable');
-  // const dashboardExpect = getService('dashboardExpect');
+  const dashboardExpect = getService('dashboardExpect');
   const appMenu = getService('appsMenu');
   const PageObjects = getPageObjects([
     'common',
@@ -30,17 +29,75 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('smoke');
 
     before(async () => {
-      // await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin', 'superuser']);
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(true);
-      // go to Discover, select flight data index, expand timespan to 1 yr
+      // add the range of the sample data so we can pick it in the quick pick list
+      const SAMPLE_DATA_RANGE=`[
+        {
+          "from": "now-30d",
+          "to": "now+40d",
+          "display": "sample data range"
+        },
+        {
+          "from": "now/d",
+          "to": "now/d",
+          "display": "Today"
+        },
+        {
+          "from": "now/w",
+          "to": "now/w",
+          "display": "This week"
+        },
+        {
+          "from": "now-15m",
+          "to": "now",
+          "display": "Last 15 minutes"
+        },
+        {
+          "from": "now-30m",
+          "to": "now",
+          "display": "Last 30 minutes"
+        },
+        {
+          "from": "now-1h",
+          "to": "now",
+          "display": "Last 1 hour"
+        },
+        {
+          "from": "now-24h",
+          "to": "now",
+          "display": "Last 24 hours"
+        },
+        {
+          "from": "now-7d",
+          "to": "now",
+          "display": "Last 7 days"
+        },
+        {
+          "from": "now-30d",
+          "to": "now",
+          "display": "Last 30 days"
+        },
+        {
+          "from": "now-90d",
+          "to": "now",
+          "display": "Last 90 days"
+        },
+        {
+          "from": "now-1y",
+          "to": "now",
+          "display": "Last 1 year"
+        }
+      ]`;
+
+      await kibanaServer.uiSettings.update({ 'timepicker:quickRanges': SAMPLE_DATA_RANGE });
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
+      await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
       await retry.try(async function() {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
@@ -52,14 +109,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.home.removeSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(false);
-      // await security.testUser.restoreDefaults();
     });
 
     it('should launch sample flights data set dashboard', async () => {
       await appMenu.clickLink('Dashboard');
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
+      await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // check at least one visualization
@@ -103,21 +159,18 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await renderable.waitForRender();
       log.debug('Checking pie charts rendered');
       await pieChart.expectPieSliceCount(4);
+
+      log.debug('Checking area, bar and heatmap charts rendered');
+      await dashboardExpect.seriesElementCount(15);
+      log.debug('Checking saved searches rendered');
+      await dashboardExpect.savedSearchRowCount(50);
+      log.debug('Checking input controls rendered');
+      await dashboardExpect.inputControlItemCount(3);
+      log.debug('Checking tag cloud rendered');
+      await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
+      log.debug('Checking vega chart rendered');
+      const tsvb = await find.existsByCssSelector('.vgaVis__view');
+      expect(tsvb).to.be(true);
     });
-
-    // since we're loading sameple data and not picking a time range which is guaranteed to
-    // contain all the sample data, we probably can't check all of these
-
-    // log.debug('Checking area, bar and heatmap charts rendered');
-    // await dashboardExpect.seriesElementCount(15);
-    // log.debug('Checking saved searches rendered');
-    // await dashboardExpect.savedSearchRowCount(50);
-    // log.debug('Checking input controls rendered');
-    // await dashboardExpect.inputControlItemCount(3);
-    // log.debug('Checking tag cloud rendered');
-    // await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
-    // log.debug('Checking vega chart rendered');
-    // const tsvb = await find.existsByCssSelector('.vgaVis__view');
-    // expect(tsvb).to.be(true);
   });
 }
