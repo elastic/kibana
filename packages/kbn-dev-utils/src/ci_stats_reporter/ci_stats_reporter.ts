@@ -19,7 +19,7 @@
 
 import { inspect } from 'util';
 
-import Axios, { Method } from 'axios';
+import Axios from 'axios';
 
 import { ToolingLog } from '../tooling_log';
 
