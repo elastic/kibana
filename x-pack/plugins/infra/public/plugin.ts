@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -22,6 +22,7 @@ import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public
 
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
 import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
+import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
 import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 
 export type ClientSetup = void;
@@ -53,6 +54,7 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getInventoryMetricAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
     pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
 
