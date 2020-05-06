@@ -89,38 +89,27 @@ export class CiStatsReporter {
       return;
     }
 
-    await this.request({
-      method: 'POST',
-      path: '/v1/metrics',
-      body: {
-        buildId: this.config.buildId,
-        metrics,
-      },
-      bodySummary: metrics.map(({ group, id, value }) => `[${group}/${id}=${value}]`).join(' '),
-    });
-  }
-
-  private async request(options: { method: Method; path: string; body: any; bodySummary: string }) {
-    if (!this.config) {
-      return;
-    }
-
-    const { method, path, body, bodySummary } = options;
     let attempt = 0;
     const maxAttempts = 5;
+    const bodySummary = metrics
+      .map(({ group, id, value }) => `[${group}/${id}=${value}]`)
+      .join(' ');
 
     while (true) {
       attempt += 1;
 
       try {
         await Axios.request({
-          method,
-          url: path,
+          method: 'POST',
+          url: '/v1/metrics',
           baseURL: this.config.apiUrl,
           headers: {
             Authorization: `token ${this.config.apiToken}`,
           },
-          data: body,
+          data: {
+            buildId: this.config.buildId,
+            metrics,
+          },
         });
 
         return;
