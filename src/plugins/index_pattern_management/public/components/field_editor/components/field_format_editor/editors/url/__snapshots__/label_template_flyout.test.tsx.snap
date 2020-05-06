@@ -4,12 +4,7 @@ exports[`LabelTemplateFlyout should not render if not visible 1`] = `""`;
 
 exports[`LabelTemplateFlyout should render normally 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[Function]}
-  ownFocus={false}
-  size="m"
 >
   <EuiFlyoutBody>
     <EuiText>
