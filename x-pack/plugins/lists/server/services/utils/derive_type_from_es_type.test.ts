@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSearchEsListItemMock } from '../mocks';
+import { getSearchEsListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
 import { Type } from '../../../common/schemas';
 
 import { deriveTypeFromItem } from './derive_type_from_es_type';
 
 describe('derive_type_from_es_type', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('it returns the item ip if it exists', () => {
     const item = getSearchEsListItemMock();
     const derivedType = deriveTypeFromItem({ item });

@@ -36,7 +36,7 @@ import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart, LegacyCoreStart } from 'kibana/public';
-import { modifyUrl } from '../../../../core/utils';
+import { modifyUrl } from '../../../../core/public';
 import { toMountPoint } from '../../../kibana_react/public';
 import { isSystemApiRequest, UrlOverflowService } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';

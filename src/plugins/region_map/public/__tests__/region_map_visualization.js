@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
+
 import ChoroplethLayer from '../choropleth_layer';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
@@ -103,31 +104,29 @@ describe('RegionMapsVisualizationTests', function() {
   let getManifestStub;
   beforeEach(
     ngMock.inject(() => {
+      const mapConfig = {
+        emsFileApiUrl: '',
+        emsTileApiUrl: '',
+        emsLandingPageUrl: '',
+      };
+      const tilemapsConfig = {
+        deprecated: {
+          config: {
+            options: {
+              attribution: '123',
+            },
+          },
+        },
+      };
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
           case 'version':
             return '123';
           default:
             return 'not found';
         }
       });
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],

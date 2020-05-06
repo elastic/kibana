@@ -115,8 +115,8 @@ export const datatableVisualization: Visualization<
     return [
       {
         title,
-        // table with >= 10 columns will have a score of 0.6, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.6,
+        // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
+        score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
           layers: [
             {
@@ -126,8 +126,8 @@ export const datatableVisualization: Visualization<
           ],
         },
         previewIcon: chartTableSVG,
-        // dont show suggestions for reduced versions or single-line tables
-        hide: table.changeType === 'reduced' || !table.isMultiRow,
+        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
+        hide: true,
       },
     ];
   },

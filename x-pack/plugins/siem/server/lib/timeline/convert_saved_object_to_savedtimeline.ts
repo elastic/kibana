@@ -11,16 +11,21 @@ import { identity } from 'fp-ts/lib/function';
 import {
   TimelineSavedObjectRuntimeType,
   TimelineSavedObject,
+  TimelineType,
 } from '../../../common/types/timeline';
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
     TimelineSavedObjectRuntimeType.decode(savedObject),
     map(savedTimeline => {
+      const attributes = {
+        ...savedTimeline.attributes,
+        timelineType: savedTimeline.attributes.timelineType ?? TimelineType.default,
+      };
       return {
         savedObjectId: savedTimeline.id,
         version: savedTimeline.version,
-        ...savedTimeline.attributes,
+        ...attributes,
       };
     }),
     fold(errors => {

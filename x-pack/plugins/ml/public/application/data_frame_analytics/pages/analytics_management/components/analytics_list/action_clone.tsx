@@ -18,6 +18,7 @@ import {
 } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 interface PropDefinition {
   /**
@@ -178,6 +179,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               // By default it is randomly generated
               ignore: true,
             },
+            loss_function: {
+              optional: true,
+              defaultValue: 'mse',
+            },
           },
         }
       : {}),
@@ -322,6 +327,8 @@ interface CloneActionProps {
  * to support EuiContext with a valid DOM structure without nested buttons.
  */
 export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item }) => {
+  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
+
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
     defaultMessage: 'Clone job',
   });
@@ -338,6 +345,7 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
       iconType="copy"
       onClick={onClick}
       aria-label={buttonText}
+      disabled={canCreateDataFrameAnalytics === false}
     >
       {buttonText}
     </EuiButtonEmpty>

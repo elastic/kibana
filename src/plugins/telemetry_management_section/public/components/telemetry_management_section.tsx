@@ -246,3 +246,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     });
   };
 }
+
+// required for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default TelemetryManagementSection;
