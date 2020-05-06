@@ -114,10 +114,10 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       to: DEFAULT_TO,
       index: DEFAULT_INDEX,
       size: DEFAULT_SIZE,
-      notValidAfter: `now+${dynamicSettings.certThresholds?.expiration ??
-        DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration}d`,
-      notValidBefore: `now-${dynamicSettings.certThresholds?.age ??
-        DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age}d`,
+      notValidAfter: `now+${dynamicSettings?.certExpirationThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
+      notValidBefore: `now-${dynamicSettings?.certAgeThreshold ??
+        DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}d`,
       sortBy: 'common_name',
       direction: 'desc',
     });
@@ -127,14 +127,14 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
     if (foundCerts) {
       const absoluteExpirationThreshold = moment()
         .add(
-          dynamicSettings.certThresholds?.expiration ??
-            DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.expiration,
+          dynamicSettings.certExpirationThreshold ??
+            DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
           'd'
         )
         .valueOf();
       const absoluteAgeThreshold = moment()
         .subtract(
-          dynamicSettings.certThresholds?.age ?? DYNAMIC_SETTINGS_DEFAULTS.certThresholds?.age,
+          dynamicSettings.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold,
           'd'
         )
         .valueOf();

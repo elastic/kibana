@@ -39,6 +39,7 @@ export interface CreateRequestBody extends PreviewRequestBody {
   dest: {
     index: IndexName;
   };
+  frequency?: string;
   sync?: {
     time: {
       field: string;

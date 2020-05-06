@@ -5,11 +5,11 @@
  */
 
 import {
+  deepFreeze,
   CoreSetup,
   PluginInitializer,
   SavedObjectsNamespaceType,
 } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/utils';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,

@@ -70,12 +70,6 @@ export const getListHandler: RequestHandler = async (context, request, response)
                   size: 1,
                 },
               },
-              package: {
-                terms: {
-                  field: 'event.module',
-                  size: 1,
-                },
-              },
               last_activity: {
                 max: {
                   field: '@timestamp',
@@ -110,11 +104,15 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dataset: { buckets: datasetBuckets },
         namespace: { buckets: namespaceBuckets },
         type: { buckets: typeBuckets },
-        package: { buckets: packageBuckets },
         last_activity: { value_as_string: lastActivity },
       } = result;
 
-      const pkg = packageBuckets.length ? packageBuckets[0].key : '';
+      // We don't have a reliable way to associate index with package ID, so
+      // this is a hack to extract the package ID from the first part of the dataset name
+      // with fallback to extraction from index name
+      const pkg = datasetBuckets.length
+        ? datasetBuckets[0].key.split('.')[0]
+        : indexName.split('-')[1].split('.')[0];
       const pkgSavedObject = packageSavedObjects.saved_objects.filter(p => p.id === pkg);
 
       // if
