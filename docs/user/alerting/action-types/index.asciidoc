@@ -17,7 +17,7 @@ Execution time field::  This field will be automatically set to the time the ale
 
 [float]
 [[Preconfigured-index-configuration]]
-==== Preconfigured action type properties: 
+==== Preconfigured action type properties
 
 [source,text]
 --
