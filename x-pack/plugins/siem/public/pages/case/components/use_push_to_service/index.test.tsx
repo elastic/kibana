@@ -33,6 +33,7 @@ describe('usePushToService', () => {
       ...basicPush,
       firstPushIndex: 0,
       lastPushIndex: 0,
+      commentsToUpdate: [],
       hasDataToPush: true,
     },
   };
