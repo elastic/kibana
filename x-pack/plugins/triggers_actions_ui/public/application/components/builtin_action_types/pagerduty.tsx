@@ -25,7 +25,6 @@ import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
 import pagerDutySvg from './pagerduty.svg';
 import { AddMessageVariables } from '../add_message_variables';
 import { hasMustacheTokens } from '../../lib/has_mustache_tokens';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -105,8 +104,7 @@ export function getActionType(): ActionTypeModel {
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets }) => {
-  const { docLinks } = useActionsConnectorsContext();
+>> = ({ errors, action, editActionConfig, editActionSecrets, docLinks }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -140,15 +138,17 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         id="routingKey"
         fullWidth
         helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-              defaultMessage="Configure a PagerDuty account."
-            />
-          </EuiLink>
+          docLinks ? (
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
+                defaultMessage="Configure a PagerDuty account."
+              />
+            </EuiLink>
+          ) : null
         }
         error={errors.routingKey}
         isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}

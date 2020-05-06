@@ -15,7 +15,6 @@ import {
 } from '../../../types';
 import { SlackActionParams, SlackActionConnector } from './types';
 import { AddMessageVariables } from '../add_message_variables';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -76,8 +75,7 @@ export function getActionType(): ActionTypeModel {
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors }) => {
-  const { docLinks } = useActionsConnectorsContext();
+>> = ({ action, editActionSecrets, errors, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (
@@ -86,15 +84,17 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         id="webhookUrl"
         fullWidth
         helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
-            target="_blank"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
-              defaultMessage="Create a Slack webhook URL"
-            />
-          </EuiLink>
+          docLinks ? (
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
+                defaultMessage="Create a Slack webhook URL"
+              />
+            </EuiLink>
+          ) : null
         }
         error={errors.webhookUrl}
         isInvalid={errors.webhookUrl.length > 0 && webhookUrl !== undefined}
