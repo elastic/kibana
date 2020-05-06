@@ -100,8 +100,13 @@ export function HeaderLogo({ href, navigateToApp, ...observables }: Props) {
   return (
     <EuiHeaderLogo
       data-test-subj="logo"
+<<<<<<< HEAD
       iconType="logoKibana"
       onClick={(e) => onClick(e, forceNavigation, navLinks, navigateToApp)}
+=======
+      iconType="logoElastic"
+      onClick={e => onClick(e, forceNavigation, navLinks)}
+>>>>>>> a108b23c276... Additional branding updates (#64712)
       href={href}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel', {
         defaultMessage: 'Go to home page',
