@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
