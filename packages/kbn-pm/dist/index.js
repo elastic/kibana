@@ -43938,11 +43938,7 @@ class CiStatsReporter {
             method: 'POST',
             path: '/v1/metrics',
             body: {
-                metrics: metrics.map(({ group, id, value }) => ({
-                    group,
-                    id,
-                    value,
-                })),
+                metrics,
             },
             bodySummary: metrics.map(({ group, id, value }) => `[${group}/${id}=${value}]`).join(' '),
         });
