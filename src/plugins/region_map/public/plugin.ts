@@ -34,6 +34,7 @@ import { getBaseMapsVis, IServiceSettings, MapsLegacyPluginSetup } from '../../m
 import { setFormatService, setNotifications } from './kibana_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { RegionMapsConfigType } from './index';
+import { ConfigSchema } from '../../maps_legacy/config';
 
 /** @private */
 interface RegionMapVisualizationDependencies {
@@ -70,17 +71,23 @@ export interface RegionMapPluginStart {}
 
 /** @internal */
 export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPluginStart> {
-  initializerContext: PluginInitializerContext;
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
+    this._initializerContext = initializerContext;
   }
 
   public async setup(
     core: CoreSetup,
     { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
   ) {
-    const config = this.initializerContext.config.get<RegionMapsConfigType>();
+    const config = {
+      ...this._initializerContext.config.get<RegionMapsConfigType>(),
+      // The maps legacy plugin updates the regionmap config directly in service_settings,
+      // future work on how configurations across the different plugins are organized would
+      // ideally constrain regionmap config updates to occur only from this plugin
+      ...mapsLegacy.config.regionmap,
+    };
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
@@ -99,6 +106,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
     };
   }
 
+  // @ts-ignore
   public start(core: CoreStart, { data }: RegionMapPluginStartDependencies) {
     setFormatService(data.fieldFormats);
     setNotifications(core.notifications);
