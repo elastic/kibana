@@ -8,7 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { KibanaContext } from '../';
-import { mockKibanaContext } from './mock_kibana_context';
+import { mockKibanaContext } from './kibana_context.mock';
 
 /**
  * This helper mounts a component with a set of default KibanaContext,

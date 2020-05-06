@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 
-import { mountWithKibanaContext } from '../../../test_utils';
+import { mountWithKibanaContext } from '../../../__mocks__';
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
 import { sendTelemetry } from '../../../shared/telemetry';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../test_utils/mock_shallow_usecontext';
+import '../__mocks__/shallow_usecontext.mock';
 
 import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';

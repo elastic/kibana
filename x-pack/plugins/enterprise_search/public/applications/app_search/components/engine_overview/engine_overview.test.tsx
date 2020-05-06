@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../test_utils/mock_rr_usehistory';
+import '../../../__mocks__/react_router_history.mock';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render } from 'enzyme';
 
 import { KibanaContext } from '../../../';
-import { mountWithKibanaContext, mockKibanaContext } from '../../../test_utils';
+import { mountWithKibanaContext, mockKibanaContext } from '../../../__mocks__';
 
 import { EmptyState, ErrorState, NoUserState } from '../empty_states';
 import { EngineTable } from './engine_table';

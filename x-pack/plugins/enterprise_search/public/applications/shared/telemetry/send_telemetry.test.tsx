@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { httpServiceMock } from 'src/core/public/mocks';
-import { mountWithKibanaContext } from '../../test_utils';
+import { mountWithKibanaContext } from '../../__mocks__';
 import { sendTelemetry, SendAppSearchTelemetry } from './';
 
 describe('Shared Telemetry Helpers', () => {
