@@ -6,7 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "kbn": "node ../scripts/kbn",
-    "kbn:bootstrap": "node legacy/plugins/canvas/scripts/storybook --clean",
+    "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
     "start": "gulp dev",
     "build": "gulp build",
     "testonly": "echo 'Deprecated, use `yarn test`' && gulp test",
