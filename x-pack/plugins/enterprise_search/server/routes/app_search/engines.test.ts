@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { mockRouter, RouterMock } from 'src/core/server/http/router/router.mock';
 import { loggingServiceMock } from 'src/core/server/mocks';
-import { httpServerMock } from 'src/core/server/http/http_server.mocks';
-import { RouteValidatorConfig } from 'src/core/server/http/router/validator';
+import { MockRouter } from '../__mocks__/router.mock';
 
 import { registerEnginesRoute } from './engines';
-import { ObjectType } from '@kbn/config-schema';
 
 jest.mock('node-fetch');
 const fetch = jest.requireActual('node-fetch');
@@ -21,15 +17,25 @@ const fetchMock = require('node-fetch') as jest.Mocked<typeof fetch>;
 describe('engine routes', () => {
   describe('GET /api/app_search/engines', () => {
     const AUTH_HEADER = 'Basic 123';
-    let router: RouterMock;
-    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = {
+      headers: {
+        authorization: AUTH_HEADER,
+      },
+      query: {
+        type: 'indexed',
+        pageIndex: 1,
+      },
+    };
+
+    const mockRouter = new MockRouter({ method: 'get', payload: 'query' });
     const mockLogger = loggingServiceMock.create().get();
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      router = mockRouter.create();
+      jest.clearAllMocks();
+      mockRouter.createRouter();
+
       registerEnginesRoute({
-        router,
+        router: mockRouter.router,
         log: mockLogger,
         config: {
           host: 'http://localhost:3002',
@@ -49,9 +55,9 @@ describe('engine routes', () => {
       });
 
       it('should return 200 with a list of engines from the App Search API', async () => {
-        await callThisRoute();
+        await mockRouter.callRoute(mockRequest);
 
-        expect(mockResponse.ok).toHaveBeenCalledWith({
+        expect(mockRouter.response.ok).toHaveBeenCalledWith({
           body: { results: [{ name: 'engine1' }], meta: { page: { total_results: 1 } } },
           headers: { 'content-type': 'application/json' },
         });
@@ -67,9 +73,9 @@ describe('engine routes', () => {
       });
 
       it('should return 403 with a message', async () => {
-        await callThisRoute();
+        await mockRouter.callRoute(mockRequest);
 
-        expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        expect(mockRouter.response.forbidden).toHaveBeenCalledWith({
           body: 'no-as-account',
         });
         expect(mockLogger.info).toHaveBeenCalledWith('No corresponding App Search account found');
@@ -85,9 +91,9 @@ describe('engine routes', () => {
       });
 
       it('should return 404 with a message', async () => {
-        await callThisRoute();
+        await mockRouter.callRoute(mockRequest);
 
-        expect(mockResponse.notFound).toHaveBeenCalledWith({
+        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
           body: 'cannot-connect',
         });
         expect(mockLogger.error).toHaveBeenCalledWith('Cannot connect to App Search: Failed');
@@ -104,9 +110,9 @@ describe('engine routes', () => {
       });
 
       it('should return 404 with a message', async () => {
-        await callThisRoute();
+        await mockRouter.callRoute(mockRequest);
 
-        expect(mockResponse.notFound).toHaveBeenCalledWith({
+        expect(mockRouter.response.notFound).toHaveBeenCalledWith({
           body: 'cannot-connect',
         });
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -116,42 +122,30 @@ describe('engine routes', () => {
       });
     });
 
-    describe('validation', () => {
-      function itShouldValidate(request: { query: object }) {
-        it('should be validated', async () => {
-          expect(() => executeRouteValidation(request)).not.toThrow();
-        });
-      }
-
-      function itShouldThrow(request: { query: object }) {
-        it('should throw', async () => {
-          expect(() => executeRouteValidation(request)).toThrow();
-        });
-      }
-
-      describe('when query is valid', () => {
+    describe('validates', () => {
+      it('correctly', () => {
         const request = { query: { type: 'meta', pageIndex: 5 } };
-        itShouldValidate(request);
+        mockRouter.shouldValidate(request);
       });
 
-      describe('pageIndex is wrong type', () => {
+      it('wrong pageIndex type', () => {
         const request = { query: { type: 'indexed', pageIndex: 'indexed' } };
-        itShouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
 
-      describe('type is wrong string', () => {
+      it('wrong type string', () => {
         const request = { query: { type: 'invalid', pageIndex: 1 } };
-        itShouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
 
-      describe('pageIndex is missing', () => {
+      it('missing pageIndex', () => {
         const request = { query: { type: 'indexed' } };
-        itShouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
 
-      describe('type is missing', () => {
+      it('missing type', () => {
         const request = { query: { pageIndex: 1 } };
-        itShouldThrow(request);
+        mockRouter.shouldThrow(request);
       });
     });
 
@@ -196,30 +190,6 @@ describe('engine routes', () => {
           },
         };
       },
-    };
-
-    const callThisRoute = async (
-      request = {
-        headers: {
-          authorization: AUTH_HEADER,
-        },
-        query: {
-          type: 'indexed',
-          pageIndex: 1,
-        },
-      }
-    ) => {
-      const [_, handler] = router.get.mock.calls[0];
-
-      const context = {} as jest.Mocked<RequestHandlerContext>;
-      await handler(context, httpServerMock.createKibanaRequest(request), mockResponse);
-    };
-
-    const executeRouteValidation = (data: { query: object }) => {
-      const [config] = router.get.mock.calls[0];
-      const validate = config.validate as RouteValidatorConfig<{}, {}, {}>;
-      const query = validate.query as ObjectType;
-      query.validate(data.query);
     };
   });
 });
