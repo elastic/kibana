@@ -54,14 +54,12 @@ export interface ActionTypeModel<ActionConnector = any, ActionParams = any> {
   actionTypeTitle?: string;
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
-  actionConnectorFields:
-    | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<ActionConnectorFieldsProps<ActionConnector>>>
-    | null;
-  actionParamsFields:
-    | React.FunctionComponent<any>
-    | React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>
-    | null;
+  actionConnectorFields: React.LazyExoticComponent<
+    ComponentType<ActionConnectorFieldsProps<ActionConnector>>
+  > | null;
+  actionParamsFields: React.LazyExoticComponent<
+    ComponentType<ActionParamsProps<ActionParams>>
+  > | null;
 }
 
 export interface ValidationResult {
