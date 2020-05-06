@@ -7,7 +7,7 @@ import { RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../../../types';
 import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
-import { AlertingIndexGetQueryResult } from '../../../../common/alerts/types';
+import { AlertingIndexGetQueryResult } from '../../../../common/alerting/types';
 
 export const alertListHandlerWrapper = function(
   endpointAppContext: EndpointAppContext

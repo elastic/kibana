@@ -5,11 +5,11 @@
  */
 
 import { IIndexPattern } from 'src/plugins/data/public';
-import { AlertResultList, AlertDetails, AlertingState } from '../../../../../common/alerts/types';
+import { AlertResultList, AlertDetails, AlertingState } from '../../../../../common/alerting/types';
 import { ImmutableMiddlewareFactory } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
-import { AlertConstants } from '../../../../../common/alerts/alert_constants';
+import { AlertConstants } from '../../../../../common/alerting/alert_constants';
 
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertingState> = (
   coreStart,

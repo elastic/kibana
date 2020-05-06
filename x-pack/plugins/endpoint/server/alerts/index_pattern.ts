@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
-import { AlertConstants } from '../../common/alerts/alert_constants';
+import { AlertConstants } from '../../common/alerting/alert_constants';
 import { ESIndexPatternService } from '../../../ingest_manager/server';
 
 export interface IndexPatternRetriever {

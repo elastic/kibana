@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 import { RisonValue, encode } from 'rison-node';
 import { RequestHandlerContext } from 'src/core/server';
-import { AlertHits, AlertSearchQuery } from '../../../../../common/alerts/types';
+import { AlertHits, AlertSearchQuery } from '../../../../../common/alerting/types';
 import { EndpointConfigType } from '../../../../config';
 import { Pagination } from '../../lib/pagination';
 import { BASE_ALERTS_ROUTE } from '../../../routes';

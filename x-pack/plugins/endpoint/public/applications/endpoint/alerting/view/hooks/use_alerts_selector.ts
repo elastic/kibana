@@ -7,7 +7,7 @@
 import { useSelector } from 'react-redux';
 import { Immutable } from '../../../../../../common/types';
 import { GlobalState } from '../../../types';
-import { AlertingState } from '../../../../../../common/alerts/types';
+import { AlertingState } from '../../../../../../common/alerting/types';
 
 export function useAlertListSelector<TSelected>(
   selector: (

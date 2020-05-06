@@ -17,7 +17,7 @@ import {
   AlertingIndexGetQueryInput,
   AlertingState,
   AlertingIndexUIQueryParams,
-} from '../../../../../common/alerts/types';
+} from '../../../../../common/alerting/types';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 

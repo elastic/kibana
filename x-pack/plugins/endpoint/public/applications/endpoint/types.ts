@@ -20,7 +20,7 @@ import {
   HostPolicyResponse,
   HostInfo,
 } from '../../../common/types';
-import { AlertingState } from '../../../common/alerts/types';
+import { AlertingState } from '../../../common/alerting/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
 import { CoreStart, AppMountParameters } from '../../../../../../src/core/public';

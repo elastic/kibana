@@ -16,8 +16,8 @@ import {
   ESTotal,
   AlertingIndexGetQueryResult,
   AlertSearchQuery,
-} from '../../../../../common/alerts/types';
-import { AlertConstants } from '../../../../../common/alerts/alert_constants';
+} from '../../../../../common/alerting/types';
+import { AlertConstants } from '../../../../../common/alerting/alert_constants';
 import { EndpointAppContext } from '../../../../types';
 import { AlertListPagination } from './pagination';
 

@@ -6,7 +6,7 @@
 
 import { Logger, RequestHandler } from 'kibana/server';
 import { EndpointAppContext } from '../../types';
-import { IndexPatternGetParamsResult } from '../../../common/alerts/types';
+import { IndexPatternGetParamsResult } from '../../../common/alerting/types';
 
 export function handleIndexPattern(
   log: Logger,

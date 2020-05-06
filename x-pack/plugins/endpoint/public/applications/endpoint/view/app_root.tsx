@@ -7,7 +7,7 @@ import * as React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
-import { AlertIndex } from '../alerting/view';
+import { useSelector } from 'react-redux';
 import { HostList } from './hosts';
 import { PolicyList } from './policy';
 import { PolicyDetails } from './policy';
@@ -16,8 +16,7 @@ import { AppRootProvider } from './app_root_provider';
 import { Setup } from './setup';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { ScopedHistory, CoreStart } from '../../../../../../../src/core/public';
-import { EndpointAppSubplugins } from '../types';
-import { useAlertListSelector } from '../alerting/view/hooks/use_alerts_selector';
+import { EndpointAppSubplugins, GlobalState } from '../types';
 
 interface RouterProps {
   history: ScopedHistory;
@@ -27,37 +26,40 @@ interface RouterProps {
   subplugins: EndpointAppSubplugins;
 }
 
-const AppRootChildren: React.FunctionComponent<EndpointAppSubplugins> = React.memo(subplugins => {
-  const { Routes, SelectorContextProvider } = subplugins.alerting;
+const AppRootChildren: React.FunctionComponent<{ subplugins: EndpointAppSubplugins }> = React.memo(
+  ({ subplugins: { alerting } }) => {
+    const { Routes, SelectorContextProvider } = alerting;
+    const alertingState = useSelector((state: GlobalState) => state.alerting);
 
-  return (
-    <>
-      <HeaderNavigation />
-      <Switch>
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <h1 data-test-subj="welcomeTitle">
-              <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-            </h1>
-          )}
-        />
-        <Route path="/hosts" component={HostList} />
-        <SelectorContextProvider value={useAlertListSelector()}>
-          <Routes />
-        </SelectorContextProvider>
-        <Route path="/policy" exact component={PolicyList} />
-        <Route path="/policy/:id" exact component={PolicyDetails} />
-        <Route
-          render={() => (
-            <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-          )}
-        />
-      </Switch>
-    </>
-  );
-});
+    return (
+      <>
+        <HeaderNavigation />
+        <Switch>
+          <Route
+            exact
+            path="/"
+            render={() => (
+              <h1 data-test-subj="welcomeTitle">
+                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
+              </h1>
+            )}
+          />
+          <Route path="/hosts" component={HostList} />
+          <SelectorContextProvider value={alertingState}>
+            <Routes />
+          </SelectorContextProvider>
+          <Route path="/policy" exact component={PolicyList} />
+          <Route path="/policy/:id" exact component={PolicyDetails} />
+          <Route
+            render={() => (
+              <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+            )}
+          />
+        </Switch>
+      </>
+    );
+  }
+);
 
 /**
  * The root of the Endpoint application react view.

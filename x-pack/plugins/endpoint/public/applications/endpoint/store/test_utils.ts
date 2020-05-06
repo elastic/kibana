@@ -5,7 +5,7 @@
  */
 
 import { Dispatch } from 'redux';
-import { AppAction, GlobalState, ImmutableMiddlewareFactory } from '../types';
+import { AppAction, GlobalState, ImmutableMiddleware } from '../types';
 
 /**
  * Utilities for testing Redux middleware
@@ -35,7 +35,7 @@ export interface MiddlewareActionSpyHelper<S = GlobalState, A extends AppAction 
   /**
    * Redux middleware that enables spying on the action that are dispatched through the store
    */
-  actionSpyMiddleware: ReturnType<ImmutableMiddlewareFactory<S>>;
+  actionSpyMiddleware: ImmutableMiddleware<S, A>;
 }
 
 /**

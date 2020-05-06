@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Route } from 'react-router-dom';
-import { AlertingState, Immutable } from '../../../../common/alerts/types';
+import { AlertingState, Immutable } from '../../../../common/alerting/types';
 import { SubpluginProviderDefinition } from '../types';
 import { alertingReducer } from './store/reducer';
 import { alertMiddlewareFactory } from './store/middleware';

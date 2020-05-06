@@ -7,29 +7,31 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { appStoreFactory } from '../store';
+import { applyMiddleware, createStore, Reducer, Store } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { depsStartMock } from './dependencies_start_mock';
 import { AppRootProvider } from '../view/app_root_provider';
 import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../store/test_utils';
+import { AppAction, SubpluginProviderDefinition } from '../types';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 /**
  * Mocked app root context renderer
  */
-export interface AppContextTestRender {
-  store: ReturnType<typeof appStoreFactory>;
+export interface AppContextTestRender<S> {
+  store: Store<S, AppAction>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
   depsStart: EndpointPluginStartDependencies;
-  middlewareSpy: MiddlewareActionSpyHelper;
+  middlewareSpy: MiddlewareActionSpyHelper<S>;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
    */
-  AppWrapper: React.FC<any>;
+  AppWrapper: React.FC<{ children: React.ReactChildren }>;
   /**
    * Renders the given UI within the created `AppWrapper` providing the given UI a mocked
    * endpoint runtime context environment
@@ -43,25 +45,30 @@ export interface AppContextTestRender {
  * Factory also returns the content that was used to create the custom renderer, allowing
  * for further customization.
  */
-export const createAppRootMockRenderer = (): AppContextTestRender => {
+export function createAppRootMockRenderer<S extends {}>(
+  subpluginDefinition: Pick<SubpluginProviderDefinition<S>, 'reducer' | 'middleware'>
+): AppContextTestRender<S> {
   const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
+  const params = coreMock.createAppMountParamters('/mock');
   const depsStart = depsStartMock();
-  const middlewareSpy = createSpyMiddleware();
-  const store = appStoreFactory({
-    coreStart,
-    depsStart,
-    additionalMiddleware: [middlewareSpy.actionSpyMiddleware],
-  });
-  const AppWrapper: React.FunctionComponent<{ children: React.ReactElement }> = ({ children }) => (
+  const middlewareSpyHelper = createSpyMiddleware<S>();
+  const composeWithReduxDevTools = composeWithDevTools({ name: 'EndpointApp' });
+  const { reducer } = subpluginDefinition;
+  const middleware = subpluginDefinition.middleware(coreStart, depsStart, params);
+  const enhancedMiddleware = composeWithReduxDevTools(
+    applyMiddleware(middleware, middlewareSpyHelper.actionSpyMiddleware)
+  );
+
+  const store = createStore(reducer as Reducer<S, AppAction>, enhancedMiddleware); // TODO: Fix this shit
+  const AppWrapper = ({ children }: { children: React.ReactChildren }) => (
     <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
       {children}
     </AppRootProvider>
   );
   const render: UiRender = (ui, options) => {
-    // @ts-ignore
     return reactRender(ui, {
-      wrapper: AppWrapper,
+      wrapper: AppWrapper as React.ComponentType<{}>, // The typescript type definition for this is wrong. Should accept children but doesn't
       ...options,
     });
   };
@@ -71,8 +78,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     history,
     coreStart,
     depsStart,
-    middlewareSpy,
+    middlewareSpy: middlewareSpyHelper,
     AppWrapper,
     render,
   };
-};
+}

@@ -12,8 +12,8 @@ import {
   AlertSearchQuery,
   SearchCursor,
   AlertDetailsRequestParams,
-} from '../../../../../common/alerts/types';
-import { AlertConstants } from '../../../../../common/alerts/alert_constants';
+} from '../../../../../common/alerting/types';
+import { AlertConstants } from '../../../../../common/alerting/alert_constants';
 import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts } from '../../lib';
 import { Pagination } from '../../lib/pagination';

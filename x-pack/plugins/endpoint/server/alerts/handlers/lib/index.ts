@@ -15,8 +15,8 @@ import {
   AlertSearchRequestWrapper,
   AlertSort,
   UndefinedResultPosition,
-} from '../../../../common/alerts/types';
-import { AlertConstants } from '../../../../common/alerts/alert_constants';
+} from '../../../../common/alerting/types';
+import { AlertConstants } from '../../../../common/alerting/alert_constants';
 
 function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {
