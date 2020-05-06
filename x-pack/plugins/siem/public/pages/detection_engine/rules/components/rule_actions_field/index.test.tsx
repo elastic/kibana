@@ -19,6 +19,15 @@ describe('RuleActionsField', () => {
         triggers_actions_ui: {
           actionTypeRegistry: {},
         },
+        application: {
+          capabilities: {
+            actions: {
+              delete: true,
+              save: true,
+              show: true,
+            },
+          },
+        },
       },
     });
     const Component = () => {

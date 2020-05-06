@@ -9,11 +9,11 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from './';
 import { TestProviders } from '../../../../mock';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
-import { ClosureType } from '../../../../../../case/common/api/cases';
+import { basicPush, actionLicenses } from '../../../../containers/case/mock';
 import * as i18n from './translations';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { getKibanaConfigError, getLicenseError } from './helpers';
-import * as api from '../../../../containers/case/configure/api';
+import { connectorsMock } from '../../../../containers/case/configure/mock';
 jest.mock('../../../../containers/case/use_get_action_license');
 jest.mock('../../../../containers/case/use_post_push_to_service');
 jest.mock('../../../../containers/case/configure/api');
@@ -26,28 +26,25 @@ describe('usePushToService', () => {
     isLoading: false,
     postPushToService,
   };
-  const closureType: ClosureType = 'close-by-user';
-  const mockConnector = {
-    connectorId: 'c00l',
-    connectorName: 'name',
+  const mockConnector = connectorsMock[0];
+  const actionLicense = actionLicenses[0];
+  const caseServices = {
+    '123': {
+      ...basicPush,
+      firstPushIndex: 0,
+      lastPushIndex: 0,
+      hasDataToPush: true,
+    },
   };
-  const mockCaseConfigure = {
-    ...mockConnector,
-    createdAt: 'string',
-    createdBy: {},
-    closureType,
-    updatedAt: 'string',
-    updatedBy: {},
-    version: 'string',
-  };
-  const getConfigureMock = jest.spyOn(api, 'getCaseConfigure');
-  const actionLicense = {
-    id: '.servicenow',
-    name: 'ServiceNow',
-    minimumLicenseRequired: 'platinum',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
+  const defaultArgs = {
+    caseConnectorId: mockConnector.id,
+    caseConnectorName: mockConnector.name,
+    caseId,
+    caseServices,
+    caseStatus: 'open',
+    connectors: connectorsMock,
+    updateCase,
+    userCanCrud: true,
   };
   beforeEach(() => {
     jest.resetAllMocks();
@@ -56,28 +53,24 @@ describe('usePushToService', () => {
       isLoading: false,
       actionLicense,
     }));
-    getConfigureMock.mockImplementation(() => Promise.resolve(mockCaseConfigure));
   });
   it('push case button posts the push with correct args', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            caseId,
-            caseStatus: 'open',
-            isNew: false,
-            updateCase,
-            userCanCrud: true,
-          }),
+        () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
       await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(getConfigureMock).toBeCalled();
       result.current.pushButton.props.children.props.onClick();
-      expect(postPushToService).toBeCalledWith({ ...mockConnector, caseId, updateCase });
+      expect(postPushToService).toBeCalledWith({
+        caseId,
+        caseServices,
+        connectorId: mockConnector.id,
+        connectorName: mockConnector.name,
+        updateCase,
+      });
       expect(result.current.pushCallouts).toBeNull();
     });
   });
@@ -91,19 +84,11 @@ describe('usePushToService', () => {
     }));
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            caseId,
-            caseStatus: 'open',
-            isNew: false,
-            updateCase,
-            userCanCrud: true,
-          }),
+        () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
@@ -120,19 +105,11 @@ describe('usePushToService', () => {
     }));
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-        () =>
-          usePushToService({
-            caseId,
-            caseStatus: 'open',
-            isNew: false,
-            updateCase,
-            userCanCrud: true,
-          }),
+        () => usePushToService(defaultArgs),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
@@ -140,27 +117,17 @@ describe('usePushToService', () => {
     });
   });
   it('Displays message when user does not have a connector configured', async () => {
-    getConfigureMock.mockImplementation(() =>
-      Promise.resolve({
-        ...mockCaseConfigure,
-        connectorId: 'none',
-      })
-    );
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
         () =>
           usePushToService({
-            caseId,
-            caseStatus: 'open',
-            isNew: false,
-            updateCase,
-            userCanCrud: true,
+            ...defaultArgs,
+            caseConnectorId: 'none',
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
@@ -172,17 +139,13 @@ describe('usePushToService', () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
         () =>
           usePushToService({
-            caseId,
+            ...defaultArgs,
             caseStatus: 'closed',
-            isNew: false,
-            updateCase,
-            userCanCrud: true,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
