@@ -25,6 +25,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { first } from 'rxjs/operators';
 
 import {
   EnvironmentService,
@@ -102,9 +103,6 @@ export class HomePublicPlugin
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
-        // Initially navigate to default app set by `kibana.defaultAppId`.
-        // This doesn't do anything as along as the default settings are kept.
-        kibanaLegacyStart.navigateToDefaultApp({ overwriteHash: false });
         const { renderApp } = await import('./application');
         return await renderApp(params.element);
       },
@@ -118,8 +116,26 @@ export class HomePublicPlugin
     };
   }
 
-  public start({ application: { capabilities } }: CoreStart) {
+  public start(
+    { application: { capabilities, currentAppId$ }, http }: CoreStart,
+    { kibanaLegacy }: HomePluginStartDependencies
+  ) {
     this.featuresCatalogueRegistry.start({ capabilities });
+
+    // If the home app is the initial location when loading Kibana...
+    if (
+      window.location.pathname === http.basePath.prepend(`/app/home`) &&
+      window.location.hash === ''
+    ) {
+      // ...wait for the app to mount initially and then...
+      currentAppId$.pipe(first()).subscribe(appId => {
+        if (appId === 'home') {
+          // ...navigate to default app set by `kibana.defaultAppId`.
+          // This doesn't do anything as along as the default settings are kept.
+          kibanaLegacy.navigateToDefaultApp({ overwriteHash: false });
+        }
+      });
+    }
   }
 }
 
