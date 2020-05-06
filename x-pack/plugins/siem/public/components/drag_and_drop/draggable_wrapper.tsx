@@ -132,6 +132,7 @@ export const DraggableWrapper = React.memo<Props>(
     const hoverContent = useMemo(
       () => (
         <DraggableWrapperHoverContent
+          draggableId={getDraggableId(dataProvider.id)}
           field={dataProvider.queryMatch.field}
           onFilterAdded={onFilterAdded}
           showTopN={showTopN}

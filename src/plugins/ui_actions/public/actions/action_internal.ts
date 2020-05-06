@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+import React from 'react';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';

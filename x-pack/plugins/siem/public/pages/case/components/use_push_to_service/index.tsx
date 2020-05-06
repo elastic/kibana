@@ -8,7 +8,6 @@ import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
-import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
 import { Case } from '../../../../containers/case/types';
 import { useGetActionLicense } from '../../../../containers/case/use_get_action_license';
 import { usePostPushToService } from '../../../../containers/case/use_post_push_to_service';
@@ -18,11 +17,16 @@ import { navTabs } from '../../../home/home_navigations';
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
+import { Connector } from '../../../../../../case/common/api/cases';
+import { CaseServices } from '../../../../containers/case/use_get_case_user_actions';
 
 export interface UsePushToService {
   caseId: string;
   caseStatus: string;
-  isNew: boolean;
+  caseConnectorId: string;
+  caseConnectorName: string;
+  caseServices: CaseServices;
+  connectors: Connector[];
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
 }
@@ -33,9 +37,12 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
+  caseConnectorId,
+  caseConnectorName,
   caseId,
+  caseServices,
   caseStatus,
-  isNew,
+  connectors,
   updateCase,
   userCanCrud,
 }: UsePushToService): ReturnUsePushToService => {
@@ -43,31 +50,30 @@ export const usePushToService = ({
 
   const { isLoading, postPushToService } = usePostPushToService();
 
-  const { connectorId, connectorName, loading: loadingCaseConfigure } = useCaseConfigure();
-
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
   const handlePushToService = useCallback(() => {
-    if (connectorId != null) {
+    if (caseConnectorId != null && caseConnectorId !== 'none') {
       postPushToService({
         caseId,
-        connectorId,
-        connectorName,
+        caseServices,
+        connectorId: caseConnectorId,
+        connectorName: caseConnectorName,
         updateCase,
       });
     }
-  }, [caseId, connectorId, connectorName, postPushToService, updateCase]);
+  }, [caseId, caseServices, caseConnectorId, caseConnectorName, postPushToService, updateCase]);
 
   const errorsMsg = useMemo(() => {
     let errors: Array<{ title: string; description: JSX.Element }> = [];
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
-    if (connectorId === 'none' && !loadingCaseConfigure && !loadingLicense) {
+    if (connectors.length === 0 && !loadingLicense) {
       errors = [
         ...errors,
         {
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
@@ -79,6 +85,19 @@ export const usePushToService = ({
                   </EuiLink>
                 ),
               }}
+            />
+          ),
+        },
+      ];
+    } else if (caseConnectorId === 'none' && !loadingLicense) {
+      errors = [
+        ...errors,
+        {
+          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          description: (
+            <FormattedMessage
+              defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
             />
           ),
         },
@@ -102,40 +121,36 @@ export const usePushToService = ({
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
-  }, [actionLicense, caseStatus, connectorId, loadingCaseConfigure, loadingLicense, urlSearch]);
+  }, [actionLicense, caseStatus, connectors.length, caseConnectorId, loadingLicense, urlSearch]);
 
-  const pushToServiceButton = useMemo(
-    () => (
+  const pushToServiceButton = useMemo(() => {
+    return (
       <EuiButton
-        data-test-subj="push-to-service-now"
+        data-test-subj="push-to-external-service"
         fill
         iconType="importAction"
         onClick={handlePushToService}
-        disabled={
-          isLoading ||
-          loadingLicense ||
-          loadingCaseConfigure ||
-          errorsMsg.length > 0 ||
-          !userCanCrud
-        }
+        disabled={isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud}
         isLoading={isLoading}
       >
-        {isNew ? i18n.PUSH_SERVICENOW : i18n.UPDATE_PUSH_SERVICENOW}
+        {caseServices[caseConnectorId]
+          ? i18n.UPDATE_THIRD(caseConnectorName)
+          : i18n.PUSH_THIRD(caseConnectorName)}
       </EuiButton>
-    ),
-    [
-      isNew,
-      handlePushToService,
-      isLoading,
-      loadingLicense,
-      loadingCaseConfigure,
-      errorsMsg,
-      userCanCrud,
-    ]
-  );
+    );
+  }, [
+    caseConnectorId,
+    caseConnectorName,
+    connectors,
+    errorsMsg,
+    handlePushToService,
+    isLoading,
+    loadingLicense,
+    userCanCrud,
+  ]);
 
-  const objToReturn = useMemo(
-    () => ({
+  const objToReturn = useMemo(() => {
+    return {
       pushButton:
         errorsMsg.length > 0 ? (
           <EuiToolTip
@@ -152,8 +167,8 @@ export const usePushToService = ({
         errorsMsg.length > 0 ? (
           <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
         ) : null,
-    }),
-    [errorsMsg, pushToServiceButton]
-  );
+    };
+  }, [errorsMsg, pushToServiceButton]);
+
   return objToReturn;
 };

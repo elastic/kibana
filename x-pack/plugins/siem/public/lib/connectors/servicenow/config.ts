@@ -4,17 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from '../types';
-
-import { SERVICENOW_TITLE } from './translations';
+import { ConnectorConfiguration } from './types';
+import * as i18n from './translations';
 import logo from './logo.svg';
 
-export const connector: Connector = {
+export const connector: ConnectorConfiguration = {
   id: '.servicenow',
-  name: SERVICENOW_TITLE,
+  name: i18n.SERVICENOW_TITLE,
   logo,
   enabled: true,
   enabledInConfig: true,
   enabledInLicense: true,
   minimumLicenseRequired: 'platinum',
+  fields: {
+    short_description: {
+      label: i18n.MAPPING_FIELD_SHORT_DESC,
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'title',
+      defaultActionType: 'overwrite',
+    },
+    description: {
+      label: i18n.MAPPING_FIELD_DESC,
+      validSourceFields: ['title', 'description'],
+      defaultSourceField: 'description',
+      defaultActionType: 'overwrite',
+    },
+    comments: {
+      label: i18n.MAPPING_FIELD_COMMENTS,
+      validSourceFields: ['comments'],
+      defaultSourceField: 'comments',
+      defaultActionType: 'append',
+    },
+  },
 };
