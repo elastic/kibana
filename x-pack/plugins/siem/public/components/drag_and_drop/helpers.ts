@@ -10,18 +10,20 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
+import { dragAndDropActions, timelineActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { ColumnHeaderOptions } from '../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-
 import { DataProvider } from '../timeline/data_providers/data_provider';
-import { dragAndDropActions, timelineActions } from '../../store/actions';
+import { addContentToTimeline } from '../timeline/data_providers/helpers';
 
 export const draggableIdPrefix = 'draggableId';
 
 export const droppableIdPrefix = 'droppableId';
 
 export const draggableContentPrefix = `${draggableIdPrefix}.content.`;
+
+export const draggableTimelineProvidersPrefix = `${draggableIdPrefix}.timelineProviders.`;
 
 export const draggableFieldPrefix = `${draggableIdPrefix}.field.`;
 
@@ -46,11 +48,42 @@ export const getDraggableFieldId = ({
   fieldId: string;
 }): string => `${draggableFieldPrefix}${escapeContextId(contextId)}.${escapeFieldId(fieldId)}`;
 
+export const getTimelineProviderDroppableId = ({
+  groupIndex,
+  timelineId,
+}: {
+  groupIndex: number;
+  timelineId: string;
+}): string => `${droppableTimelineProvidersPrefix}${timelineId}.group.${groupIndex}`;
+
+export const getTimelineProviderDraggableId = ({
+  dataProviderId,
+  groupIndex,
+  timelineId,
+}: {
+  dataProviderId: string;
+  groupIndex: number;
+  timelineId: string;
+}): string =>
+  `${draggableTimelineProvidersPrefix}${timelineId}.group.${groupIndex}.${dataProviderId}`;
+
 export const getDroppableId = (visualizationPlaceholderId: string): string =>
   `${droppableContentPrefix}${visualizationPlaceholderId}`;
 
 export const sourceIsContent = (result: DropResult): boolean =>
   result.source.droppableId.startsWith(droppableContentPrefix);
+
+export const sourceAndDestinationAreSameTimelineProviders = (result: DropResult): boolean => {
+  const regex = /^droppableId\.timelineProviders\.(\S+)\./;
+  const sourceMatches = result.source.droppableId.match(regex) ?? [];
+  const destinationMatches = result.destination?.droppableId.match(regex) ?? [];
+
+  return (
+    sourceMatches.length >= 2 &&
+    destinationMatches.length >= 2 &&
+    sourceMatches[1] === destinationMatches[1]
+  );
+};
 
 export const draggableIsContent = (result: DropResult | { draggableId: string }): boolean =>
   result.draggableId.startsWith(draggableContentPrefix);
@@ -72,14 +105,6 @@ export const destinationIsTimelineButton = (result: DropResult): boolean =>
   result.destination != null &&
   result.destination.droppableId.startsWith(droppableTimelineFlyoutButtonPrefix);
 
-export const getTimelineIdFromDestination = (result: DropResult): string =>
-  result.destination != null &&
-  (destinationIsTimelineProviders(result) ||
-    destinationIsTimelineButton(result) ||
-    destinationIsTimelineColumns(result))
-    ? result.destination.droppableId.substring(result.destination.droppableId.lastIndexOf('.') + 1)
-    : '';
-
 export const getProviderIdFromDraggable = (result: DropResult): string =>
   result.draggableId.substring(result.draggableId.lastIndexOf('.') + 1);
 
@@ -100,26 +125,22 @@ export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   sourceIsContent(result) &&
   destinationIsTimelineProviders(result);
 
+export const userIsReArrangingProviders = (result: DropResult): boolean =>
+  reasonIsDrop(result) && sourceAndDestinationAreSameTimelineProviders(result);
+
 export const fieldWasDroppedOnTimelineColumns = (result: DropResult): boolean =>
   reasonIsDrop(result) && draggableIsField(result) && destinationIsTimelineColumns(result);
 
-export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean =>
-  reasonIsDrop(result) &&
-  draggableIsContent(result) &&
-  sourceIsContent(result) &&
-  destinationIsTimelineButton(result);
-
 interface AddProviderToTimelineParams {
+  activeTimelineDataProviders: DataProvider[];
   dataProviders: IdToDataProvider;
-  result: DropResult;
   dispatch: Dispatch;
-  addProvider?: ActionCreator<{
-    id: string;
-    provider: DataProvider;
-  }>;
   noProviderFound?: ActionCreator<{
     id: string;
   }>;
+  onAddedToTimeline: (fieldOrValue: string) => void;
+  result: DropResult;
+  timelineId: string;
 }
 
 interface AddFieldToTimelineColumnsParams {
@@ -131,21 +152,30 @@ interface AddFieldToTimelineColumnsParams {
   browserFields: BrowserFields;
   dispatch: Dispatch;
   result: DropResult;
+  timelineId: string;
 }
 
 export const addProviderToTimeline = ({
+  activeTimelineDataProviders,
   dataProviders,
-  result,
   dispatch,
-  addProvider = timelineActions.addProvider,
+  result,
+  timelineId,
   noProviderFound = dragAndDropActions.noProviderFound,
+  onAddedToTimeline,
 }: AddProviderToTimelineParams): void => {
-  const timeline = getTimelineIdFromDestination(result);
   const providerId = getProviderIdFromDraggable(result);
-  const provider = dataProviders[providerId];
+  const providerToAdd = dataProviders[providerId];
 
-  if (provider) {
-    dispatch(addProvider({ id: timeline, provider }));
+  if (providerToAdd) {
+    addContentToTimeline({
+      dataProviders: activeTimelineDataProviders,
+      destination: result.destination,
+      dispatch,
+      onAddedToTimeline,
+      providerToAdd,
+      timelineId,
+    });
   } else {
     dispatch(noProviderFound({ id: providerId }));
   }
@@ -156,8 +186,8 @@ export const addFieldToTimelineColumns = ({
   browserFields,
   dispatch,
   result,
+  timelineId,
 }: AddFieldToTimelineColumnsParams): void => {
-  const timeline = getTimelineIdFromDestination(result);
   const fieldId = getFieldIdFromDraggable(result);
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
@@ -175,7 +205,7 @@ export const addFieldToTimelineColumns = ({
           aggregatable: column.aggregatable,
           width: DEFAULT_COLUMN_MIN_WIDTH,
         },
-        id: timeline,
+        id: timelineId,
         index: result.destination != null ? result.destination.index : 0,
       })
     );
@@ -188,32 +218,11 @@ export const addFieldToTimelineColumns = ({
           id: fieldId,
           width: DEFAULT_COLUMN_MIN_WIDTH,
         },
-        id: timeline,
+        id: timelineId,
         index: result.destination != null ? result.destination.index : 0,
       })
     );
   }
-};
-
-interface ShowTimelineParams {
-  result: DropResult;
-  show: boolean;
-  dispatch: Dispatch;
-  showTimeline?: ActionCreator<{
-    id: string;
-    show: boolean;
-  }>;
-}
-
-export const updateShowTimeline = ({
-  result,
-  show,
-  dispatch,
-  showTimeline = timelineActions.showTimeline,
-}: ShowTimelineParams): void => {
-  const timeline = getTimelineIdFromDestination(result);
-
-  dispatch(showTimeline({ id: timeline, show }));
 };
 
 /**

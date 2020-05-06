@@ -11,6 +11,7 @@ import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { IndexActionParams, EsIndexActionConnector } from './types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 jest.mock('../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),
   getFields: jest.fn(),
@@ -20,14 +21,35 @@ jest.mock('../../../common/index_controls', () => ({
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
+let deps: any;
 
-beforeAll(() => {
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  const mocks = coreMock.createSetup();
+  const [
+    {
+      application: { capabilities },
+    },
+  ] = await mocks.getStartServices();
+  deps = {
+    toastNotifications: mocks.notifications.toasts,
+    http: mocks.http,
+    capabilities: {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    },
+    actionTypeRegistry: actionTypeRegistry as any,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -99,8 +121,6 @@ describe('action params validation', () => {
 
 describe('IndexActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
-    const mocks = coreMock.createSetup();
-
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -145,13 +165,25 @@ describe('IndexActionConnectorFields renders', () => {
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ index: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        http={mocks.http}
-      />
+      <ActionsConnectorsContextProvider
+        value={{
+          http: deps!.http,
+          actionTypeRegistry: deps!.actionTypeRegistry,
+          capabilities: deps!.capabilities,
+          toastNotifications: deps!.toastNotifications,
+          reloadConnectors: () => {
+            return new Promise<void>(() => {});
+          },
+          docLinks: deps!.docLinks,
+        }}
+      >
+        <ConnectorFields
+          action={actionConnector}
+          errors={{ index: [] }}
+          editActionConfig={() => {}}
+          editActionSecrets={() => {}}
+        />
+      </ActionsConnectorsContextProvider>
     );
 
     await act(async () => {

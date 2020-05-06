@@ -12,7 +12,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 import {
   PluginSetupContract as AlertingPluginPublicSetup,

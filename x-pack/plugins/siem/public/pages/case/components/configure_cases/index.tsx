@@ -63,7 +63,7 @@ interface ConfigureCasesComponentProps {
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
-  const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+  const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -263,6 +263,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
           reloadConnectors,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout

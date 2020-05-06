@@ -134,6 +134,11 @@ export function Cytoscape({
       );
       cy.remove(absentElements);
       cy.add(elements);
+      // ensure all elements get latest data properties
+      elements.forEach(elementDefinition => {
+        const el = cy.getElementById(elementDefinition.data.id as string);
+        el.data(elementDefinition.data);
+      });
       cy.trigger('data');
     }
   }, [cy, elements]);
