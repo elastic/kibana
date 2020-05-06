@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilities } from '../../../../common/machine_learning/types';
-import { InfluencerInput } from '../types';
+import { MlCapabilitiesResponse } from '../../../../../ml/common/types/capabilities';
 import { KibanaServices } from '../../../lib/kibana';
+import { InfluencerInput } from '../types';
 
 export interface Body {
   jobIds: string[];
@@ -21,8 +21,8 @@ export interface Body {
   maxExamples: number;
 }
 
-export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilities> => {
-  return KibanaServices.get().http.fetch<MlCapabilities>('/api/ml/ml_capabilities', {
+export const getMlCapabilities = async (signal: AbortSignal): Promise<MlCapabilitiesResponse> => {
+  return KibanaServices.get().http.fetch<MlCapabilitiesResponse>('/api/ml/ml_capabilities', {
     method: 'GET',
     asSystemRequest: true,
     signal,

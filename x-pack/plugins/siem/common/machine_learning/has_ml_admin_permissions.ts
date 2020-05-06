@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilities } from './types';
+import { MlCapabilitiesResponse } from '../../../ml/common/types/capabilities';
 
-export const hasMlAdminPermissions = (capabilities: MlCapabilities): boolean =>
+export const hasMlAdminPermissions = (capabilities: MlCapabilitiesResponse): boolean =>
   getDataFeedPermissions(capabilities) &&
   getJobPermissions(capabilities) &&
   getFilterPermissions(capabilities) &&
   getCalendarPermissions(capabilities);
 
-const getDataFeedPermissions = ({ capabilities }: MlCapabilities): boolean =>
+const getDataFeedPermissions = ({ capabilities }: MlCapabilitiesResponse): boolean =>
   capabilities.canGetDatafeeds &&
   capabilities.canStartStopDatafeed &&
   capabilities.canUpdateDatafeed &&
   capabilities.canPreviewDatafeed;
 
-const getJobPermissions = ({ capabilities }: MlCapabilities): boolean =>
+const getJobPermissions = ({ capabilities }: MlCapabilitiesResponse): boolean =>
   capabilities.canCreateJob &&
   capabilities.canGetJobs &&
   capabilities.canUpdateJob &&
@@ -27,8 +27,8 @@ const getJobPermissions = ({ capabilities }: MlCapabilities): boolean =>
   capabilities.canCloseJob &&
   capabilities.canForecastJob;
 
-const getFilterPermissions = ({ capabilities }: MlCapabilities) =>
+const getFilterPermissions = ({ capabilities }: MlCapabilitiesResponse) =>
   capabilities.canGetFilters && capabilities.canCreateFilter && capabilities.canDeleteFilter;
 
-const getCalendarPermissions = ({ capabilities }: MlCapabilities) =>
+const getCalendarPermissions = ({ capabilities }: MlCapabilitiesResponse) =>
   capabilities.canCreateCalendar && capabilities.canGetCalendars && capabilities.canDeleteCalendar;
