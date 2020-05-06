@@ -31,7 +31,7 @@ export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
 
   async run(config, log, build) {
-    const files = [];
+    const archives = [];
 
     // archive one at a time, parallel causes OOM sometimes
     for (const platform of config.getTargetPlatforms()) {
@@ -41,10 +41,14 @@ export const CreateArchivesTask = {
       log.info('archiving', source, 'to', destination);
 
       await mkdirp(Path.dirname(destination));
-      files.push(destination);
 
       switch (Path.extname(destination)) {
         case '.zip':
+          archives.push({
+            format: 'zip',
+            path: destination,
+          });
+
           await compress(
             'zip',
             {
@@ -61,6 +65,11 @@ export const CreateArchivesTask = {
           break;
 
         case '.gz':
+          archives.push({
+            format: 'tar',
+            path: destination,
+          });
+
           await compress(
             'tar',
             {
@@ -86,10 +95,10 @@ export const CreateArchivesTask = {
     if (reporter.isEnabled()) {
       await reporter.metrics(
         await Promise.all(
-          files.map(async path => {
+          archives.map(async ({ format, path }) => {
             return {
-              group: 'distributable size',
-              id: Path.basename(path),
+              group: `${build.isOss() ? 'oss ' : ''}distributable size`,
+              id: format,
               value: (await asyncStat(path)).size,
             };
           })
