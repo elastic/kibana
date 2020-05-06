@@ -28,11 +28,20 @@ import { ISavedObjectTypeRegistry } from '..';
 export interface SavedObjectsImportRetry {
   type: string;
   id: string;
+  /**
+   * Resolve an import conflict by overwriting a destination object.
+   * Note: this attribute is mutually-exclusive with `duplicate`. If both are enabled, `overwrite` takes precedence.
+   */
   overwrite: boolean;
   /**
    * The object ID that will be overwritten. Only used if `overwrite` == true. This is required to resolve ambiguous conflicts.
    */
   idToOverwrite?: string;
+  /**
+   * Resolve an import conflict by creating a duplicate object with a new (undefined) originId.
+   * Note: this attribute is mutually-exclusive with `overwrite`. If both are enabled, `overwrite` takes precedence.
+   */
+  duplicate?: boolean;
   replaceReferences: Array<{
     type: string;
     from: string;

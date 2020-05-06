@@ -332,6 +332,30 @@ describe('copy to space', () => {
       );
     });
 
+    it(`does not allow "overwrite" to be used with "duplicate"`, async () => {
+      const payload = {
+        retries: {
+          ['a-space']: [
+            {
+              type: 'foo',
+              id: 'bar',
+              overwrite: true,
+              duplicate: true,
+            },
+          ],
+        },
+        objects: [{ type: 'foo', id: 'bar' }],
+      };
+
+      const { resolveConflicts } = await setup();
+
+      expect(() =>
+        (resolveConflicts.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[retries.a-space.0]: cannot use [overwrite] with [duplicate]"`
+      );
+    });
+
     it(`requires well-formed space ids`, async () => {
       const payload = {
         retries: {

@@ -45,7 +45,7 @@ const OTHER_TYPE = 'other';
  */
 const obj1 = createObject(MULTI_NS_TYPE, 'id-1', 'originId-a'); // -> success
 const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'originId-b'); // -> conflict
-const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-c'); // -> conflict (with known importId)
+const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'originId-c'); // -> conflict (with known importId and omitOriginId=true)
 const obj4 = createObject(MULTI_NS_TYPE, 'id-4', 'originId-d'); // -> conflict (with known importId)
 const obj5 = createObject(MULTI_NS_TYPE, 'id-5', 'originId-e'); // -> unresolvable conflict
 const obj6 = createObject(MULTI_NS_TYPE, 'id-6'); // -> success
@@ -62,7 +62,7 @@ const importId3 = 'id-foo';
 const importId4 = 'id-bar';
 const importId8 = 'id-baz';
 const importIdMap = new Map([
-  [`${obj3.type}:${obj3.id}`, { id: importId3 }],
+  [`${obj3.type}:${obj3.id}`, { id: importId3, omitOriginId: true }],
   [`${obj4.type}:${obj4.id}`, { id: importId4 }],
   [`${obj8.type}:${obj8.id}`, { id: importId8 }],
 ]);
@@ -190,7 +190,7 @@ describe('#createSavedObjects', () => {
       await createSavedObjects(objs, options);
       expect(bulkCreate).toHaveBeenCalledTimes(1);
       // these three objects are transformed before being created, because they are included in the `importIdMap`
-      const x3 = { ...obj3, id: importId3 }; // this import object already has an originId
+      const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the retry has omitOriginId=true
       const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
       const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
       const argObjs = [obj1, obj2, x3, x4, obj6, obj7, x8, obj10, obj11, obj12, obj13];
@@ -283,7 +283,7 @@ describe('#createSavedObjects', () => {
       await createSavedObjects(objs, options);
       expect(bulkCreate).toHaveBeenCalledTimes(2);
       // these three objects are transformed before being created, because they are included in the `importIdMap`
-      const x3 = { ...obj3, id: importId3 }; // this import object already has an originId
+      const x3 = { ...obj3, id: importId3, originId: undefined }; // this import object already has an originId, but the retry has omitOriginId=true
       const x4 = { ...obj4, id: importId4 }; // this import object already has an originId
       const x8 = { ...obj8, id: importId8, originId: obj8.id }; // this import object doesn't have an originId, so it is set before create
       const argObjs = [obj1, obj2, x3, x4, obj5, obj6, obj7, x8, obj9, obj10, obj11, obj12, obj13];

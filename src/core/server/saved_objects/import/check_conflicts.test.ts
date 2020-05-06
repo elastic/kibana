@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { mockUuidv4 } from './__mocks__';
 import {
   SavedObjectsClientContract,
   SavedObjectReference,
@@ -460,6 +461,9 @@ describe('#getImportIdMapForRetries', () => {
   ): SavedObjectsImportRetry => {
     return { type, id, overwrite: true, idToOverwrite, replaceReferences: [] };
   };
+  const createDuplicateRetry = (obj: { type: string; id: string }): SavedObjectsImportRetry => {
+    return { type: obj.type, id: obj.id, overwrite: false, duplicate: true, replaceReferences: [] };
+  };
 
   test('returns expected results', async () => {
     const obj1 = createObject(OTHER_TYPE, 'id-1');
@@ -468,7 +472,9 @@ describe('#getImportIdMapForRetries', () => {
     const obj4 = createObject(MULTI_NS_TYPE, 'id-4');
     const obj5 = createObject(MULTI_NS_TYPE, 'id-5');
     const obj6 = createObject(MULTI_NS_TYPE, 'id-6');
-    const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
+    const obj7 = createObject(OTHER_TYPE, 'id-7');
+    const obj8 = createObject(MULTI_NS_TYPE, 'id-8');
+    const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8];
     const retries = [
       // all three overwrite retries for non-multi-namespace types are ignored;
       // retries for non-multi-namespace these should not have `idToOverwrite` specified, but we test it here for posterity
@@ -478,10 +484,20 @@ describe('#getImportIdMapForRetries', () => {
       createOverwriteRetry(obj4), // retries that do not have `idToOverwrite` specified are ignored
       createOverwriteRetry(obj5, obj5.id), // retries that have `id` that matches `idToOverwrite` are ignored
       createOverwriteRetry(obj6, 'id-Y'), // this retry will get added to the `importIdMap`!
+      createDuplicateRetry(obj7), // this retry will get added to the `importIdMap`!
+      createDuplicateRetry(obj8), // this retry will get added to the `importIdMap`!
     ];
     const options = setupOptions(retries);
+    mockUuidv4.mockReturnValueOnce(`new-id-for-${obj7.id}`);
+    mockUuidv4.mockReturnValueOnce(`new-id-for-${obj8.id}`);
 
     const checkConflictsResult = await getImportIdMapForRetries(objects, options);
-    expect(checkConflictsResult).toEqual(new Map([[`${obj6.type}:${obj6.id}`, { id: 'id-Y' }]]));
+    expect(checkConflictsResult).toEqual(
+      new Map([
+        [`${obj6.type}:${obj6.id}`, { id: 'id-Y' }],
+        [`${obj7.type}:${obj7.id}`, { id: `new-id-for-${obj7.id}`, omitOriginId: true }],
+        [`${obj8.type}:${obj8.id}`, { id: `new-id-for-${obj8.id}`, omitOriginId: true }],
+      ])
+    );
   });
 });

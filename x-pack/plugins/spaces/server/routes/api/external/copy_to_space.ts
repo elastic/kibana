@@ -107,11 +107,14 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                   id: schema.string(),
                   overwrite: schema.boolean({ defaultValue: false }),
                   idToOverwrite: schema.maybe(schema.string()),
+                  duplicate: schema.boolean({ defaultValue: false }),
                 },
                 {
                   validate: (object) => {
                     if (object.idToOverwrite && !object.overwrite) {
                       return 'cannot use [idToOverwrite] without [overwrite]';
+                    } else if (object.overwrite && object.duplicate) {
+                      return 'cannot use [overwrite] with [duplicate]';
                     }
                   },
                 }
