@@ -6,8 +6,8 @@
 
 import React from 'react';
 
-import '../../test_utils/mock_rr_usehistory';
-import { mountWithKibanaContext } from '../../test_utils';
+import '../../__mocks__/react_router_history.mock';
+import { mountWithKibanaContext } from '../../__mocks__';
 
 jest.mock('./generate_breadcrumbs', () => ({ appSearchBreadcrumbs: jest.fn() }));
 import { appSearchBreadcrumbs, SetAppSearchBreadcrumbs } from './';
