@@ -34,7 +34,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
   }
   else if (action.type === 'appRequestedRelatedEventData') {
-    const evt = action.payload[0];
+    const evt = action.payload;
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     if(statsMap){
       const currentStatsMap = new Map(statsMap);

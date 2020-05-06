@@ -84,13 +84,13 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      */
     if (action.type === 'appRequestedRelatedEventData') {
       //An array, but assume it has a length of 1 
-      const id = event.entityId(action.payload[0]);
+      const id = event.entityId(action.payload);
       if(typeof context !== 'undefined') {
         const httpGetter = context.services.http.get;
         async function* getEachRelatedEventsResult(eventsToFetch: ResolverEvent[]) {
-          for (const evt of eventsToFetch){
+          for (const eventToRqueryForRelateds of eventsToFetch){
             //Tried with generic event.entityId() : no joy on results
-            yield [evt, await Promise.all([
+            yield [eventToRqueryForRelateds, await Promise.all([
               httpGetter(`/api/endpoint/resolver/${id}/events`, {
                 query: {events: 100},
               }),
@@ -98,7 +98,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             ]
           }
         }
-        for await (const results of getEachRelatedEventsResult([action.payload[0]])){
+        for await (const results of getEachRelatedEventsResult([action.payload])){
             const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
             const baseEvent = results[0] as unknown as ResolverEvent;
             const fetchedResults = (results[1] as unknown as {events: ResolverEvent[]}[])

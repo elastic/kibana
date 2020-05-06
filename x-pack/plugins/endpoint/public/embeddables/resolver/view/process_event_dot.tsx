@@ -374,7 +374,7 @@ export const ProcessEventDot = styled(
         () => {
           dispatch({
             type: 'appRequestedRelatedEventData',
-            payload: [event, selfId]
+            payload: event
           });
         },
         [dispatch, event, selfId]
