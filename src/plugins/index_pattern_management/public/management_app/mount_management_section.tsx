@@ -24,7 +24,6 @@ import { HashRouter, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
-import { IIndexPattern } from 'src/plugins/data/public';
 
 import { ManagementAppMountParams } from '../../../management/public';
 import {
