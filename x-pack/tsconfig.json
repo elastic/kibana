@@ -26,9 +26,6 @@
       "plugins/xpack_main/*": [
         "x-pack/legacy/plugins/xpack_main/public/*"
       ],
-      "plugins/security/*": [
-        "x-pack/legacy/plugins/security/public/*"
-      ],
       "plugins/spaces/*": [
         "x-pack/legacy/plugins/spaces/public/*"
       ],

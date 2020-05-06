@@ -8,18 +8,22 @@ import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import {
+  deepFreeze,
   ICustomClusterClient,
   CoreSetup,
+  CoreStart,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
-import { Authorization, setupAuthorization } from './authorization';
+import { AuthorizationService, AuthorizationServiceSetup } from './authorization';
 import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
@@ -31,8 +35,6 @@ export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
 >;
-
-export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -58,7 +60,7 @@ export interface SecurityPluginSetup {
     | 'grantAPIKeyAsInternalUser'
     | 'invalidateAPIKeyAsInternalUser'
   >;
-  authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  authz: Pick<AuthorizationServiceSetup, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
   license: SecurityLicense;
 
   /**
@@ -71,15 +73,16 @@ export interface SecurityPluginSetup {
    */
   registerSpacesService: (service: SpacesService) => void;
 
-  __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-    registerPrivilegesWithCluster: () => void;
-  };
+  __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
 }
 
 export interface PluginSetupDependencies {
-  features: FeaturesService;
+  features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
+}
+
+export interface PluginStartDependencies {
+  features: FeaturesPluginStart;
 }
 
 /**
@@ -90,6 +93,7 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+  private readonly authorizationService = new AuthorizationService();
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -145,15 +149,17 @@ export class Plugin {
       loggers: this.initializerContext.logger,
     });
 
-    const authz = await setupAuthorization({
+    const authz = this.authorizationService.setup({
       http: core.http,
+      capabilities: core.capabilities,
+      status: core.status,
       clusterClient: this.clusterClient,
       license,
       loggers: this.initializerContext.logger,
       kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
-      featuresService: features,
+      features,
     });
 
     setupSavedObjects({
@@ -162,8 +168,6 @@ export class Plugin {
       savedObjects: core.savedObjects,
       getSpacesService: this.getSpacesService,
     });
-
-    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
 
     defineRoutes({
       router: core.http.createRouter(),
@@ -204,16 +208,13 @@ export class Plugin {
         this.spacesService = service;
       },
 
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
-
-        registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
-      },
+      __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
     });
   }
 
-  public start() {
+  public start(core: CoreStart, { features }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
+    this.authorizationService.start({ features, clusterClient: this.clusterClient! });
   }
 
   public stop() {
@@ -228,6 +229,8 @@ export class Plugin {
       this.securityLicenseService.stop();
       this.securityLicenseService = undefined;
     }
+
+    this.authorizationService.stop();
   }
 
   private wasSpacesServiceAccessed() {

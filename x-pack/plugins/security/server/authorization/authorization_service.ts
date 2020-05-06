@@ -5,14 +5,25 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { combineLatest, Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
-  CoreSetup,
   LoggerFactory,
   KibanaRequest,
   IClusterClient,
+  ServiceStatusLevels,
+  Logger,
+  StatusServiceSetup,
+  HttpServiceSetup,
+  CapabilitiesSetup,
 } from '../../../../../src/core/server';
 
-import { FeaturesService, SpacesService } from '../plugin';
+import {
+  PluginSetupContract as FeaturesPluginSetup,
+  PluginStartContract as FeaturesPluginStart,
+} from '../../../features/server';
+
+import { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { CheckPrivilegesWithRequest, checkPrivilegesWithRequestFactory } from './check_privileges';
 import {
@@ -38,18 +49,25 @@ export { Actions } from './actions';
 export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 export { featurePrivilegeIterator } from './privileges';
 
-interface SetupAuthorizationParams {
+interface AuthorizationServiceSetupParams {
   packageVersion: string;
-  http: CoreSetup['http'];
+  http: HttpServiceSetup;
+  status: StatusServiceSetup;
+  capabilities: CapabilitiesSetup;
   clusterClient: IClusterClient;
   license: SecurityLicense;
   loggers: LoggerFactory;
-  featuresService: FeaturesService;
+  features: FeaturesPluginSetup;
   kibanaIndexName: string;
   getSpacesService(): SpacesService | undefined;
 }
 
-export interface Authorization {
+interface AuthorizationServiceStartParams {
+  features: FeaturesPluginStart;
+  clusterClient: IClusterClient;
+}
+
+export interface AuthorizationServiceSetup {
   actions: Actions;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
@@ -57,81 +75,116 @@ export interface Authorization {
   applicationName: string;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
-  disableUnauthorizedCapabilities: (
-    request: KibanaRequest,
-    capabilities: UICapabilities
-  ) => Promise<UICapabilities>;
-  registerPrivilegesWithCluster: () => Promise<void>;
 }
 
-export function setupAuthorization({
-  http,
-  packageVersion,
-  clusterClient,
-  license,
-  loggers,
-  featuresService,
-  kibanaIndexName,
-  getSpacesService,
-}: SetupAuthorizationParams): Authorization {
-  const actions = new Actions(packageVersion);
-  const mode = authorizationModeFactory(license);
-  const applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
-  const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
-    actions,
+export class AuthorizationService {
+  private logger!: Logger;
+  private license!: SecurityLicense;
+  private status!: StatusServiceSetup;
+  private applicationName!: string;
+  private privileges!: PrivilegesService;
+
+  private statusSubscription?: Subscription;
+
+  setup({
+    http,
+    capabilities,
+    status,
+    packageVersion,
     clusterClient,
-    applicationName
-  );
-  const privileges = privilegesFactory(actions, featuresService, license);
-  const logger = loggers.get('authorization');
+    license,
+    loggers,
+    features,
+    kibanaIndexName,
+    getSpacesService,
+  }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
+    this.logger = loggers.get('authorization');
+    this.license = license;
+    this.status = status;
+    this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
-  const authz = {
-    actions,
-    applicationName,
-    checkPrivilegesWithRequest,
-    checkPrivilegesDynamicallyWithRequest: checkPrivilegesDynamicallyWithRequestFactory(
+    const mode = authorizationModeFactory(license);
+    const actions = new Actions(packageVersion);
+    this.privileges = privilegesFactory(actions, features, license);
+
+    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+      actions,
+      clusterClient,
+      this.applicationName
+    );
+
+    const authz = {
+      actions,
+      applicationName: this.applicationName,
+      mode,
+      privileges: this.privileges,
       checkPrivilegesWithRequest,
-      getSpacesService
-    ),
-    checkSavedObjectsPrivilegesWithRequest: checkSavedObjectsPrivilegesWithRequestFactory(
-      checkPrivilegesWithRequest,
-      getSpacesService
-    ),
-    mode,
-    privileges,
+      checkPrivilegesDynamicallyWithRequest: checkPrivilegesDynamicallyWithRequestFactory(
+        checkPrivilegesWithRequest,
+        getSpacesService
+      ),
+      checkSavedObjectsPrivilegesWithRequest: checkSavedObjectsPrivilegesWithRequestFactory(
+        checkPrivilegesWithRequest,
+        getSpacesService
+      ),
+    };
 
-    async disableUnauthorizedCapabilities(request: KibanaRequest, capabilities: UICapabilities) {
-      // If we have a license which doesn't enable security, or we're a legacy user we shouldn't
-      // disable any ui capabilities
-      if (!mode.useRbacForRequest(request)) {
-        return capabilities;
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest, uiCapabilities: UICapabilities) => {
+        // If we have a license which doesn't enable security, or we're a legacy user we shouldn't
+        // disable any ui capabilities
+        if (!mode.useRbacForRequest(request)) {
+          return uiCapabilities;
+        }
+
+        const disableUICapabilities = disableUICapabilitiesFactory(
+          request,
+          features.getFeatures(),
+          this.logger,
+          authz
+        );
+
+        if (!request.auth.isAuthenticated) {
+          return disableUICapabilities.all(uiCapabilities);
+        }
+
+        return await disableUICapabilities.usingPrivileges(uiCapabilities);
       }
+    );
 
-      const disableUICapabilities = disableUICapabilitiesFactory(
-        request,
-        featuresService.getFeatures(),
-        logger,
-        authz
-      );
+    initAPIAuthorization(http, authz, loggers.get('api-authorization'));
+    initAppAuthorization(http, authz, loggers.get('app-authorization'), features);
 
-      if (!request.auth.isAuthenticated) {
-        return disableUICapabilities.all(capabilities);
-      }
+    return authz;
+  }
 
-      return await disableUICapabilities.usingPrivileges(capabilities);
-    },
+  start({ clusterClient, features }: AuthorizationServiceStartParams) {
+    // Register cluster privileges once Elasticsearch is available and Security plugin is enabled.
+    this.statusSubscription = combineLatest([this.status.core$, this.license.features$])
+      .pipe(
+        first(
+          ([status]) =>
+            this.license.isEnabled() && status.elasticsearch.level === ServiceStatusLevels.available
+        )
+      )
+      .subscribe(async () => {
+        const allFeatures = features.getFeatures();
+        validateFeaturePrivileges(allFeatures);
+        validateReservedPrivileges(allFeatures);
 
-    registerPrivilegesWithCluster: async () => {
-      const features = featuresService.getFeatures();
-      validateFeaturePrivileges(features);
-      validateReservedPrivileges(features);
+        await registerPrivilegesWithCluster(
+          this.logger,
+          this.privileges,
+          this.applicationName,
+          clusterClient
+        );
+      });
+  }
 
-      await registerPrivilegesWithCluster(logger, privileges, applicationName, clusterClient);
-    },
-  };
-
-  initAPIAuthorization(http, authz, loggers.get('api-authorization'));
-  initAppAuthorization(http, authz, loggers.get('app-authorization'), featuresService);
-
-  return authz;
+  stop() {
+    if (this.statusSubscription !== undefined) {
+      this.statusSubscription.unsubscribe();
+      this.statusSubscription = undefined;
+    }
+  }
 }

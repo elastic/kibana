@@ -23,9 +23,10 @@
   }
 
   &:focus {
+    @include euiFocusRing;
+
     border-color: transparent;
     border-radius: $euiBorderRadius;
-    @include euiFocusRing;
 
     .secLoginCard__title {
       text-decoration: underline;

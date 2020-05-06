@@ -51,7 +51,6 @@ describe('Security Plugin', () => {
               Object {
                 "__legacyCompat": Object {
                   "registerLegacyAPI": [Function],
-                  "registerPrivilegesWithCluster": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],

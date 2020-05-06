@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, Logger } from '../../../../../src/core/server';
-import { Authorization } from '.';
+import { HttpServiceSetup, Logger } from '../../../../../src/core/server';
+import { AuthorizationServiceSetup } from '.';
 
 export function initAPIAuthorization(
-  http: CoreSetup['http'],
-  { actions, checkPrivilegesDynamicallyWithRequest, mode }: Authorization,
+  http: HttpServiceSetup,
+  { actions, checkPrivilegesDynamicallyWithRequest, mode }: AuthorizationServiceSetup,
   logger: Logger
 ) {
   http.registerOnPostAuth(async (request, response, toolkit) => {

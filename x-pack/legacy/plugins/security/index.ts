@@ -7,28 +7,9 @@
 import { Root } from 'joi';
 import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
-import { KibanaRequest, LegacyRequest } from '../../../../src/core/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
-// @ts-ignore
-import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { AuthenticatedUser, SecurityPluginSetup } from '../../../plugins/security/server';
-
-/**
- * Public interface of the security plugin.
- */
-export interface SecurityPlugin {
-  getUser: (request: LegacyRequest) => Promise<AuthenticatedUser>;
-}
-
-function getSecurityPluginSetup(server: Server) {
-  const securityPlugin = server.newPlatform.setup.plugins.security as SecurityPluginSetup;
-  if (!securityPlugin) {
-    throw new Error('Kibana Platform Security plugin is not available.');
-  }
-
-  return securityPlugin;
-}
+import { SecurityPluginSetup } from '../../../plugins/security/server';
 
 export const security = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -55,17 +36,11 @@ export const security = (kibana: Record<string, any>) =>
       },
     },
 
-    async postInit(server: Server) {
-      watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-        const xpackInfo = server.plugins.xpack_main.info;
-        if (xpackInfo.isAvailable() && xpackInfo.feature('security').isEnabled()) {
-          await getSecurityPluginSetup(server).__legacyCompat.registerPrivilegesWithCluster();
-        }
-      });
-    },
-
     async init(server: Server) {
-      const securityPlugin = getSecurityPluginSetup(server);
+      const securityPlugin = server.newPlatform.setup.plugins.security as SecurityPluginSetup;
+      if (!securityPlugin) {
+        throw new Error('Kibana Platform Security plugin is not available.');
+      }
 
       const xpackInfo = server.plugins.xpack_main.info;
       securityPlugin.__legacyCompat.registerLegacyAPI({
@@ -79,10 +54,5 @@ export const security = (kibana: Record<string, any>) =>
       xpackInfo
         .feature(this.id)
         .registerLicenseCheckResultsGenerator(() => securityPlugin.license.getFeatures());
-
-      server.expose({
-        getUser: async (request: LegacyRequest) =>
-          securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),
-      });
     },
   });

@@ -10,13 +10,13 @@ import { KibanaRequest, Logger } from '../../../../../src/core/server';
 import { Feature } from '../../../features/server';
 
 import { CheckPrivilegesResponse } from './check_privileges';
-import { Authorization } from './index';
+import { AuthorizationServiceSetup } from '.';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,
   features: Feature[],
   logger: Logger,
-  authz: Authorization
+  authz: AuthorizationServiceSetup
 ) {
   const featureNavLinkIds = features
     .map(feature => feature.navLinkId)

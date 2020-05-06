@@ -8,6 +8,7 @@
 
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 import { LicenseType } from '../../../../common/constants/security';
 
 export const internalAuthData = Symbol('internalAuthData');
@@ -39,6 +40,11 @@ export interface BackendFrameworkAdapter {
 }
 
 export interface KibanaLegacyServer {
+  newPlatform: {
+    setup: {
+      plugins: { security: SecurityPluginSetup };
+    };
+  };
   plugins: {
     xpack_main: {
       status: {
@@ -52,9 +58,6 @@ export interface KibanaLegacyServer {
           version: string;
         };
       };
-    };
-    security: {
-      getUser: (request: KibanaServerRequest) => any;
     };
     elasticsearch: {
       status: {
