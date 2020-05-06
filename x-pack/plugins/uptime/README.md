@@ -81,7 +81,7 @@ We can run these tests like described above, but with some special config.
 We maintain a suite of Accessibility tests (you may see them referred to elsewhere as `a11y` tests).
 
 These tests render each of our pages and ensure that the inputs and other elements contain the
-attributes necessary to ensure all our users are able to make use of Kibana (for example, users relying
+attributes necessary to ensure all users are able to make use of Kibana (for example, users relying
 on screen readers).
 
 The commands for running these tests are very similar to the other functional tests described above.
