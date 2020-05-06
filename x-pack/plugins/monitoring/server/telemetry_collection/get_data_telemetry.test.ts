@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getIngestSolutions } from './get_ingest_solutions';
+import { getDataTelemetry } from './get_data_telemetry';
 
 function mockCallCluster(docs: any[] = []) {
   return jest.fn().mockImplementation(async (method: string, options) => {
@@ -21,13 +21,13 @@ function mockCallCluster(docs: any[] = []) {
 describe('get_ingest_solutions', () => {
   test('it returns an empty document when no cluster UUIDs provided', async () => {
     await expect(
-      getIngestSolutions(mockCallCluster(), [], Date.now(), Date.now(), 10)
+      getDataTelemetry(mockCallCluster(), [], Date.now(), Date.now(), 10)
     ).resolves.toStrictEqual({});
   });
 
   test('it returns the base document because no docs found', async () => {
     await expect(
-      getIngestSolutions(mockCallCluster(), ['cluster-1', 'cluster-2'], Date.now(), Date.now(), 10)
+      getDataTelemetry(mockCallCluster(), ['cluster-1', 'cluster-2'], Date.now(), Date.now(), 10)
     ).resolves.toStrictEqual({ 'cluster-1': {}, 'cluster-2': {} });
   });
 
@@ -41,10 +41,10 @@ describe('get_ingest_solutions', () => {
     }));
 
     await expect(
-      getIngestSolutions(mockCallCluster(indices), ['cluster-1'], Date.now(), Date.now(), 10)
+      getDataTelemetry(mockCallCluster(indices), ['cluster-1'], Date.now(), Date.now(), 10)
     ).resolves.toStrictEqual({
       'cluster-1': {
-        data_providers: {
+        shippers: {
           logs: { index_count: 4, doc_count: 400, size_in_bytes: 40 },
         },
       },

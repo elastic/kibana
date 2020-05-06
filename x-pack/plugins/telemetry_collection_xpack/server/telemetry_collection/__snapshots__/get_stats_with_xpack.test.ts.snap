@@ -1,13 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Telemetry Collection: Get Aggregated Stats OSS-like telemetry (no license nor X-Pack telemetry) 1`] = `
+exports[
+  `Telemetry Collection: Get Aggregated Stats OSS-like telemetry (no license nor X-Pack telemetry) 1`
+] = `
 Object {
   "cluster_name": "test",
   "cluster_stats": Object {},
   "cluster_uuid": "test",
   "collection": "local",
   "stack_stats": Object {
-    "ingest_solutions": Any<Object>,
+    "data": Any<Object>,
     "kibana": Object {
       "count": 1,
       "great": "googlymoogly",
@@ -65,7 +67,7 @@ Object {
   "cluster_uuid": "test",
   "collection": "local",
   "stack_stats": Object {
-    "ingest_solutions": Any<Object>,
+    "data": Any<Object>,
     "kibana": Object {
       "count": 1,
       "great": "googlymoogly",

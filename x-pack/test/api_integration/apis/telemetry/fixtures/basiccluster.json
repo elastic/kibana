@@ -174,8 +174,8 @@
       "apm": {
         "found": true
       },
-      "ingest_solutions": {
-        "data_providers": {
+      "data": {
+        "shippers": {
           "apm": { "doc_count": 1, "index_count": 1, "size_in_bytes": 5136 }
         }
       },

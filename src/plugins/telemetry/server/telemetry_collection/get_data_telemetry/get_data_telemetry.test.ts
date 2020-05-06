@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { buildIngestSolutionsPayload, getIngestSolutions } from './ingest_solutions';
+import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 
-describe('ingest_solutions', () => {
+describe('get_data_telemetry', () => {
   describe('buildIngestSolutionsPayload', () => {
     test('return the base object when no indices provided', () => {
-      expect(buildIngestSolutionsPayload([])).toStrictEqual({});
+      expect(buildDataTelemetryPayload([])).toStrictEqual({});
     });
 
     test('return the base object when no matching indices provided', () => {
       expect(
-        buildIngestSolutionsPayload([
+        buildDataTelemetryPayload([
           { name: 'no-way-this-can_match_anything', sizeInBytes: 10 },
           { name: '.kibana-event-log-8.0.0' },
         ])
@@ -36,7 +36,7 @@ describe('ingest_solutions', () => {
 
     test('matches some indices and puts them in their own category', () => {
       expect(
-        buildIngestSolutionsPayload([
+        buildDataTelemetryPayload([
           { name: 'apm-1234' },
           { name: 'apm-5677' },
           { name: 'filebeat-12314', docCount: 100, sizeInBytes: 10 },
@@ -47,7 +47,7 @@ describe('ingest_solutions', () => {
           { name: '.app-search-1234', docCount: 0 },
         ])
       ).toStrictEqual({
-        data_providers: {
+        shippers: {
           apm: { index_count: 2 },
           filebeat: { index_count: 1, doc_count: 100, size_in_bytes: 10 },
           metricbeat: { index_count: 1, ecs_index_count: 0, doc_count: 100, size_in_bytes: 10 },
@@ -61,13 +61,13 @@ describe('ingest_solutions', () => {
   describe('getIngestSolutions', () => {
     test('it returns the base payload (all 0s) because no indices are found', async () => {
       const callCluster = mockCallCluster();
-      await expect(getIngestSolutions(callCluster)).resolves.toStrictEqual({});
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({});
     });
 
     test('can only see the index in the state, but not the stats', async () => {
       const callCluster = mockCallCluster(['filebeat-12314']);
-      await expect(getIngestSolutions(callCluster)).resolves.toStrictEqual({
-        data_providers: {
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({
+        shippers: {
           filebeat: { index_count: 1, ecs_index_count: 0 },
         },
       });
@@ -79,8 +79,8 @@ describe('ingest_solutions', () => {
           'filebeat-12314': { total: { docs: { count: 100 }, store: { size_in_bytes: 10 } } },
         },
       });
-      await expect(getIngestSolutions(callCluster)).resolves.toStrictEqual({
-        data_providers: {
+      await expect(getDataTelemetry(callCluster)).resolves.toStrictEqual({
+        shippers: {
           filebeat: { index_count: 1, ecs_index_count: 1, doc_count: 100, size_in_bytes: 10 },
         },
       });

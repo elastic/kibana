@@ -18,24 +18,24 @@
  */
 
 import { APICaller } from 'kibana/server';
-import { INGEST_SOLUTIONS } from './constants';
+import { DATA_SHIPPERS } from './constants';
 
-type TechnologyDataProviders = typeof INGEST_SOLUTIONS[number]['name'];
+type DataShippersName = typeof DATA_SHIPPERS[number]['name'];
 
-export interface IngestSolutionProviderPayload {
+export interface DataTelemetryShipperPayload {
   index_count: number;
   ecs_index_count?: number;
   doc_count?: number;
   size_in_bytes?: number;
 }
 
-export interface IngestSolutionsPayload {
-  data_providers: {
-    [key in TechnologyDataProviders]?: IngestSolutionProviderPayload;
+export interface DataTelemetryPayload {
+  shippers: {
+    [key in DataShippersName]?: DataTelemetryShipperPayload;
   };
 }
 
-export interface IngestSolutionsIndex {
+export interface DataTelemetryIndex {
   name: string;
   isECS?: boolean; // Optional because it can't be obtained via Monitoring.
 
@@ -45,8 +45,8 @@ export interface IngestSolutionsIndex {
   sizeInBytes?: number;
 }
 
-function findMatchingTechnology(indexName: string) {
-  return INGEST_SOLUTIONS.find(({ pattern }) => {
+function findMatchingShipper(indexName: string) {
+  return DATA_SHIPPERS.find(({ pattern }) => {
     if (!pattern.startsWith('.') && indexName.startsWith('.')) {
       // avoid system indices caught by very fuzzy index patters (i.e.: *log* would catch `.kibana-log-...`)
       return false;
@@ -56,8 +56,8 @@ function findMatchingTechnology(indexName: string) {
 }
 
 function increaseCounters(
-  previousValue: IngestSolutionProviderPayload = { index_count: 0 },
-  { isECS, docCount, sizeInBytes }: IngestSolutionsIndex
+  previousValue: DataTelemetryShipperPayload = { index_count: 0 },
+  { isECS, docCount, sizeInBytes }: DataTelemetryIndex
 ) {
   return {
     ...previousValue,
@@ -76,10 +76,8 @@ function increaseCounters(
   };
 }
 
-export function buildIngestSolutionsPayload(
-  indices: IngestSolutionsIndex[]
-): IngestSolutionsPayload {
-  const startingDotPatternsUntilTheFirstAsterisk = INGEST_SOLUTIONS.map(({ pattern }) =>
+export function buildDataTelemetryPayload(indices: DataTelemetryIndex[]): DataTelemetryPayload {
+  const startingDotPatternsUntilTheFirstAsterisk = DATA_SHIPPERS.map(({ pattern }) =>
     pattern.replace(/^\.(.+)\*.*$/g, '.$1')
   ).filter(Boolean);
 
@@ -93,21 +91,21 @@ export function buildIngestSolutionsPayload(
   );
 
   return indexCandidates.reduce((acc, indexCandidate) => {
-    const matchingTechnology = findMatchingTechnology(indexCandidate.name);
+    const matchingShipper = findMatchingShipper(indexCandidate.name);
 
-    if (!matchingTechnology) {
+    if (!matchingShipper) {
       return acc;
     }
-    const { name } = matchingTechnology;
-    const dataProviders = acc.data_providers || {};
+    const { name } = matchingShipper;
+    const dataShippers = acc.shippers || {};
     return {
       ...acc,
-      data_providers: {
-        ...dataProviders,
-        [name]: increaseCounters(dataProviders[name], indexCandidate),
+      shippers: {
+        ...dataShippers,
+        [name]: increaseCounters(dataShippers[name], indexCandidate),
       },
     };
-  }, {} as IngestSolutionsPayload);
+  }, {} as DataTelemetryPayload);
 }
 
 interface IndexStats {
@@ -150,9 +148,9 @@ interface ClusterState {
   };
 }
 
-export async function getIngestSolutions(callCluster: APICaller) {
+export async function getDataTelemetry(callCluster: APICaller) {
   try {
-    const index = INGEST_SOLUTIONS.map(({ pattern }) => pattern);
+    const index = DATA_SHIPPERS.map(({ pattern }) => pattern);
     const [state, indexStats]: [ClusterState, IndexStats] = await Promise.all([
       // GET _cluster/state/metadata/<index>?filter_path=metadata.indices.*.version
       callCluster<ClusterState>('cluster.state', {
@@ -190,7 +188,7 @@ export async function getIngestSolutions(callCluster: APICaller) {
       }
       return { name, isECS };
     });
-    return buildIngestSolutionsPayload(indices);
+    return buildDataTelemetryPayload(indices);
   } catch (e) {
     return {};
   }

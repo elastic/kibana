@@ -81,16 +81,14 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.csp.warnLegacyBrowsers).to.be(true);
       expect(stats.stack_stats.kibana.plugins.csp.rulesChangedFromDefault).to.be(false);
 
-      // Testing ingest_solutions this to make sure Cluster State API doesn't change its response
-      expect(stats.stack_stats.ingest_solutions).to.be.an('object');
-      expect(stats.stack_stats.ingest_solutions.data_providers).to.be.an('object');
-      expect(stats.stack_stats.ingest_solutions.data_providers.logs).to.be.an('object');
-      expect(stats.stack_stats.ingest_solutions.data_providers.logs.index_count).to.be(1);
-      expect(stats.stack_stats.ingest_solutions.data_providers.logs.doc_count).to.be(0);
-      expect(stats.stack_stats.ingest_solutions.data_providers.logs.ecs_index_count).to.be(0);
-      expect(
-        stats.stack_stats.ingest_solutions.data_providers.logs.size_in_bytes
-      ).to.be.greaterThan(0);
+      // Testing data.shippers this to make sure Cluster State API doesn't change its response
+      expect(stats.stack_stats.data).to.be.an('object');
+      expect(stats.stack_stats.data.shippers).to.be.an('object');
+      expect(stats.stack_stats.data.shippers.logs).to.be.an('object');
+      expect(stats.stack_stats.data.shippers.logs.index_count).to.be(1);
+      expect(stats.stack_stats.data.shippers.logs.doc_count).to.be(0);
+      expect(stats.stack_stats.data.shippers.logs.ecs_index_count).to.be(0);
+      expect(stats.stack_stats.data.shippers.logs.size_in_bytes).to.be.greaterThan(0);
     });
 
     it('should pull local stats and validate fields', async () => {

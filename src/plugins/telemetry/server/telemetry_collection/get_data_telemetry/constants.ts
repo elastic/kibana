@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export const INGEST_SOLUTIONS_ID = 'ingest_solutions';
+export const DATA_TELEMETRY_ID = 'data';
 
 // TODO: Ideally this list should be updated from an external public URL (similar to the newsfeed)
 // But it's good to have a minimum list shipped with the build.
-export const INGEST_SOLUTIONS = [
+export const DATA_SHIPPERS = [
   // Security - Elastic
   { name: 'auditbeat', pattern: 'auditbeat-*' },
   { name: 'winlogbeat', pattern: 'winlogbeat-*' },

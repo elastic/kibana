@@ -47,8 +47,8 @@ export {
   getLocalLicense,
   getLocalStats,
   TelemetryLocalStats,
-  INGEST_SOLUTIONS_ID,
-  IngestSolutionsIndex,
-  IngestSolutionsPayload,
-  buildIngestSolutionsPayload,
+  DATA_TELEMETRY_ID,
+  DataTelemetryIndex,
+  DataTelemetryPayload,
+  buildDataTelemetryPayload,
 } from './telemetry_collection';

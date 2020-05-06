@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export { INGEST_SOLUTIONS_ID } from './constants';
+export { DATA_TELEMETRY_ID } from './constants';
 
 export {
-  IngestSolutionsIndex,
-  IngestSolutionsPayload,
-  getIngestSolutions,
-  buildIngestSolutionsPayload,
-} from './ingest_solutions';
+  DataTelemetryIndex,
+  DataTelemetryPayload,
+  getDataTelemetry,
+  buildDataTelemetryPayload,
+} from './get_data_telemetry';

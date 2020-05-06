@@ -10,8 +10,8 @@ import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/
 import { buildGetIndicesQuery } from '../lib/elasticsearch/indices';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import {
-  buildIngestSolutionsPayload,
-  IngestSolutionsIndex,
+  buildDataTelemetryPayload,
+  DataTelemetryIndex,
 } from '../../../../../src/plugins/telemetry/server/';
 
 interface IndexStatsSearchResponse {
@@ -31,16 +31,16 @@ interface IndexStatsSearchResponse {
 }
 
 export function handleResponse(response: SearchResponse<IndexStatsSearchResponse>) {
-  const reducedIndices: IngestSolutionsIndex[] = (response.hits?.hits || []).map(({ _source }) => ({
+  const reducedIndices: DataTelemetryIndex[] = (response.hits?.hits || []).map(({ _source }) => ({
     name: _source.index_stats.index,
     docCount: _source.index_stats.primaries.docs.count,
     sizeInBytes: _source.index_stats.total.store.size_in_bytes,
   }));
 
-  return buildIngestSolutionsPayload(reducedIndices);
+  return buildDataTelemetryPayload(reducedIndices);
 }
 
-export async function getIngestSolutions(
+export async function getDataTelemetry(
   callCluster: StatsCollectionConfig['callCluster'],
   clusterUuids: string[],
   start: StatsCollectionConfig['start'],
