@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart } from '../../../../../src/core/public';
+import { Observable } from 'rxjs';
+import { CoreSetup, CoreStart, AppUpdater } from '../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
@@ -15,7 +16,7 @@ export type CanvasServiceFactory<Service> = (
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
-  appUpdater: any
+  appUpdater: Observable<AppUpdater>
 ) => Service;
 
 class CanvasServiceProvider<Service> {
@@ -31,7 +32,7 @@ class CanvasServiceProvider<Service> {
     coreStart: CoreStart,
     canvasSetupPlugins: CanvasSetupDeps,
     canvasStartPlugins: CanvasStartDeps,
-    appUpdater: any
+    appUpdater: Observable<AppUpdater>
   ) {
     this.service = this.factory(
       coreSetup,

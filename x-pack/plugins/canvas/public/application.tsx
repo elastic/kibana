@@ -10,8 +10,9 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
+import { Observable } from 'rxjs';
 
-import { AppMountParameters, CoreStart, CoreSetup } from 'kibana/public';
+import { AppMountParameters, CoreStart, CoreSetup, AppUpdater } from 'kibana/public';
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
@@ -89,7 +90,7 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  navUpdater: any
+  navUpdater: Observable<AppUpdater>
 ) => {
   startServices(coreSetup, coreStart, setupPlugins, startPlugins, navUpdater);
 

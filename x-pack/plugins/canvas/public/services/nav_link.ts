@@ -5,7 +5,6 @@
  */
 
 import { CanvasServiceFactory } from '.';
-import { CoreStart, CoreSetup, CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { SESSIONSTORAGE_LASTPATH } from '../../common/lib/constants';
 
 interface NavLinkService {
