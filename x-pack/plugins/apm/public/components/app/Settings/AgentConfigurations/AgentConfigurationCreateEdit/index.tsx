@@ -86,6 +86,17 @@ export function AgentConfigurationCreateEdit({
     setNewConfig(getInitialNewConfig(existingConfig));
   }, [existingConfig]);
 
+  useEffect(
+    () => {
+      // cleanup settings when navigating to "choose-settings-step" to not save invalid configurations
+      if (pageStep === 'choose-settings-step' && !isEditMode) {
+        setNewConfig({ ...newConfig, settings: {} });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pageStep]
+  );
+
   useEffect(() => {
     // the user tried to edit the service of an existing config
     if (pageStep === 'choose-service-step' && isEditMode) {
@@ -100,7 +111,7 @@ export function AgentConfigurationCreateEdit({
     ) {
       setPage('choose-service-step');
     }
-  }, [isEditMode, newConfig, pageStep]);
+  }, [existingConfig, isEditMode, newConfig, pageStep]);
 
   const unsavedChanges = getUnsavedChanges({ newConfig, existingConfig });
 
