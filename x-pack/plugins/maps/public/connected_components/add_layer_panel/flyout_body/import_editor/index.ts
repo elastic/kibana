@@ -7,13 +7,14 @@
 import { connect } from 'react-redux';
 import { ImportEditor } from './view';
 
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../../../../reducers/non_serializable_instances';
 
-import { INDEXING_STAGE } from '../../../reducers/ui';
-import { updateIndexingStage } from '../../../actions/ui_actions';
-import { getIndexingStage } from '../../../selectors/ui_selectors';
+import { INDEXING_STAGE } from '../../../../reducers/ui';
+import { updateIndexingStage } from '../../../../actions/ui_actions';
+import { getIndexingStage } from '../../../../selectors/ui_selectors';
+import { MapStoreState } from '../../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     inspectorAdapters: getInspectorAdapters(state),
     isIndexingTriggered: getIndexingStage(state) === INDEXING_STAGE.TRIGGERED,
@@ -21,11 +22,11 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {
-  onIndexReady: indexReady =>
+  onIndexReady: (indexReady: boolean) =>
     indexReady ? updateIndexingStage(INDEXING_STAGE.READY) : updateIndexingStage(null),
   importSuccessHandler: () => updateIndexingStage(INDEXING_STAGE.SUCCESS),
   importErrorHandler: () => updateIndexingStage(INDEXING_STAGE.ERROR),
 };
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps)(ImportEditor);
-export { connectedFlyOut as ImportEditor };
+const connected = connect(mapStateToProps, mapDispatchToProps)(ImportEditor);
+export { connected as ImportEditor };

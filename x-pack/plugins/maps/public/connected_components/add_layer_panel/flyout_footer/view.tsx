@@ -14,6 +14,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+interface Props {
+  onClick: () => void;
+  showNextButton: boolean;
+  disableNextButton: boolean;
+  nextButtonText: string;
+  closeFlyout: () => void;
+  hasLayerSelected: boolean;
+  isLoading: boolean;
+}
+
 export const FlyoutFooter = ({
   onClick,
   showNextButton,
@@ -22,7 +32,7 @@ export const FlyoutFooter = ({
   closeFlyout,
   hasLayerSelected,
   isLoading,
-}) => {
+}: Props) => {
   const nextButton = showNextButton ? (
     <EuiButton
       data-test-subj="importFileButton"

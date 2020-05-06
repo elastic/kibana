@@ -28,3 +28,7 @@ export function getSpatialFiltersLayer(state: MapStoreState): IVectorLayer;
 
 export function getLayerList(state: MapStoreState): ILayer[];
 export function getFittableLayers(state: MapStoreState): ILayer[];
+
+export function getSelectedLayer(state: MapStoreState): ILayer | undefined;
+
+export function getMapColors(state: MapStoreState): string[];

@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './view';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import { clearTransientLayerStateAndCloseFlyout } from '../../../actions/map_actions';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   return {
     hasLayerSelected: !!selectedLayer,
@@ -17,7 +19,7 @@ function mapStateToProps(state = {}) {
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
     closeFlyout: () => dispatch(clearTransientLayerStateAndCloseFlyout()),
   };
