@@ -24,21 +24,21 @@ import {
   NotificationsStart,
   OverlayStart,
   IUiSettingsClient,
+  SavedObjectsClientContract,
 } from 'src/core/public';
 import { IndexPattern } from '../../../../../plugins/data/public';
 import { IndexPatternManagementStart } from '../..';
-import { IndexPatternTableItem } from '../types';
 
 import { EditIndexPattern } from '../edit_index_pattern';
 
 export interface EditIndexPatternContainerProps extends RouteComponentProps<{ id: string }> {
   getIndexPattern: (id: string) => Promise<IndexPattern>;
-  indexPatterns: IndexPatternTableItem[];
   config: IUiSettingsClient;
   services: {
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     overlays: OverlayStart;
+    savedObjectsClient: SavedObjectsClientContract;
     indexPatternManagement: IndexPatternManagementStart;
   };
 }
@@ -56,7 +56,6 @@ const EditIndexPatternCont: React.FC<EditIndexPatternContainerProps> = ({ ...pro
         indexPattern={indexPattern}
         services={props.services}
         config={props.config}
-        indexPatterns={props.indexPatterns}
       />
     );
   } else {

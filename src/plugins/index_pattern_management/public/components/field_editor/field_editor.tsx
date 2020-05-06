@@ -143,6 +143,7 @@ export interface FieldEdiorProps {
     toasts: NotificationsStart['toasts'];
     uiSettings: IUiSettingsClient;
     SearchBar: DataPublicPluginStart['ui']['SearchBar'];
+    indexPatterns: DataPublicPluginStart['indexPatterns'];
   };
 }
 

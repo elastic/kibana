@@ -37,7 +37,7 @@ import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig, IndexPatternManagementStart } from '../..';
 import { MatchedIndex } from './types';
 
-interface CreateIndexPatternWizardProps extends RouteComponentProps {
+export interface CreateIndexPatternWizardProps extends RouteComponentProps {
   services: {
     indexPatternCreation: IndexPatternManagementStart['creation'];
     es: DataPublicPluginStart['search']['__LEGACY']['esClient'];
