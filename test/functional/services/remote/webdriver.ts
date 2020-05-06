@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { delimiter } from 'path';
+import { delimiter, resolve } from 'path';
+import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
@@ -50,6 +51,13 @@ const certValidation: string = process.env.NODE_TLS_REJECT_UNAUTHORIZED as strin
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
+const downloadDir = resolve(__dirname, '../../../../target/functional-tests/downloads');
+const chromiumDownloadPrefs = {
+  prefs: {
+    'download.default_directory': downloadDir,
+    'download.prompt_for_download': false,
+  },
+};
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -112,6 +120,7 @@ async function attemptToCreateCommand(
         chromeCapabilities.set('goog:chromeOptions', {
           w3c: true,
           args: chromeOptions,
+          ...chromiumDownloadPrefs,
         });
         chromeCapabilities.set('unexpectedAlertBehaviour', 'accept');
         chromeCapabilities.set('goog:loggingPrefs', { browser: 'ALL' });
@@ -150,6 +159,10 @@ async function attemptToCreateCommand(
           edgeOptions.setEdgeChromium(true);
           // @ts-ignore internal modules are not typed
           edgeOptions.setBinaryPath(edgePaths.browserPath);
+          const options = edgeOptions.get('ms:edgeOptions');
+          // overriding options to include preferences
+          Object.assign(options, chromiumDownloadPrefs);
+          edgeOptions.set('ms:edgeOptions', options);
           const session = await new Builder()
             .forBrowser('MicrosoftEdge')
             .setEdgeOptions(edgeOptions)
@@ -185,6 +198,14 @@ async function attemptToCreateCommand(
         firefoxOptions.set('moz:firefoxOptions', {
           prefs: { 'devtools.console.stdout.content': true },
         });
+        firefoxOptions.setPreference('browser.download.folderList', 2);
+        firefoxOptions.setPreference('browser.download.manager.showWhenStarting', false);
+        firefoxOptions.setPreference('browser.download.dir', downloadDir);
+        firefoxOptions.setPreference(
+          'browser.helperApps.neverAsk.saveToDisk',
+          'application/comma-separated-values, text/csv, text/plain'
+        );
+
         if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
@@ -307,6 +328,11 @@ export async function initWebDriver(
 
     log.verbose(entry.message);
   });
+
+  // create browser download folder
+  if (!Fs.existsSync(downloadDir)) {
+    Fs.mkdirSync(downloadDir, { recursive: true });
+  }
 
   // download Edge driver only in case of usage
   if (browserType === Browsers.ChromiumEdge) {
