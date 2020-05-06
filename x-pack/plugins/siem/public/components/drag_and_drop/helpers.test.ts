@@ -28,7 +28,6 @@ import {
   getDroppableId,
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,
-  getTimelineIdFromDestination,
   providerWasDroppedOnTimeline,
   reasonIsDrop,
   sourceIsContent,
@@ -378,100 +377,6 @@ describe('helpers', () => {
           mode: 'FLUID',
         })
       ).toEqual(false);
-    });
-  });
-
-  describe('#getTimelineIdFromDestination', () => {
-    test('it returns returns the timeline id from the destination when it is a provider', () => {
-      expect(
-        getTimelineIdFromDestination({
-          destination: {
-            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
-            index: 0,
-          },
-          draggableId: getDraggableId('685260508808089'),
-          reason: 'DROP',
-          source: {
-            droppableId: getDroppableId('685260508808089'),
-            index: 0,
-          },
-          type: 'DEFAULT',
-          mode: 'FLUID',
-        })
-      ).toEqual('timeline');
-    });
-
-    test('it returns returns the timeline id from the destination when the destination is timeline columns', () => {
-      expect(
-        getTimelineIdFromDestination({
-          destination: {
-            droppableId: DROPPABLE_ID_TIMELINE_COLUMNS,
-            index: 0,
-          },
-          draggableId: getDraggableFieldId({ contextId: 'test', fieldId: 'event.action' }),
-          reason: 'DROP',
-          source: {
-            droppableId: 'fake.source.droppable.id',
-            index: 0,
-          },
-          type: 'DEFAULT',
-          mode: 'FLUID',
-        })
-      ).toEqual('timeline-1');
-    });
-
-    test('it returns returns the timeline id from the destination when it is a button', () => {
-      expect(
-        getTimelineIdFromDestination({
-          destination: {
-            droppableId: `${droppableTimelineFlyoutButtonPrefix}timeline`,
-            index: 0,
-          },
-          draggableId: getDraggableId('685260508808089'),
-          reason: 'DROP',
-          source: {
-            droppableId: getDroppableId('685260508808089'),
-            index: 0,
-          },
-          type: 'DEFAULT',
-          mode: 'FLUID',
-        })
-      ).toEqual('timeline');
-    });
-
-    test('it returns returns an empty string when the destination is undefined', () => {
-      expect(
-        getTimelineIdFromDestination({
-          destination: undefined,
-          draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
-          reason: 'DROP',
-          source: {
-            droppableId: `${droppableIdPrefix}.timelineProviders.timeline`,
-            index: 0,
-          },
-          type: 'DEFAULT',
-          mode: 'FLUID',
-        })
-      ).toEqual('');
-    });
-
-    test('it returns returns an empty string when the destination is not a timeline', () => {
-      expect(
-        getTimelineIdFromDestination({
-          destination: {
-            droppableId: `${droppableIdPrefix}.somewhere.else`,
-            index: 0,
-          },
-          draggableId: getDraggableId('685260508808089'),
-          reason: 'DROP',
-          source: {
-            droppableId: getDroppableId('685260508808089'),
-            index: 0,
-          },
-          type: 'DEFAULT',
-          mode: 'FLUID',
-        })
-      ).toEqual('');
     });
   });
 
