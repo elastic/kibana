@@ -327,8 +327,10 @@ export class ApplicationService {
         const link = e.currentTarget as HTMLAnchorElement;
         if (
           link.href && // ignore links with empty hrefs
+          (link.target === '' || link.target === 'self') && // ignore links having a target
           !selfOrParentHasClass(link, 'disableCoreNavigation') && // ignore explicitly ignored links
           e.button === 0 && // ignore everything but left clicks
+          !e.defaultPrevented && // ignore default prevented events
           !isModifiedEvent(e) // ignore clicks with modifier keys
         ) {
           const appInfo = parseAppUrl(link.href, http.basePath, this.apps);
