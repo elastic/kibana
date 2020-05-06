@@ -51,16 +51,6 @@ services.alertInstanceFactory.mockImplementation((instanceId: string) => {
   return alertInstance.instance;
 });
 
-// services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
-//   // To make testing easier we will specify the alert count in the metric
-//   // `{ field: 'count.is.12' }` => Mocks `{ count: 3}`
-//   // `{ field: 'count.is.something' }` => Mocks `{ count: 0 }`
-//   const metric = Object.keys(body.query.bool.must[0]?.range)[0];
-//   const count = metric ? parseInt(metric.split('.').pop()!, 10) || 0 : 0;
-
-//   return { count };
-// });
-
 /*
  * Helper functions
  */
