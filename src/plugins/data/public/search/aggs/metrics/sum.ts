@@ -22,10 +22,15 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
   defaultMessage: 'Sum',
 });
+
+export interface AggParamsSum extends BaseAggParams {
+  field: string;
+}
 
 export interface SumMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;

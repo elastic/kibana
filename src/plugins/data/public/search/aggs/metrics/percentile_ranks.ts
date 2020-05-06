@@ -24,6 +24,12 @@ import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
 import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
+
+export interface AggParamsPercentileRanks extends BaseAggParams {
+  field: string;
+  values?: number[];
+}
 
 // required by the values editor
 export type IPercentileRanksAggConfig = IResponseAggConfig;

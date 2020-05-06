@@ -5,11 +5,12 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart } from 'src/core/server';
+import { SavedObjectsServiceStart, HttpServiceSetup } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
 import { IngestManagerAppContext } from '../plugin';
+import { CloudSetup } from '../../../cloud/server';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsPluginStart | undefined;
@@ -17,11 +18,19 @@ class AppContextService {
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
+  private isProductionMode: boolean = false;
+  private kibanaVersion: string | undefined;
+  private cloud?: CloudSetup;
+  private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
+    this.isProductionMode = appContext.isProductionMode;
+    this.cloud = appContext.cloud;
+    this.kibanaVersion = appContext.kibanaVersion;
+    this.httpSetup = appContext.httpSetup;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -41,7 +50,14 @@ class AppContextService {
   }
 
   public getSecurity() {
+    if (!this.security) {
+      throw new Error('Secury service not set.');
+    }
     return this.security;
+  }
+
+  public getCloud() {
+    return this.cloud;
   }
 
   public getConfig() {
@@ -57,6 +73,24 @@ class AppContextService {
       throw new Error('Saved objects start service not set.');
     }
     return this.savedObjects;
+  }
+
+  public getIsProductionMode() {
+    return this.isProductionMode;
+  }
+
+  public getHttpSetup() {
+    if (!this.httpSetup) {
+      throw new Error('HttpServiceSetup not set.');
+    }
+    return this.httpSetup;
+  }
+
+  public getKibanaVersion() {
+    if (!this.kibanaVersion) {
+      throw new Error('Kibana version is not set.');
+    }
+    return this.kibanaVersion;
   }
 }
 
