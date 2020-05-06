@@ -352,8 +352,6 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
 
-    console.log(viewBySwimlaneOptions.length, '___viewBySwimlaneOptions.length___');
-
     return (
       <ExplorerPage jobSelectorProps={jobSelectorProps} resizeRef={this.resizeRef}>
         <div className="results-container">
