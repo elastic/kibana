@@ -424,12 +424,14 @@ export const relatedEvents = createSelector(graphableProcesses, relatedEventStat
   relatedEventStats,
   /* eslint-enable no-shadow */
 ) {
-  const eventsRelatedByProcess: RelatedEventData = new WeakMap();
+  const eventsRelatedByProcess: RelatedEventData = new Map();
   /* eslint-disable no-shadow */
   return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
     /* eslint-enable no-shadow */
-    const relatedEventDataEntry = relatedEventStats?.get(graphableProcess) || waitingForRelatedEventData;
-    relatedEvents.set(graphableProcess, relatedEventDataEntry);
+    const relatedEventDataEntry = relatedEventStats?.get(graphableProcess)
+    if(relatedEventDataEntry){
+      relatedEvents.set(graphableProcess, relatedEventDataEntry);
+    }
     return relatedEvents;
   }, eventsRelatedByProcess);
 });

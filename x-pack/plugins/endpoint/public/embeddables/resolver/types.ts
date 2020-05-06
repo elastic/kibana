@@ -191,7 +191,7 @@ export type RelatedEventEntryWithStatsOrWaiting =
  * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
  * or a `waitingForRelatedEventData` symbol when referenced unique event.
  */
-export type RelatedEventData = WeakMap<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
+export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
 
 /**
  * State for `data` reducer which handles receiving Resolver data from the backend.

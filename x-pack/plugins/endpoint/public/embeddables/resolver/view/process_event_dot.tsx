@@ -136,12 +136,7 @@ const NodeSubMenu = styled(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
-          if (optionsWithActions === waitingForRelatedEventData) {
-            // dispatch action
-            setMenuOpen(true);
-          } else {
-            setMenuOpen(!menuIsOpen);
-          }
+          setMenuOpen(!menuIsOpen);
         },
         [menuIsOpen, optionsWithActions]
       );
@@ -153,6 +148,10 @@ const NodeSubMenu = styled(
         },
         [menuAction]
       );
+      const isMenuDataAvailable = useMemo(()=>{
+        return typeof optionsWithActions === 'object'; 
+      }, [])
+
       if (!optionsWithActions) {
         /**
          * When called with a `menuAction`
@@ -173,7 +172,7 @@ const NodeSubMenu = styled(
       return (
         <div className={className + (menuIsOpen ? ' is-open' : '')}>
           <EuiButton
-            onClick={optionsWithActions === subMenuAssets.initialMenuStatus ? handleMenuActionClick : handleMenuOpenClick}
+            onClick={isMenuDataAvailable ? handleMenuOpenClick : handleMenuActionClick}
             color="ghost"
             size="s"
             iconType="arrowUp"
@@ -241,7 +240,7 @@ export const ProcessEventDot = styled(
        * A collection of events related to the current node and statistics (e.g. counts indexed by event type)
        * to provide the user some visibility regarding the contents thereof.
        */
-      relatedEvents: RelatedEventEntryWithStatsOrWaiting;
+      relatedEvents?: RelatedEventEntryWithStatsOrWaiting;
     }) => {
       /**
        * Convert the position, which is in 'world' coordinates, to screen coordinates.
@@ -254,6 +253,27 @@ export const ProcessEventDot = styled(
 
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+
+      const relatedEventOptions = useMemo(()=>{
+        console.log('rememo on %o', relatedEvents);
+        if(!relatedEvents){
+          return subMenuAssets.initialMenuStatus
+        }
+        if(relatedEvents === waitingForRelatedEventData) {
+          return relatedEvents
+        }
+        return Object.entries(relatedEvents.stats).map((k,v) => {
+          return {
+            optionTitle: `${v} ${k}`,
+            action: () => {
+              /**
+               * COMING SOON TO A THEATER NEAR YOU:
+               * OPENING SIDE MENUS
+               */
+            }
+          }
+        })
+      },[relatedEvents])
 
       const nodeViewportStyle = useMemo(
         () => ({
@@ -483,11 +503,7 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedEvents.title}
-                      // optionsWithActions={[
-                      //   { optionTitle: '10 DNS', action: () => {} },
-                      //   { optionTitle: '10 File', action: () => {} },
-                      // ]}
-                      optionsWithActions={subMenuAssets.initialMenuStatus}
+                      optionsWithActions={relatedEventOptions}
                       menuAction={handleRelatedEventRequest}
                     />
                   </EuiFlexItem>

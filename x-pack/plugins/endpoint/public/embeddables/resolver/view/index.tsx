@@ -116,7 +116,7 @@ export const Resolver = styled(
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
                   adjacentNodeMap={adjacentNodeMap}
-                  relatedEvents={relatedEvents.get(processEvent)!}
+                  relatedEvents={relatedEvents.get(processEvent)}
                 />
               );
             })}

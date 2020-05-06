@@ -11,6 +11,8 @@ import {
   resultsEnrichedWithRelatedEventInfo,
   RelatedEventDataEntryWithStats,
   RelatedEventType,
+  RelatedEventData,
+  waitingForRelatedEventData,
 } from '../../types';
 
 function initialState(): DataState {
@@ -30,14 +32,27 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       isLoading: false,
       hasError: false,
     };
-  } else if (action.type === 'serverReturnedRelatedEventData') {
+  }
+  else if (action.type === 'appRequestedRelatedEventData') {
+    const evt = action.payload[0];
+    const statsMap = state[resultsEnrichedWithRelatedEventInfo];
+    if(statsMap){
+      const currentStatsMap = new Map(statsMap);
+      currentStatsMap.set(evt, waitingForRelatedEventData);
+      return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
+    }
+    return state;
+  }
+  else if (action.type === 'serverReturnedRelatedEventData') {
     /**
      * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
      * When this data is inlined with results, there won't be a need for this.
      */
     console.log('payload received by reducer: %o', action.payload);
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
+    
     if (statsMap && typeof statsMap?.set === 'function') {
+      const currentStatsMap: RelatedEventData = new Map(statsMap);
       for (const updatedEvent of action.payload.keys()) {
         const newStatsEntry = action.payload.get(updatedEvent);
 
@@ -48,11 +63,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
             newStatsEntry,
             { stats: statsForEntry }
           );
-          statsMap.set(updatedEvent, newRelatedEventStats);
+          currentStatsMap.set(updatedEvent, newRelatedEventStats);
         }
       }
+      return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
     }
-    return { ...state, [resultsEnrichedWithRelatedEventInfo]: statsMap };
+    return state;
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,
