@@ -14,7 +14,7 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 [float]
 [[Preconfigured-server-log-configuration]]
-==== Preconfigured action type properties: 
+==== Preconfigured action type
 
 [source,text]
 --

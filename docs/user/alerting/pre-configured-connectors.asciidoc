@@ -1,9 +1,9 @@
 [role="xpack"]
 [[pre-configured-action-types-and-connectors]]
 
-== Preconfigured action types and connectors
+== Preconfigured connectors and action types
 
-You can preconfigure an action type or just a connector to have all the information it needs prior to startup
+You can preconfigure an action type or a connector to have all the information it needs prior to startup
 by adding it to the `kibana.yml` file.
 
 Preconfigured connectors offer the following capabilities:
@@ -15,14 +15,13 @@ action are predefined, including the connector name and ID.
 
 Sensitive configuration information, such as credentials, can use the <<creating-keystore, {kib} keystore>>.
 
-A preconfigured action types has only preconfigured connectors. But preconfigured connectors could belong to the preconfigured action type or to the regular action type as well.
+A preconfigured action types has only preconfigured connectors. Preconfigured connectors can belong to either the preconfigured action type or to the regular action type.
 
 [float]
 [[preconfigured-connector-example]]
 === Creating a preconfigured connector
 
 The following example shows a valid configuration of two out-of-the box connectors: <<slack-action-type, Slack>> and <<webhook-action-type, Webhook>>.
-You can find all details about available action types configuration <<action-types, here>>.
 
 ```js
   xpack.actions.preconfigured:
@@ -78,25 +77,6 @@ The following example shows a valid configuration of preconfigured action type w
 <1> `enabledActionTypes` should exclude preconfigured action type to prevent creating and deleting connectors.
 <2> `preconfigured` is the setting for defining the list of available connectors for the preconfigured action type.
 
-
-[float]
-[[pre-configured-connector-alert-form]]
-=== Alert with a preconfigured connector
-
-When attaching an action to an alert,
-select from a list of available action types, and
-then select the Slack or Webhook type. Those action types were configured previously.
-The preconfigured connector is installed and is automatically selected.
-
-[role="screenshot"]
-image::images/alert-pre-configured-slack-connector.png[Create alert with selected Slack action type]
-
-The dropdown is populated with additional preconfigured Slack connectors.
-The `preconfigured` label distinguishes them from space-aware connectors that use saved objects.
-
-[role="screenshot"]
-image::images/alert-pre-configured-connectors-dropdown.png[Dropdown list with pre-cofigured connectors]
-
 [float]
 [[managing-pre-configured-connectors]]
 === Managing preconfigured connectors
@@ -128,3 +108,21 @@ Disabled action types are not included.
 
 [role="screenshot"]
 image::images/pre-configured-action-type-select-type.png[Pre-configured connector create menu]
+
+[float]
+[[pre-configured-connector-alert-form]]
+=== Alert with a preconfigured connector
+
+When attaching an action to an alert,
+select from a list of available action types, and
+then select the Slack or Webhook type. Those action types were configured previously.
+The preconfigured connector is installed and is automatically selected.
+
+[role="screenshot"]
+image::images/alert-pre-configured-slack-connector.png[Create alert with selected Slack action type]
+
+The dropdown is populated with additional preconfigured Slack connectors.
+The `preconfigured` label distinguishes them from space-aware connectors that use saved objects.
+
+[role="screenshot"]
+image::images/alert-pre-configured-connectors-dropdown.png[Dropdown list with pre-cofigured connectors]

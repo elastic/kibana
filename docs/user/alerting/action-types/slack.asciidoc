@@ -15,7 +15,7 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
 
 [float]
 [[Preconfigured-slack-configuration]]
-==== Preconfigured action type properties: 
+==== Preconfigured action type
 
 [source,text]
 --
@@ -26,16 +26,9 @@ Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messa
    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
 --
 
-`config:` define action type specific to the configuration. The config object contains the following properties:
+`config` defines the action type specific to the configuration and contains the following properties:
 
-[cols="3*<"]
-|=====
-
-|`webhookUrl:`
- | URL string
- | correspond to *Webhook URL*.
-
-|=====
+<1> `webhookUrl:` is URL string and correspond to *Webhook URL*.
 
 
 [float]

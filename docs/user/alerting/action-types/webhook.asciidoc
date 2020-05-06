@@ -19,7 +19,7 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 
 [float]
 [[Preconfigured-webhook-configuration]]
-==== Preconfigured action type properties: 
+==== Preconfigured action type 
 
 [source,text]
 --
@@ -36,36 +36,16 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
    password: passwordkeystorevalue
 --
 
-`config:` define action type specific to the configuration. The config object contains the following properties:
+`config` defines the action type specific to the configuration and contains the following properties:
 
-[cols="3*<"]
-|=====
+<1> `url:` is URL string and correspond to *URL*.
+<2> `method:` is a string and correspond to *Method*.
+<3> `headers:` is Record<String, String> and correspond to *Headers*.
 
-|`url:`
- | URL string
- | correspond to *URL*.
-|`method:`
- | String
- | correspond to *Method*.
-|`headers:`
- | Record<String, String>
- | correspond to *Headers*.
+`secrets` defines action type sensitive configuration:
 
-|=====
-
-`secrets:` define action type sensitive configuration:
-
-[cols="3*<"]
-|=====
-
-|`user:`
- | String
- | correspond to *User*.
-|`password:`
- | String
- | correspond to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
-
-|=====
+<1> `user:` is a string and correspond to *User*.
+<2> `password:` is a string and correspond to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
 [[webhook-action-configuration]]

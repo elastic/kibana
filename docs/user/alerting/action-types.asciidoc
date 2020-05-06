@@ -46,7 +46,7 @@ see https://www.elastic.co/subscriptions[the subscription page].
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
-Action type with only preconfigured connectors could be specified as a <<preconfigured-action-type-example, preconfigured action type>>.
+If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
 
 include::action-types/email.asciidoc[]
 include::action-types/index.asciidoc[]
