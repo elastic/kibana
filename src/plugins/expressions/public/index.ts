@@ -46,7 +46,6 @@ export {
   DatatableColumn,
   DatatableColumnType,
   DatatableRow,
-  Execution,
   ExecutionContract,
   ExecutionContainer,
   ExecutionContext,

@@ -38,7 +38,6 @@ export {
   DatatableColumn,
   DatatableColumnType,
   DatatableRow,
-  Execution,
   ExecutionContainer,
   ExecutionContext,
   ExecutionParams,
