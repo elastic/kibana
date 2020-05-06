@@ -141,7 +141,7 @@ export interface FieldEdiorProps {
     docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
     fieldFormats: DataPublicPluginStart['fieldFormats'];
     toasts: NotificationsStart['toasts'];
-    UiSettings: IUiSettingsClient;
+    uiSettings: IUiSettingsClient;
     SearchBar: DataPublicPluginStart['ui']['SearchBar'];
   };
 }
@@ -220,14 +220,15 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { UiSettings } = this.props.helpers;
+    const { uiSettings } = this.props.helpers;
     const { field } = this.state;
     const DefaultFieldFormat = this.props.helpers.fieldFormats.getDefaultType(
       type
     ) as FieldFormatInstanceType;
 
     field.type = type;
-    field.format = new DefaultFieldFormat(null, UiSettings.get);
+
+    field.format = new DefaultFieldFormat(null, key => uiSettings.get(key));
 
     this.setState({
       fieldTypeFormats: getFieldTypeFormatsList(
@@ -253,12 +254,13 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFormatChange = (formatId: string, params?: any) => {
     const { field, fieldTypeFormats } = this.state;
+    const { uiSettings, fieldFormats } = this.props.helpers;
 
-    const FieldFormat = this.props.helpers.fieldFormats.getType(
+    const FieldFormat = fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as FieldFormatInstanceType;
 
-    field.format = new FieldFormat(params, this.props.helpers.UiSettings.get);
+    field.format = new FieldFormat(params, key => uiSettings.get(key));
 
     this.setState({
       fieldFormatId: FieldFormat.id,
@@ -759,7 +761,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           executeScript={executeScript}
           http={this.props.helpers.http}
           docLinksScriptedFields={this.props.helpers.docLinksScriptedFields}
-          UiSettings={this.props.helpers.UiSettings}
+          uiSettings={this.props.helpers.uiSettings}
           SearchBar={this.props.helpers.SearchBar}
         />
       </Fragment>

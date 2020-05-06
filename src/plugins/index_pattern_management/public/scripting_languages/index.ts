@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { HttpStart, NotificationsStart } from 'src/core/public';
-// import { toastNotifications } from '../notify';
 
 export function getSupportedScriptingLanguages(): string[] {
   return ['painless'];

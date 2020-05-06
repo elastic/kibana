@@ -27,7 +27,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                 id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
                 values={Object {}}
               />
-
+               
               <EuiIcon
                 type="link"
               />
@@ -40,7 +40,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                 id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
                 values={Object {}}
               />
-
+               
               <EuiIcon
                 type="link"
               />

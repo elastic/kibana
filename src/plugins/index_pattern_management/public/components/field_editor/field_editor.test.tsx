@@ -19,7 +19,6 @@
 
 import React from 'react';
 
-// import { npStart } from 'ui/new_platform';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
   Field,
@@ -27,14 +26,17 @@ import {
   IndexPatternFieldList,
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
-import { HttpStart } from '../../../../core/public';
+
+import { coreMock } from '../../../../../core/public/mocks';
+
 // eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../core/public/doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '../../../../../core/public/doc_links/doc_links_service.mock';
 
 jest.mock('brace/mode/groovy', () => ({}));
 jest.mock('ui/new_platform');
 
-import { FieldEditor } from './field_editor';
+import { FieldEdiorProps, FieldEditor } from './field_editor';
+import { dataPluginMock } from '../../../../data/public/mocks';
 
 jest.mock('@elastic/eui', () => ({
   EuiBasicTable: 'eui-basic-table',
@@ -60,7 +62,7 @@ jest.mock('@elastic/eui', () => ({
   euiPaletteColorBlind: () => ['red'],
 }));
 
-jest.mock('ui/scripting_languages', () => ({
+jest.mock('../../scripting_languages', () => ({
   getEnabledScriptingLanguages: () => ['painless', 'testlang'],
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
@@ -100,27 +102,35 @@ const field = {
   format: new Format(),
 };
 
-const helpers = {
-  Field: () => {},
-  getConfig: () => {},
-  getHttpStart: () => (({} as unknown) as HttpStart),
-  fieldFormatEditors: [],
-  redirectAway: () => {},
-  docLinksScriptedFields: docLinksServiceMock.createStartContract().links.scriptedFields,
-};
-
 describe('FieldEditor', () => {
+  const dataStartServices = dataPluginMock.createStartContract();
+  const coreStartServices = coreMock.createStart();
+
   let indexPattern: IndexPattern;
+
+  const helpers: FieldEdiorProps['helpers'] = ({
+    Field: () => {},
+    getConfig: () => {},
+    fieldFormatEditors: [],
+    redirectAway: () => {},
+    docLinksScriptedFields: docLinksServiceMock.createStartContract().links.scriptedFields,
+    fieldFormats: dataStartServices.fieldFormats,
+    toasts: coreStartServices.notifications.toasts,
+    http: coreStartServices.http,
+    uiSettings: coreStartServices.uiSettings,
+    SearchBar: dataStartServices.ui.SearchBar,
+  } as unknown) as FieldEdiorProps['helpers'];
 
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IndexPatternFieldList,
     } as unknown) as IndexPattern;
 
-    npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(
+    helpers.fieldFormats.getDefaultType = jest.fn(
       () => (({} as unknown) as FieldFormatInstanceType)
     );
-    npStart.plugins.data.fieldFormats.getByFieldType = jest.fn(fieldType => {
+
+    helpers.fieldFormats.getByFieldType = jest.fn(fieldType => {
       if (fieldType === 'number') {
         return [({} as unknown) as FieldFormatInstanceType];
       } else {

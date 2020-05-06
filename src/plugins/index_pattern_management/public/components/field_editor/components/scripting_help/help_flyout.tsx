@@ -38,7 +38,7 @@ interface ScriptingHelpFlyoutProps {
   onClose: () => void;
   http: HttpStart;
   docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
-  UiSettings: IUiSettingsClient;
+  uiSettings: IUiSettingsClient;
   SearchBar: DataPublicPluginStart['ui']['SearchBar'];
 }
 
@@ -52,7 +52,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   executeScript,
   http,
   docLinksScriptedFields,
-  UiSettings,
+  uiSettings,
   SearchBar,
 }) => {
   const tabs = [
@@ -74,7 +74,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
           script={script}
           executeScript={executeScript}
           http={http}
-          uiSettings={UiSettings}
+          uiSettings={uiSettings}
           SearchBar={SearchBar}
         />
       ),

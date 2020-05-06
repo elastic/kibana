@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../../data/public';
 import { getFieldFormat } from './get_field_format';
 
 const indexPattern = ({

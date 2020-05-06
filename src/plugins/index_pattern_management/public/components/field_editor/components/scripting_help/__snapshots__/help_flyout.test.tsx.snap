@@ -36,7 +36,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           Object {
             "content": <TestScript
               executeScript={[Function]}
-              getHttpStart={[Function]}
+              http={Object {}}
               indexPattern={Object {}}
               lang="painless"
             />,
@@ -87,7 +87,7 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
           Object {
             "content": <TestScript
               executeScript={[Function]}
-              getHttpStart={[Function]}
+              http={Object {}}
               indexPattern={Object {}}
               lang="painless"
             />,

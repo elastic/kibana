@@ -19,7 +19,7 @@ exports[`DateFormatEditor should render normally 1`] = `
             id="indexPatternManagement.date.documentationLabel"
             values={Object {}}
           />
-
+           
           <EuiIcon
             type="link"
           />

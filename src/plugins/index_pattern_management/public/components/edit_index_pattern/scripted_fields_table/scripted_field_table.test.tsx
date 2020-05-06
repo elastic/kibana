@@ -75,7 +75,11 @@ describe('ScriptedFieldsTable', () => {
 
   test('should render normally', async () => {
     const component = shallow<ScriptedFieldsTable>(
-      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
+      <ScriptedFieldsTable
+        indexPattern={indexPattern}
+        helpers={helpers}
+        painlessDocLink={'painlessDoc'}
+      />
     );
 
     // Allow the componentWillMount code to execute
@@ -88,7 +92,11 @@ describe('ScriptedFieldsTable', () => {
 
   test('should filter based on the query bar', async () => {
     const component = shallow(
-      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
+      <ScriptedFieldsTable
+        indexPattern={indexPattern}
+        helpers={helpers}
+        painlessDocLink={'painlessDoc'}
+      />
     );
 
     // Allow the componentWillMount code to execute
@@ -112,6 +120,7 @@ describe('ScriptedFieldsTable', () => {
             { name: 'Bad', lang: 'somethingElse', script: 'z++' },
           ],
         })}
+        painlessDocLink={'painlessDoc'}
         helpers={helpers}
       />
     );
@@ -133,6 +142,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={getIndexPatternMock({
           getScriptedFields: () => [],
         })}
+        painlessDocLink={'painlessDoc'}
         helpers={helpers}
       />
     );
@@ -147,7 +157,11 @@ describe('ScriptedFieldsTable', () => {
 
   test('should show a delete modal', async () => {
     const component = shallow<ScriptedFieldsTable>(
-      <ScriptedFieldsTable indexPattern={indexPattern} helpers={helpers} />
+      <ScriptedFieldsTable
+        indexPattern={indexPattern}
+        helpers={helpers}
+        painlessDocLink={'painlessDoc'}
+      />
     );
 
     await component.update(); // Fire `componentWillMount()`
@@ -167,6 +181,7 @@ describe('ScriptedFieldsTable', () => {
           removeScriptedField,
         }}
         helpers={helpers}
+        painlessDocLink={'painlessDoc'}
       />
     );
 

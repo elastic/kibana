@@ -45,7 +45,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
           <EuiCode>
             value
           </EuiCode>
-           —
+           — 
           <FormattedMessage
             defaultMessage="The URI-escaped value"
             id="indexPatternManagement.urlTemplate.valueLabel"
@@ -56,7 +56,7 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
           <EuiCode>
             rawValue
           </EuiCode>
-           —
+           — 
           <FormattedMessage
             defaultMessage="The unescaped value"
             id="indexPatternManagement.urlTemplate.rawValueLabel"

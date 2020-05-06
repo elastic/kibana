@@ -18,8 +18,8 @@
  */
 
 import { get, sortBy } from 'lodash';
-import { IndexPatternCreationConfig } from '../../../../../../../../../plugins/index_pattern_management/public';
-import { DataPublicPluginStart } from '../../../../../../../../../plugins/data/public';
+import { IndexPatternCreationConfig } from '../../../../../index_pattern_management/public';
+import { DataPublicPluginStart } from '../../../../../data/public';
 import { MatchedIndex } from '../types';
 
 export async function getIndices(

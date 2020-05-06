@@ -37,7 +37,7 @@ export interface CreateEditFieldContainerProps
   fieldFormatEditors: any;
   getConfig: IUiSettingsClient;
   services: {
-    UiSettings: IUiSettingsClient;
+    uiSettings: IUiSettingsClient;
     notifications: NotificationsStart;
     docTitle: ChromeDocTitle;
     http: HttpStart;
@@ -63,7 +63,7 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
         fieldName={props.match.params.fieldName}
         fieldFormatEditors={props.fieldFormatEditors}
         services={{
-          UiSettings: props.services.UiSettings,
+          uiSettings: props.services.uiSettings,
           http: props.services.http,
           docLinksScriptedFields: props.services.docLinksScriptedFields,
           SearchBar: props.services.SearchBar,

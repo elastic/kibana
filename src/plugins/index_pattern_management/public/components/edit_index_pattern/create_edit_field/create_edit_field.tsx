@@ -39,7 +39,7 @@ interface CreateEditFieldProps extends RouteComponentProps {
   fieldName?: string;
   fieldFormatEditors: any;
   services: {
-    UiSettings: IUiSettingsClient;
+    uiSettings: IUiSettingsClient;
     docTitle: ChromeDocTitle;
     http: HttpStart;
     docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
@@ -103,7 +103,7 @@ export const CreateEditField = withRouter(
             <EuiFlexItem>
               <IndexHeader
                 indexPattern={indexPattern}
-                defaultIndex={services.UiSettings.get('defaultIndex')}
+                defaultIndex={services.uiSettings.get('defaultIndex')}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -111,7 +111,7 @@ export const CreateEditField = withRouter(
                 indexPattern={indexPattern}
                 field={field}
                 helpers={{
-                  UiSettings: services.UiSettings,
+                  uiSettings: services.uiSettings,
                   http: services.http,
                   fieldFormatEditors,
                   redirectAway,

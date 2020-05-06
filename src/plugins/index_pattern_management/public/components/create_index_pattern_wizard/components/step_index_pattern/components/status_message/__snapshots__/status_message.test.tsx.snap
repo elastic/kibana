@@ -12,7 +12,7 @@ exports[`StatusMessage should render with exact matches 1`] = `
       type="check"
     />
     <span>
-
+       
       <FormattedMessage
         defaultMessage="{strongSuccess} Your index pattern matches {strongIndices}."
         id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"

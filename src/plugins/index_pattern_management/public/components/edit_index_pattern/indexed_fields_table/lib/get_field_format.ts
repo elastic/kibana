@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { IIndexPattern } from '../../../../../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../../data/public';
 
 export function getFieldFormat(indexPattern?: IIndexPattern, fieldName?: string): string {
   return indexPattern && fieldName

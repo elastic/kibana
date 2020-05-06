@@ -3,7 +3,7 @@
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/create-field/"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={
@@ -11,7 +11,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
         "somethingElse",
       ]
     }
-    painlessDocLink="painlessDocs"
+    painlessDocLink="painlessDoc"
   />
   <eui-spacer
     size="l"
@@ -45,11 +45,11 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/create-field/"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
-    painlessDocLink="painlessDocs"
+    painlessDocLink="painlessDoc"
   />
   <eui-spacer
     size="l"
@@ -78,11 +78,11 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/create-field/"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
-    painlessDocLink="painlessDocs"
+    painlessDocLink="painlessDoc"
   />
   <eui-spacer
     size="l"
@@ -103,11 +103,11 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
 exports[`ScriptedFieldsTable should render normally 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/create-field/"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
-    painlessDocLink="painlessDocs"
+    painlessDocLink="painlessDoc"
   />
   <eui-spacer
     size="l"
@@ -141,11 +141,11 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/create-field/"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/indexPatterns/patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
-    painlessDocLink="painlessDocs"
+    painlessDocLink="painlessDoc"
   />
   <eui-spacer
     size="l"
