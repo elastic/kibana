@@ -83,7 +83,7 @@
             />
           </form>
           <button ng-disabled="migration.isMigrating || !migration.newTitle.trim()" class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="migrate()">
-            <span ng-if="migration.isMigrating" class="euiLoadingSpinner euiLoadingSpinner--medium" />
+            <span ng-if="migration.isMigrating" class="euiLoadingSpinner euiLoadingSpinner--medium"></span>
             <span i18n-id="kbn.management.editIndexPattern.migrate"
                   i18n-default-message="Migrate"></span>
           </button>

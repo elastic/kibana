@@ -47,8 +47,8 @@ See <<breaking-changes-7.7,breaking changes in 7.7>>.
 === Known issues
 
 SIEM::
-* When you deactivate an action within a rule, the rule fails {issue}620[#620]
-* When you add a timestamp to the PagerDuty action, the rule fails {issue}607[#607]
+* When you deactivate an action within a rule, the rule fails {issue}64870[#64870]
+* When you add a timestamp to the PagerDuty action, the rule fails {issue}64871[#64871]
 
 [float]
 [[enhancement-7.7.0]]

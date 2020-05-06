@@ -453,6 +453,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         );
 
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
+
         // refresh to see alert
         await browser.refresh();
 
@@ -463,12 +469,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-
-        // await first run to complete so we have an initial state
-        await retry.try(async () => {
-          const { alertInstances } = await alerting.alerts.getAlertState(alert.id);
-          expect(Object.keys(alertInstances).length).to.eql(instances.length);
-        });
       });
 
       const PAGE_SIZE = 10;
