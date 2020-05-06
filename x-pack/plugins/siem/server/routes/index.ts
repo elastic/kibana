@@ -39,7 +39,8 @@ export const initRoutes = (
   router: IRouter,
   config: ConfigType,
   usingEphemeralEncryptionKey: boolean,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  ml: SetupPlugins['ml']
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -59,7 +60,7 @@ export const initRoutes = (
 
   createTimelinesRoute(router, config, security);
   updateTimelinesRoute(router, config, security);
-  importRulesRoute(router, config);
+  importRulesRoute(router, config, ml);
   exportRulesRoute(router, config);
 
   importTimelinesRoute(router, config, security);
