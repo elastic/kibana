@@ -25,4 +25,5 @@ export {
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
+  NavType,
 } from './header';

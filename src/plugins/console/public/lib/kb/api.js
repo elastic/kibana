@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
 import { UrlPatternMatcher } from '../autocomplete/components';
 import { UrlParams } from '../autocomplete/url_params';
 import {

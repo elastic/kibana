@@ -13,6 +13,7 @@ import {
   ArtifactsSchema,
   TutorialsCategory
 } from '../../../../../src/plugins/home/server';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
@@ -39,6 +40,7 @@ export const tutorialProvider = ({
   const savedObjects = [
     {
       ...apmIndexPattern,
+      id: APM_STATIC_INDEX_PATTERN_ID,
       attributes: {
         ...apmIndexPattern.attributes,
         title: indexPatternTitle

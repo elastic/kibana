@@ -107,4 +107,5 @@ export const JiraConnectorFlyout = withConnectorFlyout<JiraActionConnector>({
   ConnectorFormComponent: JiraConnectorForm,
   secretKeys: ['email', 'apiToken'],
   configKeys: ['projectKey'],
+  connectorActionTypeId: '.jira',
 });
