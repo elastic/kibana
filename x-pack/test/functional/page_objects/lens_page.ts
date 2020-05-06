@@ -134,6 +134,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Save the current Lens visualization.
      */
     async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
       await testSubjects.setValue('savedObjectTitle', title);
 
