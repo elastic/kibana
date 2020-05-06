@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContent, EuiCode } from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 

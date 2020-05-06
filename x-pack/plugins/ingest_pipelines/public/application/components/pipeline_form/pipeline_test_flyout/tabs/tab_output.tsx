@@ -11,9 +11,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiSwitch,
-  EuiLink,
-  EuiIcon,
+  EuiButton,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useTestConfigContext } from '../../test_config_context';
 
@@ -61,28 +62,36 @@ export const OutputTab: React.FunctionComponent<Props> = ({
             defaultMessage="View the output data, or see how each processor affects the document as it passes through the pipeline."
           />
         </p>
-
-        <EuiLink onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}>
-          <FormattedMessage
-            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
-            defaultMessage="Refresh output"
-          />{' '}
-          <EuiIcon type="refresh" />
-        </EuiLink>
       </EuiText>
 
       <EuiSpacer size="l" />
 
-      <EuiSwitch
-        label={
-          <FormattedMessage
-            id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
-            defaultMessage="View verbose output"
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.ingestPipelines.testPipelineFlyout.outputTab.verboseSwitchLabel"
+                defaultMessage="View verbose output"
+              />
+            }
+            checked={cachedVerbose}
+            onChange={e => onEnableVerbose(e.target.checked)}
           />
-        }
-        checked={cachedVerbose}
-        onChange={e => onEnableVerbose(e.target.checked)}
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            onClick={() => handleExecute(cachedDocuments!, cachedVerbose)}
+            iconType="refresh"
+          >
+            <FormattedMessage
+              id="xpack.ingestPipelines.testPipelineFlyout.outputTab.descriptionLinkLabel"
+              defaultMessage="Refresh output"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
