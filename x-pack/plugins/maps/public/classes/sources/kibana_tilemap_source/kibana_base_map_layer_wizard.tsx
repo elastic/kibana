@@ -11,7 +11,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry'
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { KibanaTilemapSource, sourceTitle } from './kibana_tilemap_source';
-import { TileLayer } from '../../layers/tile_layer';
+import { TileLayer } from '../../layers/tile_layer/tile_layer';
 // @ts-ignore
 import { getKibanaTileMap } from '../../../meta';
 

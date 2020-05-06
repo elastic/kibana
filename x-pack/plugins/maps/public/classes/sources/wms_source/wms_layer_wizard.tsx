@@ -11,7 +11,7 @@ import { WMSCreateSourceEditor } from './wms_create_source_editor';
 // @ts-ignore
 import { sourceTitle, WMSSource } from './wms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-import { TileLayer } from '../../layers/tile_layer';
+import { TileLayer } from '../../layers/tile_layer/tile_layer';
 
 export const wmsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.wmsDescription', {

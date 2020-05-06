@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractLayer } from './layer';
+import { AbstractLayer } from '../layer';
 import _ from 'lodash';
-import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../common/constants';
-import { TileStyle } from '../styles/tile/tile_style';
+import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { TileStyle } from '../../styles/tile/tile_style';
 
 export class TileLayer extends AbstractLayer {
   static type = LAYER_TYPE.TILE;

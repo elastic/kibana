@@ -5,18 +5,18 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AbstractLayer } from './layer';
-import { IVectorSource } from '../sources/vector_source';
+import { AbstractLayer } from '../layer';
+import { IVectorSource } from '../../sources/vector_source';
 import {
   MapFilters,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
-} from '../../../common/descriptor_types';
-import { ILayer } from './layer';
-import { IJoin } from '../joins/join';
-import { IVectorStyle } from '../styles/vector/vector_style';
-import { IField } from '../fields/field';
-import { SyncContext } from '../../actions/map_actions';
+} from '../../../../common/descriptor_types';
+import { ILayer } from '../layer';
+import { IJoin } from '../../joins/join';
+import { IVectorStyle } from '../../styles/vector/vector_style';
+import { IField } from '../../fields/field';
+import { SyncContext } from '../../../actions/map_actions';
 
 export type VectorLayerArguments = {
   source: IVectorSource;

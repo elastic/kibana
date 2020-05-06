@@ -6,10 +6,10 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { ITileLayerArguments, TileLayer } from './tile_layer';
-import { SOURCE_TYPES } from '../../common/constants';
-import { XYZTMSSourceDescriptor } from '../../common/descriptor_types';
-import { ITMSSource, AbstractTMSSource } from './sources/tms_source';
-import { ILayer } from './layer';
+import { SOURCE_TYPES } from '../../../../ommon/constants';
+import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { ITMSSource, AbstractTMSSource } from '../../sources/tms_source';
+import { ILayer } from '../layer';
 
 const sourceDescriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,

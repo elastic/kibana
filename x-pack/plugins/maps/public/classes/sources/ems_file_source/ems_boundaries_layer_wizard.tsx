@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { VectorLayer } from '../../layers/vector_layer';
+import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 // @ts-ignore
 import { EMSFileCreateSourceEditor } from './create_source_editor';
