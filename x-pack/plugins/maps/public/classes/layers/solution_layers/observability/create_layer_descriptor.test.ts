@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../kibana_services', () => {
+jest.mock('../../../../kibana_services', () => {
   const mockUiSettings = {
     get: () => {
       return undefined;

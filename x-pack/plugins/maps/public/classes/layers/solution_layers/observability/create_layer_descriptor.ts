@@ -14,7 +14,7 @@ import {
   SizeDynamicOptions,
   StylePropertyField,
   VectorStylePropertiesDescriptor,
-} from '../../../../common/descriptor_types';
+} from '../../../../../common/descriptor_types';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -24,20 +24,20 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
-} from '../../../../common/constants';
-import { getJoinAggKey, getSourceAggKey } from '../../../../common/get_agg_key';
+} from '../../../../../common/constants';
+import { getJoinAggKey, getSourceAggKey } from '../../../../../common/get_agg_key';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
-import { VectorStyle } from '../../styles/vector/vector_style';
+import { VectorStyle } from '../../../styles/vector/vector_style';
 // @ts-ignore
-import { EMSFileSource } from '../../sources/ems_file_source';
+import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
-import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { VectorLayer } from '../../layers/vector_layer';
+import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
+import { VectorLayer } from '../../vector_layer';
 // @ts-ignore
-import { HeatmapLayer } from '../../layers/heatmap_layer';
-import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
+import { HeatmapLayer } from '../../heatmap_layer';
+import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 
 // redefining APM constant to avoid making maps app depend on APM plugin
 export const APM_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
