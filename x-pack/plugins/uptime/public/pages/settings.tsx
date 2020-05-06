@@ -19,7 +19,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isEqual } from 'lodash';
 import { Link } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../common/runtime_types';
@@ -35,7 +34,7 @@ import {
 import * as Translations from './translations';
 
 interface SettingsPageFieldErrors {
-  heartbeatIndices: 'May not be blank' | '';
+  heartbeatIndices: string | '';
   expirationThresholdError: string | null;
   ageThresholdError: string | null;
 }
