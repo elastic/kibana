@@ -17,23 +17,20 @@
  * under the License.
  */
 
-import { KibanaMapLayer, L } from '../../../maps_legacy/public';
+export let L;
 
-export class VegaMapLayer extends KibanaMapLayer {
-  constructor(spec, options) {
-    super();
+if (!window.hasOwnProperty('L')) {
+  require('leaflet/dist/leaflet.css');
+  window.L = require('leaflet/dist/leaflet.js');
+  window.L.Browser.touch = false;
+  window.L.Browser.pointer = false;
 
-    // Used by super.getAttributions()
-    this._attribution = options.attribution;
-    delete options.attribution;
-    this._leafletLayer = L.vega(spec, options);
-  }
-
-  getVegaView() {
-    return this._leafletLayer._view;
-  }
-
-  getVegaSpec() {
-    return this._leafletLayer._spec;
-  }
+  require('leaflet-vega');
+  require('leaflet.heat/dist/leaflet-heat.js');
+  require('leaflet-draw/dist/leaflet.draw.css');
+  require('leaflet-draw/dist/leaflet.draw.js');
+  require('leaflet-responsive-popup/leaflet.responsive.popup.css');
+  require('leaflet-responsive-popup/leaflet.responsive.popup.js');
+} else {
+  L = window.L;
 }

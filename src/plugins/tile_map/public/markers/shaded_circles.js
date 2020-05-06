@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import L from 'leaflet';
 import _ from 'lodash';
 import { ScaledCirclesMarkers } from './scaled_circles';
+import { L } from '../../../maps_legacy/public';
 
 export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
   getMarkerFunction() {
