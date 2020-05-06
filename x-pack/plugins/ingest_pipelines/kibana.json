@@ -1,0 +1,17 @@
+{
+  "id": "ingestPipelines",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "licensing",
+    "management"
+  ],
+  "optionalPlugins": [
+    "usageCollection"
+  ],
+  "configPath": [
+    "xpack",
+    "ingest_pipelines"
+  ]
+}

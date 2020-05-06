@@ -11,7 +11,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../../pages/timelines/timelines_page';
-import { OpenTimelineResult } from '../types';
+import { OpenTimelineResult, OpenTimelineProps } from '../types';
 import { TimelinesTableProps } from '../timelines_table';
 import { mockTimelineResults } from '../../../mock/timeline_results';
 import { OpenTimelineModalBody } from './open_timeline_modal_body';
@@ -22,40 +22,43 @@ jest.mock('../../../lib/kibana');
 describe('OpenTimelineModal', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const title = 'All Timelines / Open Timelines';
-
   let mockResults: OpenTimelineResult[];
+
+  const getDefaultTestProps = (mockSearchResults: OpenTimelineResult[]): OpenTimelineProps => ({
+    deleteTimelines: jest.fn(),
+    defaultPageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    isLoading: false,
+    itemIdToExpandedNotesRowMap: {},
+    onAddTimelinesToFavorites: jest.fn(),
+    onDeleteSelected: jest.fn(),
+    onlyFavorites: false,
+    onOpenTimeline: jest.fn(),
+    onQueryChange: jest.fn(),
+    onSelectionChange: jest.fn(),
+    onTableChange: jest.fn(),
+    onToggleOnlyFavorites: jest.fn(),
+    onToggleShowNotes: jest.fn(),
+    pageIndex: 0,
+    pageSize: DEFAULT_SEARCH_RESULTS_PER_PAGE,
+    query: '',
+    searchResults: mockSearchResults,
+    selectedItems: [],
+    sortDirection: DEFAULT_SORT_DIRECTION,
+    sortField: DEFAULT_SORT_FIELD,
+    tabs: <div />,
+    title,
+    totalSearchResultsCount: mockSearchResults.length,
+  });
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
   });
 
   test('it renders the title row', () => {
+    const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -68,32 +71,10 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it renders the search row', () => {
+    const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -106,32 +87,10 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it renders the timelines table', () => {
+    const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -144,32 +103,14 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it shows the delete action when onDeleteSelected and deleteTimelines are specified', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      onDeleteSelected: jest.fn(),
+      deleteTimelines: jest.fn(),
+    };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -182,31 +123,14 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it does NOT show the delete when is onDeleteSelected undefined and deleteTimelines is specified', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      onDeleteSelected: undefined,
+      deleteTimelines: undefined,
+    };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          deleteTimelines={jest.fn()}
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -219,31 +143,14 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it does NOT show the delete action when is onDeleteSelected provided and deleteTimelines is undefined', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      onDeleteSelected: undefined,
+      deleteTimelines: undefined,
+    };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onDeleteSelected={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 
@@ -256,30 +163,14 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it does NOT show extended columns when both onDeleteSelected and deleteTimelines are undefined', () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      onDeleteSelected: undefined,
+      deleteTimelines: undefined,
+    };
     const wrapper = mountWithIntl(
       <ThemeProvider theme={theme}>
-        <OpenTimelineModalBody
-          defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={{}}
-          onAddTimelinesToFavorites={jest.fn()}
-          onlyFavorites={false}
-          onOpenTimeline={jest.fn()}
-          onQueryChange={jest.fn()}
-          onSelectionChange={jest.fn()}
-          onTableChange={jest.fn()}
-          onToggleOnlyFavorites={jest.fn()}
-          onToggleShowNotes={jest.fn()}
-          pageIndex={0}
-          pageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-          query={''}
-          searchResults={mockResults}
-          selectedItems={[]}
-          sortDirection={DEFAULT_SORT_DIRECTION}
-          sortField={DEFAULT_SORT_FIELD}
-          title={title}
-          totalSearchResultsCount={mockResults.length}
-        />
+        <OpenTimelineModalBody {...defaultProps} />
       </ThemeProvider>
     );
 

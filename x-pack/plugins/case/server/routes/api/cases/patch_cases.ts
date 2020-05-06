@@ -18,11 +18,16 @@ import {
 } from '../../../../common/api';
 import { escapeHatch, wrapError, flattenCaseSavedObject } from '../utils';
 import { RouteDeps } from '../types';
-import { getCaseToUpdate } from './helpers';
+import { getCaseToUpdate, getConnectorId } from './helpers';
 import { buildCaseUserActions } from '../../../services/user_actions/helpers';
 import { CASES_URL } from '../../../../common/constants';
 
-export function initPatchCasesApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPatchCasesApi({
+  caseConfigureService,
+  caseService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.patch(
     {
       path: CASES_URL,
@@ -37,10 +42,16 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
           excess(CasesPatchRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        const myCases = await caseService.getCases({
-          client,
-          caseIds: query.cases.map(q => q.id),
-        });
+
+        const [myCases, myCaseConfigure] = await Promise.all([
+          caseService.getCases({
+            client,
+            caseIds: query.cases.map(q => q.id),
+          }),
+          caseConfigureService.find({ client }),
+        ]);
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+
         let nonExistingCases: CasePatchRequest[] = [];
         const conflictedCases = query.cases.filter(q => {
           const myCase = myCases.saved_objects.find(c => c.id === q.id);
@@ -114,11 +125,14 @@ export function initPatchCasesApi({ caseService, router, userActionService }: Ro
             .map(myCase => {
               const updatedCase = updatedCases.saved_objects.find(c => c.id === myCase.id);
               return flattenCaseSavedObject({
-                ...myCase,
-                ...updatedCase,
-                attributes: { ...myCase.attributes, ...updatedCase?.attributes },
-                references: myCase.references,
-                version: updatedCase?.version ?? myCase.version,
+                savedObject: {
+                  ...myCase,
+                  ...updatedCase,
+                  attributes: { ...myCase.attributes, ...updatedCase?.attributes },
+                  references: myCase.references,
+                  version: updatedCase?.version ?? myCase.version,
+                },
+                caseConfigureConnectorId,
               });
             });
 

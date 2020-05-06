@@ -6,7 +6,7 @@
 
 import { getOr, noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { useCallback, useState, useRef, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../../components/open_timeline/types';
@@ -17,18 +17,24 @@ import {
   SortTimeline,
   TimelineResult,
 } from '../../../graphql/types';
-import { inputsModel, inputsActions } from '../../../store/inputs';
+import { inputsActions } from '../../../store/inputs';
 import { useApolloClient } from '../../../utils/apollo_context';
 
 import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../../pages/timelines/translations';
+import { TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
 
 export interface AllTimelinesArgs {
-  fetchAllTimeline: ({ onlyUserFavorite, pageInfo, search, sort }: AllTimelinesVariables) => void;
+  fetchAllTimeline: ({
+    onlyUserFavorite,
+    pageInfo,
+    search,
+    sort,
+    timelineType,
+  }: AllTimelinesVariables) => void;
   timelines: OpenTimelineResult[];
   loading: boolean;
   totalCount: number;
-  refetch: () => void;
 }
 
 export interface AllTimelinesVariables {
@@ -36,8 +42,7 @@ export interface AllTimelinesVariables {
   pageInfo: PageInfoTimeline;
   search: string;
   sort: SortTimeline;
-  timelines: OpenTimelineResult[];
-  totalCount: number;
+  timelineType: TimelineTypeLiteralWithNull;
 }
 
 export const ALL_TIMELINE_QUERY_ID = 'FETCH_ALL_TIMELINES';
@@ -80,25 +85,16 @@ export const getAllTimeline = memoizeOne(
 export const useGetAllTimeline = (): AllTimelinesArgs => {
   const dispatch = useDispatch();
   const apolloClient = useApolloClient();
-  const refetch = useRef<inputsModel.Refetch>();
   const [, dispatchToaster] = useStateToaster();
   const [allTimelines, setAllTimelines] = useState<AllTimelinesArgs>({
     fetchAllTimeline: noop,
     loading: false,
-    refetch: refetch.current ?? noop,
     totalCount: 0,
     timelines: [],
   });
 
   const fetchAllTimeline = useCallback(
-    async ({
-      onlyUserFavorite,
-      pageInfo,
-      search,
-      sort,
-      timelines,
-      totalCount,
-    }: AllTimelinesVariables) => {
+    async ({ onlyUserFavorite, pageInfo, search, sort, timelineType }: AllTimelinesVariables) => {
       let didCancel = false;
       const abortCtrl = new AbortController();
 
@@ -107,15 +103,15 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
           if (apolloClient != null) {
             setAllTimelines({
               ...allTimelines,
-              timelines: timelines ?? allTimelines.timelines,
-              totalCount: totalCount ?? allTimelines.totalCount,
               loading: true,
             });
+
             const variables: GetAllTimeline.Variables = {
               onlyUserFavorite,
               pageInfo,
               search,
               sort,
+              timelineType,
             };
             const response = await apolloClient.query<
               GetAllTimeline.Query,
@@ -130,25 +126,23 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
                 },
               },
             });
+            const totalCount = response?.data?.getAllTimeline?.totalCount ?? 0;
+            const timelines = response?.data?.getAllTimeline?.timeline ?? [];
             if (!didCancel) {
               dispatch(
                 inputsActions.setQuery({
                   inputId: 'global',
                   id: ALL_TIMELINE_QUERY_ID,
                   loading: false,
-                  refetch: refetch.current ?? noop,
+                  refetch: fetchData,
                   inspect: null,
                 })
               );
               setAllTimelines({
                 fetchAllTimeline,
                 loading: false,
-                refetch: refetch.current ?? noop,
-                totalCount: getOr(0, 'getAllTimeline.totalCount', response.data),
-                timelines: getAllTimeline(
-                  JSON.stringify(variables),
-                  getOr([], 'getAllTimeline.timeline', response.data)
-                ),
+                totalCount,
+                timelines: getAllTimeline(JSON.stringify(variables), timelines as TimelineResult[]),
               });
             }
           }
@@ -162,14 +156,12 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
             setAllTimelines({
               fetchAllTimeline,
               loading: false,
-              refetch: noop,
               totalCount: 0,
               timelines: [],
             });
           }
         }
       };
-      refetch.current = fetchData;
       fetchData();
       return () => {
         didCancel = true;
@@ -188,6 +180,5 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
   return {
     ...allTimelines,
     fetchAllTimeline,
-    refetch: refetch.current ?? noop,
   };
 };

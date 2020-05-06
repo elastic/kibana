@@ -17,7 +17,7 @@ import {
   createMapPath,
   MAP_SAVED_OBJECT_TYPE,
 } from '../../../plugins/maps/common/constants';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export function maps(kibana) {
   return new kibana.Plugin({
@@ -34,7 +34,8 @@ export function maps(kibana) {
         main: 'plugins/maps/legacy',
         icon: 'plugins/maps/icon.svg',
         euiIconType: APP_ICON,
-        category: DEFAULT_APP_CATEGORIES.analyze,
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        order: 4000,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();

@@ -25,17 +25,19 @@ import { tmsLayerWizardConfig } from './sources/xyz_tms_source';
 // @ts-ignore
 import { wmsLayerWizardConfig } from './sources/wms_source';
 import { mvtVectorSourceWizardConfig } from './sources/mvt_single_layer_vector_source';
-// @ts-ignore
+import { ObservabilityLayerWizardConfig } from './solution_layers/observability';
 import { getInjectedVarFunc } from '../kibana_services';
 
-// Registration order determines display order
 let registered = false;
 export function registerLayerWizards() {
   if (registered) {
     return;
   }
+
+  // Registration order determines display order
   // @ts-ignore
   registerLayerWizard(uploadLayerWizardConfig);
+  registerLayerWizard(ObservabilityLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(esDocumentsLayerWizardConfig);
   // @ts-ignore
