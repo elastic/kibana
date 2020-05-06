@@ -74,6 +74,8 @@ describe('utils', () => {
         someArray: [1, 2, 3],
         someEmptyObject: {},
         someDate: myDate,
+        falsey1: 0,
+        falsey2: '',
         stripThis: undefined,
         nested: {
           value: 'bar',
@@ -92,6 +94,8 @@ describe('utils', () => {
         someArray: [1, 2, 3],
         someEmptyObject: {},
         someDate: myDate,
+        falsey1: 0,
+        falsey2: '',
         nested: {
           value: 'bar',
           deepNested: {

@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, nextTick, getRandomString } from './helpers';
+import { componentHelpers, MappingsEditorTestBed, nextTick } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
@@ -322,7 +322,7 @@ describe('Mappings editor: core', () => {
       /**
        * Mapped fields
        */
-      const newField = { name: getRandomString(), type: 'text' };
+      const newField = { name: 'someNewField', type: 'text' };
       updatedMappings = {
         ...updatedMappings,
         properties: {

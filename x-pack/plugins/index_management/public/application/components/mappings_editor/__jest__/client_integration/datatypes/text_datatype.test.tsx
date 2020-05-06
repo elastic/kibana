@@ -105,16 +105,6 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    let updatedMappings: any = {
-      ...defaultMappings,
-      properties: {
-        myField: {
-          ...defaultMappings.properties.myField,
-          ...defaultTextParameters,
-        },
-      },
-    };
-
     testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
@@ -150,6 +140,15 @@ describe('Mappings editor: text datatype', () => {
 
     ({ data } = await getMappingsEditorData());
 
+    let updatedMappings: any = {
+      ...defaultMappings,
+      properties: {
+        myField: {
+          ...defaultMappings.properties.myField,
+          ...defaultTextParameters,
+        },
+      },
+    };
     expect(data).toEqual(updatedMappings);
 
     // Re-open the edit panel
