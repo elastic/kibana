@@ -85,34 +85,37 @@ export class CiStatsReporter {
   }
 
   async metric(name: string, subName: string, value: number) {
-    await this._req(
-      'POST',
-      '/metric',
-      {
+    await this.request({
+      method: 'POST',
+      path: '/metric',
+      body: {
         name,
         subName,
         value,
       },
-      `[${name}/${subName}=${value}]`
-    );
+      bodySummary: `[${name}/${subName}=${value}]`,
+    });
   }
 
   async metrics(metrics: Array<{ name: string; subName: string; value: number }>) {
-    await this._req(
-      'POST',
-      '/metrics',
-      {
+    await this.request({
+      method: 'POST',
+      path: '/metrics',
+      body: {
         metrics,
       },
-      metrics.map(({ name, subName, value }) => `[${name}/${subName}=${value}]`).join(' ')
-    );
+      bodySummary: metrics
+        .map(({ name, subName, value }) => `[${name}/${subName}=${value}]`)
+        .join(' '),
+    });
   }
 
-  async _req(method: Method, path: string, body: any, bodySummary: string) {
+  private async request(options: { method: Method; path: string; body: any; bodySummary: string }) {
     if (!this.config) {
       return;
     }
 
+    const { method, path, body, bodySummary } = options;
     let attempt = 0;
     const maxAttempts = 5;
 

@@ -43934,22 +43934,35 @@ class CiStatsReporter {
         return !!this.config;
     }
     async metric(name, subName, value) {
-        await this._req('POST', '/metric', {
-            name,
-            subName,
-            value,
-        }, `[${name}/${subName}=${value}]`);
+        await this.request({
+            method: 'POST',
+            path: '/metric',
+            body: {
+                name,
+                subName,
+                value,
+            },
+            bodySummary: `[${name}/${subName}=${value}]`,
+        });
     }
     async metrics(metrics) {
-        await this._req('POST', '/metrics', {
-            metrics,
-        }, metrics.map(({ name, subName, value }) => `[${name}/${subName}=${value}]`).join(' '));
+        await this.request({
+            method: 'POST',
+            path: '/metrics',
+            body: {
+                metrics,
+            },
+            bodySummary: metrics
+                .map(({ name, subName, value }) => `[${name}/${subName}=${value}]`)
+                .join(' '),
+        });
     }
-    async _req(method, path, body, bodySummary) {
+    async request(options) {
         var _a, _b, _c, _d;
         if (!this.config) {
             return;
         }
+        const { method, path, body, bodySummary } = options;
         let attempt = 0;
         const maxAttempts = 5;
         while (true) {
