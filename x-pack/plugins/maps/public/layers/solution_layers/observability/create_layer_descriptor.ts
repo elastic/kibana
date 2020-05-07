@@ -80,10 +80,6 @@ function createLayerLabel(
     metricName = i18n.translate('xpack.maps.observability.durationMetricName', {
       defaultMessage: 'Duration',
     });
-  } else if (metric === OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE) {
-    metricName = i18n.translate('xpack.maps.observability.slaPercentageMetricName', {
-      defaultMessage: '% Duration of SLA',
-    });
   } else if (metric === OBSERVABILITY_METRIC_TYPE.COUNT) {
     metricName = i18n.translate('xpack.maps.observability.countMetricName', {
       defaultMessage: 'Total',
@@ -102,11 +98,6 @@ function createAggDescriptor(metric: OBSERVABILITY_METRIC_TYPE): AggDescriptor {
     return {
       type: AGG_TYPE.AVG,
       field: 'transaction.duration.us',
-    };
-  } else if (metric === OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE) {
-    return {
-      type: AGG_TYPE.AVG,
-      field: 'duration_sla_pct',
     };
   } else if (metric === OBSERVABILITY_METRIC_TYPE.UNIQUE_COUNT) {
     return {
@@ -250,16 +241,6 @@ export function createLayerDescriptor({
       },
     },
   };
-
-  if (metric === OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE) {
-    styleProperties[VECTOR_STYLES.LABEL_TEXT] = {
-      type: STYLE_TYPE.DYNAMIC,
-      options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.LABEL_TEXT]!.options as LabelDynamicOptions),
-        field: metricStyleField,
-      },
-    };
-  }
 
   return VectorLayer.createDescriptor({
     label,
