@@ -48,8 +48,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const savedSearchPanel = await testSubjects.find('embeddablePanelHeading-EcommerceData');
       await dashboardPanelActions.toggleContextMenu(savedSearchPanel);
 
-      await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport'); // wait for the full panel to display
+      await testSubjects.existOrFail('embeddablePanelAction-downloadCsvReport'); // wait for the full panel to display or else the test runner could click the wrong option!
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
+      await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
 
       // check every 100ms for the file to exist in the download dir
       // just wait up to 5 seconds
@@ -62,6 +63,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
       const fileExists = await success$.toPromise();
       expect(fileExists).to.be(true);
+
+      // no need to validate download contents, API Integration tests do that some different variations
     });
   });
 }
