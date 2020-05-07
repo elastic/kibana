@@ -27,10 +27,10 @@ import { HOSTS_PAGE } from '../urls/navigation';
 describe('toggle column in timeline', () => {
   before(() => {
     loginAndWaitForPage(HOSTS_PAGE);
-    openTimeline();
   });
 
   beforeEach(() => {
+    openTimeline();
     populateTimeline();
   });
 
