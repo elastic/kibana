@@ -118,22 +118,6 @@ export function populateValidationMessages(
     basicValidations.modelMemoryLimit.message = msg;
   }
 
-  // if (validationResults.contains('effective_model_memory_limit_invalid')) {
-  //   basicValidations.modelMemoryLimit.valid = false;
-  //   const effectiveMaxModelMemoryLimit = (
-  //     limits.effective_max_model_memory_limit || ''
-  //   ).toUpperCase();
-  //   const msg = i18n.translate(
-  //     'xpack.ml.newJob.wizard.validateJob.effectoveModelMemoryLimitRangeInvalidErrorMessage',
-  //     {
-  //       defaultMessage:
-  //         'Job will not be able to run in the current cluster because model memory limit is higher than {effectiveMaxModelMemoryLimit}',
-  //       values: { effectiveMaxModelMemoryLimit },
-  //     }
-  //   );
-  //   basicValidations.modelMemoryLimit.message = msg;
-  // }
-
   if (validationResults.contains('detectors_duplicates')) {
     basicValidations.duplicateDetectors.valid = false;
     const msg = i18n.translate(
