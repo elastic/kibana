@@ -116,7 +116,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}
           onTestPipelineClick={handleTestPipelineClick}
-          hasOnFailure={Boolean(defaultValue.on_failure)}
           isEditing={isEditing}
         />
 
