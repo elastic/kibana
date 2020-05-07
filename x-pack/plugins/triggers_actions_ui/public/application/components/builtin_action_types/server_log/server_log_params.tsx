@@ -6,51 +6,9 @@
 import React, { Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiTextArea, EuiFormRow } from '@elastic/eui';
-import { ActionTypeModel, ValidationResult, ActionParamsProps } from '../../../types';
-import { ServerLogActionParams } from './types';
-import { AddMessageVariables } from '../add_message_variables';
-
-export function getActionType(): ActionTypeModel {
-  return {
-    id: '.server-log',
-    iconClass: 'logsApp',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.selectMessageText',
-      {
-        defaultMessage: 'Add a message to a Kibana log.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.actionTypeTitle',
-      {
-        defaultMessage: 'Send to Server log',
-      }
-    ),
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
-    },
-    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
-        message: new Array<string>(),
-      };
-      validationResult.errors = errors;
-      if (!actionParams.message?.length) {
-        errors.message.push(
-          i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerLogMessageText',
-            {
-              defaultMessage: 'Message is required.',
-            }
-          )
-        );
-      }
-      return validationResult;
-    },
-    actionConnectorFields: null,
-    actionParamsFields: ServerLogParamsFields,
-  };
-}
+import { ActionParamsProps } from '../../../../types';
+import { ServerLogActionParams } from '.././types';
+import { AddMessageVariables } from '../../add_message_variables';
 
 export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
   ServerLogActionParams
@@ -141,3 +99,6 @@ export const ServerLogParamsFields: React.FunctionComponent<ActionParamsProps<
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ServerLogParamsFields as default };
