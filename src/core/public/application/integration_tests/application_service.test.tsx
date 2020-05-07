@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { take } from 'rxjs/operators';
 import { createRenderer } from './utils';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { ApplicationService } from '../application_service';
@@ -54,6 +55,69 @@ describe('ApplicationService', () => {
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
     service = new ApplicationService();
+  });
+
+  describe('navigating to apps', () => {
+    describe('using history.push', () => {
+      it('emits currentAppId$ before mounting the app', async () => {
+        const { register } = service.setup(setupDeps);
+
+        let resolveMount: () => void;
+        const promise = new Promise(resolve => {
+          resolveMount = resolve;
+        });
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            await promise;
+            return () => undefined;
+          },
+        });
+
+        const { currentAppId$, getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
+
+        await navigate('/app/app1');
+
+        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+
+        resolveMount!();
+
+        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+      });
+    });
+
+    describe('using navigateToApp', () => {
+      it('emits currentAppId$ before mounting the app', async () => {
+        const { register } = service.setup(setupDeps);
+
+        let resolveMount: () => void;
+        const promise = new Promise(resolve => {
+          resolveMount = resolve;
+        });
+
+        register(Symbol(), {
+          id: 'app1',
+          title: 'App1',
+          mount: async ({}: AppMountParameters) => {
+            await promise;
+            return () => undefined;
+          },
+        });
+
+        const { navigateToApp, currentAppId$ } = await service.start(startDeps);
+
+        await navigateToApp('app1');
+
+        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+
+        resolveMount!();
+
+        expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
+      });
+    });
   });
 
   describe('leaving an application that registered an app leave handler', () => {

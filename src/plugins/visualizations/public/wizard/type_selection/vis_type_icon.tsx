@@ -34,16 +34,8 @@ interface VisTypeIconProps {
 export const VisTypeIcon = ({ icon, image }: VisTypeIconProps) => {
   return (
     <React.Fragment>
-      {image && (
-        <img
-          src={image}
-          aria-hidden="true"
-          role="presentation"
-          alt=""
-          className="visNewVisDialog__typeImage"
-        />
-      )}
-      {!image && <EuiIcon type={icon || 'empty'} size="l" color="secondary" aria-hidden="true" />}
+      {image && <img src={image} alt="" className="visNewVisDialog__typeImage" />}
+      {!image && <EuiIcon type={icon || 'empty'} size="l" color="secondary" />}
     </React.Fragment>
   );
 };

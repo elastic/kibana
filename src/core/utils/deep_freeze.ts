@@ -17,8 +17,6 @@
  * under the License.
  */
 
-type Freezable = { [k: string]: any } | any[];
-
 // if we define this inside RecursiveReadonly TypeScript complains
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
@@ -32,6 +30,15 @@ export type RecursiveReadonly<T> = T extends (...args: any[]) => any
   ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
   : T;
 
+/** @public */
+export type Freezable = { [k: string]: any } | any[];
+
+/**
+ * Apply Object.freeze to a value recursively and convert the return type to
+ * Readonly variant recursively
+ *
+ * @public
+ */
 export function deepFreeze<T extends Freezable>(object: T) {
   // for any properties that reference an object, makes sure that object is
   // recursively frozen as well
