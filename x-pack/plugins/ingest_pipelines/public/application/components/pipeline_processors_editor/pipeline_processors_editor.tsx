@@ -5,11 +5,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Processor } from '../../../../common/types';
 
 import { OnFormUpdateArg } from '../../../shared_imports';
+
+import './pipeline_processors_editor.scss';
 
 import {
   SettingsFormFlyout,
@@ -141,40 +143,64 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   return (
     <>
-      <DragAndDropTree
-        onDragEnd={onDragEnd}
-        processors={processors}
-        renderItem={({ processor, selector }) => (
-          <PipelineProcessorEditorItem
-            onClick={type => {
-              switch (type) {
-                case 'edit':
-                  setSettingsFormMode({ id: 'editingProcessor', arg: { processor, selector } });
-                  break;
-                case 'delete':
-                  if (processor.onFailure?.length) {
-                    setProcessorToDeleteSelector(selector);
-                  } else {
-                    processorsDispatch({
-                      type: 'removeProcessor',
-                      payload: { selector },
-                    });
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        className="processorsEditorContainer"
+      >
+        <EuiFlexItem grow={false}>
+          <DragAndDropTree
+            onDragEnd={onDragEnd}
+            processors={processors}
+            renderItem={({ processor, selector }) => (
+              <PipelineProcessorEditorItem
+                onClick={type => {
+                  switch (type) {
+                    case 'edit':
+                      setSettingsFormMode({ id: 'editingProcessor', arg: { processor, selector } });
+                      break;
+                    case 'delete':
+                      if (processor.onFailure?.length) {
+                        setProcessorToDeleteSelector(selector);
+                      } else {
+                        processorsDispatch({
+                          type: 'removeProcessor',
+                          payload: { selector },
+                        });
+                      }
+                      break;
+                    case 'addOnFailure':
+                      setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
+                      break;
                   }
-                  break;
-                case 'addOnFailure':
-                  setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                  break;
-              }
-            }}
-            processor={processor}
+                }}
+                processor={processor}
+              />
+            )}
           />
-        )}
-      />
-      <EuiButton onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}>
-        {i18n.translate('xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel', {
-          defaultMessage: 'Add a processor',
-        })}
-      </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            justifyContent="flexStart"
+            alignItems="center"
+            gutterSize="l"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconSide="left"
+                iconType="plusInCircle"
+                onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}
+              >
+                {i18n.translate('xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel', {
+                  defaultMessage: 'Add a processor',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {settingsFormMode.id !== 'closed' ? (
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}

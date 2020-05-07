@@ -128,63 +128,66 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       </FormRow>
 
       {/* Processors field */}
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="none"
-        justifyContent="spaceBetween"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('xpack.ingestPipelines.form.processorsFieldTitle', {
-                defaultMessage: 'Processors',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.processorsFieldDescription"
-              defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
-                    {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
-                      defaultMessage: 'Learn more.',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
+      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            justifyContent="spaceBetween"
+            responsive={false}
+          >
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h3>
+                  {i18n.translate('xpack.ingestPipelines.form.processorsFieldTitle', {
+                    defaultMessage: 'Processors',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.processorsFieldDescription"
+                  defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+                  values={{
+                    learnMoreLink: (
+                      <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
+                        {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
+                          defaultMessage: 'Learn more.',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.form.testPipelineButtonLabel"
+                  defaultMessage="Test pipeline"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.testPipelineButtonLabel"
-              defaultMessage="Test pipeline"
-            />
-          </EuiButton>
+          <FormDataProvider pathsToWatch="processors">
+            {({ processors }) => {
+              const processorProp =
+                typeof processors === 'string' && processors
+                  ? JSON.parse(processors)
+                  : initialProcessors ?? [];
+
+              return (
+                <PipelineProcessorsEditor
+                  onUpdate={onProcessorsUpdate}
+                  value={{ processors: processorProp }}
+                />
+              );
+            }}
+          </FormDataProvider>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <FormDataProvider pathsToWatch="processors">
-        {({ processors }) => {
-          const processorProp =
-            typeof processors === 'string' && processors
-              ? JSON.parse(processors)
-              : initialProcessors ?? [];
-
-          return (
-            <>
-              <PipelineProcessorsEditor
-                onUpdate={onProcessorsUpdate}
-                value={{ processors: processorProp }}
-              />
-              <EuiSpacer size="l" />
-            </>
-          );
-        }}
-      </FormDataProvider>
 
       {/* On-failure field */}
       <FormRow

@@ -13,7 +13,7 @@ import { resolveDestinationLocation, mapSelectorToDragLocation } from './utils';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
 
-import './drag_and_drop_tree_fix.scss';
+import './drag_and_drop_tree.scss';
 
 interface OnDragEndArgs {
   source: DraggableLocation;
@@ -77,7 +77,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   addRenderedItems(processors, [], 0);
 
   return (
-    <div className="pipelineProcessorsEditor__dragAndDropTreeFixes">
+    <div className="pipelineProcessorsEditor__dragAndDropTree">
       <EuiDragDropContext
         onBeforeCapture={({ draggableId: serializedSelector }) => {
           setCurrentDragSelector(serializedSelector);
@@ -114,7 +114,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
           }
         }}
       >
-        <EuiDroppable droppableId="PIPELINE_PROCESSORS_EDITOR" spacing="l" isCombineEnabled>
+        <EuiDroppable droppableId="PIPELINE_PROCESSORS_EDITOR" isCombineEnabled>
           {items.map(([, component]) => component)}
         </EuiDroppable>
       </EuiDragDropContext>
