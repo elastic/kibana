@@ -16,10 +16,12 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
+  EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import { getResultsUrl } from './common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
@@ -133,6 +135,14 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
+export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => {
+  return (
+    <EuiLink href={getResultsUrl(item.id, getAnalysisType(item.config.analysis))}>
+      {item.id}
+    </EuiLink>
+  );
+};
+
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
@@ -191,12 +201,14 @@ export const getColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      field: DataFrameAnalyticsListColumn.id,
+      // field: DataFrameAnalyticsListColumn.id,
       name: 'ID',
-      sortable: true,
+      sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
+      render: (item: DataFrameAnalyticsListRow) =>
+        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
     },
     {
       field: DataFrameAnalyticsListColumn.description,
