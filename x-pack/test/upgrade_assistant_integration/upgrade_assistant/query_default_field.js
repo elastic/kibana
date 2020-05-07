@@ -43,5 +43,13 @@ export default function({ getService }) {
       );
       expect(depMessage).to.be(undefined);
     });
+
+    it('returns 404 if the index does not exist', async () => {
+      await supertest
+        .post(`/api/upgrade_assistant/add_query_default_field/not_a_real_index`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ fieldTypes: ['text', 'keyword', 'ip'], otherFields: ['fields.*'] })
+        .expect(404);
+    });
   });
 }
