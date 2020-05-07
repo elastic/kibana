@@ -140,6 +140,7 @@ export async function validateModelMemoryLimit(
           id: 'mml_greater_than_effective_max_mml',
           maxModelMemoryLimit,
           mml,
+          effectiveMaxModelMemoryLimit,
         });
       }
     }

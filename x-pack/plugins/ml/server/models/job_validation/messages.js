@@ -437,7 +437,8 @@ export const getMessages = () => {
       status: 'WARNING',
       text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlGreaterThanMaxMmlMessage', {
         defaultMessage:
-          'Job will not be able to run in the current cluster because model memory limit is higher than the amount of available memory.',
+          'Job will not be able to run in the current cluster because model memory limit is higher than {effectiveMaxModelMemoryLimit}.',
+        values: { effectiveMaxModelMemoryLimit: '{{effectiveMaxModelMemoryLimit}}' },
       }),
     },
     mml_greater_than_max_mml: {
