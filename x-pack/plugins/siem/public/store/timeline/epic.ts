@@ -75,7 +75,6 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
-import { epicDraftTimeline } from './epic_draft_timeline';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -214,10 +213,6 @@ export const createTimelineEpic = <State>(): Epic<
             timeline$,
             allTimelineQuery$
           );
-        } else if (action.type === getDraftTimeline.type) {
-          return epicDraftTimeline(action, action$, timeline$, false);
-          // } else if (action.type === createTimeline.type) {
-          //   return epicDraftTimeline(action, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({

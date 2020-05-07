@@ -17,7 +17,7 @@ import {
   createTimelineWithTimelineId,
 } from './__mocks__/request_responses';
 
-describe('draft clean timelines', () => {
+describe('clean draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
@@ -69,9 +69,9 @@ describe('draft clean timelines', () => {
       persistNote: mockPersistNote,
     }));
 
-    const draftCleanTimelinesRoute = jest.requireActual('./draft_clean_timelines_route')
-      .draftCleanTimelinesRoute;
-    draftCleanTimelinesRoute(server.router, createMockConfig(), securitySetup);
+    const cleanDraftTimelinesRoute = jest.requireActual('./clean_draft_timelines_route')
+      .cleanDraftTimelinesRoute;
+    cleanDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should create new draft if none is available', async () => {

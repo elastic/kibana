@@ -6,7 +6,6 @@
 import * as rt from 'io-ts';
 import {
   TIMELINE_DRAFT_URL,
-  TIMELINE_DRAFT_CLEAN_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
@@ -163,7 +162,7 @@ export const getDraftTimelinesRequest = () =>
 export const cleanDraftTimelinesRequest = () =>
   requestMock.create({
     method: 'post',
-    path: TIMELINE_DRAFT_CLEAN_URL,
+    path: TIMELINE_DRAFT_URL,
   });
 
 export const mockTimelinesSavedObjects = () => ({

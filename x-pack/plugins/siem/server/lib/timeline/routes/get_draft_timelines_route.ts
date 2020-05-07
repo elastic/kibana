@@ -7,20 +7,20 @@
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../..';
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { TIMELINE_DRAFT_CLEAN_URL } from '../../../../common/constants';
+import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
+import { getDraftTimeline, persistTimeline, resetTimeline, getTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 
-export const draftCleanTimelinesRoute = (
+export const getDraftTimelinesRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.post(
+  router.get(
     {
-      path: TIMELINE_DRAFT_CLEAN_URL,
+      path: TIMELINE_DRAFT_URL,
       validate: {},
       options: {
         tags: ['access:siem'],
@@ -36,17 +36,11 @@ export const draftCleanTimelinesRoute = (
         } = await getDraftTimeline(frameworkRequest);
 
         if (draftTimeline?.savedObjectId) {
-          await resetTimeline(frameworkRequest, [draftTimeline.savedObjectId]);
-          const cleanedDraftTimeline = await getTimeline(
-            frameworkRequest,
-            draftTimeline.savedObjectId
-          );
-
           return response.ok({
             body: {
               data: {
                 persistTimeline: {
-                  timeline: cleanedDraftTimeline,
+                  timeline: draftTimeline,
                 },
               },
             },

@@ -10,15 +10,15 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { getDraftTimeline, persistTimeline } from '../saved_object';
+import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 
-export const draftTimelinesRoute = (
+export const cleanDraftTimelinesRoute = (
   router: IRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.get(
+  router.post(
     {
       path: TIMELINE_DRAFT_URL,
       validate: {},
@@ -36,11 +36,17 @@ export const draftTimelinesRoute = (
         } = await getDraftTimeline(frameworkRequest);
 
         if (draftTimeline?.savedObjectId) {
+          await resetTimeline(frameworkRequest, [draftTimeline.savedObjectId]);
+          const cleanedDraftTimeline = await getTimeline(
+            frameworkRequest,
+            draftTimeline.savedObjectId
+          );
+
           return response.ok({
             body: {
               data: {
                 persistTimeline: {
-                  timeline: draftTimeline,
+                  timeline: cleanedDraftTimeline,
                 },
               },
             },

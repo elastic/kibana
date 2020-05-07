@@ -16,7 +16,6 @@ import {
 } from '../../../common/types/timeline';
 import {
   TIMELINE_URL,
-  TIMELINE_DRAFT_CLEAN_URL,
   TIMELINE_DRAFT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
@@ -138,7 +137,7 @@ export const getDraftTimeline = async (): Promise<TimelineResponse> => {
 };
 
 export const cleanDraftTimeline = async (): Promise<TimelineResponse> => {
-  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_CLEAN_URL);
+  const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL);
 
   return decodeTimelineResponse(response);
 };
