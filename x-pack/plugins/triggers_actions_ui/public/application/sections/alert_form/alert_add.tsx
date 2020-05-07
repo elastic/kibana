@@ -219,6 +219,3 @@ const parseErrors: (errors: IErrorObject) => boolean = errors =>
     if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
-
-// eslint-disable-next-line import/no-default-export
-export { AlertAdd as default };

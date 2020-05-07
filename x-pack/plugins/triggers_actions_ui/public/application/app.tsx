@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Switch, Route, Redirect, HashRouter, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeStart,
@@ -15,6 +15,7 @@ import {
   ChromeBreadcrumb,
   CoreStart,
 } from 'kibana/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
@@ -23,7 +24,6 @@ import { TypeRegistry } from './type_registry';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
-import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const AlertDetailsRoute = lazy(() =>
@@ -68,15 +68,22 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     <Switch>
       <Route
         path={`${BASE_PATH}/:section(${sectionsRegex})`}
-        component={suspendedComponentWithProps<RouteComponentProps<any>>(TriggersActionsUIHome)}
+        component={suspendedRouteComponent(TriggersActionsUIHome)}
       />
       {canShowAlerts && (
-        <Route
-          path={routeToAlertDetails}
-          component={suspendedComponentWithProps<RouteComponentProps<any>>(AlertDetailsRoute)}
-        />
+        <Route path={routeToAlertDetails} component={suspendedRouteComponent(AlertDetailsRoute)} />
       )}
       <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
     </Switch>
   );
 };
+
+function suspendedRouteComponent<T = unknown>(
+  RouteComponent: React.ComponentType<RouteComponentProps<T>>
+) {
+  return (props: RouteComponentProps<T>) => (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <RouteComponent {...props} />
+    </Suspense>
+  );
+}

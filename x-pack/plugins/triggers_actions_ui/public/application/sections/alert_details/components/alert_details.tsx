@@ -37,9 +37,9 @@ import {
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
 import { PLUGIN } from '../../../constants/plugin';
+import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
-import { AlertEdit } from '../../../sections';
 
 type AlertDetailsProps = {
   alert: Alert;
