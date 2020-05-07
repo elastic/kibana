@@ -435,21 +435,21 @@ export const getMessages = () => {
     },
     mml_greater_than_effective_max_mml: {
       status: 'WARNING',
-      text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlGreaterThanMaxMmlMessage', {
-        defaultMessage:
-          'Job will not be able to run in the current cluster because model memory limit is higher than {effectiveMaxModelMemoryLimit}.',
-        values: { effectiveMaxModelMemoryLimit: '{{effectiveMaxModelMemoryLimit}}' },
-      }),
-    },
-    mml_greater_than_max_mml: {
-      status: 'ERROR',
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.mmlGreaterThanEffectiveMaxMmlMessage',
         {
           defaultMessage:
-            'The model memory limit is greater than the max model memory limit configured for this cluster.',
+            'Job will not be able to run in the current cluster because model memory limit is higher than {effectiveMaxModelMemoryLimit}.',
+          values: { effectiveMaxModelMemoryLimit: '{{effectiveMaxModelMemoryLimit}}' },
         }
       ),
+    },
+    mml_greater_than_max_mml: {
+      status: 'ERROR',
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlGreaterThanMaxMmlMessage', {
+        defaultMessage:
+          'The model memory limit is greater than the max model memory limit configured for this cluster.',
+      }),
     },
     mml_value_invalid: {
       status: 'ERROR',
