@@ -21,6 +21,9 @@ import {
 import { ReactExpressionRendererType } from 'src/plugins/expressions/public';
 import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
+import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -48,6 +51,11 @@ function getDefaultProps() {
     query: { query: '', language: 'lucene' },
     filters: [],
     core: coreMock.createSetup(),
+    plugins: {
+      uiActions: uiActionsPluginMock.createStartContract(),
+      data: dataPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
+    },
   };
 }
 

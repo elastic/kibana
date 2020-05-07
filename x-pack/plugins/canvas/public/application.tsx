@@ -26,7 +26,6 @@ import { getDocumentationLinks } from './lib/documentation_links';
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore, destroyStore } from './store';
 
-import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../../src/plugins/ui_actions/public';
 /* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
@@ -41,16 +40,6 @@ import { stopRouter } from './lib/router_provider';
 import './style/index.scss';
 
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
-
-let restoreAction: ActionByType<any> | undefined;
-const emptyAction = {
-  id: 'empty-action',
-  type: '',
-  getDisplayName: () => 'empty action',
-  getIconType: () => undefined,
-  isCompatible: async () => true,
-  execute: async () => undefined,
-} as ActionByType<any>;
 
 export const renderApp = (
   coreStart: CoreStart,
@@ -142,12 +131,6 @@ export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDe
   destroyRegistries();
   resetInterpreter();
   destroyStore();
-
-  startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
-  if (restoreAction) {
-    startPlugins.uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, restoreAction);
-    restoreAction = undefined;
-  }
 
   coreStart.chrome.setBadge(undefined);
   coreStart.chrome.setHelpExtension(undefined);

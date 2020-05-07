@@ -102,7 +102,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
     return new Embeddable(
       timefilter,
       expressionRenderer,
-      uiActions?.executeTriggerActions,
+      uiActions?.getTrigger,
       {
         savedVis,
         editUrl: coreHttp.basePath.prepend(getEditPath(savedObjectId)),

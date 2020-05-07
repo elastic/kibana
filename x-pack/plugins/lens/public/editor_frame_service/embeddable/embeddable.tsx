@@ -30,12 +30,8 @@ import {
 } from '../../../../../../src/plugins/embeddable/public';
 import { DOC_TYPE, Document } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  UiActionsStart,
-} from '../../../../../../src/plugins/ui_actions/public';
-import { LensInterpreterEvent } from '../../types';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 export interface LensEmbeddableConfiguration {
   savedVis: Document;
@@ -54,15 +50,11 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
 }
 
-function isLensInterpreterEvent(event: ExpressionRendererEvent): event is LensInterpreterEvent {
-  return event.name === VALUE_CLICK_TRIGGER || event.name === SELECT_RANGE_TRIGGER;
-}
-
 export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {
   type = DOC_TYPE;
 
   private expressionRenderer: ReactExpressionRendererType;
-  private executeTriggerActions: UiActionsStart['executeTriggerActions'] | undefined;
+  private getTrigger: UiActionsStart['getTrigger'] | undefined;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
@@ -78,8 +70,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   constructor(
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
-    // TODO switch to getTrigger instead
-    executeTriggerActions: UiActionsStart['executeTriggerActions'] | undefined,
+    getTrigger: UiActionsStart['getTrigger'] | undefined,
     { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
@@ -99,7 +90,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       parent
     );
 
-    this.executeTriggerActions = executeTriggerActions;
+    this.getTrigger = getTrigger;
     this.expressionRenderer = expressionRenderer;
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
@@ -163,11 +154,20 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   }
 
   handleEvent = (event: ExpressionRendererEvent) => {
-    if (!this.executeTriggerActions || this.input.disableTriggers) {
+    if (!this.getTrigger || this.input.disableTriggers) {
       return;
     }
-    if (isLensInterpreterEvent(event)) {
-      this.executeTriggerActions(event.name, { ...event.data, embeddable: this });
+    if (isLensBrushEvent(event)) {
+      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
+    }
+    if (isLensFilterEvent(event)) {
+      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
     }
   };
 

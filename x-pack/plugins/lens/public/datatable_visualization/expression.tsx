@@ -10,13 +10,11 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
+import { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import {
-  FormatFactory,
-  ILensInterpreterRenderHandlers,
-  LensExpressionRenderDefinition,
-  LensMultiTable,
-} from '../types';
-import { ExpressionFunctionDefinition } from '../../../../../src/plugins/expressions/public';
+  ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
+} from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
 import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { TriggerContext, VALUE_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
@@ -36,7 +34,7 @@ export interface DatatableProps {
 
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
-  onClickValue: (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => void;
+  onClickValue: (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => void;
   getType: (name: string) => IAggType;
 };
 
@@ -113,7 +111,7 @@ export const datatableColumns: ExpressionFunctionDefinition<
 export const getDatatableRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   getType: Promise<(name: string) => IAggType>;
-}): LensExpressionRenderDefinition<DatatableProps> => ({
+}): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
     defaultMessage: 'Datatable',
@@ -128,8 +126,8 @@ export const getDatatableRenderer = (dependencies: {
   ) => {
     const resolvedFormatFactory = await dependencies.formatFactory;
     const resolvedGetType = await dependencies.getType;
-    const onClickValue = (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => {
-      handlers.event({ name: VALUE_CLICK_TRIGGER, data: context });
+    const onClickValue = (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => {
+      handlers.event({ name: 'filter', data });
     };
     ReactDOM.render(
       <I18nProvider>
@@ -163,21 +161,19 @@ export function DatatableComponent(props: DatatableRenderProps) {
     const timeFieldName = negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
     const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
 
-    const context: ValueClickTriggerContext = {
-      data: {
-        negate,
-        data: [
-          {
-            row: rowIndex,
-            column: colIndex,
-            value,
-            table: firstTable,
-          },
-        ],
-      },
+    const data: ValueClickTriggerContext['data'] = {
+      negate,
+      data: [
+        {
+          row: rowIndex,
+          column: colIndex,
+          value,
+          table: firstTable,
+        },
+      ],
       timeFieldName,
     };
-    props.onClickValue(context);
+    props.onClickValue(data);
   };
 
   return (

@@ -57,12 +57,12 @@ export function valueClickAction(
       });
     },
     isCompatible,
-    execute: async (context: ValueClickActionContext) => {
-      if (!(await isCompatible(context))) {
+    execute: async ({ data }: ValueClickActionContext) => {
+      if (!(await isCompatible({ data }))) {
         throw new IncompatibleActionError();
       }
 
-      const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
+      const filters: Filter[] = await createFiltersFromValueClickAction(data);
 
       let selectedFilters = filters;
 
@@ -98,9 +98,9 @@ export function valueClickAction(
         selectedFilters = await filterSelectionPromise;
       }
 
-      if (context.timeFieldName) {
+      if (data.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          context.timeFieldName,
+          data.timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);

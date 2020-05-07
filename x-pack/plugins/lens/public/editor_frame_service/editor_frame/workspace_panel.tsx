@@ -22,17 +22,20 @@ import {
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import {
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  isLensBrushEvent,
+  isLensFilterEvent,
+} from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -200,11 +203,15 @@ export function InnerWorkspacePanel({
           // ui actions not available, not handling event...
           return;
         }
-        if (event.name === VALUE_CLICK_TRIGGER) {
-          plugins.uiActions.executeTriggerActions(VALUE_CLICK_TRIGGER, event.data);
+        if (isLensBrushEvent(event)) {
+          plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+            data: event.data,
+          });
         }
-        if (event.name === SELECT_RANGE_TRIGGER) {
-          plugins.uiActions.executeTriggerActions(SELECT_RANGE_TRIGGER, event.data);
+        if (isLensFilterEvent(event)) {
+          plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+            data: event.data,
+          });
         }
       },
       [plugins]

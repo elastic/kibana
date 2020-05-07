@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import moment from 'moment';
 import {
@@ -22,6 +22,7 @@ import {
 import { I18nProvider } from '@kbn/i18n/react';
 import {
   ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
 import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
@@ -31,12 +32,7 @@ import {
   ValueClickTriggerContext,
   RangeSelectTriggerContext,
 } from '../../../../../src/plugins/embeddable/public';
-import {
-  LensMultiTable,
-  FormatFactory,
-  LensExpressionRenderDefinition,
-  ILensInterpreterRenderHandlers,
-} from '../types';
+import { LensMultiTable, FormatFactory, ILensInterpreterRenderHandlers } from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
@@ -68,8 +64,8 @@ type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
-  onClickValue: (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => void;
-  onSelectRange: (context: TriggerContext<typeof SELECT_RANGE_TRIGGER>) => void;
+  onClickValue: (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => void;
+  onSelectRange: (data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data']) => void;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -123,7 +119,7 @@ export const getXyChartRenderer = (dependencies: {
   chartTheme: PartialTheme;
   histogramBarTarget: number;
   timeZone: string;
-}): LensExpressionRenderDefinition<XYChartProps> => ({
+}): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
   displayName: 'XY chart',
   help: i18n.translate('xpack.lens.xyChart.renderer.help', {
@@ -137,11 +133,11 @@ export const getXyChartRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-    const onClickValue = (context: TriggerContext<typeof VALUE_CLICK_TRIGGER>) => {
-      handlers.event({ name: VALUE_CLICK_TRIGGER, data: context });
+    const onClickValue = (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => {
+      handlers.event({ name: 'filter', data });
     };
-    const onSelectRange = (context: TriggerContext<typeof SELECT_RANGE_TRIGGER>) => {
-      handlers.event({ name: SELECT_RANGE_TRIGGER, data: context });
+    const onSelectRange = (data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data']) => {
+      handlers.event({ name: 'brush', data });
     };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
@@ -325,12 +321,10 @@ export function XYChart({
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 
-          const context: RangeSelectTriggerContext = {
-            data: {
-              range: [min, max],
-              table,
-              column: xAxisColumnIndex,
-            },
+          const context: RangeSelectTriggerContext['data'] = {
+            range: [min, max],
+            table,
+            column: xAxisColumnIndex,
             timeFieldName,
           };
           onSelectRange(context);
@@ -375,15 +369,13 @@ export function XYChart({
             ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
-          const context: ValueClickTriggerContext = {
-            data: {
-              data: points.map(point => ({
-                row: point.row,
-                column: point.column,
-                value: point.value,
-                table,
-              })),
-            },
+          const context: ValueClickTriggerContext['data'] = {
+            data: points.map(point => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
             timeFieldName,
           };
           onClickValue(context);

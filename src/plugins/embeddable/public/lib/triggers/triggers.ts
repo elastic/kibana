@@ -27,7 +27,6 @@ export interface EmbeddableContext {
 
 export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  timeFieldName?: string;
   data: {
     data: Array<{
       table: Pick<KibanaDatatable, 'rows' | 'columns'>;
@@ -35,6 +34,7 @@ export interface ValueClickTriggerContext<T extends IEmbeddable = IEmbeddable> {
       row: number;
       value: any;
     }>;
+    timeFieldName?: string;
     negate?: boolean;
   };
 }
@@ -45,11 +45,11 @@ export const isValueClickTriggerContext = (
 
 export interface RangeSelectTriggerContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
-  timeFieldName?: string;
   data: {
     table: KibanaDatatable;
     column: number;
     range: number[];
+    timeFieldName?: string;
   };
 }
 

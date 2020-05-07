@@ -8,7 +8,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import {
-  ExpressionRenderDefinition,
+  ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   KibanaDatatable,
   SerializedFieldFormat,
@@ -478,9 +478,22 @@ export interface Visualization<T = unknown, P = unknown> {
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
 }
 
-export type LensInterpreterEvent =
-  | { name: typeof VALUE_CLICK_TRIGGER; data: TriggerContext<typeof VALUE_CLICK_TRIGGER> }
-  | { name: typeof SELECT_RANGE_TRIGGER; data: TriggerContext<typeof SELECT_RANGE_TRIGGER> };
+export interface LensFilterEvent {
+  name: 'filter';
+  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+}
+export interface LensBrushEvent {
+  name: 'brush';
+  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+  return event.name === 'filter';
+}
+
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+  return event.name === 'brush';
+}
 
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
@@ -488,19 +501,5 @@ export type LensInterpreterEvent =
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensInterpreterEvent) => void;
-}
-
-/**
- * Type narrowing down an expression renderer definition by specifying the events which are handled by the
- * lens embeddable. If this type is used to define a renderer, dispatched event will be handled correctly.
- * Other events will be ignored.
- */
-export interface LensExpressionRenderDefinition<Config = unknown>
-  extends ExpressionRenderDefinition<Config> {
-  render: (
-    domNode: HTMLElement,
-    config: Config,
-    handlers: ILensInterpreterRenderHandlers
-  ) => void | Promise<void>;
+  event: (event: LensFilterEvent | LensBrushEvent) => void;
 }

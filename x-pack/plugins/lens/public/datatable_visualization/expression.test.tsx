@@ -13,7 +13,7 @@ import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
-const executeTriggerActions = jest.fn();
+const onClickValue = jest.fn();
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -66,7 +66,7 @@ describe('datatable_expression', () => {
             data={data}
             args={args}
             formatFactory={x => x as IFieldFormat}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
             getType={jest.fn()}
           />
         )
@@ -87,7 +87,7 @@ describe('datatable_expression', () => {
           }}
           args={args}
           formatFactory={x => x as IFieldFormat}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
@@ -97,18 +97,16 @@ describe('datatable_expression', () => {
         .first()
         .simulate('click');
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
-        data: {
-          data: [
-            {
-              column: 0,
-              row: 0,
-              table: data.tables.l1,
-              value: 10110,
-            },
-          ],
-          negate: true,
-        },
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: data.tables.l1,
+            value: 10110,
+          },
+        ],
+        negate: true,
         timeFieldName: undefined,
       });
     });
@@ -127,7 +125,7 @@ describe('datatable_expression', () => {
           }}
           args={args}
           formatFactory={x => x as IFieldFormat}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
@@ -137,18 +135,16 @@ describe('datatable_expression', () => {
         .at(3)
         .simulate('click');
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
-        data: {
-          data: [
-            {
-              column: 1,
-              row: 0,
-              table: data.tables.l1,
-              value: 1588024800000,
-            },
-          ],
-          negate: false,
-        },
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 1,
+            row: 0,
+            table: data.tables.l1,
+            value: 1588024800000,
+          },
+        ],
+        negate: false,
         timeFieldName: 'b',
       });
     });
