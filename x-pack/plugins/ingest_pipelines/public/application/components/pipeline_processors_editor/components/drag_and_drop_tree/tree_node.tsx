@@ -10,8 +10,6 @@ import { EuiDraggable, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@ela
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
-import { DROPPABLE_TYPE } from './drag_and_drop_tree';
-
 export interface TreeNodeComponentArgs {
   processor: ProcessorInternal;
   selector: ProcessorSelector;
