@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { each } from 'lodash';
+import { each, omit } from 'lodash';
 import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
 
@@ -173,7 +173,8 @@ function showResults(resp, action) {
 
 export async function cloneJob(jobId) {
   try {
-    const job = await loadFullJob(jobId);
+    let job = await loadFullJob(jobId);
+    job = omit(job, ['timing_stats', 'forecasts_stats']);
     if (job.custom_settings && job.custom_settings.created_by) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
