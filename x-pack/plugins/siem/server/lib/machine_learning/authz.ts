@@ -38,11 +38,16 @@ export const buildMlAuthz = ({
   ml: SetupPlugins['ml'];
   request: KibanaRequest;
 }): MlAuthz => {
+  let validation: Promise<Validation> | null = null;
+
   const validateRuleType = async (type: RuleType): Promise<Validation> => {
     if (!isMlRule(type)) {
       return { valid: true, message: undefined };
     } else {
-      return validateMlAuthz({ license, ml, request });
+      if (!validation) {
+        validation = validateMlAuthz({ license, ml, request });
+      }
+      return validation;
     }
   };
 
