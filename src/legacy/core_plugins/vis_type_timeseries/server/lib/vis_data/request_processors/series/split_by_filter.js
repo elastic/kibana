@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import { set } from 'lodash';
 import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
@@ -26,7 +26,7 @@ export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
       return next(doc);
     }
 
-    overwrite(
+    set(
       doc,
       `aggs.${series.id}.filter`,
       esQuery.buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)
