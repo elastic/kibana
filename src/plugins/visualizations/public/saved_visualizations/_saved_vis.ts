@@ -34,6 +34,7 @@ import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
 import { IIndexPattern } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
+import { createSavedSearchesLoader } from '../../../discover/public';
 
 export const convertToSerializedVis = (savedVis: ISavedVis): SerializedVis => {
   const { id, title, description, visState, uiStateJSON, searchSourceFields } = savedVis;
@@ -73,6 +74,7 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
 
 export function createSavedVisClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
+  const savedSearch = createSavedSearchesLoader(services);
 
   class SavedVis extends SavedObjectClass {
     public static type: string = 'visualization';
@@ -111,6 +113,12 @@ export function createSavedVisClass(services: SavedObjectKibanaServices) {
         afterESResp: async (savedObject: SavedObject) => {
           const savedVis = (savedObject as any) as ISavedVis;
           savedVis.visState = await updateOldState(savedVis.visState);
+          if (savedVis.searchSourceFields?.index) {
+            await services.indexPatterns.get(savedVis.searchSourceFields.index as any);
+          }
+          if (savedVis.savedSearchId) {
+            await savedSearch.get(savedVis.savedSearchId);
+          }
           return (savedVis as any) as SavedObject;
         },
       });
