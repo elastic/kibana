@@ -140,7 +140,7 @@ export class BulkUploader {
   async _fetchAndUpload(usageCollection) {
     const collectorsReady = await usageCollection.areAllCollectorsReady();
     const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
-    if (!collectorsReady || this.kibanaStatusGetter === null) {
+    if (!collectorsReady || typeof this.kibanaStatusGetter !== 'function') {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
       if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
