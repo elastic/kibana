@@ -11,7 +11,7 @@ import {
 } from '../helpers/setup_request';
 import { transactionGroupsFetcher, Options } from './fetcher';
 import { transactionGroupsTransformer } from './transform';
-import { PromiseReturnType } from '../../../typings/common';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 
 export type TransactionGroupListAPIResponse = PromiseReturnType<
   typeof getTransactionGroupList

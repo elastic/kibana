@@ -204,7 +204,7 @@ export default function({ getService, getPageObjects }) {
         ]);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
@@ -213,7 +213,7 @@ export default function({ getService, getPageObjects }) {
         await security.testUser.setRoles(['kibana_dashboard_only_user', 'superuser']);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (!(await appsMenu.linkExists('Management'))) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

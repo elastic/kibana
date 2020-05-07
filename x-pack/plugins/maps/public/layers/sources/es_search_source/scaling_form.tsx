@@ -18,9 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
 import { SingleFieldSelect } from '../../../components/single_field_select';
-
-// @ts-ignore
-import { indexPatternService } from '../../../kibana_services';
+import { getIndexPatternService } from '../../../kibana_services';
 // @ts-ignore
 import { ValidatedRange } from '../../../components/validated_range';
 import {
@@ -68,8 +66,10 @@ export class ScalingForm extends Component<Props, State> {
 
   async loadIndexSettings() {
     try {
-      const indexPattern = await indexPatternService.get(this.props.indexPatternId);
-      const { maxInnerResultWindow, maxResultWindow } = await loadIndexSettings(indexPattern.title);
+      const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
+      const { maxInnerResultWindow, maxResultWindow } = await loadIndexSettings(
+        indexPattern!.title
+      );
       if (this._isMounted) {
         this.setState({ maxInnerResultWindow, maxResultWindow });
       }

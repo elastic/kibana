@@ -11,6 +11,7 @@ import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
+import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToConfigDatasource,
   Datasource,
@@ -18,6 +19,7 @@ import {
   Installation,
   Output,
   DEFAULT_AGENT_CONFIGS_PACKAGES,
+  decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
@@ -37,13 +39,18 @@ export async function setupIngestManager(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentConfigService.ensureDefaultAgentConfig(soClient),
+    ensureDefaultIndices(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const http = appContextService.getHttpSetup();
         const serverInfo = http.getServerInfo();
         const basePath = http.basePath;
 
-        const defaultKibanaUrl = url.format({
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
           protocol: serverInfo.protocol,
           hostname: serverInfo.host,
           port: serverInfo.port,
@@ -53,7 +60,7 @@ export async function setupIngestManager(
         return settingsService.saveSettings(soClient, {
           agent_auto_upgrade: true,
           package_auto_upgrade: true,
-          kibana_url: appContextService.getConfig()?.fleet?.kibana?.host ?? defaultKibanaUrl,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
         });
       }
 

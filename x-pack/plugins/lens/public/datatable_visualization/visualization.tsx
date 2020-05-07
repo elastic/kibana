@@ -115,8 +115,8 @@ export const datatableVisualization: Visualization<
     return [
       {
         title,
-        // table with >= 10 columns will have a score of 0.6, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.6,
+        // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
+        score: (Math.min(table.columns.length, 10) / 10) * 0.4,
         state: {
           layers: [
             {
