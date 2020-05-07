@@ -80,6 +80,18 @@ export default function({ getService }) {
               ],
             });
           }));
+
+      it('should not return raw id when object id is unspecified', async () =>
+        await supertest
+          .post(`/api/saved_objects/_bulk_create`)
+          // eslint-disable-next-line no-unused-vars
+          .send(BULK_REQUESTS.map(({ id, ...rest }) => rest))
+          .expect(200)
+          .then(resp => {
+            resp.body.saved_objects.map(({ id }) =>
+              expect(id).not.match(/visualization|dashboard/)
+            );
+          }));
     });
 
     describe('without kibana index', () => {
