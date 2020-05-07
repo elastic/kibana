@@ -12,10 +12,11 @@ describe('Transform: Transform List Actions', () => {
   test('getActions()', () => {
     const actions = getActions({ forceDisable: false });
 
-    expect(actions).toHaveLength(3);
+    expect(actions).toHaveLength(4);
     expect(actions[0].isPrimary).toBeTruthy();
     expect(typeof actions[0].render).toBe('function');
     expect(typeof actions[1].render).toBe('function');
     expect(typeof actions[2].render).toBe('function');
+    expect(typeof actions[3].render).toBe('function');
   });
 });

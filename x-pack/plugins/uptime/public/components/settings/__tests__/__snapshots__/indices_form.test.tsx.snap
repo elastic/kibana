@@ -55,10 +55,8 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
     fieldErrors={null}
     formFields={
       Object {
-        "certThresholds": Object {
-          "age": 36,
-          "expiration": 7,
-        },
+        "certAgeThreshold": 36,
+        "certExpirationThreshold": 7,
         "heartbeatIndices": "heartbeat-8*",
       }
     }

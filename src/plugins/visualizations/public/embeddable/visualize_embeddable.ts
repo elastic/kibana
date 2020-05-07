@@ -138,7 +138,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     const adapters = this.handler.inspect();
     if (!adapters) return;
 
-    this.deps.start().plugins.inspector.open(adapters, {
+    return this.deps.start().plugins.inspector.open(adapters, {
       title: this.getTitle() || '',
     });
   };
@@ -340,13 +340,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.abortController.abort();
     }
     this.abortController = new AbortController();
+    const abortController = this.abortController;
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
     });
 
-    if (this.handler) {
+    if (this.handler && !abortController.signal.aborted) {
       this.handler.update(this.expression, expressionParams);
     }
   }
