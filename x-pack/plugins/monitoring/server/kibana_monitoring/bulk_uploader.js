@@ -151,7 +151,7 @@ export class BulkUploader {
 
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
-    if (payload.length > 0) {
+    if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         const result = await this._onPayload(payload);
