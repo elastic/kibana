@@ -17,23 +17,9 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
-
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    require: ['kibana'],
-    uiExports: {
-      app: {
-        title: 'Embeddable Explorer',
-        order: 1,
-        main: 'plugins/kbn_tp_embeddable_explorer/np_ready/public/legacy',
-      },
-    },
-    init(server: Legacy.Server) {
-      server.injectUiAppVars('kbn_tp_embeddable_explorer', async () =>
-        server.getInjectedUiAppVars('kibana')
-      );
-    },
-  });
-}
+export * from '../../../../../src/plugins/embeddable/public';
+export * from '../../../../../src/plugins/embeddable/public/lib/test_samples';
+export {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactory,
+} from '../../../../../examples/embeddable_examples/public';
