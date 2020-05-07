@@ -21,6 +21,7 @@ import {
   PipelineProcessorEditorItem,
   ProcessorRemoveModal,
   ProcessorsTitleAndTestButton,
+  OnFailureProcessorsTitle,
   DragAndDropTreeProvider,
 } from './components';
 import { deserialize } from './serialize';
@@ -48,6 +49,7 @@ export interface Props {
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
   learnMoreAboutProcessorsUrl: string;
+  learnMoreAboutOnFailureProcessorsUrl: string;
 }
 
 const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
@@ -70,6 +72,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   onTestPipelineClick,
   learnMoreAboutProcessorsUrl,
   isTestButtonDisabled,
+  learnMoreAboutOnFailureProcessorsUrl,
 }) => {
   const deserializedResult = useMemo(
     () => deserialize({ processors: originalProcessors, onFailure: originalOnFailureProcessors }),
@@ -245,7 +248,11 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiSpacer size="m" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>On Failure!</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <OnFailureProcessorsTitle
+              learnMoreAboutOnFailureProcessorsUrl={learnMoreAboutOnFailureProcessorsUrl}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
               direction="column"

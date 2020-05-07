@@ -44,7 +44,7 @@ export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
       >
         <p>
           <FormattedMessage
-            id="xpack.ingestPipelines.deleteModal.deleteDescription"
+            id="xpack.ingestPipelines.pipelineEditor.deleteModal.deleteDescription"
             defaultMessage="You are about to delete a processor with on-failure handlers."
           />
         </p>

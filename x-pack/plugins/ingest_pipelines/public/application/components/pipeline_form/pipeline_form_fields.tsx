@@ -6,26 +6,18 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiSwitch, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../shared_imports';
 import { PipelineProcessorsEditor, OnUpdateHandler } from '../pipeline_processors_editor';
 
-import {
-  getUseField,
-  getFormRow,
-  Field,
-  JsonEditorField,
-  useKibana,
-} from '../../../shared_imports';
+import { getUseField, getFormRow, Field, useKibana } from '../../../shared_imports';
 
 interface Props {
   // TODO: Fix processors type anno
   initialProcessors: any;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
-  hasOnFailure: boolean;
   isTestButtonDisabled: boolean;
   onTestPipelineClick: () => void;
   isEditing?: boolean;
@@ -39,14 +31,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
   onProcessorsUpdate,
   isEditing,
   hasVersion,
-  hasOnFailure,
   isTestButtonDisabled,
   onTestPipelineClick,
 }) => {
   const { services } = useKibana();
 
   const [isVersionVisible, setIsVersionVisible] = useState<boolean>(hasVersion);
-  const [isOnFailureEditorVisible, setIsOnFailureEditorVisible] = useState<boolean>(hasOnFailure);
 
   return (
     <>
@@ -119,83 +109,28 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
       </FormRow>
 
       {/* Pipeline Processors Editor */}
-      <FormDataProvider pathsToWatch="processors">
-        {({ processors }) => {
+      <FormDataProvider pathsToWatch={['processors', 'on_failure']}>
+        {({ processors, on_failure: onFailure }) => {
           const processorProp =
             typeof processors === 'string' && processors
               ? JSON.parse(processors)
               : initialProcessors ?? [];
 
+          const onFailureProp =
+            typeof onFailure === 'string' && onFailure ? JSON.parse(onFailure) : onFailure ?? [];
+
           return (
             <PipelineProcessorsEditor
               learnMoreAboutProcessorsUrl={services.documentation.getProcessorsUrl()}
+              learnMoreAboutOnFailureProcessorsUrl={services.documentation.getHandlingFailureUrl()}
               isTestButtonDisabled={isTestButtonDisabled}
               onTestPipelineClick={onTestPipelineClick}
               onUpdate={onProcessorsUpdate}
-              value={{ processors: processorProp }}
+              value={{ processors: processorProp, onFailure: onFailureProp }}
             />
           );
         }}
       </FormDataProvider>
-
-      {/* On-failure field */}
-      <FormRow
-        title={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.onFailureTitle"
-            defaultMessage="Failure processors"
-          />
-        }
-        description={
-          <>
-            <FormattedMessage
-              id="xpack.ingestPipelines.form.onFailureDescription"
-              defaultMessage="The processors to be executed following a failed processor. {learnMoreLink}"
-              values={{
-                learnMoreLink: (
-                  <EuiLink href={services.documentation.getHandlingFailureUrl()} target="_blank">
-                    {i18n.translate('xpack.ingestPipelines.form.onFailureDocumentionLink', {
-                      defaultMessage: 'Learn more.',
-                    })}
-                  </EuiLink>
-                ),
-              }}
-            />
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              label={
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.onFailureToggleDescription"
-                  defaultMessage="Add on-failure processors"
-                />
-              }
-              checked={isOnFailureEditorVisible}
-              onChange={e => setIsOnFailureEditorVisible(e.target.checked)}
-              data-test-subj="onFailureToggle"
-            />
-          </>
-        }
-      >
-        {isOnFailureEditorVisible ? (
-          <UseField
-            path="on_failure"
-            component={JsonEditorField}
-            componentProps={{
-              ['data-test-subj']: 'onFailureEditor',
-              euiCodeEditorProps: {
-                height: '300px',
-                'aria-label': i18n.translate('xpack.ingestPipelines.form.onFailureFieldAriaLabel', {
-                  defaultMessage: 'On-failure processors JSON editor',
-                }),
-              },
-            }}
-          />
-        ) : (
-          // <FormRow/> requires children or a field
-          // For now, we return an empty <div> if the editor is not visible
-          <div />
-        )}
-      </FormRow>
     </>
   );
 };
