@@ -14,4 +14,5 @@ export const mockKibanaContext = {
   http: httpServiceMock.createSetupContract(),
   setBreadcrumbs: jest.fn(),
   enterpriseSearchUrl: 'http://localhost:3002',
+  license$: jest.fn(),
 };

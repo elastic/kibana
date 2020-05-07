@@ -17,6 +17,7 @@ import {
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { LicenseContext, ILicenseContext, hasPlatinumLicense } from '../../../shared/licensing';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
 import EnginesIcon from '../../assets/engine.svg';
@@ -30,6 +31,7 @@ import './engine_overview.scss';
 
 export const EngineOverview: ReactFC<> = () => {
   const { http } = useContext(KibanaContext) as IKibanaContext;
+  const { license } = useContext(LicenseContext) as ILicenseContext;
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasNoAccount, setHasNoAccount] = useState(false);
@@ -72,11 +74,13 @@ export const EngineOverview: ReactFC<> = () => {
   }, [enginesPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const params = { type: 'meta', pageIndex: metaEnginesPage };
-    const callbacks = { setResults: setMetaEngines, setResultsTotal: setMetaEnginesTotal };
+    if (hasPlatinumLicense(license)) {
+      const params = { type: 'meta', pageIndex: metaEnginesPage };
+      const callbacks = { setResults: setMetaEngines, setResultsTotal: setMetaEnginesTotal };
 
-    setEnginesData(params, callbacks);
-  }, [metaEnginesPage]); // eslint-disable-line react-hooks/exhaustive-deps
+      setEnginesData(params, callbacks);
+    }
+  }, [license, metaEnginesPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (hasErrorConnecting) return <ErrorState />;
   if (hasNoAccount) return <NoUserState />;

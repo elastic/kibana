@@ -5,14 +5,15 @@
  */
 
 /**
- * NOTE: This variable name MUST start with 'mock*' in order for
+ * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
 import { mockKibanaContext } from './kibana_context.mock';
+import { mockLicenseContext } from './license_context.mock';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useContext: jest.fn(() => mockKibanaContext),
+  useContext: jest.fn(() => ({ ...mockKibanaContext, ...mockLicenseContext })),
 }));
 
 /**

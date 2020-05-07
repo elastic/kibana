@@ -5,14 +5,20 @@
  */
 
 import { coreMock } from 'src/core/public/mocks';
-import { renderApp } from '../applications';
+import { licensingMock } from '../../../licensing/public/mocks';
+
+import { renderApp } from './';
 
 describe('renderApp', () => {
   it('mounts and unmounts UI', () => {
     const params = coreMock.createAppMountParamters();
     const core = coreMock.createStart();
+    const config = {};
+    const plugins = {
+      licensing: licensingMock.createSetup(),
+    };
 
-    const unmount = renderApp(core, params, {});
+    const unmount = renderApp(core, params, config, plugins);
     expect(params.element.querySelector('.setup-guide')).not.toBeNull();
     unmount();
     expect(params.element.innerHTML).toEqual('');

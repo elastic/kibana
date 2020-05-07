@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { render } from 'enzyme';
 
 import { KibanaContext } from '../../../';
+import { LicenseContext } from '../../../shared/licensing';
 import { mountWithKibanaContext, mockKibanaContext } from '../../../__mocks__';
 
 import { EmptyState, ErrorState, NoUserState } from '../empty_states';
@@ -24,7 +25,9 @@ describe('EngineOverview', () => {
       // We use render() instead of mount() here to not trigger lifecycle methods (i.e., useEffect)
       const wrapper = render(
         <KibanaContext.Provider value={{ http: {} }}>
-          <EngineOverview />
+          <LicenseContext.Provider value={{ license: {} }}>
+            <EngineOverview />
+          </LicenseContext.Provider>
         </KibanaContext.Provider>
       );
 
@@ -85,19 +88,13 @@ describe('EngineOverview', () => {
     });
 
     it('renders', () => {
-      expect(wrapper.find(EngineTable)).toHaveLength(2);
+      expect(wrapper.find(EngineTable)).toHaveLength(1);
     });
 
     it('calls the engines API', () => {
       expect(mockApi).toHaveBeenNthCalledWith(1, '/api/app_search/engines', {
         query: {
           type: 'indexed',
-          pageIndex: 1,
-        },
-      });
-      expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
-        query: {
-          type: 'meta',
           pageIndex: 1,
         },
       });
@@ -130,13 +127,36 @@ describe('EngineOverview', () => {
         expect(getTablePagination().pageIndex).toEqual(4);
       });
     });
+
+    describe('when on a platinum license', () => {
+      beforeAll(async () => {
+        mockApi.mockClear();
+        wrapper = await mountWithApiMock({
+          license: { type: 'platinum', isActive: true },
+          get: mockApi,
+        });
+      });
+
+      it('renders a 2nd meta engines table', () => {
+        expect(wrapper.find(EngineTable)).toHaveLength(2);
+      });
+
+      it('makes a 2nd call to the engines API with type meta', () => {
+        expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
+          query: {
+            type: 'meta',
+            pageIndex: 1,
+          },
+        });
+      });
+    });
   });
 
   /**
    * Test helpers
    */
 
-  const mountWithApiMock = async ({ get }) => {
+  const mountWithApiMock = async ({ get, license }) => {
     let wrapper;
     const httpMock = { ...mockKibanaContext.http, get };
 
@@ -144,7 +164,12 @@ describe('EngineOverview', () => {
     // TBH, I don't fully understand why since Enzyme's mount is supposed to
     // have act() baked in - could be because of the wrapping context provider?
     await act(async () => {
-      wrapper = mountWithKibanaContext(<EngineOverview />, { http: httpMock });
+      wrapper = mountWithKibanaContext(
+        <LicenseContext.Provider value={{ license }}>
+          <EngineOverview />
+        </LicenseContext.Provider>,
+        { http: httpMock }
+      );
     });
     wrapper.update(); // This seems to be required for the DOM to actually update
 
