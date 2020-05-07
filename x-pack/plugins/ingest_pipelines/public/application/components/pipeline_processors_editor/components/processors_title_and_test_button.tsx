@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FunctionComponent } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+export interface Props {
+  learnMoreAboutProcessorsUrl: string;
+  onTestPipelineClick: () => void;
+  isTestButtonDisabled: boolean;
+}
+
+export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
+  onTestPipelineClick,
+  isTestButtonDisabled,
+  learnMoreAboutProcessorsUrl,
+}) => {
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('xpack.ingestPipelines.form.processorsFieldTitle', {
+              defaultMessage: 'Processors',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.ingestPipelines.form.processorsFieldDescription"
+            defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink href={learnMoreAboutProcessorsUrl} target="_blank">
+                  {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
+                    defaultMessage: 'Learn more.',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+          <FormattedMessage
+            id="xpack.ingestPipelines.form.testPipelineButtonLabel"
+            defaultMessage="Test pipeline"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

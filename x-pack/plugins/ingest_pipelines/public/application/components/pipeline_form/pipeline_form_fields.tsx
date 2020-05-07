@@ -7,16 +7,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiSpacer,
-  EuiSwitch,
-  EuiLink,
-  EuiTitle,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiLink } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../shared_imports';
 import { PipelineProcessorsEditor, OnUpdateHandler } from '../pipeline_processors_editor';
@@ -127,67 +118,25 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         />
       </FormRow>
 
-      {/* Processors field */}
-      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            justifyContent="spaceBetween"
-            responsive={false}
-          >
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3>
-                  {i18n.translate('xpack.ingestPipelines.form.processorsFieldTitle', {
-                    defaultMessage: 'Processors',
-                  })}
-                </h3>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.processorsFieldDescription"
-                  defaultMessage="The processors used to pre-process documents before indexing. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink href={services.documentation.getProcessorsUrl()} target="_blank">
-                        {i18n.translate('xpack.ingestPipelines.form.processorsDocumentionLink', {
-                          defaultMessage: 'Learn more.',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.form.testPipelineButtonLabel"
-                  defaultMessage="Test pipeline"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormDataProvider pathsToWatch="processors">
-            {({ processors }) => {
-              const processorProp =
-                typeof processors === 'string' && processors
-                  ? JSON.parse(processors)
-                  : initialProcessors ?? [];
+      {/* Pipeline Processors Editor */}
+      <FormDataProvider pathsToWatch="processors">
+        {({ processors }) => {
+          const processorProp =
+            typeof processors === 'string' && processors
+              ? JSON.parse(processors)
+              : initialProcessors ?? [];
 
-              return (
-                <PipelineProcessorsEditor
-                  onUpdate={onProcessorsUpdate}
-                  value={{ processors: processorProp }}
-                />
-              );
-            }}
-          </FormDataProvider>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          return (
+            <PipelineProcessorsEditor
+              learnMoreAboutProcessorsUrl={services.documentation.getProcessorsUrl()}
+              isTestButtonDisabled={isTestButtonDisabled}
+              onTestPipelineClick={onTestPipelineClick}
+              onUpdate={onProcessorsUpdate}
+              value={{ processors: processorProp }}
+            />
+          );
+        }}
+      </FormDataProvider>
 
       {/* On-failure field */}
       <FormRow

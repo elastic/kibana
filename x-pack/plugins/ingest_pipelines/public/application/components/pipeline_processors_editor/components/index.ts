@@ -13,3 +13,5 @@ export { DragAndDropTree } from './drag_and_drop_tree';
 export { PipelineProcessorEditorItem } from './pipeline_processor_editor_item';
 
 export { ProcessorRemoveModal } from './processor_remove_modal';
+
+export { ProcessorsTitleAndTestButton } from './processors_title_and_test_button';

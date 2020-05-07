@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -18,6 +20,7 @@ import {
   DragAndDropTree,
   PipelineProcessorEditorItem,
   ProcessorRemoveModal,
+  ProcessorsTitleAndTestButton,
 } from './components';
 import { deserialize } from './serialize';
 import { serialize, SerializeResult } from './deserialize';
@@ -41,6 +44,9 @@ export interface Props {
     onFailure?: Processor[];
   };
   onUpdate: (arg: OnUpdateHandlerArg) => void;
+  isTestButtonDisabled: boolean;
+  onTestPipelineClick: () => void;
+  learnMoreAboutProcessorsUrl: string;
 }
 
 /**
@@ -55,12 +61,16 @@ type SettingsFormMode =
   | { id: 'closed' };
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
-  value: { processors: originalProcessors },
+  value: { processors: originalProcessors, onFailure: originalOnFailureProcessors },
   onUpdate,
+  onTestPipelineClick,
+  learnMoreAboutProcessorsUrl,
+  isTestButtonDisabled,
 }) => {
-  const deserializedResult = useMemo(() => deserialize({ processors: originalProcessors }), [
-    originalProcessors,
-  ]);
+  const deserializedResult = useMemo(
+    () => deserialize({ processors: originalProcessors, onFailure: originalOnFailureProcessors }),
+    [originalProcessors, originalOnFailureProcessors]
+  );
 
   const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
     ProcessorSelector | undefined
@@ -143,60 +153,77 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-        className="processorsEditorContainer"
-      >
+      <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
-          <DragAndDropTree
-            onDragEnd={onDragEnd}
-            processors={processors}
-            renderItem={({ processor, selector }) => (
-              <PipelineProcessorEditorItem
-                onClick={type => {
-                  switch (type) {
-                    case 'edit':
-                      setSettingsFormMode({ id: 'editingProcessor', arg: { processor, selector } });
-                      break;
-                    case 'delete':
-                      if (processor.onFailure?.length) {
-                        setProcessorToDeleteSelector(selector);
-                      } else {
-                        processorsDispatch({
-                          type: 'removeProcessor',
-                          payload: { selector },
-                        });
-                      }
-                      break;
-                    case 'addOnFailure':
-                      setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                      break;
-                  }
-                }}
-                processor={processor}
-              />
-            )}
+          <ProcessorsTitleAndTestButton
+            learnMoreAboutProcessorsUrl={learnMoreAboutProcessorsUrl}
+            onTestPipelineClick={onTestPipelineClick}
+            isTestButtonDisabled={isTestButtonDisabled}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
-            justifyContent="flexStart"
-            alignItems="center"
-            gutterSize="l"
+            direction="column"
+            gutterSize="none"
             responsive={false}
+            className="processorsEditorContainer"
           >
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconSide="left"
-                iconType="plusInCircle"
-                onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}
+              <DragAndDropTree
+                onDragEnd={onDragEnd}
+                processors={processors}
+                renderItem={({ processor, selector }) => (
+                  <PipelineProcessorEditorItem
+                    onClick={type => {
+                      switch (type) {
+                        case 'edit':
+                          setSettingsFormMode({
+                            id: 'editingProcessor',
+                            arg: { processor, selector },
+                          });
+                          break;
+                        case 'delete':
+                          if (processor.onFailure?.length) {
+                            setProcessorToDeleteSelector(selector);
+                          } else {
+                            processorsDispatch({
+                              type: 'removeProcessor',
+                              payload: { selector },
+                            });
+                          }
+                          break;
+                        case 'addOnFailure':
+                          setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
+                          break;
+                      }
+                    }}
+                    processor={processor}
+                  />
+                )}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                alignItems="center"
+                gutterSize="l"
+                responsive={false}
               >
-                {i18n.translate('xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel', {
-                  defaultMessage: 'Add a processor',
-                })}
-              </EuiButtonEmpty>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconSide="left"
+                    iconType="plusInCircle"
+                    onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}
+                  >
+                    {i18n.translate(
+                      'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',
+                      {
+                        defaultMessage: 'Add a processor',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
