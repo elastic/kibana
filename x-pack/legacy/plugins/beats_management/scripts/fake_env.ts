@@ -9,7 +9,8 @@ import request from 'request';
 import uuidv4 from 'uuid/v4';
 import { configBlockSchemas } from '../common/config_schemas';
 import { BeatTag } from '../common/domain_types';
-import { compose } from '../public/lib/compose/scripts';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { compose } from '../../../../plugins/beats_management/public/lib/compose/scripts';
 const args = process.argv.slice(2);
 const chance = new Chance();
 

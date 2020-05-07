@@ -10,7 +10,7 @@ import { SecurityPluginSetup } from '../../security/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 
-import { bootstrap } from '../../../legacy/plugins/beats_management/public';
+import { bootstrap } from './bootstrap';
 import { BeatsManagementConfigType } from '../common';
 
 interface SetupDeps {

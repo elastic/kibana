@@ -5,7 +5,8 @@
  */
 
 import { BeatEvent } from '../../../../common/domain_types';
-import { FrameworkUser } from '../../../../public/lib/adapters/framework/adapter_types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FrameworkUser } from '../../../../../../../plugins/beats_management/public/lib/adapters/framework/adapter_types';
 import { DatabaseAdapter } from '../database/adapter_types';
 import { BeatEventsAdapter } from './adapter_types';
 
