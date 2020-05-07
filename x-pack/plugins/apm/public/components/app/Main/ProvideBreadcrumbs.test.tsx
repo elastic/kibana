@@ -5,8 +5,8 @@
  */
 
 import { Location } from 'history';
-import { BreadcrumbRoute, getBreadcrumbs } from '../ProvideBreadcrumbs';
-import { RouteName } from '../route_config/route_names';
+import { BreadcrumbRoute, getBreadcrumbs } from './ProvideBreadcrumbs';
+import { RouteName } from './route_config/route_names';
 
 describe('getBreadcrumbs', () => {
   const getTestRoutes = (): BreadcrumbRoute[] => [
