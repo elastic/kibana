@@ -16,11 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import _ from 'lodash';
 import { dateHistogramInterval } from '../../../../../../data/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
+import { overwrite } from '../../helpers';
 
 export function dateHistogram(
   req,
@@ -36,7 +35,7 @@ export function dateHistogram(
     const { from, to } = getTimerange(req);
     const timezone = capabilities.searchTimezone;
 
-    _.set(doc, `aggs.${annotation.id}.date_histogram`, {
+    overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
       min_doc_count: 0,
       time_zone: timezone,
