@@ -16,5 +16,19 @@ export function UptimeOverviewProvider({ getService }: FtrProviderContext) {
     async openIntegrationsPopoverForMonitor(id: string): Promise<void> {
       return testSubjects.click(`xpack.uptime.monitorList.actionsPopover.${id}`);
     },
+    async openAlertsPopover(): Promise<void> {
+      return testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
+    },
+    /**
+     * If the popover is already open, click the nested button.
+     * Otherwise, open the popover, then click the nested button.
+     */
+    async navigateToNestedPopover(): Promise<void> {
+      if (testSubjects.exists('xpack.uptime.openAlertContextPanel')) {
+        return testSubjects.click('xpack.uptime.openAlertContextPanel');
+      }
+      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
+      return testSubjects.click('xpack.uptime.openAlertContextPanel');
+    },
   };
 }

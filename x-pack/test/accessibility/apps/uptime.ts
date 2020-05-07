@@ -60,6 +60,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
+    it('overview alert popover controls', async () => {
+      await uptimeService.overview.openAlertsPopover();
+      await a11y.testAppSnapshot();
+      await uptimeService.overview.navigateToNestedPopover();
+      await a11y.testAppSnapshot();
+    });
+
     it('detail page', async () => {
       await uptimeService.navigation.goToMonitor(A11Y_TEST_MONITOR_ID);
       await uptimeService.monitor.locationMapIsRendered();
