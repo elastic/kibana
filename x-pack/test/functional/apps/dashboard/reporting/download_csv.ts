@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
 import * as Rx from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, timeout } from 'rxjs/operators';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const csvPath = path.resolve(
@@ -51,13 +52,16 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('embeddablePanelAction-downloadCsvReport');
 
       // check every 100ms for the file to exist in the download dir
+      // just wait up to 5 seconds
       const success$ = Rx.interval(100).pipe(
         map(() => fs.existsSync(csvPath)),
         filter(value => value === true),
-        first()
+        first(),
+        timeout(5000)
       );
 
-      await success$.toPromise();
+      const fileExists = await success$.toPromise();
+      expect(fileExists).to.be(true);
     });
   });
 }
