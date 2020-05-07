@@ -38,6 +38,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       let expectedChartTypes = [
         'Area',
         'Controls',
+        'Coordinate Map',
         // TODO skipped because legacy maps vis are not ready yet
         'Data Table',
         'Gauge',
