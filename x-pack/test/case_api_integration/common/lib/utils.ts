@@ -68,34 +68,3 @@ export const deleteConfiguration = async (es: any): Promise<void> => {
     body: {},
   });
 };
-
-export const getConnector = () => ({
-  name: 'ServiceNow Connector',
-  actionTypeId: '.servicenow',
-  secrets: {
-    username: 'admin',
-    password: 'admin',
-  },
-  config: {
-    apiUrl: 'localhost',
-    casesConfiguration: {
-      mapping: [
-        {
-          source: 'title',
-          target: 'short_description',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'description',
-          target: 'description',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'comments',
-          target: 'comments',
-          actionType: 'append',
-        },
-      ],
-    },
-  },
-});
