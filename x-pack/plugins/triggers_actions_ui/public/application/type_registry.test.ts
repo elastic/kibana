@@ -21,6 +21,7 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
     },
     alertParamsExpression: ExpressionComponent,
     isEditable: true,
+    consumer: 'alerting',
   };
 };
 

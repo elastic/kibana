@@ -110,6 +110,7 @@ export interface AlertTypeModel {
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
   isEditable: boolean;
+  consumer: string;
   defaultActionMessage?: string;
 }
 

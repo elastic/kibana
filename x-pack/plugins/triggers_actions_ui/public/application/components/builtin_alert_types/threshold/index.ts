@@ -15,5 +15,6 @@ export function getAlertType(): AlertTypeModel {
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateExpression,
     isEditable: true,
+    consumer: 'alerting',
   };
 }

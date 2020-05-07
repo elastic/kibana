@@ -40,6 +40,7 @@ jest.mock('../../../app_context', () => ({
           return { errors: {} };
         },
         isEditable: true,
+        consumer: 'alerting',
       }),
       list: jest.fn(),
     },

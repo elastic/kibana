@@ -21,4 +21,5 @@ export const initTlsAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
   validate: () => ({ errors: {} }),
   defaultActionMessage,
   isEditable: false,
+  consumer: 'uptime',
 });

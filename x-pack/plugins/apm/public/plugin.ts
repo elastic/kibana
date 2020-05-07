@@ -116,7 +116,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       validate: () => ({
         errors: []
       }),
-      isEditable: false
+      isEditable: false,
+      consumer: 'apm'
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
@@ -129,7 +130,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       validate: () => ({
         errors: []
       }),
-      isEditable: false
+      isEditable: false,
+      consumer: 'apm'
     });
   }
 }

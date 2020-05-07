@@ -67,4 +67,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   validate,
   defaultActionMessage,
   isEditable: false,
+  consumer: 'uptime',
 });

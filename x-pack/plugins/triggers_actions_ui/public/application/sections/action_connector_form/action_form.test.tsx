@@ -27,6 +27,7 @@ describe('action_form', () => {
     },
     alertParamsExpression: () => <Fragment />,
     isEditable: true,
+    consumer: 'alerting',
   };
 
   const actionType = {

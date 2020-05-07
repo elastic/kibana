@@ -26,6 +26,7 @@ describe('alert_form', () => {
     },
     alertParamsExpression: () => <Fragment />,
     isEditable: true,
+    consumer: 'alerting',
   };
 
   const actionType = {
@@ -41,6 +42,18 @@ describe('alert_form', () => {
     },
     actionConnectorFields: null,
     actionParamsFields: null,
+  };
+
+  const alertTypeNonEditable = {
+    id: 'non-edit-alert-type',
+    iconClass: 'test',
+    name: 'non edit alert',
+    validate: (): ValidationResult => {
+      return { errors: {} };
+    },
+    alertParamsExpression: () => <Fragment />,
+    isEditable: false,
+    consumer: 'alerting',
   };
 
   describe('alert_form create alert', () => {
@@ -62,7 +75,7 @@ describe('alert_form', () => {
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
         capabilities,
       };
-      alertTypeRegistry.list.mockReturnValue([alertType]);
+      alertTypeRegistry.list.mockReturnValue([alertType, alertTypeNonEditable]);
       alertTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -117,6 +130,14 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="my-alert-type-SelectOption"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('does not render registered alert type which non editable', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="non-edit-alert-type-SelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });
 
     it('renders registered action types', async () => {

@@ -169,6 +169,7 @@ describe('monitor status alert type', () => {
     expect(initMonitorStatusAlertType({ autocomplete: {} })).toMatchInlineSnapshot(`
       Object {
         "alertParamsExpression": [Function],
+        "consumer": "uptime",
         "defaultActionMessage": "{{context.message}}
       Last triggered at: {{state.lastTriggeredAt}}
       {{context.downMonitorsWithGeo}}",

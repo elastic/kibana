@@ -72,6 +72,7 @@ export function getAlertType(): AlertTypeModel {
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateAlertType,
     isEditable: true,
+    consumer: 'alerting',
   };
 }
 ```
@@ -309,6 +310,7 @@ export function getAlertType(): AlertTypeModel {
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
     isEditable: true,
+    consumer: 'alerting',
   };
 }
 ```
