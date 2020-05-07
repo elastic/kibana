@@ -15,7 +15,7 @@ import {
   ChromeBreadcrumb,
   CoreStart,
 } from 'kibana/public';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BASE_PATH, Section, routeToAlertDetails } from './constants';
 import { AppContextProvider, useAppDependencies } from './app_context';
 import { hasShowAlertsCapability } from './lib/capabilities';
@@ -25,7 +25,7 @@ import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 
-const TriggersActionsUIHome = lazy(() => import('./home'));
+const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(() =>
   import('./sections/alert_details/components/alert_details_route')
 );
@@ -82,7 +82,15 @@ function suspendedRouteComponent<T = unknown>(
   RouteComponent: React.ComponentType<RouteComponentProps<T>>
 ) {
   return (props: RouteComponentProps<T>) => (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense
+      fallback={
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
       <RouteComponent {...props} />
     </Suspense>
   );

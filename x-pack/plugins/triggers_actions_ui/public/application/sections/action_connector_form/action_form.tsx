@@ -283,7 +283,15 @@ export const ActionForm = ({
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
-          <Suspense fallback={<EuiLoadingSpinner />}>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
             <ParamsFieldsComponent
               actionParams={actionItem.params as any}
               index={index}
