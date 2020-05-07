@@ -4,7 +4,7 @@
 
 ## ApplicationStart.navigateToApp() method
 
-Navigate to a given app
+Navigate to a given app.
 
 <b>Signature:</b>
 
@@ -25,4 +25,8 @@ navigateToApp(appId: string, options?: {
 <b>Returns:</b>
 
 `Promise<void>`
+
+## Remarks
+
+'Cross-Links', links from an application to another using either a relative or absolute `href` property, will automatically be intercepted by the application service's global click handler to call `navigateToApp` instead of performing a full page refresh. This means that adding a `click` handler on them to do it manually is not required, and should be avoided. Due to some React limitations regarding mixed native/react event handlers, it is not possible to prevent the execution of this handler using `event.stopPropagation` or `event.preventDefault`<!-- -->. In the rare scenario where this behavior would still need to be disabled, it can be done by adding the `data-disable-core-navigation` attribute to the link (`a` element) of any of its parents.
 
