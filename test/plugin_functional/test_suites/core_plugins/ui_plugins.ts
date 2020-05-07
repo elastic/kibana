@@ -47,14 +47,6 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         await PageObjects.common.navigateToApp('settings');
       });
 
-      it('to injectedMetadata service', async () => {
-        expect(
-          await browser.execute(() => {
-            return window.__coreProvider.setup.core.injectedMetadata.getKibanaBuildNumber();
-          })
-        ).to.be.a('number');
-      });
-
       it('to start services via coreSetup.getStartServices', async () => {
         expect(
           await browser.executeAsync(async cb => {

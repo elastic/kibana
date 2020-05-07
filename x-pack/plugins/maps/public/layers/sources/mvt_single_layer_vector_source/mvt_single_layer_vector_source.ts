@@ -20,6 +20,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',
@@ -151,6 +152,10 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getApplyGlobalQuery(): boolean {
     return false;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]> {
+    return [];
   }
 }
 
