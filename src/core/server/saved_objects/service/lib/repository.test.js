@@ -809,34 +809,34 @@ describe('SavedObjectsRepository', () => {
           saved_objects: [expectSuccessResult(obj1), expectError(obj), expectSuccessResult(obj2)],
         });
       });
-    });
 
-    it(`deserializes the raw ES response into a saved object`, async () => {
-      // Test for fix to https://github.com/elastic/kibana/issues/65088 where
-      // we returned raw ID's when an object without an id was created.
-      const namespace = 'myspace';
-      const response = getMockBulkCreateResponse([obj1, obj2], namespace);
-      callAdminCluster.mockResolvedValueOnce(response); // this._writeToCluster('bulk', ...)
+      it(`a deserialized saved object`, async () => {
+        // Test for fix to https://github.com/elastic/kibana/issues/65088 where
+        // we returned raw ID's when an object without an id was created.
+        const namespace = 'myspace';
+        const response = getMockBulkCreateResponse([obj1, obj2], namespace);
+        callAdminCluster.mockResolvedValueOnce(response); // this._writeToCluster('bulk', ...)
 
-      // Bulk create one object with id unspecified, and one with id specified
-      const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2], {
-        namespace,
+        // Bulk create one object with id unspecified, and one with id specified
+        const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2], {
+          namespace,
+        });
+
+        // Assert that both raw docs from the ES response are deserialized
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
+          ...response.items[0].create,
+          _id: expect.stringMatching(/myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        });
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
+
+        // Assert that ID's are deserialized to remove the type and namespace
+        expect(result.saved_objects[0].id).toEqual(
+          expect.not.stringMatching(/config|index-pattern|myspace/)
+        );
+        expect(result.saved_objects[1].id).toEqual(
+          expect.not.stringMatching(/config|index-pattern|myspace/)
+        );
       });
-
-      // Assert that both raw docs from the ES response are deserialized
-      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
-        ...response.items[0].create,
-        _id: expect.stringMatching(/myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-      });
-      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
-
-      // Assert that ID's are deserialized to remove the type and namespace
-      expect(result.saved_objects[0].id).toEqual(
-        expect.not.stringMatching(/config|index-pattern|myspace/)
-      );
-      expect(result.saved_objects[1].id).toEqual(
-        expect.not.stringMatching(/config|index-pattern|myspace/)
-      );
     });
   });
 
