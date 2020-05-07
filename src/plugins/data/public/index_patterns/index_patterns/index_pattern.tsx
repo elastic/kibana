@@ -35,7 +35,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findByTitle, getRoutes } from '../utils';
+import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
@@ -241,10 +241,6 @@ export class IndexPattern implements IIndexPattern {
     }
 
     return this.indexFields(forceFieldRefresh);
-  }
-
-  public get routes() {
-    return getRoutes();
   }
 
   getComputedFields() {
