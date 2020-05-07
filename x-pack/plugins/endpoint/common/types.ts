@@ -25,7 +25,7 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   ? ImmutableSet<M>
   : ImmutableObject<T>;
 
-type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
+export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
@@ -643,6 +643,8 @@ export interface HostPolicyResponseActions {
   read_logging_config: HostPolicyResponseActionDetails;
   read_malware_config: HostPolicyResponseActionDetails;
 }
+
+export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
