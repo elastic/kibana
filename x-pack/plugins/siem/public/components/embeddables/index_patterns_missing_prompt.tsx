@@ -8,6 +8,8 @@ import { EuiButton, EuiCode, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
+import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../../../src/plugins/data/public';
+
 import { useKibana, useBasePath } from '../../lib/kibana';
 import * as i18n from './translations';
 
@@ -61,7 +63,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${kibanaBasePath}#/management/kibana/indexPatterns`}
+          href={`${kibanaBasePath}${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}`}
           color="primary"
           target="_blank"
           fill

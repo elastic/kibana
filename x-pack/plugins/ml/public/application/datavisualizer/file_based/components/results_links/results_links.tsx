@@ -14,6 +14,8 @@ import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlKibana } from '../../../../contexts/kibana';
 
+import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../../../../../../src/plugins/data/public';
+
 const RECHECK_DELAY_MS = 3000;
 
 interface Props {
@@ -153,8 +155,8 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/kibana#/management/kibana/indexPatterns/${
-            createIndexPattern ? `patterns/${indexPatternId}` : ''
+          href={`${basePath.get()}/app/kibana${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}${
+            createIndexPattern ? `/patterns/${indexPatternId}` : ''
           }`}
         />
       </EuiFlexItem>
