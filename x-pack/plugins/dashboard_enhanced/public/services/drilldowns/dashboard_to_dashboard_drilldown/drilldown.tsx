@@ -58,12 +58,7 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
-    const dashboardPath = await this.getDestinationUrl(config, context);
-    const dashboardHash = dashboardPath.split('#')[1];
-
-    return this.params.start().core.application.getUrlForApp('dashboards', {
-      path: `#${dashboardHash}`,
-    });
+    return this.getDestinationUrl(config, context);
   };
 
   public readonly execute = async (
