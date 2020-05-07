@@ -125,8 +125,8 @@ describe('selfOrParentMatch', () => {
     const elem = document.createElement('div');
     elem.className = 'foo bar dolly';
 
-    expect(selfOrParentMatch(elem, el => el.tagName === 'div')).toEqual(true);
-    expect(selfOrParentMatch(elem, el => el.tagName === 'p')).toEqual(false);
+    expect(selfOrParentMatch(elem, el => el.tagName === 'DIV')).toEqual(true);
+    expect(selfOrParentMatch(elem, el => el.tagName === 'P')).toEqual(false);
   });
 
   it('returns true if any parent matches the predicate', () => {
