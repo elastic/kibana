@@ -51,7 +51,7 @@ export function getAlertType(): AlertTypeModel {
       }
       return validationResult;
     },
-    isUiEditEnabled: true,
+    isEditable: true,
   };
 }
 

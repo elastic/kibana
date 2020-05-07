@@ -20,5 +20,5 @@ export const initTlsAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  isUiEditEnabled: false,
+  isEditable: false,
 });

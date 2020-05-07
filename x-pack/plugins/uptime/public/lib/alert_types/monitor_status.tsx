@@ -66,5 +66,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   alertParamsExpression: params => <AlertMonitorStatus {...params} autocomplete={autocomplete} />,
   validate,
   defaultActionMessage,
-  isUiEditEnabled: false,
+  isEditable: false,
 });

@@ -109,7 +109,7 @@ export interface AlertTypeModel {
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
-  isUiEditEnabled: boolean;
+  isEditable: boolean;
   defaultActionMessage?: string;
 }
 

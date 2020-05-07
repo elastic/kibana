@@ -71,7 +71,7 @@ describe('alert_add', () => {
         return { errors: {} };
       },
       alertParamsExpression: TestExpression,
-      isUiEditEnabled: true,
+      isEditable: true,
     };
 
     const actionTypeModel = {

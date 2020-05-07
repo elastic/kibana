@@ -114,7 +114,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                {canSave && alertTypeRegistryModel.isUiEditEnabled ? (
+                {canSave && alertTypeRegistryModel.isEditable ? (
                   <EuiFlexItem grow={false}>
                     <Fragment>
                       {' '}

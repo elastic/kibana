@@ -30,6 +30,6 @@ Reason:
 `,
       }
     ),
-    isUiEditEnabled: false,
+    isEditable: false,
   };
 }
