@@ -493,15 +493,25 @@ export function validateModelMemoryLimit(job, limits) {
     typeof job.analysis_limits !== 'undefined' &&
     typeof job.analysis_limits.model_memory_limit !== 'undefined'
   ) {
-    if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
+    if (
+      typeof limits === 'object' &&
+      typeof limits.max_model_memory_limit !== 'undefined' &&
+      typeof limits.effective_max_model_memory_limit !== 'undefined'
+    ) {
       const max = limits.max_model_memory_limit.toUpperCase();
+      const effectiveMml = limits.effective_max_model_memory_limit.toUpperCase();
       const mml = job.analysis_limits.model_memory_limit.toUpperCase();
 
       const mmlBytes = numeral(mml).value();
+      // const effectiveMmlBytes = 100;
+      const effectiveMmlBytes = numeral(effectiveMml).value();
       const maxBytes = numeral(max).value();
 
       if (mmlBytes > maxBytes) {
         messages.push({ id: 'model_memory_limit_invalid' });
+        valid = false;
+      } else if (mmlBytes > effectiveMmlBytes) {
+        messages.push({ id: 'effective_model_memory_limit_invalid' });
         valid = false;
       } else {
         messages.push({ id: 'model_memory_limit_valid' });

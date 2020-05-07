@@ -45,6 +45,7 @@ export interface BasicValidations {
   jobId: Validation;
   groupIds: Validation;
   modelMemoryLimit: Validation;
+  effectiveModelMemoryLimit: Validation;
   bucketSpan: Validation;
   duplicateDetectors: Validation;
   query: Validation;
@@ -70,6 +71,7 @@ export class JobValidator {
     jobId: { valid: true },
     groupIds: { valid: true },
     modelMemoryLimit: { valid: true },
+    effectiveModelMemoryLimit: { valid: true },
     bucketSpan: { valid: true },
     duplicateDetectors: { valid: true },
     query: { valid: true },
