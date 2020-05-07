@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { Switch, Route, Redirect, HashRouter, RouteComponentProps } from 'react-router-dom';
 import {
   ChromeStart,
@@ -68,12 +69,12 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     <Switch>
       <Route
         path={`${BASE_PATH}/:section(${sectionsRegex})`}
-        component={suspendedComponentWithProps<RouteComponentProps<any>>(TriggersActionsUIHome)}
+        component={suspendedComponentWithProps(TriggersActionsUIHome)}
       />
       {canShowAlerts && (
         <Route
           path={routeToAlertDetails}
-          component={suspendedComponentWithProps<RouteComponentProps<any>>(AlertDetailsRoute)}
+          component={suspendedComponentWithProps(AlertDetailsRoute)}
         />
       )}
       <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />

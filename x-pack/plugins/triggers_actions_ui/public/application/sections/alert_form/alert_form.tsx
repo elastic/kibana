@@ -36,7 +36,7 @@ import { AlertReducerAction } from './alert_reducer';
 import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
-import { ActionForm } from '../action_connector_form/action_form';
+import { ActionForm } from '../action_connector_form';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
