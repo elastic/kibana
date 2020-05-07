@@ -1332,10 +1332,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@23.2.0":
-  version "23.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-23.2.0.tgz#ffc7d3b681e0e5efb02d8a67991c2ab558c975d7"
-  integrity sha512-a2wIT4sYwDEr7EOOIWAQsaKDXn1yXNf1aLGd5ekbmBw2m8TlLLlBd8jHEh2diAaBSkZ+cU6sKlwUbbN2yRehPQ==
+"@elastic/eui@23.3.0":
+  version "23.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-23.3.0.tgz#9516cb3fd2c63192dbe0e1d24b2a8ffed88c06d8"
+  integrity sha512-DpivOF347NAj60hdOWsC70Sx6492j9fYlCmjQ9XJ/L9rfPfUaC0qRSpKS6FPtgRW0BIuw+rWuxV2++t+j4Aiog==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/enzyme" "^3.1.13"
