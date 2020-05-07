@@ -23,7 +23,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
   const a11y = getService('a11y');
 
   describe('Management', () => {
