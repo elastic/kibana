@@ -324,7 +324,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {
-        await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
