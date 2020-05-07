@@ -8,19 +8,6 @@ import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { ExplainExporters, ExplainExportersCloud } from '../exporters';
 
-// Mocking to prevent errors with React portal.
-// Temporary until https://github.com/elastic/kibana/pull/55877 provides other alternatives.
-jest.mock('@elastic/eui/lib/components/code/code', () => {
-  const React = require.requireActual('react');
-  return {
-    EuiCode: ({ children }) => (
-      <span>
-        <code>{children}</code>
-      </span>
-    ),
-  };
-});
-
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
     const reason = {
