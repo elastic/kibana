@@ -7,11 +7,11 @@
 const bucketsA = [
   {
     doc_count: 2,
-    aggregatedValue: { value: 0.5 },
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
   },
   {
     doc_count: 3,
-    aggregatedValue: { value: 1.0 },
+    aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
   },
 ];
 
