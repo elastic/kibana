@@ -19,7 +19,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { getAnalysisType, DataFrameAnalyticsId, ANALYSIS_CONFIG_TYPE } from '../../../../common';
+import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
