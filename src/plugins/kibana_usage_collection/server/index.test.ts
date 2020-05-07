@@ -17,8 +17,12 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { coreMock } from '../../../core/server/mocks';
+import { BehaviorSubject } from 'rxjs';
+import {
+  coreMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '../../../core/server/mocks';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { plugin } from './';
 
@@ -41,7 +45,31 @@ describe('kibana_usage_collection', () => {
 
   test('Runs the setup method without issues', () => {
     const coreSetup = coreMock.createSetup();
-    coreSetup.metrics.getOpsMetrics$.mockImplementation(() => new Observable());
+    coreSetup.metrics.getOpsMetrics$.mockImplementation(
+      () =>
+        new BehaviorSubject({
+          process: {
+            memory: {
+              heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
+              resident_set_size_in_bytes: 1,
+            },
+            event_loop_delay: 1,
+            pid: 1,
+            uptime_in_millis: 1,
+          },
+          os: {
+            platform: 'darwin' as const,
+            platformRelease: 'test',
+            load: { '1m': 1, '5m': 1, '15m': 1 },
+            memory: { total_in_bytes: 1, free_in_bytes: 1, used_in_bytes: 1 },
+            uptime_in_millis: 1,
+          },
+          response_times: { avg_in_millis: 1, max_in_millis: 1 },
+          requests: { disconnects: 1, total: 1, statusCodes: { '200': 1 } },
+          concurrent_connections: 1,
+        })
+    );
+
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
     usageCollectors.forEach(({ isReady }) => {
       expect(isReady()).toMatchSnapshot(); // Some should return false at this stage
@@ -49,7 +77,14 @@ describe('kibana_usage_collection', () => {
   });
 
   test('Runs the start method without issues', () => {
-    expect(pluginInstance.start(coreMock.createStart())).toBe(undefined);
+    const coreStart = coreMock.createStart();
+    coreStart.savedObjects.createInternalRepository.mockImplementation(() =>
+      savedObjectsRepositoryMock.create()
+    );
+    coreStart.uiSettings.asScopedToClient.mockImplementation(() =>
+      uiSettingsServiceMock.createClient()
+    );
+    expect(pluginInstance.start(coreStart)).toBe(undefined);
     usageCollectors.forEach(({ isReady }) => {
       expect(isReady()).toBe(true); // All should return true at this point
     });
