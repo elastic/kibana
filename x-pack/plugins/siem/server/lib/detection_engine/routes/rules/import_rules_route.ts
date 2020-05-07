@@ -69,7 +69,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
 
         const { filename } = request.body.file.hapi;
         const fileExtension = extname(filename).toLowerCase();
@@ -152,7 +152,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                 } = parsedRule;
 
                 try {
-                  throwHttpError(mlAuthz.validateRuleType(type));
+                  throwHttpError(await mlAuthz.validateRuleType(type));
 
                   const rule = await readRules({ alertsClient, ruleId });
                   if (rule == null) {

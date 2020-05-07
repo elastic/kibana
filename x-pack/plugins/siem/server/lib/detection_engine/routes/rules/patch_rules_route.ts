@@ -74,8 +74,8 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
         }
 
         if (type) {
-          const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
-          throwHttpError(mlAuthz.validateRuleType(type));
+          const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+          throwHttpError(await mlAuthz.validateRuleType(type));
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);

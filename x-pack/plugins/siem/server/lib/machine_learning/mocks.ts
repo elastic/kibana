@@ -21,12 +21,12 @@ export const mlServicesMock = {
     } as unknown) as jest.Mocked<MlPluginSetup>),
 };
 
-const mockValidateRuleType = jest.fn().mockReturnValue({ valid: true });
+const mockValidateRuleType = jest.fn().mockResolvedValue({ valid: true, message: undefined });
 const createBuildMlAuthzMock = () =>
-  jest.fn().mockResolvedValue({ validateRuleType: mockValidateRuleType });
+  jest.fn().mockReturnValue({ validateRuleType: mockValidateRuleType });
 
 export const mlAuthzMock = {
   create: () => ({
-    buildMlAuthz: jest.fn(() => createBuildMlAuthzMock()()),
+    buildMlAuthz: createBuildMlAuthzMock(),
   }),
 };

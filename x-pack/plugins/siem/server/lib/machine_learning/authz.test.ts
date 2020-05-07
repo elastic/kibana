@@ -62,108 +62,154 @@ describe('mlAuthz', () => {
     request = httpServerMock.createKibanaRequest();
   });
 
-  it('is valid for a non-ML rule when ML plugin is unavailable', async () => {
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: undefined,
-      request,
+  describe('#validateRuleType', () => {
+    it('is valid for a non-ML rule when ML plugin is unavailable', async () => {
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: undefined,
+        request,
+      });
+
+      const validation = await mlAuthz.validateRuleType('query');
+
+      expect(validation.valid).toEqual(true);
     });
 
-    const validation = mlAuthz.validateRuleType('query');
+    it('is invalid for an ML rule when ML plugin is unavailable', async () => {
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: undefined,
+        request,
+      });
 
-    expect(validation.valid).toEqual(true);
-  });
+      const validation = await mlAuthz.validateRuleType('machine_learning');
 
-  it('is invalid for an ML rule when ML plugin is unavailable', async () => {
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: undefined,
-      request,
+      expect(validation.valid).toEqual(false);
+      expect(validation.message).toEqual(
+        'The machine learning plugin is not available. Try enabling the plugin.'
+      );
     });
 
-    const validation = mlAuthz.validateRuleType('machine_learning');
+    it('is valid for a non-ML rule when license is insufficient', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
 
-    expect(validation.valid).toEqual(false);
-    expect(validation.message).toEqual(
-      'The machine learning plugin is not available. Try enabling the plugin.'
-    );
-  });
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
 
-  it('is valid for a non-ML rule when license is insufficient', async () => {
-    licenseMock.hasAtLeast.mockReturnValue(false);
+      const validation = await mlAuthz.validateRuleType('query');
 
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: mlMock,
-      request,
+      expect(validation.valid).toEqual(true);
     });
 
-    const validation = mlAuthz.validateRuleType('query');
+    it('is invalid for an ML rule when license is insufficient', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(false);
 
-    expect(validation.valid).toEqual(true);
-  });
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
 
-  it('is invalid for an ML rule when license is insufficient', async () => {
-    licenseMock.hasAtLeast.mockReturnValue(false);
+      const validation = await mlAuthz.validateRuleType('machine_learning');
 
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: mlMock,
-      request,
+      expect(validation.valid).toEqual(false);
+      expect(validation.message).toEqual(
+        'Your license does not support machine learning. Please upgrade your license.'
+      );
     });
 
-    const validation = mlAuthz.validateRuleType('machine_learning');
+    it('is valid for a non-ML rule when not an ML Admin', async () => {
+      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
 
-    expect(validation.valid).toEqual(false);
-    expect(validation.message).toEqual(
-      'Your license does not support machine learning. Please upgrade your license.'
-    );
-  });
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
 
-  it('is valid for a non-ML rule when not an ML Admin', async () => {
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+      const validation = await mlAuthz.validateRuleType('query');
 
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: mlMock,
-      request,
+      expect(validation.valid).toEqual(true);
     });
 
-    const validation = mlAuthz.validateRuleType('query');
+    it('is invalid for an ML rule when not an ML Admin', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(true); // prevents short-circuit on license check
+      (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
 
-    expect(validation.valid).toEqual(true);
-  });
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
 
-  it('is invalid for an ML rule when not an ML Admin', async () => {
-    licenseMock.hasAtLeast.mockReturnValue(true); // prevents short-circuit on license check
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(false);
+      const validation = await mlAuthz.validateRuleType('machine_learning');
 
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: mlMock,
-      request,
+      expect(validation.valid).toEqual(false);
+      expect(validation.message).toEqual(
+        'The current user is not a machine learning administrator.'
+      );
     });
 
-    const validation = mlAuthz.validateRuleType('machine_learning');
+    it('is valid for an ML rule if ML available, license is sufficient, and an ML Admin', async () => {
+      licenseMock.hasAtLeast.mockReturnValue(true);
+      (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
+      licenseMock.hasAtLeast.mockReturnValue(true);
 
-    expect(validation.valid).toEqual(false);
-    expect(validation.message).toEqual('The current user is not a machine learning administrator.');
-  });
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
 
-  it('is valid for an ML rule if ML available, license is sufficient, and an ML Admin', async () => {
-    licenseMock.hasAtLeast.mockReturnValue(true);
-    (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
-    licenseMock.hasAtLeast.mockReturnValue(true);
+      const validation = await mlAuthz.validateRuleType('machine_learning');
 
-    const mlAuthz = await buildMlAuthz({
-      license: licenseMock,
-      ml: mlMock,
-      request,
+      expect(validation.valid).toEqual(true);
+      expect(validation.message).toBeUndefined();
     });
 
-    const validation = mlAuthz.validateRuleType('machine_learning');
+    it('only calls ml services once for multiple invocations', async () => {
+      const mockMlCapabilities = jest.fn();
+      mlMock.mlSystemProvider.mockImplementation(() => ({
+        mlInfo: jest.fn(),
+        mlSearch: jest.fn(),
+        mlCapabilities: mockMlCapabilities,
+      }));
 
-    expect(validation.valid).toEqual(true);
-    expect(validation.message).toBeUndefined();
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
+
+      await mlAuthz.validateRuleType('machine_learning');
+      await mlAuthz.validateRuleType('machine_learning');
+      await mlAuthz.validateRuleType('machine_learning');
+
+      expect(mockMlCapabilities).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call ml services for non-ML rules', async () => {
+      const mockMlCapabilities = jest.fn();
+      mlMock.mlSystemProvider.mockImplementation(() => ({
+        mlInfo: jest.fn(),
+        mlSearch: jest.fn(),
+        mlCapabilities: mockMlCapabilities,
+      }));
+
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
+
+      await mlAuthz.validateRuleType('query');
+      await mlAuthz.validateRuleType('query');
+      await mlAuthz.validateRuleType('query');
+
+      expect(mockMlCapabilities).not.toHaveBeenCalled();
+    });
   });
 });

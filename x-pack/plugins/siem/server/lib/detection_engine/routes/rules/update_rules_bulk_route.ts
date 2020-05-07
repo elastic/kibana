@@ -41,7 +41,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
@@ -82,7 +82,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
           const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
-            throwHttpError(mlAuthz.validateRuleType(type));
+            throwHttpError(await mlAuthz.validateRuleType(type));
 
             const rule = await updateRules({
               alertsClient,

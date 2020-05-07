@@ -99,8 +99,10 @@ describe('update_rules_bulk', () => {
     });
 
     it('returns a 403 error object if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockResolvedValueOnce({
-        validateRuleType: () => ({ valid: false, message: 'mocked validation message' }),
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
       const request = requestMock.create({
         method: 'put',

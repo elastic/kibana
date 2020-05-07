@@ -77,8 +77,8 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
-        throwHttpError(mlAuthz.validateRuleType(type));
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);

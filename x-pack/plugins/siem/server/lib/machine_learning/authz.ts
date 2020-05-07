@@ -17,7 +17,7 @@ import { RuleType } from '../../../common/detection_engine/types';
 import { Validation } from './validation';
 
 export interface MlAuthz {
-  validateRuleType: (type: RuleType) => Validation;
+  validateRuleType: (type: RuleType) => Promise<Validation>;
 }
 
 /**
@@ -29,7 +29,7 @@ export interface MlAuthz {
  *
  * @returns A {@link MLAuthz} service object
  */
-export const buildMlAuthz = async ({
+export const buildMlAuthz = ({
   license,
   ml,
   request,
@@ -37,7 +37,36 @@ export const buildMlAuthz = async ({
   license: ILicense;
   ml: SetupPlugins['ml'];
   request: KibanaRequest;
-}): Promise<MlAuthz> => {
+}): MlAuthz => {
+  const validateRuleType = async (type: RuleType): Promise<Validation> => {
+    if (!isMlRule(type)) {
+      return { valid: true, message: undefined };
+    } else {
+      return validateMlAuthz({ license, ml, request });
+    }
+  };
+
+  return { validateRuleType };
+};
+
+/**
+ * Validates ML authorization for the current request
+ *
+ * @param license A {@link ILicense} representing the user license
+ * @param ml {@link MlPluginSetup} ML services to fetch ML capabilities
+ * @param request A {@link KibanaRequest} representing the authenticated user
+ *
+ * @returns A {@link Validation} validation
+ */
+export const validateMlAuthz = async ({
+  license,
+  ml,
+  request,
+}: {
+  license: ILicense;
+  ml: SetupPlugins['ml'];
+  request: KibanaRequest;
+}): Promise<Validation> => {
   let message: string | undefined;
 
   if (ml == null) {
@@ -56,7 +85,8 @@ export const buildMlAuthz = async ({
   }
 
   return {
-    validateRuleType: (type: RuleType) => ({ valid: !isMlRule(type) || !message, message }),
+    valid: !message,
+    message,
   };
 };
 

@@ -92,8 +92,10 @@ describe('create_rules', () => {
     });
 
     it('returns a 403 if ML Authz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockResolvedValueOnce({
-        validateRuleType: () => ({ valid: false, message: 'mocked validation message' }),
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
       const response = await server.inject(createMlRuleRequest(), context);

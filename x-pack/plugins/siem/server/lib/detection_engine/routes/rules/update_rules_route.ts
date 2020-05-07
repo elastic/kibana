@@ -76,8 +76,8 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = await buildMlAuthz({ license: context.licensing.license, ml, request });
-        throwHttpError(mlAuthz.validateRuleType(type));
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
