@@ -7,6 +7,7 @@
 import { BaseParams } from './types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../common/constants';
+import { MonitorDurationResultType } from '../../../common/runtime_types';
 
 export const fetchMonitorDuration = async ({ monitorId, dateStart, dateEnd }: BaseParams) => {
   const queryParams = {
@@ -15,5 +16,5 @@ export const fetchMonitorDuration = async ({ monitorId, dateStart, dateEnd }: Ba
     dateEnd,
   };
 
-  return await apiService.get(API_URLS.MONITOR_DURATION, queryParams);
+  return await apiService.get(API_URLS.MONITOR_DURATION, MonitorDurationResultType, queryParams);
 };

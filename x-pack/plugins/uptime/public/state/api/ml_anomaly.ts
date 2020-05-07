@@ -19,6 +19,11 @@ import {
   MonitorIdParam,
   HeartbeatIndicesParam,
 } from '../actions/types';
+import { DataRecognizerConfigResponse } from '../../../../../plugins/ml/common/types/modules';
+import {
+  JobExistResult,
+  JobExistResultType,
+} from '../../../../../plugins/ml/common/types/data_recognizer';
 
 const getJobPrefix = (monitorId: string) => {
   // ML App doesn't support upper case characters in job name
@@ -41,11 +46,13 @@ const getJobPrefix = (monitorId: string) => {
 export const getMLJobId = (monitorId: string) => `${getJobPrefix(monitorId)}${ML_JOB_ID}`;
 
 export const getMLCapabilities = async (): Promise<MlCapabilitiesResponse> => {
-  return await apiService.get(API_URLS.ML_CAPABILITIES);
+  // @ts-ignore we're relying on ML types here, and opting for an empty type
+  // rather than trying to modify their internal typing to use io-ts
+  return await apiService.get(API_URLS.ML_CAPABILITIES, EmptyType);
 };
 
 export const getExistingJobs = async (): Promise<JobExistResult> => {
-  return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID);
+  return await apiService.get(API_URLS.ML_MODULE_JOBS + ML_MODULE_ID, JobExistResultType);
 };
 
 export const createMLJob = async ({

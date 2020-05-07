@@ -6,6 +6,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isRight } from 'fp-ts/lib/Either';
+import { Decoder } from 'io-ts';
 import { HttpFetchQuery, HttpSetup } from '../../../../../../target/types/core/public';
 
 class ApiService {
@@ -30,19 +31,21 @@ class ApiService {
     return ApiService.instance;
   }
 
-  public async get(apiUrl: string, params?: HttpFetchQuery, decodeType?: any) {
+  public async get<T>(
+    apiUrl: string,
+    decodeType: Decoder<unknown, T>,
+    params?: HttpFetchQuery
+  ): Promise<T> {
     const response = await this._http!.get(apiUrl, { query: params });
 
-    if (decodeType) {
-      const decoded = decodeType.decode(response);
-      if (isRight(decoded)) {
-        return decoded.right;
-      } else {
-        // eslint-disable-next-line no-console
-        console.error(
-          `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
-        );
-      }
+    const decoded = decodeType.decode(response);
+    if (isRight(decoded)) {
+      return decoded.right;
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(
+        `API ${apiUrl} is not returning expected response, ${PathReporter.report(decoded)}`
+      );
     }
 
     return response;

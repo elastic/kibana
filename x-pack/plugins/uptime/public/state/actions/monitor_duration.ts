@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { QueryParams } from './types';
-import { MonitorDurationResult } from '../../../common/types';
+import { MonitorDurationResult } from '../../../common/runtime_types';
 import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
 
 type MonitorQueryParams = QueryParams & { monitorId: string };

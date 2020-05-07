@@ -5,5 +5,6 @@
  */
 
 export * from './details';
+export * from './duration';
 export * from './locations';
 export * from './state';

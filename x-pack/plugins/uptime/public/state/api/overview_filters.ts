@@ -28,5 +28,5 @@ export const fetchOverviewFilters = async ({
     search,
   };
 
-  return await apiService.get(API_URLS.FILTERS, queryParams, OverviewFiltersType);
+  return await apiService.get(API_URLS.FILTERS, OverviewFiltersType, queryParams);
 };

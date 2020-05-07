@@ -17,8 +17,8 @@ import {
   GetCertsParams,
   GetPingsParams,
   CertResult,
+  MonitorDurationResult,
 } from '../../../common/runtime_types';
-import { MonitorDurationResult } from '../../../common/types';
 
 import {
   GetFilterBarParams,

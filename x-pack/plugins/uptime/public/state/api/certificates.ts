@@ -9,5 +9,5 @@ import { apiService } from './utils';
 import { CertResultType, GetCertsParams } from '../../../common/runtime_types';
 
 export const fetchCertificates = async (params: GetCertsParams) => {
-  return await apiService.get(API_URLS.CERTS, params, CertResultType);
+  return await apiService.get(API_URLS.CERTS, CertResultType, params);
 };

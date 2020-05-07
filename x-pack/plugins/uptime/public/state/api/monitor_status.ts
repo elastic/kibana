@@ -5,7 +5,7 @@
  */
 
 import { QueryParams } from '../actions/types';
-import { Ping } from '../../../common/runtime_types';
+import { Ping, PingType } from '../../../common/runtime_types';
 import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 
@@ -20,5 +20,5 @@ export const fetchMonitorStatus = async ({
     dateEnd,
   };
 
-  return await apiService.get(API_URLS.MONITOR_STATUS, queryParams);
+  return await apiService.get(API_URLS.MONITOR_STATUS, PingType, queryParams);
 };

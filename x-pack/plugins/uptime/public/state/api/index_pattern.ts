@@ -5,8 +5,9 @@
  */
 
 import { API_URLS } from '../../../common/constants';
+import { EmptyType } from '../../../common/runtime_types';
 import { apiService } from './utils';
 
 export const fetchIndexPattern = async () => {
-  return await apiService.get(API_URLS.INDEX_PATTERN);
+  return await apiService.get(API_URLS.INDEX_PATTERN, EmptyType);
 };

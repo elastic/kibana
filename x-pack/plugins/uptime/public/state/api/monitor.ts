@@ -26,7 +26,7 @@ export const fetchMonitorDetails = async ({
     dateStart,
     dateEnd,
   };
-  return await apiService.get(API_URLS.MONITOR_DETAILS, params, MonitorDetailsType);
+  return await apiService.get(API_URLS.MONITOR_DETAILS, MonitorDetailsType, params);
 };
 
 type ApiParams = QueryParams & ApiRequest;
@@ -37,5 +37,5 @@ export const fetchMonitorLocations = async ({ monitorId, dateStart, dateEnd }: A
     dateEnd,
     monitorId,
   };
-  return await apiService.get(API_URLS.MONITOR_LOCATIONS, params, MonitorLocationsType);
+  return await apiService.get(API_URLS.MONITOR_LOCATIONS, MonitorLocationsType, params);
 };

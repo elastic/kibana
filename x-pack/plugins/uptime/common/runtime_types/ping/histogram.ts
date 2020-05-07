@@ -4,29 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface HistogramDataPoint {
-  upCount?: number;
+import * as t from 'io-ts';
 
-  downCount?: number;
+export const HistogramDataPointType = t.partial({
+  upCount: t.number,
+  downCount: t.number,
+  x: t.number,
+  x0: t.number,
+  y: t.number,
+});
 
-  x?: number;
+export type HistogramDataPoint = t.TypeOf<typeof HistogramDataPointType>;
 
-  x0?: number;
+export const GetPingHistogramParamsType = t.intersection([
+  t.type({
+    dateStart: t.string,
+    dateEnd: t.string,
+  }),
+  t.partial({
+    filters: t.string,
+    monitorId: t.string,
+  }),
+]);
 
-  y?: number;
-}
+export type GetPingHistogramParams = t.TypeOf<typeof GetPingHistogramParamsType>;
 
-export interface GetPingHistogramParams {
-  dateStart: string;
-  dateEnd: string;
-  filters?: string;
-  monitorId?: string;
-}
+export const HistogramResultType = t.type({
+  histogram: t.array(HistogramDataPointType),
+  interval: t.string,
+});
 
-export interface HistogramResult {
-  histogram: HistogramDataPoint[];
-  interval: string;
-}
+export type HistogramResult = t.TypeOf<typeof HistogramResultType>;
 
 export interface HistogramQueryResult {
   key: number;

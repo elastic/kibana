@@ -15,5 +15,5 @@ import {
 export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs
 ): Promise<MonitorSummaryResult> => {
-  return await apiService.get(API_URLS.MONITOR_LIST, params, MonitorSummaryResultType);
+  return await apiService.get(API_URLS.MONITOR_LIST, MonitorSummaryResultType, params);
 };

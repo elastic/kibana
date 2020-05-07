@@ -32,6 +32,8 @@ export const DateRangeType = t.type({
   to: t.string,
 });
 
+export const EmptyType = t.type({});
+
 export type Summary = t.TypeOf<typeof SummaryType>;
 export type Location = t.TypeOf<typeof LocationType>;
 export type StatesIndexStatus = t.TypeOf<typeof StatesIndexStatusType>;

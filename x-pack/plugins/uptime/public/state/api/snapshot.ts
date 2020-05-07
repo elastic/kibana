@@ -28,5 +28,5 @@ export const fetchSnapshotCount = async ({
     ...(statusFilter && { statusFilter }),
   };
 
-  return await apiService.get(API_URLS.SNAPSHOT_COUNT, queryParams, SnapshotType);
+  return await apiService.get(API_URLS.SNAPSHOT_COUNT, SnapshotType, queryParams);
 };

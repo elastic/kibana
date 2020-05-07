@@ -19,7 +19,7 @@ interface SaveApiRequest {
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(apiPath, undefined, DynamicSettingsType);
+  return await apiService.get(apiPath, DynamicSettingsType);
 };
 
 export const setDynamicSettings = async ({

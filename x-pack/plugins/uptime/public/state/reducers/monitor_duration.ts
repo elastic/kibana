@@ -10,7 +10,7 @@ import {
   getMonitorDurationActionSuccess,
   getMonitorDurationActionFail,
 } from '../actions';
-import { MonitorDurationResult } from '../../../common/types';
+import { MonitorDurationResult } from '../../../common/runtime_types';
 
 export interface MonitorDuration {
   durationLines: MonitorDurationResult | null;

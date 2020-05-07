@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface JobStat {
-  id: string;
-  earliestTimestampMs: number;
-  latestTimestampMs: number;
-  latestResultsTimestampMs: number;
-}
+import * as t from 'io-ts';
 
-export interface JobExistResult {
-  jobsExist: boolean;
-  jobs: JobStat[];
-}
+export const JobStatType = t.type({
+  id: t.string,
+  earliestTimestampMs: t.number,
+  latestTimestampMs: t.number,
+  latestResultsTimestampMs: t.number,
+});
+
+export type JobStat = t.TypeOf<typeof JobStatType>;
+
+export const JobExistResultType = t.type({
+  jobsExist: t.boolean,
+  jobs: t.array(JobStatType),
+});
+
+export type JobExistResult = t.TypeOf<typeof JobExistResultType>;
