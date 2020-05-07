@@ -45,11 +45,7 @@ export default function({ getService }: FtrProviderContext) {
     it('should support pagination for events', async () => {
       const id = uuid.v4();
 
-      const [firstExpectedEvent, ...expectedEvents] = times(6, () => fakeEvent(id));
-
-      // run one first to create the SO and avoid clashes
-      await logTestEvent(id, firstExpectedEvent);
-      await Promise.all(expectedEvents.map(event => logTestEvent(id, event)));
+      const expectedEvents = await logFakeEvents(id, 6);
 
       await retry.try(async () => {
         const {
@@ -59,10 +55,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(foundEvents.length).to.be(6);
       });
 
-      const [expectedFirstPage, expectedSecondPage] = chunk(
-        [firstExpectedEvent, ...expectedEvents],
-        3
-      );
+      const [expectedFirstPage, expectedSecondPage] = chunk(expectedEvents, 3);
 
       const {
         body: { data: firstPage },
