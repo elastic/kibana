@@ -54,7 +54,6 @@ interface SelectedData {
 export interface ExplorerSwimlaneProps {
   chartWidth: number;
   filterActive?: boolean;
-  filteredFields?: string[];
   maskAll?: boolean;
   timeBuckets: InstanceType<typeof TimeBucketsClass>;
   swimlaneCellClick?: Function;
@@ -287,7 +286,6 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
     const {
       chartWidth,
       filterActive,
-      filteredFields,
       maskAll,
       timeBuckets,
       swimlaneCellClick,
@@ -633,21 +631,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       if (selectedCellTimes.length > 0) {
         this.highlightOverall(selectedCellTimes);
       }
-      // If filtered fields includes a wildcard search maskAll only if there are no points matching the pattern
-      const wildCardFields =
-        filteredFields !== undefined
-          ? filteredFields.filter(field => /\@kuery-wildcard\@$/.test(field))
-          : [];
-      const substring =
-        wildCardFields.length > 0 ? wildCardFields[0].replace(/\@kuery-wildcard\@$/, '') : null;
-      const hasMatchingPoints =
-        substring !== null &&
-        swimlaneData.points.some(point => {
-          return point.laneLabel.includes(substring);
-        });
-
-      const shouldMaskAll = Boolean(maskAll) && !hasMatchingPoints;
-      this.maskIrrelevantSwimlanes(shouldMaskAll);
+      this.maskIrrelevantSwimlanes(Boolean(maskAll));
     } else {
       this.clearSelection();
     }

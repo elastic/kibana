@@ -81,6 +81,7 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
 import { MlTooltipComponent } from '../components/chart_tooltip';
+import { hasMatchingPoints } from './has_matching_points';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -501,8 +502,13 @@ export class Explorer extends React.Component {
                           <ExplorerSwimlane
                             chartWidth={swimlaneContainerWidth}
                             filterActive={filterActive}
-                            filteredFields={filteredFields}
-                            maskAll={maskAll}
+                            maskAll={
+                              maskAll &&
+                              !hasMatchingPoints({
+                                filteredFields,
+                                swimlaneData: viewBySwimlaneData,
+                              })
+                            }
                             timeBuckets={this.timeBuckets}
                             swimlaneCellClick={this.swimlaneCellClick}
                             swimlaneData={viewBySwimlaneData}
