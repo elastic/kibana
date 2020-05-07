@@ -104,7 +104,7 @@ export function getActionType(): ActionTypeModel {
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets }) => {
+>> = ({ errors, action, editActionConfig, editActionSecrets, docLinks }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (
@@ -139,7 +139,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/current/pagerduty-action-type.html"
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pagerduty-action-type.html`}
             target="_blank"
           >
             <FormattedMessage

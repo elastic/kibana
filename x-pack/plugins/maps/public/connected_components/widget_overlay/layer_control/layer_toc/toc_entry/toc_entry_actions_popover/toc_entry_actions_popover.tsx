@@ -137,7 +137,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
           defaultMessage: 'Fit to data',
         }),
-        icon: <EuiIcon type="search" size="m" />,
+        icon: <EuiIcon type="expand" size="m" />,
         'data-test-subj': 'fitToBoundsButton',
         toolTipContent: this.state.supportsFitToBounds
           ? null

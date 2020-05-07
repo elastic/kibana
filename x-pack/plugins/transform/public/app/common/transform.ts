@@ -39,6 +39,11 @@ export interface CreateRequestBody extends PreviewRequestBody {
   dest: {
     index: IndexName;
   };
+  frequency?: string;
+  settings?: {
+    max_page_search_size?: number;
+    docs_per_second?: number;
+  };
   sync?: {
     time: {
       field: string;

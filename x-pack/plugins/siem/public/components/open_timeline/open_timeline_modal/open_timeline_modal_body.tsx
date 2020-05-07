@@ -42,6 +42,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     selectedItems,
     sortDirection,
     sortField,
+    tabs,
     title,
     totalSearchResultsCount,
   }) => {
@@ -52,6 +53,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
           : ['duplicate'];
       return actions.filter(action => !hideActions.includes(action));
     }, [onDeleteSelected, deleteTimelines, hideActions]);
+
     return (
       <>
         <EuiModalHeader>
@@ -62,15 +64,17 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               selectedTimelinesCount={selectedItems.length}
               title={title}
             />
-
-            <SearchRow
-              data-test-subj="search-row"
-              onlyFavorites={onlyFavorites}
-              onQueryChange={onQueryChange}
-              onToggleOnlyFavorites={onToggleOnlyFavorites}
-              query={query}
-              totalSearchResultsCount={totalSearchResultsCount}
-            />
+            <>
+              <SearchRow
+                data-test-subj="search-row"
+                onlyFavorites={onlyFavorites}
+                onQueryChange={onQueryChange}
+                onToggleOnlyFavorites={onToggleOnlyFavorites}
+                query={query}
+                tabs={tabs}
+                totalSearchResultsCount={totalSearchResultsCount}
+              />
+            </>
           </HeaderContainer>
         </EuiModalHeader>
 
