@@ -17,34 +17,18 @@
  * under the License.
  */
 
-import { CiStatsReporter } from '@kbn/dev-utils';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  logOptimizerState,
-  reportOptimizerStats,
-} from '@kbn/optimizer';
+import { PluginConfigDescriptor } from 'kibana/server';
+import { configSchema, ConfigSchema } from '../config';
 
-export const BuildKibanaPlatformPluginsTask = {
-  description: 'Building distributable versions of Kibana platform plugins',
-  async run(_, log, build) {
-    const optimizerConfig = OptimizerConfig.create({
-      repoRoot: build.resolvePath(),
-      cache: false,
-      oss: build.isOss(),
-      examples: false,
-      watch: false,
-      dist: true,
-      includeCoreBundle: true,
-    });
-
-    const reporter = CiStatsReporter.fromEnv(log);
-
-    await runOptimizer(optimizerConfig)
-      .pipe(
-        reportOptimizerStats(reporter, optimizerConfig),
-        logOptimizerState(log, optimizerConfig)
-      )
-      .toPromise();
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    includeElasticMapsService: true,
+    layers: true,
   },
+  schema: configSchema,
 };
+
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
