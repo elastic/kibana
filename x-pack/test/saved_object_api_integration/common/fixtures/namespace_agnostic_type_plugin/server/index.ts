@@ -6,8 +6,6 @@
 import { CoreSetup, Plugin } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../../../../../plugins/features/server';
 
-import mappings from './mappings.json';
-
 export const plugin = () => new NamespaceAgnosticTypePlugin();
 
 interface SetupDeps {
@@ -18,12 +16,24 @@ class NamespaceAgnosticTypePlugin implements Plugin {
   setup(core: CoreSetup, plugins: SetupDeps) {
     core.savedObjects.registerType({
       name: 'globaltype',
-      namespaceType: 'agnostic',
       hidden: false,
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: true,
       },
-      mappings,
+      mappings: {
+        properties: {
+          title: {
+            type: 'text',
+            fields: {
+              keyword: {
+                type: 'keyword',
+                ignore_above: 2048,
+              },
+            },
+          },
+        },
+      },
     });
 
     plugins.features.registerFeature({
