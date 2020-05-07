@@ -8,7 +8,6 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
 import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
 /* eslint-disable @typescript-eslint/consistent-type-definitions */

@@ -6,9 +6,6 @@
 
 import { connect } from 'react-redux';
 import { FlyoutBody } from './flyout_body';
-
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-
 import { INDEXING_STAGE } from '../../../reducers/ui';
 import { updateIndexingStage } from '../../../actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';

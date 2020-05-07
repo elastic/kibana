@@ -70,7 +70,7 @@ export class AddLayerPanel extends Component<Props, State> {
       return;
     }
 
-    this.setState({ layerDescriptor, isIndexingSource });
+    this.setState({ layerDescriptor, isIndexingSource: !!isIndexingSource });
     this.props.previewLayer(layerDescriptor);
   };
 
@@ -87,6 +87,7 @@ export class AddLayerPanel extends Component<Props, State> {
       newState.layerWizard = null;
       newState.importView = false;
     }
+    // @ts-ignore
     this.setState(newState);
 
     this.props.removeTransientLayer();

@@ -16,7 +16,7 @@ function mapStateToProps(state: MapStoreState) {
   const hasLayerSelected = !!selectedLayer;
   return {
     hasLayerSelected,
-    isLoading: hasLayerSelected && selectedLayer.isLayerLoading(),
+    isLoading: hasLayerSelected && selectedLayer!.isLayerLoading(),
   };
 }
 
