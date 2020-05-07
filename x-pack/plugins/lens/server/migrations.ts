@@ -113,7 +113,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
  * Adds missing timeField arguments to esaggs in the Lens expression
  */
 const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (doc, context) => {
-  const expression = doc.attributes?.expression;
+  const expression = doc.attributes.expression;
   if (!expression) {
     return doc;
   }
@@ -178,9 +178,8 @@ const removeInvalidAccessors: SavedObjectMigrationFn<
   LensDocShape<XYStatePost77>
 > = doc => {
   const newDoc = cloneDeep(doc);
-  if (newDoc.attributes?.visualizationType === 'lnsXY') {
-    const datasourceState = newDoc.attributes.state.datasourceStates.indexpattern;
-    const datasourceLayers = datasourceState?.layers ?? {};
+  if (newDoc.attributes.visualizationType === 'lnsXY') {
+    const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
     const xyState = newDoc.attributes.state.visualization;
     (newDoc.attributes as LensDocShape<
       XYStatePost77
