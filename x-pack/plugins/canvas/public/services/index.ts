@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, AppUpdater } from '../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
@@ -16,7 +16,7 @@ export type CanvasServiceFactory<Service> = (
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
-  appUpdater: Observable<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => Service;
 
 class CanvasServiceProvider<Service> {
@@ -32,7 +32,7 @@ class CanvasServiceProvider<Service> {
     coreStart: CoreStart,
     canvasSetupPlugins: CanvasSetupDeps,
     canvasStartPlugins: CanvasStartDeps,
-    appUpdater: Observable<AppUpdater>
+    appUpdater: BehaviorSubject<AppUpdater>
   ) {
     this.service = this.factory(
       coreSetup,
