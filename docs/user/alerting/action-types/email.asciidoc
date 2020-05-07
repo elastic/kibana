@@ -24,17 +24,17 @@ Password::  password for 'login' type authentication.
 
 [source,text]
 --
- id: 'my-email'
- name: preconfigured-email-action-type
- actionTypeId: .email
- config:
-   from: testsender@test.com <1.1>
-   host: validhostname <1.2>
-   port: 8080 <1.3>
-   secure: false <1.4>
- secrets:
-   user: testuser <2.1>
-   password: passwordkeystorevalue <2.2>
+ my-email:
+   name: preconfigured-email-action-type
+   actionTypeId: .email
+   config:
+     from: testsender@test.com <1.1>
+     host: validhostname <1.2>
+     port: 8080 <1.3>
+     secure: false <1.4>
+   secrets:
+     user: testuser <2.1>
+     password: passwordkeystorevalue <2.2>
 --
 
 `config` defines the action type specific to the configuration and contains the following properties:
