@@ -9,6 +9,7 @@ import {
   AppMountParameters,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../../src/core/public';
+import { alertTypeInitializers } from '../lib/alert_types';
 import { UMFrontendLibs } from '../lib/lib';
 import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
@@ -50,6 +51,18 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    const {
+      data: { autocomplete },
+      triggers_actions_ui,
+    } = plugins;
+
+    alertTypeInitializers.forEach(init => {
+      const alertInitializer = init({ autocomplete });
+      if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
+        triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
+      }
+    });
 
     core.application.register({
       appRoute: '/app/uptime#/',
