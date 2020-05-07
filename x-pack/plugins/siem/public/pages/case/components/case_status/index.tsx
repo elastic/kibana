@@ -20,6 +20,7 @@ import * as i18n from '../case_view/translations';
 import { FormattedRelativePreferenceDate } from '../../../../components/formatted_date';
 import { CaseViewActions } from '../case_view/actions';
 import { Case } from '../../../../containers/case/types';
+import { CaseService } from '../../../../containers/case/use_get_case_user_actions';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -35,6 +36,7 @@ interface CaseStatusProps {
   badgeColor: string;
   buttonLabel: string;
   caseData: Case;
+  currentExternalIncident: CaseService | null;
   disabled?: boolean;
   icon: string;
   isLoading: boolean;
@@ -50,6 +52,7 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
   badgeColor,
   buttonLabel,
   caseData,
+  currentExternalIncident,
   disabled = false,
   icon,
   isLoading,
@@ -100,7 +103,11 @@ const CaseStatusComp: React.FC<CaseStatusProps> = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CaseViewActions caseData={caseData} disabled={disabled} />
+          <CaseViewActions
+            caseData={caseData}
+            currentExternalIncident={currentExternalIncident}
+            disabled={disabled}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

@@ -65,7 +65,7 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     },
 
     goToCertificates: async () => {
-      await testSubjects.click('uptimeCertificatesLink');
+      await testSubjects.click('uptimeCertificatesLink', 10000);
       return retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeCertificatesPage');
       });

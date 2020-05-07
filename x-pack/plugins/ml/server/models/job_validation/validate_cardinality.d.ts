@@ -7,4 +7,7 @@
 import { APICaller } from 'kibana/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
-export function validateCardinality(callAsCurrentUser: APICaller, job: CombinedJob): any[];
+export function validateCardinality(
+  callAsCurrentUser: APICaller,
+  job?: CombinedJob
+): Promise<any[]>;

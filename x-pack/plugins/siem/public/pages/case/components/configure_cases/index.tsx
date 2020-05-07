@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useState, Dispatch, SetStateAction, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, Dispatch, SetStateAction } from 'react';
 import styled, { css } from 'styled-components';
 
 import {
@@ -16,7 +16,8 @@ import {
   EuiButtonEmpty,
   EuiText,
 } from '@elastic/eui';
-import { isEmpty, difference } from 'lodash/fp';
+
+import { difference } from 'lodash/fp';
 import { useKibana } from '../../../../lib/kibana';
 import { useConnectors } from '../../../../containers/case/configure/use_connectors';
 import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
@@ -31,12 +32,10 @@ import {
 import { ActionConnectorTableItem } from '../../../../../../triggers_actions_ui/public/types';
 import { getCaseUrl } from '../../../../components/link_to';
 import { useGetUrlSearch } from '../../../../components/navigation/use_get_url_search';
-import { CCMapsCombinedActionAttributes } from '../../../../containers/case/configure/types';
 import { connectorsConfiguration } from '../../../../lib/connectors/config';
 
 import { Connectors } from '../configure_cases/connectors';
 import { ClosureOptions } from '../configure_cases/closure_options';
-import { Mapping } from '../configure_cases/mapping';
 import { SectionWrapper } from '../wrappers';
 import { navTabs } from '../../../../pages/home/home_navigations';
 import * as i18n from './translations';
@@ -64,7 +63,7 @@ interface ConfigureCasesComponentProps {
 
 const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
   const search = useGetUrlSearch(navTabs.case);
-  const { http, triggers_actions_ui, notifications, application } = useKibana().services;
+  const { http, triggers_actions_ui, notifications, application, docLinks } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -79,14 +78,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const {
     connectorId,
     closureType,
-    mapping,
     currentConfiguration,
     loading: loadingCaseConfigure,
     persistLoading,
     persistCaseConfigure,
     setConnector,
     setClosureType,
-    setMapping,
   } = useCaseConfigure();
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
@@ -107,7 +104,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         closureType,
       });
     },
-    [connectorId, connectors, closureType, mapping]
+    [connectorId, connectors, closureType]
   );
 
   const onClickAddConnector = useCallback(() => {
@@ -151,24 +148,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   useEffect(() => {
     if (
-      !isEmpty(connectors) &&
-      connectorId !== 'none' &&
-      connectors.some(c => c.id === connectorId)
-    ) {
-      const myConnector = connectors.find(c => c.id === connectorId);
-      const myMapping = myConnector?.config?.casesConfiguration?.mapping ?? [];
-      setMapping(
-        myMapping.map((m: CCMapsCombinedActionAttributes) => ({
-          source: m.source,
-          target: m.target,
-          actionType: m.action_type ?? m.actionType,
-        }))
-      );
-    }
-  }, [connectors, connectorId]);
-
-  useEffect(() => {
-    if (
       !isLoadingConnectors &&
       connectorId !== 'none' &&
       !connectors.some(c => c.id === connectorId)
@@ -200,11 +179,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     currentConfiguration.closureType,
   ]);
 
-  const connectorActionTypeId = useMemo(
-    () => connectors.find(c => c.id === connectorId)?.actionTypeId ?? '.none',
-    [connectorId, connectors]
-  );
-
   return (
     <FormWrapper>
       {!connectorIsValid && (
@@ -220,16 +194,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         </SectionWrapper>
       )}
       <SectionWrapper>
-        <Connectors
-          connectors={connectors ?? []}
-          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-          isLoading={isLoadingConnectors}
-          onChangeConnector={setConnector}
-          handleShowAddFlyout={onClickAddConnector}
-          selectedConnector={connectorId}
-        />
-      </SectionWrapper>
-      <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
@@ -237,13 +201,15 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         />
       </SectionWrapper>
       <SectionWrapper>
-        <Mapping
-          disabled
+        <Connectors
+          connectors={connectors ?? []}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+          isLoading={isLoadingConnectors}
+          onChangeConnector={setConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
-          mapping={mapping}
-          connectorActionTypeId={connectorActionTypeId}
-          onChangeMapping={setMapping}
-          setEditFlyoutVisibility={onClickUpdateConnector}
+          handleShowAddFlyout={onClickAddConnector}
+          handleShowEditFlyout={onClickUpdateConnector}
+          selectedConnector={connectorId}
         />
       </SectionWrapper>
       {actionBarVisible && (
@@ -297,6 +263,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           toastNotifications: notifications.toasts,
           capabilities: application.capabilities,
           reloadConnectors,
+          docLinks,
         }}
       >
         <ConnectorAddFlyout

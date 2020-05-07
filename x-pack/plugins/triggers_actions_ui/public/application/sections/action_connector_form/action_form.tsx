@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, Suspense, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,8 +27,9 @@ import {
   EuiCallOut,
   EuiHorizontalRule,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { HttpSetup, ToastsApi } from 'kibana/public';
+import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   IErrorObject,
@@ -57,10 +58,12 @@ interface ActionAccordionFormProps {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
+  docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: string[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  capabilities: ApplicationStart['capabilities'];
 }
 
 interface ActiveActionConnectorState {
@@ -81,6 +84,8 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  capabilities,
+  docLinks,
 }: ActionAccordionFormProps) => {
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
@@ -278,14 +283,24 @@ export const ActionForm = ({
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
-          />
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={messageVariables}
+              defaultMessage={defaultActionMessage ?? undefined}
+            />
+          </Suspense>
         ) : null}
       </Fragment>
     ) : (
@@ -685,6 +700,8 @@ export const ActionForm = ({
           actionTypeRegistry={actionTypeRegistry}
           http={http}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

@@ -38,8 +38,9 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
     async checkForPingListTimestamps(timestamps: string[]): Promise<void> {
       return retry.tryForTime(10000, async () => {
         await Promise.all(
-          timestamps.map(timestamp =>
-            testSubjects.existOrFail(`xpack.uptime.pingList.ping-${timestamp}`)
+          timestamps.map(
+            async timestamp =>
+              await testSubjects.existOrFail(`xpack.uptime.pingList.ping-${timestamp}`)
           )
         );
       });
