@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { validateBucketSpan } from '../validate_bucket_span';
-import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../common/constants/validation';
+import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
+
+import { ValidationMessage } from './messages';
+// @ts-ignore
+import { validateBucketSpan } from './validate_bucket_span';
 
 // farequote2017 snapshot snapshot mock search response
 // it returns a mock for the response of PolledDataChecker's search request
 // to get an aggregation of non_empty_buckets with an interval of 1m.
 // this allows us to test bucket span estimation.
-import mockFareQuoteSearchResponse from './mock_farequote_search_response';
+import mockFareQuoteSearchResponse from './__mocks__/mock_farequote_search_response.json';
 
 // it_ops_app_logs 2017 snapshot mock search response
 // sparse data with a low number of buckets
-import mockItSearchResponse from './mock_it_search_response';
+import mockItSearchResponse from './__mocks__/mock_it_search_response.json';
 
 // mock callWithRequestFactory
-const callWithRequestFactory = mockSearchResponse => {
+const callWithRequestFactory = (mockSearchResponse: any) => {
   return () => {
     return new Promise(resolve => {
       resolve(mockSearchResponse);
@@ -86,17 +88,17 @@ describe('ML - validateBucketSpan', () => {
     };
 
     return validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), job).then(
-      messages => {
+      (messages: ValidationMessage[]) => {
         const ids = messages.map(m => m.id);
-        expect(ids).to.eql([]);
+        expect(ids).toStrictEqual([]);
       }
     );
   });
 
-  const getJobConfig = bucketSpan => ({
+  const getJobConfig = (bucketSpan: string) => ({
     analysis_config: {
       bucket_span: bucketSpan,
-      detectors: [],
+      detectors: [] as Array<{ function?: string }>,
       influencers: [],
     },
     data_description: { time_field: '@timestamp' },
@@ -111,9 +113,9 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then(messages => {
+    ).then((messages: ValidationMessage[]) => {
       const ids = messages.map(m => m.id);
-      expect(ids).to.eql(['success_bucket_span']);
+      expect(ids).toStrictEqual(['success_bucket_span']);
     });
   });
 
@@ -125,9 +127,9 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then(messages => {
+    ).then((messages: ValidationMessage[]) => {
       const ids = messages.map(m => m.id);
-      expect(ids).to.eql(['bucket_span_high']);
+      expect(ids).toStrictEqual(['bucket_span_high']);
     });
   });
 
@@ -135,14 +137,18 @@ describe('ML - validateBucketSpan', () => {
     return;
   }
 
-  const testBucketSpan = (bucketSpan, mockSearchResponse, test) => {
+  const testBucketSpan = (
+    bucketSpan: string,
+    mockSearchResponse: any,
+    test: (ids: string[]) => void
+  ) => {
     const job = getJobConfig(bucketSpan);
     job.analysis_config.detectors.push({
       function: 'count',
     });
 
     return validateBucketSpan(callWithRequestFactory(mockSearchResponse), job, {}).then(
-      messages => {
+      (messages: ValidationMessage[]) => {
         const ids = messages.map(m => m.id);
         test(ids);
       }
@@ -151,13 +157,13 @@ describe('ML - validateBucketSpan', () => {
 
   it('farequote count detector, bucket span estimation matches 15m', () => {
     return testBucketSpan('15m', mockFareQuoteSearchResponse, ids => {
-      expect(ids).to.eql(['success_bucket_span']);
+      expect(ids).toStrictEqual(['success_bucket_span']);
     });
   });
 
   it('farequote count detector, bucket span estimation does not match 1m', () => {
     return testBucketSpan('1m', mockFareQuoteSearchResponse, ids => {
-      expect(ids).to.eql(['bucket_span_estimation_mismatch']);
+      expect(ids).toStrictEqual(['bucket_span_estimation_mismatch']);
     });
   });
 
@@ -167,7 +173,7 @@ describe('ML - validateBucketSpan', () => {
   // should result in a lower bucket span estimation.
   it('it_ops_app_logs count detector, bucket span estimation matches 6h', () => {
     return testBucketSpan('6h', mockItSearchResponse, ids => {
-      expect(ids).to.eql(['success_bucket_span']);
+      expect(ids).toStrictEqual(['success_bucket_span']);
     });
   });
 });
