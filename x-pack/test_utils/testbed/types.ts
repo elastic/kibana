@@ -41,7 +41,7 @@ export interface TestBed<T = string> {
    *
    * @example
    *
-    ```ts
+    ```typescript
     find('nameInput');
     // or more specific,
     // "nameInput" is a child of "myForm"
@@ -61,6 +61,7 @@ export interface TestBed<T = string> {
    * and we need to wait for the data to be fetched (and bypass any "loading" state).
    */
   waitFor: (testSubject: T, count?: number) => Promise<void>;
+  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
@@ -79,6 +80,28 @@ export interface TestBed<T = string> {
       value: string,
       isAsync?: boolean
     ) => Promise<void> | void;
+    /**
+     * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
+     * For the <EuiSuperSelect /> you need to mock it like this
+     * 
+     ```typescript
+     jest.mock('@elastic/eui', () => ({
+        ...jest.requireActual('@elastic/eui'),
+        EuiSuperSelect: (props: any) => (
+          <input
+            data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
+            value={props.valueOfSelected}
+            onChange={e => {
+              props.onChange(e.target.value);
+            }}
+          />
+        ),
+      }));
+     ```
+     * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
+     * @param value The value to set
+     */
+    setSelectValue: (select: T | ReactWrapper, value: string) => void;
     /**
      * Select or unselect a form checkbox.
      *

@@ -96,7 +96,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                         <div>
                           {/* Title */}
                           <EuiTitle size="m">
-                            <h2>
+                            <h2 data-test-subj="flyoutTitle">
                               {isMultiField
                                 ? i18n.translate(
                                     'xpack.idxMgmt.mappingsEditor.editMultiFieldTitle',
@@ -127,6 +127,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                             href={linkDocumentation}
                             target="_blank"
                             iconType="help"
+                            data-test-subj="documentationLink"
                           >
                             {i18n.translate(
                               'xpack.idxMgmt.mappingsEditor.editField.typeDocumentation',
@@ -146,7 +147,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
                     {/* Field path */}
                     <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} data-test-subj="fieldPath">
                         <CodeBlock padding="small">{field.path.join(' > ')}</CodeBlock>
                       </EuiFlexItem>
                     </EuiFlexGroup>
