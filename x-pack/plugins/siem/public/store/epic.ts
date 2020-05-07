@@ -9,13 +9,11 @@ import { createTimelineEpic } from './timeline/epic';
 import { createTimelineFavoriteEpic } from './timeline/epic_favorite';
 import { createTimelineNoteEpic } from './timeline/epic_note';
 import { createTimelinePinnedEventEpic } from './timeline/epic_pinned_event';
-import { createDraftTimelineEpic } from './timeline/epic_draft_timeline';
 
 export const createRootEpic = <State>() =>
   combineEpics(
     createTimelineEpic<State>(),
     createTimelineFavoriteEpic<State>(),
     createTimelineNoteEpic<State>(),
-    createTimelinePinnedEventEpic<State>(),
-    createDraftTimelineEpic<State>()
+    createTimelinePinnedEventEpic<State>()
   );

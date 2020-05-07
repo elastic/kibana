@@ -8,7 +8,7 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
-import { TimelineTypeLiteral } from '../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteral } from '../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -48,7 +48,7 @@ export interface OpenTimelineResult {
   savedObjectId?: string | null;
   title?: string | null;
   templateTimelineId?: string | null;
-  type?: TimelineTypeLiteral;
+  type?: TimelineType.template | TimelineType.default;
   updated?: number | null;
   updatedBy?: string | null;
 }
