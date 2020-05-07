@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 
@@ -11,11 +11,17 @@ import { Processor } from '../../../../common/types';
 
 import { OnFormUpdateArg } from '../../../shared_imports';
 
-import { SettingsFormFlyout, DragAndDropTree, PipelineProcessorEditorItem } from './components';
+import {
+  SettingsFormFlyout,
+  DragAndDropTree,
+  PipelineProcessorEditorItem,
+  ProcessorRemoveModal,
+} from './components';
 import { deserialize } from './serialize';
 import { serialize, SerializeResult } from './deserialize';
 import { useProcessorsState } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
+import { getValue } from './utils';
 
 interface FormValidityState {
   validate: OnFormUpdateArg<any>['validate'];
@@ -54,6 +60,9 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     originalProcessors,
   ]);
 
+  const [processorToDeleteSelector, setProcessorToDeleteSelector] = useState<
+    ProcessorSelector | undefined
+  >();
   const [settingsFormMode, setSettingsFormMode] = useState<SettingsFormMode>({ id: 'closed' });
   const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
   const { processors } = processorsState;
@@ -143,11 +152,14 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
                   setSettingsFormMode({ id: 'editingProcessor', arg: { processor, selector } });
                   break;
                 case 'delete':
-                  // TODO: This should have a delete confirmation modal
-                  processorsDispatch({
-                    type: 'removeProcessor',
-                    payload: { selector },
-                  });
+                  if (processor.onFailure?.length) {
+                    setProcessorToDeleteSelector(selector);
+                  } else {
+                    processorsDispatch({
+                      type: 'removeProcessor',
+                      payload: { selector },
+                    });
+                  }
                   break;
                 case 'addOnFailure':
                   setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
@@ -158,9 +170,10 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           />
         )}
       />
-      {/* TODO: Translate */}
       <EuiButton onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}>
-        Add a processor
+        {i18n.translate('xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel', {
+          defaultMessage: 'Add a processor',
+        })}
       </EuiButton>
       {settingsFormMode.id !== 'closed' ? (
         <SettingsFormFlyout
@@ -176,6 +189,20 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         />
       ) : (
         undefined
+      )}
+      {processorToDeleteSelector && (
+        <ProcessorRemoveModal
+          processor={getValue(processorToDeleteSelector, processors)}
+          onResult={confirmed => {
+            if (confirmed) {
+              processorsDispatch({
+                type: 'removeProcessor',
+                payload: { selector: processorToDeleteSelector },
+              });
+            }
+            setProcessorToDeleteSelector(undefined);
+          }}
+        />
       )}
     </>
   );
