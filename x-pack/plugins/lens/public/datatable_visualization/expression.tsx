@@ -10,14 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiBasicTable, EuiFlexGroup, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { IAggType } from 'src/plugins/data/public';
-import { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
+import {
+  FormatFactory,
+  ILensInterpreterRenderHandlers,
+  LensFilterEvent,
+  LensMultiTable,
+} from '../types';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from '../../../../../src/plugins/expressions/public';
 import { VisualizationContainer } from '../visualization_container';
-import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
-import { TriggerContext, VALUE_CLICK_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 export interface DatatableColumns {
   columnIds: string[];
 }
@@ -34,7 +37,7 @@ export interface DatatableProps {
 
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
-  onClickValue: (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => void;
+  onClickValue: (data: LensFilterEvent['data']) => void;
   getType: (name: string) => IAggType;
 };
 
@@ -126,7 +129,7 @@ export const getDatatableRenderer = (dependencies: {
   ) => {
     const resolvedFormatFactory = await dependencies.formatFactory;
     const resolvedGetType = await dependencies.getType;
-    const onClickValue = (data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data']) => {
+    const onClickValue = (data: LensFilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
     ReactDOM.render(
@@ -161,7 +164,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     const timeFieldName = negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
     const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
 
-    const data: ValueClickTriggerContext['data'] = {
+    const data: LensFilterEvent['data'] = {
       negate,
       data: [
         {

@@ -6,8 +6,8 @@
 
 import { Datum, LayerValue } from '@elastic/charts';
 import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
-import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { ColumnGroups } from './types';
+import { LensFilterEvent } from '../types';
 
 export function getSliceValueWithFallback(
   d: Datum,
@@ -28,7 +28,7 @@ export function getFilterContext(
   clickedLayers: LayerValue[],
   layerColumnIds: string[],
   table: KibanaDatatable
-): ValueClickTriggerContext {
+): LensFilterEvent['data'] {
   const matchingIndex = table.rows.findIndex(row =>
     clickedLayers.every((layer, index) => {
       const columnId = layerColumnIds[index];
@@ -37,13 +37,11 @@ export function getFilterContext(
   );
 
   return {
-    data: {
-      data: clickedLayers.map((clickedLayer, index) => ({
-        column: table.columns.findIndex(col => col.id === layerColumnIds[index]),
-        row: matchingIndex,
-        value: clickedLayer.groupByRollup,
-        table,
-      })),
-    },
+    data: clickedLayers.map((clickedLayer, index) => ({
+      column: table.columns.findIndex(col => col.id === layerColumnIds[index]),
+      row: matchingIndex,
+      value: clickedLayer.groupByRollup,
+      table,
+    })),
   };
 }
