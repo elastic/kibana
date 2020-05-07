@@ -32,13 +32,13 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class HeaderPage {
     public async clickDiscover() {
-      await appsMenu.clickLink('Discover');
+      await appsMenu.clickLink('Discover', { category: 'kibana' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async clickVisualize() {
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
@@ -52,7 +52,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickDashboard() {
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -62,7 +62,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickStackManagement() {
-      await appsMenu.clickLink('Management');
+      await appsMenu.clickLink('Stack Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 

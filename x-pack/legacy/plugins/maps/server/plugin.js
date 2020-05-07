@@ -19,8 +19,9 @@ import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, home, licensing, usageCollection } = plugins;
+    const { featuresPlugin, home, licensing, usageCollection, mapsLegacy } = plugins;
     let routesInitialized = false;
+    const mapConfig = mapsLegacy.config;
 
     featuresPlugin.registerFeature({
       id: APP_ID,
@@ -58,7 +59,7 @@ export class MapPlugin {
       const { state } = license.check('maps', 'basic');
       if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
-        initRoutes(__LEGACY, license.uid);
+        initRoutes(__LEGACY, license.uid, mapConfig);
       }
     });
 
@@ -134,7 +135,7 @@ export class MapPlugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath: core.http.basePath.prepend,
-          emsLandingPageUrl: __LEGACY.mapConfig().emsLandingPageUrl,
+          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
         })
       );
     }
@@ -142,11 +143,5 @@ export class MapPlugin {
     __LEGACY.injectUiAppVars(APP_ID, async () => {
       return await __LEGACY.getInjectedUiAppVars('kibana');
     });
-
-    return {
-      getMapConfig() {
-        return __LEGACY.mapConfig();
-      },
-    };
   }
 }

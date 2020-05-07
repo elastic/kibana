@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { ListItemArraySchema } from '../../../common/schemas';
-import { getListItemResponseMock, getSearchListItemMock } from '../mocks';
 
 import { transformElasticToListItem } from './transform_elastic_to_list_item';
 

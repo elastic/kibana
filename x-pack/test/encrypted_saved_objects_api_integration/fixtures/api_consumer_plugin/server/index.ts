@@ -5,7 +5,7 @@
  */
 
 import { CoreSetup, PluginInitializer } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/utils';
+import { deepFreeze } from '../../../../../../src/core/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,

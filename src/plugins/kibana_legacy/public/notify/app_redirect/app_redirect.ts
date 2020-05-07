@@ -18,7 +18,7 @@
  */
 
 import { ILocationService } from 'angular';
-import { modifyUrl } from '../../../../../core/utils';
+import { modifyUrl } from '../../../../../core/public';
 import { ToastsStart } from '../../../../../core/public';
 
 const APP_REDIRECT_MESSAGE_PARAM = 'app_redirect_message';
