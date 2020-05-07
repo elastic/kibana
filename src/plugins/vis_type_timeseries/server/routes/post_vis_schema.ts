@@ -20,7 +20,7 @@
 import { schema } from '@kbn/config-schema';
 import { TypeOptions } from '@kbn/config-schema/target/types/types';
 
-const stringOptionalNullable = schema.nullable(schema.string());
+const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
 
 const stringRequired = schema.string();
 
@@ -62,7 +62,7 @@ const annotationsItems = schema.object({
 });
 
 const backgroundColorRulesItems = schema.object({
-  value: schema.nullable(schema.number()),
+  value: schema.maybe(schema.nullable(schema.number())),
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
   color: stringOptionalNullable,
@@ -117,7 +117,7 @@ const metricsItems = schema.object({
   ),
   type: stringRequired,
   value: stringOptionalNullable,
-  values: schema.nullable(schema.arrayOf(schema.nullable(schema.string()))),
+  values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
 });
 
 const splitFiltersItems = schema.object({
@@ -252,7 +252,7 @@ export const visPayloadSchema = schema.object({
     })
   ),
   // general
-  query: schema.maybe(schema.arrayOf(schema.nullable(queryObject))),
+  query: schema.nullable(schema.arrayOf(queryObject)),
   state: schema.object({
     sort: schema.maybe(
       schema.object({
