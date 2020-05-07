@@ -32,6 +32,9 @@ describe('Pipeline Editor', () => {
         ...(testProcessors as any),
       },
       onUpdate,
+      isTestButtonDisabled: false,
+      onTestPipelineClick: jest.fn(),
+      learnMoreAboutProcessorsUrl: 'test',
     });
 
     const {
