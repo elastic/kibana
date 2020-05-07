@@ -17,15 +17,27 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './es_query';
-export * from './field_formats';
-export * from './field_mapping';
-export * from './index_patterns';
-export * from './kbn_field_types';
-export * from './query';
-export * from './search';
-export * from './search/aggs';
-export * from './search/expressions';
-export * from './types';
-export * from './utils';
+import {
+  KibanaContext,
+  KibanaDatatable,
+  ExpressionFunctionDefinition,
+} from '../../../../../plugins/expressions/public';
+
+type Input = KibanaContext | null;
+type Output = Promise<KibanaDatatable>;
+
+interface Arguments {
+  index: string;
+  metricsAtAllLevels: boolean;
+  partialRows: boolean;
+  includeFormatHints: boolean;
+  aggConfigs: string;
+  timeFields?: string[];
+}
+
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  'esaggs',
+  Input,
+  Arguments,
+  Output
+>;

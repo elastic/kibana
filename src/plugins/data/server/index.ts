@@ -21,6 +21,18 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
+/**
+ * Augment `ExpressionFunctionDefinitions` with any expression functions
+ * registered in this plugin.
+ */
+import { EsaggsExpressionFunctionDefinition } from '../common';
+
+declare module '../../expressions/server' {
+  interface ExpressionFunctionDefinitions {
+    esaggs: EsaggsExpressionFunctionDefinition;
+  }
+}
+
 import {
   buildQueryFilter,
   buildCustomFilter,
