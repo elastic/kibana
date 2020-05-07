@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import _ from 'lodash';
 
 export function topHits(req, panel, annotation) {
   return next => doc => {
     const fields = (annotation.fields && annotation.fields.split(/[,\s]+/)) || [];
     const timeField = annotation.time_field;
-    overwrite(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
+    _.set(doc, `aggs.${annotation.id}.aggs.hits.top_hits`, {
       sort: [
         {
           [timeField]: { order: 'desc' },

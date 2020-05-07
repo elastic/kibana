@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import { set } from 'lodash';
 import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
@@ -26,13 +26,13 @@ export function splitByEverything(req, panel, esQueryConfig, indexPattern) {
       .filter(c => !(c.aggregate_by && c.aggregate_function))
       .forEach(column => {
         if (column.filter) {
-          overwrite(
+          set(
             doc,
             `aggs.pivot.aggs.${column.id}.filter`,
             esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
           );
         } else {
-          overwrite(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
+          set(doc, `aggs.pivot.aggs.${column.id}.filter.match_all`, {});
         }
       });
     return next(doc);

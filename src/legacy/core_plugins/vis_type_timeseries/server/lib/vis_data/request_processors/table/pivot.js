@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { get, last } from 'lodash';
-import { overwrite } from '../../helpers';
+import { get, set, last } from 'lodash';
 
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
@@ -28,13 +27,13 @@ export function pivot(req, panel) {
   return next => doc => {
     const { sort } = req.payload.state;
     if (panel.pivot_id) {
-      overwrite(doc, 'aggs.pivot.terms.field', panel.pivot_id);
-      overwrite(doc, 'aggs.pivot.terms.size', panel.pivot_rows);
+      set(doc, 'aggs.pivot.terms.field', panel.pivot_id);
+      set(doc, 'aggs.pivot.terms.size', panel.pivot_rows);
       if (sort) {
         const series = panel.series.find(item => item.id === sort.column);
         const metric = series && last(series.metrics);
         if (metric && metric.type === 'count') {
-          overwrite(doc, 'aggs.pivot.terms.order', { _count: sort.order });
+          set(doc, 'aggs.pivot.terms.order', { _count: sort.order });
         } else if (metric && basicAggs.includes(metric.type)) {
           const sortAggKey = `${metric.id}-SORT`;
           const fn = bucketTransform[metric.type];
@@ -42,16 +41,16 @@ export function pivot(req, panel) {
             metric.id,
             sortAggKey
           );
-          overwrite(doc, `aggs.pivot.terms.order`, { [bucketPath]: sort.order });
-          overwrite(doc, `aggs.pivot.aggs`, { [sortAggKey]: fn(metric) });
+          set(doc, `aggs.pivot.terms.order`, { [bucketPath]: sort.order });
+          set(doc, `aggs.pivot.aggs`, { [sortAggKey]: fn(metric) });
         } else {
-          overwrite(doc, 'aggs.pivot.terms.order', {
+          set(doc, 'aggs.pivot.terms.order', {
             _key: get(sort, 'order', 'asc'),
           });
         }
       }
     } else {
-      overwrite(doc, 'aggs.pivot.filter.match_all', {});
+      set(doc, 'aggs.pivot.filter.match_all', {});
     }
     return next(doc);
   };

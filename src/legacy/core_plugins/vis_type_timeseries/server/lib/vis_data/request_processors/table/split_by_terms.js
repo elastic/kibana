@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import { set } from 'lodash';
 import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
@@ -25,11 +25,11 @@ export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
     panel.series
       .filter(c => c.aggregate_by && c.aggregate_function)
       .forEach(column => {
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
-        overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
+        set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
+        set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
 
         if (column.filter) {
-          overwrite(
+          set(
             doc,
             `aggs.pivot.aggs.${column.id}.column_filter.filter`,
             esQuery.buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)

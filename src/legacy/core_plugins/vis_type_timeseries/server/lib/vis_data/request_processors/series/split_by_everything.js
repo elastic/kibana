@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
+import _ from 'lodash';
 
 export function splitByEverything(req, panel, series) {
   return next => doc => {
@@ -25,7 +25,7 @@ export function splitByEverything(req, panel, series) {
       series.split_mode === 'everything' ||
       (series.split_mode === 'terms' && !series.terms_field)
     ) {
-      overwrite(doc, `aggs.${series.id}.filter.match_all`, {});
+      _.set(doc, `aggs.${series.id}.filter.match_all`, {});
     }
     return next(doc);
   };
