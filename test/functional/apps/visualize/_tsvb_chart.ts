@@ -29,7 +29,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
   describe('visual builder', function describeIndexTests() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();

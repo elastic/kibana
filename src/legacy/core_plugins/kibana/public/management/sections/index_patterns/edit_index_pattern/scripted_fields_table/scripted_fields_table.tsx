@@ -37,7 +37,7 @@ interface ScriptedFieldsTableProps {
   scriptedFieldLanguageFilter?: string;
   helpers: {
     redirectToRoute: Function;
-    getRouteHref: Function;
+    getRouteHref?: Function;
   };
   onRemoveField?: () => void;
 }
@@ -136,14 +136,19 @@ export class ScriptedFieldsTable extends Component<
   };
 
   render() {
-    const { helpers, indexPattern } = this.props;
+    const { indexPattern } = this.props;
     const { fieldToDelete, deprecatedLangsInUse } = this.state;
 
     const items = this.getFilteredItems();
 
     return (
       <>
-        <Header addScriptedFieldUrl={helpers.getRouteHref(indexPattern, 'addField')} />
+        <Header
+          addScriptedFieldUrl={`${window.location.origin +
+            window.location.pathname}#/management/kibana/index_patterns/${
+            indexPattern.id
+          }/create-field/`}
+        />
 
         <CallOuts
           deprecatedLangsInUse={deprecatedLangsInUse}

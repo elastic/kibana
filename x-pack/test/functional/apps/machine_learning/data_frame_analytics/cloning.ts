@@ -13,9 +13,8 @@ export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('jobs cloning supported by UI form', function() {
-    this.tags(['smoke']);
-
+  // TODO add fix for https://github.com/elastic/elasticsearch/pull/56118
+  describe.skip('jobs cloning supported by UI form', function() {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

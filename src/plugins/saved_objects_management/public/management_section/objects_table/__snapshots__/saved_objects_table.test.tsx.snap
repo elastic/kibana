@@ -238,6 +238,9 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   indexPatterns={
     Object {
       "clearCache": [MockFunction],
+      "createField": [MockFunction],
+      "createFieldList": [MockFunction],
+      "ensureDefaultIndexPattern": [MockFunction],
       "get": [MockFunction],
       "make": [Function],
     }
@@ -259,19 +262,10 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   search={
     Object {
       "__LEGACY": Object {
-        "AggConfig": [MockFunction],
-        "AggType": [MockFunction],
-        "FieldParamType": [MockFunction],
-        "MetricAggType": [MockFunction],
-        "aggTypeFieldFilters": AggTypeFieldFilters {
-          "filters": Set {},
-        },
         "esClient": Object {
           "msearch": [MockFunction],
           "search": [MockFunction],
         },
-        "parentPipelineAggHelper": [MockFunction],
-        "siblingPipelineAggHelper": [MockFunction],
       },
       "aggs": Object {
         "calculateAutoTimeExpression": [Function],

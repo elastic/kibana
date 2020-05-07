@@ -53,3 +53,8 @@ export const lightCssDistFilename: string;
 export const externals: {
   [key: string]: string;
 };
+
+/**
+ * Webpack loader for configuring the public path lookup from `window.__kbnPublicPath__`.
+ */
+export const publicPathLoader: string;

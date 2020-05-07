@@ -43,13 +43,13 @@ export interface Content {
 }
 
 // send an email
-export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<any> {
+export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
-  const transportConfig: Record<string, any> = {};
+  const transportConfig: Record<string, unknown> = {};
 
   if (user != null && password != null) {
     transportConfig.auth = {

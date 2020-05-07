@@ -31,16 +31,12 @@ import * as Breadcrumbs from './breadcrumbs';
 export const renderApp = async (
   core: CoreStart,
   { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
+  isMonitoringEnabled: boolean,
   licenseService$: Observable<any>
 ) => {
   const logstashLicenseService = await licenseService$.pipe(first()).toPromise();
   const clusterService = new ClusterService(core.http);
-  const monitoringService = new MonitoringService(
-    core.http,
-    // When monitoring is migrated this should be fetched from monitoring's plugin contract
-    core.injectedMetadata.getInjectedVar('monitoringUiEnabled'),
-    clusterService
-  );
+  const monitoringService = new MonitoringService(core.http, isMonitoringEnabled, clusterService);
   const pipelinesService = new PipelinesService(core.http, monitoringService);
   const pipelineService = new PipelineService(core.http, pipelinesService);
   const upgradeService = new UpgradeService(core.http);

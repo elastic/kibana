@@ -13,14 +13,19 @@ import { Adapters } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
 
-import { LayerDescriptor, SourceDescriptor } from '../../../common/descriptor_types';
-import { ILayer } from '../layer';
+import { SourceDescriptor } from '../../../common/descriptor_types';
 import { IField } from '../fields/field';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
+import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+
+export type SourceEditorArgs = {
+  onChange: (args: OnSourceChangeArgs) => void;
+};
 
 export type ImmutableSourceProperty = {
   label: string;
   value: string;
+  link?: string;
 };
 
 export type Attribution = {
@@ -37,7 +42,6 @@ export type PreIndexedShape = {
 export type FieldFormatter = (value: string | number | null | undefined | boolean) => string;
 
 export interface ISource {
-  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer;
   destroy(): void;
   getDisplayName(): Promise<string>;
   getInspectorAdapters(): Adapters | undefined;
@@ -50,7 +54,7 @@ export interface ISource {
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
   isESSource(): boolean;
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }): ReactElement<any> | null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   isJoinable(): boolean;
   cloneDescriptor(): SourceDescriptor;
@@ -59,7 +63,6 @@ export interface ISource {
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  shouldBeIndexed(): boolean;
   getPreIndexedShape(): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
@@ -99,10 +102,6 @@ export class AbstractSource implements ISource {
     return this._inspectorAdapters;
   }
 
-  createDefaultLayer(options?: Partial<LayerDescriptor>): ILayer {
-    throw new Error(`Source#createDefaultLayer not implemented`);
-  }
-
   async getDisplayName(): Promise<string> {
     return '';
   }
@@ -131,7 +130,7 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  renderSourceSettingsEditor() {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
 
@@ -152,10 +151,6 @@ export class AbstractSource implements ISource {
   }
 
   isJoinable(): boolean {
-    return false;
-  }
-
-  shouldBeIndexed(): boolean {
     return false;
   }
 

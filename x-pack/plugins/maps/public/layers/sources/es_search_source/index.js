@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ESSearchSource, esDocumentsLayerWizardConfig } from './es_search_source';
+export { ESSearchSource } from './es_search_source';
+export {
+  createDefaultLayerDescriptor,
+  esDocumentsLayerWizardConfig,
+} from './es_documents_layer_wizard';

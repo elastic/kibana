@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
+
 import ChoroplethLayer from '../choropleth_layer';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
@@ -54,6 +55,7 @@ import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_ty
 import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
@@ -101,43 +103,52 @@ describe('RegionMapsVisualizationTests', function() {
 
   let getManifestStub;
   beforeEach(
-    ngMock.inject((Private, $injector) => {
+    ngMock.inject(() => {
+      const mapConfig = {
+        emsFileApiUrl: '',
+        emsTileApiUrl: '',
+        emsLandingPageUrl: '',
+      };
+      const tilemapsConfig = {
+        deprecated: {
+          config: {
+            options: {
+              attribution: '123',
+            },
+          },
+        },
+      };
       setInjectedVarFunc(injectedVar => {
         switch (injectedVar) {
-          case 'mapConfig':
-            return {
-              emsFileApiUrl: '',
-              emsTileApiUrl: '',
-              emsLandingPageUrl: '',
-            };
-          case 'tilemapsConfig':
-            return {
-              deprecated: {
-                config: {
-                  options: {
-                    attribution: '123',
-                  },
-                },
-              },
-            };
           case 'version':
             return '123';
           default:
             return 'not found';
         }
       });
-      const serviceSettings = new ServiceSettings();
-      const uiSettings = $injector.get('config');
+      const serviceSettings = new ServiceSettings(mapConfig, tilemapsConfig);
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
       };
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {
+          get: () => {},
+        },
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
 
       dependencies = {
         serviceSettings,
-        $injector,
         regionmapsConfig,
-        uiSettings,
+        uiSettings: coreSetupMock.uiSettings,
+        BaseMapsVisualization,
       };
 
       regionMapVisType = new BaseVisType(createRegionMapTypeDefinition(dependencies));
