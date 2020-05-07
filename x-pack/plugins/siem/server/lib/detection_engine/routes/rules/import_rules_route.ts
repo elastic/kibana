@@ -75,6 +75,14 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
             body: `Invalid file extension ${fileExtension}`,
           });
         }
+        const signalsIndex = siemClient.getSignalsIndex();
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+        if (!indexExists) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
+          });
+        }
 
         const objectLimit = config.maxRuleImportExportSize;
         const readStream = createRulesStreamFromNdJson(objectLimit);
@@ -94,166 +102,150 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
           const batchParseObjects = chunkParseObjects.shift() ?? [];
           const newImportRuleResponse = await Promise.all(
             batchParseObjects.reduce<Array<Promise<ImportRuleResponse>>>((accum, parsedRule) => {
-              const importsWorkerPromise = new Promise<ImportRuleResponse>(
-                async (resolve, reject) => {
-                  if (parsedRule instanceof Error) {
-                    // If the JSON object had a validation or parse error then we return
-                    // early with the error and an (unknown) for the ruleId
-                    resolve(
-                      createBulkErrorObject({
-                        statusCode: 400,
-                        message: parsedRule.message,
-                      })
-                    );
-                    return null;
-                  }
-                  const {
-                    anomaly_threshold: anomalyThreshold,
-                    description,
-                    enabled,
-                    false_positives: falsePositives,
-                    from,
-                    immutable,
-                    query,
-                    language,
-                    machine_learning_job_id: machineLearningJobId,
-                    output_index: outputIndex,
-                    saved_id: savedId,
-                    meta,
-                    filters,
-                    rule_id: ruleId,
-                    index,
-                    interval,
-                    max_signals: maxSignals,
-                    risk_score: riskScore,
-                    name,
-                    severity,
-                    tags,
-                    threat,
-                    to,
-                    type,
-                    references,
-                    note,
-                    timeline_id: timelineId,
-                    timeline_title: timelineTitle,
-                    version,
-                    exceptions_list,
-                  } = parsedRule;
-
-                  try {
-                    validateLicenseForRuleType({
-                      license: context.licensing.license,
-                      ruleType: type,
-                    });
-
-                    const signalsIndex = siemClient.getSignalsIndex();
-                    const indexExists = await getIndexExists(
-                      clusterClient.callAsCurrentUser,
-                      signalsIndex
-                    );
-                    if (!indexExists) {
-                      resolve(
-                        createBulkErrorObject({
-                          ruleId,
-                          statusCode: 409,
-                          message: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
-                        })
-                      );
-                    }
-                    const rule = await readRules({ alertsClient, ruleId });
-                    if (rule == null) {
-                      await createRules({
-                        alertsClient,
-                        anomalyThreshold,
-                        description,
-                        enabled,
-                        falsePositives,
-                        from,
-                        immutable,
-                        query,
-                        language,
-                        machineLearningJobId,
-                        outputIndex: signalsIndex,
-                        savedId,
-                        timelineId,
-                        timelineTitle,
-                        meta,
-                        filters,
-                        ruleId,
-                        index,
-                        interval,
-                        maxSignals,
-                        riskScore,
-                        name,
-                        severity,
-                        tags,
-                        to,
-                        type,
-                        threat,
-                        references,
-                        note,
-                        version,
-                        exceptions_list,
-                        actions: [], // Actions are not imported nor exported at this time
-                      });
-                      resolve({ rule_id: ruleId, status_code: 200 });
-                    } else if (rule != null && request.query.overwrite) {
-                      await patchRules({
-                        alertsClient,
-                        savedObjectsClient,
-                        description,
-                        enabled,
-                        falsePositives,
-                        from,
-                        immutable,
-                        query,
-                        language,
-                        outputIndex,
-                        savedId,
-                        timelineId,
-                        timelineTitle,
-                        meta,
-                        filters,
-                        id: undefined,
-                        ruleId,
-                        index,
-                        interval,
-                        maxSignals,
-                        riskScore,
-                        name,
-                        severity,
-                        tags,
-                        to,
-                        type,
-                        threat,
-                        references,
-                        note,
-                        version,
-                        exceptions_list,
-                        anomalyThreshold,
-                        machineLearningJobId,
-                      });
-                      resolve({ rule_id: ruleId, status_code: 200 });
-                    } else if (rule != null) {
-                      resolve(
-                        createBulkErrorObject({
-                          ruleId,
-                          statusCode: 409,
-                          message: `rule_id: "${ruleId}" already exists`,
-                        })
-                      );
-                    }
-                  } catch (err) {
-                    resolve(
-                      createBulkErrorObject({
-                        ruleId,
-                        statusCode: 400,
-                        message: err.message,
-                      })
-                    );
-                  }
+              const importsWorkerPromise = new Promise<ImportRuleResponse>(async resolve => {
+                if (parsedRule instanceof Error) {
+                  // If the JSON object had a validation or parse error then we return
+                  // early with the error and an (unknown) for the ruleId
+                  resolve(
+                    createBulkErrorObject({
+                      statusCode: 400,
+                      message: parsedRule.message,
+                    })
+                  );
+                  return null;
                 }
-              );
+                const {
+                  anomaly_threshold: anomalyThreshold,
+                  description,
+                  enabled,
+                  false_positives: falsePositives,
+                  from,
+                  immutable,
+                  query,
+                  language,
+                  machine_learning_job_id: machineLearningJobId,
+                  output_index: outputIndex,
+                  saved_id: savedId,
+                  meta,
+                  filters,
+                  rule_id: ruleId,
+                  index,
+                  interval,
+                  max_signals: maxSignals,
+                  risk_score: riskScore,
+                  name,
+                  severity,
+                  tags,
+                  threat,
+                  to,
+                  type,
+                  references,
+                  note,
+                  timeline_id: timelineId,
+                  timeline_title: timelineTitle,
+                  version,
+                  exceptions_list,
+                } = parsedRule;
+
+                try {
+                  validateLicenseForRuleType({
+                    license: context.licensing.license,
+                    ruleType: type,
+                  });
+
+                  const rule = await readRules({ alertsClient, ruleId });
+                  if (rule == null) {
+                    await createRules({
+                      alertsClient,
+                      anomalyThreshold,
+                      description,
+                      enabled,
+                      falsePositives,
+                      from,
+                      immutable,
+                      query,
+                      language,
+                      machineLearningJobId,
+                      outputIndex: signalsIndex,
+                      savedId,
+                      timelineId,
+                      timelineTitle,
+                      meta,
+                      filters,
+                      ruleId,
+                      index,
+                      interval,
+                      maxSignals,
+                      riskScore,
+                      name,
+                      severity,
+                      tags,
+                      to,
+                      type,
+                      threat,
+                      references,
+                      note,
+                      version,
+                      exceptions_list,
+                      actions: [], // Actions are not imported nor exported at this time
+                    });
+                    resolve({ rule_id: ruleId, status_code: 200 });
+                  } else if (rule != null && request.query.overwrite) {
+                    await patchRules({
+                      alertsClient,
+                      savedObjectsClient,
+                      description,
+                      enabled,
+                      falsePositives,
+                      from,
+                      immutable,
+                      query,
+                      language,
+                      outputIndex,
+                      savedId,
+                      timelineId,
+                      timelineTitle,
+                      meta,
+                      filters,
+                      id: undefined,
+                      ruleId,
+                      index,
+                      interval,
+                      maxSignals,
+                      riskScore,
+                      name,
+                      severity,
+                      tags,
+                      to,
+                      type,
+                      threat,
+                      references,
+                      note,
+                      version,
+                      exceptions_list,
+                      anomalyThreshold,
+                      machineLearningJobId,
+                    });
+                    resolve({ rule_id: ruleId, status_code: 200 });
+                  } else if (rule != null) {
+                    resolve(
+                      createBulkErrorObject({
+                        ruleId,
+                        statusCode: 409,
+                        message: `rule_id: "${ruleId}" already exists`,
+                      })
+                    );
+                  }
+                } catch (err) {
+                  resolve(
+                    createBulkErrorObject({
+                      ruleId,
+                      statusCode: 400,
+                      message: err.message,
+                    })
+                  );
+                }
+              });
               return [...accum, importsWorkerPromise];
             }, [])
           );
