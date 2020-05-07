@@ -167,7 +167,7 @@ export function Demo({ actionFactories }: { actionFactories: Array<ActionFactory
     config?: ActionBaseConfig;
   }>({});
 
-  function changeActionFactory(newActionFactory: ActionFactory | null) {
+  function changeActionFactory(newActionFactory?: ActionFactory) {
     if (!newActionFactory) {
       // removing action factory
       return setState({});

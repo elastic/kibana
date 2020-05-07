@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-
-export function validateCardinality(
-  callAsCurrentUser: APICaller,
-  job?: CombinedJob
-): Promise<any[]>;
+export * from '../common/types/anomalies';
