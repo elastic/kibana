@@ -32,6 +32,7 @@ import {
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
+import { VALUE_MUST_BE_GREATER_THEN_ZEO } from '../../common/translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -52,7 +53,7 @@ const isValidCertVal = (val: string | number) => {
     return Translations.BLANK_STR;
   }
   if (val === 0) {
-    return Translations.VALID_STR;
+    return VALUE_MUST_BE_GREATER_THEN_ZEO;
   }
 };
 
