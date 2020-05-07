@@ -50,19 +50,11 @@ export const REOPENED_CASES = ({
     defaultMessage: 'Reopened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
-export const TAG_FETCH_FAILURE = i18n.translate(
-  'xpack.siem.containers.case.tagFetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch Tags',
-  }
-);
-
-export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = i18n.translate(
-  'xpack.siem.containers.case.pushToExterService',
-  {
-    defaultMessage: 'Successfully sent to ServiceNow',
-  }
-);
+export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
+  i18n.translate('xpack.siem.containers.case.pushToExternalService', {
+    values: { serviceName },
+    defaultMessage: 'Successfully sent to { serviceName }',
+  });
 
 export const ERROR_PUSH_TO_SERVICE = i18n.translate(
   'xpack.siem.case.configure.errorPushingToService',
