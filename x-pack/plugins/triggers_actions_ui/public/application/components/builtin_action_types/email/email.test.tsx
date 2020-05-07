@@ -3,12 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { TypeRegistry } from '../../type_registry';
-import { registerBuiltInActionTypes } from './index';
-import { ActionTypeModel, ActionParamsProps } from '../../../types';
-import { EmailActionParams, EmailActionConnector } from './types';
+import { TypeRegistry } from '../../../type_registry';
+import { registerBuiltInActionTypes } from '../index';
+import { ActionTypeModel } from '../../../../types';
+import { EmailActionConnector } from '../types';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -204,82 +202,5 @@ describe('action params validation', () => {
         subject: [],
       },
     });
-  });
-});
-
-describe('EmailActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
-    expect(actionTypeModel.actionConnectorFields).not.toBeNull();
-    if (!actionTypeModel.actionConnectorFields) {
-      return;
-    }
-    const ConnectorFields = actionTypeModel.actionConnectorFields;
-    const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
-      config: {
-        from: 'test@test.com',
-      },
-    } as EmailActionConnector;
-    const wrapper = mountWithIntl(
-      <ConnectorFields
-        action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="emailFromInput"]')
-        .first()
-        .prop('value')
-    ).toBe('test@test.com');
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
-  });
-});
-
-describe('EmailParamsFields renders', () => {
-  test('all params fields is rendered', () => {
-    expect(actionTypeModel.actionParamsFields).not.toBeNull();
-    if (!actionTypeModel.actionParamsFields) {
-      return;
-    }
-    const ParamsFields = actionTypeModel.actionParamsFields as FunctionComponent<
-      ActionParamsProps<EmailActionParams>
-    >;
-    const actionParams = {
-      cc: [],
-      bcc: [],
-      to: ['test@test.com'],
-      subject: 'test',
-      message: 'test message',
-    };
-    const wrapper = mountWithIntl(
-      <ParamsFields
-        actionParams={actionParams}
-        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-        editAction={() => {}}
-        index={0}
-      />
-    );
-    expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="toEmailAddressInput"]')
-        .first()
-        .prop('selectedOptions')
-    ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
   });
 });
