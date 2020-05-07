@@ -60,7 +60,7 @@ export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
 export const PUSH_DISABLE_BY_KIBANA_CONFIG_TITLE = i18n.translate(
   'xpack.siem.case.caseView.pushToServiceDisableByConfigTitle',
   {
-    defaultMessage: 'Enable ServiceNow in Kibana configuration file',
+    defaultMessage: 'Enable external service in Kibana configuration file',
   }
 );
 
