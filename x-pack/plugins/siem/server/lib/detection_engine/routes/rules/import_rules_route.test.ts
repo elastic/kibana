@@ -122,20 +122,11 @@ describe('import_rules_route', () => {
       clients.siemClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-              status_code: 409,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message:
+          'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+        status_code: 400,
       });
     });
 
@@ -145,19 +136,10 @@ describe('import_rules_route', () => {
       });
 
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message: 'Test error',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message: 'Test error',
+        status_code: 500,
       });
     });
 
