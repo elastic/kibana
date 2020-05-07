@@ -38,7 +38,7 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
   const clickHandler = useNavigateByRouterEventHandler(route);
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={href} onClick={clickHandler}>
+    <EuiLink href={href} onClick={clickHandler} data-test-subj="policyNameLink">
       {name}
     </EuiLink>
   );
@@ -134,6 +134,7 @@ export const PolicyList = React.memo(() => {
         render(version: string) {
           return (
             <LinkToApp
+              data-test-subj="agentConfigLink"
               appId="ingestManager"
               appPath={`#/configs/${version}`}
               href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}

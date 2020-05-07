@@ -75,7 +75,7 @@ export function getActionType(): ActionTypeModel {
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors }) => {
+>> = ({ action, editActionSecrets, errors, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (
@@ -85,7 +85,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-slack.html#configuring-slack"
+            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/slack-action-type.html`}
             target="_blank"
           >
             <FormattedMessage

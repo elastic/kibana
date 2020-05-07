@@ -55,13 +55,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  IndexPatternField,
+  FieldFormatInstanceType,
   IndexPattern,
   IFieldType,
   KBN_FIELD_TYPES,
   ES_FIELD_TYPES,
 } from '../../../../plugins/data/public';
-import { FieldFormatInstanceType } from '../../../../plugins/data/common';
-import { Field } from '../../../../plugins/data/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -114,7 +114,7 @@ interface InitialFieldTypeFormat extends FieldTypeFormat {
   defaultFieldFormat: FieldFormatInstanceType;
 }
 
-interface FieldClone extends Field {
+interface FieldClone extends IndexPatternField {
   format: any;
 }
 
@@ -139,7 +139,7 @@ export interface FieldEditorState {
 
 export interface FieldEdiorProps {
   indexPattern: IndexPattern;
-  field: Field;
+  field: IndexPatternField;
   helpers: {
     getConfig: (key: string) => any;
     getHttpStart: () => HttpStart;

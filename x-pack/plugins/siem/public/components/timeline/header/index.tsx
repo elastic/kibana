@@ -12,8 +12,6 @@ import deepEqual from 'fast-deep-equal';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import {
-  OnChangeDataProviderKqlQuery,
-  OnChangeDroppableAndProvider,
   OnDataProviderEdited,
   OnDataProviderRemoved,
   OnToggleDataProviderEnabled,
@@ -30,8 +28,6 @@ interface Props {
   filterManager: FilterManager;
   id: string;
   indexPattern: IIndexPattern;
-  onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
-  onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderEdited: OnDataProviderEdited;
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -46,8 +42,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   indexPattern,
   dataProviders,
   filterManager,
-  onChangeDataProviderKqlQuery,
-  onChangeDroppableAndProvider,
   onDataProviderEdited,
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
@@ -65,18 +59,19 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         size="s"
       />
     )}
-    <DataProviders
-      browserFields={browserFields}
-      id={id}
-      dataProviders={dataProviders}
-      onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-      onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-      onDataProviderEdited={onDataProviderEdited}
-      onDataProviderRemoved={onDataProviderRemoved}
-      onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-      onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-      show={show}
-    />
+    {show && (
+      <DataProviders
+        browserFields={browserFields}
+        id={id}
+        dataProviders={dataProviders}
+        onDataProviderEdited={onDataProviderEdited}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+        show={show}
+      />
+    )}
+
     <StatefulSearchOrFilter
       browserFields={browserFields}
       filterManager={filterManager}
@@ -94,8 +89,6 @@ export const TimelineHeader = React.memo(
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
-    prevProps.onChangeDataProviderKqlQuery === nextProps.onChangeDataProviderKqlQuery &&
-    prevProps.onChangeDroppableAndProvider === nextProps.onChangeDroppableAndProvider &&
     prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
     prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
