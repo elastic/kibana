@@ -7,25 +7,23 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
-// @ts-ignore
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
-// @ts-ignore
 import { EMSFileSource, sourceTitle } from './ems_file_source';
 // @ts-ignore
-import { isEmsEnabled } from '../../../meta';
+import { getIsEmsEnabled } from '../../../kibana_services';
+import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 
 export const emsBoundariesLayerWizardConfig: LayerWizard = {
   checkVisibility: () => {
-    return isEmsEnabled();
+    return getIsEmsEnabled();
   },
   description: i18n.translate('xpack.maps.source.emsFileDescription', {
     defaultMessage: 'Administrative boundaries from Elastic Maps Service',
   }),
   icon: 'emsApp',
   renderWizard: ({ previewLayer, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: unknown) => {
-      // @ts-ignore
+    const onSourceConfigChange = (sourceConfig: Partial<EMSFileSourceDescriptor>) => {
       const sourceDescriptor = EMSFileSource.createDescriptor(sourceConfig);
       const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
       previewLayer(layerDescriptor);
