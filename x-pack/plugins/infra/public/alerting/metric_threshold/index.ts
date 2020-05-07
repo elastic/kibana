@@ -30,5 +30,6 @@ Reason:
 `,
       }
     ),
+    isUiEditEnabled: true,
   };
 }

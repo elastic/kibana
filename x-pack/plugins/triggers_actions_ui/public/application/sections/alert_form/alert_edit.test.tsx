@@ -55,6 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
+      isUiEditEnabled: true,
     };
 
     const actionTypeModel = {

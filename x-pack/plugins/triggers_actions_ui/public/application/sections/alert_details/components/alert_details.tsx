@@ -74,6 +74,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
+  const alertTypeRegistryModel = alertTypeRegistry.get(alert.alertTypeId);
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
@@ -113,7 +114,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                {canSave ? (
+                {canSave && alertTypeRegistryModel.isUiEditEnabled ? (
                   <EuiFlexItem grow={false}>
                     <Fragment>
                       {' '}

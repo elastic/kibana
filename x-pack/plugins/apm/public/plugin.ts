@@ -115,7 +115,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       alertParamsExpression: ErrorRateAlertTrigger,
       validate: () => ({
         errors: []
-      })
+      }),
+      isUiEditEnabled: false
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
@@ -127,7 +128,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       alertParamsExpression: TransactionDurationAlertTrigger,
       validate: () => ({
         errors: []
-      })
+      }),
+      isUiEditEnabled: false
     });
   }
 }
