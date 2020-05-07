@@ -17,7 +17,7 @@
     "core-js": "^3.2.1",
     "custom-event-polyfill": "^0.3.0",
     "elasticsearch-browser": "^16.5.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
     "monaco-editor": "~0.17.0",
