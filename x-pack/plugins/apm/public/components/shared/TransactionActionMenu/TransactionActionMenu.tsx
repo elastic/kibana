@@ -103,7 +103,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
 
             const [, , app, ...rest] = appPathname.split('/');
 
-            if (app === 'uptime' || app === 'infra' || app === 'logs') {
+            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
               event.preventDefault();
               core.application.navigateToApp(app, {
                 path: `${rest.join('/')}${
