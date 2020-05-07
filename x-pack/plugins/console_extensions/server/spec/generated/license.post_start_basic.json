@@ -1,0 +1,14 @@
+{
+  "license.post_start_basic": {
+    "url_params": {
+      "acknowledge": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_license/start_basic"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/start-basic.html"
+  }
+}

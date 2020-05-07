@@ -1,0 +1,11 @@
+{
+  "ccr.follow_info": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_ccr/info"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-get-follow-info.html"
+  }
+}

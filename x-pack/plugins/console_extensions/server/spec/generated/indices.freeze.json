@@ -1,0 +1,25 @@
+{
+  "indices.freeze": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": "",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "wait_for_active_shards": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_freeze"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/freeze-index-api.html"
+  }
+}

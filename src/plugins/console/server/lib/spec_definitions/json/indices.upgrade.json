@@ -1,0 +1,20 @@
+{
+  "indices.upgrade": {
+    "url_params": {
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "ignore_unavailable": "__flag__",
+      "wait_for_completion": "__flag__",
+      "only_ancient_segments": "__flag__"
+    },
+    "methods": [],
+    "patterns": [],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
+  }
+}

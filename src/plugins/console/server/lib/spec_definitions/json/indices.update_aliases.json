@@ -1,0 +1,15 @@
+{
+  "indices.update_aliases": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_aliases"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-aliases.html"
+  }
+}

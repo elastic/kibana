@@ -1,0 +1,17 @@
+{
+  "snapshot.status": {
+    "url_params": {
+      "master_timeout": "",
+      "ignore_unavailable": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_snapshot/_status",
+      "_snapshot/{repository}/_status",
+      "_snapshot/{repository}/{snapshot}/_status"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html"
+  }
+}

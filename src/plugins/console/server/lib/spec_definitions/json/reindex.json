@@ -1,0 +1,22 @@
+{
+  "reindex": {
+    "url_params": {
+      "refresh": "__flag__",
+      "timeout": "",
+      "wait_for_active_shards": "",
+      "wait_for_completion": "__flag__",
+      "requests_per_second": "",
+      "scroll": "",
+      "slices": "",
+      "max_docs": "all documents",
+      "prefer_v2_templates": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_reindex"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html"
+  }
+}
