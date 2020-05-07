@@ -18,18 +18,8 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { TileMapPlugin as Plugin } from './plugin';
 
-import { TileMapPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
-
-const plugins: Readonly<TileMapPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-  mapsLegacy: npSetup.plugins.mapsLegacy,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
+}

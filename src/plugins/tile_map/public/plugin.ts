@@ -22,9 +22,9 @@ import {
   Plugin,
   PluginInitializerContext,
   IUiSettingsClient,
-} from '../../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
-import { VisualizationsSetup } from '../../../../plugins/visualizations/public';
+} from 'kibana/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 // TODO: Determine why visualizations don't populate without this
 import 'angular-sanitize';
 
@@ -32,7 +32,13 @@ import 'angular-sanitize';
 import { createTileMapFn } from './tile_map_fn';
 // @ts-ignore
 import { createTileMapTypeDefinition } from './tile_map_type';
-import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
+import { getBaseMapsVis, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { DataPublicPluginStart } from '../../data/public';
+import { setFormatService, setQueryService } from './services';
+
+export interface TileMapConfigType {
+  tilemap: any;
+}
 
 /** @private */
 interface TileMapVisualizationDependencies {
@@ -50,7 +56,18 @@ export interface TileMapPluginSetupDependencies {
 }
 
 /** @internal */
-export class TileMapPlugin implements Plugin<Promise<void>, void> {
+export interface TileMapPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+export interface TileMapPluginSetup {
+  config: any;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TileMapPluginStart {}
+
+/** @internal */
+export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginStart> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -72,9 +89,16 @@ export class TileMapPlugin implements Plugin<Promise<void>, void> {
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
+
+    const config = this.initializerContext.config.get<TileMapConfigType>();
+    return {
+      config,
+    };
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, { data }: TileMapPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
+    setQueryService(data.query);
+    return {};
   }
 }
