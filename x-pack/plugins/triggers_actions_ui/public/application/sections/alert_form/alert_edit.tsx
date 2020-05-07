@@ -210,3 +210,6 @@ export const AlertEdit = ({
     </EuiPortal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertEdit as default };
