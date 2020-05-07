@@ -140,7 +140,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
             <EuiSpacer />
 
-            <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+            <EuiButton
+              size="s"
+              onClick={onTestPipelineClick}
+              disabled={isTestButtonDisabled}
+              data-test-subj="testPipelineButton"
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.form.testPipelineButtonLabel"
                 defaultMessage="Test pipeline"
