@@ -20,25 +20,19 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('get_case', () => {
+  describe('post_case', () => {
     afterEach(async () => {
       await deleteCases(es);
     });
 
-    it('should return a case', async () => {
+    it('should post a case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      const data = removeServerGeneratedPropertiesFromCase(body);
+      const data = removeServerGeneratedPropertiesFromCase(postedCase);
       expect(data).to.eql(postCaseResp(postedCase.id));
     });
   });

@@ -32,17 +32,13 @@ export function initPostCaseApi({
     },
     async (context, request, response) => {
       try {
-        console.log('????????0', JSON.stringify(request.body));
-        console.log('????????1', request);
         const client = context.core.savedObjects.client;
         const query = pipe(
           excess(CasePostRequestRt).decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-        console.log('????????1');
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
-        console.log('????????2');
         const createdDate = new Date().toISOString();
         const myCaseConfigure = await caseConfigureService.find({ client });
         const connectorId = getConnectorId(myCaseConfigure);
@@ -80,7 +76,6 @@ export function initPostCaseApi({
           ),
         });
       } catch (error) {
-        console.log('ERRRRRR', error)
         return response.customError(wrapError(error));
       }
     }

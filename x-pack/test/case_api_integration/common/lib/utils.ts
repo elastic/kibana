@@ -29,7 +29,17 @@ export const removeServerGeneratedPropertiesFromConfigure = (
   return rest;
 };
 
-export const deleteCase = async (es: any): Promise<void> => {
+export const deleteCasesUserActions = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-user-actions',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+    body: {},
+  });
+};
+
+export const deleteCases = async (es: any): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
@@ -39,6 +49,15 @@ export const deleteCase = async (es: any): Promise<void> => {
   });
 };
 
+export const deleteComments = async (es: any): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-comments',
+    waitForCompletion: true,
+    refresh: 'wait_for',
+    body: {},
+  });
+};
 
 export const deleteConfiguration = async (es: any): Promise<void> => {
   await es.deleteByQuery({

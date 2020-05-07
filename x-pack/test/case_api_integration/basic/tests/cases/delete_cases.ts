@@ -8,11 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
-import {
-  postCaseReq,
-  postCaseResp,
-  removeServerGeneratedPropertiesFromCase,
-} from '../../../common/lib/mock';
+import { postCaseReq } from '../../../common/lib/mock';
 import { deleteCases } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -20,12 +16,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('get_case', () => {
+  describe('delete_cases', () => {
     afterEach(async () => {
       await deleteCases(es);
     });
 
-    it('should return a case', async () => {
+    it('should delete a case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -33,13 +29,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}`)
+        .delete(`${CASES_URL}?ids=["${postedCase.id}"]`)
         .set('kbn-xsrf', 'true')
         .send()
-        .expect(200);
+        .expect(204);
 
-      const data = removeServerGeneratedPropertiesFromCase(body);
-      expect(data).to.eql(postCaseResp(postedCase.id));
+      expect(body).to.eql({});
     });
   });
 };

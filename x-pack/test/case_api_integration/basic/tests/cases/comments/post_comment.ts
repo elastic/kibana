@@ -5,41 +5,37 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../plugins/case/common/constants';
-import {
-  postCaseReq,
-  postCaseResp,
-  removeServerGeneratedPropertiesFromCase,
-} from '../../../common/lib/mock';
-import { deleteCases } from '../../../common/lib/utils';
+import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { defaultUser, postCaseReq, postCommentReq } from '../../../../common/lib/mock';
+import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('get_case', () => {
+  describe('post_comment', () => {
     afterEach(async () => {
       await deleteCases(es);
+      await deleteComments(es);
+      await deleteCasesUserActions(es);
     });
 
-    it('should return a case', async () => {
+    it('should post a comment', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}`)
+      const { body: c } = await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-
-      const data = removeServerGeneratedPropertiesFromCase(body);
-      expect(data).to.eql(postCaseResp(postedCase.id));
+        .send(postCommentReq);
+      expect(c.comments[0].comment).to.eql(postCommentReq.comment);
+      expect(c.updated_by).to.eql(defaultUser);
     });
   });
 };

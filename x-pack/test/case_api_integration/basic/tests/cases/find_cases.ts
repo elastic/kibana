@@ -9,21 +9,17 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../plugins/case/common/constants';
 import { postCaseReq, postCommentReq, findCasesResp } from '../../../common/lib/mock';
-import { deleteCase } from '../../../common/lib/utils';
+import { deleteCases, deleteComments, deleteCasesUserActions } from '../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
-  // const req = () => supertest
-  //   .post(CASES_URL)
-  //   .set('kbn-xsrf', 'true')
-  //   .send(postCaseReq)
-  //   .expect(200);
-
   describe('find_cases', () => {
     afterEach(async () => {
-      await deleteCase(es);
+      await deleteCases(es);
+      await deleteComments(es);
+      await deleteCasesUserActions(es);
     });
     it('should return empty response', async () => {
       const { body } = await supertest
@@ -100,7 +96,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(`${CASES_URL}/${b.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
-      const { body: c3 } = await supertest
+      const { body: c } = await supertest
         .post(`${CASES_URL}/${b.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
@@ -116,13 +112,45 @@ export default ({ getService }: FtrProviderContext): void => {
         cases: [
           a,
           {
-            ...c3,
+            ...c,
             comments: [],
             totalComment: 2,
           },
         ],
         count_open_cases: 2,
       });
+    });
+
+    it('correctly counts open/closed', async () => {
+      await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq);
+      const { body: b } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq);
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: b.id,
+              version: b.version,
+              status: 'closed',
+            },
+          ],
+        })
+        .expect(200);
+      const { body } = await supertest
+        .get(`${CASES_URL}/_find?sortOrder=asc`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+
+      expect(body.count_open_cases).to.eql(1);
+      expect(body.count_closed_cases).to.eql(1);
     });
   });
 };

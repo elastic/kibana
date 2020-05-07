@@ -9,7 +9,7 @@ import {
   CaseResponse,
   CasesFindResponse,
 } from '../../../../plugins/case/common/api';
-const defaultUser = { email: null, full_name: null, username: 'elastic' };
+export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
@@ -21,13 +21,11 @@ export const postCommentReq: { comment: string } = {
 };
 
 export const postCaseResp = (id: string): Partial<CaseResponse> => ({
+  ...postCaseReq,
   id,
   comments: [],
   totalComment: 0,
   connector_id: 'none',
-  description: 'This is a brand new case of a bad meanie defacing data',
-  title: 'Super Bad Security Issue',
-  tags: ['defacement'],
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
