@@ -139,7 +139,7 @@ export const MappingsState = React.memo(({ children, onChange, value, mappingsTy
             ...templatesData,
           }),
           properties: fields,
-        };
+        } as Mappings;
 
         return mappingsType === undefined
           ? mappings
