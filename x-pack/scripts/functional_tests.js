@@ -9,7 +9,8 @@ const alwaysImportedTests = [
   require.resolve('../test/functional_endpoint_ingest_failure/config.ts'),
   require.resolve('../test/functional_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
-  require.resolve('../test/functional/config_security_basic.js'),
+  require.resolve('../test/functional/config_security_basic.ts'),
+  require.resolve('../test/functional/config_security_trial.ts'),
   require.resolve('../test/plugin_functional/config.ts'),
 ];
 const onlyNotInCoverageTests = [
