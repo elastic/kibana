@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(200);
+          .expect(400);
 
         // We have to wait up to 5 seconds for any unresolved promises to flush
         await new Promise(resolve => setTimeout(resolve, 5000));
@@ -50,21 +50,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(200);
+          .expect(400);
 
         expect(body).to.eql({
-          errors: [
-            {
-              error: {
-                message:
-                  'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-                status_code: 409,
-              },
-              rule_id: 'rule-1',
-            },
-          ],
-          success: false,
-          success_count: 0,
+          message:
+            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+          status_code: 400,
         });
       });
 
@@ -73,29 +64,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
           .set('kbn-xsrf', 'true')
           .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-2']), 'rules.ndjson')
-          .expect(200);
+          .expect(400);
 
         expect(body).to.eql({
-          errors: [
-            {
-              error: {
-                message:
-                  'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-                status_code: 409,
-              },
-              rule_id: 'rule-1',
-            },
-            {
-              error: {
-                message:
-                  'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
-                status_code: 409,
-              },
-              rule_id: 'rule-2',
-            },
-          ],
-          success: false,
-          success_count: 0,
+          message:
+            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+          status_code: 400,
         });
       });
     });

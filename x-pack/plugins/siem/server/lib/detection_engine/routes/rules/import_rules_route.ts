@@ -75,6 +75,14 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
             body: `Invalid file extension ${fileExtension}`,
           });
         }
+        const signalsIndex = siemClient.getSignalsIndex();
+        const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+        if (!indexExists) {
+          return siemResponse.error({
+            statusCode: 400,
+            body: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
+          });
+        }
 
         const objectLimit = config.maxRuleImportExportSize;
         const readStream = createRulesStreamFromNdJson(objectLimit);
@@ -145,21 +153,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                     ruleType: type,
                   });
 
-                  const signalsIndex = siemClient.getSignalsIndex();
-                  const indexExists = await getIndexExists(
-                    clusterClient.callAsCurrentUser,
-                    signalsIndex
-                  );
-                  if (!indexExists) {
-                    resolve(
-                      createBulkErrorObject({
-                        ruleId,
-                        statusCode: 409,
-                        message: `To create a rule, the index must exist first. Index ${signalsIndex} does not exist`,
-                      })
-                    );
-                    return null;
-                  }
                   const rule = await readRules({ alertsClient, ruleId });
                   if (rule == null) {
                     await createRules({
