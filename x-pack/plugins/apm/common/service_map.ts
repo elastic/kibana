@@ -34,7 +34,6 @@ export interface Connection {
 }
 
 export interface ServiceNodeMetrics {
-  numInstances: number;
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
   avgTransactionDuration: number | null;

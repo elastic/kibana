@@ -128,10 +128,10 @@ export const PipelineTestFlyout: React.FunctionComponent<PipelineTestFlyoutProps
   }
 
   return (
-    <EuiFlyout maxWidth={550} onClose={closeFlyout}>
+    <EuiFlyout maxWidth={550} onClose={closeFlyout} data-test-subj="testPipelineFlyout">
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 data-test-subj="title">
             {pipeline.name ? (
               <FormattedMessage
                 id="xpack.ingestPipelines.testPipelineFlyout.withPipelineNameTitle"
