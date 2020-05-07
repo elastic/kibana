@@ -196,7 +196,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
-      const fieldSelection: FieldSelectionItem[] = resp.field_selection;
+      const fieldSelection: FieldSelectionItem[] | undefined = resp.field_selection;
 
       let hasRequiredFields = false;
       if (fieldSelection) {
