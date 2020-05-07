@@ -47,6 +47,10 @@ export const FilterPopover = ({
   const [tempSelectedItems, setTempSelectedItems] = useState<string[]>(selectedItems);
 
   useEffect(() => {
+    setTempSelectedItems(selectedItems);
+  }, [selectedItems]);
+
+  useEffect(() => {
     if (searchQuery !== '') {
       const toDisplay = items.filter(item => item.indexOf(searchQuery) >= 0);
       setItemsToDisplay(toDisplay);

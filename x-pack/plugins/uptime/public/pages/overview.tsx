@@ -23,7 +23,9 @@ import { OVERVIEW_ROUTE } from '../../common/constants';
 import { OverviewPageProps } from '../components/overview/overview_container';
 
 const StyleLink = styled(Link)`
-  animation: none !important;
+  &&& {
+    animation: none !important;
+  }
 `;
 
 interface Props extends OverviewPageProps {
