@@ -11,12 +11,10 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { ServiceMetricList } from './ServiceMetricList';
 
 interface ServiceMetricFetcherProps {
-  frameworkName?: string;
   serviceName: string;
 }
 
 export function ServiceMetricFetcher({
-  frameworkName,
   serviceName
 }: ServiceMetricFetcherProps) {
   const {
@@ -39,11 +37,5 @@ export function ServiceMetricFetcher({
   );
   const isLoading = status === 'loading';
 
-  return (
-    <ServiceMetricList
-      {...data}
-      frameworkName={frameworkName}
-      isLoading={isLoading}
-    />
-  );
+  return <ServiceMetricList {...data} isLoading={isLoading} />;
 }

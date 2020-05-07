@@ -13,7 +13,7 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
 
   return {
     async navigateTo() {
-      pageObjects.infraLogs.navigateToTab('log-categories');
+      await pageObjects.infraLogs.navigateToTab('log-categories');
     },
 
     async getSetupScreen(): Promise<WebElementWrapper> {

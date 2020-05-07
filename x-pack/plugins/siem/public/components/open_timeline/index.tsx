@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 
 import { Dispatch } from 'redux';
+
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { deleteTimelineMutation } from '../../containers/timeline/delete/persist.gql_query';
 import { useGetAllTimeline } from '../../containers/timeline/all';
@@ -40,6 +41,7 @@ import {
   OnDeleteOneTimeline,
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { useTimelineTypes } from './use_timeline_types';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -103,7 +105,21 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     /** The requested field to sort on */
     const [sortField, setSortField] = useState(DEFAULT_SORT_FIELD);
 
-    const { fetchAllTimeline, timelines, loading, totalCount, refetch } = useGetAllTimeline();
+    const { timelineType, timelineTabs, timelineFilters } = useTimelineTypes();
+    const { fetchAllTimeline, timelines, loading, totalCount } = useGetAllTimeline();
+
+    const refetch = useCallback(() => {
+      fetchAllTimeline({
+        pageInfo: {
+          pageIndex: pageIndex + 1,
+          pageSize,
+        },
+        search,
+        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
+        onlyUserFavorite: onlyFavorites,
+        timelineType,
+      });
+    }, [pageIndex, pageSize, search, sortField, sortDirection, timelineType, onlyFavorites]);
 
     /** Invoked when the user presses enters to submit the text in the search input */
     const onQueryChange: OnQueryChange = useCallback((query: EuiSearchBarQuery) => {
@@ -139,6 +155,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         if (timelineIds.includes(timeline.savedObjectId || '')) {
           createNewTimeline({ id: 'timeline-1', columns: defaultHeaders, show: false });
         }
+
         await apolloClient.mutate<
           DeleteTimelineMutation.Mutation,
           DeleteTimelineMutation.Variables
@@ -229,27 +246,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     }, []);
 
     useEffect(() => {
-      fetchAllTimeline({
-        pageInfo: {
-          pageIndex: pageIndex + 1,
-          pageSize,
-        },
-        search,
-        sort: { sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction },
-        onlyUserFavorite: onlyFavorites,
-        timelines,
-        totalCount,
-      });
-    }, [
-      pageIndex,
-      pageSize,
-      search,
-      sortField,
-      sortDirection,
-      timelines,
-      totalCount,
-      onlyFavorites,
-    ]);
+      refetch();
+    }, [refetch]);
 
     return !isModal ? (
       <OpenTimeline
@@ -277,6 +275,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
+        tabs={timelineTabs}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -303,6 +302,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
+        tabs={timelineFilters}
         title={title}
         totalSearchResultsCount={totalCount}
       />
