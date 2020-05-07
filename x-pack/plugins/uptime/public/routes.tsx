@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect } from 'react';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import React, { FC } from 'react';
+import { Route, Switch } from 'react-router-dom';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { OverviewPage } from './components/overview/overview_container';
 import {
