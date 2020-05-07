@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { createGetterSetter } from '../../../../../src/plugins/kibana_utils/public';
+import { ExpressionsStart } from './types';
 
-// eslint-disable-next-line import/no-default-export
-export default function CoreProviderPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'core-provider',
-    require: [],
-    publicDir: resolve(__dirname, 'public'),
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      hacks: [resolve(__dirname, 'public/index')],
-    },
-  };
-
-  return new kibana.Plugin(config);
-}
+export const [getExpressions, setExpressions] = createGetterSetter<ExpressionsStart>('Expressions');

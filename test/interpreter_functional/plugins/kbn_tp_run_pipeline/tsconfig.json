@@ -6,9 +6,9 @@
   },
   "include": [
     "index.ts",
-    "types.ts",
     "public/**/*.ts",
-    "../../../../typings/**/*"
+    "public/**/*.tsx",
+    "../../../../typings/**/*",
   ],
   "exclude": []
 }

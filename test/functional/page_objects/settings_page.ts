@@ -33,7 +33,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
+      await find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
 
     async clickLinkText(text: string) {
@@ -110,7 +110,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async toggleAdvancedSettingCheckbox(propertyName: string) {
-      testSubjects.click(`advancedSetting-editField-${propertyName}`);
+      await testSubjects.click(`advancedSetting-editField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
