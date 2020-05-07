@@ -179,7 +179,6 @@ describe('CreateIndexPatternWizard', () => {
     expect(services.uiSettings.get).toBeCalled();
     expect(create).toBeCalled();
     expect(clear).toBeCalledWith('id');
-    // todo:
     expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/id`);
   });
 });

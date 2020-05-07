@@ -18,3 +18,4 @@
  */
 
 export { FieldFormatEditor } from './field_format_editor';
+export * from './editors';

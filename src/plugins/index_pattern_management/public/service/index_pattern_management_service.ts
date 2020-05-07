@@ -34,7 +34,7 @@ import {
   StringFormatEditor,
   TruncateFormatEditor,
   UrlFormatEditor,
-} from '../components/field_editor/components/field_format_editor/editors';
+} from '../components/field_editor/components/field_format_editor';
 
 interface SetupDependencies {
   httpClient: HttpSetup;
@@ -63,18 +63,21 @@ export class IndexPatternManagementService {
     const indexPatternListConfigSetup = this.indexPatternListConfig.setup();
     indexPatternListConfigSetup.addListConfig(IndexPatternListConfig);
 
-    const fieldFormatEditorsSetup = this.fieldFormatEditors.setup();
-    fieldFormatEditorsSetup.register(BytesFormatEditor);
-    fieldFormatEditorsSetup.register(ColorFormatEditor);
-    fieldFormatEditorsSetup.register(DateFormatEditor);
-    fieldFormatEditorsSetup.register(DateNanosFormatEditor);
-    fieldFormatEditorsSetup.register(DurationFormatEditor);
-    fieldFormatEditorsSetup.register(NumberFormatEditor);
-    fieldFormatEditorsSetup.register(PercentFormatEditor);
-    fieldFormatEditorsSetup.register(StaticLookupFormatEditor);
-    fieldFormatEditorsSetup.register(StringFormatEditor);
-    fieldFormatEditorsSetup.register(TruncateFormatEditor);
-    fieldFormatEditorsSetup.register(UrlFormatEditor);
+    const defaultFieldFormatEditors = [
+      BytesFormatEditor,
+      ColorFormatEditor,
+      DateFormatEditor,
+      DateNanosFormatEditor,
+      DurationFormatEditor,
+      NumberFormatEditor,
+      PercentFormatEditor,
+      StaticLookupFormatEditor,
+      StringFormatEditor,
+      TruncateFormatEditor,
+      UrlFormatEditor,
+    ];
+
+    const fieldFormatEditorsSetup = this.fieldFormatEditors.setup(defaultFieldFormatEditors);
 
     return {
       creation: creationManagerSetup,

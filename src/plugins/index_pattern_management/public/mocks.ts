@@ -19,7 +19,6 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { managementPluginMock } from '../../../plugins/management/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import {

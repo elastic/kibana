@@ -17,18 +17,18 @@
  * under the License.
  */
 
-// todo better path
-import { DefaultFormatEditor } from '../../components/field_editor/components/field_format_editor/editors/default';
+import { DefaultFormatEditor } from '../../components/field_editor/components/field_format_editor';
 
 export class FieldFormatEditors {
   private editors: Array<typeof DefaultFormatEditor> = [];
-  private register(editor: typeof DefaultFormatEditor) {
-    this.editors.push(editor);
-  }
 
-  public setup() {
+  public setup(defaultFieldEditors: FieldFormatEditors['editors'] = []) {
+    this.editors = defaultFieldEditors;
+
     return {
-      register: this.register.bind(this),
+      register: (editor: typeof DefaultFormatEditor) => {
+        this.editors.push(editor);
+      },
     };
   }
 

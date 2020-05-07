@@ -25,6 +25,13 @@ export interface IndexPatternTag {
   name: string;
 }
 
+const defaultIndexPatternListName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
+  {
+    defaultMessage: 'Default',
+  }
+);
+
 export class IndexPatternListConfig {
   public readonly key = 'default';
 
@@ -33,12 +40,7 @@ export class IndexPatternListConfig {
       ? [
           {
             key: 'default',
-            name: i18n.translate(
-              'indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName',
-              {
-                defaultMessage: 'Default',
-              }
-            ),
+            name: defaultIndexPatternListName,
           },
         ]
       : [];

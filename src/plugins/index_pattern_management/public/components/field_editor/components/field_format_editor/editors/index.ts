@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export { DefaultFormatEditor } from './default';
 
 export { BytesFormatEditor } from './bytes';
 export { ColorFormatEditor } from './color';
