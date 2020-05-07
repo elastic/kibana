@@ -44,6 +44,6 @@ const convertProcessors = (processors: ProcessorInternal[]) => {
 export const serialize = ({ processors, onFailure }: SerializeArgs): SerializeResult => {
   return {
     processors: convertProcessors(processors),
-    on_failure: onFailure ? convertProcessors(onFailure) : undefined,
+    on_failure: onFailure?.length ? convertProcessors(onFailure) : undefined,
   };
 };

@@ -8,6 +8,8 @@ import { reducer, State } from './processors_reducer';
 
 const initialState: State = {
   processors: [],
+  onFailure: [],
+  isRoot: true,
 };
 
 describe('Processors reducer', () => {
@@ -194,5 +196,38 @@ describe('Processors reducer', () => {
 
     // Assert nothing changed
     expect(s5.processors).toEqual(s4.processors);
+  });
+
+  it('will not set the root "onFailure" to "undefined" if it is empty', () => {
+    const processor1 = { type: 'test1', options: {} };
+    const processor2 = { type: 'test2', options: {} };
+
+    const s1 = reducer(initialState, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor1, selector: ['processors'] },
+    });
+
+    const s2 = reducer(s1, {
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor2, selector: ['onFailure'] },
+    });
+
+    // Move the parent into a child list
+    const s3 = reducer(s2, {
+      type: 'moveProcessor',
+      payload: {
+        source: { selector: ['onFailure'], index: 0 },
+        destination: {
+          selector: ['processors'],
+          index: 1,
+        },
+      },
+    });
+
+    expect(s3).toEqual({
+      processors: [processor1, processor2],
+      onFailure: [],
+      isRoot: true,
+    });
   });
 });

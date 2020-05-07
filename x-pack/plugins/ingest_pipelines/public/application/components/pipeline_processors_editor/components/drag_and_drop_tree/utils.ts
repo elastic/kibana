@@ -19,16 +19,19 @@ export const mapSelectorToDragLocation = (selector: ProcessorSelector): Draggabl
 
 export const resolveDestinationLocation = (
   items: ProcessorSelector[],
-  destinationIndex: number
+  destinationIndex: number,
+  baseSelector: ProcessorSelector
 ): DraggableLocation => {
   // Dragged to top, place at root level
   if (destinationIndex === 0) {
-    return { selector: [], index: 0 };
+    const destinationSelector = items[destinationIndex] ?? baseSelector;
+    return { selector: destinationSelector.slice(0, 1), index: 0 };
   }
 
   // Dragged to bottom, place at root level
-  if (destinationIndex === items.length - 1) {
-    return { selector: [], index: items.length - 1 };
+  if (destinationIndex === items.length - 1 || destinationIndex === items.length) {
+    const destinationSelector = items[destinationIndex] ?? baseSelector;
+    return { selector: destinationSelector.slice(0, 1), index: items.length - 1 };
   }
 
   const above: ProcessorSelector = items[destinationIndex - 1];

@@ -4,33 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState, memo } from 'react';
-import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
+import React, { FunctionComponent, memo, useRef, useMemo, useEffect } from 'react';
+import { EuiDroppable, EuiSpacer } from '@elastic/eui';
+import uuid from 'uuid';
 
-import { ProcessorInternal, DraggableLocation, ProcessorSelector } from '../../types';
-
-import { resolveDestinationLocation, mapSelectorToDragLocation } from './utils';
+import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
+import { useDragDropContext, ON_FAILURE } from './drag_and_drop_tree_provider';
 
 import './drag_and_drop_tree.scss';
-
-interface OnDragEndArgs {
-  source: DraggableLocation;
-  destination: DraggableLocation;
-}
 
 export type RenderTreeItemFunction = (arg: TreeNodeComponentArgs) => React.ReactNode;
 
 export interface Props {
   processors: ProcessorInternal[];
-  onDragEnd: (args: OnDragEndArgs) => void;
   renderItem: RenderTreeItemFunction;
   baseSelector: ProcessorSelector;
 }
 
-/** This value comes from the {@link ProcessorInternal} type */
-const ON_FAILURE = 'onFailure';
+type SelectorReactElementTuple = [ProcessorSelector, React.ReactElement];
+
+export const DROPPABLE_TYPE = 'processor';
 
 /**
  * Takes in array of {@link ProcessorInternal} and renders a drag and drop tree.
@@ -43,89 +38,79 @@ const ON_FAILURE = 'onFailure';
  */
 export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   processors,
-  onDragEnd,
   renderItem,
   baseSelector,
 }) => {
-  let flatTreeIndex = 0;
-  const items: Array<[ProcessorSelector, React.ReactElement]> = [];
+  const { currentDragSelector, registerTreeItems, unRegisterTreeItems } = useDragDropContext();
 
-  const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
-
-  const addRenderedItems = (
-    _processors: ProcessorInternal[],
-    _selector: ProcessorSelector,
-    level = 0
-  ) => {
-    _processors.forEach((processor, idx) => {
-      const index = flatTreeIndex++;
-      const nodeSelector = _selector.concat(String(idx));
-      items.push([
-        nodeSelector,
-        <TreeNode
-          key={index}
-          index={index}
-          level={level}
-          processor={processor}
-          selector={nodeSelector}
-          component={renderItem}
-        />,
-      ]);
-
-      if (processor.onFailure?.length && nodeSelector.join('.') !== currentDragSelector) {
-        addRenderedItems(processor.onFailure, nodeSelector.concat(ON_FAILURE), level + 1);
-      }
-    });
+  const treeIdRef = useRef<string>();
+  const getTreeId = () => {
+    if (!treeIdRef.current) {
+      treeIdRef.current = uuid.v4();
+    }
+    return treeIdRef.current;
   };
 
-  addRenderedItems(processors, baseSelector, 0);
+  const items = useMemo<SelectorReactElementTuple[]>(() => {
+    let flatTreeIndex = 0;
+    const _items: SelectorReactElementTuple[] = [];
+
+    const addRenderedItems = (
+      _processors: ProcessorInternal[],
+      _selector: ProcessorSelector,
+      level = 0
+    ) => {
+      _processors.forEach((processor, idx) => {
+        const index = flatTreeIndex++;
+        const nodeSelector = _selector.concat(String(idx));
+        _items.push([
+          nodeSelector,
+          <TreeNode
+            key={index}
+            index={index}
+            level={level}
+            processor={processor}
+            selector={nodeSelector}
+            component={renderItem}
+          />,
+        ]);
+
+        if (processor.onFailure?.length && nodeSelector.join('.') !== currentDragSelector) {
+          addRenderedItems(processor.onFailure, nodeSelector.concat(ON_FAILURE), level + 1);
+        }
+      });
+    };
+
+    addRenderedItems(processors, baseSelector, 0);
+    return _items;
+  }, [processors, baseSelector, renderItem, currentDragSelector]);
+
+  const treeId = `${getTreeId()}_PIPELINE_PROCESSORS_EDITOR`;
+
+  useEffect(() => {
+    registerTreeItems(treeId, {
+      selectors: items.map(([selector]) => selector),
+      baseSelector,
+    });
+
+    return () => unRegisterTreeItems(treeId);
+  }, [items, registerTreeItems, unRegisterTreeItems, treeId, baseSelector]);
+
+  const droppableContent = items.length ? (
+    items.map(([, component]) => component)
+  ) : (
+    <EuiSpacer size="l" />
+  );
 
   return (
     <div className="pipelineProcessorsEditor__dragAndDropTree">
-      <EuiDragDropContext
-        onBeforeCapture={({ draggableId: serializedSelector }) => {
-          setCurrentDragSelector(serializedSelector);
-        }}
-        onDragEnd={arg => {
-          setCurrentDragSelector(undefined);
-
-          const { source, destination, combine } = arg;
-          if (source && combine) {
-            const [sourceSelector] = items[source.index];
-            const destinationSelector = combine.draggableId.split('.');
-            onDragEnd({
-              source: {
-                index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
-                selector: sourceSelector.slice(0, -1),
-              },
-              destination: {
-                index: parseInt(destinationSelector[destinationSelector.length - 1], 10),
-                selector: destinationSelector.concat(ON_FAILURE),
-              },
-            });
-            return;
-          }
-
-          if (source && destination) {
-            const [sourceSelector] = items[source.index];
-            onDragEnd({
-              source: mapSelectorToDragLocation(sourceSelector),
-              destination: resolveDestinationLocation(
-                items.map(([selector]) => selector),
-                destination.index
-              ),
-            });
-          }
-        }}
-      >
-        <EuiDroppable droppableId="PIPELINE_PROCESSORS_EDITOR" isCombineEnabled>
-          {items.map(([, component]) => component)}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      <EuiDroppable type={DROPPABLE_TYPE} droppableId={treeId} isCombineEnabled>
+        {droppableContent}
+      </EuiDroppable>
     </div>
   );
 };
 
 export const DragAndDropTree = memo(DragAndDropTreeUI, (prev, current) => {
-  return prev.processors === current.processors && prev.onDragEnd === current.onDragEnd;
+  return prev.processors === current.processors;
 });

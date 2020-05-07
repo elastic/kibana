@@ -10,7 +10,10 @@ import { DeserializeResult } from './serialize';
 import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 
-export type State = DeserializeResult;
+export type State = Omit<DeserializeResult, 'onFailure'> & {
+  onFailure: ProcessorInternal[];
+  isRoot: true;
+};
 
 type Action =
   | {
@@ -107,5 +110,10 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   return state;
 };
 
-export const useProcessorsState = (initialState: State) =>
-  useReducer<typeof reducer>(reducer, { ...initialState });
+export const useProcessorsState = (initialState: DeserializeResult) => {
+  const state = {
+    ...initialState,
+    onFailure: initialState.onFailure ?? [],
+  };
+  return useReducer<typeof reducer>(reducer, { ...state, isRoot: true });
+};
