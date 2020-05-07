@@ -25,14 +25,10 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../../common/index_controls';
-import { useActionsConnectorsContext } from '../../../context/actions_connectors_context';
 
-export const IndexActionConnectorFields = ({
-  action,
-  editActionConfig,
-  errors,
-}: ActionConnectorFieldsProps<EsIndexActionConnector>) => {
-  const { http } = useActionsConnectorsContext();
+const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
+  EsIndexActionConnector
+>> = ({ action, editActionConfig, errors, http }) => {
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null

@@ -9,12 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { PagerDutyActionConnector } from '.././types';
-import { useActionsConnectorsContext } from '../../../context/actions_connectors_context';
 
 const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
   PagerDutyActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets }) => {
-  const { docLinks } = useActionsConnectorsContext();
+>> = ({ errors, action, editActionConfig, editActionSecrets, docLinks }) => {
   const { apiUrl } = action.config;
   const { routingKey } = action.secrets;
   return (

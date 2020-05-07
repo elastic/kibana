@@ -122,7 +122,10 @@ export const usePostPushToService = (): UsePostPushToService => {
           dispatch({ type: 'FETCH_SUCCESS_PUSH_SERVICE', payload: responseService });
           dispatch({ type: 'FETCH_SUCCESS_PUSH_CASE', payload: responseCase });
           updateCase(responseCase);
-          displaySuccessToast(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE, dispatchToaster);
+          displaySuccessToast(
+            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connectorName),
+            dispatchToaster
+          );
         }
       } catch (error) {
         if (!cancel) {
@@ -156,25 +159,12 @@ export const formatServiceRequestData = (
     createdBy,
     comments,
     description,
-    externalService,
     title,
     updatedAt,
     updatedBy,
   } = myCase;
-  let actualExternalService = externalService;
-  if (
-    externalService != null &&
-    externalService.connectorId !== connectorId &&
-    caseServices[connectorId]
-  ) {
-    actualExternalService = caseServices[connectorId];
-  } else if (
-    externalService != null &&
-    externalService.connectorId !== connectorId &&
-    !caseServices[connectorId]
-  ) {
-    actualExternalService = null;
-  }
+  const actualExternalService = caseServices[connectorId] ?? null;
+
   return {
     caseId,
     createdAt,
@@ -183,17 +173,9 @@ export const formatServiceRequestData = (
       username: createdBy?.username ?? '',
     },
     comments: comments
-      .filter(c => {
-        const lastPush = c.pushedAt != null ? new Date(c.pushedAt) : null;
-        const lastUpdate = c.updatedAt != null ? new Date(c.updatedAt) : null;
-        if (
-          lastPush === null ||
-          (lastPush != null && lastUpdate != null && lastPush.getTime() < lastUpdate?.getTime())
-        ) {
-          return true;
-        }
-        return false;
-      })
+      .filter(
+        c => actualExternalService == null || actualExternalService.commentsToUpdate.includes(c.id)
+      )
       .map(c => ({
         commentId: c.id,
         comment: c.comment,

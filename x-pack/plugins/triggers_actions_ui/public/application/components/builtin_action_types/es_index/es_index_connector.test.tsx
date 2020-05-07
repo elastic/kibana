@@ -9,7 +9,6 @@ import { act } from 'react-dom/test-utils';
 import { EsIndexActionConnector } from '../types';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import IndexActionConnectorFields from './es_index_connector';
-import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';
 import { TypeRegistry } from '../../../type_registry';
 import { DocLinksStart } from 'kibana/public';
 
@@ -82,25 +81,14 @@ describe('IndexActionConnectorFields renders', () => {
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
-          },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <IndexActionConnectorFields
-          action={actionConnector}
-          errors={{ index: [] }}
-          editActionConfig={() => {}}
-          editActionSecrets={() => {}}
-        />
-      </ActionsConnectorsContextProvider>
+      <IndexActionConnectorFields
+        action={actionConnector}
+        errors={{ index: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        http={deps!.http}
+        docLinks={deps!.docLinks}
+      />
     );
 
     await act(async () => {
