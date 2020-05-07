@@ -22,7 +22,7 @@ interface Props {
 const { emptyField } = fieldValidators;
 
 const typeConfig: FieldConfig = {
-  type: FIELD_TYPES.TEXT,
+  type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Type',
   }),
