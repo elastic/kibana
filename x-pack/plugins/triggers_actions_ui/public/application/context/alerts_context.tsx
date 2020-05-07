@@ -49,7 +49,7 @@ export const AlertsContextProvider = ({
 export const useAlertsContext = () => {
   const ctx = useContext(AlertsContext);
   if (!ctx) {
-    throw new Error('ActionsConnectorsContext has not been set.');
+    throw new Error('AlertsContext has not been set.');
   }
   return ctx;
 };
