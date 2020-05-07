@@ -6597,7 +6597,6 @@
     "xpack.graph.sidebar.selectionsTitle": "选择的内容",
     "xpack.graph.sidebar.styleVerticesTitle": "样式选择的顶点",
     "xpack.graph.sidebar.topMenu.addLinksButtonTooltip": "在现有字词之间添加链接",
-    "xpack.graph.sidebar.topMenu.blacklistButtonTooltip": "返回工作空间时选择的黑名单",
     "xpack.graph.sidebar.topMenu.customStyleButtonTooltip": "定制样式选择的顶点",
     "xpack.graph.sidebar.topMenu.drillDownButtonTooltip": "向下钻取",
     "xpack.graph.sidebar.topMenu.expandSelectionButtonTooltip": "展开选择内容",
