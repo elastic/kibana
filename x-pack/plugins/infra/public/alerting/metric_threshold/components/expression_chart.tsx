@@ -224,7 +224,7 @@ export const ExpressionChart: React.FC<Props> = ({
               />
             </>
           ) : null}
-          {isAbove ? (
+          {isAbove && first(expression.threshold) != null ? (
             <RectAnnotation
               id="upper-threshold"
               style={{
