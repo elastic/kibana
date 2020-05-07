@@ -12,12 +12,11 @@ import { EMSTMSSource, sourceTitle } from './ems_tms_source';
 import { VectorTileLayer } from '../../vector_tile_layer';
 // @ts-ignore
 import { TileServiceSelect } from './tile_service_select';
-// @ts-ignore
-import { isEmsEnabled } from '../../../meta';
+import { getIsEmsEnabled } from '../../../kibana_services';
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
   checkVisibility: () => {
-    return isEmsEnabled();
+    return getIsEmsEnabled();
   },
   description: i18n.translate('xpack.maps.source.emsTileDescription', {
     defaultMessage: 'Tile map service from Elastic Maps Service',

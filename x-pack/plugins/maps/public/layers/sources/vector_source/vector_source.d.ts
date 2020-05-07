@@ -15,6 +15,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
+import { ITooltipProperty } from '../../tooltips/tooltip_property';
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
 
@@ -24,6 +25,7 @@ export type GeoJsonWithMeta = {
 };
 
 export interface IVectorSource extends ISource {
+  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',
@@ -39,6 +41,7 @@ export interface IVectorSource extends ISource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
+  filterAndFormatPropertiesToHtml(properties: unknown): Promise<ITooltipProperty[]>;
   getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent;
   getGeoJsonWithMeta(
     layerName: 'string',
