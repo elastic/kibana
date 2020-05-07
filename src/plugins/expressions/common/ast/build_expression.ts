@@ -22,14 +22,29 @@ import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_f
 import { format } from './format';
 import { parse } from './parse';
 
-/** @internal */
-export function isExpressionBuilder(arg: any): arg is ExpressionAstExpressionBuilder {
-  return arg?.type === 'expression_builder';
+/**
+ * Type guard that checks whether a given value is an
+ * `ExpressionAstExpressionBuilder`. This is useful when working
+ * with subexpressions, where you might be retrieving a function
+ * argument, and need to know whether it is an expression builder
+ * instance which you can perform operations on.
+ *
+ * @example
+ * const arg = myFunction.getArgument('foo');
+ * if (isExpressionAstBuilder(foo)) {
+ *   foo.toAst();
+ * }
+ *
+ * @param val Value you want to check.
+ * @return boolean
+ */
+export function isExpressionAstBuilder(val: any): val is ExpressionAstExpressionBuilder {
+  return val?.type === 'expression_builder';
 }
 
 /** @internal */
-export function isExpressionAst(arg: any): arg is ExpressionAstExpression {
-  return arg?.type === 'expression';
+export function isExpressionAst(val: any): val is ExpressionAstExpression {
+  return val?.type === 'expression';
 }
 
 export interface ExpressionAstExpressionBuilder {
@@ -115,7 +130,7 @@ export function buildExpression(
       return fns.reduce((found, currFn) => {
         Object.values(currFn.arguments).forEach(values => {
           values.forEach(value => {
-            if (isExpressionBuilder(value)) {
+            if (isExpressionAstBuilder(value)) {
               // `value` is a subexpression, recurse and continue searching
               found = found.concat(value.findFunction(fnName));
             }

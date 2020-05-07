@@ -25,7 +25,7 @@ import {
 import {
   buildExpression,
   ExpressionAstExpressionBuilder,
-  isExpressionBuilder,
+  isExpressionAstBuilder,
   isExpressionAst,
 } from './build_expression';
 import { format } from './format';
@@ -208,7 +208,7 @@ export function buildExpressionFunction<F extends string>(
       }
 
       values.forEach((val, i) => {
-        if (isExpressionBuilder(val)) {
+        if (isExpressionAstBuilder(val)) {
           values[i] = val.toAst();
         }
       });
@@ -229,7 +229,7 @@ export function buildExpressionFunction<F extends string>(
         function: fnName,
         arguments: Object.entries(args).reduce((acc, [key, values]) => {
           acc[key] = values.map(val => {
-            return isExpressionBuilder(val) ? val.toAst() : val;
+            return isExpressionAstBuilder(val) ? val.toAst() : val;
           });
           return acc;
         }, ast),

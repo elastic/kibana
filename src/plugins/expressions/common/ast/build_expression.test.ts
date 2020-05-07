@@ -18,9 +18,64 @@
  */
 
 import { ExpressionAstExpression } from './types';
-import { buildExpression, isExpressionBuilder } from './build_expression';
+import { buildExpression, isExpressionAstBuilder, isExpressionAst } from './build_expression';
 import { buildExpressionFunction, ExpressionAstFunctionBuilder } from './build_function';
 import { format } from './format';
+
+describe('isExpressionAst()', () => {
+  test('returns true when a valid AST is provided', () => {
+    const ast = {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'foo',
+          arguments: {},
+        },
+      ],
+    };
+    expect(isExpressionAst(ast)).toBe(true);
+  });
+
+  test('returns false when a invalid value is provided', () => {
+    const invalidValues = [
+      buildExpression('hello | world'),
+      false,
+      null,
+      undefined,
+      'hi',
+      { type: 'unknown' },
+      {},
+    ];
+
+    invalidValues.forEach(value => {
+      expect(isExpressionAst(value)).toBe(false);
+    });
+  });
+});
+
+describe('isExpressionAstBuilder()', () => {
+  test('returns true when a valid builder is provided', () => {
+    const builder = buildExpression('hello | world');
+    expect(isExpressionAstBuilder(builder)).toBe(true);
+  });
+
+  test('returns false when a invalid value is provided', () => {
+    const invalidValues = [
+      buildExpressionFunction('myFn', {}),
+      false,
+      null,
+      undefined,
+      'hi',
+      { type: 'unknown' },
+      {},
+    ];
+
+    invalidValues.forEach(value => {
+      expect(isExpressionAstBuilder(value)).toBe(false);
+    });
+  });
+});
 
 describe('buildExpression()', () => {
   let ast: ExpressionAstExpression;
@@ -75,7 +130,7 @@ describe('buildExpression()', () => {
 
   test('converts subexpressions in provided AST to expression builder instances', () => {
     const exp = buildExpression(ast);
-    expect(isExpressionBuilder(exp.functions[0].getArgument('subexp')![0])).toBe(true);
+    expect(isExpressionAstBuilder(exp.functions[0].getArgument('subexp')![0])).toBe(true);
   });
 
   test('accepts an expresssion string as input', () => {
@@ -323,7 +378,7 @@ describe('buildExpression()', () => {
       );
       const fns: ExpressionAstFunctionBuilder[] = exp.findFunction('hit');
       const subexpressionArgs = fns.map(fn =>
-        fn.getArgument('sub')?.map(arg => isExpressionBuilder(arg))
+        fn.getArgument('sub')?.map(arg => isExpressionAstBuilder(arg))
       );
       expect(subexpressionArgs).toEqual([undefined, [true], [true]]);
     });

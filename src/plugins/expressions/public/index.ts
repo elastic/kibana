@@ -93,6 +93,7 @@ export {
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
+  isExpressionAstBuilder,
   KIBANA_CONTEXT_NAME,
   KibanaContext,
   KibanaDatatable,
