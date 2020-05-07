@@ -136,13 +136,11 @@ const SavedSortRuntimeType = runtimeTypes.partial({
 
 export enum TimelineType {
   default = 'default',
-  draft = 'draft',
   template = 'template',
 }
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineType.template),
-  runtimeTypes.literal(TimelineType.draft),
   runtimeTypes.literal(TimelineType.default),
 ]);
 

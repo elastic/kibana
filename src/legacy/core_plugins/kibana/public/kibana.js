@@ -39,7 +39,6 @@ import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
 import './management';
-import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
 npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('doc', 'discover', { keepPrefix: true });

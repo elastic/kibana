@@ -109,7 +109,10 @@ export function PieComponent(
         return String(d);
       },
       fillLabel:
-        isDarkMode && shape === 'treemap' && layerIndex < columnGroups.length - 1
+        isDarkMode &&
+        shape === 'treemap' &&
+        layerIndex < columnGroups.length - 1 &&
+        categoryDisplay !== 'hide'
           ? { ...fillLabel, textColor: euiDarkVars.euiTextColor }
           : fillLabel,
       shape: {
@@ -252,6 +255,7 @@ export function PieComponent(
           valueFormatter={(d: number) => (hideLabels ? '' : formatters[metricColumn.id].convert(d))}
           layers={layers}
           config={config}
+          topGroove={hideLabels || categoryDisplay === 'hide' ? 0 : undefined}
         />
       </Chart>
     </VisualizationContainer>

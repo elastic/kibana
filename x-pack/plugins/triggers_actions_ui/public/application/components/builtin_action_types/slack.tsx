@@ -15,7 +15,6 @@ import {
 } from '../../../types';
 import { SlackActionParams, SlackActionConnector } from './types';
 import { AddMessageVariables } from '../add_message_variables';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 
 export function getActionType(): ActionTypeModel {
   return {
@@ -76,8 +75,7 @@ export function getActionType(): ActionTypeModel {
 
 const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps<
   SlackActionConnector
->> = ({ action, editActionSecrets, errors }) => {
-  const { docLinks } = useActionsConnectorsContext();
+>> = ({ action, editActionSecrets, errors, docLinks }) => {
   const { webhookUrl } = action.secrets;
 
   return (
