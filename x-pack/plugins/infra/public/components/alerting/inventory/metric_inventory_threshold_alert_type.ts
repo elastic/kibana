@@ -30,6 +30,6 @@ Current value is \\{\\{context.valueOf.condition0\\}\\}
 `,
       }
     ),
-    isUiEditEnabled: true,
+    isUiEditEnabled: false,
   };
 }

@@ -44,6 +44,7 @@ const alertType = {
     return { errors: {} };
   },
   alertParamsExpression: () => null,
+  isUiEditEnabled: true,
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
