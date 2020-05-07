@@ -297,7 +297,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href={{ INDEX_PATTERN_MANAGEMENT_SECTION_PATH }}
+              href={INDEX_PATTERN_MANAGEMENT_SECTION_PATH}
             >
               <FormattedMessage
                 id="home.addData.yourDataLink"

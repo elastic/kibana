@@ -277,11 +277,7 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href={
-            Object {
-              "INDEX_PATTERN_MANAGEMENT_SECTION_PATH": "#/management/kibana/indexPatterns",
-            }
-          }
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -547,11 +543,7 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          href={
-            Object {
-              "INDEX_PATTERN_MANAGEMENT_SECTION_PATH": "#/management/kibana/indexPatterns",
-            }
-          }
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -884,11 +876,7 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          href={
-            Object {
-              "INDEX_PATTERN_MANAGEMENT_SECTION_PATH": "#/management/kibana/indexPatterns",
-            }
-          }
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
@@ -1154,11 +1142,7 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          href={
-            Object {
-              "INDEX_PATTERN_MANAGEMENT_SECTION_PATH": "#/management/kibana/indexPatterns",
-            }
-          }
+          href="#/management/kibana/indexPatterns"
           style={
             Object {
               "display": "block",
