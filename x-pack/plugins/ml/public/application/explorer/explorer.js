@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -170,12 +170,7 @@ export class Explorer extends React.Component {
   };
 
   componentDidMount() {
-    limit$
-      .pipe(
-        takeUntil(this._unsubscribeAll),
-        map(d => d.val)
-      )
-      .subscribe(explorerService.setSwimlaneLimit);
+    limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
