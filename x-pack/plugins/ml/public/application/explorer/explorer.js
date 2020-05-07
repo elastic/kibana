@@ -120,6 +120,7 @@ export class Explorer extends React.Component {
   disableDragSelectOnMouseLeave = true;
 
   dragSelect = new DragSelect({
+    selectorClass: 'ml-swimlane-selector',
     selectables: document.getElementsByClassName('sl-cell'),
     callback(elements) {
       if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
