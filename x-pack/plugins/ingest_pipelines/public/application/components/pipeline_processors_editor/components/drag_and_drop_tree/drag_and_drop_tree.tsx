@@ -20,10 +20,13 @@ interface OnDragEndArgs {
   destination: DraggableLocation;
 }
 
+export type RenderTreeItemFunction = (arg: TreeNodeComponentArgs) => React.ReactNode;
+
 export interface Props {
   processors: ProcessorInternal[];
   onDragEnd: (args: OnDragEndArgs) => void;
-  renderItem: (arg: TreeNodeComponentArgs) => React.ReactNode;
+  renderItem: RenderTreeItemFunction;
+  baseSelector: ProcessorSelector;
 }
 
 /** This value comes from the {@link ProcessorInternal} type */
@@ -42,6 +45,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   processors,
   onDragEnd,
   renderItem,
+  baseSelector,
 }) => {
   let flatTreeIndex = 0;
   const items: Array<[ProcessorSelector, React.ReactElement]> = [];
@@ -74,7 +78,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
     });
   };
 
-  addRenderedItems(processors, [], 0);
+  addRenderedItems(processors, baseSelector, 0);
 
   return (
     <div className="pipelineProcessorsEditor__dragAndDropTree">

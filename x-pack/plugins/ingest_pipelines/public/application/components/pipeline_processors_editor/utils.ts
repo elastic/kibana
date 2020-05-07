@@ -5,6 +5,7 @@
  */
 
 import { DraggableLocation, ProcessorInternal } from './types';
+import { State } from './processors_reducer';
 
 type Path = string[];
 
@@ -111,29 +112,26 @@ export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
  * This function assumes parents cannot be moved into themselves.
  */
 export const unsafeProcessorMove = (
-  processors: ProcessorInternal[],
+  state: State,
   source: DraggableLocation,
   destination: DraggableLocation
-) => {
+): State => {
   const selectorToSource = source.selector.concat(String(source.index));
   if (selectorToSource.every((pathSegment, idx) => pathSegment === destination.selector[idx])) {
     throw new Error(PARENT_CHILD_NEST_ERROR);
   }
   // Start by setting up references to objects of interest using our selectors
   // At this point, our selectors are consistent with the data passed in.
-  const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, processors);
-  const destinationProcessors = getValue<ProcessorInternal[]>(destination.selector, processors);
+  const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, state);
+  const destinationProcessors = getValue<ProcessorInternal[]>(destination.selector, state);
   const processor = sourceProcessors[source.index];
-  const sourceProcessor = getValue<ProcessorInternal>(source.selector.slice(0, -1), processors);
+  const sourceProcessor = getValue<ProcessorInternal>(source.selector.slice(0, -1), state);
 
   // First perform the add operation.
   if (destinationProcessors) {
     destinationProcessors.splice(destination.index, 0, processor);
   } else {
-    const targetProcessor = getValue<ProcessorInternal>(
-      destination.selector.slice(0, -1),
-      processors
-    );
+    const targetProcessor = getValue<ProcessorInternal>(destination.selector.slice(0, -1), state);
     targetProcessor.onFailure = [processor];
   }
 
@@ -146,5 +144,5 @@ export const unsafeProcessorMove = (
     sourceProcessor.onFailure = undefined;
   }
 
-  return [...processors];
+  return { ...state, processors: [...state.processors] };
 };

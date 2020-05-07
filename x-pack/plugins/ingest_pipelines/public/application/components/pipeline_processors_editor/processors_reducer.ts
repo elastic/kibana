@@ -15,7 +15,7 @@ export type State = DeserializeResult;
 type Action =
   | {
       type: 'addTopLevelProcessor';
-      payload: { processor: Omit<ProcessorInternal, 'id'> };
+      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
     }
   | {
       type: 'addOnFailureProcessor';
@@ -37,27 +37,19 @@ type Action =
       payload: { source: DraggableLocation; destination: DraggableLocation };
     };
 
-const addSelectorRoot = (selector: ProcessorSelector): ProcessorSelector => {
-  return ['processors'].concat(selector);
-};
-
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {
     const { destination, source } = action.payload;
     if (source.selector.join('.') === destination.selector.join('.')) {
-      const path = addSelectorRoot(source.selector);
+      const selector = source.selector;
       return setValue(
-        path,
+        selector,
         state,
-        euiDragDropReorder(getValue(path, state), source.index, destination.index)
+        euiDragDropReorder(getValue(selector, state), source.index, destination.index)
       );
     } else {
       try {
-        return setValue(
-          ['processors'],
-          state,
-          unsafeProcessorMove(state.processors, source, destination)
-        );
+        return unsafeProcessorMove(state, source, destination);
       } catch (e) {
         if (e.message === PARENT_CHILD_NEST_ERROR) {
           return { ...state };
@@ -68,9 +60,8 @@ export const reducer: Reducer<State, Action> = (state, action) => {
 
   if (action.type === 'removeProcessor') {
     const { selector } = action.payload;
-    const path = addSelectorRoot(selector);
-    const processorsSelector = path.slice(0, -1);
-    const idx = parseInt(path[path.length - 1], 10);
+    const processorsSelector = selector.slice(0, -1);
+    const idx = parseInt(selector[selector.length - 1], 10);
     const processors = getValue<ProcessorInternal[]>(processorsSelector, state);
     processors.splice(idx, 1);
     if (!processors.length && selector.length) {
@@ -80,9 +71,7 @@ export const reducer: Reducer<State, Action> = (state, action) => {
   }
 
   if (action.type === 'addTopLevelProcessor') {
-    const { processor } = action.payload;
-    // Empty array returns a selector to the base path
-    const selector = addSelectorRoot([]);
+    const { processor, selector } = action.payload;
     return setValue(selector, state, getValue(selector, state).concat(processor));
   }
 
@@ -91,22 +80,20 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     if (!targetSelector.length) {
       throw new Error('Expected target selector to contain a path, but received an empty array.');
     }
-    const path = addSelectorRoot(targetSelector);
-    const targetProcessor = getValue<ProcessorInternal>(path, state);
+    const targetProcessor = getValue<ProcessorInternal>(targetSelector, state);
     if (!targetProcessor) {
-      throw new Error(`Could not find processor at ${path.join('.')}`);
+      throw new Error(`Could not find processor at ${targetSelector.join('.')}`);
     }
     targetProcessor.onFailure = targetProcessor.onFailure
       ? targetProcessor.onFailure.concat(onFailureProcessor)
       : [onFailureProcessor];
-    return setValue(path, state, targetProcessor);
+    return setValue(targetSelector, state, targetProcessor);
   }
 
   if (action.type === 'updateProcessor') {
     const { processor, selector } = action.payload;
-    const path = addSelectorRoot(selector);
-    const processorsSelector = path.slice(0, -1);
-    const idx = parseInt(path[path.length - 1], 10);
+    const processorsSelector = selector.slice(0, -1);
+    const idx = parseInt(selector[selector.length - 1], 10);
 
     if (idx !== idx) {
       throw new Error(`Expected numeric value, received ${idx}`);

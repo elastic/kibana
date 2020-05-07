@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useState, useMemo, useEffect, useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -18,6 +17,7 @@ import './pipeline_processors_editor.scss';
 import {
   SettingsFormFlyout,
   DragAndDropTree,
+  RenderTreeItemFunction,
   PipelineProcessorEditorItem,
   ProcessorRemoveModal,
   ProcessorsTitleAndTestButton,
@@ -49,13 +49,16 @@ export interface Props {
   learnMoreAboutProcessorsUrl: string;
 }
 
+const PROCESSOR_STATE_SCOPE: ProcessorSelector = ['processors'];
+const ON_FAILURE_STATE_SCOPE: ProcessorSelector = ['onFailure'];
+
 /**
  * The settings form can be in different modes. This enables us to hold
  * a reference to data dispatch to * the reducer (like the {@link ProcessorSelector}
  * which will be used to update the in-memory processors data structure.
  */
 type SettingsFormMode =
-  | { id: 'creatingTopLevelProcessor' }
+  | { id: 'creatingTopLevelProcessor'; arg: ProcessorSelector }
   | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
   | { id: 'closed' };
@@ -106,7 +109,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         case 'creatingTopLevelProcessor':
           processorsDispatch({
             type: 'addTopLevelProcessor',
-            payload: { processor: processorTypeAndOptions },
+            payload: { processor: processorTypeAndOptions, selector: settingsFormMode.arg },
           });
           break;
         case 'creatingOnFailureProcessor':
@@ -151,6 +154,35 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     setSettingsFormMode({ id: 'closed' });
   };
 
+  const renderTreeItem: RenderTreeItemFunction = ({ processor, selector }) => (
+    <PipelineProcessorEditorItem
+      onClick={type => {
+        switch (type) {
+          case 'edit':
+            setSettingsFormMode({
+              id: 'editingProcessor',
+              arg: { processor, selector },
+            });
+            break;
+          case 'delete':
+            if (processor.onFailure?.length) {
+              setProcessorToDeleteSelector(selector);
+            } else {
+              processorsDispatch({
+                type: 'removeProcessor',
+                payload: { selector },
+              });
+            }
+            break;
+          case 'addOnFailure':
+            setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
+            break;
+        }
+      }}
+      processor={processor}
+    />
+  );
+
   return (
     <>
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
@@ -170,36 +202,10 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
           >
             <EuiFlexItem grow={false}>
               <DragAndDropTree
+                baseSelector={PROCESSOR_STATE_SCOPE}
                 onDragEnd={onDragEnd}
                 processors={processors}
-                renderItem={({ processor, selector }) => (
-                  <PipelineProcessorEditorItem
-                    onClick={type => {
-                      switch (type) {
-                        case 'edit':
-                          setSettingsFormMode({
-                            id: 'editingProcessor',
-                            arg: { processor, selector },
-                          });
-                          break;
-                        case 'delete':
-                          if (processor.onFailure?.length) {
-                            setProcessorToDeleteSelector(selector);
-                          } else {
-                            processorsDispatch({
-                              type: 'removeProcessor',
-                              payload: { selector },
-                            });
-                          }
-                          break;
-                        case 'addOnFailure':
-                          setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
-                          break;
-                      }
-                    }}
-                    processor={processor}
-                  />
-                )}
+                renderItem={renderTreeItem}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -213,7 +219,12 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
                   <EuiButtonEmpty
                     iconSide="left"
                     iconType="plusInCircle"
-                    onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}
+                    onClick={() =>
+                      setSettingsFormMode({
+                        id: 'creatingTopLevelProcessor',
+                        arg: PROCESSOR_STATE_SCOPE,
+                      })
+                    }
                   >
                     {i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.addProcessorButtonLabel',

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DragAndDropTree } from './drag_and_drop_tree';
+export { DragAndDropTree, RenderTreeItemFunction } from './drag_and_drop_tree';

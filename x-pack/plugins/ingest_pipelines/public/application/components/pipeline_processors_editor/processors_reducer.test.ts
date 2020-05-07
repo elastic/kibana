@@ -18,15 +18,15 @@ describe('Processors reducer', () => {
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor1 },
+      payload: { processor: processor1, selector: ['processors'] },
     });
     const s2 = reducer(s1, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor2 },
+      payload: { processor: processor2, selector: ['processors'] },
     });
     const s3 = reducer(s2, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor3 },
+      payload: { processor: processor3, selector: ['processors'] },
     });
 
     expect(s3.processors).toEqual([processor1, processor2, processor3]);
@@ -34,7 +34,10 @@ describe('Processors reducer', () => {
     // Move the second processor to the first
     const s4 = reducer(s3, {
       type: 'moveProcessor',
-      payload: { destination: { selector: [], index: 1 }, source: { selector: [], index: 0 } },
+      payload: {
+        destination: { selector: ['processors'], index: 1 },
+        source: { selector: ['processors'], index: 0 },
+      },
     });
 
     expect(s4.processors).toEqual([processor2, processor1, processor3]);
@@ -48,22 +51,24 @@ describe('Processors reducer', () => {
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor1 },
+      payload: { processor: processor1, selector: ['processors'] },
     });
-
     const s2 = reducer(s1, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor2 },
+      payload: { processor: processor2, selector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['1'] },
+      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor4, targetSelector: ['1', 'onFailure', '0'] },
+      payload: {
+        onFailureProcessor: processor4,
+        targetSelector: ['processors', '1', 'onFailure', '0'],
+      },
     });
 
     expect(s4.processors).toEqual([
@@ -76,8 +81,8 @@ describe('Processors reducer', () => {
     const s5 = reducer(s4, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: ['1', 'onFailure'], index: 0 },
-        destination: { selector: [], index: 1 },
+        source: { selector: ['processors', '1', 'onFailure'], index: 0 },
+        destination: { selector: ['processors'], index: 1 },
       },
     });
 
@@ -96,22 +101,24 @@ describe('Processors reducer', () => {
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor1 },
+      payload: { processor: processor1, selector: ['processors'] },
     });
-
     const s2 = reducer(s1, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor2 },
+      payload: { processor: processor2, selector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['1'] },
+      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor4, targetSelector: ['1', 'onFailure', '0'] },
+      payload: {
+        onFailureProcessor: processor4,
+        targetSelector: ['processors', '1', 'onFailure', '0'],
+      },
     });
 
     expect(s4.processors).toEqual([
@@ -123,8 +130,11 @@ describe('Processors reducer', () => {
     const s5 = reducer(s4, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: [], index: 0 },
-        destination: { selector: ['1', 'onFailure', '0', 'onFailure', '0', 'onFailure'], index: 0 },
+        source: { selector: ['processors'], index: 0 },
+        destination: {
+          selector: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure'],
+          index: 0,
+        },
       },
     });
 
@@ -144,22 +154,25 @@ describe('Processors reducer', () => {
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor1 },
+      payload: { processor: processor1, selector: ['processors'] },
     });
 
     const s2 = reducer(s1, {
       type: 'addTopLevelProcessor',
-      payload: { processor: processor2 },
+      payload: { processor: processor2, selector: ['processors'] },
     });
 
     const s3 = reducer(s2, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['1'] },
+      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
     });
 
     const s4 = reducer(s3, {
       type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor4, targetSelector: ['1', 'onFailure', '0'] },
+      payload: {
+        onFailureProcessor: processor4,
+        targetSelector: ['processors', '1', 'onFailure', '0'],
+      },
     });
 
     expect(s4.processors).toEqual([
@@ -171,8 +184,11 @@ describe('Processors reducer', () => {
     const s5 = reducer(s4, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: [], index: 1 },
-        destination: { selector: ['1', 'onFailure', '0', 'onFailure', '0', 'onFailure'], index: 0 },
+        source: { selector: ['processors'], index: 1 },
+        destination: {
+          selector: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure'],
+          index: 0,
+        },
       },
     });
 
