@@ -164,7 +164,7 @@ interface NewTimelineProps {
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ createTimeline, onClosePopover, timelineId }) => {
     const handleClick = useCallback(() => {
-      createTimeline({ id: timelineId, show: true });
+      createTimeline({ id: timelineId });
       onClosePopover();
     }, [createTimeline, timelineId, onClosePopover]);
 
