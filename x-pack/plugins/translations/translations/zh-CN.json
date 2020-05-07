@@ -12214,7 +12214,6 @@
     "xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle": "已为 {reportObjectType}“{reportObjectTitle}”创建报告",
     "xpack.reporting.registerFeature.reportingDescription": "管理您从 Discover、Visualize 和 Dashboard 生成的报告。",
     "xpack.reporting.registerFeature.reportingTitle": "报告",
-    "xpack.reporting.screencapture.asyncTook": "{description} 花费了 {took}ms",
     "xpack.reporting.screencapture.couldntFinishRendering": "尝试等候 {count} 个可视化完成渲染时发生错误。您可能需要增加“{configKey}”。{error}",
     "xpack.reporting.screencapture.couldntLoadKibana": "尝试打开 Kibana URL 时发生了错误。您可能需要增加“{configKey}”。{error}",
     "xpack.reporting.screencapture.injectCss": "尝试为 Reporting 更新 Kibana CSS 时发生错误。{error}",
