@@ -17,6 +17,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { LicensingPluginSetup } from '../../licensing/public';
 
 import AppSearchLogo from './applications/app_search/assets/logo.svg';
 
@@ -24,7 +25,8 @@ export interface ClientConfigType {
   host?: string;
 }
 export interface PluginsSetup {
-  home?: HomePublicPluginSetup;
+  home: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -43,11 +45,12 @@ export class EnterpriseSearchPlugin implements Plugin {
       euiIconType: AppSearchLogo, // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
       category: DEFAULT_APP_CATEGORIES.management, // TODO - This is likely not final/correct
       order: 10, // TODO - This will also likely not be needed once new nav structure changes land
-      async mount(params: AppMountParameters) {
+      mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
+
         const { renderApp } = await import('./applications');
 
-        return renderApp(coreStart, params, config);
+        return renderApp(coreStart, params, config, plugins);
       },
     });
 
