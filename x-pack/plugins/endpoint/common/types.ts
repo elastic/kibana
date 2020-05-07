@@ -35,6 +35,11 @@ type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
  */
 export type AlertAPIOrdering = 'asc' | 'desc';
 
+export interface AggBucket {
+  key: string;
+  doc_count: number;
+}
+
 export interface ResolverNodeStats {
   totalEvents: number;
   totalAlerts: number;
@@ -48,7 +53,7 @@ export interface ResolverNodePagination {
 }
 
 /**
- * A node that contains pointers to other nodes, arrrays of resolver events, and any metadata associated with resolver specific data
+ * A node that contains pointers to other nodes, arrays of resolver events, and any metadata associated with resolver specific data
  */
 export interface ResolverNode {
   id: string;

@@ -51,13 +51,13 @@ export class Fetcher {
     }
 
     const query = new LifecycleQuery(this.indexPattern, this.endpointID);
-    const { results } = await query.search(this.client, curNode);
+    const results = await query.search(this.client, curNode);
 
     if (results.length === 0) {
       tree.setNextAncestor(null);
       return;
     }
-    tree.addAncestor(previousNode, ...results);
+    tree.addAncestor(previousNode, results);
 
     const next = parentEntityId(results[0]);
     if (next !== undefined) {
@@ -67,13 +67,13 @@ export class Fetcher {
 
   private async doEvents(tree: Tree, limit: number, after?: string) {
     const query = new EventsQuery(
+      getPaginationParams(limit, after),
       this.indexPattern,
-      this.endpointID,
-      getPaginationParams(limit, after)
+      this.endpointID
     );
 
     const { totals, results } = await query.search(this.client, this.id);
-    tree.addEvent(...results);
+    tree.addEvent(results);
     tree.paginateEvents(totals, results);
     if (results.length === 0) tree.setNextEvent(null);
   }
@@ -88,24 +88,24 @@ export class Fetcher {
     if (levels === 0 || ids.length === 0) return;
 
     const childrenQuery = new ChildrenQuery(
+      getPaginationParams(limit, after),
       this.indexPattern,
-      this.endpointID,
-      getPaginationParams(limit, after)
+      this.endpointID
     );
     const lifecycleQuery = new LifecycleQuery(this.indexPattern, this.endpointID);
 
-    const { totals, results } = await childrenQuery.search(this.client, ...ids);
+    const { totals, results } = await childrenQuery.search(this.client, ids);
     if (results.length === 0) {
-      tree.markLeafNode(...ids);
+      tree.markLeafNode(ids);
       return;
     }
 
     const childIDs = results.map(entityId);
-    const children = (await lifecycleQuery.search(this.client, ...childIDs)).results;
+    const children = await lifecycleQuery.search(this.client, childIDs);
 
-    tree.addChild(...children);
+    tree.addChild(children);
     tree.paginateChildren(totals, results);
-    tree.markLeafNode(...childIDs);
+    tree.markLeafNode(childIDs);
 
     await this.doChildren(tree, childIDs, limit * limit, levels - 1);
   }
@@ -113,9 +113,9 @@ export class Fetcher {
   private async doStats(tree: Tree) {
     const statsQuery = new StatsQuery(this.indexPattern, this.endpointID);
     const ids = tree.ids();
-    const { extras } = await statsQuery.search(this.client, ...ids);
-    const alerts = extras?.alerts || {};
-    const events = extras?.events || {};
+    const res = await statsQuery.search(this.client, ids);
+    const alerts = res?.alerts || {};
+    const events = res?.events || {};
     ids.forEach(id => {
       tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
     });

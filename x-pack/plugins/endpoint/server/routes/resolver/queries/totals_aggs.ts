@@ -15,37 +15,36 @@ export interface TotalsResult {
 }
 
 export class TotalsAggregation {
-  constructor(private readonly pagination: PaginationParams) {}
+  constructor(
+    private readonly tiebreaker: string,
+    private readonly aggregator: string,
+    private readonly pagination: PaginationParams
+  ) {}
 
-  private addTotalsAggregation(
-    tiebreaker: string,
-    aggregator: string,
-    query: JsonObject
-  ): JsonObject {
+  public createFields(numTerms: number, aggs: JsonObject = {}): JsonObject {
     const { size, timestamp, eventID } = this.pagination;
-    query.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
-    query.aggs = query.aggs || {};
-    query.aggs = Object.assign({}, query.aggs, { totals: { terms: { field: aggregator, size } } });
-    query.size = size;
+    const fields: JsonObject = {};
+    fields.sort = [{ '@timestamp': 'asc' }, { [this.tiebreaker]: 'asc' }];
+    fields.aggs = Object.assign({}, aggs, {
+      totals: { terms: { field: this.aggregator, size: numTerms } },
+    });
+    fields.size = size;
     if (timestamp && eventID) {
-      query.search_after = [timestamp, eventID] as Array<number | string>;
+      fields.search_after = [timestamp, eventID] as Array<number | string>;
     }
-    return query;
+    return fields;
   }
 
-  public paginateBy(tiebreaker: string, aggregator: string) {
-    return (query: JsonObject) => {
-      return this.addTotalsAggregation(tiebreaker, aggregator, query);
-    };
-  }
-
-  public formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
+  public static formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
     if (response.hits.hits.length === 0) {
       return { totals: {}, results: [] };
     }
 
     const totals = response.aggregations?.totals?.buckets?.reduce(
-      (cumulative: any, bucket: any) => ({ ...cumulative, [bucket.key]: bucket.doc_count }),
+      (cumulative: Record<string, number>, bucket: { key: string; doc_count: number }) => ({
+        ...cumulative,
+        [bucket.key]: bucket.doc_count,
+      }),
       {}
     );
 

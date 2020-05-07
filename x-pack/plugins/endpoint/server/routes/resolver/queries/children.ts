@@ -8,21 +8,24 @@ import { ResolverEvent } from '../../../../common/types';
 import { ResolverQuery } from './base';
 import { TotalsAggregation, TotalsResult } from './totals_aggs';
 import { PaginationParams } from '../utils/pagination';
+import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 export class ChildrenQuery extends ResolverQuery<TotalsResult> {
-  private readonly totalsAggs: TotalsAggregation;
   constructor(
     private readonly pagination: PaginationParams,
     indexPattern: string,
     endpointID?: string
   ) {
     super(indexPattern, endpointID);
-    this.totalsAggs = new TotalsAggregation(this.pagination);
   }
 
-  protected legacyQuery(endpointID: string, uniquePIDs: string[]) {
-    const paginator = this.totalsAggs.paginateBy('endgame.serial_event_id', 'endgame.unique_ppid');
-    return paginator({
+  protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
+    const totalsAggs = new TotalsAggregation(
+      'endgame.serial_event_id',
+      'endgame.unique_ppid',
+      this.pagination
+    );
+    return {
       query: {
         bool: {
           filter: [
@@ -53,12 +56,17 @@ export class ChildrenQuery extends ResolverQuery<TotalsResult> {
           ],
         },
       },
-    });
+      ...totalsAggs.createFields(uniquePIDs.length),
+    };
   }
 
-  protected query(entityIDs: string[]) {
-    const paginator = this.totalsAggs.paginateBy('event.id', 'process.parent.entity_id');
-    return paginator({
+  protected query(entityIDs: string[]): JsonObject {
+    const totalsAggs = new TotalsAggregation(
+      'event.id',
+      'process.parent.entity_id',
+      this.pagination
+    );
+    return {
       query: {
         bool: {
           filter: [
@@ -77,10 +85,11 @@ export class ChildrenQuery extends ResolverQuery<TotalsResult> {
           ],
         },
       },
-    });
+      ...totalsAggs.createFields(entityIDs.length),
+    };
   }
 
   formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
-    return this.totalsAggs.formatResponse(response);
+    return TotalsAggregation.formatResponse(response);
   }
 }

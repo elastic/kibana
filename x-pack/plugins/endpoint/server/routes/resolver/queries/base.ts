@@ -11,7 +11,7 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { MSearchQuery } from './multi_searcher';
 
-export abstract class ResolverQuery<T> implements MSearchQuery<T> {
+export abstract class ResolverQuery<T> implements MSearchQuery {
   constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
 
   private static createIdsArray(ids: string | string[]): string[] {

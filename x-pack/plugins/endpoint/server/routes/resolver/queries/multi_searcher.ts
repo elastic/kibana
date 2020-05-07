@@ -6,12 +6,9 @@
 /* eslint-disable max-classes-per-file */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { MSearchResponse, SearchResponse } from 'elasticsearch';
+import { MSearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-import { EventsQuery } from './events';
-import { ChildrenQuery } from './children';
-import { TotalsResult } from './totals_aggs';
 
 export interface MSearchQuery {
   buildMSearch(ids: string | string[]): JsonObject[];
@@ -23,20 +20,26 @@ export interface QueryInfo {
 }
 
 export class MultiSearcher {
-  private queries: QueryInfo[] = [];
   constructor(private readonly client: IScopedClusterClient) {}
 
-  add(newQueries: QueryInfo[]) {
-    this.queries = [...this.queries, ...newQueries];
-  }
+  async search(queries: QueryInfo[]) {
+    if (queries.length === 0) {
+      throw new Error('No queries provided to MultiSearcher');
+    }
 
-  async search() {
     let searchQuery: JsonObject[] = [];
-    this.queries.forEach(
-      info => (searchQuery = [...searchQuery, ...info.query.buildMSearch(info.ids)])
-    );
-    return await this.client.callAsCurrentUser('msearch', {
+    queries.forEach(info => (searchQuery = [...searchQuery, ...info.query.buildMSearch(info.ids)]));
+    const res: MSearchResponse<ResolverEvent> = await this.client.callAsCurrentUser('msearch', {
       body: searchQuery,
     });
+
+    if (!res.responses) {
+      throw new Error('No response from Elasticsearch');
+    }
+
+    if (res.responses.length !== queries.length) {
+      throw new Error(`Responses length was: ${res.responses.length} expected ${queries.length}`);
+    }
+    return res.responses;
   }
 }

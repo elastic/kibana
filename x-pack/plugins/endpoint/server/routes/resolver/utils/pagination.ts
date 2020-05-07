@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { entityId } from '../../../../common/models/event';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
@@ -13,13 +12,6 @@ export interface PaginationParams {
   size: number;
   timestamp?: number;
   eventID?: string;
-}
-
-export interface PaginatedResults {
-  totals: Record<string, number>;
-  results: ResolverEvent[];
-  // content holder for any other extra aggregation counts
-  extras?: Record<string, Record<string, number>>;
 }
 
 interface PaginationCursor {
@@ -90,18 +82,4 @@ export function buildPaginationCursor(total: number, results: ResolverEvent[]): 
     return urlEncodeCursor(cursor);
   }
   return null;
-}
-
-export function paginatedResults(response: SearchResponse<ResolverEvent>): PaginatedResults {
-  if (response.hits.hits.length === 0) {
-    return { totals: {}, results: [] };
-  }
-
-  const totals = response.aggregations?.totals?.buckets?.reduce(
-    (cummulative: any, bucket: any) => ({ ...cummulative, [bucket.key]: bucket.doc_count }),
-    {}
-  );
-
-  const results = response.hits.hits.map(hit => hit._source);
-  return { totals, results };
 }
