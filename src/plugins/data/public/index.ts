@@ -245,7 +245,6 @@ export const indexPatterns = {
   validate: validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
   formatHitProvider,
 };
 
