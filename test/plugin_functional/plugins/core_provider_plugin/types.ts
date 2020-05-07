@@ -16,17 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyCoreSetup, LegacyCoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 
 declare global {
   interface Window {
     __coreProvider: {
       setup: {
-        core: LegacyCoreSetup;
+        core: CoreSetup;
         plugins: Record<string, any>;
       };
       start: {
-        core: LegacyCoreStart;
+        core: CoreStart;
         plugins: Record<string, any>;
       };
       testUtils: {
