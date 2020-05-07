@@ -32,9 +32,9 @@ export interface ActionWizardProps {
 
   /**
    * Action factory selected changed
-   * null - means user click "change" and removed action factory selection
+   * empty - means user click "change" and removed action factory selection
    */
-  onActionFactoryChange: (actionFactory: ActionFactory | null) => void;
+  onActionFactoryChange: (actionFactory?: ActionFactory) => void;
 
   /**
    * current config for currently selected action factory
@@ -71,7 +71,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
         actionFactory={currentActionFactory}
         showDeselect={actionFactories.length > 1}
         onDeselect={() => {
-          onActionFactoryChange(null);
+          onActionFactoryChange(undefined);
         }}
         context={context}
         config={config}

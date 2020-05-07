@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ActionGroup } from '../../alerting/common';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
@@ -27,6 +27,7 @@ export interface ActionConnectorFieldsProps<TActionConnector> {
   editActionConfig: (property: string, value: any) => void;
   editActionSecrets: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
+  docLinks: DocLinksStart;
   http?: HttpSetup;
 }
 
