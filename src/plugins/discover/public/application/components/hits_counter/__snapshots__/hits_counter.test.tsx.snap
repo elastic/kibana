@@ -489,11 +489,13 @@ exports[`hits counter HitsCounter renders a button by providing the showResetBut
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <EuiButtonEmpty
+                  aria-label="Reset search"
                   data-test-subj="resetSavedSearch"
                   onClick={[MockFunction]}
                   size="s"
                 >
                   <button
+                    aria-label="Reset search"
                     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
                     data-test-subj="resetSavedSearch"
                     onClick={[MockFunction]}

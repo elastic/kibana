@@ -19,6 +19,7 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { formatNumWithCommas } from '../../helpers';
 
 export interface HitsCounterProps {
@@ -60,7 +61,14 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
         </EuiFlexItem>
         {showResetButton && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="resetSavedSearch" onClick={onResetQuery} size="s">
+            <EuiButtonEmpty
+              data-test-subj="resetSavedSearch"
+              onClick={onResetQuery}
+              size="s"
+              aria-label={i18n.translate('discover.reloadSavedSearchButton', {
+                defaultMessage: 'Reset search',
+              })}
+            >
               <FormattedMessage
                 id="discover.reloadSavedSearchButton"
                 defaultMessage="Reset search"
