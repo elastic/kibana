@@ -7,24 +7,23 @@
 /* eslint-disable max-classes-per-file */
 import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { UIRoutes } from 'ui/routes';
 import { isLeft } from 'fp-ts/lib/Either';
-import { npSetup } from 'ui/new_platform';
+import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
   FrameworkAdapter,
   FrameworkInfo,
   FrameworkUser,
-  ManagementAPI,
   RuntimeFrameworkInfo,
   RuntimeFrameworkUser,
 } from './adapter_types';
-interface IInjector {
-  get(injectable: string): any;
-}
+import {
+  ManagementSetup,
+  RegisterManagementAppArgs,
+} from '../../../../../../../../src/plugins/management/public';
+import { LicensingPluginSetup } from '../../../../../../../plugins/licensing/public';
+import { BeatsManagementConfigType } from '../../../../../../../plugins/beats_management/common';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public get info() {
@@ -43,11 +42,11 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private shieldUser: FrameworkUser | null = null;
   constructor(
     private readonly PLUGIN_ID: string,
-    private readonly management: ManagementAPI,
-    private readonly routes: UIRoutes,
+    private readonly management: ManagementSetup,
     private readonly getBasePath: () => string,
-    private readonly onKibanaReady: () => Promise<IInjector>,
-    private readonly xpackInfoService: any | null,
+    private readonly licensing: LicensingPluginSetup,
+    private readonly securitySetup: SecurityPluginSetup | undefined,
+    private readonly config: BeatsManagementConfigType,
     public readonly version: string
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -60,30 +59,23 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
 
   public async waitUntilFrameworkReady(): Promise<void> {
-    await this.onKibanaReady();
-    const xpackInfo: any = this.xpackInfoService;
+    const license = await this.licensing.license$.pipe(first()).toPromise();
     let xpackInfoUnpacked: FrameworkInfo;
 
     try {
       xpackInfoUnpacked = {
         basePath: this.getBasePath(),
         license: {
-          type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
-          expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
-          expiry_date_in_millis:
-            xpackInfo.getLicense().expiryDateInMillis !== undefined
-              ? xpackInfo.getLicense().expiryDateInMillis
-              : -1,
+          type: license.type ?? 'oss',
+          expired: !license.isActive,
+          expiry_date_in_millis: license.expiryDateInMillis ?? -1,
         },
         security: {
-          enabled: xpackInfo
-            ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
-            : false,
-          available: xpackInfo
-            ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
-            : false,
+          enabled: license.getFeature('security').isEnabled,
+          available: license.getFeature('security').isAvailable,
         },
-        settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
+        // TODO: this really has nothing to do with licensing, but should be server config
+        settings: this.config,
       };
     } catch (e) {
       throw new Error(`Unexpected data structure from xpackInfoService, ${JSON.stringify(e)}`);
@@ -97,10 +89,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
     this.xpackInfo = xpackInfoUnpacked;
 
-    const securitySetup = ((npSetup.plugins as unknown) as { security?: SecurityPluginSetup })
-      .security;
     try {
-      this.shieldUser = (await securitySetup?.authc.getCurrentUser()) || null;
+      this.shieldUser = (await this.securitySetup?.authc.getCurrentUser()) || null;
       const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
       if (isLeft(assertUser)) {
@@ -113,41 +103,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self' = 'self'
-  ) {
-    const adapter = this;
-    this.routes.when(
-      `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
-      {
-        template:
-          toController === 'self'
-            ? `<${this.PLUGIN_ID}><div id="${this.PLUGIN_ID}ReactRoot"></div></${this.PLUGIN_ID}>`
-            : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
-                <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
-                <div id="${this.PLUGIN_ID}ReactRoot" />
-               </kbn-management-app>`,
-        // eslint-disable-next-line max-classes-per-file
-        controller: ($scope: any, $route: any) => {
-          try {
-            $scope.$$postDigest(() => {
-              const elem = document.getElementById(`${this.PLUGIN_ID}ReactRoot`);
-              ReactDOM.render(component, elem);
-              adapter.manageAngularLifecycle($scope, $route, elem);
-            });
-            $scope.$onInit = () => {
-              $scope.topNavMenu = [];
-            };
-          } catch (e) {
-            throw new Error(`Error rendering Beats CM to the dom, ${e.message}`);
-          }
-        },
-      }
-    );
-  }
-
   public registerManagementSection(settings: {
     id?: string;
     name: string;
@@ -156,13 +111,12 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }) {
     const sectionId = settings.id || this.PLUGIN_ID;
 
-    if (!this.management.hasItem(sectionId)) {
-      this.management.register(sectionId, {
-        display: settings.name,
-        icon: settings.iconName,
-        order: settings.order || 30,
-      });
-    }
+    this.management.sections.register({
+      id: sectionId,
+      title: settings.name,
+      euiIconType: settings.iconName,
+      order: settings.order || 30,
+    });
   }
 
   public registerManagementUI(settings: {
@@ -171,50 +125,23 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     basePath: string;
     visable?: boolean;
     order?: number;
+    mount: RegisterManagementAppArgs['mount'];
   }) {
     const sectionId = settings.sectionId || this.PLUGIN_ID;
 
-    if (!this.management.hasItem(sectionId)) {
+    const section = this.management.sections.getSection(sectionId);
+
+    if (!section) {
       throw new Error(
         `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
       );
     }
 
-    const section = this.management.getSection(sectionId);
-
-    section.register(sectionId, {
-      visible: settings.visable || true,
-      display: settings.name,
+    section.registerApp({
+      id: sectionId,
+      title: settings.name,
       order: settings.order || 30,
-      url: `#${settings.basePath}`,
-    });
-  }
-
-  private manageAngularLifecycle($scope: any, $route: any, elem: any) {
-    const lastRoute = $route.current;
-    const deregister = $scope.$on('$locationChangeSuccess', () => {
-      const currentRoute = $route.current;
-      // if templates are the same we are on the same route
-      if (lastRoute.$$route.template === currentRoute.$$route.template) {
-        // this prevents angular from destroying scope
-        $route.current = lastRoute;
-      } else {
-        if (elem) {
-          ReactDOM.unmountComponentAtNode(elem);
-          elem.remove();
-        }
-      }
-    });
-    $scope.$on('$destroy', () => {
-      if (deregister) {
-        deregister();
-      }
-
-      // manually unmount component when scope is destroyed
-      if (elem) {
-        ReactDOM.unmountComponentAtNode(elem);
-        elem.remove();
-      }
+      mount: settings.mount,
     });
   }
 }

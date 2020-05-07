@@ -8,6 +8,7 @@
 
 import * as t from 'io-ts';
 import { LICENSES } from './../../../../common/constants/security';
+import { RegisterManagementAppArgs } from '../../../../../../../../src/plugins/management/public';
 
 export interface FrameworkAdapter {
   // Instance vars
@@ -16,11 +17,6 @@ export interface FrameworkAdapter {
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self'
-  ): void;
   registerManagementSection(settings: {
     id?: string;
     name: string;
@@ -33,6 +29,7 @@ export interface FrameworkAdapter {
     basePath: string;
     visable?: boolean;
     order?: number;
+    mount: RegisterManagementAppArgs['mount'];
   }): void;
 }
 
@@ -55,23 +52,6 @@ export const RuntimeFrameworkInfo = t.type({
 });
 
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
-
-interface ManagementSection {
-  register(
-    sectionId: string,
-    options: {
-      visible: boolean;
-      display: string;
-      order: number;
-      url: string;
-    }
-  ): void;
-}
-export interface ManagementAPI {
-  getSection(sectionId: string): ManagementSection;
-  hasItem(sectionId: string): boolean;
-  register(sectionId: string, options: { display: string; icon: string; order: number }): void;
-}
 
 export const RuntimeFrameworkUser = t.interface(
   {

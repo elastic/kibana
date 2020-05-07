@@ -5,9 +5,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { ElasticsearchAdapter } from './adapter_types';
 import { QuerySuggestion, esKuery } from '../../../../../../../../src/plugins/data/public';
+import { services } from '../../../kbn_services';
 
 export class RestElasticsearchAdapter implements ElasticsearchAdapter {
   private cachedIndexPattern: any = null;
@@ -35,7 +35,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     const indexPattern = await this.getIndexPattern();
 
     return (
-      (await npStart.plugins.data.autocomplete.getQuerySuggestions({
+      (await services.dataStart.autocomplete.getQuerySuggestions({
         language: 'kuery',
         indexPatterns: [indexPattern],
         boolFilter: [],
@@ -50,7 +50,7 @@ export class RestElasticsearchAdapter implements ElasticsearchAdapter {
     if (this.cachedIndexPattern) {
       return this.cachedIndexPattern;
     }
-    const res = await npStart.plugins.data.indexPatterns.getFieldsForWildcard({
+    const res = await services.dataStart.indexPatterns.getFieldsForWildcard({
       pattern: this.indexPatternName,
     });
     if (isEmpty(res.fields)) {

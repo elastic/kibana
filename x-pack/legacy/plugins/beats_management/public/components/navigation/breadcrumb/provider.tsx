@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Component, ReactElement } from 'react';
-import chrome from 'ui/chrome';
 import { Provider } from './context';
 import { Breadcrumb } from './types';
+import { services } from '../../../kbn_services';
 
 interface ComponentProps {
   useGlobalBreadcrumbs: boolean;
@@ -64,7 +64,7 @@ export class BreadcrumbProvider extends Component<ComponentProps, ComponentState
       removeCrumb: this.removeCrumb,
     };
     if (this.props.useGlobalBreadcrumbs) {
-      chrome.breadcrumbs.set(context.breadcrumbs);
+      services.setBreadcrumbs(context.breadcrumbs);
     }
     return <Provider value={context}>{this.props.children}</Provider>;
   }

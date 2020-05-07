@@ -40,14 +40,6 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     return;
   }
 
-  public renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self' = 'self'
-  ) {
-    throw new Error('not yet implamented');
-  }
-
   public registerManagementSection(settings: {
     id?: string;
     name: string;

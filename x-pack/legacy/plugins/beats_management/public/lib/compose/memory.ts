@@ -3,13 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
-import { management } from 'ui/management';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
-// @ts-ignore: path dynamic for kibana
-import routes from 'ui/routes';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 // @ts-ignore: path dynamic for kibana
