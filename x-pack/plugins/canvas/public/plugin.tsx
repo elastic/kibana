@@ -73,7 +73,7 @@ export class CanvasPlugin
       id: 'canvas',
       title: 'Canvas',
       euiIconType: 'canvasApp',
-      order: 0, // need to figure out if this is the proper order for us
+      order: 3000,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');

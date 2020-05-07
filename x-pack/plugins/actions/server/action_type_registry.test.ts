@@ -71,6 +71,19 @@ describe('register()', () => {
     `);
   });
 
+  test('shallow clones the given action type', () => {
+    const myType: ActionType = {
+      id: 'my-action-type',
+      name: 'My action type',
+      minimumLicenseRequired: 'basic',
+      executor,
+    };
+    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    actionTypeRegistry.register(myType);
+    myType.name = 'Changed';
+    expect(actionTypeRegistry.get('my-action-type').name).toEqual('My action type');
+  });
+
   test('throws error if action type already registered', () => {
     const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
     actionTypeRegistry.register({
