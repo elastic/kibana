@@ -18,6 +18,7 @@
  */
 
 import { omit } from 'lodash';
+import uuid from 'uuid';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';
 
@@ -299,6 +300,8 @@ export class SavedObjectsRepository {
       const requiresNamespacesCheck =
         method === 'index' && this._registry.isMultiNamespace(object.type);
 
+      if (object.id == null) object.id = uuid.v1();
+
       return {
         tag: 'Right' as 'Right',
         value: {
@@ -417,9 +420,12 @@ export class SavedObjectsRepository {
         }
 
         // When method == 'index' the bulkResponse doesn't include the indexed
-        // _source so we return rawMigratedDoc but have to spread rawResponse
-        // to return the latest _seq_no and _primary_term values from ES.
-        return this._serializer.rawToSavedObject({ ...rawMigratedDoc, ...rawResponse });
+        // _source so we return rawMigratedDoc but have to spread the latest
+        // _seq_no and _primary_term values from the rawResponse.
+        return this._serializer.rawToSavedObject({
+          ...rawMigratedDoc,
+          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+        });
       }),
     };
   }

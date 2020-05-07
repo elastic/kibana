@@ -23,6 +23,7 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DocumentMigrator } from '../../migrations/core/document_migrator';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
@@ -115,6 +116,7 @@ describe('SavedObjectsRepository', () => {
   const createType = type => ({
     name: type,
     mappings: { properties: mappings.properties[type].properties },
+    migrations: { '1.1.1': doc => doc },
   });
 
   const registry = new SavedObjectTypeRegistry();
@@ -142,6 +144,13 @@ describe('SavedObjectsRepository', () => {
     ...createType(HIDDEN_TYPE),
     hidden: true,
     namespaceType: 'agnostic',
+  });
+
+  const documentMigrator = new DocumentMigrator({
+    typeRegistry: registry,
+    kibanaVersion: '2.0.0',
+    log: {},
+    validateDoc: jest.fn(),
   });
 
   const getMockGetResponse = ({ type, id, references, namespace }) => ({
@@ -207,7 +216,7 @@ describe('SavedObjectsRepository', () => {
   beforeEach(() => {
     callAdminCluster = jest.fn();
     migrator = {
-      migrateDocument: jest.fn(doc => doc),
+      migrateDocument: jest.fn().mockImplementation(documentMigrator.migrate),
       runMigrations: async () => ({ status: 'skipped' }),
     };
 
@@ -805,19 +814,29 @@ describe('SavedObjectsRepository', () => {
     it(`deserializes the raw ES response into a saved object`, async () => {
       // Test for fix to https://github.com/elastic/kibana/issues/65088 where
       // we returned raw ID's when an object without an id was created.
-      const response = getMockBulkCreateResponse([obj1, obj2]);
+      const namespace = 'myspace';
+      const response = getMockBulkCreateResponse([obj1, obj2], namespace);
       callAdminCluster.mockResolvedValueOnce(response); // this._writeToCluster('bulk', ...)
 
       // Bulk create one object with id unspecified, and one with id specified
-      const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2]);
+      const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2], {
+        namespace,
+      });
 
       // Assert that both raw docs from the ES response are deserialized
-      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, response.items[0].create);
+      expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
+        ...response.items[0].create,
+        _id: expect.stringMatching(/myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+      });
       expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
 
-      // Assert that ID's are deserialized and doesn't include the namespace
-      // and type.
-      expect(result.saved_objects.map(so => so.id)).toEqual([obj1.id, obj2.id]);
+      // Assert that ID's are deserialized to remove the type and namespace
+      expect(result.saved_objects[0].id).toEqual(
+        expect.not.stringMatching(/config|index-pattern|myspace/)
+      );
+      expect(result.saved_objects[1].id).toEqual(
+        expect.not.stringMatching(/config|index-pattern|myspace/)
+      );
     });
   });
 
@@ -1633,6 +1652,7 @@ describe('SavedObjectsRepository', () => {
           version: mockVersion,
           attributes,
           references,
+          migrationVersion: { [type]: '1.1.1' },
         });
       });
     });
