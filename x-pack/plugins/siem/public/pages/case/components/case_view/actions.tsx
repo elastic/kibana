@@ -13,13 +13,19 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { SiemPageName } from '../../../home/types';
 import { PropertyActions } from '../property_actions';
 import { Case } from '../../../../containers/case/types';
+import { CaseService } from '../../../../containers/case/use_get_case_user_actions';
 
 interface CaseViewActions {
   caseData: Case;
+  currentExternalIncident: CaseService | null;
   disabled?: boolean;
 }
 
-const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData, disabled = false }) => {
+const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
+  caseData,
+  currentExternalIncident,
+  disabled = false,
+}) => {
   // Delete case
   const {
     handleToggleModal,
@@ -48,17 +54,17 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({ caseData, disable
         label: i18n.DELETE_CASE,
         onClick: handleToggleModal,
       },
-      ...(caseData.externalService != null && !isEmpty(caseData.externalService?.externalUrl)
+      ...(currentExternalIncident != null && !isEmpty(currentExternalIncident?.externalUrl)
         ? [
             {
               iconType: 'popout',
-              label: i18n.VIEW_INCIDENT(caseData.externalService?.externalTitle ?? ''),
-              onClick: () => window.open(caseData.externalService?.externalUrl, '_blank'),
+              label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
+              onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
             },
           ]
         : []),
     ],
-    [disabled, handleToggleModal, caseData]
+    [disabled, handleToggleModal, currentExternalIncident]
   );
 
   if (isDeleted) {

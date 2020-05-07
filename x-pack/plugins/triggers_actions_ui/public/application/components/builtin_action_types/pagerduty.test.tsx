@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
@@ -17,14 +18,18 @@ import {
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
+let deps: any;
 
-beforeAll(() => {
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  deps = {
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -106,7 +111,7 @@ describe('pagerduty action params validation', () => {
 });
 
 describe('PagerDutyActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -126,11 +131,17 @@ describe('PagerDutyActionConnectorFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{ routingKey: [] }}
+        errors={{ index: [], routingKey: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
       />
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
     expect(
       wrapper

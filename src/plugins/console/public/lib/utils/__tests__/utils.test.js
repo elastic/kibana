@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const utils = require('../');
+import * as utils from '../';
 
 describe('Utils class', () => {
   test('extract deprecation messages', function() {

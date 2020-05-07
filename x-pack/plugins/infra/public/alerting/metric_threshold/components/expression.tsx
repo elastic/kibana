@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiSpacer,
@@ -39,6 +40,8 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionRow } from './expression_row';
 import { AlertContextMeta, TimeUnit, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface Props {
   errors: IErrorObject[];
@@ -124,6 +127,10 @@ export const Expressions: React.FC<Props> = props => {
     },
     [setAlertParams, derivedIndexPattern]
   );
+
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
@@ -251,7 +258,7 @@ export const Expressions: React.FC<Props> = props => {
                 context={alertsContext}
                 derivedIndexPattern={derivedIndexPattern}
                 source={source}
-                filterQuery={alertParams.filterQuery}
+                filterQuery={alertParams.filterQueryText}
                 groupBy={alertParams.groupBy}
               />
             </ExpressionRow>
@@ -320,7 +327,7 @@ export const Expressions: React.FC<Props> = props => {
         {(alertsContext.metadata && (
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             onSubmit={onFilterChange}
             value={alertParams.filterQueryText}
           />
