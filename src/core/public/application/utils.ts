@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
-import { LegacyApp } from './types';
+import { App, LegacyApp } from './types';
 
 /**
  * Utility to remove trailing, leading or duplicate slashes.

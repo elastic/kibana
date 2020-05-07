@@ -43,9 +43,7 @@ export const parseAppUrl = (
     return undefined;
   }
 
-  const appList = [...apps.values()];
-  for (let i = 0; i < appList.length; i++) {
-    const app = appList[i];
+  for (const app of apps.values()) {
     const appPath = isLegacyApp(app) ? app.appUrl : app.appRoute || `/app/${app.id}`;
 
     if (url.startsWith(appPath)) {

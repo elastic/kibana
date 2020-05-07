@@ -38,7 +38,7 @@ export const createCrossAppLinkClickHandler = ({
 }: {
   navigateToApp: ApplicationStart['navigateToApp'];
   basePath: IBasePath;
-  apps: Map<string, App<any> | LegacyApp>;
+  apps: Map<string, App<unknown> | LegacyApp>;
   getCurrentAppId: () => string | undefined;
 }): DelegatedClickEventHandler => {
   return (e: DelegatedClickEvent) => {
