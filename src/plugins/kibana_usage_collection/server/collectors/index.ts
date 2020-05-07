@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { registerTelemetryUsageCollector } from './usage';
-export { registerTelemetryPluginUsageCollector } from './telemetry_plugin';
+export { registerUiMetricUsageCollector } from './ui_metric';
+export { registerManagementUsageCollector } from './management';
+export { registerApplicationUsageCollector } from './application_usage';
+export { registerKibanaUsageCollector } from './kibana';
+export { registerOpsStatsCollector } from './ops_stats';
