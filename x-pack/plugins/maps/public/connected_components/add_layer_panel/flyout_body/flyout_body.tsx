@@ -9,11 +9,9 @@ import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
 import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
-import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 type Props = RenderWizardArguments & {
-  importView: boolean;
   layerWizard: LayerWizard | null;
   onClear: () => void;
   onWizardSelect: (layerWizard: LayerWizard) => void;
@@ -24,6 +22,16 @@ export const FlyoutBody = (props: Props) => {
     if (!props.layerWizard) {
       return <LayerWizardSelect onSelect={props.onWizardSelect} />;
     }
+
+    const renderWizardArgs = {
+      previewLayer: props.previewLayer,
+      mapColors: props.mapColors,
+      isIndexingTriggered: props.isIndexingTriggered,
+      onRemove: props.onRemove,
+      onIndexReady: props.onIndexReady,
+      importSuccessHandler: props.importSuccessHandler,
+      importErrorHandler: props.importErrorHandler,
+    };
 
     const backButton = props.isIndexingTriggered ? null : (
       <Fragment>
@@ -36,27 +44,6 @@ export const FlyoutBody = (props: Props) => {
         <EuiSpacer size="s" />
       </Fragment>
     );
-
-    const renderWizardArgs = {
-      previewLayer: props.previewLayer,
-      mapColors: props.mapColors,
-      isIndexingTriggered: props.isIndexingTriggered,
-      onRemove: props.onRemove,
-      onIndexReady: props.onIndexReady,
-      importSuccessHandler: props.importSuccessHandler,
-      importErrorHandler: props.importErrorHandler,
-    };
-
-    if (props.importView) {
-      return (
-        <Fragment>
-          {backButton}
-          <EuiPanel style={{ position: 'relative' }}>
-            {uploadLayerWizardConfig.renderWizard(renderWizardArgs)}
-          </EuiPanel>
-        </Fragment>
-      );
-    }
 
     return (
       <Fragment>

@@ -137,7 +137,6 @@ export class AddLayerPanel extends Component<Props, State> {
         </EuiFlyoutHeader>
 
         <FlyoutBody
-          importView={this.state.importView}
           layerWizard={this.state.layerWizard}
           onClear={() => this._clearLayerData({ keepSourceType: false })}
           onRemove={() => this._clearLayerData({ keepSourceType: true })}
