@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseObject } from 'hapi';
 import { EventEmitter } from 'events';
+import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
+import { JobStatus } from '../../../plugins/reporting'; // reporting new platform
 import { CancellationToken } from './common/cancellation_token';
+import { ReportingCore } from './server/core';
 import { LevelLogger } from './server/lib/level_logger';
-import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
-import { BrowserType } from './server/browsers/types';
-import { LegacySetup } from './server/plugin';
-
-export type ReportingPlugin = object; // For Plugin contract
+import { LegacySetup } from './server/types';
 
 export type Job = EventEmitter & {
   id: string;
@@ -23,26 +21,10 @@ export type Job = EventEmitter & {
   };
 };
 
-export interface ReportingConfigOptions {
-  browser: BrowserConfig;
-  poll: {
-    jobCompletionNotifier: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-    jobsRefresh: {
-      interval: number;
-      intervalErrorMultiplier: number;
-    };
-  };
-  queue: QueueConfig;
-  capture: CaptureConfig;
-}
-
 export interface NetworkPolicyRule {
   allow: boolean;
-  protocol: string;
-  host: string;
+  protocol?: string;
+  host?: string;
 }
 
 export interface NetworkPolicy {
@@ -64,6 +46,7 @@ interface GenerateExportTypePayload {
 
 /*
  * Legacy System
+ * TODO: move to server/types
  */
 
 export type ServerFacade = LegacySetup;
@@ -108,46 +91,6 @@ export type ReportingResponseToolkit = Legacy.ResponseToolkit;
 
 export type ESCallCluster = CallCluster;
 
-/*
- * Reporting Config
- */
-
-export interface CaptureConfig {
-  browser: {
-    type: BrowserType;
-    autoDownload: boolean;
-    chromium: BrowserConfig;
-  };
-  maxAttempts: number;
-  networkPolicy: NetworkPolicy;
-  loadDelay: number;
-}
-
-export interface BrowserConfig {
-  inspect: boolean;
-  userDataDir: string;
-  viewport: { width: number; height: number };
-  disableSandbox: boolean;
-  proxy: {
-    enabled: boolean;
-    server: string;
-    bypass?: string[];
-  };
-}
-
-export interface QueueConfig {
-  indexInterval: string;
-  pollEnabled: boolean;
-  pollInterval: number;
-  pollIntervalErrorMultiplier: number;
-  timeout: number;
-}
-
-export interface ScrollConfig {
-  duration: string;
-  size: number;
-}
-
 export interface ElementPosition {
   boundingClientRect: {
     // modern browsers support x/y, but older ones don't
@@ -174,8 +117,13 @@ export interface ConditionalHeadersConditions {
   basePath: string;
 }
 
-export interface CryptoFactory {
-  decrypt: (headers?: string) => any;
+export interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
 }
 
 export interface TimeRangeParams {
@@ -198,23 +146,21 @@ export interface JobDocPayload<JobParamsType> {
 
 export interface JobSource<JobParamsType> {
   _id: string;
+  _index: string;
   _source: {
     jobtype: string;
     output: JobDocOutput;
     payload: JobDocPayload<JobParamsType>;
-    status: string; // completed, failed, etc
+    status: JobStatus;
   };
 }
 
 export interface JobDocOutput {
   content_type: string;
   content: string | null;
-  max_size_reached: boolean;
   size: number;
-}
-
-export interface ESQueue {
-  addJob: (type: string, payload: object, options: object) => Job;
+  max_size_reached?: boolean;
+  warnings?: string[];
 }
 
 export interface ESQueueWorker {
@@ -241,7 +187,7 @@ export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
   job: JobDocPayloadType,
   cancellationToken?: CancellationToken
-) => void;
+) => Promise<any>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -266,8 +212,9 @@ type GenericWorkerFn<JobParamsType> = (
   ...workerRestArgs: any[]
 ) => void | Promise<JobDocOutput>;
 
-export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
-  registerWorker: (
+export interface ESQueueInstance {
+  addJob: (type: string, payload: unknown, options: object) => Job;
+  registerWorker: <JobParamsType>(
     pluginId: string,
     workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
@@ -275,16 +222,13 @@ export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
 }
 
 export type CreateJobFactory<CreateJobFnType> = (
-  server: ServerFacade,
+  reporting: ReportingCore,
   logger: LevelLogger
 ) => CreateJobFnType;
 export type ExecuteJobFactory<ExecuteJobFnType> = (
-  server: ServerFacade,
-  logger: LevelLogger,
-  opts: {
-    browserDriverFactory: HeadlessChromiumDriverFactory;
-  }
-) => ExecuteJobFnType;
+  reporting: ReportingCore,
+  logger: LevelLogger
+) => Promise<ExecuteJobFnType>; // FIXME: does not "need" to be async
 
 export interface ExportTypeDefinition<
   JobParamsType,
@@ -302,11 +246,11 @@ export interface ExportTypeDefinition<
   validLicenses: string[];
 }
 
-export { ExportTypesRegistry } from './server/lib/export_types_registry';
-export { HeadlessChromiumDriver } from './server/browsers/chromium/driver';
-export { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
 export { CancellationToken } from './common/cancellation_token';
 
+export { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from './server/browsers';
+
+export { ExportTypesRegistry } from './server/lib/export_types_registry';
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger };
 

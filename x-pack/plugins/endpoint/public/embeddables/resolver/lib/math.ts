@@ -10,3 +10,10 @@
 export function clamp(value: number, minimum: number, maximum: number) {
   return Math.max(Math.min(value, maximum), minimum);
 }
+
+/**
+ * linearly interpolate between `a` and `b` at a ratio of `ratio`. If `ratio` is `0`, return `a`, if ratio is `1`, return `b`.
+ */
+export function lerp(a: number, b: number, ratio: number): number {
+  return a * (1 - ratio) + b * ratio;
+}

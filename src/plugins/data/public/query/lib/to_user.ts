@@ -27,9 +27,6 @@ export function toUser(text: { [key: string]: any } | string | number): string {
     return '';
   }
   if (typeof text === 'object') {
-    if (text.match_all) {
-      return '';
-    }
     if (text.query_string) {
       return toUser(text.query_string.query);
     }

@@ -29,14 +29,14 @@
 
 import { uiModules } from '../modules';
 import { StateProvider } from './state';
-import '../persisted_state';
+import { PersistedState } from '../../../../plugins/visualizations/public';
 import { createLegacyClass } from '../utils/legacy_class';
 
 const urlParam = '_a';
 
-export function AppStateProvider(Private, $location, $injector) {
+export function AppStateProvider(Private, $location) {
   const State = Private(StateProvider);
-  const PersistedState = $injector.get('PersistedState');
+
   let persistedStates;
   let eventUnsubscribers;
 

@@ -18,8 +18,14 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { IndexPatterns } from './index_patterns';
-import { SavedObjectsClientContract, IUiSettingsClient, HttpSetup } from 'kibana/public';
+import { IndexPatternsService } from './index_patterns';
+import { SavedObjectsClientContract, SavedObjectsFindResponsePublic } from 'kibana/public';
+import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+
+const core = coreMock.createStart();
+const http = httpServiceMock.createStartContract();
+const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
 jest.mock('./index_pattern', () => {
   class IndexPattern {
@@ -44,14 +50,19 @@ jest.mock('./index_patterns_api_client', () => {
 });
 
 describe('IndexPatterns', () => {
-  let indexPatterns: IndexPatterns;
+  let indexPatterns: IndexPatternsService;
+  let savedObjectsClient: SavedObjectsClientContract;
 
   beforeEach(() => {
-    const savedObjectsClient = {} as SavedObjectsClientContract;
-    const uiSettings = {} as IUiSettingsClient;
-    const http = {} as HttpSetup;
+    savedObjectsClient = {} as SavedObjectsClientContract;
+    savedObjectsClient.find = jest.fn(
+      () =>
+        Promise.resolve({
+          savedObjects: [{ id: 'id', attributes: { title: 'title' } }],
+        }) as Promise<SavedObjectsFindResponsePublic<any>>
+    );
 
-    indexPatterns = new IndexPatterns(uiSettings, savedObjectsClient, http);
+    indexPatterns = new IndexPatternsService(core, savedObjectsClient, http, fieldFormats);
   });
 
   test('does cache gets for the same id', async () => {
@@ -60,5 +71,28 @@ describe('IndexPatterns', () => {
 
     expect(indexPattern).toBeDefined();
     expect(indexPattern).toBe(await indexPatterns.get(id));
+  });
+
+  test('savedObjectCache pre-fetches only title', async () => {
+    expect(await indexPatterns.getIds()).toEqual(['id']);
+    expect(savedObjectsClient.find).toHaveBeenCalledWith({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
+  });
+
+  test('caches saved objects', async () => {
+    await indexPatterns.getIds();
+    await indexPatterns.getTitles();
+    await indexPatterns.getFields(['id', 'title']);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+  });
+
+  test('can refresh the saved objects caches', async () => {
+    await indexPatterns.getIds();
+    await indexPatterns.getTitles(true);
+    await indexPatterns.getFields(['id', 'title'], true);
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
   });
 });

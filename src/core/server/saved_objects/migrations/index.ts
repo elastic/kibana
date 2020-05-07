@@ -17,4 +17,10 @@
  * under the License.
  */
 
+export { MigrationResult } from './core';
 export { KibanaMigrator, IKibanaMigrator } from './kibana';
+export {
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+  SavedObjectMigrationContext,
+} from './types';

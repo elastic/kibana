@@ -20,12 +20,10 @@
 import { NotificationsStart } from 'kibana/public';
 import { createKibanaUtilsCore, createGetterSetter } from '../../kibana_utils/public';
 import { ExpressionInterpreter } from './types';
-import { Start as IInspector } from '../../inspector/public';
 import { ExpressionsSetup } from './plugin';
+import { ExpressionsService } from '../common';
 
-export const { getCoreStart, setCoreStart, savedObjects } = createKibanaUtilsCore();
-
-export const [getInspector, setInspector] = createGetterSetter<IInspector>('Inspector');
+export const { getCoreStart, setCoreStart } = createKibanaUtilsCore();
 
 export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
   'Interpreter'
@@ -37,3 +35,7 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
 export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
   ExpressionsSetup['__LEGACY']['renderers']
 >('Renderers registry');
+
+export const [getExpressionsService, setExpressionsService] = createGetterSetter<
+  ExpressionsService
+>('ExpressionsService');

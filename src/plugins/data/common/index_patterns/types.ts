@@ -26,6 +26,7 @@ export interface IIndexPattern {
   id?: string;
   type?: string;
   timeFieldName?: string;
+  getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<
     string,
     {
@@ -33,4 +34,16 @@ export interface IIndexPattern {
       params: unknown;
     }
   >;
+}
+
+/**
+ * Use data plugin interface instead
+ * @deprecated
+ */
+export interface IndexPatternAttributes {
+  type: string;
+  fields: string;
+  title: string;
+  typeMeta: string;
+  timeFieldName?: string;
 }

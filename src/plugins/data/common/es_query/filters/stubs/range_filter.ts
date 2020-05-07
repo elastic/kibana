@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { esFilters } from '../../..';
+import { RangeFilter, FilterStateStore } from '..';
 
-export const rangeFilter: esFilters.RangeFilter = {
+export const rangeFilter: RangeFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
@@ -34,7 +34,7 @@ export const rangeFilter: esFilters.RangeFilter = {
     },
   },
   $state: {
-    store: esFilters.FilterStateStore.APP_STATE,
+    store: FilterStateStore.APP_STATE,
   },
   range: {},
 };

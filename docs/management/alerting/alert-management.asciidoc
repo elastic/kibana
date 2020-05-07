@@ -1,0 +1,59 @@
+[role="xpack"]
+[[alert-management]]
+=== Managing Alerts
+
+beta[]
+
+The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like <<xpack-infra, Metrics>>, <<xpack-apm, APM>>, <<xpack-uptime, Uptime>>, and <<xpack-siem, SIEM>> can offer their own alerts, and the *Alerts* tab provides a central place to:
+
+* <<create-edit-alerts, Create and edit>> alerts
+* <<controlling-alerts, Control alerts>> including enabling/disabling, muting/unmuting, and deleting
+* Drill-down to <<alert-details, alert details>>
+
+[role="screenshot"]
+image:management/alerting/images/alerts-and-actions-ui.png[Example alert listing in the Alerts and Actions UI]
+
+For more information on alerting concepts and the types of alerts and actions available, see <<alerting-getting-started>>.
+
+[float]
+==== Finding alerts
+
+The *Alerts* tab lists all alerts in the current space, including summary information about their execution frequency, tags, and type.
+
+The *search bar* can be used to quickly find alerts by name or tag.
+
+[role="screenshot"]
+image::images/alerts-filter-by-search.png[Filtering the alerts list using the search bar]
+
+The *type* dropdown lets you filter to a subset of alert types.
+
+[role="screenshot"]
+image::images/alerts-filter-by-type.png[Filtering the alerts list by types of alert]
+
+The *Action type* dropdown lets you filter by the type of action used in the alert.
+
+[role="screenshot"]
+image::images/alerts-filter-by-action-type.png[Filtering the alert list by type of action]
+
+[float]
+[[create-edit-alerts]]
+==== Creating and editing alerts
+
+Many alerts must be created within the context of a {kib} app like <<xpack-infra, Metrics>>, <<xpack-apm, APM>>, or <<xpack-uptime, Uptime>>, but others are generic. Generic alert types can be created in the *Alerts* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting an alert type and configuring it's properties. Refer to <<alert-types>> for details on what types of alerts are available and how to configure them.
+
+After an alert is created, you can re-open the flyout and change an alerts properties by clicking the *Edit* button shown on each row of the alert listing.
+
+
+[float]
+[[controlling-alerts]]
+==== Controlling alerts
+
+The alert listing allows you to quickly mute/unmute, disable/enable, and delete individual alerts by clicking the action button. 
+
+[role="screenshot"]
+image:management/alerting/images/individual-mute-disable.png[The actions button allows an individual alert to be muted, disabled, or deleted]
+
+These operations can also be performed in bulk by multi-selecting alerts and clicking the *Manage alerts* button:
+
+[role="screenshot"]
+image:management/alerting/images/bulk-mute-disable.png[The Manage alerts button lets you mute/unmute, enable/disable, and delete in bulk]

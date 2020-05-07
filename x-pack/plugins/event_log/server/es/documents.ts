@@ -8,12 +8,9 @@ import { EsNames } from './names';
 import mappings from '../../generated/mappings.json';
 
 // returns the body of an index template used in an ES indices.putTemplate call
-export function getIndexTemplate(esNames: EsNames, ilmExists: boolean) {
-  const indexTemplateBody: any = {
-    index_patterns: [esNames.indexPattern],
-    aliases: {
-      [esNames.alias]: {},
-    },
+export function getIndexTemplate(esNames: EsNames) {
+  const indexTemplateBody = {
+    index_patterns: [esNames.indexPatternWithVersion],
     settings: {
       number_of_shards: 1,
       number_of_replicas: 1,
@@ -22,11 +19,6 @@ export function getIndexTemplate(esNames: EsNames, ilmExists: boolean) {
     },
     mappings,
   };
-
-  if (!ilmExists) {
-    delete indexTemplateBody.settings['index.lifecycle.name'];
-    delete indexTemplateBody.settings['index.lifecycle.rollover_alias'];
-  }
 
   return indexTemplateBody;
 }
@@ -39,10 +31,16 @@ export function getIlmPolicy() {
         hot: {
           actions: {
             rollover: {
-              max_size: '5GB',
+              max_size: '50GB',
               max_age: '30d',
               // max_docs: 1, // you know, for testing
             },
+          },
+        },
+        delete: {
+          min_age: '90d',
+          actions: {
+            delete: {},
           },
         },
       },

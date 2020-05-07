@@ -38,6 +38,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: mockSecuritySetup.authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -100,6 +101,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -119,6 +121,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -135,6 +138,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -156,6 +160,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();

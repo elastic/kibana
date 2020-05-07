@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../legacy/plugins/ml/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../plugins/ml/common/constants/field_types';
 
 export function MachineLearningDataVisualizerIndexBasedProvider({
   getService,
@@ -102,6 +102,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType);
       await this.assertFieldsPanelTypeInputValue(filterFieldType);
       await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
+    },
+
+    async clickCreateAdvancedJobButton() {
+      await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
     },
   };
 }

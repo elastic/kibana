@@ -43,4 +43,11 @@ describe('String TruncateFormat', () => {
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });
+
+  test('does not truncate whole text when non integer is passed in', () => {
+    // https://github.com/elastic/kibana/issues/29648
+    const truncate = new TruncateFormat({ fieldLength: 3.2 }, jest.fn());
+
+    expect(truncate.convert('This is some text')).toBe('Thi...');
+  });
 });

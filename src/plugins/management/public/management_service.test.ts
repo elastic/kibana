@@ -19,24 +19,24 @@
 
 import { ManagementService } from './management_service';
 import { coreMock } from '../../../core/public/mocks';
+import { npSetup } from '../../../legacy/ui/public/new_platform/__mocks__';
 
-const mockKibanaLegacy = { registerLegacyApp: () => {}, forwardApp: () => {} };
+jest.mock('ui/new_platform');
 
 test('Provides default sections', () => {
   const service = new ManagementService().setup(
-    mockKibanaLegacy,
+    npSetup.plugins.kibanaLegacy,
     () => {},
     coreMock.createSetup().getStartServices
   );
-  expect(service.getAllSections().length).toEqual(3);
+  expect(service.getAllSections().length).toEqual(2);
   expect(service.getSection('kibana')).not.toBeUndefined();
-  expect(service.getSection('logstash')).not.toBeUndefined();
   expect(service.getSection('elasticsearch')).not.toBeUndefined();
 });
 
 test('Register section, enable and disable', () => {
   const service = new ManagementService().setup(
-    mockKibanaLegacy,
+    npSetup.plugins.kibanaLegacy,
     () => {},
     coreMock.createSetup().getStartServices
   );

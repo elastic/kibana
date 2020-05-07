@@ -12,7 +12,7 @@ Elasticsearch will run with a basic license. To run with a trial license, includ
 
 Example: `yarn es snapshot --license trial --password changeme`
 
-By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana` user which `elasticsearch.username` defaults to in development. If you wish to specific a password for a given native realm account, you can do that like so: `--password.kibana=notsecure`
+By default, this will also set the password for native realm accounts to the password provided (`changeme` by default). This includes that of the `kibana_system` user which `elasticsearch.username` defaults to in development. If you wish to specify a password for a given native realm account, you can do that like so: `--password.kibana_system=notsecure`
 
 # Testing
 ## Running specific tests
@@ -46,17 +46,17 @@ yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc
 
 #### Debugging browser tests
 ```
-yarn test:browser:dev
+yarn test:karma:debug
 ```
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
 
 #### Running server unit tests
-You can run server-side unit tests by running:
+You can run mocha unit tests by running:
 
 ```
-yarn test:server
+yarn test:mocha
 ```
 
 #### Running functional tests

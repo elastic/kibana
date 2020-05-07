@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 
 import { Plugin } from './plugin';
 import { EsContext } from './es';
+import { EventLogService } from './event_log_service';
 import {
   IEvent,
   IValidatedEvent,
@@ -18,6 +19,7 @@ import {
   ECS_VERSION,
   EventSchema,
 } from './types';
+import { SAVED_OBJECT_REL_PRIMARY } from './types';
 
 type SystemLogger = Plugin['systemLogger'];
 
@@ -28,14 +30,14 @@ interface Doc {
 
 interface IEventLoggerCtorParams {
   esContext: EsContext;
-  eventLogService: IEventLogService;
+  eventLogService: EventLogService;
   initialProperties: IEvent;
   systemLogger: SystemLogger;
 }
 
 export class EventLogger implements IEventLogger {
   private esContext: EsContext;
-  private eventLogService: IEventLogService;
+  private eventLogService: EventLogService;
   private initialProperties: IEvent;
   private systemLogger: SystemLogger;
 
@@ -69,17 +71,18 @@ export class EventLogger implements IEventLogger {
     if (!this.eventLogService.isEnabled()) return;
 
     const event: IEvent = {};
+    const fixedProperties = {
+      '@timestamp': new Date().toISOString(),
+      ecs: {
+        version: ECS_VERSION,
+      },
+      kibana: {
+        server_uuid: this.eventLogService.kibanaUUID,
+      },
+    };
 
     // merge the initial properties and event properties
-    merge(event, this.initialProperties, eventProperties);
-
-    // add fixed properties
-    event['@timestamp'] = new Date().toISOString();
-    event.ecs = event.ecs || {};
-    event.ecs.version = ECS_VERSION;
-
-    // TODO add kibana server uuid
-    // event.kibana.server_uuid = NP version of config.get('server.uuid');
+    merge(event, this.initialProperties, eventProperties, fixedProperties);
 
     let validatedEvent: IValidatedEvent;
     try {
@@ -116,6 +119,8 @@ const RequiredEventSchema = schema.object({
   action: schema.string({ minLength: 1 }),
 });
 
+const ValidSavedObjectRels = new Set([undefined, SAVED_OBJECT_REL_PRIMARY]);
+
 function validateEvent(eventLogService: IEventLogService, event: IEvent): IValidatedEvent {
   if (event?.event == null) {
     throw new Error(`no "event" property`);
@@ -135,12 +140,24 @@ function validateEvent(eventLogService: IEventLogService, event: IEvent): IValid
   }
 
   // could throw an error
-  return EventSchema.validate(event);
+  const result = EventSchema.validate(event);
+
+  if (result?.kibana?.saved_objects?.length) {
+    for (const so of result?.kibana?.saved_objects) {
+      if (!ValidSavedObjectRels.has(so.rel)) {
+        throw new Error(`invalid rel property in saved_objects: "${so.rel}"`);
+      }
+    }
+  }
+
+  return result;
 }
+
+export const EVENT_LOGGED_PREFIX = `event logged: `;
 
 function logEventDoc(logger: Logger, doc: Doc): void {
   setImmediate(() => {
-    logger.info(`event logged ${JSON.stringify(doc.body)}`);
+    logger.info(`${EVENT_LOGGED_PREFIX}${JSON.stringify(doc.body)}`);
   });
 }
 
@@ -164,14 +181,14 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 }
 
 // whew, the thing that actually writes the event log document!
-async function indexLogEventDoc(esContext: EsContext, doc: any) {
+async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
   esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
   await esContext.waitTillReady();
-  await esContext.callEs('index', doc);
+  await esContext.esAdapter.indexDocument(doc);
   esContext.logger.debug(`writing to event log complete`);
 }
 
 // TODO: write log entry to a bounded queue buffer
-function writeLogEventDocOnError(esContext: EsContext, doc: any) {
+function writeLogEventDocOnError(esContext: EsContext, doc: unknown) {
   esContext.logger.warn(`unable to write event doc: ${JSON.stringify(doc)}`);
 }

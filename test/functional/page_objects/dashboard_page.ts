@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/np_ready/dashboard_constants';
+import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -65,6 +65,13 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await this.waitForRenderComplete();
     }
 
+    public async exitFullScreenMode() {
+      log.debug(`exitFullScreenMode`);
+      const logoButton = await this.getExitFullScreenLogoButton();
+      await logoButton.moveMouseTo();
+      await this.clickExitFullScreenTextButton();
+    }
+
     public async fullScreenModeMenuItemExists() {
       return await testSubjects.exists('dashboardFullScreenMode');
     }
@@ -97,13 +104,18 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
-      const urlSubstring = 'kibana#/dashboard/';
-      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
-      const endIndex = currentUrl.indexOf('?');
-      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+      const id = this.getDashboardIdFromUrl(currentUrl);
 
       log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
+      return id;
+    }
+
+    public getDashboardIdFromUrl(url: string) {
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = url.indexOf('?');
+      const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
       return id;
     }
 
@@ -190,10 +202,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('dashboardEditMode');
       // wait until the count of dashboard panels equals the count of toggle menu icons
       await retry.waitFor('in edit mode', async () => {
-        const [panels, menuIcons] = await Promise.all([
-          testSubjects.findAll('embeddablePanel'),
-          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
-        ]);
+        const panels = await testSubjects.findAll('embeddablePanel', 2500);
+        const menuIcons = await testSubjects.findAll('embeddablePanelToggleMenuIcon', 2500);
         return panels.length === menuIcons.length;
       });
     }
@@ -210,6 +220,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickNewDashboard() {
       await listingTable.clickNewButton('createDashboardPromptButton');
+      // make sure the dashboard page is shown
+      await this.waitForRenderComplete();
     }
 
     public async clickCreateDashboardPrompt() {
@@ -471,15 +483,16 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
-      const sharedItems = await find.allByCssSelector('[data-shared-item]');
-      return await Promise.all(
-        sharedItems.map(async sharedItem => {
+      const sharedItemscontainer = await find.byCssSelector('[data-shared-items-count]');
+      const $ = await sharedItemscontainer.parseDomContent();
+      return $('[data-shared-item]')
+        .toArray()
+        .map(item => {
           return {
-            title: await sharedItem.getAttribute('data-title'),
-            description: await sharedItem.getAttribute('data-description'),
+            title: $(item).attr('data-title'),
+            description: $(item).attr('data-description'),
           };
-        })
-      );
+        });
     }
 
     public async checkHideTitle() {
@@ -503,6 +516,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
 
       return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+    }
+
+    public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await this.getDashboardPanels())[panelIndex];
+      try {
+        const count = await panel.findByTestSubject(
+          'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
+        );
+        return Number.parseInt(await count.getVisibleText(), 10);
+      } catch (e) {
+        // if not found then this is 0 (we don't show badge with 0)
+        return 0;
+      }
     }
   }
 

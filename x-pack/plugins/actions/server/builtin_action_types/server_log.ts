@@ -12,8 +12,6 @@ import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { withoutControlCharacters } from './lib/string_utils';
 
-const ACTION_NAME = 'Server log';
-
 // params definition
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
@@ -37,7 +35,10 @@ const ParamsSchema = schema.object({
 export function getActionType({ logger }: { logger: Logger }): ActionType {
   return {
     id: '.server-log',
-    name: ACTION_NAME,
+    minimumLicenseRequired: 'basic',
+    name: i18n.translate('xpack.actions.builtin.serverLogTitle', {
+      defaultMessage: 'Server log',
+    }),
     validate: {
       params: ParamsSchema,
     },
@@ -56,7 +57,7 @@ async function executor(
 
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {
-    logger[params.level](`${ACTION_NAME}: ${sanitizedMessage}`);
+    logger[params.level](`Server log: ${sanitizedMessage}`);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error logging message',

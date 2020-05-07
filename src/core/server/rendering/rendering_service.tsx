@@ -23,43 +23,40 @@ import { take } from 'rxjs/operators';
 
 import { i18n } from '@kbn/i18n';
 
+import { UiPlugins } from '../plugins';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
+import { LegacyService } from '../legacy';
 import {
   IRenderOptions,
   RenderingSetupDeps,
-  RenderingServiceSetup,
+  InternalRenderingServiceSetup,
   RenderingMetadata,
 } from './types';
 
 /** @internal */
-export class RenderingService implements CoreService<RenderingServiceSetup> {
+export class RenderingService implements CoreService<InternalRenderingServiceSetup> {
+  private legacyInternals?: LegacyService['legacyInternals'];
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup({
     http,
     legacyPlugins,
-    plugins,
-  }: RenderingSetupDeps): Promise<RenderingServiceSetup> {
-    async function getUiConfig(pluginId: string) {
-      const browserConfig = plugins.uiPlugins.browserConfigs.get(pluginId);
-
-      return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
-    }
-
+    uiPlugins,
+  }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     return {
       render: async (
         request,
         uiSettings,
-        {
-          app = { getId: () => 'core' },
-          includeUserSettings = true,
-          vars = {},
-        }: IRenderOptions = {}
+        { app = { getId: () => 'core' }, includeUserSettings = true, vars }: IRenderOptions = {}
       ) => {
+        if (!this.legacyInternals) {
+          throw new Error('Cannot render before "start"');
+        }
         const { env } = this.coreContext;
         const basePath = http.basePath.get(request);
+        const serverBasePath = http.basePath.serverBasePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
@@ -79,18 +76,19 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
             buildNumber: env.packageInfo.buildNum,
             branch: env.packageInfo.branch,
             basePath,
+            serverBasePath,
             env,
             legacyMode: appId !== 'core',
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            vars,
+            vars: vars ?? (await this.legacyInternals!.getVars('core', request)),
             uiPlugins: await Promise.all(
-              [...plugins.uiPlugins.public].map(async ([id, plugin]) => ({
+              [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
                 plugin,
-                config: await getUiConfig(id),
+                config: await this.getUiConfig(uiPlugins, id),
               }))
             ),
             legacyMetadata: {
@@ -114,7 +112,15 @@ export class RenderingService implements CoreService<RenderingServiceSetup> {
     };
   }
 
-  public async start() {}
+  public async start({ legacy }: { legacy: LegacyService }) {
+    this.legacyInternals = legacy.legacyInternals;
+  }
 
   public async stop() {}
+
+  private async getUiConfig(uiPlugins: UiPlugins, pluginId: string) {
+    const browserConfig = uiPlugins.browserConfigs.get(pluginId);
+
+    return ((await browserConfig?.pipe(take(1)).toPromise()) ?? {}) as Record<string, any>;
+  }
 }

@@ -1,0 +1,4 @@
+{
+  "rule_id": "machine-learning",
+  "anomaly_threshold": 10
+}

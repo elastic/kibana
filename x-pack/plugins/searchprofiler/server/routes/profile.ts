@@ -12,7 +12,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       path: '/api/searchprofiler/profile',
       validate: {
         body: schema.object({
-          query: schema.object({}, { allowUnknowns: true }),
+          query: schema.object({}, { unknowns: 'allow' }),
           index: schema.string(),
         }),
       },

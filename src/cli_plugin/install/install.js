@@ -46,7 +46,7 @@ export default async function install(settings, logger) {
 
     await extract(settings, logger);
 
-    del.sync(settings.tempArchiveFile);
+    del.sync(settings.tempArchiveFile, { force: true });
 
     existingInstall(settings, logger);
 

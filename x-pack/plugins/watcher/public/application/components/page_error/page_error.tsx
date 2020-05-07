@@ -13,14 +13,14 @@ export function getPageErrorCode(errorOrErrors: any) {
   const errors = Array.isArray(errorOrErrors) ? errorOrErrors : [errorOrErrors];
   const firstError = errors.find((error: any) => {
     if (error) {
-      return [403, 404].includes(error.status);
+      return [403, 404].includes(error.statusCode);
     }
 
     return false;
   });
 
   if (firstError) {
-    return firstError.status;
+    return firstError.statusCode;
   }
 }
 

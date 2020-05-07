@@ -49,7 +49,6 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should not get the field referer', async function() {
-      //let  fieldNames;
       const fieldNames = await PageObjects.discover.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter(

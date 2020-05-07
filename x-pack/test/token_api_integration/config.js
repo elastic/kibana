@@ -10,6 +10,7 @@ export default async function({ readConfigFile }) {
   return {
     testFiles: [require.resolve('./auth')],
     servers: xPackAPITestsConfig.get('servers'),
+    security: { disableTestUser: true },
     services: {
       legacyEs: xPackAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),

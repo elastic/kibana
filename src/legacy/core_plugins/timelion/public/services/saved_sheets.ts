@@ -17,26 +17,18 @@
  * under the License.
  */
 import { npStart } from 'ui/new_platform';
-import { SavedObjectLoader } from 'ui/saved_objects';
-// @ts-ignore
-import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { SavedObjectLoader } from '../../../../../plugins/saved_objects/public';
 import { createSavedSheetClass } from './_saved_sheet';
 
 const module = uiModules.get('app/sheet');
-
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedSheets',
-  title: 'sheets',
-});
 
 const savedObjectsClient = npStart.core.savedObjects.client;
 const services = {
   savedObjectsClient,
   indexPatterns: npStart.plugins.data.indexPatterns,
+  search: npStart.plugins.data.search,
   chrome: npStart.core.chrome,
   overlays: npStart.core.overlays,
 };

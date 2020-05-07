@@ -58,7 +58,6 @@ export default function({ getService }) {
         'max_ngram_diff',
         'translog',
         'auto_expand_replicas',
-        'mapper',
         'requests',
         'data_path',
         'highlight',

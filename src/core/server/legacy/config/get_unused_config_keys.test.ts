@@ -200,6 +200,24 @@ describe('getUnusedConfigKeys', () => {
     ).toEqual(['foo.dolly']);
   });
 
+  it('handles array values', async () => {
+    expect(
+      await getUnusedConfigKeys({
+        coreHandledConfigPaths: ['core', 'array'],
+        pluginSpecs: [],
+        disabledPluginSpecs: [],
+        settings: {
+          core: {
+            prop: 'value',
+            array: [1, 2, 3],
+          },
+          array: ['some', 'values'],
+        },
+        legacyConfig: getConfig({}),
+      })
+    ).toEqual([]);
+  });
+
   describe('using deprecation', () => {
     it('should use the plugin deprecations provider', async () => {
       expect(

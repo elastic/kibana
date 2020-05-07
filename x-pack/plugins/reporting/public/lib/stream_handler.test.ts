@@ -5,9 +5,9 @@
  */
 
 import sinon, { stub } from 'sinon';
-import { HttpSetup, NotificationsStart } from '../../../../../src/core/public';
-import { SourceJob, JobSummary, HttpService } from '../../index.d';
-import { JobQueue } from './job_queue';
+import { NotificationsStart } from 'src/core/public';
+import { SourceJob, JobSummary } from '../../index.d';
+import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
 Object.defineProperty(window, 'sessionStorage', {
@@ -44,20 +44,16 @@ const mockJobsFound = [
   },
 ];
 
-const jobQueueClientMock: JobQueue = {
-  findForJobIds: async (http: HttpService, jobIds: string[]) => {
+const jobQueueClientMock: ReportingAPIClient = {
+  findForJobIds: async (jobIds: string[]) => {
     return mockJobsFound as SourceJob[];
   },
-  getContent: () => {
-    return Promise.resolve('this is the completed report data');
+  getContent: (): Promise<any> => {
+    return Promise.resolve({ content: 'this is the completed report data' });
   },
-};
-
-const httpMock: HttpService = ({
-  basePath: {
-    prepend: stub(),
-  },
-} as unknown) as HttpSetup;
+  getManagementLink: () => '/#management',
+  getDownloadLink: () => '/reporting/download/job-123',
+} as any;
 
 const mockShowDanger = stub();
 const mockShowSuccess = stub();
@@ -76,17 +72,13 @@ describe('stream handler', () => {
   });
 
   it('constructs', () => {
-    const sh = new ReportingNotifierStreamHandler(httpMock, notificationsMock, jobQueueClientMock);
+    const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
     expect(sh).not.toBe(null);
   });
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([]);
       findJobs.subscribe(data => {
         expect(data).toEqual({ completed: [], failed: [] });
@@ -95,11 +87,7 @@ describe('stream handler', () => {
     });
 
     it('finds changed status jobs', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       const findJobs = sh.findChangedStatusJobs([
         'job-source-mock1',
         'job-source-mock2',
@@ -115,11 +103,7 @@ describe('stream handler', () => {
 
   describe('showNotifications', () => {
     it('show success', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
@@ -140,11 +124,7 @@ describe('stream handler', () => {
     });
 
     it('show max length warning', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
@@ -166,11 +146,7 @@ describe('stream handler', () => {
     });
 
     it('show csv formulas warning', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {
@@ -192,11 +168,7 @@ describe('stream handler', () => {
     });
 
     it('show failed job toast', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [],
         failed: [
@@ -217,11 +189,7 @@ describe('stream handler', () => {
     });
 
     it('show multiple toast', done => {
-      const sh = new ReportingNotifierStreamHandler(
-        httpMock,
-        notificationsMock,
-        jobQueueClientMock
-      );
+      const sh = new ReportingNotifierStreamHandler(notificationsMock, jobQueueClientMock);
       sh.showNotifications({
         completed: [
           {

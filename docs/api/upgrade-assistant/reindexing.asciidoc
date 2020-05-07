@@ -4,14 +4,14 @@
 <titleabbrev>Start or resume reindex</titleabbrev>
 ++++
 
-Start a new reindex or resume a paused reindex.
+experimental[] Start a new reindex or resume a paused reindex.
 
-experimental["The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are experimental."]
+Start a new reindex or resume a paused reindex.
 
 [[start-resume-reindex-request]]
 ==== Request
 
-`POST /api/upgrade_assistant/reindex/myIndex`
+`POST <kibana host>:<port>/api/upgrade_assistant/reindex/myIndex`
 
 [[start-resume-reindex-codes]]
 ==== Response code
@@ -24,7 +24,7 @@ experimental["The underlying Upgrade Assistant concepts are stable, but the APIs
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "indexName": ".ml-state",
@@ -37,9 +37,9 @@ The API returns the following:
 }
 --------------------------------------------------
 
-<1> Name of the new index that is being created.
-<2> Current status of the reindex. For details, see <<status-code,Status codes>>.
-<3> Last successfully completed step of the reindex. For details, see <<step-code,Step codes>> table.
-<4> Task ID of the reindex task in Elasticsearch. Only present if reindexing has started.
-<5> Percentage of how far the reindexing task in Elasticsearch has progressed, in decimal from from 0 to 1.
-<6> Error that caused the reindex to fail, if it failed.
+<1> The name of the new index.
+<2> The reindex status. For more information, refer to <<status-code,Status codes>>.
+<3> The last successfully completed step of the reindex. For more information, refer to <<step-code,Step codes>>.
+<4> The task ID of the reindex task in {es}. Appears when the reindexing starts.
+<5> The progress of the reindexing task in {es}. Appears in decimal form, from 0 to 1.
+<6> The error that caused the reindex to fail, if it failed.

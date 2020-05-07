@@ -8,7 +8,6 @@ You can also view related application traces or uptime information where availab
 
 [role="screenshot"]
 image::logs/images/logs-console.png[Logs Console in Kibana]
-// ++ Update this
 
 [float]
 [[logs-search]]
@@ -32,16 +31,14 @@ If so, <<xpack-logs-configuring, configure the logs source data>> to change the 
 
 Click image:images/time-filter-calendar.png[time filter calendar], then choose the time range for the logs.
 
-Log entries for the specified time appear in the middle of the page, with the earlier entries above and the later entries below.
-
-To quickly jump to a nearby point in time, click the minimap timeline to the right.
+Log entries for the specified time appear in the middle of the page. To quickly jump to a nearby point in time, click the minimap timeline to the right.
 // ++ what's this thing called? It's minimap in the UI. Would timeline be better?
 
 [float]
 [[logs-customize]]
 === Customize your view
 Click *Customize* to customize the view.
-Here, you can set the scale to use for the minimap timeline, choose whether to wrap long lines, and choose your preferred text size.
+Here, you can choose whether to wrap long lines, and choose your preferred text size.
 
 [float]
 === Configuring the data to use for your logs
@@ -72,11 +69,18 @@ To highlight a word or phrase in the logs stream, click *Highlights* and enter y
 [float]
 [[logs-event-inspector]]
 === Inspect a log event
-To inspect a log event, hover over it, then click the *View details* icon image:logs/images/logs-view-event.png[View event icon] beside the event.
-This opens the *Log event document details* fly-out that shows the fields associated with the log event.
+To inspect a log event, hover over it, then click the *View actions for line* icon image:logs/images/logs-action-menu.png[View actions for line icon]. On the menu that opens, select *View details*. This opens the *Log event document details* fly-out that shows the fields associated with the log event.
 
 To quickly filter the logs stream by one of the field values, in the log event details, click the *View event with filter* icon image:logs/images/logs-view-event-with-filter.png[View event icon] beside the field.
 This automatically adds a search filter to the logs stream to filter the entries by this field and value.
+
+[float]
+[[log-view-in-context]]
+=== View log line in context
+To view a certain line in its context (for example, with other log lines from the same file, or the same cloud container), hover over it, then click the *View actions for line* image:logs/images/logs-action-menu.png[View actions for line icon]. On the menu that opens, select *View in context*. This opens the *View log in context* modal, that shows the log line in its context.
+
+[role="screenshot"]
+image::logs/images/logs-view-in-context.png[View a log line in context]
 
 [float]
 [[view-log-anomalies]]

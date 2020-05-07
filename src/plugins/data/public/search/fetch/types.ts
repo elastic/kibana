@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { ISearchStart } from 'src/plugins/data/public';
 import { IUiSettingsClient } from '../../../../../core/public';
+import { ISearchStartLegacy } from '../types';
+
+export type SearchRequest = any;
+export type SearchResponse = any;
 
 export interface FetchOptions {
   abortSignal?: AbortSignal;
@@ -26,7 +29,7 @@ export interface FetchOptions {
 }
 
 export interface FetchHandlers {
-  searchService: ISearchStart;
+  legacySearchService: ISearchStartLegacy;
   config: IUiSettingsClient;
   esShardTimeout: number;
 }

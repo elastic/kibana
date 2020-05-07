@@ -17,7 +17,24 @@
  * under the License.
  */
 
+import * as Rx from 'rxjs';
+
 import { mockCluster } from './cluster_manager.test.mocks';
+
+jest.mock('./run_kbn_optimizer', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires,no-shadow
+  const Rx = require('rxjs');
+
+  return {
+    runKbnOptimizer: () =>
+      new Rx.BehaviorSubject({
+        type: 'compiler success',
+        durSec: 0,
+        bundles: [],
+      }),
+  };
+});
+
 jest.mock('readline', () => ({
   createInterface: jest.fn(() => ({
     on: jest.fn(),
@@ -25,6 +42,13 @@ jest.mock('readline', () => ({
     setPrompt: jest.fn(),
   })),
 }));
+
+const mockConfig: any = {
+  get: (key: string) => {
+    expect(key).toBe('optimize.enabled');
+    return false;
+  },
+};
 
 import { sample } from 'lodash';
 
@@ -51,7 +75,7 @@ describe('CLI cluster manager', () => {
   });
 
   test('has two workers', () => {
-    const manager = new ClusterManager({}, {} as any);
+    const manager = new ClusterManager({}, mockConfig);
 
     expect(manager.workers).toHaveLength(2);
     for (const worker of manager.workers) expect(worker).toBeInstanceOf(Worker);
@@ -61,7 +85,7 @@ describe('CLI cluster manager', () => {
   });
 
   test('delivers broadcast messages to other workers', () => {
-    const manager = new ClusterManager({}, {} as any);
+    const manager = new ClusterManager({}, mockConfig);
 
     for (const worker of manager.workers) {
       Worker.prototype.start.call(worker); // bypass the debounced start method
@@ -86,92 +110,59 @@ describe('CLI cluster manager', () => {
     test('correctly configures `BasePathProxy`.', async () => {
       const basePathProxyMock = { start: jest.fn() };
 
-      new ClusterManager({}, {} as any, basePathProxyMock as any);
+      new ClusterManager({}, mockConfig, basePathProxyMock as any);
 
       expect(basePathProxyMock.start).toHaveBeenCalledWith({
         shouldRedirectFromOldBasePath: expect.any(Function),
-        blockUntil: expect.any(Function),
+        delayUntil: expect.any(Function),
       });
     });
 
-    describe('proxy is configured with the correct `shouldRedirectFromOldBasePath` and `blockUntil` functions.', () => {
+    describe('basePathProxy config', () => {
       let clusterManager: ClusterManager;
       let shouldRedirectFromOldBasePath: (path: string) => boolean;
-      let blockUntil: () => Promise<any>;
+      let delayUntil: () => Rx.Observable<undefined>;
+
       beforeEach(async () => {
         const basePathProxyMock = { start: jest.fn() };
-
-        clusterManager = new ClusterManager({}, {} as any, basePathProxyMock as any);
-
-        jest.spyOn(clusterManager.server, 'on');
-        jest.spyOn(clusterManager.server, 'off');
-
-        [[{ blockUntil, shouldRedirectFromOldBasePath }]] = basePathProxyMock.start.mock.calls;
+        clusterManager = new ClusterManager({}, mockConfig, basePathProxyMock as any);
+        [[{ delayUntil, shouldRedirectFromOldBasePath }]] = basePathProxyMock.start.mock.calls;
       });
 
-      test('`shouldRedirectFromOldBasePath()` returns `false` for unknown paths.', () => {
-        expect(shouldRedirectFromOldBasePath('')).toBe(false);
-        expect(shouldRedirectFromOldBasePath('some-path/')).toBe(false);
-        expect(shouldRedirectFromOldBasePath('some-other-path')).toBe(false);
+      describe('shouldRedirectFromOldBasePath()', () => {
+        test('returns `false` for unknown paths.', () => {
+          expect(shouldRedirectFromOldBasePath('')).toBe(false);
+          expect(shouldRedirectFromOldBasePath('some-path/')).toBe(false);
+          expect(shouldRedirectFromOldBasePath('some-other-path')).toBe(false);
+        });
+
+        test('returns `true` for `app` and other known paths.', () => {
+          expect(shouldRedirectFromOldBasePath('app/')).toBe(true);
+          expect(shouldRedirectFromOldBasePath('login')).toBe(true);
+          expect(shouldRedirectFromOldBasePath('logout')).toBe(true);
+          expect(shouldRedirectFromOldBasePath('status')).toBe(true);
+        });
       });
 
-      test('`shouldRedirectFromOldBasePath()` returns `true` for `app` and other known paths.', () => {
-        expect(shouldRedirectFromOldBasePath('app/')).toBe(true);
-        expect(shouldRedirectFromOldBasePath('login')).toBe(true);
-        expect(shouldRedirectFromOldBasePath('logout')).toBe(true);
-        expect(shouldRedirectFromOldBasePath('status')).toBe(true);
-      });
+      describe('delayUntil()', () => {
+        test('returns an observable which emits when the server and kbnOptimizer are ready and completes', async () => {
+          clusterManager.serverReady$.next(false);
+          clusterManager.optimizerReady$.next(false);
+          clusterManager.kbnOptimizerReady$.next(false);
 
-      test('`blockUntil()` resolves immediately if worker has already crashed.', async () => {
-        clusterManager.server.crashed = true;
+          const events: Array<string | Error> = [];
+          delayUntil().subscribe(
+            () => events.push('next'),
+            error => events.push(error),
+            () => events.push('complete')
+          );
 
-        await expect(blockUntil()).resolves.not.toBeDefined();
-        expect(clusterManager.server.on).not.toHaveBeenCalled();
-        expect(clusterManager.server.off).not.toHaveBeenCalled();
-      });
+          clusterManager.serverReady$.next(true);
+          expect(events).toEqual([]);
 
-      test('`blockUntil()` resolves immediately if worker is already listening.', async () => {
-        clusterManager.server.listening = true;
-
-        await expect(blockUntil()).resolves.not.toBeDefined();
-        expect(clusterManager.server.on).not.toHaveBeenCalled();
-        expect(clusterManager.server.off).not.toHaveBeenCalled();
-      });
-
-      test('`blockUntil()` resolves when worker crashes.', async () => {
-        const blockUntilPromise = blockUntil();
-
-        expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.on).toHaveBeenCalledWith('crashed', expect.any(Function));
-
-        const [, [eventName, onCrashed]] = (clusterManager.server.on as jest.Mock).mock.calls;
-        // Check event name to make sure we call the right callback,
-        // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
-        expect(eventName).toBe('crashed');
-        expect(clusterManager.server.off).not.toHaveBeenCalled();
-
-        onCrashed();
-        await expect(blockUntilPromise).resolves.not.toBeDefined();
-
-        expect(clusterManager.server.off).toHaveBeenCalledTimes(2);
-      });
-
-      test('`blockUntil()` resolves when worker starts listening.', async () => {
-        const blockUntilPromise = blockUntil();
-
-        expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.on).toHaveBeenCalledWith('listening', expect.any(Function));
-
-        const [[eventName, onListening]] = (clusterManager.server.on as jest.Mock).mock.calls;
-        // Check event name to make sure we call the right callback,
-        // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
-        expect(eventName).toBe('listening');
-        expect(clusterManager.server.off).not.toHaveBeenCalled();
-
-        onListening();
-        await expect(blockUntilPromise).resolves.not.toBeDefined();
-
-        expect(clusterManager.server.off).toHaveBeenCalledTimes(2);
+          clusterManager.kbnOptimizerReady$.next(true);
+          expect(events).toEqual(['next', 'complete']);
+        });
       });
     });
   });

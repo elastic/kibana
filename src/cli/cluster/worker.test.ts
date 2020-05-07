@@ -20,8 +20,8 @@
 import { mockCluster } from './cluster_manager.test.mocks';
 
 import { Worker, ClusterWorker } from './worker';
-// @ts-ignore
-import Log from '../log';
+
+import { Log } from './log';
 
 const workersToShutdown: Worker[] = [];
 

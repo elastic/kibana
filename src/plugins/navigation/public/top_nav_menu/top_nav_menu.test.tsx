@@ -22,13 +22,6 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-const mockTimeHistory = {
-  add: () => {},
-  get: () => {
-    return [];
-  },
-};
-
 const dataShim = {
   ui: {
     SearchBar: () => <div className="searchBar" />,
@@ -76,15 +69,23 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = shallowWithIntl(
-      <TopNavMenu
-        appName={'test'}
-        showSearchBar={true}
-        timeHistory={mockTimeHistory}
-        data={dataShim as any}
-      />
+      <TopNavMenu appName={'test'} showSearchBar={true} data={dataShim as any} />
     );
 
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
     expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
+  });
+
+  it('Should render with a class name', () => {
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showSearchBar={true}
+        data={dataShim as any}
+        className={'myCoolClass'}
+      />
+    );
+    expect(component.find('.kbnTopNavMenu').length).toBe(1);
+    expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 });

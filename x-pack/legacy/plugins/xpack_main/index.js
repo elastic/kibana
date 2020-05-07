@@ -11,10 +11,7 @@ import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
 import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
-import { has } from 'lodash';
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
-import { registerMonitoringCollection } from './server/telemetry_collection';
 
 export const xpackMain = kibana => {
   return new kibana.Plugin({
@@ -26,11 +23,6 @@ export const xpackMain = kibana => {
     config(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        telemetry: Joi.object({
-          config: Joi.string().default(),
-          enabled: Joi.boolean().default(),
-          url: Joi.string().default(),
-        }).default(), // deprecated
       }).default();
     },
 
@@ -71,7 +63,6 @@ export const xpackMain = kibana => {
       }
 
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
-      registerMonitoringCollection();
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),
@@ -81,22 +72,6 @@ export const xpackMain = kibana => {
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
-    },
-    deprecations: () => {
-      function movedToTelemetry(configPath) {
-        return (settings, log) => {
-          if (has(settings, configPath)) {
-            log(
-              `Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`
-            );
-          }
-        };
-      }
-      return [
-        movedToTelemetry('telemetry.config'),
-        movedToTelemetry('telemetry.url'),
-        movedToTelemetry('telemetry.enabled'),
-      ];
     },
   });
 };

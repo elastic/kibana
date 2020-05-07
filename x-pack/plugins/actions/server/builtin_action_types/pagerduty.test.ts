@@ -11,20 +11,17 @@ jest.mock('./lib/post_pagerduty', () => ({
 import { getActionType } from './pagerduty';
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
-import { configUtilsMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
 const ACTION_TYPE_ID = '.pagerduty';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -60,7 +57,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: url => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
@@ -76,7 +73,7 @@ describe('validateConfig()', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
-        ...configUtilsMock,
+        ...actionsConfigMock.create(),
         ensureWhitelistedUri: _ => {
           throw new Error(`target url is not whitelisted`);
         },
@@ -137,10 +134,29 @@ describe('validateParams()', () => {
       validateParams(actionType, { eventAction: 'ackynollage' });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [eventAction]: types that failed validation:
-- [eventAction.0]: expected value to equal [trigger] but got [ackynollage]
-- [eventAction.1]: expected value to equal [resolve] but got [ackynollage]
-- [eventAction.2]: expected value to equal [acknowledge] but got [ackynollage]"
+- [eventAction.0]: expected value to equal [trigger]
+- [eventAction.1]: expected value to equal [resolve]
+- [eventAction.2]: expected value to equal [acknowledge]"
 `);
+  });
+
+  test('should validate and throw error when timestamp has spaces', () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const timestamp = `  ${randoDate}`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
+
+  test('should validate and throw error when timestamp is invalid', () => {
+    const timestamp = `1963-09-55 90:23:45`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 });
 

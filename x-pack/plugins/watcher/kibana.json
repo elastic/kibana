@@ -1,11 +1,12 @@
 {
   "id": "watcher",
+  "configPath": ["xpack", "watcher"],
   "version": "kibana",
   "requiredPlugins": [
     "home",
     "licensing",
     "management",
-    "eui_utils",
+    "charts",
     "data"
   ],
   "server": true,

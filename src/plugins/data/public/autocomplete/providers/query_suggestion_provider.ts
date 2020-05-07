@@ -19,13 +19,20 @@
 
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
-export type QuerySuggestionType = 'field' | 'value' | 'operator' | 'conjunction' | 'recentSearch';
+export enum QuerySuggestionTypes {
+  Field = 'field',
+  Value = 'value',
+  Operator = 'operator',
+  Conjunction = 'conjunction',
+  RecentSearch = 'recentSearch',
+}
 
-export type QuerySuggestionsGetFn = (
-  args: QuerySuggestionsGetFnArgs
+export type QuerySuggestionGetFn = (
+  args: QuerySuggestionGetFnArgs
 ) => Promise<QuerySuggestion[]> | undefined;
 
-interface QuerySuggestionsGetFnArgs {
+/** @public **/
+export interface QuerySuggestionGetFnArgs {
   language: string;
   indexPatterns: IIndexPattern[];
   query: string;
@@ -35,22 +42,21 @@ interface QuerySuggestionsGetFnArgs {
   boolFilter?: any;
 }
 
-interface BasicQuerySuggestion {
-  type: QuerySuggestionType;
-  description?: string;
+/** @public **/
+export interface QuerySuggestionBasic {
+  type: QuerySuggestionTypes;
+  description?: string | JSX.Element;
   end: number;
   start: number;
   text: string;
   cursorIndex?: number;
 }
 
-interface FieldQuerySuggestion extends BasicQuerySuggestion {
-  type: 'field';
+/** @public **/
+export interface QuerySuggestionField extends QuerySuggestionBasic {
+  type: QuerySuggestionTypes.Field;
   field: IFieldType;
 }
 
-// A union type allows us to do easy type guards in the code. For example, if I want to ensure I'm
-// working with a FieldAutocompleteSuggestion, I can just do `if ('field' in suggestion)` and the
-// TypeScript compiler will narrow the type to the parts of the union that have a field prop.
 /** @public **/
-export type QuerySuggestion = BasicQuerySuggestion | FieldQuerySuggestion;
+export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;

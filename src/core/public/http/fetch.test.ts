@@ -21,6 +21,7 @@
 import fetchMock from 'fetch-mock/es5/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { first } from 'rxjs/operators';
 
 import { Fetch } from './fetch';
 import { BasePath } from './base_path';
@@ -30,13 +31,89 @@ function delay<T>(duration: number) {
   return new Promise<T>(r => setTimeout(r, duration));
 }
 
+const BASE_PATH = 'http://localhost/myBase';
+
 describe('Fetch', () => {
   const fetchInstance = new Fetch({
-    basePath: new BasePath('http://localhost/myBase'),
+    basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
   });
   afterEach(() => {
     fetchMock.restore();
+    fetchInstance.removeAllInterceptors();
+  });
+
+  describe('getRequestCount$', () => {
+    const getCurrentRequestCount = () =>
+      fetchInstance
+        .getRequestCount$()
+        .pipe(first())
+        .toPromise();
+
+    it('should increase and decrease when request receives success response', async () => {
+      fetchMock.get('*', 200);
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      await expect(fetchResponse).resolves.not.toThrow();
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should increase and decrease when request receives error response', async () => {
+      fetchMock.get('*', 500);
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      await expect(fetchResponse).rejects.toThrow();
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should increase and decrease when request fails', async () => {
+      fetchMock.get('*', Promise.reject('Network!'));
+
+      const fetchResponse = fetchInstance.fetch('/path');
+      expect(await getCurrentRequestCount()).toEqual(1);
+
+      await expect(fetchResponse).rejects.toThrow();
+      expect(await getCurrentRequestCount()).toEqual(0);
+    });
+
+    it('should change for multiple requests', async () => {
+      fetchMock.get(`${BASE_PATH}/success`, 200);
+      fetchMock.get(`${BASE_PATH}/fail`, 400);
+      fetchMock.get(`${BASE_PATH}/network-fail`, Promise.reject('Network!'));
+
+      const requestCounts: number[] = [];
+      const subscription = fetchInstance
+        .getRequestCount$()
+        .subscribe(count => requestCounts.push(count));
+
+      const success1 = fetchInstance.fetch('/success');
+      const success2 = fetchInstance.fetch('/success');
+      const failure1 = fetchInstance.fetch('/fail');
+      const failure2 = fetchInstance.fetch('/fail');
+      const networkFailure1 = fetchInstance.fetch('/network-fail');
+      const success3 = fetchInstance.fetch('/success');
+      const failure3 = fetchInstance.fetch('/fail');
+      const networkFailure2 = fetchInstance.fetch('/network-fail');
+
+      const swallowError = (p: Promise<any>) => p.catch(() => {});
+      await Promise.all([
+        success1,
+        success2,
+        success3,
+        swallowError(failure1),
+        swallowError(failure2),
+        swallowError(failure3),
+        swallowError(networkFailure1),
+        swallowError(networkFailure2),
+      ]);
+
+      expect(requestCounts).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0]);
+      subscription.unsubscribe();
+    });
   });
 
   describe('http requests', () => {
@@ -287,6 +364,42 @@ describe('Fetch', () => {
       });
     });
 
+    it('preserves the name of the original error', async () => {
+      expect.assertions(1);
+
+      const abortError = new DOMException('The operation was aborted.', 'AbortError');
+
+      fetchMock.get('*', Promise.reject(abortError));
+
+      await fetchInstance.fetch('/my/path').catch(e => {
+        expect(e.name).toEqual('AbortError');
+      });
+    });
+
+    it('exposes the request to the interceptors in case of aborted request', async () => {
+      const responseErrorSpy = jest.fn();
+      const abortError = new DOMException('The operation was aborted.', 'AbortError');
+
+      fetchMock.get('*', Promise.reject(abortError));
+
+      fetchInstance.intercept({
+        responseError: responseErrorSpy,
+      });
+
+      await expect(fetchInstance.fetch('/my/path')).rejects.toThrow();
+
+      expect(responseErrorSpy).toHaveBeenCalledTimes(1);
+      const interceptedResponse = responseErrorSpy.mock.calls[0][0];
+
+      expect(interceptedResponse.request).toEqual(
+        expect.objectContaining({
+          method: 'GET',
+          url: 'http://localhost/myBase/my/path',
+        })
+      );
+      expect(interceptedResponse.error.name).toEqual('AbortError');
+    });
+
     it('should support get() helper', async () => {
       fetchMock.get('*', {});
       await fetchInstance.get('/my/path', { method: 'POST' });
@@ -366,11 +479,6 @@ describe('Fetch', () => {
   describe('interception', () => {
     beforeEach(async () => {
       fetchMock.get('*', { foo: 'bar' });
-    });
-
-    afterEach(() => {
-      fetchMock.restore();
-      fetchInstance.removeAllInterceptors();
     });
 
     it('should make request and receive response', async () => {

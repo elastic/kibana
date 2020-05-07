@@ -18,20 +18,23 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_saved_search', function() {
-    this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
+      await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
-        source: 'farequote_filter',
+        source: 'ft_farequote_filter',
         groupByEntries: [
           {
             identifier: 'terms(airline)',
@@ -48,7 +51,7 @@ export default function({ getService }: FtrProviderContext) {
         transformDescription:
           'farequote batch transform with groups terms(airline) and aggregation avg(responsetime.avg) with saved search filter',
         get destinationIndex(): string {
-          return `dest_${this.transformId}`;
+          return `user-${this.transformId}`;
         },
         expected: {
           pivotPreview: {
@@ -60,9 +63,9 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourceIndex: 'farequote',
-          sourcePreview: {
-            column: 3,
+          sourceIndex: 'ft_farequote',
+          indexPreview: {
+            column: 2,
             values: ['ASA'],
           },
         },
@@ -73,6 +76,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -96,14 +100,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the filtered source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewColumnValues(
-            testData.expected.sourcePreview.column,
-            testData.expected.sourcePreview.values
+        it('shows the filtered index preview', async () => {
+          await transform.wizard.assertIndexPreviewColumnValues(
+            testData.expected.indexPreview.column,
+            testData.expected.indexPreview.values
           );
         });
 
@@ -194,14 +198,17 @@ export default function({ getService }: FtrProviderContext) {
 
         it('displays the create and start button', async () => {
           await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCreateAndStartButtonEnabled(true);
         });
 
         it('displays the create button', async () => {
           await transform.wizard.assertCreateButtonExists();
+          await transform.wizard.assertCreateButtonEnabled(true);
         });
 
         it('displays the copy to clipboard button', async () => {
-          await transform.wizard.assertCreateAndStartButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonExists();
+          await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
         it('creates the transform', async () => {

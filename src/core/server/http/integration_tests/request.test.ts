@@ -45,6 +45,89 @@ afterEach(async () => {
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
+  describe('auth', () => {
+    describe('isAuthenticated', () => {
+      it('returns false if no auth interceptor was registered', async () => {
+        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            isAuthenticated: false,
+          });
+      });
+      it('returns false if not authenticated on a route with authRequired: "optional"', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        registerAuth((req, res, toolkit) => toolkit.notHandled());
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            isAuthenticated: false,
+          });
+      });
+      it('returns false if redirected on a route with authRequired: "optional"', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        registerAuth((req, res, toolkit) => toolkit.redirected({ location: '/any' }));
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            isAuthenticated: false,
+          });
+      });
+      it('returns true if authenticated on a route with authRequired: "optional"', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            isAuthenticated: true,
+          });
+      });
+      it('returns true if authenticated', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const router = createRouter('/');
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener)
+          .get('/')
+          .expect(200, {
+            isAuthenticated: true,
+          });
+      });
+    });
+  });
   describe('events', () => {
     describe('aborted$', () => {
       it('emits once and completes when request aborted', async done => {

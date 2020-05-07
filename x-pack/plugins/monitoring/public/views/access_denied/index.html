@@ -1,0 +1,43 @@
+<div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem">
+  <div class="kuiInfoPanel kuiInfoPanel--error">
+    <div class="kuiInfoPanelHeader">
+      <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"></span>
+      <span
+        class="kuiInfoPanelHeader__title"
+        data-test-subj="accessDeniedTitle"
+        i18n-id="xpack.monitoring.accessDeniedTitle"
+        i18n-default-message="Access Denied"
+      ></span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div
+        class="kuiInfoPanelBody__message"
+        i18n-id="xpack.monitoring.accessDenied.notAuthorizedDescription"
+        i18n-default-message="You are not authorized to access Monitoring. To use Monitoring, you
+        need the privileges granted by both the `{kibanaAdmin}` and
+        `{monitoringUser}` roles."
+        i18n-values="{ kibanaAdmin: 'kibana_admin', monitoringUser: 'monitoring_user' }"
+      ></div>
+
+      <div
+        class="kuiInfoPanelBody__message"
+        i18n-id="xpack.monitoring.accessDenied.clusterNotConfiguredDescription"
+        i18n-default-message="If you are attempting to access a dedicated monitoring cluster, this
+        might be because you are logged in as a user that is not configured on
+        the monitoring cluster."
+      ></div>
+
+      <div class="kuiInfoPanelBody__message">
+        <div class="kuiButtonGroup">
+          <button
+            ng-click="accessDenied.goToKibana();"
+            class="kuiButton kuiButton--primary"
+            i18n-id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
+            i18n-default-message="Back to Kibana"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

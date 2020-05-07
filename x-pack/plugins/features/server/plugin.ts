@@ -11,11 +11,11 @@ import {
   RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
-import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
+import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { Feature, FeatureWithAllOrReadPrivileges } from '../common/feature';
+import { Feature, FeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';
@@ -24,10 +24,14 @@ import { defineRoutes } from './routes';
  * Describes public Features plugin contract returned at the `setup` stage.
  */
 export interface PluginSetupContract {
-  registerFeature(feature: FeatureWithAllOrReadPrivileges): void;
+  registerFeature(feature: FeatureConfig): void;
   getFeatures(): Feature[];
   getFeaturesUICapabilities(): UICapabilities;
   registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
+}
+
+export interface PluginStartContract {
+  getFeatures(): Feature[];
 }
 
 /**
@@ -45,6 +49,8 @@ export interface LegacyAPI {
 export class Plugin {
   private readonly logger: Logger;
 
+  private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
+
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
     if (!this.legacyAPI) {
@@ -59,20 +65,18 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup,
-    { timelion }: { timelion?: TimelionSetupContract }
+    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const featureRegistry = new FeatureRegistry();
-
     defineRoutes({
       router: core.http.createRouter(),
-      featureRegistry,
+      featureRegistry: this.featureRegistry,
       getLegacyAPI: this.getLegacyAPI,
     });
 
     return deepFreeze({
-      registerFeature: featureRegistry.register.bind(featureRegistry),
-      getFeatures: featureRegistry.getAll.bind(featureRegistry),
-      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(featureRegistry.getAll()),
+      registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
+      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+      getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
 
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
@@ -80,16 +84,19 @@ export class Plugin {
         // Register OSS features.
         for (const feature of buildOSSFeatures({
           savedObjectTypes: this.legacyAPI.savedObjectTypes,
-          includeTimelion: timelion !== undefined && timelion.uiEnabled,
+          includeTimelion: visTypeTimelion !== undefined && visTypeTimelion.uiEnabled,
         })) {
-          featureRegistry.register(feature);
+          this.featureRegistry.register(feature);
         }
       },
     });
   }
 
-  public start() {
+  public start(): RecursiveReadonly<PluginStartContract> {
     this.logger.debug('Starting plugin');
+    return deepFreeze({
+      getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
+    });
   }
 
   public stop() {

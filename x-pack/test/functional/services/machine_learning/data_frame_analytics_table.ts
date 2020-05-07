@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return new (class AnalyticsTable {
     public async parseAnalyticsTable() {
@@ -23,6 +24,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
         rows.push({
           id: $tr
             .findTestSubject('mlAnalyticsTableColumnId')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
+          description: $tr
+            .findTestSubject('mlAnalyticsTableColumnJobDescription')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -71,6 +77,10 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return await tableListContainer.findByClassName('euiFieldSearch');
     }
 
+    async assertJobViewButtonExists() {
+      await testSubjects.existOrFail('mlAnalyticsJobViewButton');
+    }
+
     async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
       const searchBarInput = await this.getAnalyticsSearchInput();
       const actualSearchValue = await searchBarInput.getAttribute('value');
@@ -78,6 +88,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
         expectedSearchValue,
         `Analytics search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
       );
+    }
+
+    public async openResultsView() {
+      await this.assertJobViewButtonExists();
+      await testSubjects.click('mlAnalyticsJobViewButton');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
     }
 
     public async filterWithSearchString(filter: string) {
@@ -92,6 +108,19 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       const rows = await this.parseAnalyticsTable();
       const analyticsRow = rows.filter(row => row.id === analyticsId)[0];
       expect(analyticsRow).to.eql(expectedRow);
+    }
+
+    public async openRowActions(analyticsId: string) {
+      await find.clickByCssSelector(
+        `[data-test-subj="mlAnalyticsTableRow row-${analyticsId}"] [data-test-subj=euiCollapsedItemActionsButton]`
+      );
+      await find.existsByCssSelector('.euiPanel', 20 * 1000);
+    }
+
+    public async cloneJob(analyticsId: string) {
+      await this.openRowActions(analyticsId);
+      await testSubjects.click(`mlAnalyticsJobCloneButton`);
+      await testSubjects.existOrFail('mlAnalyticsCreateJobFlyout');
     }
   })();
 }

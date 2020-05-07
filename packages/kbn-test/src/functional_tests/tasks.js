@@ -59,6 +59,19 @@ const makeSuccessMessage = options => {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+    const log = options.createLogger();
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+  }
+
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {

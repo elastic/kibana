@@ -30,10 +30,10 @@ describe('EnvironmentService', () => {
     });
   });
 
-  describe('start', () => {
+  describe('getEnvironment', () => {
     test('returns default values', () => {
       const service = new EnvironmentService();
-      expect(service.start().get()).toEqual({ ml: false, cloud: false, apmUi: false });
+      expect(service.getEnvironment()).toEqual({ ml: false, cloud: false, apmUi: false });
     });
 
     test('returns last state of update calls', () => {
@@ -41,7 +41,7 @@ describe('EnvironmentService', () => {
       const setup = service.setup();
       setup.update({ ml: true, cloud: true });
       setup.update({ ml: false, apmUi: true });
-      expect(service.start().get()).toEqual({ ml: false, cloud: true, apmUi: true });
+      expect(service.getEnvironment()).toEqual({ ml: false, cloud: true, apmUi: true });
     });
   });
 });

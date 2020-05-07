@@ -103,8 +103,15 @@ export class Tokens {
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate refresh token: ${err.message}`);
-        // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
-        invalidationError = err;
+
+        // When using already deleted refresh token, Elasticsearch responds with 404 and a body that
+        // shows that no tokens were invalidated.
+        if (getErrorStatusCode(err) === 404 && err.body?.invalidated_tokens === 0) {
+          invalidatedTokensCount = err.body.invalidated_tokens;
+        } else {
+          // We don't re-throw the error here to have a chance to invalidate access token if it's provided.
+          invalidationError = err;
+        }
       }
 
       if (invalidatedTokensCount === 0) {
@@ -128,7 +135,14 @@ export class Tokens {
         ).invalidated_tokens;
       } catch (err) {
         this.logger.debug(`Failed to invalidate access token: ${err.message}`);
-        invalidationError = err;
+
+        // When using already deleted access token, Elasticsearch responds with 404 and a body that
+        // shows that no tokens were invalidated.
+        if (getErrorStatusCode(err) === 404 && err.body?.invalidated_tokens === 0) {
+          invalidatedTokensCount = err.body.invalidated_tokens;
+        } else {
+          invalidationError = err;
+        }
       }
 
       if (invalidatedTokensCount === 0) {
@@ -150,21 +164,10 @@ export class Tokens {
   /**
    * Tries to determine whether specified error that occurred while trying to authenticate request
    * using access token happened because access token is expired. We treat all `401 Unauthorized`
-   * as such. Another use case that we should temporarily support (until elastic/elasticsearch#38866
-   * is fixed) is when token document has been removed and ES responds with `500 Internal Server Error`.
+   * as such.
    * @param err Error returned from Elasticsearch.
    */
   public static isAccessTokenExpiredError(err?: any) {
-    const errorStatusCode = getErrorStatusCode(err);
-    return (
-      errorStatusCode === 401 ||
-      (errorStatusCode === 500 &&
-        !!(
-          err &&
-          err.body &&
-          err.body.error &&
-          err.body.error.reason === 'token document is missing and must be present'
-        ))
-    );
+    return getErrorStatusCode(err) === 401;
   }
 }

@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { CONFIG_DASHBOARD_ONLY_MODE_ROLES } from './common';
 import { createDashboardModeRequestInterceptor } from './server';
 
@@ -33,6 +33,15 @@ export function dashboardMode(kibana) {
           ),
           value: ['kibana_dashboard_only_user'],
           category: ['dashboard'],
+          deprecation: {
+            message: i18n.translate(
+              'xpack.dashboardMode.uiSettings.dashboardsOnlyRolesDeprecation',
+              {
+                defaultMessage: 'This setting is deprecated and will be removed in Kibana 8.0.',
+              }
+            ),
+            docLinksKey: 'dashboardSettings',
+          },
         },
       },
       app: {
@@ -52,7 +61,7 @@ export function dashboardMode(kibana) {
             title: i18n.translate('xpack.dashboardMode.dashboardViewer.dashboardTitle', {
               defaultMessage: 'Dashboard',
             }),
-            order: -1001,
+            order: 1000,
             url: `${kbnBaseUrl}#/dashboards`,
             subUrlBase: `${kbnBaseUrl}#/dashboard`,
             description: i18n.translate(
@@ -62,7 +71,7 @@ export function dashboardMode(kibana) {
               }
             ),
             icon: 'plugins/kibana/dashboard/assets/dashboard.svg',
-            category: DEFAULT_APP_CATEGORIES.analyze,
+            category: DEFAULT_APP_CATEGORIES.kibana,
           },
         ],
       },

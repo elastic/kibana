@@ -85,14 +85,14 @@ elasticsearch.username: 'custom_kibana_system'
 [[reporting-roles-user-api]]
 ==== With the user API
 This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
-`reporting_user` role and the `kibana_user` role:
+`reporting_user` role and the `kibana_admin` role:
 
 [source, sh]
 ---------------------------------------------------------------
 POST /_security/user/reporter
 {
   "password" : "x-pack-test-password",
-  "roles" : ["kibana_user", "reporting_user"],
+  "roles" : ["kibana_admin", "reporting_user"],
   "full_name" : "Reporting User"
 }
 ---------------------------------------------------------------
@@ -106,11 +106,11 @@ roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
 {ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
-`kibana_user` and `reporting_user` roles:
+`kibana_admin` and `reporting_user` roles:
 
 [source,yaml]
 --------------------------------------------------------------------------------
-kibana_user:
+kibana_admin:
   - "cn=Bill Murray,dc=example,dc=com"
 reporting_user:
   - "cn=Bill Murray,dc=example,dc=com"

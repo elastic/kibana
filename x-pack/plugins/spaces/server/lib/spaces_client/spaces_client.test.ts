@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract as SecuritySetupContract } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 import { SpacesClient } from './spaces_client';
 import { ConfigType, ConfigSchema } from '../../config';
 import { GetSpacePurpose } from '../../../common/model/types';
@@ -224,17 +224,17 @@ describe('#getAll', () => {
     [
       {
         purpose: undefined,
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'any',
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.login,
       },
       {
         purpose: 'copySavedObjectsIntoSpace',
-        expectedPrivilege: (mockAuthorization: SecuritySetupContract['authz']) =>
+        expectedPrivilege: (mockAuthorization: SecurityPluginSetup['authz']) =>
           mockAuthorization.actions.ui.get('savedObjectsManagement', 'copyIntoSpace'),
       },
     ].forEach(scenario => {
@@ -250,14 +250,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: false,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { resource: savedObjects[0].id, privilege, authorized: false },
+              { resource: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const maxSpaces = 1234;
           const mockConfig = createMockConfig({
@@ -314,14 +310,10 @@ describe('#getAll', () => {
           mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
           mockCheckPrivilegesAtSpaces.mockReturnValue({
             username,
-            spacePrivileges: {
-              [savedObjects[0].id]: {
-                [privilege]: true,
-              },
-              [savedObjects[1].id]: {
-                [privilege]: false,
-              },
-            },
+            privileges: [
+              { resource: savedObjects[0].id, privilege, authorized: true },
+              { resource: savedObjects[1].id, privilege, authorized: false },
+            ],
           });
           const mockInternalRepository = {
             find: jest.fn().mockReturnValue({

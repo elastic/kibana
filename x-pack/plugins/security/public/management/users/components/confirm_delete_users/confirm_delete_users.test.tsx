@@ -15,7 +15,7 @@ describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         usersToDelete={['foo']}
         onCancel={jest.fn()}
@@ -28,7 +28,7 @@ describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a multiple users', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         usersToDelete={['foo', 'bar', 'baz']}
         onCancel={jest.fn()}
@@ -42,7 +42,7 @@ describe('ConfirmDeleteUsers', () => {
     const onCancel = jest.fn();
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
-        apiClient={userAPIClientMock.create()}
+        userAPIClient={userAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
         usersToDelete={['foo']}
         onCancel={onCancel}
@@ -63,7 +63,7 @@ describe('ConfirmDeleteUsers', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
         usersToDelete={['foo', 'bar']}
-        apiClient={apiClientMock}
+        userAPIClient={apiClientMock}
         notifications={coreMock.createStart().notifications}
         onCancel={onCancel}
       />
@@ -90,7 +90,7 @@ describe('ConfirmDeleteUsers', () => {
     const wrapper = mountWithIntl(
       <ConfirmDeleteUsers
         usersToDelete={['foo', 'bar']}
-        apiClient={apiClientMock}
+        userAPIClient={apiClientMock}
         notifications={coreMock.createStart().notifications}
         onCancel={onCancel}
       />

@@ -23,6 +23,8 @@ import { CoreContext } from '../core_context';
 
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { mockCoreContext } from '../core_context.mock';
+import { Env } from '../config';
+import { getEnvOptions } from '../config/__mocks__/env';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
@@ -31,26 +33,44 @@ jest.mock('./resolve_uuid', () => ({
 describe('UuidService', () => {
   let logger: ReturnType<typeof loggingServiceMock.create>;
   let coreContext: CoreContext;
-  let service: UuidService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggingServiceMock.create();
     coreContext = mockCoreContext.create({ logger });
-    service = new UuidService(coreContext);
   });
 
   describe('#setup()', () => {
-    it('calls manageInstanceUuid with core configuration service', async () => {
+    it('calls resolveInstanceUuid with core configuration service', async () => {
+      const service = new UuidService(coreContext);
       await service.setup();
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
-      expect(resolveInstanceUuid).toHaveBeenCalledWith(
-        coreContext.configService,
-        logger.get('uuid')
-      );
+      expect(resolveInstanceUuid).toHaveBeenCalledWith({
+        configService: coreContext.configService,
+        syncToFile: true,
+        logger: logger.get('uuid'),
+      });
     });
 
-    it('returns the uuid resolved from manageInstanceUuid', async () => {
+    describe('when cliArgs.optimize is true', () => {
+      it('calls resolveInstanceUuid with syncToFile: false', async () => {
+        coreContext = mockCoreContext.create({
+          logger,
+          env: Env.createDefault(getEnvOptions({ cliArgs: { optimize: true } })),
+        });
+        const service = new UuidService(coreContext);
+        await service.setup();
+        expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
+        expect(resolveInstanceUuid).toHaveBeenCalledWith({
+          configService: coreContext.configService,
+          syncToFile: false,
+          logger: logger.get('uuid'),
+        });
+      });
+    });
+
+    it('returns the uuid resolved from resolveInstanceUuid', async () => {
+      const service = new UuidService(coreContext);
       const setup = await service.setup();
       expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
     });

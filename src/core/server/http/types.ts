@@ -252,6 +252,11 @@ export interface HttpServiceSetup {
     contextName: T,
     provider: RequestHandlerContextProvider<T>
   ) => RequestHandlerContextContainer;
+
+  /**
+   * Provides common {@link HttpServerInfo | information} about the running http server.
+   */
+  getServerInfo: () => HttpServerInfo;
 }
 
 /** @internal */
@@ -260,6 +265,7 @@ export interface InternalHttpServiceSetup
   auth: HttpServerSetup['auth'];
   server: HttpServerSetup['server'];
   createRouter: (path: string, plugin?: PluginOpaqueId) => IRouter;
+  registerStaticDir: (path: string, dirPath: string) => void;
   getAuthHeaders: GetAuthHeaders;
   registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
     pluginOpaqueId: PluginOpaqueId,
@@ -272,4 +278,16 @@ export interface InternalHttpServiceSetup
 export interface HttpServiceStart {
   /** Indicates if http server is listening on a given port */
   isListening: (port: number) => boolean;
+}
+
+/** @public */
+export interface HttpServerInfo {
+  /** The name of the Kibana server */
+  name: string;
+  /** The hostname of the server */
+  host: string;
+  /** The port the server is listening on */
+  port: number;
+  /** The protocol used by the server */
+  protocol: 'http' | 'https' | 'socket';
 }

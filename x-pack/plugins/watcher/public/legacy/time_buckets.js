@@ -6,12 +6,13 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import { parseInterval, FIELD_FORMAT_IDS } from '../../../../../src/plugins/data/public';
+import { search, FIELD_FORMAT_IDS } from '../../../../../src/plugins/data/public';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
+const { parseInterval } = search.aggs;
 
 function isValidMoment(m) {
   return m && 'isValid' in m && m.isValid();
@@ -130,7 +131,7 @@ TimeBuckets.prototype.getDuration = function() {
  * generated.
  *
  * Input can be one of the following:
- *  - Any object from src/legacy/ui/agg_types/buckets/_interval_options.js
+ *  - Any object from src/plugins/data/public/search/aggs/buckets/_interval_options.ts
  *  - "auto"
  *  - Pass a valid moment unit
  *  - a moment.duration object.

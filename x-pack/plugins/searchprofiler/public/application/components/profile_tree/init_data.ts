@@ -24,6 +24,9 @@ export function mutateAggsTimesTree(shard: Shard) {
   }
   for (const agg of shard.aggregations!) {
     initTree([agg], shardTime);
+    // To make this data structure consistent with that of search we
+    // mark each aggregation as it's own tree root.
+    agg.treeRoot = agg;
   }
   shard.time = shardTime;
 }

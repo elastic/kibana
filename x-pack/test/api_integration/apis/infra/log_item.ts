@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   LOG_ENTRIES_ITEM_PATH,
   logEntriesItemRequestRT,
-} from '../../../../legacy/plugins/infra/common/http_api';
+} from '../../../../plugins/infra/common/http_api';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

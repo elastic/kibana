@@ -6,10 +6,6 @@
 import 'brace';
 import 'brace/mode/json';
 
-jest.mock('./worker', () => {
-  return { workerModule: { id: 'ace/mode/json_worker', src: '' } };
-});
-
 import { registerTestBed } from '../../../../../test_utils';
 import { Editor, Props } from '.';
 

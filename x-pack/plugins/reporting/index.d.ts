@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  HttpSetup,
-  Plugin,
-  PluginInitializerContext,
-  NotificationsStart,
-} from '../../../src/core/public';
-
 export type JobId = string;
-export type JobStatus = 'completed' | 'pending' | 'processing' | 'failed';
-
-export type HttpService = HttpSetup;
-export type NotificationsService = NotificationsStart;
+export type JobStatus =
+  | 'completed'
+  | 'completed_with_warnings'
+  | 'pending'
+  | 'processing'
+  | 'failed';
 
 export interface SourceJob {
   _id: JobId;
@@ -57,3 +50,19 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
+
+export interface PollerOptions {
+  functionToPoll: () => Promise<any>;
+  pollFrequencyInMillis: number;
+  trailing?: boolean;
+  continuePollingOnError?: boolean;
+  pollFrequencyErrorMultiplier?: number;
+  successFunction?: (...args: any) => any;
+  errorFunction?: (error: Error) => any;
+}
+
+export interface LicenseCheckResults {
+  enableLinks: boolean;
+  showLinks: boolean;
+  message: string;
+}

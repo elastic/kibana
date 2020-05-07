@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React from 'react';
 
 export interface GenericComboBoxProps<T> {
@@ -38,7 +38,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
   const { options, selectedOptions, getLabel, onChange, ...otherProps } = props;
 
   const labels = options.map(getLabel);
-  const euiOptions: EuiComboBoxOptionProps[] = labels.map(label => ({ label }));
+  const euiOptions: EuiComboBoxOptionOption[] = labels.map(label => ({ label }));
   const selectedEuiOptions = selectedOptions
     .filter(option => {
       return options.indexOf(option) !== -1;
@@ -47,7 +47,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
       return euiOptions[options.indexOf(option)];
     });
 
-  const onComboBoxChange = (newOptions: EuiComboBoxOptionProps[]) => {
+  const onComboBoxChange = (newOptions: EuiComboBoxOptionOption[]) => {
     const newValues = newOptions.map(({ label }) => {
       return options[labels.indexOf(label)];
     });

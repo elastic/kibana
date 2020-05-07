@@ -24,6 +24,7 @@ import { MaybePromise } from '@kbn/utility-types';
 export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
+   * See {@link IBasePath}
    */
   basePath: IBasePath;
 
@@ -94,6 +95,13 @@ export interface IBasePath {
    * Removes the prepended basePath from the `path`.
    */
   remove: (url: string) => string;
+
+  /**
+   * Returns the server's root basePath as configured, without any namespace prefix.
+   *
+   * See {@link BasePath.get} for getting the basePath value for a specific request
+   */
+  readonly serverBasePath: string;
 }
 
 /**
@@ -198,7 +206,12 @@ export interface HttpRequestInit {
 
 /** @public */
 export interface HttpFetchQuery {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | undefined
+    | Array<string | number | boolean | undefined>;
 }
 
 /**
@@ -291,6 +304,7 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
 
 /** @public */
 export interface IHttpFetchError extends Error {
+  readonly name: string;
   readonly request: Request;
   readonly response?: Response;
   /**

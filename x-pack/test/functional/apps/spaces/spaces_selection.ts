@@ -21,9 +21,12 @@ export default function spaceSelectorFunctonalTests({
   ]);
 
   describe('Spaces', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     describe('Space Selector', () => {
-      before(async () => await esArchiver.load('spaces/selector'));
+      before(async () => {
+        await esArchiver.load('spaces/selector');
+        await PageObjects.security.forceLogout();
+      });
       after(async () => await esArchiver.unload('spaces/selector'));
 
       afterEach(async () => {

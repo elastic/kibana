@@ -5,16 +5,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
-import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
+import { IScopedClusterClient } from 'kibana/server';
 import { RouteDependencies } from '../../../types';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-function deleteWatches(callWithRequest: any, watchIds: string[]) {
+const bodySchema = schema.object({
+  watchIds: schema.arrayOf(schema.string()),
+});
+
+function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
   const deletePromises = watchIds.map(watchId => {
-    return callWithRequest('watcher.deleteWatch', {
-      id: watchId,
-    })
+    return dataClient
+      .callAsCurrentUser('watcher.deleteWatch', {
+        id: watchId,
+      })
       .then((success: Array<{ _id: string }>) => ({ success }))
       .catch((error: Array<{ _id: string }>) => ({ error }));
   });
@@ -22,7 +26,7 @@ function deleteWatches(callWithRequest: any, watchIds: string[]) {
   return Promise.all(deletePromises).then(results => {
     const errors: Error[] = [];
     const successes: boolean[] = [];
-    results.forEach(({ success, error }) => {
+    results.forEach(({ success, error }: { success?: any; error?: any }) => {
       if (success) {
         successes.push(success._id);
       } else if (error) {
@@ -38,26 +42,20 @@ function deleteWatches(callWithRequest: any, watchIds: string[]) {
 }
 
 export function registerDeleteRoute(deps: RouteDependencies) {
-  const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
-
-    try {
-      const results = await deleteWatches(callWithRequest, request.body.watchIds);
-      return response.ok({ body: { results } });
-    } catch (e) {
-      return response.internalError({ body: e });
-    }
-  };
-
   deps.router.post(
     {
       path: '/api/watcher/watches/delete',
       validate: {
-        body: schema.object({
-          watchIds: schema.arrayOf(schema.string()),
-        }),
+        body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, handler)
+    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+      try {
+        const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
+        return response.ok({ body: { results } });
+      } catch (e) {
+        return response.internalError({ body: e });
+      }
+    })
   );
 }

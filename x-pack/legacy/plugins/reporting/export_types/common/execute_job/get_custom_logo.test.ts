@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { getConditionalHeaders, getCustomLogo } from './index';
+import { ReportingCore } from '../../../server';
+import { createMockReportingCore } from '../../../test_helpers';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
+import { getConditionalHeaders, getCustomLogo } from './index';
 
-let mockServer: any;
-beforeEach(() => {
-  mockServer = createMockServer('');
+const mockConfigGet = jest.fn().mockImplementation((key: string) => {
+  return 'localhost';
+});
+const mockConfig = { get: mockConfigGet, kbnConfig: { get: mockConfigGet } };
+
+let mockReportingPlugin: ReportingCore;
+beforeEach(async () => {
+  mockReportingPlugin = await createMockReportingCore(mockConfig);
 });
 
 test(`gets logo from uiSettings`, async () => {
@@ -19,19 +25,30 @@ test(`gets logo from uiSettings`, async () => {
     baz: 'quix',
   };
 
+  const mockGet = jest.fn();
+  mockGet.mockImplementationOnce((...args: any[]) => {
+    if (args[0] === 'xpackReporting:customPdfLogo') {
+      return 'purple pony';
+    }
+    throw new Error('wrong caller args!');
+  });
+  mockReportingPlugin.getUiSettingsServiceFactory = jest.fn().mockResolvedValue({
+    get: mockGet,
+  });
+
   const conditionalHeaders = await getConditionalHeaders({
     job: {} as JobDocPayloadPDF,
     filteredHeaders: permittedHeaders,
-    server: mockServer,
+    config: mockConfig,
   });
 
   const { logo } = await getCustomLogo({
+    reporting: mockReportingPlugin,
+    config: mockConfig,
     job: {} as JobDocPayloadPDF,
     conditionalHeaders,
-    server: mockServer,
   });
 
-  mockServer.uiSettingsServiceFactory().get.mockReturnValue(logo);
-
-  expect(mockServer.uiSettingsServiceFactory().get).toBeCalledWith('xpackReporting:customPdfLogo');
+  expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
+  expect(logo).toBe('purple pony');
 });

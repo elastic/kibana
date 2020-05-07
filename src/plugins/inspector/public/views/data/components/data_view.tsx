@@ -31,7 +31,11 @@ import {
 
 import { DataTableFormat } from './data_table';
 import { InspectorViewProps, Adapters } from '../../../types';
-import { TabularLoaderOptions, TabularData, TabularCallback } from '../../../adapters/data/types';
+import {
+  TabularLoaderOptions,
+  TabularData,
+  TabularCallback,
+} from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataViewComponentState {

@@ -18,17 +18,41 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
+import { UiActionsService } from '../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
 
-export class EmbeddableExplorerPlugin implements Plugin {
-  public setup(core: CoreSetup<{ embeddable: IEmbeddableStart }>) {
+interface StartDeps {
+  uiActions: UiActionsService;
+  embeddable: EmbeddableStart;
+  inspector: InspectorStart;
+  embeddableExamples: EmbeddableExamplesStart;
+}
+
+export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>) {
     core.application.register({
       id: 'embeddableExplorer',
       title: 'Embeddable explorer',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        return renderApp(coreStart, depsStart.embeddable, params);
+        await depsStart.embeddableExamples.createSampleData();
+        return renderApp(
+          {
+            notifications: coreStart.notifications,
+            inspector: depsStart.inspector,
+            embeddableApi: depsStart.embeddable,
+            uiActionsApi: depsStart.uiActions,
+            basename: params.appBasePath,
+            uiSettingsClient: coreStart.uiSettings,
+            savedObject: coreStart.savedObjects,
+            overlays: coreStart.overlays,
+            navigateToApp: coreStart.application.navigateToApp,
+          },
+          params.element
+        );
       },
     });
   }

@@ -10,25 +10,35 @@ import {
   TransformAPIProvider,
   TransformManagementProvider,
   TransformNavigationProvider,
+  TransformSecurityCommonProvider,
+  TransformSecurityUIProvider,
   TransformSourceSelectionProvider,
   TransformTableProvider,
   TransformWizardProvider,
 } from './transform_ui';
 
+import { MachineLearningTestResourcesProvider } from './machine_learning';
+
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);
   const management = TransformManagementProvider(context);
   const navigation = TransformNavigationProvider(context);
+  const securityCommon = TransformSecurityCommonProvider(context);
+  const securityUI = TransformSecurityUIProvider(context, securityCommon);
   const sourceSelection = TransformSourceSelectionProvider(context);
   const table = TransformTableProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context);
   const wizard = TransformWizardProvider(context);
 
   return {
     api,
     management,
     navigation,
+    securityCommon,
+    securityUI,
     sourceSelection,
     table,
+    testResources,
     wizard,
   };
 }

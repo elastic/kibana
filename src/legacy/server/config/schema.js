@@ -103,6 +103,10 @@ export default () =>
 
     logging: Joi.object()
       .keys({
+        appenders: HANDLED_IN_NEW_PLATFORM,
+        loggers: HANDLED_IN_NEW_PLATFORM,
+        root: HANDLED_IN_NEW_PLATFORM,
+
         silent: Joi.boolean().default(false),
 
         quiet: Joi.boolean().when('silent', {
@@ -129,8 +133,8 @@ export default () =>
           .keys({
             enabled: Joi.boolean().default(false),
             everyBytes: Joi.number()
-              // > 100KB
-              .greater(102399)
+              // > 1MB
+              .greater(1048576)
               // < 1GB
               .less(1073741825)
               // 10MB
@@ -191,6 +195,7 @@ export default () =>
       }),
       workers: Joi.number().min(1),
       profile: Joi.boolean().default(false),
+      validateSyntaxOfNodeModules: Joi.boolean().default(true),
     }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
@@ -257,9 +262,9 @@ export default () =>
       manifestServiceUrl: Joi.string()
         .default('')
         .allow(''),
-      emsFileApiUrl: Joi.string().default('https://vector-staging.maps.elastic.co'),
+      emsFileApiUrl: Joi.string().default('https://vector.maps.elastic.co'),
       emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
-      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.4'),
+      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.7'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
       ),

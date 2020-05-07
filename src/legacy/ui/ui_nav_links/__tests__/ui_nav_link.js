@@ -49,6 +49,7 @@ describe('UiNavLink', () => {
 
         // defaults
         linkToLastSubUrl: true,
+        disableSubUrlTracking: undefined,
         tooltip: '',
       });
     });

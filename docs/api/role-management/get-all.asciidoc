@@ -4,32 +4,30 @@
 <titleabbrev>Get all roles</titleabbrev>
 ++++
 
-Retrieve all {kib} roles.
-
-experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
+experimental[] Retrieve all {kib} roles.
 
 [[role-management-api-get-prereqs]]
-==== Prerequisite 
+==== Prerequisite
 
 To use the get role API, you must have the `manage_security` cluster privilege.
 
 [[role-management-api-retrieve-all-request-body]]
 ==== Request
 
-`GET /api/security/role`
+`GET <kibana host>:<port>/api/security/role`
 
 [[role-management-api-retrieve-all-response-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
   Indicates a successful call.
-  
+
 [[role-management-api-retrieve-all-example]]
 ==== Example
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 [
   {

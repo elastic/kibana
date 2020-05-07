@@ -19,9 +19,12 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HomePageProvider({ getService }: FtrProviderContext) {
+export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -63,9 +66,50 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    async launchSampleDashboard(id: string) {
+      await this.launchSampleDataSet(id);
+      isOss = await PageObjects.common.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
+      }
+    }
+
     async launchSampleDataSet(id: string) {
       await this.addSampleDataSet(id);
       await testSubjects.click(`launchSampleDataSet${id}`);
+    }
+
+    async clickAllKibanaPlugins() {
+      await testSubjects.click('allPlugins');
+    }
+
+    async clickVisualizeExplorePlugins() {
+      await testSubjects.click('tab-data');
+    }
+
+    async clickAdminPlugin() {
+      await testSubjects.click('tab-admin');
+    }
+
+    async clickOnConsole() {
+      await testSubjects.click('homeSynopsisLinkconsole');
+    }
+    async clickOnLogo() {
+      await testSubjects.click('logo');
+    }
+
+    async ClickOnLogsData() {
+      await testSubjects.click('logsData');
+    }
+
+    // clicks on Active MQ logs
+    async clickOnLogsTutorial() {
+      await testSubjects.click('homeSynopsisLinkactivemq logs');
+    }
+
+    // clicks on cloud tutorial link
+    async clickOnCloudTutorial() {
+      await testSubjects.click('onCloudTutorial');
     }
 
     async loadSavedObjects() {

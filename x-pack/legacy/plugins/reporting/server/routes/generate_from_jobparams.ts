@@ -4,31 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
 import boom from 'boom';
 import Joi from 'joi';
+import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
+import { makeRequestFacade } from './lib/make_request_facade';
 import {
-  getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
+  getRouteConfigFactoryReportingPre,
   RouteConfigFactory,
 } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
+  reporting: ReportingCore,
   server: ServerFacade,
+  plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
   logger: Logger
 ) {
+  const config = reporting.getConfig();
   const getRouteConfig = () => {
     const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
-      server,
+      config,
+      plugins,
       logger
     );
     const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(
@@ -79,15 +84,20 @@ export function registerGenerateFromJobParams(
       }
 
       const { exportType } = request.params;
+      let jobParams;
       let response;
       try {
-        const jobParams = rison.decode(jobParamsRison) as object | null;
+        jobParams = rison.decode(jobParamsRison) as object | null;
         if (!jobParams) {
           throw new Error('missing jobParams!');
         }
-        response = await handler(exportType, jobParams, legacyRequest, h);
       } catch (err) {
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
+      }
+      try {
+        response = await handler(exportType, jobParams, legacyRequest, h);
+      } catch (err) {
+        throw handleError(exportType, err);
       }
       return response;
     },

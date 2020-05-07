@@ -62,6 +62,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   config = {
+    name: 'kibana',
     host: '127.0.0.1',
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
@@ -810,6 +811,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: false,
         tags: [],
       },
     });
@@ -922,6 +924,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       path: '/',
       options: {
         authRequired: true,
+        xsrfRequired: true,
         tags: [],
         body: {
           parse: true, // hapi populates the default
@@ -1065,6 +1068,14 @@ describe('setup contract', () => {
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
     });
+
+    it('does not throw if called after stop', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        createCookieSessionStorageFactory(cookieOptions);
+      }).not.toThrow();
+    });
   });
 
   describe('#isTlsEnabled', () => {
@@ -1075,6 +1086,89 @@ describe('setup contract', () => {
     it('returns "false" if TLS not enabled', async () => {
       const { isTlsEnabled } = await server.setup(config);
       expect(isTlsEnabled).toBe(false);
+    });
+  });
+
+  describe('#getServerInfo', () => {
+    it('returns correct information', async () => {
+      let { getServerInfo } = await server.setup(config);
+
+      expect(getServerInfo()).toEqual({
+        host: '127.0.0.1',
+        name: 'kibana',
+        port: 10002,
+        protocol: 'http',
+      });
+
+      ({ getServerInfo } = await server.setup({
+        ...config,
+        port: 12345,
+        name: 'custom-name',
+        host: 'localhost',
+      }));
+
+      expect(getServerInfo()).toEqual({
+        host: 'localhost',
+        name: 'custom-name',
+        port: 12345,
+        protocol: 'http',
+      });
+    });
+
+    it('returns correct protocol when ssl is enabled', async () => {
+      const { getServerInfo } = await server.setup(configWithSSL);
+
+      expect(getServerInfo().protocol).toEqual('https');
+    });
+  });
+
+  describe('#registerStaticDir', () => {
+    it('does not throw if called after stop', async () => {
+      const { registerStaticDir } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPostAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPostAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPostAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreResponse', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreResponse } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreResponse((req, res, t) => t.next());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
     });
   });
 });

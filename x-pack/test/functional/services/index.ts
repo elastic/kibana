@@ -46,9 +46,13 @@ import { GrokDebuggerProvider } from './grok_debugger';
 import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { InfraLogStreamProvider } from './infra_log_stream';
+import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
+import {
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
+} from './dashboard';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -88,7 +92,9 @@ export const services = {
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  infraLogStream: InfraLogStreamProvider,
+  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
 };

@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
-import { groupBy } from 'lodash';
+import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade, HeadlessChromiumDriverFactory, ConditionalHeaders } from '../../../../types';
+import { ConditionalHeaders } from '../../../../types';
+import { createLayout } from '../../../common/layouts';
+import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { createLayout } from '../../../common/layouts';
-import { ScreenshotResults } from '../../../common/lib/screenshots/types';
-import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
@@ -26,11 +26,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export function generatePdfObservableFactory(
-  server: ServerFacade,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+export async function generatePdfObservableFactory(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const getScreenshots = await reporting.getScreenshotsObservable();
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -40,26 +39,26 @@ export function generatePdfObservableFactory(
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
-  ): Rx.Observable<Buffer> {
-    const layout = createLayout(server, layoutParams) as LayoutInstance;
-    const screenshots$ = screenshotsObservable({
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+    const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
+    const screenshots$ = getScreenshots({
       logger,
       urls,
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      mergeMap(async urlScreenshots => {
+      mergeMap(async (results: ScreenshotResults[]) => {
         const pdfOutput = pdf.create(layout, logo);
 
         if (title) {
-          const timeRange = getTimeRange(urlScreenshots);
+          const timeRange = getTimeRange(results);
           title += timeRange ? ` - ${timeRange.duration}` : '';
           pdfOutput.setTitle(title);
         }
 
-        urlScreenshots.forEach(({ screenshots }) => {
-          screenshots.forEach(screenshot => {
+        results.forEach(r => {
+          r.screenshots.forEach(screenshot => {
             pdfOutput.addImage(screenshot.base64EncodedData, {
               title: screenshot.title,
               description: screenshot.description,
@@ -68,7 +67,16 @@ export function generatePdfObservableFactory(
         });
 
         pdfOutput.generate();
-        return await pdfOutput.getBuffer();
+
+        return {
+          buffer: await pdfOutput.getBuffer(),
+          warnings: results.reduce((found, current) => {
+            if (current.error) {
+              found.push(current.error.message);
+            }
+            return found;
+          }, [] as string[]),
+        };
       })
     );
 

@@ -5,22 +5,15 @@
  */
 
 import { Legacy } from 'kibana';
-import { Logger, ServerFacade } from '../../types';
+import { KibanaRequest } from '../../../../../../src/core/server';
+import { Logger } from '../../types';
+import { ReportingSetupDeps } from '../types';
 
-export function getUserFactory(server: ServerFacade, logger: Logger) {
+export function getUserFactory(security: ReportingSetupDeps['security'], logger: Logger) {
   /*
    * Legacy.Request because this is called from routing middleware
    */
   return async (request: Legacy.Request) => {
-    if (!server.plugins.security) {
-      return null;
-    }
-
-    try {
-      return await server.plugins.security.getUser(request);
-    } catch (err) {
-      logger.error(err, ['getUser']);
-      return null;
-    }
+    return security?.authc.getCurrentUser(KibanaRequest.from(request)) ?? null;
   };
 }

@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -92,6 +92,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
@@ -108,6 +109,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
@@ -212,8 +214,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('error');
-      expect(result.message).to.match(/error calling webhook, invalid response/);
-      expect(result.serviceMessage).to.eql('[400] Bad Request');
+      expect(result.message).to.match(/error calling webhook, retry later/);
+      expect(result.serviceMessage).to.eql('[500] Internal Server Error');
     });
   });
 }

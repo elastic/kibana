@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { uiActionsTestPlugin } from './test_plugin';
+export * from './test_samples';

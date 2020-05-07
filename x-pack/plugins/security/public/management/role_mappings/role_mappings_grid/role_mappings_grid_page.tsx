@@ -6,7 +6,6 @@
 
 import React, { Component, Fragment } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -26,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
-import { RoleMapping } from '../../../../common/model';
+import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
   NoCompatibleRealms,
@@ -34,15 +33,15 @@ import {
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import {
-  getCreateRoleMappingHref,
-  getEditRoleMappingHref,
-  getEditRoleHref,
-} from '../../management_urls';
+import { getCreateRoleMappingHref, getEditRoleMappingHref } from '../../management_urls';
 import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import { RoleTableDisplay } from '../../role_table_display';
+import { RolesAPIClient } from '../../roles';
+import { EnabledBadge, DisabledBadge } from '../../badges';
 
 interface Props {
+  rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
@@ -51,6 +50,7 @@ interface Props {
 interface State {
   loadState: 'loadingApp' | 'loadingTable' | 'permissionDenied' | 'finished';
   roleMappings: null | RoleMapping[];
+  roles: null | Role[];
   selectedItems: RoleMapping[];
   hasCompatibleRealms: boolean;
   error: any;
@@ -62,6 +62,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     this.state = {
       loadState: 'loadingApp',
       roleMappings: null,
+      roles: null,
       hasCompatibleRealms: true,
       selectedItems: [],
       error: undefined,
@@ -308,7 +309,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         }),
         sortable: true,
         render: (entry: any, record: RoleMapping) => {
-          const { roles = [], role_templates: roleTemplates = [] } = record;
+          const { roles: assignedRoleNames = [], role_templates: roleTemplates = [] } = record;
           if (roleTemplates.length > 0) {
             return (
               <span data-test-subj="roleMappingRoles">
@@ -322,13 +323,11 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               </span>
             );
           }
-          const roleLinks = roles.map((rolename, index) => {
-            return (
-              <Fragment key={rolename}>
-                <EuiLink href={getEditRoleHref(rolename)}>{rolename}</EuiLink>
-                {index === roles.length - 1 ? null : ', '}
-              </Fragment>
-            );
+          const roleLinks = assignedRoleNames.map((rolename, index) => {
+            const role: Role | string =
+              this.state.roles?.find(r => r.name === rolename) ?? rolename;
+
+            return <RoleTableDisplay role={role} key={rolename} />;
           });
           return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
         },
@@ -341,24 +340,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         sortable: true,
         render: (enabled: boolean) => {
           if (enabled) {
-            return (
-              <EuiBadge data-test-subj="roleMappingEnabled" color="secondary">
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.enabledBadge"
-                  defaultMessage="Enabled"
-                />
-              </EuiBadge>
-            );
+            return <EnabledBadge data-test-subj="roleMappingEnabled" />;
           }
 
-          return (
-            <EuiBadge color="hollow" data-test-subj="roleMappingEnabled">
-              <FormattedMessage
-                id="xpack.security.management.roleMappings.disabledBadge"
-                defaultMessage="Disabled"
-              />
-            </EuiBadge>
-          );
+          return <DisabledBadge data-test-subj="roleMappingEnabled" />;
         },
       },
       {
@@ -458,12 +443,26 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       });
 
       if (canManageRoleMappings) {
-        this.loadRoleMappings();
+        this.performInitialLoad();
       }
     } catch (e) {
       this.setState({ error: e, loadState: 'finished' });
     }
   }
+
+  private performInitialLoad = async () => {
+    try {
+      const [roleMappings, roles] = await Promise.all([
+        this.props.roleMappingsAPI.getRoleMappings(),
+        this.props.rolesAPIClient.getRoles(),
+      ]);
+      this.setState({ roleMappings, roles });
+    } catch (e) {
+      this.setState({ error: e });
+    }
+
+    this.setState({ loadState: 'finished' });
+  };
 
   private reloadRoleMappings = () => {
     this.setState({ roleMappings: [], loadState: 'loadingTable' });

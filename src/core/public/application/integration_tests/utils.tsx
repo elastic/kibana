@@ -18,6 +18,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
@@ -34,17 +35,25 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   return () =>
     new Promise(async resolve => {
       if (dom) {
-        dom.update();
+        await act(async () => {
+          dom.update();
+        });
       }
       setImmediate(() => resolve(dom)); // flushes any pending promises
     });
 };
 
-export const createAppMounter = (
-  appId: string,
-  html: string,
-  appRoute = `/app/${appId}`
-): MockedMounterTuple<App> => {
+export const createAppMounter = ({
+  appId,
+  html = `<div>App ${appId}</div>`,
+  appRoute = `/app/${appId}`,
+  extraMountHook,
+}: {
+  appId: string;
+  html?: string;
+  appRoute?: string;
+  extraMountHook?: (params: AppMountParameters) => void;
+}): MockedMounterTuple<App> => {
   const unmount = jest.fn();
   return [
     appId,
@@ -52,11 +61,15 @@ export const createAppMounter = (
       mounter: {
         appRoute,
         appBasePath: appRoute,
-        mount: jest.fn(async ({ appBasePath: basename, element }: AppMountParameters) => {
+        mount: jest.fn(async (params: AppMountParameters) => {
+          const { appBasePath: basename, element } = params;
           Object.assign(element, {
             innerHTML: `<div>\nbasename: ${basename}\nhtml: ${html}\n</div>`,
           });
           unmount.mockImplementation(() => Object.assign(element, { innerHTML: '' }));
+          if (extraMountHook) {
+            extraMountHook(params);
+          }
           return unmount;
         }),
       },

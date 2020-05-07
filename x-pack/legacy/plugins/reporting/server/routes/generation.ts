@@ -5,34 +5,27 @@
  */
 
 import boom from 'boom';
+import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  ServerFacade,
-  ExportTypesRegistry,
-  HeadlessChromiumDriverFactory,
-  ReportingResponseToolkit,
-  Logger,
-} from '../../types';
+import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
-import { createQueueFactory, enqueueJobFactory } from '../lib';
 import { makeRequestFacade } from './lib/make_request_facade';
 
+const esErrors = elasticsearchErrors as Record<string, any>;
+
 export function registerJobGenerationRoutes(
+  reporting: ReportingCore,
   server: ServerFacade,
-  exportTypesRegistry: ExportTypesRegistry,
-  browserDriverFactory: HeadlessChromiumDriverFactory,
+  plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const config = server.config();
-  const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  // @ts-ignore TODO
-  const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
-
-  const esqueue = createQueueFactory(server, logger, { exportTypesRegistry, browserDriverFactory });
-  const enqueueJob = enqueueJobFactory(server, logger, { exportTypesRegistry, esqueue });
+  const config = reporting.getConfig();
+  const downloadBaseUrl =
+    config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
 
   /*
    * Generates enqueued job details to use in responses
@@ -47,6 +40,7 @@ export function registerJobGenerationRoutes(
     const user = request.pre.user;
     const headers = request.headers;
 
+    const enqueueJob = await reporting.getEnqueueJob();
     const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
 
     // return the queue's job information
@@ -54,7 +48,7 @@ export function registerJobGenerationRoutes(
 
     return h
       .response({
-        path: `${DOWNLOAD_BASE_URL}/${jobJson.id}`,
+        path: `${downloadBaseUrl}/${jobJson.id}`,
         job: jobJson,
       })
       .type('application/json');
@@ -73,11 +67,11 @@ export function registerJobGenerationRoutes(
     return err;
   }
 
-  registerGenerateFromJobParams(server, handler, handleError, logger);
+  registerGenerateFromJobParams(reporting, server, plugins, handler, handleError, logger);
 
   // Register beta panel-action download-related API's
-  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(server, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(server, logger);
+  if (config.get('csv', 'enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger);
+    registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
   }
 }

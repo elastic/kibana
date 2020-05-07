@@ -18,7 +18,6 @@
  */
 
 import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -26,16 +25,6 @@ export default function(kibana: any) {
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      mappings: require('./mappings.json'),
-    },
-    init(server: Legacy.Server) {
-      const { getSavedObjectsRepository } = server.savedObjects;
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-      const { usageCollection } = server.newPlatform.setup.plugins;
-
-      usageCollection.registerLegacySavedObjects(internalRepository);
-    },
+    init() {},
   });
 }

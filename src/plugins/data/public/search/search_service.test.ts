@@ -18,25 +18,26 @@
  */
 
 import { coreMock } from '../../../../core/public/mocks';
+import { CoreSetup } from '../../../../core/public';
+import { expressionsPluginMock } from '../../../../plugins/expressions/public/mocks';
 
 import { SearchService } from './search_service';
-import { CoreSetup } from '../../../../core/public';
 
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
 
   beforeEach(() => {
-    searchService = new SearchService(coreMock.createPluginInitializerContext());
+    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
       const setup = searchService.setup(mockCoreSetup, {
-        version: '8',
+        packageInfo: { version: '8' },
+        expressions: expressionsPluginMock.createSetupContract(),
       } as any);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
       expect(setup).toHaveProperty('registerSearchStrategyProvider');
     });
   });

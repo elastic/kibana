@@ -32,7 +32,7 @@ import { Kibana } from '../utils/kibana';
 
 export type ChecksumMap = Map<string, string | undefined>;
 /** map of [repo relative path to changed file, type of change] */
-type Changes = Map<string, 'modified' | 'deleted' | 'invalid'>;
+type Changes = Map<string, 'modified' | 'deleted' | 'invalid' | 'untracked'>;
 
 const statAsync = promisify(Fs.stat);
 const projectBySpecificitySorter = (a: Project, b: Project) => b.path.length - a.path.length;
@@ -43,7 +43,15 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
 
   const { stdout } = await execa(
     'git',
-    ['ls-files', '-dmt', '--', ...Array.from(projects.values()).map(p => p.path)],
+    [
+      'ls-files',
+      '-dmto',
+      '--exclude-standard',
+      '--',
+      ...Array.from(projects.values())
+        .filter(p => kbn.isPartOfRepo(p))
+        .map(p => p.path),
+    ],
     {
       cwd: kbn.getAbsolute(),
     }
@@ -71,10 +79,13 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
           unassignedChanges.set(path, 'deleted');
           break;
 
+        case '?':
+          unassignedChanges.set(path, 'untracked');
+          break;
+
         case 'H':
         case 'S':
         case 'K':
-        case '?':
         default:
           log.warning(`unexpected modification status "${tag}" for ${path}, please report this!`);
           unassignedChanges.set(path, 'invalid');
@@ -84,9 +95,14 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
   }
 
   const sortedRelevantProjects = Array.from(projects.values()).sort(projectBySpecificitySorter);
-  const changesByProject = new Map<Project, Changes>();
+  const changesByProject = new Map<Project, Changes | undefined>();
 
   for (const project of sortedRelevantProjects) {
+    if (kbn.isOutsideRepo(project)) {
+      changesByProject.set(project, undefined);
+      continue;
+    }
+
     const ownChanges: Changes = new Map();
     const prefix = kbn.getRelative(project.path);
 
@@ -114,6 +130,10 @@ async function getChangesForProjects(projects: ProjectMap, kbn: Kibana, log: Too
 
 /** Get the latest commit sha for a project */
 async function getLatestSha(project: Project, kbn: Kibana) {
+  if (kbn.isOutsideRepo(project)) {
+    return;
+  }
+
   const { stdout } = await execa(
     'git',
     ['log', '-n', '1', '--pretty=format:%H', '--', project.path],
@@ -175,7 +195,7 @@ function resolveDepsForProject(project: Project, yarnLock: YarnLock, kbn: Kibana
  */
 async function getChecksum(
   project: Project,
-  changes: Changes,
+  changes: Changes | undefined,
   yarnLock: YarnLock,
   kbn: Kibana,
   log: ToolingLog
@@ -185,7 +205,7 @@ async function getChecksum(
     log.verbose(`[${project.name}] local sha:`, sha);
   }
 
-  if (Array.from(changes.values()).includes('invalid')) {
+  if (!changes || Array.from(changes.values()).includes('invalid')) {
     log.warning(`[${project.name}] unable to determine local changes, caching disabled`);
     return;
   }
@@ -248,7 +268,7 @@ export async function getAllChecksums(kbn: Kibana, log: ToolingLog) {
     Array.from(projects.values()).map(async project => {
       cacheKeys.set(
         project.name,
-        await getChecksum(project, changesByProject.get(project)!, yarnLock, kbn, log)
+        await getChecksum(project, changesByProject.get(project), yarnLock, kbn, log)
       );
     })
   );

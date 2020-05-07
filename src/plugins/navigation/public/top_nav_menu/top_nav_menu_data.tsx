@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ButtonIconSide } from '@elastic/eui';
+
 export type TopNavMenuAction = (anchorElement: EventTarget) => void;
 
 export interface TopNavMenuData {
@@ -28,6 +30,9 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string);
+  emphasize?: boolean;
+  iconType?: string;
+  iconSide?: ButtonIconSide;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

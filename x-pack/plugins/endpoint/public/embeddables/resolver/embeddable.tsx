@@ -6,7 +6,8 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { AppRoot } from './view';
+import { Provider } from 'react-redux';
+import { Resolver } from './view';
 import { storeFactory } from './store';
 import { Embeddable } from '../../../../../../src/plugins/embeddable/public';
 
@@ -20,7 +21,12 @@ export class ResolverEmbeddable extends Embeddable {
     }
     this.lastRenderTarget = node;
     const { store } = storeFactory();
-    ReactDOM.render(<AppRoot store={store} />, node);
+    ReactDOM.render(
+      <Provider store={store}>
+        <Resolver />
+      </Provider>,
+      node
+    );
   }
 
   public reload(): void {

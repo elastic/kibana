@@ -1,0 +1,25 @@
+{
+  "anomaly_threshold": 50,
+  "description": "Searches for rare processes running on multiple Linux hosts in an entire fleet or network. This reduces the detection of false positives since automated maintenance processes usually only run occasionally on a single machine but are common to all or many hosts in a fleet.",
+  "false_positives": [
+    "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this signal."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "machine_learning_job_id": "linux_anomalous_process_all_hosts_ecs",
+  "name": "Anomalous Process For a Linux Population",
+  "note": "### Investigating an Unusual Linux Process ###\nSignals from this rule indicate the presence of a Linux process that is rare and unusual for all of the monitored Linux hosts for which Auditbeat data is available. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.",
+  "references": [
+    "https://www.elastic.co/guide/en/siem/guide/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "647fc812-7996-4795-8869-9c4ea595fe88",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 1
+}

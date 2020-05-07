@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { isPlainObject } from 'lodash';
 /**
  * Deeply merges two objects, omitting undefined values, and not deeply merging Arrays.
  *
@@ -60,7 +60,7 @@ export function merge<TReturn extends Record<string, any>>(
     ) as TReturn;
 }
 
-const isMergable = (obj: any) => typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+const isMergable = (obj: any) => isPlainObject(obj);
 
 const mergeObjects = <T extends Record<string, any>, U extends Record<string, any>>(
   baseObj: T,

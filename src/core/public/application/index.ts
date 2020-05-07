@@ -19,6 +19,7 @@
 
 export { ApplicationService } from './application_service';
 export { Capabilities } from './capabilities';
+export { ScopedHistory } from './scoped_history';
 export {
   App,
   AppBase,

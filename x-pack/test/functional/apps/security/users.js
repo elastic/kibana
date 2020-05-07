@@ -12,22 +12,28 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
 
   describe('users', function() {
-    this.tags('smoke');
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
 
-    it('should show the default elastic and kibana users', async function() {
+    it('should show the default elastic and kibana_system users', async function() {
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.info('actualUsers = %j', users);
       log.info('config = %j', config.get('servers.elasticsearch.hostname'));
       if (config.get('servers.elasticsearch.hostname') === 'localhost') {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);
+        expect(users.elastic.deprecated).to.be(false);
+
+        expect(users.kibana_system.roles).to.eql(['kibana_system']);
+        expect(users.kibana_system.reserved).to.be(true);
+        expect(users.kibana_system.deprecated).to.be(false);
+
         expect(users.kibana.roles).to.eql(['kibana_system']);
         expect(users.kibana.reserved).to.be(true);
+        expect(users.kibana.deprecated).to.be(true);
       } else {
         expect(users.anonymous.roles).to.eql(['anonymous']);
         expect(users.anonymous.reserved).to.be(true);
@@ -42,11 +48,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'LeeFirst LeeLast',
         email: 'lee@myEmail.com',
         save: true,
-        roles: ['kibana_user'],
+        roles: ['kibana_admin'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.Lee.roles).to.eql(['kibana_user']);
+      expect(users.Lee.roles).to.eql(['kibana_admin']);
       expect(users.Lee.fullname).to.eql('LeeFirst LeeLast');
       expect(users.Lee.email).to.eql('lee@myEmail.com');
       expect(users.Lee.reserved).to.be(false);
@@ -82,13 +88,34 @@ export default function({ getService, getPageObjects }) {
       log.debug('actualRoles = %j', roles);
       // This only contains the first page of alphabetically sorted results, so the assertions are only for the first handful of expected roles.
       expect(roles.apm_system.reserved).to.be(true);
+      expect(roles.apm_system.deprecated).to.be(false);
+
       expect(roles.apm_user.reserved).to.be(true);
+      expect(roles.apm_user.deprecated).to.be(false);
+
       expect(roles.beats_admin.reserved).to.be(true);
+      expect(roles.beats_admin.deprecated).to.be(false);
+
       expect(roles.beats_system.reserved).to.be(true);
+      expect(roles.beats_system.deprecated).to.be(false);
+
+      expect(roles.kibana_admin.reserved).to.be(true);
+      expect(roles.kibana_admin.deprecated).to.be(false);
+
       expect(roles.kibana_user.reserved).to.be(true);
+      expect(roles.kibana_user.deprecated).to.be(true);
+
+      expect(roles.kibana_dashboard_only_user.reserved).to.be(true);
+      expect(roles.kibana_dashboard_only_user.deprecated).to.be(true);
+
       expect(roles.kibana_system.reserved).to.be(true);
+      expect(roles.kibana_system.deprecated).to.be(false);
+
       expect(roles.logstash_system.reserved).to.be(true);
+      expect(roles.logstash_system.deprecated).to.be(false);
+
       expect(roles.monitoring_user.reserved).to.be(true);
+      expect(roles.monitoring_user.deprecated).to.be(false);
     });
   });
 }

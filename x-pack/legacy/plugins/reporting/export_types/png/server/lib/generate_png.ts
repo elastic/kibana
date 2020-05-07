@@ -6,17 +6,15 @@
 
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { ServerFacade, HeadlessChromiumDriverFactory, ConditionalHeaders } from '../../../../types';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
-import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { ConditionalHeaders } from '../../../../types';
 import { LayoutParams } from '../../../common/layouts/layout';
+import { PreserveLayout } from '../../../common/layouts/preserve_layout';
+import { ScreenshotResults } from '../../../common/lib/screenshots/types';
 
-export function generatePngObservableFactory(
-  server: ServerFacade,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-) {
-  const screenshotsObservable = screenshotsObservableFactory(server, browserDriverFactory);
+export async function generatePngObservableFactory(reporting: ReportingCore) {
+  const getScreenshots = await reporting.getScreenshotsObservable();
 
   return function generatePngObservable(
     logger: LevelLogger,
@@ -24,25 +22,29 @@ export function generatePngObservableFactory(
     browserTimezone: string,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
-  ): Rx.Observable<Buffer> {
+  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
 
     const layout = new PreserveLayout(layoutParams.dimensions);
-    const screenshots$ = screenshotsObservable({
+    const screenshots$ = getScreenshots({
       logger,
       urls: [url],
       conditionalHeaders,
       layout,
       browserTimezone,
     }).pipe(
-      map(([{ screenshots }]) => {
-        if (screenshots.length !== 1) {
-          throw new Error(`Expected there to be 1 screenshot, but there are ${screenshots.length}`);
-        }
-
-        return screenshots[0].base64EncodedData;
+      map((results: ScreenshotResults[]) => {
+        return {
+          buffer: results[0].screenshots[0].base64EncodedData,
+          warnings: results.reduce((found, current) => {
+            if (current.error) {
+              found.push(current.error.message);
+            }
+            return found;
+          }, [] as string[]),
+        };
       })
     );
 

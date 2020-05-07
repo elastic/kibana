@@ -5,25 +5,29 @@
  */
 
 import Boom from 'boom';
-import { Legacy } from 'kibana';
 import { ResponseObject } from 'hapi';
+import { Legacy } from 'kibana';
 import { API_BASE_URL } from '../../common/constants';
 import {
-  ServerFacade,
-  ExportTypesRegistry,
-  Logger,
-  ReportingResponseToolkit,
   JobDocOutput,
   JobSource,
   ListQuery,
+  Logger,
+  ReportingResponseToolkit,
+  ServerFacade,
 } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { jobResponseHandlerFactory } from './lib/job_response_handler';
+import { ReportingCore, ReportingSetupDeps } from '../types';
 import {
+  deleteJobResponseHandlerFactory,
+  downloadJobResponseHandlerFactory,
+} from './lib/job_response_handler';
+import { makeRequestFacade } from './lib/make_request_facade';
+import {
+  getRouteConfigFactoryDeletePre,
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
-import { makeRequestFacade } from './lib/make_request_facade';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
@@ -32,13 +36,15 @@ function isResponse(response: Boom<null> | ResponseObject): response is Response
 }
 
 export function registerJobInfoRoutes(
+  reporting: ReportingCore,
   server: ServerFacade,
-  exportTypesRegistry: ExportTypesRegistry,
+  plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const jobsQuery = jobsQueryFactory(server);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(server, logger);
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(server, logger);
+  const config = reporting.getConfig();
+  const { elasticsearch } = plugins;
+  const jobsQuery = jobsQueryFactory(config, elasticsearch);
+  const getRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
 
   // list jobs in the queue, paginated
   server.route({
@@ -135,7 +141,9 @@ export function registerJobInfoRoutes(
   });
 
   // trigger a download of the output from a job
-  const jobResponseHandler = jobResponseHandlerFactory(server, exportTypesRegistry);
+  const exportTypesRegistry = reporting.getExportTypesRegistry();
+  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(config, plugins, logger);
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(config, elasticsearch, exportTypesRegistry); // prettier-ignore
   server.route({
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
@@ -144,7 +152,47 @@ export function registerJobInfoRoutes(
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
-      let response = await jobResponseHandler(
+      let response = await downloadResponseHandler(
+        request.pre.management.jobTypes,
+        request.pre.user,
+        h,
+        { docId }
+      );
+
+      if (isResponse(response)) {
+        const { statusCode } = response;
+
+        if (statusCode !== 200) {
+          if (statusCode === 500) {
+            logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
+          } else {
+            logger.debug(
+              `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
+                response.source
+              )}]`
+            );
+          }
+        }
+
+        response = response.header('accept-ranges', 'none');
+      }
+
+      return response;
+    },
+  });
+
+  // allow a report to be deleted
+  const getRouteConfigDelete = getRouteConfigFactoryDeletePre(config, plugins, logger);
+  const deleteResponseHandler = deleteJobResponseHandlerFactory(config, elasticsearch);
+  server.route({
+    path: `${MAIN_ENTRY}/delete/{docId}`,
+    method: 'DELETE',
+    options: getRouteConfigDelete(),
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+      const request = makeRequestFacade(legacyRequest);
+      const { docId } = request.params;
+
+      let response = await deleteResponseHandler(
         request.pre.management.jobTypes,
         request.pre.user,
         h,

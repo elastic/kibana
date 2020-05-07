@@ -18,12 +18,11 @@
  */
 
 import { parse as _parseUrl } from 'url';
+import { History } from 'history';
 
 export const parseUrl = (url: string) => _parseUrl(url, true);
 export const parseUrlHash = (url: string) => {
   const hash = parseUrl(url).hash;
   return hash ? parseUrl(hash.slice(1)) : null;
 };
-export const getCurrentUrl = () => window.location.href;
-export const parseCurrentUrl = () => parseUrl(getCurrentUrl());
-export const parseCurrentUrlHash = () => parseUrlHash(getCurrentUrl());
+export const getCurrentUrl = (history: History) => history.createHref(history.location);

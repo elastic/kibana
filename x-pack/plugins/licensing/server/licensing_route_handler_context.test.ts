@@ -17,9 +17,9 @@ describe('createRouteHandlerContext', () => {
 
     const routeHandler = createRouteHandlerContext(license$);
 
-    const firstCtx = await routeHandler({}, {} as any, {} as any);
+    const firstCtx = await routeHandler({} as any, {} as any, {} as any);
     license$.next(secondLicense);
-    const secondCtx = await routeHandler({}, {} as any, {} as any);
+    const secondCtx = await routeHandler({} as any, {} as any, {} as any);
 
     expect(firstCtx.license).toBe(firstLicense);
     expect(secondCtx.license).toBe(secondLicense);

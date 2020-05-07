@@ -30,7 +30,11 @@ export type LogFn = (path: string[], message: string) => void;
 export interface SavedObjectsMigrationLogger {
   debug: (msg: string) => void;
   info: (msg: string) => void;
+  /**
+   * @deprecated Use `warn` instead.
+   */
   warning: (msg: string) => void;
+  warn: (msg: string) => void;
 }
 
 export class MigrationLogger implements SavedObjectsMigrationLogger {
@@ -43,4 +47,5 @@ export class MigrationLogger implements SavedObjectsMigrationLogger {
   public info = (msg: string) => this.logger.info(msg);
   public debug = (msg: string) => this.logger.debug(msg);
   public warning = (msg: string) => this.logger.warn(msg);
+  public warn = (msg: string) => this.logger.warn(msg);
 }

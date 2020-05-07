@@ -102,6 +102,9 @@ function generator({
   RUN chmod g+ws /usr/share/kibana && \\
       find /usr/share/kibana -gid 0 -and -not -perm /g+w -exec chmod g+w {} \\;
 
+  # Remove the suid bit everywhere to mitigate "Stack Clash"
+  RUN find / -xdev -perm -4000 -exec chmod u-s {} +
+
   # Provide a non-root user to run the process.
   RUN groupadd --gid 1000 kibana && \\
       useradd --uid 1000 --gid 1000 \\

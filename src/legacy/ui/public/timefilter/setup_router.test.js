@@ -18,7 +18,7 @@
  */
 import { registerTimefilterWithGlobalState } from './setup_router';
 
-jest.mock('ui/utils/subscribe_with_scope', () => ({
+jest.mock('../../../../plugins/kibana_legacy/public', () => ({
   subscribeWithScope: jest.fn(),
 }));
 

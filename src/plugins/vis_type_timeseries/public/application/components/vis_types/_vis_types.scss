@@ -1,0 +1,27 @@
+.tvbVis {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 100%;
+  padding: $euiSizeS;
+
+  .tvbVisTimeSeries {
+    overflow: hidden;
+  }
+  .tvbVisTimeSeriesDark {
+    .echReactiveChart_unavailable {
+      color: #DFE5EF;
+    }
+    .echLegendItem  {
+      color: #DFE5EF;
+    }
+  }
+  .tvbVisTimeSeriesLight {
+    .echReactiveChart_unavailable {
+      color: #343741;
+    }
+    .echLegendItem  {
+      color: #343741;
+    }
+  }
+}
+

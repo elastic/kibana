@@ -12,12 +12,10 @@ import { SpacesServiceSetup } from '../../../plugins/spaces/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
-import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
-import { migrateToKibana660 } from './server/lib/migrations';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
+import { initEnterSpaceView } from './server/routes/views';
 
 export interface LegacySpacesPlugin {
   getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
@@ -34,44 +32,11 @@ export const spaces = (kibana: Record<string, any>) =>
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
-    uiCapabilities() {
-      return {
-        spaces: {
-          manage: true,
-        },
-        management: {
-          kibana: {
-            spaces: true,
-          },
-        },
-      };
-    },
-
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [],
-      apps: [
-        {
-          id: 'space_selector',
-          title: 'Spaces',
-          main: 'plugins/spaces/space_selector',
-          url: 'space_selector',
-          hidden: true,
-        },
-      ],
+      apps: [],
       hacks: ['plugins/spaces/legacy'],
-      mappings,
-      migrations: {
-        space: {
-          '6.6.0': migrateToKibana660,
-        },
-      },
-      savedObjectSchemas: {
-        space: {
-          isNamespaceAgnostic: true,
-          hidden: true,
-        },
-      },
       home: [],
       injectDefaultVars(server: Server) {
         return {
@@ -118,24 +83,16 @@ export const spaces = (kibana: Record<string, any>) =>
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
 
-      const config = server.config();
-
       const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
-        legacyConfig: {
-          kibanaIndex: config.get('kibana.index'),
-        },
-        savedObjects: server.savedObjects,
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
-        xpackMain: server.plugins.xpack_main,
       });
 
       initEnterSpaceView(server);
-      initSpaceSelectorView(server);
 
       watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
         await createDefaultSpace();

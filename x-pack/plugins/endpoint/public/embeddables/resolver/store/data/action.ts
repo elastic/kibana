@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessEvent } from '../../types';
+import { ResolverEvent } from '../../../../../common/types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
-  readonly payload: {
-    readonly data: {
-      readonly result: {
-        readonly search_results: readonly ProcessEvent[];
-      };
-    };
-  };
+  readonly payload: ResolverEvent[];
 }
 
-export type DataAction = ServerReturnedResolverData;
+interface ServerFailedToReturnResolverData {
+  readonly type: 'serverFailedToReturnResolverData';
+}
+
+export type DataAction = ServerReturnedResolverData | ServerFailedToReturnResolverData;

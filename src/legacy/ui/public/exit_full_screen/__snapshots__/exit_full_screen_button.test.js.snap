@@ -12,26 +12,40 @@ exports[`is rendered 1`] = `
     <button
       aria-label="Exit full screen mode"
       class="dshExitFullScreenButton"
+      data-test-subj="exitFullScreenModeLogo"
     >
       <span
-        class="dshExitFullScreenButton__logo"
-        data-test-subj="exitFullScreenModeLogo"
-      />
-      <span
-        class="dshExitFullScreenButton__text"
-        data-test-subj="exitFullScreenModeText"
+        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
       >
-        Exit full screen
-        <svg
-          aria-hidden="true"
-          class="euiIcon euiIcon--small euiIcon-isLoading"
-          focusable="false"
-          height="16"
-          role="img"
-          viewBox="0 0 16 16"
-          width="16"
-          xmlns="http://www.w3.org/2000/svg"
-        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            data-euiicon-type="logoElastic"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+          data-test-subj="exitFullScreenModeText"
+        >
+          <div>
+            <div
+              class="euiText euiText--small dshExitFullScreenButton__text"
+            >
+              <p>
+                Exit full screen
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <div
+            class="dshExitFullScreenButton__icon"
+            data-euiicon-type="fullScreen"
+          />
+        </div>
       </span>
     </button>
   </div>

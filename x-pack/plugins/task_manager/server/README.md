@@ -261,6 +261,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   remove: (id: string) =>  {
     // ...
   },
+  get: (id: string) =>  {
+    // ...
+  },
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) => {
     // ...
   },
@@ -453,6 +456,6 @@ The task manager's public API is create / delete / list. Updates aren't directly
    ```
 - Integration tests:
    ```
-   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.js
-   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.js
+   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
+   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
    ```

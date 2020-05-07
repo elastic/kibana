@@ -16,6 +16,7 @@ import {
   MachineLearningDataFrameAnalyticsCreationProvider,
   MachineLearningDataFrameAnalyticsTableProvider,
   MachineLearningDataVisualizerProvider,
+  MachineLearningDataVisualizerFileBasedProvider,
   MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
   MachineLearningJobSelectionProvider,
@@ -23,12 +24,16 @@ import {
   MachineLearningJobTableProvider,
   MachineLearningJobTypeSelectionProvider,
   MachineLearningJobWizardAdvancedProvider,
+  MachineLearningJobWizardCategorizationProvider,
   MachineLearningJobWizardCommonProvider,
   MachineLearningJobWizardMultiMetricProvider,
   MachineLearningJobWizardPopulationProvider,
   MachineLearningNavigationProvider,
+  MachineLearningSecurityCommonProvider,
+  MachineLearningSecurityUIProvider,
   MachineLearningSettingsProvider,
   MachineLearningSingleMetricViewerProvider,
+  MachineLearningTestResourcesProvider,
 } from './machine_learning';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
@@ -39,9 +44,14 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const api = MachineLearningAPIProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
-  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(context);
+  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(
+    context,
+    common,
+    api
+  );
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
+  const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, common);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
@@ -49,12 +59,16 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
+  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
+  const securityCommon = MachineLearningSecurityCommonProvider(context);
+  const securityUI = MachineLearningSecurityUIProvider(context, securityCommon);
   const settings = MachineLearningSettingsProvider(context);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const testResources = MachineLearningTestResourcesProvider(context);
 
   return {
     anomaliesTable,
@@ -66,6 +80,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsTable,
     dataVisualizer,
+    dataVisualizerFileBased,
     dataVisualizerIndexBased,
     jobManagement,
     jobSelection,
@@ -73,11 +88,15 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobTable,
     jobTypeSelection,
     jobWizardAdvanced,
+    jobWizardCategorization,
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
     navigation,
+    securityCommon,
+    securityUI,
     settings,
     singleMetricViewer,
+    testResources,
   };
 }

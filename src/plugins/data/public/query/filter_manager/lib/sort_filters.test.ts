@@ -18,26 +18,18 @@
  */
 
 import { sortFilters } from './sort_filters';
-import { esFilters } from '../../../../common';
+import { FilterStateStore, buildQueryFilter } from '../../../../common';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {
     test('Not sort two application level filters', () => {
       const f1 = {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.APP_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
       const f2 = {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.APP_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);
@@ -46,20 +38,12 @@ describe('sortFilters', () => {
 
     test('Not sort two global level filters', () => {
       const f1 = {
-        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
       const f2 = {
-        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);
@@ -68,20 +52,12 @@ describe('sortFilters', () => {
 
     test('Move global level filter to the beginning of the array', () => {
       const f1 = {
-        $state: { store: esFilters.FilterStateStore.APP_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.APP_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
       const f2 = {
-        $state: { store: esFilters.FilterStateStore.GLOBAL_STATE },
-        ...esFilters.buildQueryFilter(
-          { _type: { match: { query: 'apache', type: 'phrase' } } },
-          'index',
-          ''
-        ),
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+        ...buildQueryFilter({ _type: { match: { query: 'apache', type: 'phrase' } } }, 'index', ''),
       };
 
       const filters = [f1, f2].sort(sortFilters);

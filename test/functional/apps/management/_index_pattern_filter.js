@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }) {
   describe('index pattern filter', function describeIndexTests() {
     before(async function() {
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ pageNavigation: 'individual' });
+      await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
     });

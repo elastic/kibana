@@ -23,7 +23,7 @@ interface Props {
   user: User;
   isUserChangingOwnPassword: boolean;
   onChangePassword?: () => void;
-  apiClient: PublicMethodsOf<UserAPIClient>;
+  userAPIClient: PublicMethodsOf<UserAPIClient>;
   notifications: NotificationsStart;
 }
 
@@ -72,6 +72,7 @@ export class ChangePasswordForm extends Component<Props, State> {
             }
           >
             <EuiFieldText
+              autoComplete="off"
               data-test-subj="currentPassword"
               type="password"
               value={this.state.currentPassword}
@@ -99,6 +100,7 @@ export class ChangePasswordForm extends Component<Props, State> {
           }
         >
           <EuiFieldText
+            autoComplete="new-password"
             data-test-subj="newPassword"
             type="password"
             value={this.state.newPassword}
@@ -118,6 +120,7 @@ export class ChangePasswordForm extends Component<Props, State> {
           }
         >
           <EuiFieldText
+            autoComplete="new-password"
             data-test-subj="confirmNewPassword"
             type="password"
             value={this.state.confirmPassword}
@@ -276,7 +279,7 @@ export class ChangePasswordForm extends Component<Props, State> {
 
   private performPasswordChange = async () => {
     try {
-      await this.props.apiClient.changePassword(
+      await this.props.userAPIClient.changePassword(
         this.props.user.username,
         this.state.newPassword,
         this.state.currentPassword

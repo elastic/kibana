@@ -539,6 +539,24 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
   });
 
   /**
+   * Grants an API key in Elasticsearch for the current user.
+   *
+   * @param {string} type The type of grant, either "password" or "access_token"
+   * @param {string} username Required when using the "password" type
+   * @param {string} password Required when using the "password" type
+   * @param {string} access_token Required when using the "access_token" type
+   *
+   * @returns {{api_key: string}}
+   */
+  shield.grantAPIKey = ca({
+    method: 'POST',
+    needBody: true,
+    url: {
+      fmt: '/_security/api_key/grant',
+    },
+  });
+
+  /**
    * Invalidates an API key in Elasticsearch.
    *
    * @param {string} [id] An API key id.

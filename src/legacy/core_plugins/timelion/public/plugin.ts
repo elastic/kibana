@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-  IUiSettingsClient,
-} from 'kibana/public';
+import { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from 'kibana/public';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
@@ -65,13 +59,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
     dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
   }
 
-  public start(core: CoreStart) {
-    const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
-
-    if (timelionUiEnabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
-  }
+  public start() {}
 
   public stop(): void {}
 }

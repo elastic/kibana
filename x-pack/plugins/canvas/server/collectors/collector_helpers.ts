@@ -9,25 +9,30 @@
  * @param cb: callback to do something with a function that has been found
  */
 
-import { ExpressionAST, ExpressionArgAST } from '../../types';
+import {
+  ExpressionAstExpression,
+  ExpressionAstNode,
+} from '../../../../../src/plugins/expressions/common';
 
-function isExpression(maybeExpression: ExpressionArgAST): maybeExpression is ExpressionAST {
-  return typeof maybeExpression === 'object';
+function isExpression(
+  maybeExpression: ExpressionAstNode
+): maybeExpression is ExpressionAstExpression {
+  return typeof maybeExpression === 'object' && maybeExpression.type === 'expression';
 }
 
-export function collectFns(ast: ExpressionArgAST, cb: (functionName: string) => void) {
-  if (isExpression(ast)) {
-    ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
-      cb(cFunction);
+export function collectFns(ast: ExpressionAstNode, cb: (functionName: string) => void) {
+  if (!isExpression(ast)) return;
 
-      // recurse the arguments and update the set along the way
-      Object.keys(cArguments).forEach(argName => {
-        cArguments[argName].forEach(subAst => {
-          if (subAst != null) {
-            collectFns(subAst, cb);
-          }
-        });
+  ast.chain.forEach(({ function: cFunction, arguments: cArguments }) => {
+    cb(cFunction);
+
+    // recurse the arguments and update the set along the way
+    Object.keys(cArguments).forEach(argName => {
+      cArguments[argName].forEach(subAst => {
+        if (subAst != null) {
+          collectFns(subAst, cb);
+        }
       });
     });
-  }
+  });
 }

@@ -25,17 +25,21 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const security = getService('security');
   const pieChart = getService('pieChart');
   const renderable = getService('renderable');
   const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'timePicker']);
 
   describe('sample data', function describeIndexTests() {
-    this.tags('smoke');
-
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('should display registered flights sample data sets', async () => {
@@ -84,7 +88,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample flights data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('flights');
+        await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
@@ -96,7 +100,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render visualizations', async () => {
-        await PageObjects.home.launchSampleDataSet('flights');
+        await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         log.debug('Checking pie charts rendered');
@@ -115,7 +119,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample logs data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('logs');
+        await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
@@ -127,7 +131,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
-        await PageObjects.home.launchSampleDataSet('ecommerce');
+        await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');

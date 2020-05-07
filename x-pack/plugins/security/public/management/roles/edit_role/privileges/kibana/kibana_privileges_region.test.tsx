@@ -6,12 +6,13 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivileges, Role } from '../../../../../../common/model';
+import { Role } from '../../../../../../common/model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
-import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
 import { TransformErrorSection } from './transform_error_section';
+import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
+import { KibanaPrivileges } from '../../../model';
 
 const buildProps = (customProps = {}) => {
   return {
@@ -39,12 +40,15 @@ const buildProps = (customProps = {}) => {
       },
     ],
     features: [],
-    kibanaPrivileges: new KibanaPrivileges({
-      global: {},
-      space: {},
-      features: {},
-      reserved: {},
-    }),
+    kibanaPrivileges: new KibanaPrivileges(
+      {
+        global: {},
+        space: {},
+        features: {},
+        reserved: {},
+      },
+      []
+    ),
     intl: null as any,
     uiCapabilities: {
       navLinks: {},
@@ -57,6 +61,7 @@ const buildProps = (customProps = {}) => {
     editable: true,
     onChange: jest.fn(),
     validator: new RoleValidator(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
   };
 };

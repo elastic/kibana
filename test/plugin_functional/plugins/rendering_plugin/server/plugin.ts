@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, IRenderOptions } from 'kibana/server';
+import { Plugin, CoreSetup } from 'kibana/server';
 
 import { schema } from '@kbn/config-schema';
 
 export class RenderingPlugin implements Plugin {
   public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-
-    router.get(
+    core.http.resources.register(
       {
         path: '/render/{id}',
         validate: {
@@ -33,7 +31,7 @@ export class RenderingPlugin implements Plugin {
             {
               includeUserSettings: schema.boolean({ defaultValue: true }),
             },
-            { allowUnknowns: true }
+            { unknowns: 'allow' }
           ),
           params: schema.object({
             id: schema.maybe(schema.string()),
@@ -41,18 +39,12 @@ export class RenderingPlugin implements Plugin {
         },
       },
       async (context, req, res) => {
-        const { id } = req.params;
         const { includeUserSettings } = req.query;
-        const app = { getId: () => id! };
-        const options: Partial<IRenderOptions> = { app, includeUserSettings };
-        const body = await context.core.rendering.render(options);
 
-        return res.ok({
-          body,
-          headers: {
-            'content-security-policy': core.http.csp.header,
-          },
-        });
+        if (includeUserSettings) {
+          return res.renderCoreApp();
+        }
+        return res.renderAnonymousCoreApp();
       }
     );
   }

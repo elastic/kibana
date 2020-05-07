@@ -46,3 +46,56 @@ export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttri
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttribute;
 }
+
+/**
+ * A reference to another saved object.
+ *
+ * @public
+ */
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+/**
+ * Information about the migrations that have been applied to this SavedObject.
+ * When Kibana starts up, KibanaMigrator detects outdated documents and
+ * migrates them based on this value. For each migration that has been applied,
+ * the plugin's name is used as a key and the latest migration version as the
+ * value.
+ *
+ * @example
+ * migrationVersion: {
+ *   dashboard: '7.1.1',
+ *   space: '6.6.6',
+ * }
+ *
+ * @public
+ */
+export interface SavedObjectsMigrationVersion {
+  [pluginName: string]: string;
+}
+
+export interface SavedObject<T = unknown> {
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
+  id: string;
+  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
+  type: string;
+  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
+  version?: string;
+  /** Timestamp of the last time this document had been updated.  */
+  updated_at?: string;
+  error?: {
+    message: string;
+    statusCode: number;
+  };
+  /** {@inheritdoc SavedObjectAttributes} */
+  attributes: T;
+  /** {@inheritdoc SavedObjectReference} */
+  references: SavedObjectReference[];
+  /** {@inheritdoc SavedObjectsMigrationVersion} */
+  migrationVersion?: SavedObjectsMigrationVersion;
+  /** Namespace(s) that this saved object exists in. This attribute is only used for multi-namespace saved object types. */
+  namespaces?: string[];
+}

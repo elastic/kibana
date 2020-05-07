@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { QueryService, QuerySetup } from '.';
+import { Observable } from 'rxjs';
+import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
@@ -26,16 +27,18 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<QuerySetup> = {
     filterManager: jest.fn() as any,
     timefilter: timefilterServiceMock.createSetupContract(),
+    state$: new Observable(),
   };
 
   return setupContract;
 };
 
 const createStartContractMock = () => {
-  const startContract = {
+  const startContract: jest.Mocked<QueryStart> = {
     filterManager: jest.fn() as any,
     timefilter: timefilterServiceMock.createStartContract(),
     savedQueries: jest.fn() as any,
+    state$: new Observable(),
   };
 
   return startContract;

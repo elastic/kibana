@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionPlugin } from './plugin';
 
 export { UsageCollectionSetup } from './plugin';

@@ -37,12 +37,17 @@ import {
 import {
   TodoEmbeddable,
   TODO_EMBEDDABLE,
-  TodoEmbeddableFactory,
+  TodoInput,
 } from '../../../examples/embeddable_examples/public/todo';
-import { GetEmbeddableFactory, EmbeddableRoot } from '../../../src/plugins/embeddable/public';
+import {
+  EmbeddableStart,
+  EmbeddableRoot,
+  EmbeddableOutput,
+  ErrorEmbeddable,
+} from '../../../src/plugins/embeddable/public';
 
 interface Props {
-  getEmbeddableFactory: GetEmbeddableFactory;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
 }
 
 interface State {
@@ -53,7 +58,7 @@ interface State {
 }
 
 export class TodoEmbeddableExample extends React.Component<Props, State> {
-  private embeddable?: TodoEmbeddable;
+  private embeddable?: TodoEmbeddable | ErrorEmbeddable;
 
   constructor(props: Props) {
     super(props);
@@ -62,7 +67,9 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
   }
 
   public componentDidMount() {
-    const factory = this.props.getEmbeddableFactory(TODO_EMBEDDABLE) as TodoEmbeddableFactory;
+    const factory = this.props.getEmbeddableFactory<TodoInput, EmbeddableOutput, TodoEmbeddable>(
+      TODO_EMBEDDABLE
+    );
 
     if (factory === undefined) {
       throw new Error('Embeddable factory is undefined!');

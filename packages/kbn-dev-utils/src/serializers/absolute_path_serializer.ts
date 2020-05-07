@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function createAbsolutePathSerializer(rootPath: string) {
+import { REPO_ROOT } from '../repo_root';
+
+export function createAbsolutePathSerializer(rootPath: string = REPO_ROOT) {
   return {
     print: (value: string) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
     test: (value: any) => typeof value === 'string' && value.startsWith(rootPath),

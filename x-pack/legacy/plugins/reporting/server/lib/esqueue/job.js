@@ -78,7 +78,7 @@ export class Job extends events.EventEmitter {
     }
 
     this.ready = createIndex(this._client, this.index, this.indexSettings)
-      .then(() => this._client.callWithInternalUser('index', indexParams))
+      .then(() => this._client.callAsInternalUser('index', indexParams))
       .then(doc => {
         this.document = {
           id: doc._id,
@@ -89,7 +89,7 @@ export class Job extends events.EventEmitter {
         this.debug(`Job created in index ${this.index}`);
 
         return this._client
-          .callWithInternalUser('indices.refresh', {
+          .callAsInternalUser('indices.refresh', {
             index: this.index,
           })
           .then(() => {
@@ -111,7 +111,7 @@ export class Job extends events.EventEmitter {
   get() {
     return this.ready
       .then(() => {
-        return this._client.callWithInternalUser('get', {
+        return this._client.callAsInternalUser('get', {
           index: this.index,
           id: this.id,
         });

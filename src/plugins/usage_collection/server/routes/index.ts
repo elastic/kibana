@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { IRouter } from '../../../../../src/core/server';
+import { IRouter, ISavedObjectsRepository } from 'kibana/server';
 import { registerUiMetricRoute } from './report_metrics';
 
-export function setupRoutes(router: IRouter, getLegacySavedObjects: any) {
-  registerUiMetricRoute(router, getLegacySavedObjects);
+export function setupRoutes(
+  router: IRouter,
+  getSavedObjects: () => ISavedObjectsRepository | undefined
+) {
+  registerUiMetricRoute(router, getSavedObjects);
 }

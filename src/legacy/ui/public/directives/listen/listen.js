@@ -18,23 +18,6 @@
  */
 
 import { uiModules } from '../../modules';
-
-export function registerListenEventListener($rootScope) {
-  /**
-   * Helper that registers an event listener, and removes that listener when
-   * the $scope is destroyed.
-   *
-   * @param  {SimpleEmitter} emitter - the event emitter to listen to
-   * @param  {string} eventName - the event name
-   * @param  {Function} handler - the event handler
-   * @return {undefined}
-   */
-  $rootScope.constructor.prototype.$listen = function(emitter, eventName, handler) {
-    emitter.on(eventName, handler);
-    this.$on('$destroy', function() {
-      emitter.off(eventName, handler);
-    });
-  };
-}
+import { registerListenEventListener } from '../../../../../plugins/kibana_legacy/public';
 
 uiModules.get('kibana').run(registerListenEventListener);

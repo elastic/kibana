@@ -37,8 +37,7 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
-    const route = http.anonymousPaths.isAnonymous(window.location.pathname) ? '/defaults' : '';
-    const capabilities = await http.post<Capabilities>(`/api/core/capabilities${route}`, {
+    const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
       body: JSON.stringify({ applications: appIds }),
     });
 

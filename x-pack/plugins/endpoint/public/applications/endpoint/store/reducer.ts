@@ -3,14 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { combineReducers, Reducer } from 'redux';
-import { endpointListReducer, EndpointListState } from './endpoint_list';
-import { AppAction } from './actions';
 
-export interface GlobalState {
-  endpointList: EndpointListState;
-}
+import { hostListReducer } from './hosts';
+import { AppAction } from './action';
+import { alertListReducer } from './alerts';
+import { GlobalState, ImmutableReducer } from '../types';
+import { policyListReducer } from './policy_list';
+import { policyDetailsReducer } from './policy_details';
+import { immutableCombineReducers } from './immutable_combine_reducers';
 
-export const appReducer: Reducer<GlobalState, AppAction> = combineReducers({
-  endpointList: endpointListReducer,
+export const appReducer: ImmutableReducer<GlobalState, AppAction> = immutableCombineReducers({
+  hostList: hostListReducer,
+  alertList: alertListReducer,
+  policyList: policyListReducer,
+  policyDetails: policyDetailsReducer,
 });

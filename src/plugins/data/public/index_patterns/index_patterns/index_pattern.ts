@@ -31,13 +31,14 @@ import {
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
 import { findByTitle, getRoutes } from '../utils';
-import { indexPatterns } from '../';
-import { Field, FieldList, IFieldList } from '../fields';
+import { IndexPatternMissingIndices } from '../lib';
+import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { IIndexPatternsApiClient } from './index_patterns_api_client';
 import { getNotifications, getFieldFormats } from '../../services';
+import { TypeMeta } from './types';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const type = 'index-pattern';
@@ -49,8 +50,8 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public type?: string;
   public fieldFormatMap: any;
-  public typeMeta: any;
-  public fields: IFieldList;
+  public typeMeta?: TypeMeta;
+  public fields: IIndexPatternFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -63,7 +64,7 @@ export class IndexPattern implements IIndexPattern {
   private getConfig: any;
   private sourceFilters?: [];
   private originalBody: { [key: string]: any } = {};
-  private fieldsFetcher: any;
+  public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
 
   private mapping: MappingObject = expandShorthand({
@@ -105,7 +106,12 @@ export class IndexPattern implements IIndexPattern {
     this.shortDotsEnable = this.getConfig('shortDots:enable');
     this.metaFields = this.getConfig('metaFields');
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats: getFieldFormats(),
+      toastNotifications: getNotifications().toasts,
+    });
+
+    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(
@@ -130,7 +136,7 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -280,7 +286,11 @@ export class IndexPattern implements IIndexPattern {
           filterable: true,
           searchable: true,
         },
-        false
+        false,
+        {
+          fieldFormats: getFieldFormats(),
+          toastNotifications: getNotifications().toasts,
+        }
       )
     );
 
@@ -334,6 +344,10 @@ export class IndexPattern implements IIndexPattern {
   getFieldByName(name: string): Field | void {
     if (!this.fields || !this.fields.getByName) return;
     return this.fields.getByName(name);
+  }
+
+  getAggregationRestrictions() {
+    return this.typeMeta?.aggs;
   }
 
   isWildcard() {
@@ -484,7 +498,7 @@ export class IndexPattern implements IIndexPattern {
         // so do not rethrow the error here
         const { toasts } = getNotifications();
 
-        if (err instanceof indexPatterns.IndexPatternMissingIndices) {
+        if (err instanceof IndexPatternMissingIndices) {
           toasts.addDanger((err as any).message);
 
           return [];

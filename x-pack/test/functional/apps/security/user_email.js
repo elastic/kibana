@@ -12,7 +12,6 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
 
   describe('useremail', function() {
-    this.tags('smoke');
     before(async () => {
       await esArchiver.load('security/discover');
       await PageObjects.settings.navigateTo();
@@ -27,11 +26,11 @@ export default function({ getService, getPageObjects }) {
         fullname: 'newuserFirst newuserLast',
         email: 'newuser@myEmail.com',
         save: true,
-        roles: ['kibana_user', 'superuser'],
+        roles: ['kibana_admin', 'superuser'],
       });
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
-      expect(users.newuser.roles).to.eql(['kibana_user', 'superuser']);
+      expect(users.newuser.roles).to.eql(['kibana_admin', 'superuser']);
       expect(users.newuser.fullname).to.eql('newuserFirst newuserLast');
       expect(users.newuser.email).to.eql('newuser@myEmail.com');
       expect(users.newuser.reserved).to.be(false);

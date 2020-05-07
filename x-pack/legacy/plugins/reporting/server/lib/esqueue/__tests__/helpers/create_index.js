@@ -17,7 +17,7 @@ describe('Create Index', function() {
 
     beforeEach(function() {
       client = new ClientMock();
-      createSpy = sinon.spy(client, 'callWithInternalUser').withArgs('indices.create');
+      createSpy = sinon.spy(client, 'callAsInternalUser').withArgs('indices.create');
     });
 
     it('should return true', function() {
@@ -75,10 +75,10 @@ describe('Create Index', function() {
     beforeEach(function() {
       client = new ClientMock();
       sinon
-        .stub(client, 'callWithInternalUser')
+        .stub(client, 'callAsInternalUser')
         .withArgs('indices.exists')
         .callsFake(() => Promise.resolve(true));
-      createSpy = client.callWithInternalUser.withArgs('indices.create');
+      createSpy = client.callAsInternalUser.withArgs('indices.create');
     });
 
     it('should return true', function() {

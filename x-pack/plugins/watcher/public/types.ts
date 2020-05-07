@@ -5,7 +5,7 @@
  */
 
 import { ManagementSetup } from 'src/plugins/management/public';
-import { EuiUtilsStart } from 'src/plugins/eui_utils/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -14,6 +14,6 @@ export interface Dependencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
-  eui_utils: EuiUtilsStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginSetup;
 }
