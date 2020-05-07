@@ -150,7 +150,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
