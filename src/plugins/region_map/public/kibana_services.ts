@@ -17,9 +17,14 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { RegionMapPlugin as Plugin } from './plugin';
+import { NotificationsStart } from 'kibana/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('data.fieldFormats');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
