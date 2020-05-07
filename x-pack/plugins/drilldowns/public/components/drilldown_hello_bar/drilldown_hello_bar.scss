@@ -1,0 +1,7 @@
+@include internetExplorerOnly {
+  .drdHelloBar__content .drdHelloBar__contentWrapIE {
+    // flex-basis: auto; auto doesn't wraps properly,
+    // so have to use static value that works for most cases
+    flex-basis: 480px;
+  }
+}
