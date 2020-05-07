@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { MlCapabilitiesResponse } from '../../../../../ml/common/types/capabilities';
+import { MlCapabilitiesResponse } from '../../../../../ml/public';
 import { emptyMlCapabilities } from '../../../../common/machine_learning/empty_ml_capabilities';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
 import { errorToToaster, useStateToaster } from '../../toasters';

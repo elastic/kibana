@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Influencer } from '../../../../ml/public';
+
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';
 import { FlowTarget } from '../../graphql/types';
-
-export interface Influencer {
-  influencer_field_name: string;
-  influencer_field_values: string[];
-}
 
 export interface Source {
   job_id: string;
@@ -33,11 +30,6 @@ export interface Source {
   typical: number[];
   actual: number[];
   influencers: Influencer[];
-}
-
-export interface Influencer {
-  influencer_field_name: string;
-  influencer_field_values: string[];
 }
 
 export interface CriteriaFields {
