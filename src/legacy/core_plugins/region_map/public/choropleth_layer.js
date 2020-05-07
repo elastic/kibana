@@ -18,7 +18,6 @@
  */
 
 import $ from 'jquery';
-import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
 import { i18n } from '@kbn/i18n';
@@ -86,6 +85,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._layerName = name;
     this._layerConfig = layerConfig;
 
+    // eslint-disable-next-line no-undef
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
         layer.on('click', () => {
@@ -96,6 +96,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           mouseover: () => {
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
+              // eslint-disable-next-line no-undef
               const leafletGeojson = L.geoJson(feature);
               location = leafletGeojson.getBounds().getCenter();
             }
@@ -428,6 +429,7 @@ CORS configuration of the server permits requests from the Kibana application on
 
     const { min, max } = getMinMax(this._metrics);
 
+    // eslint-disable-next-line no-undef
     const boundsOfAllFeatures = new L.LatLngBounds();
     return {
       leafletStyleFunction: geojsonFeature => {
@@ -435,6 +437,7 @@ CORS configuration of the server permits requests from the Kibana application on
         if (!match) {
           return emptyStyle();
         }
+        // eslint-disable-next-line no-undef
         const boundsOfFeature = L.geoJson(geojsonFeature).getBounds();
         boundsOfAllFeatures.extend(boundsOfFeature);
 

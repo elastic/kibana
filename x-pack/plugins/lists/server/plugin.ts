@@ -5,7 +5,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerContext } from 'kibana/server';
+import { Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
@@ -14,12 +14,19 @@ import { SpacesServiceSetup } from '../../spaces/server';
 import { ConfigType } from './config';
 import { initRoutes } from './routes/init_routes';
 import { ListClient } from './services/lists/client';
-import { ContextProvider, ContextProviderReturn, PluginsSetup } from './types';
+import {
+  ContextProvider,
+  ContextProviderReturn,
+  ListPluginSetup,
+  ListsPluginStart,
+  PluginsSetup,
+} from './types';
 import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
 
-export class ListPlugin {
+export class ListPlugin
+  implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, PluginsSetup> {
   private readonly logger: Logger;
   private spaces: SpacesServiceSetup | undefined | null;
   private config: ConfigType | undefined | null;
@@ -29,7 +36,7 @@ export class ListPlugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<void> {
+  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<ListPluginSetup> {
     const config = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
@@ -44,6 +51,17 @@ export class ListPlugin {
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
     initRoutes(router);
+
+    return {
+      getListClient: (apiCaller, spaceId, user): ListClient => {
+        return new ListClient({
+          callCluster: apiCaller,
+          config,
+          spaceId,
+          user,
+        });
+      },
+    };
   }
 
   public start(): void {
@@ -74,8 +92,6 @@ export class ListPlugin {
             new ListClient({
               callCluster: callAsCurrentUser,
               config,
-              request,
-              security,
               spaceId,
               user,
             }),
