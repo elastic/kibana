@@ -35,7 +35,7 @@ export default function({ getService, getPageObjects }) {
   describe('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('settings');
       await security.testUser.setRoles([
         'kibana_admin',
         'test_logstash_reader',
