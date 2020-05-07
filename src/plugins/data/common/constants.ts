@@ -18,3 +18,5 @@
  */
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
+export const INDEX_PATTERN_MANAGEMENT_SECTION_PATH = '#/management/kibana/indexPatterns';

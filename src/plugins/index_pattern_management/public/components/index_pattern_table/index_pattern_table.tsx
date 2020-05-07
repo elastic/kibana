@@ -32,7 +32,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
+import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../core/public';
+import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../data/public';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
@@ -53,7 +54,10 @@ const columns = [
         }>;
       }
     ) => (
-      <EuiButtonEmpty size="xs" href={`#/management/kibana/indexPatterns/patterns/${index.id}`}>
+      <EuiButtonEmpty
+        size="xs"
+        href={`${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${index.id}`}
+      >
         {name}
         {index.tags &&
           index.tags.map(({ key: tagKey, name: tagName }) => (

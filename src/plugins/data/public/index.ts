@@ -269,6 +269,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
+  INDEX_PATTERN_MANAGEMENT_SECTION_PATH,
 } from '../common';
 
 /*

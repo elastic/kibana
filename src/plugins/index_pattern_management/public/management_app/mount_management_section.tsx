@@ -54,12 +54,13 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   params.setBreadcrumbs(crumb);
+
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
     { data },
     indexPatternManagementStart,
   ] = await getStartServices();
-  const canSave = application.capabilities.indexPatterns.save as boolean;
+  const canSave = Boolean(application.capabilities.indexPatterns.save);
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
@@ -144,6 +145,7 @@ export async function mountManagementSection(
     </I18nProvider>,
     params.element
   );
+
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);
   };

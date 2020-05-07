@@ -105,6 +105,7 @@
 |  [FilterBar](./kibana-plugin-plugins-data-public.filterbar.md) |  |
 |  [getIndexPatternFieldListCreator](./kibana-plugin-plugins-data-public.getindexpatternfieldlistcreator.md) |  |
 |  [getKbnTypeNames](./kibana-plugin-plugins-data-public.getkbntypenames.md) | Get the esTypes known by all kbnFieldTypes {<!-- -->Array<string>} |
+|  [INDEX\_PATTERN\_MANAGEMENT\_SECTION\_PATH](./kibana-plugin-plugins-data-public.index_pattern_management_section_path.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.indexpatterns.md) |  |
 |  [QueryStringInput](./kibana-plugin-plugins-data-public.querystringinput.md) |  |
 |  [search](./kibana-plugin-plugins-data-public.search.md) |  |

@@ -27,7 +27,10 @@ import {
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import {
+  IIndexPattern,
+  INDEX_PATTERN_MANAGEMENT_SECTION_PATH,
+} from '../../../../../../plugins/data/public';
 
 interface ScriptedFieldsTableProps {
   indexPattern: IIndexPattern;
@@ -145,7 +148,7 @@ export class ScriptedFieldsTable extends Component<
       <>
         <Header
           addScriptedFieldUrl={`${window.location.origin +
-            window.location.pathname}#/management/kibana/indexPatterns/patterns/${
+            window.location.pathname}${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${
             indexPattern.id
           }/create-field/`}
         />

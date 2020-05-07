@@ -22,6 +22,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
+import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../data/public';
 
 import {
   EuiButton,
@@ -296,7 +297,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/management/kibana/indexPatterns/patterns/"
+              href={{ INDEX_PATTERN_MANAGEMENT_SECTION_PATH }}
             >
               <FormattedMessage
                 id="home.addData.yourDataLink"
