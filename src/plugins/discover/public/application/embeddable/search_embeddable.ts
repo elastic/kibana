@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
 import * as Rx from 'rxjs';
