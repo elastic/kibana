@@ -11,29 +11,43 @@ import { i18n } from '@kbn/i18n';
 
 import { TransformPivotConfig } from '../../../../common';
 
+// A Validator function takes in a value to check and returns an array of error messages.
+// If no messages (empty array) get returned, the value is valid.
+type Validator = (arg: any) => string[];
+
+// Note on the form validation and input components used:
+// All inputs use `EuiFieldText` which means all form values will be treated as strings.
+// This means we cast other formats like numbers coming from the transform config to strings,
+// then revalidate them and cast them again to number before submitting a transform update.
+// We do this so we have fine grained control over field validation and the option to
+// cast to special values like `null` for disabling `docs_per_second`.
+const numberAboveZeroNotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
+  {
+    defaultMessage: 'Value needs to be a number above zero.',
+  }
+);
+export const numberAboveZeroValidator: Validator = arg =>
+  !isNaN(arg) && parseInt(arg, 10) > 0 ? [] : [numberAboveZeroNotValidErrorMessage];
+
+// The way the current form is set up, this validator is just a sanity check,
+// it should never trigger an error, because `EuiFieldText` always returns a string.
 const stringNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormStringNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be of type string.',
   }
 );
-
-type Validator = (arg: any) => string[];
-
-// The way the current form is set up,
-// this validator is just a sanity check,
-// it should never trigger an error.
 const stringValidator: Validator = arg =>
   typeof arg === 'string' ? [] : [stringNotValidErrorMessage];
 
+// Only allow frequencies in the form of 1s/1h etc.
 const frequencyNotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage',
   {
     defaultMessage: 'The frequency value is not valid.',
   }
 );
-
-// Only allow frequencies in the form of 1s/1h etc.
 export const frequencyValidator: Validator = arg => {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
@@ -58,23 +72,26 @@ export const frequencyValidator: Validator = arg => {
   );
 };
 
-interface Validate {
-  [key: string]: Validator;
-}
+type Validators = 'string' | 'frequency' | 'numberAboveZero';
+
+type Validate = {
+  [key in Validators]: Validator;
+};
 
 const validate: Validate = {
   string: stringValidator,
   frequency: frequencyValidator,
+  numberAboveZero: numberAboveZeroValidator,
 };
 
-interface Field {
+export interface FormField {
   errorMessages: string[];
   isOptional: boolean;
-  validator: keyof typeof validate;
+  validator: keyof Validate;
   value: string;
 }
 
-const defaultField: Field = {
+const defaultField: FormField = {
   errorMessages: [],
   isOptional: true,
   validator: 'string',
@@ -82,9 +99,10 @@ const defaultField: Field = {
 };
 
 interface EditTransformFlyoutFieldsState {
-  [key: string]: Field;
-  description: Field;
-  frequency: Field;
+  [key: string]: FormField;
+  description: FormField;
+  frequency: FormField;
+  docsPerSecond: FormField;
 }
 
 export interface EditTransformFlyoutState {
@@ -101,10 +119,14 @@ interface Action {
 }
 
 // Some attributes can have a value of `null` to trigger
-// a reset to the default value.
+// a reset to the default value, or in the case of `docs_per_second`
+// `null` is used to disable throttling.
 interface UpdateTransformPivotConfig {
   description: string;
   frequency: string;
+  settings: {
+    docs_per_second: number | null;
+  };
 }
 
 // Takes in the form configuration and returns a
@@ -112,7 +134,7 @@ interface UpdateTransformPivotConfig {
 // transform update API endpoint.
 export const applyFormFieldsToTransformConfig = (
   config: TransformPivotConfig,
-  { description, frequency }: EditTransformFlyoutFieldsState
+  { description, docsPerSecond, frequency }: EditTransformFlyoutFieldsState
 ): Partial<UpdateTransformPivotConfig> => {
   const updateConfig: Partial<UpdateTransformPivotConfig> = {};
 
@@ -132,6 +154,16 @@ export const applyFormFieldsToTransformConfig = (
     updateConfig.description = description.value;
   }
 
+  // if the input field was left empty,
+  // fall back to the default value of `null`
+  // which will disable throttling.
+  const docsPerSecondFormValue =
+    docsPerSecond.value !== '' ? parseInt(docsPerSecond.value, 10) : null;
+  const docsPerSecondConfigValue = config.settings?.docs_per_second ?? null;
+  if (docsPerSecondFormValue !== docsPerSecondConfigValue) {
+    updateConfig.settings = { docs_per_second: docsPerSecondFormValue };
+  }
+
   return updateConfig;
 };
 
@@ -141,6 +173,11 @@ export const getDefaultState = (config: TransformPivotConfig): EditTransformFlyo
   formFields: {
     description: { ...defaultField, value: config?.description ?? '' },
     frequency: { ...defaultField, value: config?.frequency ?? '', validator: 'frequency' },
+    docsPerSecond: {
+      ...defaultField,
+      value: config?.settings?.docs_per_second?.toString() ?? '',
+      validator: 'numberAboveZero',
+    },
   },
   isFormTouched: false,
   isFormValid: true,
@@ -154,10 +191,13 @@ const isFormValid = (fieldsState: EditTransformFlyoutFieldsState) =>
 // Updates a form field with its new value,
 // runs validation and populates
 // `errorMessages` if any errors occur.
-const formFieldReducer = (state: Field, value: string): Field => {
+const formFieldReducer = (state: FormField, value: string): FormField => {
   return {
     ...state,
-    errorMessages: state.isOptional && value.length === 0 ? [] : validate[state.validator](value),
+    errorMessages:
+      state.isOptional && typeof value === 'string' && value.length === 0
+        ? []
+        : validate[state.validator](value),
     value,
   };
 };
