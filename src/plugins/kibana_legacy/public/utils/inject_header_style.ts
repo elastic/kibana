@@ -16,5 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { IUiSettingsClient } from 'kibana/public';
 
-import './style_compile';
+export function buildCSS(maxHeight = 0, truncateGradientHeight = 15) {
+  return `
+.truncate-by-height {
+  max-height: ${maxHeight > 0 ? `${maxHeight}px !important` : 'none'};
+  display: inline-block;
+}
+.truncate-by-height:before {
+  top:  ${maxHeight > 0 ? maxHeight - truncateGradientHeight : truncateGradientHeight * -1}px;
+}
+`;
+}
+
+export function injectHeaderStyle(uiSettings: IUiSettingsClient) {
+  const style = document.createElement('style');
+  style.setAttribute('id', 'style-compile');
+  document.getElementsByTagName('head')[0].appendChild(style);
+
+  uiSettings.get$('truncate:maxHeight').subscribe((value: number) => {
+    style.innerHTML = buildCSS(value);
+  });
+}

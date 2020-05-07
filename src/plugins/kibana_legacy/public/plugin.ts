@@ -30,6 +30,7 @@ import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
 import { navigateToDefaultApp } from './navigate_to_default_app';
 import { createLegacyUrlForwardApp } from './forward_app';
+import { injectHeaderStyle } from './utils/inject_header_style';
 
 interface LegacyAppAliasDefinition {
   legacyAppId: string;
@@ -178,10 +179,11 @@ export class KibanaLegacyPlugin {
     };
   }
 
-  public start({ application, http: { basePath } }: CoreStart) {
+  public start({ application, http: { basePath }, uiSettings }: CoreStart) {
     this.currentAppIdSubscription = application.currentAppId$.subscribe(currentAppId => {
       this.currentAppId = currentAppId;
     });
+    injectHeaderStyle(uiSettings);
     return {
       /**
        * @deprecated
