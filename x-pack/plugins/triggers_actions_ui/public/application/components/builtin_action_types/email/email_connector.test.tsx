@@ -7,6 +7,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EmailActionConnector } from '../types';
 import EmailActionConnectorFields from './email_connector';
+import { DocLinksStart } from 'kibana/public';
 
 describe('EmailActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
@@ -28,6 +29,7 @@ describe('EmailActionConnectorFields renders', () => {
         errors={{ from: [], port: [], host: [], user: [], password: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
