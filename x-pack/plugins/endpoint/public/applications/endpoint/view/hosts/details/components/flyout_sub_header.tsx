@@ -9,7 +9,7 @@ import { EuiFlyoutHeader, CommonProps, EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 
 export type FlyoutSubHeaderProps = CommonProps & {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   backButton?: {
     title: string;
     onClick: MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
@@ -25,6 +25,9 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
       padding-bottom: ${props => props.theme.eui.paddingSizes.s};
     }
 
+    .flyoutSubHeaderBackButton {
+      font-size: ${props => props.theme.eui.euiFontSizeXS};
+    }
     .back-button-content {
       padding-left: 0;
       &-text {
@@ -48,7 +51,7 @@ const BUTTON_TEXT_PROPS = Object.freeze({ className: 'back-button-content-text' 
 export const FlyoutSubHeader = memo<FlyoutSubHeaderProps>(
   ({ children, backButton, ...otherProps }) => {
     return (
-      <StyledEuiFlyoutHeader hasBorder {...otherProps} className={backButton && `hasButtons`}>
+      <StyledEuiFlyoutHeader {...otherProps} className={backButton && `hasButtons`}>
         {backButton && (
           <div className="buttons">
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
@@ -60,6 +63,7 @@ export const FlyoutSubHeader = memo<FlyoutSubHeaderProps>(
               size="xs"
               href={backButton?.href ?? ''}
               onClick={backButton?.onClick}
+              className="flyoutSubHeaderBackButton"
             >
               {backButton?.title}
             </EuiButtonEmpty>
