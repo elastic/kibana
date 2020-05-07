@@ -5,8 +5,16 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
 import { SavedObjectMigrationMap, SavedObjectMigrationFn } from 'src/core/server';
+import {
+  buildExpression,
+  ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
+  ExpressionAstFunction,
+  formatExpression,
+  isExpressionAstBuilder,
+  parseExpression,
+} from '../../../../src/plugins/expressions/server';
 
 interface LensDocShape<VisualizationState = unknown> {
   id?: string;
@@ -61,46 +69,40 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (
     return doc;
   }
   try {
-    const ast = fromExpression(expression);
-    const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
-      if (topNode.function !== 'lens_merge_tables') {
-        return topNode;
-      }
-      return {
-        ...topNode,
-        arguments: {
-          ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
-            return {
-              type: 'expression',
-              chain: middleNode.chain.map((node) => {
-                // Check for sub-expression in aggConfigs
-                if (
-                  node.function === 'esaggs' &&
-                  typeof node.arguments.aggConfigs[0] !== 'string'
-                ) {
-                  return {
-                    ...node,
-                    arguments: {
-                      ...node.arguments,
-                      aggConfigs: (node.arguments.aggConfigs[0] as Ast).chain[0].arguments
-                        .aggConfigs,
-                    },
-                  };
+    const ast = buildExpression(expression);
+    ast.findFunction('lens_merge_tables').forEach((fn) => {
+      const arg = fn.getArgument('tables');
+      if (arg) {
+        const tables = arg.reduce((acc, table) => {
+          if (isExpressionAstBuilder(table)) {
+            const esaggs = table.findFunction('esaggs')[0];
+            const aggConfigs = esaggs.getArgument('aggConfigs');
+            if (aggConfigs) {
+              aggConfigs.forEach((aggConfig) => {
+                if (isExpressionAstBuilder(aggConfig)) {
+                  const autoDateAggConfigs = aggConfig
+                    .findFunction('lens_auto_date')[0]
+                    .getArgument('aggConfigs');
+                  if (autoDateAggConfigs) {
+                    esaggs.replaceArgument('aggConfigs', autoDateAggConfigs);
+                  }
                 }
-                return node;
-              }),
-            };
-          }),
-        },
-      };
+              });
+            }
+            acc.push(table);
+          }
+          return acc;
+        }, [] as ExpressionAstExpressionBuilder[]);
+
+        fn.replaceArgument('tables', tables);
+      }
     });
 
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
-        expression: toExpression({ ...ast, chain: newChain }),
+        expression: ast.toString(),
       },
     };
   } catch (e) {
@@ -119,7 +121,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
   }
 
   try {
-    const ast = fromExpression(expression);
+    const ast = parseExpression(expression);
     const newChain: ExpressionFunctionAST[] = ast.chain.map((topNode) => {
       if (topNode.function !== 'lens_merge_tables') {
         return topNode;
@@ -128,7 +130,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
         ...topNode,
         arguments: {
           ...topNode.arguments,
-          tables: (topNode.arguments.tables as Ast[]).map((middleNode) => {
+          tables: (topNode.arguments.tables as ExpressionAstExpression[]).map((middleNode) => {
             return {
               type: 'expression',
               chain: middleNode.chain.map((node) => {
@@ -164,7 +166,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> =
       ...doc,
       attributes: {
         ...doc.attributes,
-        expression: toExpression({ ...ast, chain: newChain }),
+        expression: formatExpression({ ...ast, chain: newChain }),
       },
     };
   } catch (e) {
