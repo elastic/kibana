@@ -85,12 +85,15 @@ export const getOrigin = (): string => {
 };
 
 /**
- * Return true if given element or any parent has the given class.
+ * Return true if given element or any parent match the given predicate.
  */
-export const selfOrParentHasClass = (element: HTMLElement, className: string): boolean => {
+export const selfOrParentMatch = (
+  element: HTMLElement,
+  predicate: (el: HTMLElement) => boolean
+): boolean => {
   let current = element;
   while (current) {
-    if (current.classList.contains(className)) {
+    if (predicate(current)) {
       return true;
     }
     if (!current.parentElement || current.parentElement === document.body) {

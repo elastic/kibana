@@ -21,7 +21,7 @@ import React from 'react';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
-import { on, off } from 'delegated-events';
+import { on as addDelegatedHandler, off as removeDelegatedHandler } from 'delegated-events';
 
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
@@ -47,8 +47,8 @@ import {
   Mounter,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
-import { appendAppPath, relativeToAbsolute, selfOrParentHasClass, isModifiedEvent } from './utils';
-import { parseAppUrl } from './parse_app_url';
+import { appendAppPath, relativeToAbsolute } from './utils';
+import { DelegatedClickEventHandler, createCrossAppLinkClickHandler } from './delegated_handlers';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -93,8 +93,6 @@ interface AppUpdaterWrapper {
   application: string;
   updater: AppUpdater;
 }
-
-type DelegatedClickEventHandler = (event: MouseEvent & { currentTarget: Element }) => void;
 
 /**
  * Service that is responsible for registering new applications.
@@ -323,24 +321,13 @@ export class ApplicationService {
     // also, there is a trick with 'multiple' legacy apps such as kibana:XXX we don't want to
     // handle to avoid adding complexity to the handler's logic.
     if (!this.legacyMode) {
-      this.linkClickDelegateHandler = e => {
-        const link = e.currentTarget as HTMLAnchorElement;
-        if (
-          link.href && // ignore links with empty hrefs
-          (link.target === '' || link.target === 'self') && // ignore links having a target
-          !selfOrParentHasClass(link, 'disableCoreNavigation') && // ignore explicitly ignored links
-          e.button === 0 && // ignore everything but left clicks
-          !e.defaultPrevented && // ignore default prevented events
-          !isModifiedEvent(e) // ignore clicks with modifier keys
-        ) {
-          const appInfo = parseAppUrl(link.href, http.basePath, this.apps);
-          if (appInfo && appInfo.app !== this.currentAppId$.value) {
-            e.preventDefault();
-            startContract.navigateToApp(appInfo.app, { path: appInfo.path });
-          }
-        }
-      };
-      on('click', 'a', this.linkClickDelegateHandler);
+      this.linkClickDelegateHandler = createCrossAppLinkClickHandler({
+        navigateToApp: startContract.navigateToApp,
+        basePath: http.basePath,
+        apps: this.apps,
+        getCurrentAppId: () => this.currentAppId$.value,
+      });
+      addDelegatedHandler('click', 'a', this.linkClickDelegateHandler);
     }
 
     return startContract;
@@ -389,7 +376,7 @@ export class ApplicationService {
     window.removeEventListener('beforeunload', this.onBeforeUnload);
     if (this.linkClickDelegateHandler) {
       // off expects a custom event handler even when unregistering another type of events
-      off('click', 'a', this.linkClickDelegateHandler as any);
+      removeDelegatedHandler('click', 'a', this.linkClickDelegateHandler as any);
     }
   }
 }

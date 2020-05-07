@@ -23,7 +23,7 @@ import {
   isLegacyApp,
   relativeToAbsolute,
   getOrigin,
-  selfOrParentHasClass,
+  selfOrParentMatch,
 } from './utils';
 
 describe('removeSlashes', () => {
@@ -120,27 +120,27 @@ describe('relativeToAbsolute', () => {
   });
 });
 
-describe('selfOrParentHasClass', () => {
-  it('returns true if the element has the given class', () => {
-    const el = document.createElement('div');
-    el.className = 'foo bar dolly';
+describe('selfOrParentMatch', () => {
+  it('returns true if the element matches the predicate', () => {
+    const elem = document.createElement('div');
+    elem.className = 'foo bar dolly';
 
-    expect(selfOrParentHasClass(el, 'foo')).toEqual(true);
-    expect(selfOrParentHasClass(el, 'missing')).toEqual(false);
+    expect(selfOrParentMatch(elem, el => el.tagName === 'div')).toEqual(true);
+    expect(selfOrParentMatch(elem, el => el.tagName === 'p')).toEqual(false);
   });
 
-  it('returns true if any parent has the given class', () => {
-    const el = document.createElement('div');
+  it('returns true if any parent matches the predicate', () => {
+    const elem = document.createElement('div');
     const parent = document.createElement('div');
     parent.className = 'foo classB';
     const parent2 = document.createElement('div');
     parent2.className = 'bar classC';
 
     parent2.appendChild(parent);
-    parent.appendChild(el);
+    parent.appendChild(elem);
 
-    expect(selfOrParentHasClass(el, 'foo')).toEqual(true);
-    expect(selfOrParentHasClass(el, 'bar')).toEqual(true);
-    expect(selfOrParentHasClass(el, 'missing')).toEqual(false);
+    expect(selfOrParentMatch(elem, el => el.classList.contains('foo'))).toEqual(true);
+    expect(selfOrParentMatch(elem, el => el.classList.contains('bar'))).toEqual(true);
+    expect(selfOrParentMatch(elem, el => el.classList.contains('missing'))).toEqual(false);
   });
 });

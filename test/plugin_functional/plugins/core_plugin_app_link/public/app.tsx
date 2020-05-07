@@ -55,12 +55,12 @@ const FooApp = ({
       <a
         data-test-subj="applink-prevention-test"
         href={basePath.prepend(`/app/${targetAppId}/path`)}
-        className="disableCoreNavigation"
+        data-disable-core-navigation="true"
       >
         <span>Link with navigation prevention class on self</span>
       </a>
       <br />
-      <div className="disableCoreNavigation">
+      <div data-disable-core-navigation="true">
         <a
           data-test-subj="applink-parent-prevention-test"
           href={basePath.prepend(`/app/${targetAppId}/other`)}

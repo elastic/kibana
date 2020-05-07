@@ -191,7 +191,6 @@ export class Header extends Component<HeaderProps, State> {
 
     const className = classnames(
       'chrHeaderWrapper',
-      'disableCoreNavigation',
       {
         'chrHeaderWrapper--navIsLocked': this.state.isLocked,
       },
@@ -199,7 +198,11 @@ export class Header extends Component<HeaderProps, State> {
     );
 
     return (
-      <header className={className} data-test-subj="headerGlobalNav">
+      <header
+        className={className}
+        data-test-subj="headerGlobalNav"
+        data-disable-core-navigation="true"
+      >
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
